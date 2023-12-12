@@ -1050,8 +1050,10 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         replica_role = 'AsyncReplica'
         public_access_arg = ''
         public_access_check = []
+        virtual_endpoint_name = self.create_random_name(F'virtual-endpoint', 32)
+        read_write_endpoint_type = 'ReadWrite'
         master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
-        replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
+        replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(3)]
 
         if vnet_enabled:
             master_vnet = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
@@ -1097,7 +1099,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  .format(database_engine, resource_group, master_server),
                  checks=[JMESPathCheck('length(@)', 1)])
 
-        # test replica stop
+        # test replica promote
         self.cmd('{} flexible-server replica promote -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[0]),
                  checks=[
@@ -1105,7 +1107,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('replica.role', primary_role),
                      JMESPathCheck('sourceServerResourceId', 'None'),
-                     JMESPathCheck('replica.capacity', result['replica.capacity'])])
+                     JMESPathCheck('replica.capacity', result['replica']['capacity'])])
 
         # test show server with replication info, master becomes normal server
         self.cmd('{} flexible-server show -g {} --name {}'
@@ -1113,7 +1115,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  checks=[
                      JMESPathCheck('replica.role', primary_role),
                      JMESPathCheck('sourceServerResourceId', 'None'),
-                     JMESPathCheck('replica.capacity', result['replica.capacity'])])
+                     JMESPathCheck('replica.capacity', result['replica']['capacity'])])
 
         # test delete master server
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} {}'
@@ -1130,6 +1132,82 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
                     .format(database_engine, resource_group, master_server),
                     expect_failure=True)
+
+        # test virtual-endpoint
+        if not vnet_enabled:
+            self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+                    .format(database_engine, resource_group, replicas[2], result['id']),
+                    checks=[
+                        JMESPathCheck('name', replicas[2]),
+                        JMESPathCheck('replica.role', replica_role),
+                        JMESPathCheck('sourceServerResourceId', result['id'])])
+
+            # test virtual-endpoint create
+            self.cmd('{} flexible-server virtual-endpoint create -g {} --server-name {} --name {} --endpoint-type {} --members {}'
+                    .format(database_engine, resource_group, master_server, virtual_endpoint_name, read_write_endpoint_type, master_server),
+                    checks=[
+                        JMESPathCheck('endpointType', read_write_endpoint_type),
+                        JMESPathCheck('name', virtual_endpoint_name),
+                        JMESPathCheck('length(virtualEndpoints)', 2)])
+
+            # test virtual-endpoint update
+            update_result = self.cmd('{} flexible-server virtual-endpoint update -g {} --server-name {} --name {} --endpoint-type {} --members {}'
+                    .format(database_engine, resource_group, master_server, virtual_endpoint_name, read_write_endpoint_type, replicas[2]),
+                    checks=[JMESPathCheck('length(members)', 2)]).get_output_in_json()
+
+            # test virtual-endpoint show
+            self.cmd('{} flexible-server virtual-endpoint show -g {} --server-name {} --name {}'
+                    .format(database_engine, resource_group, master_server, virtual_endpoint_name),
+                    checks=[JMESPathCheck('members', update_result['members'])])
+
+            # test replica switchover planned
+            switchover_result = self.cmd('{} flexible-server replica promote -g {} --name {} --promote-mode switchover --promote-option planned --yes'
+                    .format(database_engine, resource_group, replicas[2]),
+                    checks=[
+                        JMESPathCheck('name', replicas[2]),
+                        JMESPathCheck('replica.role', primary_role),
+                        JMESPathCheck('sourceServerResourceId', 'None'),
+                        JMESPathCheck('replica.capacity', result['replica']['capacity'])]).get_output_in_json()
+
+            # test show server with replication info, master became replica server
+            self.cmd('{} flexible-server show -g {} --name {}'
+                    .format(database_engine, resource_group, master_server),
+                    checks=[
+                        JMESPathCheck('replica.role',replica_role),
+                        JMESPathCheck('sourceServerResourceId', switchover_result['id']),
+                        JMESPathCheck('replica.capacity', '0')])
+
+            # test replica switchover forced
+            self.cmd('{} flexible-server replica promote -g {} --name {} --promote-mode switchover --promote-option forced --yes'
+                    .format(database_engine, resource_group, master_server),
+                    checks=[
+                        JMESPathCheck('name', master_server),
+                        JMESPathCheck('replica.role', primary_role),
+                        JMESPathCheck('sourceServerResourceId', 'None'),
+                        JMESPathCheck('replica.capacity', result['replica']['capacity'])])
+
+            # test promote replica standalone forced
+            self.cmd('{} flexible-server replica promote -g {} --name {} --promote-mode standalone --promote-option forced --yes'
+                    .format(database_engine, resource_group, replicas[2]),
+                    checks=[
+                        JMESPathCheck('name',replicas[2]),
+                        JMESPathCheck('replica.role', primary_role),
+                        JMESPathCheck('sourceServerResourceId', 'None'),
+                        JMESPathCheck('replica.capacity', result['replica']['capacity'])])
+
+            # test virtual-endpoint delete
+            self.cmd('{} flexible-server virtual-endpoint delete -g {} --server-name {} --name {} --yes'
+                    .format(database_engine, resource_group, master_server, virtual_endpoint_name))
+
+            # test virtual-endpoint list
+            self.cmd('{} flexible-server virtual-endpoint list -g {} --server-name {}'
+                    .format(database_engine, resource_group, master_server),
+                    checks=[JMESPathCheck('length(@)', 0)])
+
+            # delete standalone server
+            self.cmd('{} flexible-server delete -g {} --name {} --yes'
+                        .format(database_engine, resource_group, replicas[2]))
+
 
         # delete replica server first
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
