@@ -315,6 +315,7 @@ class TestExtensions(TestExtensionsBase):
         self.assertEqual(ext["name"], "extension-test-pkg")
         self.assertEqual(ext["version"], "1.2.3")
         remove_extension("extension-test-pkg")
+
     def test_add_extension_without_preview(self):
         extension_name = "extension-test-pkg"
         extension1 = 'extension_test_pkg-1.0.0b1-py3-none-any.whl'
