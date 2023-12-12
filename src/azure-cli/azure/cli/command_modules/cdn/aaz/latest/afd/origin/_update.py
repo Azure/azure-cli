@@ -69,13 +69,6 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.azure_origin = AAZObjectArg(
-            options=["--azure-origin"],
-            arg_group="Properties",
-            help="Resource reference to the Azure origin resource.",
-            nullable=True,
-        )
-        cls._build_args_resource_reference_update(_args_schema.azure_origin)
         _args_schema.enabled_state = AAZStrArg(
             options=["--enabled-state"],
             arg_group="Properties",
@@ -453,7 +446,6 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                _UpdateHelper._build_schema_resource_reference_update(properties.set_prop("azureOrigin", AAZObjectType, ".azure_origin"))
                 properties.set_prop("enabledState", AAZStrType, ".enabled_state")
                 properties.set_prop("enforceCertificateNameCheck", AAZBoolType, ".enforce_certificate_name_check")
                 properties.set_prop("hostName", AAZStrType, ".host_name", typ_kwargs={"flags": {"required": True}})

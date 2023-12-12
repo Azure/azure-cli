@@ -72,24 +72,6 @@ class Update(AAZCommand):
 
         # define Arg Group "Properties"
 
-        _args_schema = cls._args_schema
-        _args_schema.extended_properties = AAZDictArg(
-            options=["--extended-properties"],
-            arg_group="Properties",
-            help="Key-Value pair representing migration properties for domains.",
-            nullable=True,
-        )
-        _args_schema.host_name = AAZStrArg(
-            options=["--host-name"],
-            arg_group="Properties",
-            help="The host name of the domain. Must be a domain name.",
-        )
-
-        extended_properties = cls._args_schema.extended_properties
-        extended_properties.Element = AAZStrArg(
-            nullable=True,
-        )
-
         # define Arg Group "Secret"
 
         _args_schema = cls._args_schema
@@ -387,17 +369,11 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("azureDnsZone", AAZObjectType)
-                properties.set_prop("extendedProperties", AAZDictType, ".extended_properties")
-                properties.set_prop("hostName", AAZStrType, ".host_name", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("tlsSettings", AAZObjectType)
 
             azure_dns_zone = _builder.get(".properties.azureDnsZone")
             if azure_dns_zone is not None:
                 azure_dns_zone.set_prop("id", AAZStrType, ".azure_dns_zone")
-
-            extended_properties = _builder.get(".properties.extendedProperties")
-            if extended_properties is not None:
-                extended_properties.set_elements(AAZStrType, ".")
 
             tls_settings = _builder.get(".properties.tlsSettings")
             if tls_settings is not None:
