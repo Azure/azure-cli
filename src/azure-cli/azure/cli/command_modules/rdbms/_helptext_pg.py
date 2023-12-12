@@ -672,7 +672,7 @@ examples:
 
 helps['postgres flexible-server replica promote'] = """
 type: command
-short-summary: Stop replication of a read replica and promote it to an independent server or the primary server.
+short-summary: Stop replication of a read replica and promote it to an independent server or as a primary server.
 examples:
   - name: Stop replication to 'testReplicaServer' and promote it a standalone read/write server.
     text: az postgres flexible-server replica promote -g testGroup -n testReplicaServer
