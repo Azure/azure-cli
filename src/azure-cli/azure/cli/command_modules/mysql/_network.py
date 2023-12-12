@@ -449,7 +449,7 @@ def prepare_public_network(public_access, yes):
         if yes:
             return ip_address, ip_address
 
-        if get_user_confirmation("Do you want to enable access to client {0} (y/n)".format(ip_address), yes=yes):
+        if get_user_confirmation("Do you want to enable access to client {0}".format(ip_address), yes=yes):
             return ip_address, ip_address
 
         if get_user_confirmation("Do you want to enable access for all IPs ", yes=yes):
