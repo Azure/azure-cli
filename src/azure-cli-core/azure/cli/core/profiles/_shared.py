@@ -431,7 +431,7 @@ AZURE_API_PROFILES = {
 # use the version in a profile as much as possible.
 AD_HOC_API_VERSIONS = {
     ResourceType.MGMT_APPSERVICE: {
-        # src/azure-cli/azure/cli/command_modules/appservice/custom.py:3033
+        # src/azure-cli/azure/cli/command_modules/appservice/_constants.py:68
         'app_service_certificate_orders': '2022-09-01'
     },
     ResourceType.MGMT_CONTAINERREGISTRY: {
