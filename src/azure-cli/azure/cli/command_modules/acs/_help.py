@@ -1549,7 +1549,7 @@ parameters:
     short-summary: The ipTags of the node public IPs.
   - name: --crg-id
     type: string
-    short-summary: The crg-id used to associate the new nodepool with the existed Capacity Reservation Group resource.
+    short-summary: The crg id used to associate the new nodepool with the existed Capacity Reservation Group resource.
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
