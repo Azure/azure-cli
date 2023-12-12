@@ -338,6 +338,10 @@ def cf_postgres_flexible_firewall_rules(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).firewall_rules
 
 
+def cf_postgres_flexible_virtual_endpoints(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).virtual_endpoints
+
+
 def cf_postgres_flexible_config(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).configurations
 

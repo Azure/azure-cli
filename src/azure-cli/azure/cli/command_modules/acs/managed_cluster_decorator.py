@@ -1882,6 +1882,19 @@ class AKSManagedClusterContext(BaseAKSContext):
             "load_balancer_idle_timeout"
         )
 
+    def get_load_balancer_backend_pool_type(self) -> Union[str, None]:
+        """Obtain the value of load_balancer_backend_pool_type.
+        :return: string
+        """
+        # read the original value passed by the command
+        load_balancer_backend_pool_type = self.raw_param.get(
+            "load_balancer_backend_pool_type"
+        )
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return load_balancer_backend_pool_type
+
     def get_nat_gateway_managed_outbound_ip_count(self) -> Union[int, None]:
         """Obtain the value of nat_gateway_managed_outbound_ip_count.
 
@@ -5544,6 +5557,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             self.context.get_load_balancer_outbound_ip_prefixes(),
             self.context.get_load_balancer_outbound_ports(),
             self.context.get_load_balancer_idle_timeout(),
+            self.context.get_load_balancer_backend_pool_type(),
             models=self.models.load_balancer_models,
         )
 
@@ -6820,6 +6834,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 outbound_ip_prefixes=self.context.get_load_balancer_outbound_ip_prefixes(),
                 outbound_ports=self.context.get_load_balancer_outbound_ports(),
                 idle_timeout=self.context.get_load_balancer_idle_timeout(),
+                backend_pool_type=self.context.get_load_balancer_backend_pool_type(),
                 profile=mc.network_profile.load_balancer_profile,
                 models=self.models.load_balancer_models)
         return mc

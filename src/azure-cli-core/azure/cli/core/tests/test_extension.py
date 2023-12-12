@@ -9,12 +9,15 @@ import shutil
 import zipfile
 
 from unittest import mock
+from azure.cli.core.mock import DummyCli
 
 from azure.cli.core.extension import (get_extensions, build_extension_path, extension_exists,
                                       get_extension, get_extension_names, get_extension_modname, ext_compat_with_cli,
                                       ExtensionNotInstalledException, WheelExtension,
                                       EXTENSIONS_MOD_PREFIX, EXT_METADATA_MINCLICOREVERSION, EXT_METADATA_MAXCLICOREVERSION)
 
+from azure.cli.core.extension.operations import list_available_extensions, add_extension, show_extension, remove_extension, list_extensions, update_extension
+from azure.cli.core.extension.tests.latest import IndexPatch, mock_ext
 
 # The test extension name
 EXT_NAME = 'myfirstcliextension'
@@ -59,6 +62,9 @@ class TestExtensionsBase(unittest.TestCase):
                          mock.patch('azure.cli.core.extension.EXTENSIONS_SYS_DIR', self.ext_sys_dir)]
         for patcher in self.patchers:
             patcher.start()
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        self.cmd = cmd
 
     def tearDown(self):
         for patcher in self.patchers:
@@ -229,6 +235,170 @@ class TestExtensions(TestExtensionsBase):
             is_compatible, _, _, _, min_ext_required = ext_compat_with_cli(azext_metadata)
             self.assertFalse(is_compatible)
             self.assertEqual(min_ext_required, expected_min_ext_required)
+
+    def test_list_available_extensions_preview_details(self):
+        sample_index_extensions = {
+            'ml': [{
+                'metadata': {
+                    'name': 'ml',
+                    'summary': 'AzureMachineLearningWorkspaces Extension',
+                    'version': '2.0.0a1',
+                    'azext.isExperimental': True
+                }
+            }],
+            'test_sample_extension1': [{
+                'metadata': {
+                    'name': 'test_sample_extension1',
+                    'summary': 'my summary',
+                    'version': '1.15.0',
+                    'azext.isPreview': True,
+                }
+            }],
+            'test_sample_extension2': [{
+                'metadata': {
+                    'name': 'test_sample_extension2',
+                    'summary': 'my summary',
+                    'version': '1.1.0b1'
+                }
+            }],
+            'test_sample_extension3': [{
+                'metadata': {
+                    'name': 'test_sample_extension3',
+                    'summary': 'my summary',
+                    'version': '2.15.0'
+                }
+            }]
+        }
+        with mock.patch('azure.cli.core.extension.operations.get_index_extensions',
+                        return_value=sample_index_extensions):
+            res = list_available_extensions(cli_ctx=self.cmd.cli_ctx)
+            self.assertIsInstance(res, list)
+            self.assertEqual(len(res), len(sample_index_extensions))
+            self.assertEqual(res[0]['name'], 'ml')
+            self.assertEqual(res[0]['summary'], 'AzureMachineLearningWorkspaces Extension')
+            self.assertEqual(res[0]['version'], '2.0.0a1')
+            self.assertEqual(res[0]['preview'], True)
+            self.assertEqual(res[0]['experimental'], False)
+            self.assertEqual(res[1]['name'], 'test_sample_extension1')
+            self.assertEqual(res[1]['version'], '1.15.0')
+            self.assertEqual(res[1]['preview'], True)
+            self.assertEqual(res[2]['name'], 'test_sample_extension2')
+            self.assertEqual(res[2]['version'], '1.1.0b1')
+            self.assertEqual(res[2]['preview'], True)
+            self.assertEqual(res[3]['name'], 'test_sample_extension3')
+            self.assertEqual(res[3]['version'], '2.15.0')
+            self.assertEqual(res[3]['preview'], False)
+
+    def test_add_list_show_preview_extension(self):
+        test_ext_source = _get_test_data_file('ml-2.0.0a1-py3-none-any.whl')
+        with mock.patch('azure.cli.core.extension.operations.logger') as mock_logger:
+            add_extension(cmd=self.cmd, source=test_ext_source, allow_preview=True)
+            call_args = mock_logger.warning.call_args
+            self.assertEqual("The installed extension '%s' is in preview.", call_args[0][0])
+            self.assertEqual("ml", call_args[0][1])
+            self.assertEqual(mock_logger.warning.call_count, 1)
+        ext = show_extension("ml")
+        self.assertEqual(ext["name"], "ml")
+        self.assertEqual(ext["version"], "2.0.0a1")
+        remove_extension("ml")
+
+    def test_add_preview_extension_by_default(self):
+        test_ext_source = _get_test_data_file('extension_test_pkg-1.2.3-py3-none-any.whl')
+        with mock.patch('azure.cli.core.extension.operations.logger') as mock_logger:
+            add_extension(cmd=self.cmd, source=test_ext_source)
+            call_args = mock_logger.warning.call_args
+            self.assertEqual("Default enabled including preview versions for extension installation now. "
+                       "Disabled in May 2024. "
+                       "Use '--allow-preview true' to enable it specifically if needed. "
+                       "Use '--allow-preview false' to install stable version only. ", call_args[0][0])
+        ext = show_extension("extension-test-pkg")
+        self.assertEqual(ext["name"], "extension-test-pkg")
+        self.assertEqual(ext["version"], "1.2.3")
+        remove_extension("extension-test-pkg")
+
+    def test_add_extension_without_preview(self):
+        extension_name = "extension-test-pkg"
+        extension1 = 'extension_test_pkg-1.0.0b1-py3-none-any.whl'
+        extension2 = 'extension_test_pkg-1.2.3-py3-none-any.whl'
+        extension3 = 'extension_test_pkg-1.4.1a1-py3-none-any.whl'
+
+        mocked_index_data = {
+            extension_name: [
+                mock_ext(extension1, version='1.0.0b1', download_url=_get_test_data_file(extension1)),
+                mock_ext(extension2, version='1.2.3', download_url=_get_test_data_file(extension2)),
+                mock_ext(extension3, version='1.4.1a1', download_url=_get_test_data_file(extension3))
+            ]
+        }
+
+        with IndexPatch(mocked_index_data):
+            add_extension(self.cmd, extension_name=extension_name, allow_preview=False)
+            ext = show_extension(extension_name)
+            self.assertEqual(ext['name'], extension_name)
+            self.assertEqual(ext['version'], '1.2.3')
+            remove_extension(extension_name)
+
+    def test_add_extension_with_preview(self):
+        extension_name = "extension-test-pkg"
+        extension1 = 'extension_test_pkg-1.0.0b1-py3-none-any.whl'
+        extension2 = 'extension_test_pkg-1.2.3-py3-none-any.whl'
+        extension3 = 'extension_test_pkg-1.4.1a1-py3-none-any.whl'
+
+        mocked_index_data = {
+            extension_name: [
+                mock_ext(extension1, version='1.0.0b1', download_url=_get_test_data_file(extension1)),
+                mock_ext(extension2, version='1.2.3', download_url=_get_test_data_file(extension2)),
+                mock_ext(extension3, version='1.4.1a1', download_url=_get_test_data_file(extension3))
+            ]
+        }
+
+        with IndexPatch(mocked_index_data):
+            add_extension(self.cmd, extension_name=extension_name, allow_preview=True)
+            ext = show_extension(extension_name)
+            self.assertEqual(ext['name'], extension_name)
+            self.assertEqual(ext['version'], '1.4.1a1')
+            remove_extension(extension_name)
+
+    def test_add_extension_preview_inavailable(self):
+        extension_name = "extension-test-pkg"
+        extension1 = 'extension_test_pkg-1.0.0b1-py3-none-any.whl'
+        extension2 = 'extension_test_pkg-1.2.3-py3-none-any.whl'
+        extension3 = 'extension_test_pkg-1.4.1a1-py3-none-any.whl'
+
+        mocked_index_data = {
+            extension_name: [
+                mock_ext(extension1, version='1.0.0b1', download_url=_get_test_data_file(extension1)),
+                mock_ext(extension3, version='1.4.1a1', download_url=_get_test_data_file(extension3))
+            ]
+        }
+        from knack.util import CLIError
+        with IndexPatch(mocked_index_data):
+            with self.assertRaisesRegex(CLIError, "No suitable stable version of 'extension-test-pkg' to install. Add `--allow-preview` to try preview versions"):
+                add_extension(cmd=self.cmd, extension_name=extension_name, allow_preview=False)
+
+    def test_update_extension_with_preview(self):
+        extension_name = "extension-test-pkg"
+        extension1 = 'extension_test_pkg-1.0.0b1-py3-none-any.whl'
+        extension2 = 'extension_test_pkg-1.2.3-py3-none-any.whl'
+        extension3 = 'extension_test_pkg-1.4.1a1-py3-none-any.whl'
+
+        mocked_index_data = {
+            extension_name: [
+                mock_ext(extension1, version='1.0.0b1', download_url=_get_test_data_file(extension1)),
+                mock_ext(extension2, version='1.2.3', download_url=_get_test_data_file(extension2)),
+                mock_ext(extension3, version='1.4.1a1', download_url=_get_test_data_file(extension3))
+            ]
+        }
+
+        with IndexPatch(mocked_index_data):
+            add_extension(self.cmd, extension_name=extension_name, allow_preview=False)
+            ext = show_extension(extension_name)
+            self.assertEqual(ext['name'], extension_name)
+            self.assertEqual(ext['version'], '1.2.3')
+
+            update_extension(self.cmd, extension_name, allow_preview=True)
+            ext = show_extension(extension_name)
+            self.assertEqual(ext['name'], extension_name)
+            self.assertEqual(ext['version'], '1.4.1a1')
 
     @mock.patch('sys.stdin.isatty', return_value=True)
     def test_ext_dynamic_install_config_tty(self, _):
