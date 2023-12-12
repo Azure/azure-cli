@@ -652,10 +652,11 @@ examples:
         --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
         --private-dns-zone testDNS.postgres.database.azure.com
-  - name: Create a read replica 'testReplicaServer' for 'testserver' with public or private access \\
-        in the specified location if available. Since zone is not passed, it will automatically pick up zone in the \\
-        replica location which is different from source server, if available, else will pick up zone same as source server \\
-        in the replica location if available, else will set the zone as None, i.e. No preference
+  - name: >
+      Create a read replica 'testReplicaServer' for 'testserver' with public or private access \
+      in the specified location if available. Since zone is not passed, it will automatically pick up zone in the \
+      replica location which is different from source server, if available, else will pick up zone same as source server \
+      in the replica location if available, else will set the zone as None, i.e. No preference
     text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --location testLocation
   - name: Create a read replica 'testReplicaServer' for 'testserver' with custom --storage-size and --sku.
     text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --sku-name Standard_D4ds_v5 --storage-size 256
