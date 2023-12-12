@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete an existing AzureFrontDoor rule set with the specified rule set name under the specified subscription, resource group and profile.
+
+    :example: Delete a rule set with the name ruleset1.
+        az afd rule-set delete -g group --rule-set-name ruleset1 --profile-name profile
     """
 
     _aaz_info = {

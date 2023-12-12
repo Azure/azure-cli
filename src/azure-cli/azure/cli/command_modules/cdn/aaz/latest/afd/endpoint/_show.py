@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get an existing AzureFrontDoor endpoint with the specified endpoint name under the specified subscription, resource group and profile.
+
+    :example: show details of the endpoint named endpoint1.
+        az afd endpoint show -g group --profile-name profile  --endpoint-name endpoint1
     """
 
     _aaz_info = {

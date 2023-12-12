@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Purge(AAZCommand):
     """Removes a content from AzureFrontDoor.
+
+    :example: Remove all cached contents under directory "/script" for domain www.contoso.com
+        az afd endpoint purge -g group --profile-name profile --domains www.contoso.com --content-paths '/scripts/*'
     """
 
     _aaz_info = {

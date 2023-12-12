@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a new rule set within the specified profile.
+
+    :example: Create a new rule set under the specified profile.
+        az afd rule-set create -g group --rule-set-name ruleset1 --profile-name profile
     """
 
     _aaz_info = {

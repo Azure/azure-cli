@@ -16,6 +16,12 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a new delivery rule within the specified rule set.
+
+    :example: Create a rule to append a response header for requests from Thailand.
+        az afd rule create -g group --rule-set-name ruleset1 --profile-name profile --order 2 --match-variable RemoteAddress --operator GeoMatch --match-values TH --rule-name disablecaching --action-name ModifyResponseHeader --header-action Append --header-name X-CDN --header-value AFDX
+
+    :example: Create a rule for http to https redirect
+        az afd rule create -g group --rule-set-name ruleset1 --profile-name profile --order 1 --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTP --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
     """
 
     _aaz_info = {

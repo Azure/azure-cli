@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete an existing AzureFrontDoor domain with the specified domain name under the specified subscription, resource group and profile.
+
+    :example: Delete a custom domain.
+        az afd custom-domain delete -g group --profile-name profile  --custom-domain-name customDomainName
     """
 
     _aaz_info = {

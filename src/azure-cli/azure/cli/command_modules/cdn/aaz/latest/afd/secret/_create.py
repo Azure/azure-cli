@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a new Secret within the specified profile.
+
+    :example: Creates a secret using the specified certificate version.
+        az afd secret create -g group --profile-name profile --secret-name secret1 --secret-version version1 --secret-source /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1
     """
 
     _aaz_info = {

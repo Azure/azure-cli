@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List all of the Azure Front Door Standard, Azure Front Door Premium, and CDN profiles within an Azure subscription.
+
+    :example: List AFD profiles in a resource group.
+        az afd profile list -g group
     """
 
     _aaz_info = {

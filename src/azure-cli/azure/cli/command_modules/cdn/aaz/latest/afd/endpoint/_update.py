@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a new AzureFrontDoor endpoint with the specified endpoint name under the specified subscription, resource group and profile.
+
+    :example: Update an endpoint's state to disabled.
+        az afd endpoint update -g group --endpoint-name endpoint1 --profile-name profile --enabled-state Disabled
     """
 
     _aaz_info = {

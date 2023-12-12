@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete an existing  Azure Front Door Standard or Azure Front Door Premium or CDN profile with the specified parameters. Deleting a profile will result in the deletion of all of the sub-resources including endpoints, origins and custom domains.
+
+    :example: Delete an AFD profile.
+        az profile delete -g group --profile-name profile
     """
 
     _aaz_info = {

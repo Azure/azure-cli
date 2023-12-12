@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a new origin group within the specified profile.
+
+    :example: Update the probe setting of the specified origin group.
+        az afd origin-group update -g group --origin-group-name og1 --profile-name profile --probe-request-type HEAD --probe-protocol Https --probe-interval-in-seconds 120 --probe-path /test1/azure.txt
     """
 
     _aaz_info = {

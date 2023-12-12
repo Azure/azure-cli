@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a new security policy within the specified profile.
+
+    :example: Update the specified security policy's domain list.
+        az afd security-policy update -g group --security-policy-name sp1 --profile-name profile --domains /subscriptions/sub1/resourcegroups/rg1/providers/Microsoft.Cdn/profiles/profile1/customDomains/customDomain1
     """
 
     _aaz_info = {

@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List existing AzureFrontDoor endpoints.
+
+    :example: List all the endpoints within the specified profile.
+        az afd endpoint list -g group --profile-name profile
     """
 
     _aaz_info = {

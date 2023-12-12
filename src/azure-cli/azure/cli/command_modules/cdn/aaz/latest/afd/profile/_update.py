@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a new Azure Front Door Standard or Azure Front Door Premium or CDN profile with a profile name under the specified subscription and resource group.
+
+    :example: Update an AFD profile with tags.
+        az afd profile update --profile-name profile --resource-group MyResourceGroup --tags tag1=value1
     """
 
     _aaz_info = {

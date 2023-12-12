@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get an existing AzureFrontDoor domain with the specified domain name under the specified subscription, resource group and profile.
+
+    :example: show details of the custom domain within the specified profile.
+        az afd custom-domain show -g group --profile-name profile  --custom-domain-name customDomainName
     """
 
     _aaz_info = {

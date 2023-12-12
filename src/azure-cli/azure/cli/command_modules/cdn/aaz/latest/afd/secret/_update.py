@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a new Secret within the specified profile.
+
+    :example: Update the specified secret to use the certificate's latest version.
+        az afd secret update -g group --profile-name profile --secret-name secret1 --use-latest-version
     """
 
     _aaz_info = {

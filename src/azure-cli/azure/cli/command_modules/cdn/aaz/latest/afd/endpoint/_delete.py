@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete an existing AzureFrontDoor endpoint with the specified endpoint name under the specified subscription, resource group and profile.
+
+    :example: Delete an endpoint named endpoint1.
+        az afd endpoint delete -g group --profile-name profile --endpoint-name endpoint1
     """
 
     _aaz_info = {

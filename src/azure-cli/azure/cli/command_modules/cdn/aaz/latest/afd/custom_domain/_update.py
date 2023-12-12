@@ -16,6 +16,12 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a new domain within the specified profile.
+
+    :example: Update the custom domain's supported minimum TLS version.
+        az afd custom-domain update -g group --custom-domain-name customDomain --profile-name profile --minimum-tls-version TLS12
+
+    :example: Update the custom domain's certificate type to AFD managed certificate.
+        az afd custom-domain update -g group --custom-domain-name customDomain --profile-name profile --certificate-type ManagedCertificate
     """
 
     _aaz_info = {

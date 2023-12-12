@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Usage(AAZCommand):
     """Checks the quota and actual usage of endpoints under the given Azure Front Door profile.
+
+    :example: List resource usage within the specific AFD profile.
+        az afd profile usage -g group --profile-name profile
     """
 
     _aaz_info = {

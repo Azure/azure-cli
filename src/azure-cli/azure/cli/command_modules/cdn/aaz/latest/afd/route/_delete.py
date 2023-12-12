@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete an existing route with the specified route name under the specified subscription, resource group, profile, and AzureFrontDoor endpoint.
+
+    :example: Delete an route named route1.
+        az afd route delete -g group --profile-name profile --endpoint-name endpoint1 --route-name route1
     """
 
     _aaz_info = {

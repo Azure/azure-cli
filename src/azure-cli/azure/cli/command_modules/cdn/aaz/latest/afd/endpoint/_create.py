@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a new AzureFrontDoor endpoint with the specified endpoint name under the specified subscription, resource group and profile.
+
+    :example: Creates an enabled endpoint
+        az afd endpoint create -g group --endpoint-name endpoint1 --profile-name profile --enabled-state Enabled
     """
 
     _aaz_info = {

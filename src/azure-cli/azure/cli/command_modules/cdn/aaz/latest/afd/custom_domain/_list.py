@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List existing AzureFrontDoor domains.
+
+    :example: List all the custom domains within the specified profile.
+        az afd custom-domain list -g group --profile-name profile
     """
 
     _aaz_info = {

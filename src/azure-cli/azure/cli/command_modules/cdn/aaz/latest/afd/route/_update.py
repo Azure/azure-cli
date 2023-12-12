@@ -16,6 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a new route with the specified route name under the specified subscription, resource group, profile, and AzureFrontDoor endpoint.
+
+    :example: Update a route to accept both Http and Https requests and redirect all trafic to use Https.
+        az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --supported-protocols Http Https --https-redirect Enabled
+
+    :example: Update a route's rule sets settings to customize the route behavior.
+        az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --rule-sets ruleset1 rulseset2
+
+    :example: Update a route's compression settings to enable compression for the specified content types.
+        az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --query-string-caching-behavior IgnoreQueryString --enable-compression true --content-types-to-compress text/javascript text/plain
     """
 
     _aaz_info = {

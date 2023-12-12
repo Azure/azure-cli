@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete an existing origin group within a profile.
+
+    :example: Deletes an existing origin group within a profile.
+        az afd origin-group delete -g group --origin-group-name og1 --profile-name profile
     """
 
     _aaz_info = {

@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a new Azure Front Door Standard or Azure Front Door Premium or CDN profile with a profile name under the specified subscription and resource group.
+
+    :example: Create an AFD profile using Standard SKU.
+        az afd profile create -g group --profile-name profile --sku Standard_AzureFrontDoor
     """
 
     _aaz_info = {

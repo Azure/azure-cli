@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a new security policy within the specified profile.
+
+    :example: Creates a security policy to apply the specified WAF policy to an endpoint's default domain and a custom domain.
+        az afd security-policy create -g group --profile-name profile --security-policy-name sp1 --domains /subscriptions/sub1/resourcegroups/rg1/providers/Microsoft.Cdn/profiles/profile1/afdEndpoints/endpoint1 /subscriptions/sub1/resourcegroups/rg1/providers/Microsoft.Cdn/profiles/profile1/customDomains/customDomain1 --waf-policy /subscriptions/sub1/resourcegroups/rg1/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/waf1
     """
 
     _aaz_info = {

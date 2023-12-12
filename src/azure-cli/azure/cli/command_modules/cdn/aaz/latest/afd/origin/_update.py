@@ -16,6 +16,12 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a new origin within the specified origin group.
+
+    :example: Update the host header and priority of the specified origin.
+        az afd origin update -g group --host-name example.contoso.com --profile-name profile --origin-group-name originGroup --origin-name origin1 --origin-host-header example.contoso.com --priority 3
+
+    :example: Disable private link of the origin.
+        az afd origin update -g group --host-name example.contoso.com --profile-name profile --origin-group-name originGroup --origin-name origin1 --enable-private-link False
     """
 
     _aaz_info = {
