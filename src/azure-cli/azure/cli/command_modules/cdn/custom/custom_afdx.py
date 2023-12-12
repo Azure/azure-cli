@@ -124,7 +124,7 @@ class AFDEndpointUpdate(_AFDEndpointUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        existing = _AFDProfileShow(cli_ctx=self.cli_ctx)(command_args={
+        existing = _AFDEndpointShow(cli_ctx=self.cli_ctx)(command_args={
             'resource_group': args.resource_group,
             'profile_name': args.profile_name,
             'endpoint_name': args.endpoint_name
