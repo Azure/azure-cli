@@ -483,7 +483,7 @@ class AFDRouteUpdate(_AFDRouteUpdate):
                 cache_configuration['compression_settings']['content_types_to_compress'] = []
             else:
                 if (not has_value(args.content_types_to_compress) or
-                        args.content_types_to_compress.to_serialized_data()) is None:
+                        args.content_types_to_compress.to_serialized_data() is None):
                     cache_configuration['compression_settings']['content_types_to_compress'] = default_content_types()
         args.cache_configuration = cache_configuration
 

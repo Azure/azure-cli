@@ -9,7 +9,6 @@ from azure.mgmt.cdn.models import (AfdCertificateType, AfdMinimumTlsVersion)
 
 
 class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @record_only()  # This tests relies on a specific subscription with existing resources
     @ResourceGroupPreparer()
     def test_afd_custom_domain_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
