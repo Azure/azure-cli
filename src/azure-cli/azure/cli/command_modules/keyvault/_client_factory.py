@@ -39,9 +39,6 @@ OPERATIONS_NAME = {
 KEYVAULT_TEMPLATE_STRINGS = {
     ResourceType.MGMT_KEYVAULT:
         'azure.mgmt.keyvault{api_version}.{module_name}#{class_name}{obj_name}',
-    ResourceType.DATA_KEYVAULT:
-        'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1{api_version}.'
-        'key_vault_client#{class_name}{obj_name}',
     ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP:
         'azure.keyvault.administration._backup_client#KeyVaultBackupClient{obj_name}',
     ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
@@ -165,31 +162,6 @@ def keyvault_mgmt_client_factory(resource_type, client_name):
         return getattr(get_mgmt_service_client(cli_ctx, resource_type), client_name)
 
     return _keyvault_mgmt_client_factory
-
-
-def keyvault_data_plane_factory(cli_ctx, *_):
-    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1 import (
-        KeyVaultAuthentication, KeyVaultClient)
-    from azure.cli.core.util import should_disable_connection_verify
-
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
-
-    def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
-                                                      subscription=cli_ctx.data.get('subscription_id'))[0]
-
-    client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
-
-    # HACK, work around the fact that KeyVault library does't take confiuration object on constructor
-    # which could be used to turn off the verifiaction. Remove this once we migrate to new data plane library
-    # pylint: disable=protected-access
-    if hasattr(client, '_client') and hasattr(client._client, 'config'):
-        verify = not should_disable_connection_verify()
-        client._client.config.connection.verify = verify
-    else:
-        logger.info('Could not find the configuration object to turn off the verification if needed')
-
-    return client
 
 
 def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):

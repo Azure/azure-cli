@@ -631,7 +631,7 @@ def set_vault_base_url(ns):
 
 def validate_key_id(entity_type):
     def _validate(ns):
-        from .vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
+        from azure.keyvault.keys._shared import parse_key_vault_id
 
         pure_entity_type = entity_type.replace('deleted', '')
         name = getattr(ns, pure_entity_type + '_name', None)
@@ -648,9 +648,9 @@ def validate_key_id(entity_type):
             if hsm_name:
                 raise CLIError('--hsm-name and --id are mutually exclusive.')
 
-            ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
+            ident = parse_key_vault_id(identifier)
             setattr(ns, pure_entity_type + '_name', ident.name)
-            setattr(ns, 'vault_base_url', ident.vault)
+            setattr(ns, 'vault_base_url', ident.vault_url)
             if ident.version and hasattr(ns, pure_entity_type + '_version'):
                 setattr(ns, pure_entity_type + '_version', ident.version)
         elif not (name and vault):
