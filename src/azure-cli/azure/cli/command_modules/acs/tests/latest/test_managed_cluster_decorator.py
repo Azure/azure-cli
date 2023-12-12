@@ -38,6 +38,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_VIRTUAL_MACHINE_SCALE_SETS,
     CONST_NODEPOOL_MODE_SYSTEM,
     CONST_DEFAULT_NODE_VM_SIZE,
+    CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
     DecoratorEarlyExitException,
     DecoratorMode,
     AgentPoolDecoratorMode,
@@ -1414,6 +1415,19 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_2)
         ctx_2.attach_mc(mc)
         self.assertEqual(ctx_2.get_load_balancer_managed_outbound_ipv6_count(), None)
+
+    def test_get_load_balancer_backend_pool_type(self):
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "load_balancer_backend_pool_type": "nodeIP",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx.get_load_balancer_backend_pool_type(), "nodeIP")
 
     def test_get_load_balancer_outbound_ips(self):
         # default
@@ -5967,6 +5981,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "load_balancer_outbound_ip_prefixes": None,
                 "load_balancer_outbound_ports": None,
                 "load_balancer_idle_timeout": None,
+                "load_balancer_backend_pool_type": CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
                 "outbound_type": None,
                 "network_plugin": None,
                 "pod_cidr": None,
@@ -5992,6 +6007,10 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             load_balancer_sku="standard",
             outbound_type="loadBalancer",
         )
+        load_balancer_profile_1 = self.models.load_balancer_models.ManagedClusterLoadBalancerProfile(
+            backend_pool_type=CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
+        )
+        network_profile_1.load_balancer_profile = load_balancer_profile_1
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location", network_profile=network_profile_1)
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
@@ -10157,6 +10176,39 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
 
         self.assertEqual(dec_mc_5, ground_truth_mc_5)
 
+        # test update network policy
+        dec_6 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "network_policy": "azure",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_6 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_policy="",
+            ),
+        )
+
+        dec_6.context.attach_mc(mc_6)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_6.update_network_plugin_settings(None)
+        dec_mc_6 = dec_6.update_network_plugin_settings(mc_6)
+
+        ground_truth_mc_6 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_policy="azure",
+            ),
+        )
+
+        self.assertEqual(dec_mc_6, ground_truth_mc_6)
+
     def test_update_mc_profile_default(self):
         import inspect
 
@@ -10466,6 +10518,117 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             },
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_setup_supportPlan(self):
+        # default value in `aks_create`
+        ltsDecorator = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "k8s_support_plan": "AKSLongTermSupport"
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        premiumSKU = self.models.ManagedClusterSKU(
+                name="Base",
+                tier="Premium")
+        premiumCluster = self.models.ManagedCluster(
+            location="test_location", 
+            support_plan=None,
+            sku=premiumSKU,
+        )
+        ltsDecorator.context.attach_mc(premiumCluster)
+
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            ltsDecorator.set_up_k8s_support_plan(None)
+
+        ltsClusterCalculated = ltsDecorator.set_up_k8s_support_plan(premiumCluster)
+        expectedLTSCluster = self.models.ManagedCluster(
+            location="test_location",
+            support_plan="AKSLongTermSupport",
+            sku=premiumSKU,
+        )
+        self.assertEqual(ltsClusterCalculated, expectedLTSCluster)
+
+        nonLTSDecorator = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "k8s_support_plan": "KubernetesOfficial"
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        nonLTSDecorator.context.attach_mc(premiumCluster)
+        nonLTSClusterCalculated = nonLTSDecorator.set_up_k8s_support_plan(premiumCluster)
+        expectedNonLTSCluster = self.models.ManagedCluster(
+            location="test_location",
+            support_plan="KubernetesOfficial",
+            sku=premiumSKU,
+        )
+        self.assertEqual(nonLTSClusterCalculated, expectedNonLTSCluster)
+
+    def test_update_supportPlan(self):
+        # default value in `aks_create`
+        noopDecorator = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        premiumSKU = self.models.ManagedClusterSKU(
+                name="Base",
+                tier="Premium")
+        ltsCluster = self.models.ManagedCluster(
+            location="test_location", 
+            sku=premiumSKU,
+            support_plan="AKSLongTermSupport",
+        )
+        noopDecorator.context.attach_mc(ltsCluster)
+
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            noopDecorator.update_k8s_support_plan(None)
+
+        ltsClusterCalculated = noopDecorator.update_k8s_support_plan(ltsCluster)
+        self.assertEqual(ltsClusterCalculated, ltsCluster)
+
+        disableLTSDecorator = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "k8s_support_plan": "KubernetesOfficial"
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        disableLTSDecorator.context.attach_mc(ltsCluster)
+        nonLTSClusterCalculated = disableLTSDecorator.update_k8s_support_plan(ltsCluster)
+        expectedNonLTSCluster = self.models.ManagedCluster(
+            location="test_location",
+            support_plan="KubernetesOfficial",
+            sku=premiumSKU,
+        )
+        self.assertEqual(nonLTSClusterCalculated, expectedNonLTSCluster)
+
+        normalCluster = self.models.ManagedCluster(
+            location="test_location", 
+            sku=self.models.ManagedClusterSKU(
+                name="Base",
+                tier="Standard"),
+            support_plan="KubernetesOfficial",
+        )
+        noopDecorator3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        noopDecorator3.context.attach_mc(normalCluster)
+        normalClusterCalculated = noopDecorator3.update_k8s_support_plan(normalCluster)
+        self.assertEqual(normalClusterCalculated, normalCluster)
+
 
 if __name__ == "__main__":
     unittest.main()

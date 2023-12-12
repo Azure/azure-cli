@@ -379,6 +379,14 @@ def validate_ppg(namespace):
             raise CLIError("--ppg is not a valid Azure resource ID.")
 
 
+def validate_node_public_ip_tags(ns):
+    if isinstance(ns.node_public_ip_tags, list):
+        tags_dict = {}
+        for item in ns.node_public_ip_tags:
+            tags_dict.update(validate_tag(item))
+        ns.node_public_ip_tags = tags_dict
+
+
 def validate_nodepool_labels(namespace):
     """Validates that provided node labels is a valid format"""
 
@@ -735,3 +743,37 @@ def validate_start_time(namespace):
 def validate_force_upgrade_disable_and_enable_parameters(namespace):
     if namespace.disable_force_upgrade and namespace.enable_force_upgrade:
         raise MutuallyExclusiveArgumentError('Providing both --disable-force-upgrade and --enable-force-upgrade flags is invalid')
+
+
+def validate_allowed_host_ports(namespace):
+    if hasattr(namespace, "nodepool_allowed_host_ports"):
+        host_ports = namespace.nodepool_allowed_host_ports
+    else:
+        host_ports = namespace.allowed_host_ports
+    if not host_ports:
+        return
+
+    # Parse the port range. The format is either `<int>/<protocol>` or `<int>-<int>/<protocol>`.
+    # e.g. `80/tcp` | `22/udp` | `4000-5000/tcp`
+    regex = re.compile(r'^((\d+)|(\d+-\d+))/(tcp|udp)$')
+    for port_range in host_ports:
+        found = regex.findall(port_range.lower())
+        if found:
+            continue
+        raise InvalidArgumentValueError(
+            "--allowed-host-ports must be a space-separated list of port ranges in the format of <port-range>/<protocol>: '{}'".format(port_range)
+        )
+
+
+def validate_application_security_groups(namespace):
+    if hasattr((namespace), "nodepool_asg_ids"):
+        asg_ids = namespace.nodepool_asg_ids
+    else:
+        asg_ids = namespace.asg_ids
+    if not asg_ids:
+        return
+
+    from msrestazure.tools import is_valid_resource_id
+    for asg in asg_ids:
+        if not is_valid_resource_id(asg):
+            raise InvalidArgumentValueError(asg + " is not a valid Azure resource ID.")
