@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "afd secret delete",
+    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete an existing Secret within profile.

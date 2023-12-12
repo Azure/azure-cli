@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "afd rule-set delete",
+    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete an existing AzureFrontDoor rule set with the specified rule set name under the specified subscription, resource group and profile.

@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "afd route delete",
+    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete an existing route with the specified route name under the specified subscription, resource group, profile, and AzureFrontDoor endpoint.
