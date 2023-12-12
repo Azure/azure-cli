@@ -21,6 +21,8 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Show as
     Create as _AFDSecurityPolicyCreate, Update as _AFDSecurityPolicyUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDProfileShow, \
     Create as _AFDProfileCreate, Update as _AFDProfileUpdate
+from azure.cli.command_modules.cdn.aaz.latest.afd.endpoint import Show as _AFDEndpointShow, \
+    Create as _AFDEndpointCreate, Update as _AFDEndpointUpdate
 from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZDateArg
 
 logger = get_logger(__name__)
@@ -70,10 +72,11 @@ def default_content_types():
             'text/x-java-source']
 
 
-class AFDProfileUpdate(_AFDProfileUpdate):
+class AFDProfileCreate(_AFDProfileCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.location._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -85,6 +88,8 @@ class AFDProfileUpdate(_AFDProfileUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.location._registered = False
+        args_schema.sku._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -92,6 +97,37 @@ class AFDProfileUpdate(_AFDProfileUpdate):
         existing = _AFDProfileShow(cli_ctx=self.cli_ctx)(command_args={
             'resource_group': args.resource_group,
             'profile_name': args.profile_name
+        })
+        existing_location = None if 'location' not in existing else existing['location']
+        args.location = existing_location
+
+
+class AFDEndpointCreate(_AFDEndpointCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.location._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.location = 'global'
+
+
+class AFDEndpointUpdate(_AFDEndpointUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.location._registered = False
+        args_schema.name_reuse_scope._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        existing = _AFDProfileShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name,
+            'endpoint_name': args.endpoint_name
         })
         existing_location = None if 'location' not in existing else existing['location']
         args.location = existing_location
@@ -122,6 +158,7 @@ class AFDOriginCreate(_AFDOriginCreate):
             help='The sub-resource type of the origin that will be connected to using the private '
             'link.You can use "az network private-link-resource list" to obtain the supported sub-resource types.',
         )
+        args_schema.shared_private_link_resource._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -162,6 +199,7 @@ class AFDOriginUpdate(_AFDOriginUpdate):
             help='The sub-resource type of the origin that will be connected to using the private link.'
             'You can use "az network private-link-resource list" to obtain the supported sub-resource types.',
         )
+        args_schema.shared_private_link_resource._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -267,6 +305,9 @@ class AFDRouteCreate(_AFDRouteCreate):
             'Content won\'t be compressed on AzureFrontDoor'
             'when requested content is smaller than 1 byte or larger than 1 MB.',
         )
+        args_schema.cache_configuration._registered = False
+        args_schema.formatted_custom_domains._registered = False
+        args_schema.formatted_rule_sets._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -364,6 +405,9 @@ class AFDRouteUpdate(_AFDRouteUpdate):
             'Content won\'t be compressed on AzureFrontDoor'
             'when requested content is smaller than 1 byte or larger than 1 MB.',
         )
+        args_schema.cache_configuration._registered = False
+        args_schema.formatted_custom_domains._registered = False
+        args_schema.formatted_rule_sets._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -581,6 +625,8 @@ class AFDRuleCreate(_AFDRuleCreate):
             help='Transform to apply before matching.',
         )
         args_schema.transforms.Element = AAZStrArg()
+        args_schema.actions._registered = False
+        args_schema.conditions._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -796,6 +842,7 @@ class AFDSecretCreate(_AFDSecretCreate):
             options=['--use-latest-version'],
             help='Whether to use the latest version for the certificate.',
         )
+        args_schema.parameters._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -837,6 +884,7 @@ class AFDSecretUpdate(_AFDSecretUpdate):
             options=['--use-latest-version'],
             help='Whether to use the latest version for the certificate.',
         )
+        args_schema.parameters._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -887,6 +935,7 @@ class AFDSecurityPolicyCreate(_AFDSecurityPolicyCreate):
             help='The ID of Front Door WAF policy.',
             required=True,
         )
+        args_schema.web_application_firewall._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -925,6 +974,7 @@ class AFDSecurityPolicyUpdate(_AFDSecurityPolicyUpdate):
             options=['--waf-policy'],
             help='The ID of Front Door WAF policy.',
         )
+        args_schema.web_application_firewall._registered = False
         return args_schema
 
     def pre_operations(self):
