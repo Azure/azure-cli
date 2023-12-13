@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "monitor",
+    "monitor log-analytics workspace available-service-tier",
 )
 class __CMDGroup(AAZCommandGroup):
-    """monitor
+    """monitor workspace available-service-tier
     """
     pass
 

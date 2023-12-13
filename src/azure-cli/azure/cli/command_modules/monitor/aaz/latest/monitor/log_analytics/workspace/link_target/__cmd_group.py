@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "monitor",
+    "monitor log-analytics workspace link-target",
 )
 class __CMDGroup(AAZCommandGroup):
-    """monitor
+    """monitor workspace link-target
     """
     pass
 

@@ -8,16 +8,5 @@
 # pylint: skip-file
 # flake8: noqa
 
-from azure.cli.core.aaz import *
-
-
-@register_command_group(
-    "monitor",
-)
-class __CMDGroup(AAZCommandGroup):
-    """monitor
-    """
-    pass
-
-
-__all__ = ["__CMDGroup"]
+from .__cmd_group import *
+from ._list import *
