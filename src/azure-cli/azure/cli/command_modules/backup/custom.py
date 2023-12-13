@@ -1274,6 +1274,28 @@ def _get_alr_restore_mode(target_vm_name, target_vnet_name, target_vnet_resource
         """)
 
 
+def _set_edge_zones_restore_properties(cmd, trigger_restore_properties, restore_to_edge_zone, recovery_point,
+                                       target_subscription, use_secondary_region, restore_mode):
+    if restore_to_edge_zone is not None:
+        # If CSR or CRR, error
+        if target_subscription != get_subscription_id(cmd.cli_ctx) or use_secondary_region:
+            raise InvalidArgumentValueError()
+        if restore_to_edge_zone is not None:
+            if recovery_point.properties.extended_location is None \
+                or recovery_point.properties.extended_location.name is None \
+                or recovery_point.properties.extended_location.name == "":
+                raise InvalidArgumentValueError()
+        trigger_restore_properties.extended_location = recovery_point.properties.extended_location
+
+    if restore_mode == "OriginalLocation":
+        if recovery_point.properties.extended_location is not None \
+            and recovery_point.properties.extended_location.name is not None \
+            and recovery_point.properties.extended_location.name != "":
+            trigger_restore_properties.extended_location = recovery_point.properties.extended_location
+    
+    return trigger_restore_properties
+
+
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
@@ -1282,7 +1304,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
                   mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
                   target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None,
-                  target_subscription_id=None, storage_account_resource_group=None):
+                  target_subscription_id=None, storage_account_resource_group=None, restore_to_edge_zone=None):
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     vault_location = vault.location
     vault_identity = vault.identity
@@ -1381,6 +1403,11 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                     target_vnet_resource_group, target_subnet_name, vault_name, resource_group_name,
                                     recovery_point, target_zone, target_rg_id, _source_resource_id, restore_mode,
                                     target_subscription, use_secondary_region)
+
+    # Edge zones-specific code. Not using existing set/get properties code as it is messy and prone to errors
+    trigger_restore_properties = _set_edge_zones_restore_properties(trigger_restore_properties, restore_to_edge_zone,
+                                                                    recovery_point, target_subscription,
+                                                                    use_secondary_region, restore_mode)
 
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
