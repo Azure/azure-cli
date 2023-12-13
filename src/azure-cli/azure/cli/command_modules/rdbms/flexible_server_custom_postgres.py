@@ -1005,22 +1005,18 @@ def flexible_server_threat_protection_set(
 
 
 # Custom functions for server logs
-def flexible_server_download_log_files(
-        client,
-        resource_group_name,
-        server_name,
-        file_name):
+def flexible_server_download_log_files(client, resource_group_name, server_name, file_name):
 
     # list all files
     files = client.list_by_server(resource_group_name, server_name)
 
     for f in files:
         if f.name in file_name:
-            urlretrieve(f.url, f.name.replace("serverlogs/", ""))
+            urlretrieve(f.url, f.name.replace("/", "_"))
 
 
 def flexible_server_list_log_files_with_filter(client, resource_group_name, server_name, filename_contains=None,
-                                file_last_written=None, max_file_size=None):
+                                               file_last_written=None, max_file_size=None):
 
     # list all files
     all_files = client.list_by_server(resource_group_name, server_name)

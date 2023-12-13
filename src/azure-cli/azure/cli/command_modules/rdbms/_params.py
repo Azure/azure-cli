@@ -845,9 +845,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('file_name', options_list=['--name', '-n'], nargs='+', help='Space-separated list of log filenames on the server to download.')
 
         with self.argument_context('{} flexible-server server-logs list'.format(command_group)) as c:
-                c.argument('filename_contains', help='The pattern that file name should match.')
-                c.argument('file_last_written', type=int, help='Integer in hours to indicate file last modify time.', default=72)
-                c.argument('max_file_size', type=int, help='The file size limitation to filter files.')
+            c.argument('filename_contains', help='The pattern that file name should match.')
+            c.argument('file_last_written', type=int, help='Integer in hours to indicate file last modify time.', default=72)
+            c.argument('max_file_size', type=int, help='The file size limitation to filter files.')
 
         # GTID
         if command_group == 'mysql':
