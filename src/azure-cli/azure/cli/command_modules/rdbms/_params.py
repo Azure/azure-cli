@@ -16,7 +16,8 @@ from azure.cli.core.commands.parameters import (
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
     tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, \
-    retention_validator, firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities
+    retention_validator, firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities, \
+    virtual_endpoint_name_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
@@ -491,6 +492,27 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Show connection strings for PgBouncer.'
         )
 
+        virtual_endpoint_arg_type = CLIArgumentType(
+            metavar='NAME',
+            options_list=['--name', '-n'],
+            id_part='name',
+            help="Name of the virtual endpoint. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
+            local_context_attribute=LocalContextAttribute(
+                name='virtual_endpoint_name',
+                actions=[LocalContextAction.SET, LocalContextAction.GET],
+                scopes=['{} flexible-server'.format(command_group)]))
+
+        endpoint_type_arg_type = CLIArgumentType(
+            options_list=['--endpoint-type', '-t'],
+            arg_type=get_enum_type(['ReadWrite']),
+            help='Type of connection point for virtual endpoint.'
+        )
+
+        members_type = CLIArgumentType(
+            options_list=['--members', '-m'],
+            help='The read replicas the virtual endpoints point to.'
+        )
+
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', arg_type=server_name_arg_type)
@@ -725,6 +747,25 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
             c.argument('database_name', arg_type=database_name_arg_type)
             c.argument('show_pg_bouncer', arg_type=pg_bouncer_arg_type)
+
+        # virtual-endpoint
+        for scope in ['create', 'delete', 'list', 'show', 'update']:
+            argument_context_string = '{} flexible-server virtual-endpoint {}'.format(command_group, scope)
+            with self.argument_context(argument_context_string) as c:
+                c.argument('resource_group_name', arg_type=resource_group_name_type)
+                c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+                c.argument('virtual_endpoint_name', options_list=['--name', '-n'], arg_type=virtual_endpoint_arg_type, validator=virtual_endpoint_name_validator)
+
+        for scope in ['create', 'update']:
+            argument_context_string = '{} flexible-server virtual-endpoint {}'.format(command_group, scope)
+            with self.argument_context(argument_context_string) as c:
+                c.argument('endpoint_type', options_list=['--endpoint-type', '-t'], arg_type=endpoint_type_arg_type,
+                           help='Virtual Endpoints offer two distinct types of connection points. Writer endpoint (Read/Write), this endpoint always points to the current primary server. Read-only endpoint, This endpoint can point to either a read replica or primary server. ')
+                c.argument('members', options_list=['--members', '-m'], arg_type=members_type,
+                           help='The read replicas the virtual endpoints point to. ')
+
+        with self.argument_context('{} flexible-server virtual-endpoint delete'.format(command_group)) as c:
+            c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server replica list'.format(command_group)) as c:
             c.argument('server_name', id_part=None, options_list=['--name', '-n'], help='Name of the source server.')
