@@ -98,3 +98,12 @@ WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
 
 DEFAULT_CENTAURI_IMAGE = 'mcr.microsoft.com/azure-functions/dotnet7-quickstart-demo:1.0'
 ACR_IMAGE_SUFFIX = ".azurecr.io"
+
+RUNTIME_STATUS_TEXT_MAP = {
+    "BuildInProgress": "Building the app...",
+    "BuildSuccessful": "Build successful.",
+    "BuildFailed": "Build failed.",
+    "RuntimeStarting": "Starting the site...",
+    "RuntimeSuccessful": "Site started successfully.",
+    "RuntimeFailed": "Site failed to start."
+}
