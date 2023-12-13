@@ -537,6 +537,30 @@ class FunctionAppManagedEnvironment(ScenarioTest):
 
         self.assertTrue('ftpPublishingUrl' not in r)
 
+    @ResourceGroupPreparer(location='eastus')
+    @StorageAccountPreparer()
+    def test_functionapp_create_with_appcontainer_managed_environment_existing_app_insights(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwindowsruntime', 32)
+        managed_environment_name = self.create_random_name(
+            'containerappmanagedenvironment', 40
+        )
+        app_insights_key = '00000000-0000-0000-0000-123456789123'
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location eastus --logs-destination none'
+        .format(managed_environment_name, resource_group)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', 'East US')])
+
+        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --app-insights-key {} --functions-version 4'
+                 .format(resource_group, functionapp_name, storage_account, managed_environment_name, app_insights_key)).assert_with_checks([
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathPatternCheck('hostNames[0]', functionapp_name + ".+" + 'azurecontainerapps.io')])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck("[?name=='APPINSIGHTS_INSTRUMENTATIONKEY'].value|[0]", app_insights_key)])
+
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment_consumption_plan_error(self, resource_group, storage_account):
