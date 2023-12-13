@@ -4315,17 +4315,26 @@ def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
 
 
 def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment_id, timeout=None):
+    runtime_status_text_map = {
+        "BuildInProgress": "Building the app...",
+        "BuildSuccessful": "Build successful.",
+        "BuildFailed": "Build failed.",
+        "RuntimeStarting": "Starting the site...",
+        "RuntimeSuccessful": "Site started successfully.",
+        "RuntimeFailed": "Site failed to start."
+    }
     max_time_sec = int(timeout) if timeout else 1000
     start_time = time.time()
     time_elapsed = 0
     deployment_status = None
     while time_elapsed < max_time_sec:
-        response_body = send_raw_request(params.cmd.cli_ctx, "GET", deploymentstatusapi_url,
-                                         disable_request_response_logging=True).json()
+        response_body = send_raw_request(params.cmd.cli_ctx, "GET", deploymentstatusapi_url).json()
         deployment_properties = response_body.get('properties')
         deployment_status = deployment_properties.get('status')
         time_elapsed = int(time.time() - start_time)
-        logger.warning("Status: %s. Time: %s(s)", deployment_status, time_elapsed)
+        status = runtime_status_text_map.get(deployment_status)
+        status = deployment_status if status is None else status
+        logger.warning("Status: %s Time: %s(s)", status, time_elapsed)
         if deployment_status == "RuntimeStarting":
             logger.info("InprogressInstances: %s, SuccessfulInstances: %s",
                         deployment_properties.get('numberOfInstancesInProgress'),
@@ -4341,10 +4350,11 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
             errors = deployment_properties.get('errors')
             if errors is not None and len(errors) > 0:
                 error_extended_code = errors[0]['extendedCode']
-                error_code = errors[0]['code']
                 error_message = errors[0]['message']
-                logger.error("Error - [Code : %s, Message: %s, ExtendedCode: %s]",
-                             error_code, error_message, error_extended_code)
+                if error_message is not None:
+                    logger.error("Error: %s", error_message)
+                else:
+                    logger.error("Extended ErrorCode: %s", error_extended_code)
             failure_logs = deployment_properties.get('failedInstancesLogs')
             if failure_logs is not None and len(failure_logs) > 0:
                 failure_logs = failure_logs[0]
@@ -4369,7 +4379,7 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
             logger.error("Please check the build logs for more info: %s",
                          deployment_logs)
             raise CLIError
-        time.sleep(5)
+        time.sleep(15)
 
     if time_elapsed >= max_time_sec or deployment_status != "RuntimeSuccessful":
         scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
@@ -4378,13 +4388,13 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
             raise CLIError("Timeout reached while build was still in progress. "
                            "Navigate to {} to check the build logs for your app.".format(
                                deployments_log_url))
-        # For any other status, redirect user to /deployments/latest endpoint
-        latest_deployment_url = scm_url + "/api/deployments/latest"
+        # For any other status, redirect user to /deployments/<id> endpoint
+        deployments_url = scm_url + f"/api/deployments/{deployment_id}"
         raise CLIError("Timeout reached while tracking deployment status, however,"
                        "the deployment operation is still on-going. "
                        "Navigate to {} to check the deployment status of your app. "
                        "InprogressInstances: {}, SuccessfulInstances: {}, FailedInstances: {}".format(
-                           latest_deployment_url,
+                           deployments_url,
                            deployment_properties.get('numberOfInstancesInProgress'),
                            deployment_properties.get('numberOfInstancesSuccessful'),
                            deployment_properties.get('numberOfInstancesFailed')))
@@ -5262,7 +5272,7 @@ def perform_onedeploy_functionapp(cmd,
     params.should_ignore_stack = ignore_stack
     params.timeout = timeout
     params.slot = slot
-    params.track_runtime_status = False
+    params.track_status = False
 
     return _perform_onedeploy_internal(params)
 
@@ -5280,7 +5290,7 @@ def perform_onedeploy_webapp(cmd,
                              ignore_stack=None,
                              timeout=None,
                              slot=None,
-                             track_runtime_status=False):
+                             track_status=False):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -5296,7 +5306,7 @@ def perform_onedeploy_webapp(cmd,
     params.should_ignore_stack = ignore_stack
     params.timeout = timeout
     params.slot = slot
-    params.track_runtime_status = track_runtime_status
+    params.track_status = track_status
 
     return _perform_onedeploy_internal(params)
 
@@ -5318,7 +5328,7 @@ class OneDeployParams:
         self.should_ignore_stack = None
         self.timeout = None
         self.slot = None
-        self.track_runtime_status = False
+        self.track_status = False
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
 
@@ -5460,6 +5470,7 @@ def _make_onedeploy_request(params):
     deploy_url = _build_onedeploy_url(params)
     deployment_status_url = _get_onedeploy_status_url(params)
     headers = _get_ondeploy_headers(params)
+    deployment_id = None
 
     # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
     # For that, set poll_async_deployment_for_debugging=True
@@ -5478,7 +5489,7 @@ def _make_onedeploy_request(params):
             logger.warning('Polling the status of %s deployment. Start Time: %s UTC',
                            "async" if params.is_async_deployment else "sync",
                            datetime.datetime.now(datetime.timezone.utc))
-            if params.track_runtime_status is not None and params.track_runtime_status:
+            if params.track_status is not None and params.track_status:
                 # once deploymentstatus/latest is available, we can use it to track the deployment
                 deployment_id = _get_latest_deployment_id(params.cmd, params.resource_group_name,
                                                           params.webapp_name, deployment_status_url, params.slot)
@@ -5515,8 +5526,9 @@ def _make_onedeploy_request(params):
 
     # check if an error occured during deployment
     if response.status_code:
+        deployment_id = "latest" if deployment_id is None else deployment_id
         scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
-        latest_deployment_url = scm_url + "/api/deployments/latest"
+        deployments_url = scm_url + f"/api/deployments/{deployment_id}"
         raise CLIError("An error occured during deployment. Status Code: {}, Details: {}, Please visit {}"
                        " to get more information about your deployment"
                        .format(response.status_code, response.text, latest_deployment_url))
