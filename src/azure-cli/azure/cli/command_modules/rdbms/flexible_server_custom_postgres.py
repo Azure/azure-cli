@@ -696,12 +696,12 @@ def flexible_replica_stop(client, resource_group_name, server_name):
         raise CLIError('Server {} is not a replica server.'.format(server_name))
 
     params = postgresql_flexibleservers.models.ServerForUpdate(
-            replica=postgresql_flexibleservers.models.Replica(
-                role='None',
-                promote_mode='standalone',
-                promote_option='planned'
-            )
+        replica=postgresql_flexibleservers.models.Replica(
+            role='None',
+            promote_mode='standalone',
+            promote_option='planned'
         )
+    )
 
     return client.begin_update(resource_group_name, server_name, params)
 
