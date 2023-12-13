@@ -39,7 +39,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         ])
 
         # delete and recheck
-        self.cmd("az netappfiles account delete --yes --resource-group {rg} --account-name '{acc_name}'")
+        self.cmd("az netappfiles account delete --resource-group {rg} --account-name '{acc_name}'")
         self.cmd("netappfiles account list --resource-group {rg}", checks=[
             self.check('length(@)', 0)
         ])
@@ -52,7 +52,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
-        self.cmd("az netappfiles account delete --yes --resource-group {rg} -a {acc_name}")
+        self.cmd("az netappfiles account delete --resource-group {rg} -a {acc_name}")
         self.cmd("netappfiles account list --resource-group {rg}", checks=[
             self.check('length(@)', 0)
         ])
@@ -71,8 +71,8 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             self.check('length(@)', 2)
         ])
 
-        self.cmd("az netappfiles account delete -g {rg} -a {acc1_name} --yes")
-        self.cmd("az netappfiles account delete -g {rg} -a {acc2_name} --yes")
+        self.cmd("az netappfiles account delete -g {rg} -a {acc1_name}")
+        self.cmd("az netappfiles account delete -g {rg} -a {acc2_name}")
 
         self.cmd("netappfiles account list -g {rg}", checks=[
             self.check('length(@)', 0)

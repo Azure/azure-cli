@@ -35,7 +35,7 @@ class AzureNetAppFilesPoolServiceScenarioTest(ScenarioTest):
         pool_list = self.cmd("netappfiles pool list --resource-group {rg} --account-name %s" % account_name).get_output_in_json()
         assert len(pool_list) == 1
 
-        self.cmd("az netappfiles pool delete --resource-group {rg} --account-name '%s' --pool-name '%s' --yes" % (account_name, pool_name))
+        self.cmd("az netappfiles pool delete --resource-group {rg} --account-name '%s' --pool-name '%s'" % (account_name, pool_name))
         pool_list = self.cmd("netappfiles pool list --resource-group {rg} --account-name %s" % account_name).get_output_in_json()
         assert len(pool_list) == 0
 
@@ -46,7 +46,7 @@ class AzureNetAppFilesPoolServiceScenarioTest(ScenarioTest):
         assert pool['tags']['Tag2'] == 'Value2'
         assert pool['qosType'] == 'Auto'
 
-        self.cmd("az netappfiles pool delete --resource-group {rg} -a %s -p %s --yes" % (account_name, pool_name))
+        self.cmd("az netappfiles pool delete --resource-group {rg} -a %s -p %s" % (account_name, pool_name))
         pool_list = self.cmd("netappfiles pool list --resource-group {rg} -a %s" % account_name).get_output_in_json()
         assert len(pool_list) == 0
 
@@ -81,7 +81,7 @@ class AzureNetAppFilesPoolServiceScenarioTest(ScenarioTest):
         assert len(pool_list) == 2
 
         for pool_name in pools:
-            self.cmd("az netappfiles pool delete -g {rg} -a %s -p %s --yes" % (account_name, pool_name))
+            self.cmd("az netappfiles pool delete -g {rg} -a %s -p %s" % (account_name, pool_name))
         pool_list = self.cmd("netappfiles pool list --resource-group {rg} -a '%s'" % account_name).get_output_in_json()
         assert len(pool_list) == 0
 

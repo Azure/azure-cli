@@ -79,7 +79,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert len(backup_policy_list) == 1
 
         # delete backup policy
-        self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s --yes" %
+        self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s" %
                  (account_name, backup_policy_name))
 
         # create backup policy using short parameter names and validate result
@@ -96,7 +96,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert backup_policy['tags']['Tag2'] == 'Value2'
 
         # delete backup policy
-        self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s --yes" %
+        self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s" %
                  (account_name, backup_policy_name))
 
         # validate backup policy doesn't exist
@@ -125,7 +125,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
 
         # delete all backup policies
         for backup_policy_name in backup_policies:
-            self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s --yes" %
+            self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s" %
                      (account_name, backup_policy_name))
 
         # validate that no backup policies exist

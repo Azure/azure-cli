@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles volume revert-relocation",
+    confirmation="Are you sure you want to perform this operation?",
 )
 class RevertRelocation(AAZCommand):
     """Reverts the volume relocation process, cleans up the new volume and starts using the former-existing volume.

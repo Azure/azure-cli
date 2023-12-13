@@ -33,9 +33,9 @@ class NetAppFilesCommandsLoader(AzCommandsLoader):
         load_command_table(self, args)
         return self.command_table
 
-    # def load_arguments(self, command):
-        # from azure.cli.command_modules.netappfiles._params import load_arguments
-        # load_arguments(self, command)
+    def load_arguments(self, command):
+        from azure.cli.command_modules.netappfiles._params import load_arguments
+        load_arguments(command)
 
 
 COMMAND_LOADER_CLS = NetAppFilesCommandsLoader
