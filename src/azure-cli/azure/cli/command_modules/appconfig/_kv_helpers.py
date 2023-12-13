@@ -901,7 +901,7 @@ def __validate_import_keyvault_ref(kv):
             # URL with a valid scheme and netloc is a valid url, but keyvault ref has path as well, so validate it
             if parsed_url.scheme and parsed_url.netloc and parsed_url.path:
                 try:
-                    parse_key_vault_id(uri=value['uri'])
+                    parse_key_vault_id(source_id=value['uri'])
                     return True
                 except Exception:  # pylint: disable=broad-except
                     pass
