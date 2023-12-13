@@ -84,8 +84,8 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles volume-group delete -g {rg} -a {acc} --volume-group-name {vg_name} -y --yes")
 
         # Delete pool and account
-        self.cmd("az netappfiles pool delete -g {rg} -a {acc} -p {pool} --yes")
-        self.cmd("az netappfiles account delete -g {rg} -a {acc} --yes")
+        self.cmd("az netappfiles pool delete -g {rg} -a {acc} -p {pool}")
+        self.cmd("az netappfiles account delete -g {rg} -a {acc}")
 
     #@unittest.skip('(drp failure) DRP stamp pinning failing on the environment, no way to test until fixed')
     def test_hrs_volume_groups(self):
@@ -165,7 +165,7 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
         if (self.is_live or self.in_recording):
             time.sleep(20)
         # Delete pool and account
-        self.cmd("az netappfiles pool delete -g {rg} -a {acc} -p {pool} --yes")
+        self.cmd("az netappfiles pool delete -g {rg} -a {acc} -p {pool}")
         if (self.is_live or self.in_recording):
             time.sleep(20)
-        self.cmd("az netappfiles account delete -g {rg} -a {acc} --yes")
+        self.cmd("az netappfiles account delete -g {rg} -a {acc}")
