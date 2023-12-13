@@ -509,7 +509,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
             JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
 
 
-class FunctionappDapr(ScenarioTest):
+class FunctionappDapr(LiveScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
     @StorageAccountPreparer()
