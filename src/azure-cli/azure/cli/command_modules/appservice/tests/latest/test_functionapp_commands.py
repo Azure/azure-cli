@@ -520,7 +520,7 @@ class FunctionappDapr(ScenarioTest):
             'managedenvironment', 40
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location {}'.format(
+        self.cmd('containerapp env create --name {} --resource-group {} --location {} --logs-destination none'.format(
             managed_environment_name,
             resource_group,
             "northeurope"
