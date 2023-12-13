@@ -225,7 +225,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume_list = self.cmd("netappfiles volume list --resource-group {rg} -a '%s' -p '%s'" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 2
 
-        self.cmd("az netappfiles volume delete -g {rg} -a %s -p %s -v %s --yes" % (account_name, pool_name, volume_name1))
+        self.cmd("az netappfiles volume delete -g {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name1))
         volume_list = self.cmd("netappfiles volume list -g {rg} -a '%s' -p '%s'" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 1
 
