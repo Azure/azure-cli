@@ -2112,6 +2112,7 @@ class FunctionappIdentityTest(ScenarioTest):
         self.cmd('functionapp identity assign -g {} -n {}'.format(resource_group, functionapp_name))
         result = self.cmd('functionapp identity assign -g {} -n {} --identities {}'.format(
             resource_group, functionapp_name, msi_result['id'])).get_output_in_json()
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO=BAR'.format(resource_group, functionapp_name))
         self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             self.check('principalId', result['principalId']),
             self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
@@ -2119,6 +2120,7 @@ class FunctionappIdentityTest(ScenarioTest):
 
         self.cmd('functionapp identity remove -g {} -n {} --identities {}'.format(
             resource_group, functionapp_name, msi_result['id']))
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO2=BAR2'.format(resource_group, functionapp_name))
         self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             self.check('principalId', result['principalId']),
             self.check('userAssignedIdentities', None),
@@ -2145,6 +2147,7 @@ class FunctionappIdentityTest(ScenarioTest):
         self.cmd('functionapp identity assign -g {} -n {} --identities [system] {} {}'.format(
             resource_group, functionapp_name, msi_result['id'], msi2_result['id']))
 
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO=BAR'.format(resource_group, functionapp_name))
         result = self.cmd('functionapp identity remove -g {} -n {} --identities {}'.format(
             resource_group, functionapp_name, msi2_result['id'])).get_output_in_json()
         self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
@@ -2153,6 +2156,7 @@ class FunctionappIdentityTest(ScenarioTest):
         ])
 
         self.cmd('functionapp identity remove -g {} -n {}'.format(resource_group, functionapp_name))
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO2=BAR2'.format(resource_group, functionapp_name))
         self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             self.check('principalId', None),
             self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
@@ -2160,6 +2164,7 @@ class FunctionappIdentityTest(ScenarioTest):
 
         self.cmd('functionapp identity remove -g {} -n {} --identities [system] {}'.format(
             resource_group, functionapp_name, msi_result['id']))
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO3=BAR3'.format(resource_group, functionapp_name))
         self.cmd('functionapp identity show -g {} -n {}'.format(
             resource_group, functionapp_name), checks=self.is_empty())
 
