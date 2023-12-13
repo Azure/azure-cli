@@ -379,6 +379,14 @@ def validate_ppg(namespace):
             raise CLIError("--ppg is not a valid Azure resource ID.")
 
 
+def validate_node_public_ip_tags(ns):
+    if isinstance(ns.node_public_ip_tags, list):
+        tags_dict = {}
+        for item in ns.node_public_ip_tags:
+            tags_dict.update(validate_tag(item))
+        ns.node_public_ip_tags = tags_dict
+
+
 def validate_nodepool_labels(namespace):
     """Validates that provided node labels is a valid format"""
 

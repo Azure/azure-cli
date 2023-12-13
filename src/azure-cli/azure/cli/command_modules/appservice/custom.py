@@ -78,7 +78,8 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
-                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE)
+                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
+                         VERSION_2022_09_01)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -3028,9 +3029,9 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         if kv_subscription.lower() != subscription_id.lower():
             diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
                                                                subscription_id=kv_subscription)
-            ascs = diff_subscription_client.app_service_certificate_orders.list()
+            ascs = diff_subscription_client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
         else:
-            ascs = client.app_service_certificate_orders.list()
+            ascs = client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
 
         kv_secret_name = None
         for asc in ascs:
