@@ -11,8 +11,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.9.13 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/providers/Microsoft.ManagedIdentity/operations?api-version=2023-01-31
   response:
@@ -48,16 +47,19 @@ interactions:
         Assigned Identity","description":"Gets an existing user assigned identity"}},{"name":"Microsoft.ManagedIdentity/userAssignedIdentities/write","display":{"provider":"Microsoft
         Managed Identity","resource":"User Assigned Identities","operation":"Create/Update
         User Assigned Identity","description":"Creates a new user assigned identity
-        or updates the tags associated with an existing user assigned identity"}}]}'
+        or updates the tags associated with an existing user assigned identity"}},{"name":"Microsoft.ManagedIdentity/userAssignedIdentities/revokeTokens/action","display":{"provider":"Microsoft
+        Managed Identity","resource":"User Assigned Identities","operation":"Revokes
+        tokens minted on User Assigned Identity","description":"Revoked all the existing
+        tokens on a user assigned identity"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3233'
+      - '3541'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:09:57 GMT
+      - Wed, 13 Dec 2023 02:41:14 GMT
       expires:
       - '-1'
       pragma:
@@ -74,50 +76,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - identity create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_identity_mgmt_000001?api-version=2022-09-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_identity_mgmt_000001","name":"cli_test_identity_mgmt_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-03-13T11:09:56Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '336'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Mar 2023 11:09:57 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westus"}'
+    body: '{"location": "eastus2euap"}'
     headers:
       Accept:
       - application/json
@@ -128,28 +87,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '22'
+      - '27'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.9.13 (Windows-10-10.0.22631-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_identity_mgmt_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity?api-version=2023-01-31
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_identity_mgmt_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity","name":"myidentity","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"de46396d-0101-4c56-95a0-4daa96936d76","clientId":"390e69d8-5e41-49e3-89cf-463539faef9f"}}'
+      string: '{"location":"eastus2euap","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_identity_mgmt_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity","name":"myidentity","type":"Microsoft.ManagedIdentity/userAssignedIdentities","properties":{"tenantId":"bea21ebe-8b64-4d06-9f6d-6a889b120a7c","principalId":"103ff2f3-bd10-4ee0-a2e7-6a484224f6ea","clientId":"94c9c0b0-b763-4b9c-af97-7f4fad96d529"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '451'
+      - '456'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:10:00 GMT
+      - Wed, 13 Dec 2023 02:41:16 GMT
       expires:
       - '-1'
       location:
@@ -161,7 +119,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -181,8 +139,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.9.13 (Windows-10-10.0.22631-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_identity_mgmt_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity/listAssociatedResources?api-version=2022-01-31-preview
   response:
@@ -196,7 +153,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:10:02 GMT
+      - Wed, 13 Dec 2023 02:41:18 GMT
       expires:
       - '-1'
       pragma:
@@ -226,22 +183,21 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.9.13 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_identity_mgmt_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities?api-version=2023-01-31
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_identity_mgmt_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity","name":"myidentity","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"de46396d-0101-4c56-95a0-4daa96936d76","clientId":"390e69d8-5e41-49e3-89cf-463539faef9f"}}]}'
+      string: '{"value":[{"location":"eastus2euap","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_identity_mgmt_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity","name":"myidentity","type":"Microsoft.ManagedIdentity/userAssignedIdentities","properties":{"tenantId":"bea21ebe-8b64-4d06-9f6d-6a889b120a7c","principalId":"103ff2f3-bd10-4ee0-a2e7-6a484224f6ea","clientId":"94c9c0b0-b763-4b9c-af97-7f4fad96d529"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '463'
+      - '468'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:10:02 GMT
+      - Wed, 13 Dec 2023 02:41:20 GMT
       expires:
       - '-1'
       pragma:
@@ -273,8 +229,7 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.9.13 (Windows-10-10.0.22631-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_identity_mgmt_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity?api-version=2023-01-31
   response:
@@ -286,7 +241,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 13 Mar 2023 11:10:07 GMT
+      - Wed, 13 Dec 2023 02:41:22 GMT
       expires:
       - '-1'
       pragma:
@@ -296,7 +251,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14997'
+      - '14999'
     status:
       code: 200
       message: OK
