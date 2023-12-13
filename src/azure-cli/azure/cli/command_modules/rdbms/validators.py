@@ -23,7 +23,9 @@ from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysq
                                     get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers,
                                     _is_resource_name)
 from ._flexible_server_location_capabilities_util import (get_postgres_location_capability_info,
-                                                          get_postgres_server_capability_info)
+                                                          get_postgres_server_capability_info,
+                                                          get_performance_tiers,
+                                                          get_performance_tiers_for_storage)
 
 logger = get_logger(__name__)
 
@@ -297,7 +299,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                           auto_grow=None, storage_type=None, iops=None, throughput=None, replication_role=None):
+                           auto_grow=None, replication_role=None, performance_tier=None, storage_type=None, iops=None, throughput=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     if not instance:
         list_location_capability_info = get_postgres_location_capability_info(
@@ -315,6 +317,10 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
         tier = instance.sku.tier
+    _pg_storage_performance_tier_validator(performance_tier,
+                                           sku_info,
+                                           tier,
+                                           instance.storage.storage_size_gb if storage_gb is None else storage_gb)
     if geo_redundant_backup is None and instance is not None:
         geo_redundant_backup = instance.backup.geo_redundant_backup
     _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported)
@@ -338,15 +344,16 @@ def _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throug
             storage_sizes = sorted([int(size) for size in storage_sizes])
             raise CLIError('Incorrect value for --storage-size : Allowed values(in GiB) : {}'
                         .format(storage_sizes))
-    if storage_type == "PremiumV2_LRS" and (iops is None or throughput is None):
-        raise CLIError('Incorrect usage : --storage-type. Please provide --iops and --throughput with --storage-type.')
-    if storage_type != "PremiumV2_LRS" and (throughput is not None or iops is not None):
-        raise CLIError('Please set "--storage-type" to "PremiumV2_LRS" and provide values for both --iops and --throughput.')
-    if instance is not None:
+    if instance is None:
+        if storage_type == "PremiumV2_LRS" and (iops is None or throughput is None):
+            raise CLIError('Incorrect usage : --storage-type. Please provide --iops and --throughput with --storage-type.')
+        if storage_type != "PremiumV2_LRS" and (throughput is not None or iops is not None):
+            raise CLIError('Please set "--storage-type" to "PremiumV2_LRS" and provide values for both --iops and --throughput.')
+    else:
         if instance.storage.type != "PremiumV2_LRS" and throughput is not None:
-            raise CLIError('Incorrect usage : --throughput. Server is not created with premium SSD v2.')
+            raise CLIError('Updating throughput is only capable for server created with premium SSD v2.')
         if instance.storage.type != "PremiumV2_LRS" and iops is not None:
-            raise CLIError('Incorrect usage : --iops. Server is not created with premium SSD v2.')
+            raise CLIError('Updating storage iops is only capable for server created with premium SSD v2.')
 
 
 def _pg_tier_validator(tier, sku_info):
@@ -365,6 +372,20 @@ def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
             raise CLIError('Incorrect value for --sku-name. The SKU name does not match {} tier. '
                            'Specify --tier if you did not. Or CLI will set GeneralPurpose as the default tier. '
                            'Allowed values : {}'.format(tier, skus))
+
+
+def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None, storage_size=None):
+    if performance_tier:
+        tiers = get_postgres_tiers(sku_info)
+        if tier in tiers:
+            if storage_size is None:
+                performance_tiers = get_performance_tiers(sku_info[tier]["storage_edition"])
+            else:
+                performance_tiers = get_performance_tiers_for_storage(sku_info[tier]["storage_edition"],
+                                                                      storage_size=storage_size)
+            if performance_tier not in performance_tiers:
+                raise CLIError('Incorrect value for --performance-tier for storage-size: {}.'
+                               ' Allowed values : {}'.format(storage_size, performance_tiers))
 
 
 def _pg_version_validator(version, versions):
@@ -521,6 +542,14 @@ def _valid_range(addr_range):
     return False
 
 
+def virtual_endpoint_name_validator(ns):
+    if not re.search(r'^(?=[a-z0-9].*)(?=.*[a-z-])(?!.*[^a-z0-9-])(?=.*[a-z0-9]$)', ns.virtual_endpoint_name):
+        raise ValidationError("The virtual endpoint name can only contain 0-9, a-z, and \'-\'. "
+                              "The virtual endpoint name must not start or end in a hyphen. "
+                              "Additionally, the name of the virtual endpoint must be at least 3 characters "
+                              "and no more than 63 characters in length. ")
+
+
 def firewall_rule_name_validator(ns):
     if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,126}[_a-zA-Z0-9]$', ns.firewall_rule_name):
         raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
@@ -586,7 +615,8 @@ def validate_mysql_replica(server):
                               "Scale up the source server to General Purpose or Memory Optimized. ")
 
 
-def validate_postgres_replica(cmd, tier, location, instance, list_location_capability_info=None):
+def validate_postgres_replica(cmd, tier, location, instance, sku_name,
+                              storage_gb, performance_tier=None, list_location_capability_info=None):
     # Tier validation
     if tier == 'Burstable':
         raise ValidationError("Read replica is not supported for the Burstable pricing tier. "
@@ -597,6 +627,14 @@ def validate_postgres_replica(cmd, tier, location, instance, list_location_capab
 
     if not list_location_capability_info:
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
+
+    sku_info = list_location_capability_info['sku_info']
+    _pg_tier_validator(tier, sku_info)  # need to be validated first
+    _pg_sku_name_validator(sku_name, sku_info, tier, instance)
+    _pg_storage_performance_tier_validator(performance_tier,
+                                           sku_info,
+                                           tier,
+                                           storage_gb)
 
 
 def validate_mysql_tier_update(instance, tier):

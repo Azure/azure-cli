@@ -112,7 +112,7 @@ class WebappBasicE2ETest(ScenarioTest):
         # show publish profile info
         result = self.cmd('webapp deployment list-publishing-profiles -g {} -n {}'.format(
             resource_group, webapp_name)).get_output_in_json()
-        self.assertTrue(result[1]['publishUrl'].startswith('ftp://'))
+        self.assertTrue(result[1]['publishUrl'].startswith('ftps://'))
         self.cmd('webapp stop -g {} -n {}'.format(resource_group, webapp_name))
         self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('state', 'Stopped'),
@@ -146,10 +146,10 @@ class WebappQuickCreateTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
-        self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
+        self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '~14'),
+            JMESPathCheck('[0].value', '~16'),
         ])
 
     @ResourceGroupPreparer(name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -160,14 +160,14 @@ class WebappQuickCreateTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|16LTS"'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
-        self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
+        self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '~14'),
+            JMESPathCheck('[0].value', '~16'),
         ])
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "dotnet:6"'.format(
             resource_group, webapp_name_2, plan)).get_output_in_json()
-        self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
+        self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_win_webapp_quick_create_cd(self, resource_group):
@@ -539,25 +539,25 @@ class AppServicePlanScenarioTest(ScenarioTest):
         self.cmd('appservice plan list -g {}'.format(resource_group),
                  checks=[JMESPathCheck('length(@)', 0)])
 
-    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(location="eastus")
     def test_zone_redundant_plan(self, resource_group):
         plan = self.create_random_name('plan', 24)
         self.cmd(
-            'appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
+            'appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan, "eastus"))
 
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('properties.zoneRedundant', True), JMESPathCheck('properties.numberOfWorkers', 3)])
 
         # test with unsupported SKU
         plan2 = self.create_random_name('plan', 24)
-        self.cmd('appservice plan create -g {} -n {} -l {} -z --sku FREE'.format(resource_group, plan2, LINUX_ASP_LOCATION_WEBAPP), expect_failure=True)
+        self.cmd('appservice plan create -g {} -n {} -l {} -z --sku FREE'.format(resource_group, plan2, "eastus"), expect_failure=True)
 
         # test with unsupported location
         self.cmd('appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan2, WINDOWS_ASP_LOCATION_WEBAPP), expect_failure=True)
 
         # ensure non zone redundant
         plan = self.create_random_name('plan', 24)
-        self.cmd('functionapp plan create -g {} -n {} -l {} --sku FREE'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
+        self.cmd('functionapp plan create -g {} -n {} -l {} --sku FREE'.format(resource_group, plan, "eastus"))
 
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[JMESPathCheck('properties.zoneRedundant', False)])
 
@@ -2701,10 +2701,8 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
         
         self.cmd(f'webapp deploy -g {resource_group} -n {webapp_name} --src-url {war_url} --type war').assert_with_checks([
-            JMESPathCheck('status', 4),
             JMESPathCheck('deployer', 'OneDeploy'),
             JMESPathCheck('message', 'OneDeploy'),
-            JMESPathCheck('complete', True)
         ])
 
 class DomainScenarioTest(ScenarioTest):

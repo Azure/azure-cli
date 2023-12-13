@@ -21,6 +21,25 @@ def get_postgres_server_capability_info(cmd, resource_group, server_name):
     return _postgres_parse_list_capability(list_server_capability_result)
 
 
+def get_performance_tiers_for_storage(storage_edition, storage_size):
+    performance_tiers = []
+    storage_size_mb = None if storage_size is None else storage_size * 1024
+    for storage_info in storage_edition.supported_storage_mb:
+        if storage_size_mb == storage_info.storage_size_mb:
+            for performance_tier in storage_info.supported_iops_tiers:
+                performance_tiers.append(performance_tier.name)
+    return performance_tiers
+
+
+def get_performance_tiers(storage_edition):
+    performance_tiers = []
+    for storage_info in storage_edition.supported_storage_mb:
+        for performance_tier in storage_info.supported_iops_tiers:
+            if performance_tier.name not in performance_tiers:
+                performance_tiers.append(performance_tier.name)
+    return performance_tiers
+
+
 def _postgres_parse_list_capability(result):
     result = _get_list_from_paged_response(result)
 
@@ -52,32 +71,33 @@ def _postgres_parse_list_capability(result):
 
         storage_sizes = set()
         for storage_edition in tier_info.supported_storage_editions:
-            if storage_edition.name == "ManagedDiskV2":
-                supported_storage_mb = storage_edition.supported_storage_mb[0]
-                tier_dict["ssdv2_data"] = {'storage_size': supported_storage_mb.storage_size_mb // 1024,
-                                           'maximum_storage_size': supported_storage_mb.maximum_storage_size_mb // 1024,
-                                           'supported_maximum_iops': supported_storage_mb.supported_maximum_iops,
-                                           'supported_throughput': supported_storage_mb.supported_throughput,
-                                           'supported_maximum_throughput': supported_storage_mb.supported_maximum_throughput
-                                           }
-            for storage_info in storage_edition.supported_storage_mb:
-                storage_sizes.add(int(storage_info.storage_size_mb // 1024))
+            if storage_edition.name == "ManagedDisk":
+                for storage_info in storage_edition.supported_storage_mb:
+                    storage_sizes.add(int(storage_info.storage_size_mb // 1024))
+                tier_dict["storage_edition"] = storage_edition
+            else:
+                tier_dict["supported_storageV2_size"] = int(storage_edition.supported_storage_mb[0].storage_size_mb // 1024)
+                tier_dict["supported_storageV2_size_max"] = int(storage_edition.supported_storage_mb[0].maximum_storage_size_mb // 1024)
+                tier_dict["supported_storageV2_iops"] = storage_edition.supported_storage_mb[0].supported_iops
+                tier_dict["supported_storageV2_iops_max"] = storage_edition.supported_storage_mb[0].supported_maximum_iops
+                tier_dict["supported_storageV2_throughput"] = storage_edition.supported_storage_mb[0].supported_throughput
+                tier_dict["supported_storageV2_throughput_max"] = storage_edition.supported_storage_mb[0].supported_maximum_throughput
 
         tier_dict["skus"] = skus
         tier_dict["storage_sizes"] = storage_sizes
-
         tiers_dict[tier_name] = tier_dict
 
     versions = set()
     for version in result[0].supported_server_versions:
         versions.add(version.name)
 
-    return {'sku_info': tiers_dict,
-            'single_az': single_az,
-            'geo_backup_supported': geo_backup_supported,
-            'zones': zones,
-            'server_versions': versions
-            }
+    return {
+        'sku_info': tiers_dict,
+        'single_az': single_az,
+        'geo_backup_supported': geo_backup_supported,
+        'zones': zones,
+        'server_versions': versions
+    }
 
 
 def _get_list_from_paged_response(obj_list):

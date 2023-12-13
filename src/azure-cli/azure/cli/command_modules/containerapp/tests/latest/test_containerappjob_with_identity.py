@@ -20,7 +20,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # pylint: skip-file
 
 
-class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
+class ContainerAppJobsIdentityOperationsTest(ScenarioTest):
     def __init__(self, *arg, **kwargs):
         super().__init__(*arg, random_config_dir=True, **kwargs)
 
