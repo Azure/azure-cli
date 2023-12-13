@@ -15,7 +15,8 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_replica,
     cf_postgres_flexible_adadmin,
     cf_postgres_flexible_migrations,
-    cf_postgres_flexible_server_threat_protection_settings)
+    cf_postgres_flexible_server_threat_protection_settings,
+    cf_postgres_flexible_server_log_files)
 
 from ._transformers import (
     table_transform_output,
@@ -80,6 +81,11 @@ def load_flexibleserver_command_table(self, _):
     postgres_flexible_server_threat_protection_settings_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#ServerThreatProtectionSettingsOperations.{}',
         client_factory=cf_postgres_flexible_server_threat_protection_settings
+    )
+
+    postgres_flexible_server_log_files_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#LogFilesOperations.{}',
+        client_factory=cf_postgres_flexible_server_log_files
     )
 
     # MERU COMMANDS
@@ -196,3 +202,9 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_server_threat_protection_settings) as g:
         g.custom_show_command('show', 'flexible_server_threat_protection_get', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('update', 'flexible_server_threat_protection_update', custom_command_type=flexible_servers_custom_postgres)
+
+    with self.command_group('postgres flexible-server server-logs', postgres_flexible_server_log_files_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_server_log_files) as g:
+        g.custom_command('list', 'flexible_server_list_log_files_with_filter', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('download', 'flexible_server_download_log_files', custom_command_type=flexible_servers_custom_postgres)

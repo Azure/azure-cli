@@ -4,9 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
+from datetime import datetime, timedelta
 import os
 import json
 from importlib import import_module
+import re
+from urllib.request import urlretrieve
+from dateutil.tz import tzutc   # pylint: disable=import-error
 import uuid
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
@@ -998,6 +1002,46 @@ def flexible_server_threat_protection_set(
             parameters=parameters),
         cmd.cli_ctx,
         'PostgreSQL Flexible Server Advanced Threat Protection Setting Update')
+
+
+# Custom functions for server logs
+def flexible_server_download_log_files(
+        client,
+        resource_group_name,
+        server_name,
+        file_name):
+
+    # list all files
+    files = client.list_by_server(resource_group_name, server_name)
+
+    for f in files:
+        if f.name in file_name:
+            urlretrieve(f.url, f.name.replace("serverlogs/", ""))
+
+
+def flexible_server_list_log_files_with_filter(client, resource_group_name, server_name, filename_contains=None,
+                                file_last_written=None, max_file_size=None):
+
+    # list all files
+    all_files = client.list_by_server(resource_group_name, server_name)
+    files = []
+
+    if file_last_written is None:
+        file_last_written = 72
+    time_line = datetime.utcnow().replace(tzinfo=tzutc()) - timedelta(hours=file_last_written)
+
+    for f in all_files:
+        if f.last_modified_time < time_line:
+            continue
+        if filename_contains is not None and re.search(filename_contains, f.name) is None:
+            continue
+        if max_file_size is not None and f.size_in_kb > max_file_size:
+            continue
+
+        del f.created_time
+        files.append(f)
+
+    return files
 
 
 def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_mode="offline",
