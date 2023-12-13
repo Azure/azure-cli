@@ -13,7 +13,7 @@ from knack.log import get_logger
 
 from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError, ResourceNotFoundError)
 from azure.cli.core.commands.parameters import get_subscription_locations
-from azure.cli.core.util import should_disable_connection_verify, send_raw_request
+from azure.cli.core.util import should_disable_connection_verify
 from azure.cli.core.commands.client_factory import get_subscription_id
 
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
