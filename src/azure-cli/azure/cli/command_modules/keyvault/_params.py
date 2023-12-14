@@ -682,7 +682,7 @@ def load_arguments(self, _):
                 type=get_json_object, validator=process_certificate_policy)
         c.extra('tags', tags_type)
 
-    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)). \
+    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES)). \
         replace('.', '_').replace('-', '_')
 
     if data_api_version != "2016_10_01":

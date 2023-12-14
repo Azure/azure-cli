@@ -106,9 +106,7 @@ def get_client_factory(resource_type, client_name=''):
     if is_mgmt_plane(resource_type):
         return keyvault_mgmt_client_factory(resource_type, client_name)
     if resource_type == ResourceType.DATA_KEYVAULT:
-        if client_name == Clients.private_7_2:
-            return keyvault_private_data_plane_factory_v7_2_preview
-        return keyvault_data_plane_factory
+        return keyvault_private_data_plane_factory_v7_2_preview
     if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP:
         return data_plane_azure_keyvault_administration_backup_client
     if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:

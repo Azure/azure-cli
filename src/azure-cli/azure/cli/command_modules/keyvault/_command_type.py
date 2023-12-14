@@ -54,10 +54,9 @@ def keyvault_exception_handler(cmd, ex):
 class KeyVaultCommandGroup(AzCommandGroup):
 
     def __init__(self, command_loader, group_name, **kwargs):
-        from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-        # all regular and custom commands should use the keyvault data plane client
+        from azure.cli.command_modules.keyvault._client_factory import keyvault_mgmt_client_factory
         merged_kwargs = self._merge_kwargs(kwargs, base_kwargs=command_loader.module_kwargs)
-        merged_kwargs['custom_command_type'].settings['client_factory'] = keyvault_data_plane_factory
+        merged_kwargs['custom_command_type'].settings['client_factory'] = keyvault_mgmt_client_factory
         super(KeyVaultCommandGroup, self).__init__(command_loader, group_name, **kwargs)
 
     def _create_keyvault_command(self, name, method_name=None, command_type_name=None, **kwargs):

@@ -182,11 +182,6 @@ def process_secret_set_namespace(namespace):
     namespace.value = content
 
 
-def process_sas_token_parameter(cmd, ns):
-    SASTokenParameter = cmd.get_models('SASTokenParameter', resource_type=ResourceType.DATA_KEYVAULT)
-    return SASTokenParameter(storage_resource_uri=ns.storage_resource_uri, token=ns.token)
-
-
 def process_hsm_name(ns):
     if not ns.identifier and not ns.hsm_name:
         raise CLIError('Please specify --hsm-name or --id.')
