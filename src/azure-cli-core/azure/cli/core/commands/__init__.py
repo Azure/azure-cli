@@ -716,9 +716,9 @@ class AzCliCommandInvoker(CommandInvoker):
             redact_keys = sensitive_info.redact_keys if sensitive_info and redact else []
             for key in redact_keys:
                 result[key] = '_REDACTED_'
-            from ..credential_helper import is_containing_credential, distinguish_credential, redact_credential
+            from ..credential_helper import is_containing_credential, distinguish_credential, redact_credential, senstive_data_warning_message
             if not sensitive_info and is_containing_credential(result, max_level=99):
-                logger.warning(f'!!! The output may contain sensitive data: {distinguish_credential(result)}, please be careful !!!')
+                logger.warning(senstive_data_warning_message)
             if (not sensitive_info) or redact:
                 result = redact_credential(result)
             event_data = {'result': result}

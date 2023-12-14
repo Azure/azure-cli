@@ -7,6 +7,8 @@ import re
 import json
 from enum import Enum
 
+senstive_data_warning_message = 'The output includes secrets that you must protect. Be sure that you do not include these secrets in your source control. Also verify that no secrets are present in the logs of your command or script. For additional information, see http://aka.ms/clisecrets.'
+
 
 class CredentialType(Enum):
     STORAGE_SAS_TOKEN = ('([?&;])sig=[\w%-/]+', r'\1sig=_REDACTED_SAS_TOKEN_SIG_', 1, 'Storage SAS token')

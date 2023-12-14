@@ -53,7 +53,9 @@ class SensitiveItem(StatusTag):
         """
 
         def _default_get_message(self):
-            return "{} may contain sensitive data, please take care.".format("This " + self.object_type)
+            from ..credential_helper import senstive_data_warning_message
+            return senstive_data_warning_message
+            # return "{} may contain sensitive data, please take care.".format("This " + self.object_type)
 
         super().__init__(
             cli_ctx=cli_ctx,
