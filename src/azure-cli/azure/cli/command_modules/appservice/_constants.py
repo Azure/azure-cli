@@ -65,6 +65,8 @@ GENERATE_RANDOM_APP_NAMES = os.path.abspath(os.path.join(os.path.abspath(__file_
 
 PUBLIC_CLOUD = "AzureCloud"
 
+VERSION_2022_09_01 = "2022-09-01"
+
 LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
     'node': 'AppService/linux/nodejs-webapp-on-azure.yml',
     'python': 'AppService/linux/python-webapp-on-azure.yml',

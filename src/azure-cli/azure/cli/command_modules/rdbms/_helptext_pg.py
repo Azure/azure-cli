@@ -201,8 +201,17 @@ examples:
         --key $keyIdentifier --identity testIdentity --backup-key $geoKeyIdentifier --backup-identity geoIdentity
 
 
-      # create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
+  - name: >
+      Create flexible server with custom storage performance tier. Accepted values "P4", "P6", "P10", "P15", "P20", "P30", \\
+      "P40", "P50", "P60", "P70", "P80". Actual allowed values depend on the --storage-size selection for flexible server creation. \\
+      Default value for storage performance tier depends on the --storage-size selected for flexible server creation.
+    text: >
+      az postgres flexible-server create -g testGroup -n testServer --location testLocation --performance-tier P15
 
+
+  - name: >
+      create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
+    text: >
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --storage-auto-grow Enabled
 """
 
@@ -256,6 +265,8 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --private-dns-zone /subscriptions/{SubId2}/resourceGroups/{testGroup2}/providers/Microsoft.Network/privateDnsZones/testDNS.postgres.database.azure.com
   - name: Update a flexible server's storage to enable / disable storage auto-grow.
     text: az postgres flexible-server update --resource-group testGroup --name testserver --storage-auto-grow Enabled
+  - name: Update a flexible server's storage to set custom storage performance tier.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --performance-tier P15
 """
 
 helps['postgres flexible-server restore'] = """
@@ -426,6 +437,53 @@ short-summary: Delete a firewall rule.
 examples:
   - name: Delete a firewall rule.
     text: az postgres flexible-server firewall-rule delete --rule-name testRule --resource-group testGroup --name testserver
+"""
+
+helps['postgres flexible-server virtual-endpoint'] = """
+type: group
+short-summary: Manage virtual endpoints for a PostgreSQL flexible server.
+"""
+
+helps['postgres flexible-server virtual-endpoint create'] = """
+type: command
+short-summary: Create a new virtual endpoint for a flexible server.
+examples:
+  - name: >
+      Create a virtual endpoint with writer endpoint.
+    text: >
+      az postgres flexible-server virtual-endpoint create --resource-group testGroup --server-name testserver --name test_virtual_endpoint --endpoint-type ReadWrite --members testReplica1
+"""
+
+helps['postgres flexible-server virtual-endpoint list'] = """
+type: command
+short-summary: List all virtual endpoints for a flexible server.
+example:
+  - name: List all virtual endpoints for a flexible server.
+    text: az postgres flexible-server virtual-endpoint list --resource-group testGroup --server-name testserver
+"""
+
+helps['postgres flexible-server virtual-endpoint show'] = """
+type: command
+short-summary: Get the details of a virtual endpoint.
+examples:
+  - name: Get the details of a virtual endpoint.
+    text: az postgres flexible-server virtual-endpoint show --resource-group testGroup --server-name testserver --name test_virtual_endpoint
+"""
+
+helps['postgres flexible-server virtual-endpoint update'] = """
+type: command
+short-summary: Update a virtual endpoint.
+examples:
+  - name: Update a virtual endpoint.
+    text: az postgres flexible-server virtual-endpoint update --resource-group testGroup --server-name testserver --name test_virtual_endpoint --endpoint-type ReadWrite --members testReplica1
+"""
+
+helps['postgres flexible-server virtual-endpoint delete'] = """
+type: command
+short-summary: Delete a virtual endpoint.
+examples:
+  - name: Delete a virtual endpoint.
+    text: az postgres flexible-server virtual-endpoint delete --resource-group testGroup --server-name testserver --name test_virtual_endpoint
 """
 
 helps['postgres flexible-server migration'] = """
@@ -599,6 +657,8 @@ examples:
         replica location which is different from source server, if available, else will pick up zone same as source server \\
         in the replica location if available, else will set the zone as None, i.e. No preference
     text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --location testLocation
+  - name: Create a read replica 'testReplicaServer' for 'testserver' with custom --storage-size and --sku.
+    text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --sku-name Standard_D4ds_v5 --storage-size 256
 """
 
 helps['postgres flexible-server replica list'] = """
@@ -745,4 +805,35 @@ examples:
     text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --exists
   - name: Wait for an Active Directory administrator to be deleted.
     text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --deleted
+"""
+
+helps['postgres flexible-server advanced-threat-protection-setting'] = """
+type: group
+short-summary: Manage advanced threat protection setting for a PostgreSQL flexible server.
+"""
+
+helps['postgres flexible-server advanced-threat-protection-setting update'] = """
+type: command
+short-summary: Updates advanced threat protection setting state for a flexible server.
+examples:
+  - name: >
+      Enable advanced threat protection setting for a PostgreSQL flexible server.
+    text: >
+      az postgres flexible-server advanced-threat-protection-setting update --resource-group testGroup --server-name testserver --state Enabled
+  - name: >
+      Disable advanced threat protection setting for a PostgreSQL flexible server.
+    text: >
+      az postgres flexible-server advanced-threat-protection-setting update --resource-group testGroup --server-name testserver --state Disabled
+"""
+
+helps['postgres flexible-server advanced-threat-protection-setting show'] = """
+type: command
+short-summary: Get advanced threat protection settings for a PostgreSL flexible server.
+examples:
+  - name: Get the details of advanced threat protection setting for a flexible server.
+    text: az postgres flexible-server advanced-threat-protection-setting show --resource-group testGroup --server-name testserver
+  - name: Get the details of advanced threat protection setting for a flexible server in a different subscription.
+    text: az postgres flexible-server advanced-threat-protection-setting show --subscription testSubscription --resource-group testGroup --server-name testserver
+  - name: Get the details of advanced threat protection setting for a flexible server using --ids parameter.
+    text: az postgres flexible-server advanced-threat-protection-setting show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testServer
 """

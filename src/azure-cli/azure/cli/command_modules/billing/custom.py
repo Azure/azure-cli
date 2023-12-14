@@ -11,13 +11,15 @@
 # --------------------------------------------------------------------------
 
 # pylint: disable=unused-wildcard-import
-# pylint: disable=wildcard-import
+# pylint: disable=wildcard-import, protected-access
 
 from .generated.custom import *  # noqa: F403
 try:
     from .manual.custom import *  # noqa: F403
 except ImportError:
     pass
+from azure.cli.core.aaz import has_value
+from .aaz.latest.billing.period import List as _PeriodList, Show as _PeriodShow
 
 
 def cli_billing_list_invoices(client, generate_url=False):
@@ -30,3 +32,18 @@ def cli_billing_get_invoice(client, name=None):
     if name:
         return client.get(name)
     return client.get_latest()
+
+
+class PeriodList(_PeriodList):
+    def post_operations(self):
+        args = self.ctx.args
+        if has_value(args.top):
+            self.ctx.vars.instance.next_link = None
+
+
+class PeriodShow(_PeriodShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.name._id_part = None
+        return args_schema

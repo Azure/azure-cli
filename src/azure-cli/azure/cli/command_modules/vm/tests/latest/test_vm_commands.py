@@ -1329,6 +1329,46 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_disk_and_snapshot_with_elastic_san', location='westus2')
+    @AllowLargeResponse(size_kb=99999)
+    def test_disk_and_snapshot_with_elastic_san(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10),
+            'snapshot': self.create_random_name('snap', 10),
+            'elastic_san': self.create_random_name('elastic_san', 20),
+            'volume_group': self.create_random_name('volume_group', 20),
+            'volume_name': self.create_random_name('volume-name', 20),
+            'snapshot_name': self.create_random_name('snapshot_name', 20),
+        })
+        self.cmd('extension add -n elastic-san')
+        self.cmd('elastic-san create -n {elastic_san} -g {rg} -l westus2 --base-size-tib 23 --extended-size 14 --sku {{name:Premium_LRS,tier:Premium}}')
+        self.cmd('elastic-san volume-group create -e {elastic_san} -g {rg} -n {volume_group}')
+        volume = self.cmd('elastic-san volume create -e {elastic_san} -g {rg} -v {volume_group} -n {volume_name} --size-gib 2').get_output_in_json()
+        self.kwargs.update({"volume_id": volume['id']})
+        snapshot = self.cmd('elastic-san volume snapshot create -g {rg} -e {elastic_san} -v {volume_group} -n {snapshot_name} --creation-data {{source-id:{volume_id}}}').get_output_in_json()
+        self.kwargs.update({"snapshot_id": snapshot['id']})
+        # disk resource is currently blocked and is expected
+        # self.cmd('disk create -g {rg} -n {disk} --elastic-san-resource-id {snapshot_id}', checks=[
+        #     self.check('creationData.createOption', 'CopyFromSanSnapshot'),
+        #     self.check('creationData.sourceResourceId', "{snapshot_id}")
+        # ])
+        self.cmd('snapshot create -n {snapshot} -g {rg} --elastic-san-resource-id {snapshot_id}', checks=[
+            self.check('creationData.createOption', 'CopyFromSanSnapshot'),
+            self.check('creationData.elasticSanResourceId', '{snapshot_id}'),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_with_optimized_for_frequent_attach_')
+    def test_disk_with_optimized_for_frequent_attach(self, resource_group):
+        self.kwargs.update({
+            'disk1': self.create_random_name('testdisk1-', length=15),
+            'disk2': self.create_random_name('testdisk2-', length=15),
+        })
+
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 10 -l westus --optimized-for-frequent-attach true',
+                 self.check('optimizedForFrequentAttach', True))
+        self.cmd('disk create -g {rg} -n {disk2} --size-gb 10 -l westus --optimized-for-frequent-attach false',
+                 self.check('optimizedForFrequentAttach', False))
+
 
 class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
 

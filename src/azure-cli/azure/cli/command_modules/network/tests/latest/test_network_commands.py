@@ -6684,6 +6684,18 @@ class NetworkExtendedLocation(ScenarioTest):
         self.cmd('network public-ip prefix create -g {rg} -n {ip1} --length 30 --edge-zone {edge_name}',
                  checks=self.check('extendedLocation.name', '{edge_name}'))
 
+    @ResourceGroupPreparer(name_prefix='test_network_public_ip_prefix_with_tier', location='eastus2euap')
+    def test_network_public_ip_prefix_with_tier(self, resource_group):
+        self.kwargs.update({
+            'prefix1': self.create_random_name('prefix', 15),
+            'prefix2': self.create_random_name('prefix', 15),
+        })
+
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix1} --length 28 --tier regional',
+                 checks=self.check('sku.tier', 'Regional'))
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix2} --length 28 --tier global',
+                 checks=self.check('sku.tier', 'Global'))
+
     # @unittest.skip('wait for service ready')
     @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_edge_zone', location='eastus2euap')
     def test_network_vnet_gateway_edge_zone(self, resource_group):

@@ -416,6 +416,10 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type append --if-none-match *', account_info,
                              container, local_file, blob_name)
 
+        local_file_larger = self.create_temp_file(20 * 1024)
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type append', account_info,
+                         container, local_file_larger, blob_name)
+
     @ResourceGroupPreparer()
     def test_storage_blob_update_service_properties(self, resource_group):
         storage_account = self.create_random_name(prefix='account', length=24)

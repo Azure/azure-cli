@@ -79,6 +79,7 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
+                         VERSION_2022_09_01,
                          RUNTIME_STATUS_TEXT_MAP)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
@@ -2912,14 +2913,19 @@ def _get_log(url, headers, log_file=None):
                 f.write(data)
     else:  # streaming
         std_encoding = sys.stdout.encoding
-        for chunk in r.stream():
-            if chunk:
-                # Extra encode() and decode for stdout which does not surpport 'utf-8'
-                logger.warning(chunk.decode(encoding='utf-8', errors='replace')
-                               .encode(std_encoding, errors='replace')
-                               .decode(std_encoding, errors='replace')
-                               .rstrip('\n\r'))  # each line of log has CRLF.
-    r.release_conn()
+        try:
+            for chunk in r.stream():
+                if chunk:
+                    # Extra encode() and decode for stdout which does not support 'utf-8'
+                    logger.warning(chunk.decode(encoding='utf-8', errors='replace')
+                                   .encode(std_encoding, errors='replace')
+                                   .decode(std_encoding, errors='replace')
+                                   .rstrip('\n\r'))  # each line of log has CRLF.
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.error("Log stream interrupted. Exiting live log stream.")
+            logger.debug(ex)
+        finally:
+            r.release_conn()
 
 
 def upload_ssl_cert(cmd, resource_group_name,
@@ -3024,9 +3030,9 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         if kv_subscription.lower() != subscription_id.lower():
             diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
                                                                subscription_id=kv_subscription)
-            ascs = diff_subscription_client.app_service_certificate_orders.list()
+            ascs = diff_subscription_client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
         else:
-            ascs = client.app_service_certificate_orders.list()
+            ascs = client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
 
         kv_secret_name = None
         for asc in ascs:
