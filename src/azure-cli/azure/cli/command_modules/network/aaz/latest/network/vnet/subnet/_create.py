@@ -89,13 +89,13 @@ class Create(AAZCommand):
             ),
         )
         _args_schema.private_endpoint_network_policy = AAZStrArg(
-            options=["--private-endpoint-network-policy"],
+            options=["--ple-network-policy", "--private-endpoint-network-policy"],
             help="Manage network policy for private endpoint.",
             default="Disabled",
             enum={"Disabled": "Disabled", "Enabled": "Enabled", "NetworkSecurityGroupEnabled": "NetworkSecurityGroupEnabled", "RouteTableEnabled": "RouteTableEnabled"},
         )
         _args_schema.private_link_service_network_policy = AAZStrArg(
-            options=["--private-link-service-network-policy"],
+            options=["--pls-network-policy", "--private-link-service-network-policy"],
             help="Manage network policy for private link service.",
             default="Enabled",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
