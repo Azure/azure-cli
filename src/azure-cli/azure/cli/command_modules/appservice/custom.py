@@ -4000,7 +4000,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.is_xenon = None
         functionapp_def.type = 'Microsoft.Web/sites'
 
-        # validate either both cup and momory
+        if any([cpu, memory, workload_profile_name]) and environment is None:
+            raise RequiredArgumentMissingError("usage error: parameters --cpu, -memory, --workload-profile-name "
+                                               "must be used with parameter --environment, please provide the "
+                                               "name of the container app environment using --environment.")
+
+        # validate cpu and memory parameters.
         _validate_cpu_momory_functionapp(cpu, memory)
 
         if (workload_profile_name is not None):
@@ -4111,7 +4116,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
 
 def _validate_cpu_momory_functionapp(cpu=None, memory=None):
-    # validate either both cup and momory are provided or none is provided. throw error otherwise
+    # validate either both cpu and memory are provided or none is provided. throw error otherwise
     if cpu is None and memory is None:
         return
 
