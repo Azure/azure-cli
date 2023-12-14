@@ -453,11 +453,11 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
 
 class FunctionWorkloadProfile(ScenarioTest):
     @AllowLargeResponse(8192)
-    @ResourceGroupPreparer(location="eastasia")
+    @ResourceGroupPreparer(location="westus")
     @StorageAccountPreparer()
     def test_functionapp_workloadprofiles(self, resource_group, storage_account):
         
-        location = "eastasia"
+        location = "NorthCentralUS(Stage)"
         functionapp_name = self.create_random_name(
             'functionapp', 32)
         managed_environment_name = self.create_random_name(
