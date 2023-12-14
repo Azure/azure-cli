@@ -749,7 +749,20 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
                     except KeyError:
                         raise ValidationError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), enabled_for_keyword))
 
-                    if feature_flag_value.conditions["client_filters"]:
+                    for condition, condition_value in v.items():
+                        if condition == feature_management_keywords.enabled_for:
+                            feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS] = condition_value
+                            enabled_for_found = True
+                        elif condition == feature_management_keywords.requirement_type and condition_value:
+                            if condition_value.lower() not in (FeatureFlagConstants.REQUIREMENT_TYPE_ALL, FeatureFlagConstants.REQUIREMENT_TYPE_ANY):
+                                raise ValidationError("Feature '{0}' must have an any/all requirement type. \n".format(str(k)))
+                            feature_flag_value.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = condition_value
+                        else:
+                            feature_flag_value.conditions[condition] = condition_value
+                    if not enabled_for_found:
+                        raise ValidationError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), feature_management_keywords.enabled_for))
+
+                    if feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]:
                         feature_flag_value.enabled = True
 
                         for idx, val in enumerate(feature_flag_value.conditions["client_filters"]):

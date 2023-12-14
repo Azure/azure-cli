@@ -2008,19 +2008,23 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                          self.check('state', default_state),
                          self.check('conditions', default_conditions)])
 
-        # update an existing feature flag entry (we can only update description)
+        # update an existing feature flag entry
         updated_entry_description = "Beta Testing Feature Flag"
+        updated_requirement_type =  FeatureFlagConstants.REQUIREMENT_TYPE_ANY
+
         self.kwargs.update({
-            'description': updated_entry_description
+            'description': updated_entry_description,
+            'requirement_type': updated_requirement_type
         })
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --description "{description}" -y',
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --description "{description}" --requirement-type {requirement_type} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', entry_feature),
                          self.check('key', internal_feature_key),
                          self.check('description', updated_entry_description),
                          self.check('label', entry_label),
                          self.check('state', default_state),
-                         self.check('conditions', default_conditions)])
+                         self.check('conditions.client_filters', []),
+                         self.check('conditions.requirement_type', updated_requirement_type)])
 
         # add a new label - this should create a new KV in the config store
         updated_label = 'v2'

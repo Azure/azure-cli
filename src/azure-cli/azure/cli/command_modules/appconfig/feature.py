@@ -69,8 +69,8 @@ def set_feature(cmd,
     default_conditions = {'client_filters': []}
 
     if requirement_type:
-        default_conditions["requirement_type"] = requirement_type #TODO: Update to use feature flag constants.
-    
+        default_conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
+
     default_value = {
         "id": feature,
         "description": "" if description is None else description,
@@ -117,6 +117,9 @@ def set_feature(cmd,
                 # User can only update description if the key already exists
                 if description is not None:
                     feature_flag_value.description = description
+
+                if requirement_type is not None:
+                    feature_flag_value.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
 
                 set_kv = KeyValue(key=key,
                                   label=label,
