@@ -23,17 +23,17 @@ class Update(AAZCommand):
     :example: Update subnet with NAT gateway.
         az network vnet subnet update -n MySubnet --vnet-name MyVnet -g MyResourceGroup --nat-gateway MyNatGateway --address-prefixes "10.0.0.0/21"
 
-    :example: Disable the private endpoint network policies
-        az network vnet subnet update -n MySubnet --vnet-name MyVnet -g MyResourceGroup --disable-private-endpoint-network-policies
+    :example: Disable the private endpoint network policy
+        az network vnet subnet update -n MySubnet --vnet-name MyVnet -g MyResourceGroup --private-endpoint-network-policy Disabled
 
     :example: Detach a network security group in a subnet.
         az network vnet subnet update -g MyResourceGroup --vnet-name MyVNet -n MySubnet --nsg null
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2023-09-01"],
         ]
     }
 
@@ -104,15 +104,15 @@ class Update(AAZCommand):
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkSecurityGroups/{}",
             ),
         )
-        _args_schema.private_endpoint_network_policies = AAZStrArg(
-            options=["--private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet.",
+        _args_schema.private_endpoint_network_policy = AAZStrArg(
+            options=["--private-endpoint-network-policy"],
+            help="Manage network policy for private endpoint.",
             nullable=True,
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+            enum={"Disabled": "Disabled", "Enabled": "Enabled", "NetworkSecurityGroupEnabled": "NetworkSecurityGroupEnabled", "RouteTableEnabled": "RouteTableEnabled"},
         )
-        _args_schema.private_link_service_network_policies = AAZStrArg(
-            options=["--private-link-service-network-policies"],
-            help="Disable private link service network policies on the subnet.",
+        _args_schema.private_link_service_network_policy = AAZStrArg(
+            options=["--private-link-service-network-policy"],
+            help="Manage network policy for private link service.",
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
@@ -435,7 +435,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -538,7 +538,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -607,8 +607,8 @@ class Update(AAZCommand):
                 properties.set_prop("delegations", AAZListType, ".delegated_services")
                 properties.set_prop("natGateway", AAZObjectType)
                 properties.set_prop("networkSecurityGroup", AAZObjectType)
-                properties.set_prop("privateEndpointNetworkPolicies", AAZStrType, ".private_endpoint_network_policies")
-                properties.set_prop("privateLinkServiceNetworkPolicies", AAZStrType, ".private_link_service_network_policies")
+                properties.set_prop("privateEndpointNetworkPolicies", AAZStrType, ".private_endpoint_network_policy")
+                properties.set_prop("privateLinkServiceNetworkPolicies", AAZStrType, ".private_link_service_network_policy")
                 properties.set_prop("routeTable", AAZObjectType)
                 properties.set_prop("serviceEndpointPolicies", AAZListType, ".policies")
                 properties.set_prop("serviceEndpoints", AAZListType, ".endpoints")
