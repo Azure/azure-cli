@@ -7,6 +7,7 @@ import re
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
+import math
 from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
 from azure.cli.core.azclierror import ValidationError, ArgumentUsageError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
@@ -317,6 +318,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
         tier = instance.sku.tier
+    supported_storageV2_size = None if sku_info is None else sku_info[tier]["supported_storageV2_size"]
     _pg_storage_performance_tier_validator(performance_tier,
                                            sku_info,
                                            tier,
@@ -324,6 +326,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     if geo_redundant_backup is None and instance is not None:
         geo_redundant_backup = instance.backup.geo_redundant_backup
     _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported)
+    _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, supported_storageV2_size, iops, throughput, instance)
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     pg_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
@@ -333,27 +336,61 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
 
 
 def _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance):
+    is_ssdv2 = storage_type == "PremiumV2_LRS" or instance is not None and instance.storage.type == "PremiumV2_LRS"
+    #storage_gb range validation
     if storage_gb is not None:
         if instance is not None:
             original_size = instance.storage.storage_size_gb
             if original_size > storage_gb:
                 raise CLIError('Updating storage cannot be smaller than '
                             'the original storage size {} GiB.'.format(original_size))
-        storage_sizes = get_postgres_storage_sizes(sku_info, tier)
-        if storage_gb not in storage_sizes:
-            storage_sizes = sorted([int(size) for size in storage_sizes])
-            raise CLIError('Incorrect value for --storage-size : Allowed values(in GiB) : {}'
-                        .format(storage_sizes))
-    if instance is None:
-        if storage_type == "PremiumV2_LRS" and (iops is None or throughput is None):
-            raise CLIError('Incorrect usage : --storage-type. Please provide --iops and --throughput with --storage-type.')
-        if storage_type != "PremiumV2_LRS" and (throughput is not None or iops is not None):
-            raise CLIError('Please set "--storage-type" to "PremiumV2_LRS" and provide values for both --iops and --throughput.')
+        if not is_ssdv2:
+            storage_sizes = get_postgres_storage_sizes(sku_info, tier)
+            if storage_gb not in storage_sizes:
+                storage_sizes = sorted([int(size) for size in storage_sizes])
+                raise CLIError('Incorrect value for --storage-size : Allowed values(in GiB) : {}'
+                            .format(storage_sizes))
+
+    #ssdv2 range validation
+    if is_ssdv2 and (storage_gb is not None or throughput is not None or iops is not None):
+        _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance)
+
+
+def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
+    storage_gib = storage_gb if storage_gb is not None else instance.storage.storage_size_gb
+    storage_iops = iops if iops is not None else instance.storage.iops
+    storage_throughput = throughput if throughput is not None else instance.storage.throughput
+
+    #find min and max values for storage
+    min_storage = instance.storage.storage_size_gb if instance is not None else sku_info[tier]["supported_storageV2_size"]
+    max_storage = sku_info[tier]["supported_storageV2_size_max"]
+    if not (storage_gib >= min_storage and storage_gib <=  max_storage):
+            raise CLIError('The requested value for storage size does not fall between {} and {} GiB.'.format(min_storage, max_storage))
+
+    storage = storage_gib * 1.07374182
+    #find min and max values for IOPS
+    min_iops = sku_info[tier]["supported_storageV2_iops"]
+    if sku_info[tier]["supported_storageV2_iops"] < math.floor(max(0, storage - 6) * 500 + min_iops):
+        max_iops = sku_info[tier]["supported_storageV2_iops_max"]
     else:
-        if instance.storage.type != "PremiumV2_LRS" and throughput is not None:
-            raise CLIError('Updating throughput is only capable for server created with premium SSD v2.')
-        if instance.storage.type != "PremiumV2_LRS" and iops is not None:
-            raise CLIError('Updating storage iops is only capable for server created with premium SSD v2.')
+        max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
+
+    if not (storage_iops >= min_iops and storage_iops <=  max_iops):
+            raise CLIError('The requested value for IOPS does not fall between {} and {} operations/sec.'.format(min_iops, max_iops))
+
+    #find min and max values for throughout
+    min_throughout = sku_info[tier]["supported_storageV2_throughput"]
+    if storage > 6:
+        max_storage_throughout = math.floor(max(0.25 * storage_iops, min_throughout))
+    else:
+        max_storage_throughout = min_throughout
+    if sku_info[tier]["supported_storageV2_throughput_max"] < max_storage_throughout:
+        max_throughout = sku_info[tier]["supported_storageV2_throughput_max"]
+    else:
+        max_throughout = max_storage_throughout
+
+    if not (storage_throughput >= min_throughout and storage_throughput <= max_throughout):
+            raise CLIError('The requested value for throughput does not fall between {} and {} MB/sec.'.format(min_throughout, max_throughout))
 
 
 def _pg_tier_validator(tier, sku_info):
@@ -729,3 +766,28 @@ def pg_auto_grow_validator(auto_grow, replication_role, high_availability, insta
     # if replica, cannot be disabled
     if replication_role not in ('None', None, 'Primary'):
         raise ValidationError("Storage Auto grow is not supported for replica servers.")
+
+
+def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, supported_storageV2_size, iops, throughput, instance):
+    is_create_ssdv2 = storage_type == "PremiumV2_LRS"
+    is_update_ssdv2 = instance is not None and instance.storage.type == "PremiumV2_LRS"
+    if is_create_ssdv2:
+        if supported_storageV2_size is None:
+            raise CLIError('Storage type set to PremiumV2_LRS is not supported for this region.')
+        if iops is None or throughput is None:
+            raise CLIError('Incorrect usage : --storage-type. Please provide --iops and --throughput with --storage-type.')
+    elif not is_create_ssdv2 and instance is None and (throughput is not None or iops is not None):
+        raise CLIError('Please set "--storage-type" to "PremiumV2_LRS" and provide values for both --iops and --throughput.')
+
+    if is_create_ssdv2 or is_update_ssdv2:
+        if auto_grow:
+            raise ValidationError("Storage Auto-grow is not supported for servers with Premium SSD V2.")
+        if high_availability and high_availability.lower() != 'disabled':
+            raise ValidationError("High availability is not supported for servers with Premium SSD V2.")
+        if geo_redundant_backup and geo_redundant_backup.lower() == 'enabled':
+            raise ValidationError("Geo-redundancy is not supported for servers with Premium SSD V2.")
+    else:
+        if throughput is not None:
+            raise CLIError('Updating throughput is only capable for server created with premium SSD v2.')
+        if iops is not None:
+            raise CLIError('Updating storage iops is only capable for server created with premium SSD v2.')
