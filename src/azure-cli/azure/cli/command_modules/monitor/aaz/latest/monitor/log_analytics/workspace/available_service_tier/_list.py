@@ -45,7 +45,7 @@ class List(AAZCommand):
             required=True,
         )
         _args_schema.workspace_name = AAZStrArg(
-            options=["--workspace-name"],
+            options=["-n", "--workspace-name"],
             help="The name of the workspace.",
             required=True,
             fmt=AAZStrArgFormat(
