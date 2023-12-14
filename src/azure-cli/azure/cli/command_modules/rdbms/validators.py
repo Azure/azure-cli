@@ -319,6 +319,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     if tier is None and instance is not None:
         tier = instance.sku.tier
     supported_storageV2_size = None if sku_info is None else sku_info[tier]["supported_storageV2_size"]
+    _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier, supported_storageV2_size, iops, throughput, instance)
     _pg_storage_performance_tier_validator(performance_tier,
                                            sku_info,
                                            tier,
@@ -326,7 +327,6 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     if geo_redundant_backup is None and instance is not None:
         geo_redundant_backup = instance.backup.geo_redundant_backup
     _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported)
-    _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, supported_storageV2_size, iops, throughput, instance)
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     pg_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
@@ -768,16 +768,17 @@ def pg_auto_grow_validator(auto_grow, replication_role, high_availability, insta
         raise ValidationError("Storage Auto grow is not supported for replica servers.")
 
 
-def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, supported_storageV2_size, iops, throughput, instance):
+def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier, supported_storageV2_size, iops, throughput, instance):
     is_create_ssdv2 = storage_type == "PremiumV2_LRS"
     is_update_ssdv2 = instance is not None and instance.storage.type == "PremiumV2_LRS"
+
     if is_create_ssdv2:
         if supported_storageV2_size is None:
             raise CLIError('Storage type set to PremiumV2_LRS is not supported for this region.')
         if iops is None or throughput is None:
-            raise CLIError('Incorrect usage : --storage-type. Please provide --iops and --throughput with --storage-type.')
-    elif not is_create_ssdv2 and instance is None and (throughput is not None or iops is not None):
-        raise CLIError('Please set "--storage-type" to "PremiumV2_LRS" and provide values for both --iops and --throughput.')
+            raise CLIError('To set --storage-type, required to provide --iops and --throughput.')
+    elif instance is None and (throughput is not None or iops is not None):
+        raise CLIError('Please set "--storage-type" to "PremiumV2_LRS" and provide required values for both --iops and --throughput.')
 
     if is_create_ssdv2 or is_update_ssdv2:
         if auto_grow:
@@ -786,6 +787,8 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
             raise ValidationError("High availability is not supported for servers with Premium SSD V2.")
         if geo_redundant_backup and geo_redundant_backup.lower() == 'enabled':
             raise ValidationError("Geo-redundancy is not supported for servers with Premium SSD V2.")
+        if performance_tier:
+            raise ValidationError("Performance tier is not supported for servers with Premium SSD V2.")
     else:
         if throughput is not None:
             raise CLIError('Updating throughput is only capable for server created with premium SSD v2.')
