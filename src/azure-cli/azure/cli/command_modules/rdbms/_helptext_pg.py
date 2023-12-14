@@ -35,7 +35,7 @@ examples:
         az postgres flexible-server create --location northeurope --resource-group testGroup \\
           --name testserver --admin-user username --admin-password password \\
           --sku-name Standard_B1ms --tier Burstable --public-access 153.24.26.117 --storage-size 128 \\
-          --tags "key=value" --version 13 --high-availability Enabled --zone 1 \\
+          --tags "key=value" --version 13 --high-availability ZoneRedundant --zone 1 \\
           --standby-zone 3
   - name: >
       Create a PostgreSQL flexible server using Premium SSD v2 Disks.
