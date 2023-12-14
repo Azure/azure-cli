@@ -51,7 +51,8 @@ def flexible_server_create(cmd, client,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                           active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None, storage_type=None, iops=None, throughput=None, yes=False):
+                           active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None,
+                           storage_type=None, iops=None, throughput=None, yes=False):
 
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,

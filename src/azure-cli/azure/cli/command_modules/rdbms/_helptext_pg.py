@@ -273,6 +273,10 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --storage-auto-grow Enabled
   - name: Update a flexible server's storage to set custom storage performance tier.
     text: az postgres flexible-server update --resource-group testGroup --name testserver --performance-tier P15
+  - name: Update a flexible server's storage to set IOPS (operations/sec). Server must be using Premium SSD v2 Disks.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --iops 3000
+  - name: Update a flexible server's storage to set Throughput (MB/sec). Server must be using Premium SSD v2 Disks.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --throughput 125
 """
 
 helps['postgres flexible-server restore'] = """

@@ -315,15 +315,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         iops_v2_arg_type = CLIArgumentType(
             type=int,
             options_list=['--iops'],
-            help='Number of IOPS to be allocated for this server. You will get certain amount of free IOPS based '
-                 'on compute and storage provisioned. The default value for IOPS is free IOPS. '
-                 'This property is required to be set for storage Type PremiumV2_LRS.'
+            help='Value of IOPS in (operations/sec) to be allocated for this server. '
+                 'This value can only be updated if flexible server is using Premium SSD v2 Disks.'
         )
 
         throughput_arg_type = CLIArgumentType(
             type=int,
             options_list=['--throughput'],
-            help='Storage throughput for the server. This is required to be set for storage Type PremiumV2_LRS.'
+            help='Storage throughput in (MB/sec) for the server. '
+                 'This value can only be updated if flexible server is using Premium SSD v2 Disks.'
         )
 
         auto_grow_arg_type = CLIArgumentType(
@@ -333,10 +333,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         )
 
         storage_type_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['Premium_LRS', 'PremiumV2_LRS']),
+            arg_type=get_enum_type(['PremiumV2_LRS']),
             options_list=['--storage-type'],
-            help='Storage type for the server. Allowed values are Premium_LRS and PremiumV2_LRS, and default is Premium_LRS if not specified. '
-                 'Must set iops and throughput if using PremiumV2_LRS.'
+            help='Storage type for the server. Allowed value is PremiumV2_LRS. Must set iops and throughput if using PremiumV2_LRS.'
         )
 
         auto_scale_iops_arg_type = CLIArgumentType(
@@ -549,9 +548,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', default='Enabled', arg_type=password_auth_arg_type)
                 c.argument('auto_grow', default='Disabled', arg_type=auto_grow_arg_type)
-                c.argument('storage_type', default='Premium_LRS', arg_type=storage_type_arg_type)
-                c.argument('iops', arg_type=iops_v2_arg_type)
-                c.argument('throughput', arg_type=throughput_arg_type)
+                c.argument('storage_type', default=None, arg_type=storage_type_arg_type)
+                c.argument('iops', default=None, arg_type=iops_v2_arg_type)
+                c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
@@ -683,13 +682,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             elif command_group == 'postgres':
                 c.argument('auto_grow', arg_type=auto_grow_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
+                c.argument('iops', default=None, arg_type=iops_v2_arg_type)
+                c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', arg_type=password_auth_arg_type)
                 c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
                 c.argument('yes', arg_type=yes_arg_type)
-                c.argument('iops', arg_type=iops_v2_arg_type)
-                c.argument('throughput', arg_type=throughput_arg_type)
 
         with self.argument_context('{} flexible-server upgrade'.format(command_group)) as c:
             c.argument('version', arg_type=mysql_version_upgrade_arg_type if command_group == 'mysql' else pg_version_upgrade_arg_type)
