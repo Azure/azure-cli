@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor log-analytics",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Azure log analytics workspace
+    """Manage Azure log analytics.
     """
     pass
 

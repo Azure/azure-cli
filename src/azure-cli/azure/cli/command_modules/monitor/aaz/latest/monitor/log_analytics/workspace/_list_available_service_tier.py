@@ -12,9 +12,9 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "monitor log-analytics workspace available-service-tier list",
+    "monitor log-analytics workspace list-available-service-tier",
 )
-class List(AAZCommand):
+class ListAvailableServiceTier(AAZCommand):
     """List the available service tiers for the workspace.
     """
 
@@ -48,6 +48,7 @@ class List(AAZCommand):
             options=["-n", "--workspace-name"],
             help="The name of the workspace.",
             required=True,
+            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^[A-Za-z0-9][A-Za-z0-9-]+[A-Za-z0-9]$",
                 max_length=63,
@@ -188,8 +189,8 @@ class List(AAZCommand):
             return cls._schema_on_200
 
 
-class _ListHelper:
-    """Helper class for List"""
+class _ListAvailableServiceTierHelper:
+    """Helper class for ListAvailableServiceTier"""
 
 
-__all__ = ["List"]
+__all__ = ["ListAvailableServiceTier"]

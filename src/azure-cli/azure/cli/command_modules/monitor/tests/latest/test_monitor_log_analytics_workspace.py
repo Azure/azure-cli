@@ -715,5 +715,5 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
         from azure.core.exceptions import ResourceNotFoundError
         with self.assertRaises(ResourceNotFoundError):
-            self.cmd("monitor log-analytics workspace link-target list")
-        self.cmd("monitor log-analytics workspace available-service-tier list -g {rg} --workspace-name {ws_name}")
+            self.cmd("monitor log-analytics workspace list-link-target")
+        self.cmd("monitor log-analytics workspace list-available-service-tier -g {rg} --workspace-name {ws_name}")

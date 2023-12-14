@@ -12,9 +12,9 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "monitor log-analytics workspace link-target list",
+    "monitor log-analytics workspace list-link-target",
 )
-class List(AAZCommand):
+class ListLinkTarget(AAZCommand):
     """List a list of workspaces which the current user has administrator privileges and are not associated with an Azure Subscription. The subscriptionId parameter in the Url is ignored.
     """
 
@@ -148,8 +148,8 @@ class List(AAZCommand):
             return cls._schema_on_200
 
 
-class _ListHelper:
-    """Helper class for List"""
+class _ListLinkTargetHelper:
+    """Helper class for ListLinkTarget"""
 
 
-__all__ = ["List"]
+__all__ = ["ListLinkTarget"]
