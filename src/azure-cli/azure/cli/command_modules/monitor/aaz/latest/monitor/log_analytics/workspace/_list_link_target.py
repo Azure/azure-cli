@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor log-analytics workspace list-link-target",
 )
 class ListLinkTarget(AAZCommand):
-    """List a list of workspaces which the current user has administrator privileges and are not associated with an Azure Subscription. The subscriptionId parameter in the Url is ignored.
+    """List a list of workspaces which the current user has administrator privileges and are not associated with an Azure Subscription.
     """
 
     _aaz_info = {
