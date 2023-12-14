@@ -95,17 +95,41 @@ def _validate_image_layers(repository_name,
 
     manifest = manifest_response.json()
 
-    # Get the digest of the smallest blob for performance purposes
-    smallest_blob = min(manifest['layers'], key=lambda layer: layer['size'])
-    digest = smallest_blob['digest']
+    # Pull the smallest blob layer in the image to test if the image can be pulled
+    # First, check if the manifest is a Docker Manifest List
+    if manifest['mediaType'] == 'application/vnd.docker.distribution.manifest.list.v2+json':
+        smallest_blobs = []
+
+        # Iterate over each manifest in the list
+        for manifest_item in manifest['manifests']:
+            # Get the manifest for the image
+            image_manifest_response = requests.get(
+                'https://{}/v2/{}/manifests/{}'.format(login_server, repository_name, manifest_item['digest']),
+                headers=get_manifest_authorization_header(username, password))
+
+            image_manifest = image_manifest_response.json()
+
+            # Find the smallest blob in the image manifest
+            smallest_blob = min(image_manifest['layers'], key=lambda layer: layer['size'])
+            smallest_blobs.append(smallest_blob)
+
+        # Find the smallest blob across all image manifests
+        smallest_blob = min(smallest_blobs, key=lambda blob: blob['size'])
+
+    else:
+        # If manifest is not a Docker Manifest List, find the smallest blob in the given single manifest
+        smallest_blob = min(manifest['layers'], key=lambda layer: layer['size'])
+
+    smallest_digest = smallest_blob['digest']
 
     # Get blob
-    request_url = _get_blob(login_server, repository_name, digest)
+    request_url = _get_blob(login_server, repository_name, smallest_digest)
     logger.debug(add_timestamp("Sending a HTTP GET request to {}".format(request_url)))
 
     res = requests.get(request_url, auth=(username, password))
 
-    # Return server error message; if server error not available, will return custom error message below
+    # If blob layer cannot be pulled, return server error message;
+    # If server error not available, will return custom error message
     if res.status_code >= 400:
         raise CLIError(parse_error_message('Could not get the requested data.', res), res.status_code)
     print_pass("Blobs in image '{}' can be pulled from registry '{}'".format(digest, login_server))
@@ -132,6 +156,7 @@ def _check_image_match(repository_name,
     digests = [item['digest'] for item in image_digest_list]
     matches = get_close_matches(digest, digests, n=1, cutoff=0.8)
 
+    # Give a suggestion to the user if a match is found
     if matches:
         raise CLIError("Image '{}' not found. Did you mean to input '{}'?".format(digest, matches[0]))
 
@@ -473,7 +498,7 @@ def _validate_image_name(repository_name,
         get_manifest_authorization_header,
         RegistryException
     )
-
+    # First check if image exists in repository before validating image layers
     try:
         request_data_from_registry(
             http_method='get',
@@ -486,15 +511,20 @@ def _validate_image_name(repository_name,
             manifest_headers=get_manifest_authorization_header(username, password),
             params=digest)
 
+    # If image does not exist, check for possible matches
+    # This helps deliver a more useful error message in case of a typo or other user error
     except RegistryException as e:
         if e.status_code == 404:
+            # If at least 80% similarity with the inputted image name is found, return a suggested image name to user
             _check_image_match(repository_name,
                                digest,
                                login_server,
                                username,
                                password)
+        # otherwise, return the error message
         raise CLIError("{} Please check if image was inputted correctly.".format(str(e)))
 
+    # If image exists, then validate image layers and check if blob can be pulled
     _validate_image_layers(repository_name,
                            digest,
                            login_server,

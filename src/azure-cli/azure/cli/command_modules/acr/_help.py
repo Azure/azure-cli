@@ -49,9 +49,9 @@ examples:
   - name: Gets health state of the environment, without stopping on first error.
     text: >
         az acr check-health --ignore-errors
-  - name: Verify that blobs within a given image ('name:tag' or 'name@digest') can be downloaded from the repository.
+  - name: Verify that blobs within a given image, identified as 'name:tag' or 'name@digest', can be downloaded from the repository.
     text: >
-        az acr check-health -n MyRegistry -t sample/hello-world@sha256:123
+        az acr check-health -n MyRegistry -t hello-world@sha256:123
 """
 
 helps['acr check-name'] = """
