@@ -318,7 +318,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
         tier = instance.sku.tier
-    supported_storageV2_size = None if sku_info is None else sku_info[tier]["supported_storageV2_size"]
+    supported_storageV2_size = sku_info[tier]["supported_storageV2_size"] if "supported_storageV2_size" in sku_info[tier] else None
     _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier, supported_storageV2_size, iops, throughput, instance)
     _pg_storage_performance_tier_validator(performance_tier,
                                            sku_info,
@@ -778,14 +778,14 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
         if iops is None or throughput is None:
             raise CLIError('To set --storage-type, required to provide --iops and --throughput.')
     elif instance is None and (throughput is not None or iops is not None):
-        raise CLIError('Please set "--storage-type" to "PremiumV2_LRS" and provide required values for both --iops and --throughput.')
+        raise CLIError('To provide values for both --iops and --throughput, please set "--storage-type" to "PremiumV2_LRS".')
 
     if is_create_ssdv2 or is_update_ssdv2:
-        if auto_grow:
+        if auto_grow and auto_grow.lower() != 'disabled':
             raise ValidationError("Storage Auto-grow is not supported for servers with Premium SSD V2.")
         if high_availability and high_availability.lower() != 'disabled':
             raise ValidationError("High availability is not supported for servers with Premium SSD V2.")
-        if geo_redundant_backup and geo_redundant_backup.lower() == 'enabled':
+        if geo_redundant_backup and geo_redundant_backup.lower() != 'disabled':
             raise ValidationError("Geo-redundancy is not supported for servers with Premium SSD V2.")
         if performance_tier:
             raise ValidationError("Performance tier is not supported for servers with Premium SSD V2.")

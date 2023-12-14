@@ -105,7 +105,7 @@ def flexible_server_create(cmd, client,
                                                                            subnet_address_prefix=subnet_address_prefix,
                                                                            yes=yes)
 
-    storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=auto_grow, tier=performance_tier, storage_type=storage_type, iops=iops, throughput=throughput)
+    storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=auto_grow, tier=performance_tier, type=storage_type, iops=iops, throughput=throughput)
 
     backup = postgresql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                       geo_redundant_backup=geo_redundant_backup)
@@ -596,6 +596,9 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
         source_server_object = postgres_source_client.servers.get(id_parts['resource_group'], id_parts['name'])
     except Exception as e:
         raise ResourceNotFoundError(e)
+
+    if source_server_object.storage.type == "PremiumV2_LRS":
+            raise CLIError("Geo restore is not supported for servers with Premium SSD V2.")
 
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
