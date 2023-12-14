@@ -33,7 +33,6 @@ TEST_REPO_URL = 'https://github.com/yugangw-msft/azure-site-test.git'
 WINDOWS_ASP_LOCATION_WEBAPP = 'westeurope'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
-LINUX_ASP_LOCATION_WEBAPP_EASTUS = 'eastus'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
 # During the 'webapp vnet-integration remove' call
 # Will enter 20s wait for hit geo and 45s wait on app service side in order for NCs to be deleted successfully on machines.
@@ -2706,7 +2705,7 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             JMESPathCheck('message', 'OneDeploy'),
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location=LINUX_ASP_LOCATION_WEBAPP_EASTUS)
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
     def test_webapp_track_runtimestatus_runtimesucessful(self, resource_group):
         webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
         plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
@@ -2725,7 +2724,7 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             JMESPathCheck('type', 'Microsoft.Web/sites/deploymentStatus'),
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location=LINUX_ASP_LOCATION_WEBAPP_EASTUS)
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
     def test_webapp_track_runtimestatus_buildfailed(self, resource_group):
         webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
         plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
@@ -2737,7 +2736,7 @@ class WebappOneDeployScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(CLIError, "Deployment failed because the build process failed"):
             self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async --track-status'.format(resource_group, webapp_name, zip_file))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location=LINUX_ASP_LOCATION_WEBAPP_EASTUS)
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
     def test_webapp_track_runtimestatus_runtimefailed(self, resource_group):
         webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
         plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
