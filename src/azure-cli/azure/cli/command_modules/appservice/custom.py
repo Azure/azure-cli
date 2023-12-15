@@ -454,27 +454,6 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
     return _build_app_settings_output(result.properties, app_settings_slot_cfg_names, redact=True)
-
-def update_generic_site_ops_polling(cmd, resource_group_name, name, config_name, slot, configs):
-    try:
-        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, config_name, slot, configs)
-    except Exception as ex:  # pylint: disable=broad-except
-        if not is_centauri_functionapp(cmd, resource_group_name, name):
-            raise CLIError(ex)
-        else:
-            poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
-            if ex.response.status_code == 202 and poll_url:
-                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
-                poll_timeout = time.time() + 60 * 2  # 2 minute timeout
-
-                while r.status_code != 200 and time.time() < poll_timeout:
-                    time.sleep(5)
-                    r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
-                return r.cors    
-            else:
-                raise CLIError(ex)
-        
-        return result.cors
     
 # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
 def update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client):
