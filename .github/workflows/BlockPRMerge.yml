@@ -1,0 +1,21 @@
+name: Prevent Merge on "do-not-merge" Label
+
+on:
+  pull_request_target:
+    types: [labeled, unlabeled]
+
+jobs:
+  block-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check "do-not-merge" label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(label => label.name);
+            if (labels.includes("do-not-merge")) {
+              console.log("PR contains 'do-not-merge' label. Blocking merge.");
+              process.exit(1); // Exit with a non-zero status code to block merge
+            } else {
+              console.log("PR does not contain 'do-not-merge' label. Allow merge.");
+            }
