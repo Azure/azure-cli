@@ -510,7 +510,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     location = ''.join(location.lower().split())
 
     if source_server_object.storage.type == "PremiumV2_LRS":
-            raise CLIError("Read replica is not supported for servers with Premium SSD V2.")
+        raise CLIError("Read replica is not supported for servers with Premium SSD V2.")
 
     list_location_capability_info = get_postgres_location_capability_info(cmd, location)
 
@@ -598,7 +598,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
         raise ResourceNotFoundError(e)
 
     if source_server_object.storage.type == "PremiumV2_LRS":
-            raise CLIError("Geo restore is not supported for servers with Premium SSD V2.")
+        raise CLIError("Geo restore is not supported for servers with Premium SSD V2.")
 
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,

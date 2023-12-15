@@ -337,21 +337,21 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
 
 def _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance):
     is_ssdv2 = storage_type == "PremiumV2_LRS" or instance is not None and instance.storage.type == "PremiumV2_LRS"
-    #storage_gb range validation
+    # storage_gb range validation
     if storage_gb is not None:
         if instance is not None:
             original_size = instance.storage.storage_size_gb
             if original_size > storage_gb:
                 raise CLIError('Updating storage cannot be smaller than '
-                            'the original storage size {} GiB.'.format(original_size))
+                                'the original storage size {} GiB.'.format(original_size))
         if not is_ssdv2:
             storage_sizes = get_postgres_storage_sizes(sku_info, tier)
             if storage_gb not in storage_sizes:
                 storage_sizes = sorted([int(size) for size in storage_sizes])
                 raise CLIError('Incorrect value for --storage-size : Allowed values(in GiB) : {}'
-                            .format(storage_sizes))
+                                .format(storage_sizes))
 
-    #ssdv2 range validation
+    # ssdv2 range validation
     if is_ssdv2 and (storage_gb is not None or throughput is not None or iops is not None):
         _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance)
 
@@ -361,24 +361,24 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     storage_iops = iops if iops is not None else instance.storage.iops
     storage_throughput = throughput if throughput is not None else instance.storage.throughput
 
-    #find min and max values for storage
+    # find min and max values for storage
     min_storage = instance.storage.storage_size_gb if instance is not None else sku_info[tier]["supported_storageV2_size"]
     max_storage = sku_info[tier]["supported_storageV2_size_max"]
-    if not (storage_gib >= min_storage and storage_gib <=  max_storage):
-            raise CLIError('The requested value for storage size does not fall between {} and {} GiB.'.format(min_storage, max_storage))
+    if not (storage_gib >= min_storage and storage_gib <= max_storage):
+        raise CLIError('The requested value for storage size does not fall between {} and {} GiB.'.format(min_storage, max_storage))
 
     storage = storage_gib * 1.07374182
-    #find min and max values for IOPS
+    # find min and max values for IOPS
     min_iops = sku_info[tier]["supported_storageV2_iops"]
     if sku_info[tier]["supported_storageV2_iops"] < math.floor(max(0, storage - 6) * 500 + min_iops):
         max_iops = sku_info[tier]["supported_storageV2_iops_max"]
     else:
         max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
 
-    if not (storage_iops >= min_iops and storage_iops <=  max_iops):
-            raise CLIError('The requested value for IOPS does not fall between {} and {} operations/sec.'.format(min_iops, max_iops))
+    if not (storage_iops >= min_iops and storage_iops <= max_iops):
+        raise CLIError('The requested value for IOPS does not fall between {} and {} operations/sec.'.format(min_iops, max_iops))
 
-    #find min and max values for throughout
+    # find min and max values for throughout
     min_throughout = sku_info[tier]["supported_storageV2_throughput"]
     if storage > 6:
         max_storage_throughout = math.floor(max(0.25 * storage_iops, min_throughout))
@@ -390,7 +390,7 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
         max_throughout = max_storage_throughout
 
     if not (storage_throughput >= min_throughout and storage_throughput <= max_throughout):
-            raise CLIError('The requested value for throughput does not fall between {} and {} MB/sec.'.format(min_throughout, max_throughout))
+        raise CLIError('The requested value for throughput does not fall between {} and {} MB/sec.'.format(min_throughout, max_throughout))
 
 
 def _pg_tier_validator(tier, sku_info):
