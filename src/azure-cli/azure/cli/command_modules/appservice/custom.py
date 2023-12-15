@@ -457,7 +457,8 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
     return _build_app_settings_output(result.properties, app_settings_slot_cfg_names, redact=True)
-    
+
+
 # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
 def update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client):
     try:
@@ -2790,13 +2791,13 @@ def enable_credentials(cmd, resource_group_name, name, enable, slot=None):
     if not configs.cors:
         configs.cors = CorsSettings()
     configs.cors.support_credentials = enable
-    
+
     result = None
     if is_centauri_functionapp(cmd, resource_group_name, name):
         result = update_configuration_polling(cmd, resource_group_name, name, slot, configs)
     else:
         result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
-    
+
     return result.cors
 
 
@@ -2806,14 +2807,15 @@ def add_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
     if not configs.cors:
         configs.cors = CorsSettings()
     configs.cors.allowed_origins = (configs.cors.allowed_origins or []) + allowed_origins
-    
+
     result = None
     if is_centauri_functionapp(cmd, resource_group_name, name):
         result = update_configuration_polling(cmd, resource_group_name, name, slot, configs)
     else:
         result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
-    
+
     return result.cors
+
 
 def remove_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
@@ -2822,13 +2824,13 @@ def remove_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
             configs.cors.allowed_origins = [x for x in (configs.cors.allowed_origins or []) if x not in allowed_origins]
         else:
             configs.cors.allowed_origins = []
-    
+
     result = None
     if is_centauri_functionapp(cmd, resource_group_name, name):
         result = update_configuration_polling(cmd, resource_group_name, name, slot, configs)
     else:
         result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
-    
+
     return result.cors
 
 
