@@ -2707,8 +2707,8 @@ class WebappOneDeployScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
     def test_webapp_track_runtimestatus_runtimesucessful(self, resource_group):
-        webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
-        plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
+        webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
+        plan_name = self.create_random_name('webapp-runtimestatus-plan', 40)
         war_file = os.path.join(TEST_DIR, 'data', 'sample.war')
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
@@ -2726,8 +2726,8 @@ class WebappOneDeployScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
     def test_webapp_track_runtimestatus_buildfailed(self, resource_group):
-        webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
-        plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
+        webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
+        plan_name = self.create_random_name('webapp-runtimestatus-plan', 40)
         zip_file = os.path.join(TEST_DIR, 'data', 'nodebuildfailed.zip')
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
@@ -2738,14 +2738,14 @@ class WebappOneDeployScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
     def test_webapp_track_runtimestatus_runtimefailed(self, resource_group):
-        webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
-        plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
+        webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
+        plan_name = self.create_random_name('webapp-runtimestatus-plan', 40)
         zip_file = os.path.join(TEST_DIR, 'data', 'noderuntimefailed.zip')
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
-        with self.assertRaisesRegexp(CLIError, "Deployment failed because the site failed to start within timeout limits."):
+        with self.assertRaisesRegexp(CLIError, "Deployment failed because the site failed to start within 10 mins."):
             self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async --track-status'.format(resource_group, webapp_name, zip_file))
 
 class DomainScenarioTest(ScenarioTest):
