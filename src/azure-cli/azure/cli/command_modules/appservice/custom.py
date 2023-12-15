@@ -3811,8 +3811,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if any([cpu, memory, workload_profile_name]) and environment is None:
         raise RequiredArgumentMissingError("usage error: parameters --cpu, -memory, --workload-profile-name "
-                                            "must be used with parameter --environment, please provide the "
-                                            "name of the container app environment using --environment.")
+                                           "must be used with parameter --environment, please provide the "
+                                           "name of the container app environment using --environment.")
     if environment is None and bool(plan) == bool(consumption_plan_location):
         raise MutuallyExclusiveArgumentError("usage error: You must specify one of these parameter "
                                              "--plan NAME_OR_ID | --consumption-plan-location LOCATION")
