@@ -463,6 +463,10 @@ def get_pipeline_result(test_result_fp, pipeline_result):
                 for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'][0]['Details']:
                     if i['Module'] == module:
                         i['Status'] = 'Failed'
+                        # GitHub has a comment length limit of 65535, we must ensure that the length is less than 65535.
+                        # The calculation based on 90% is because the azure cli bot will also add some html characters, so 10% needs to be reserved
+                        if len(pipeline_result) + len(message) > 65535 * 0.9:
+                            message = 'The error message is too long, please check the pipeline log for details.'
                         i['Content'] = build_markdown_content(state, test_case, message, line, i['Content'])
                         break
             else:
