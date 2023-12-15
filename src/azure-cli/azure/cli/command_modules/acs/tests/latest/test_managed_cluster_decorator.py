@@ -1936,6 +1936,22 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             self.assertEqual(ctx_3.get_network_plugin(), "azure")
 
+        # update kubenet to azure cni overlay
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "network_plugin": "azure",
+                    "network_plugin_mode": "overlay"
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.assertEqual(ctx_4.get_network_plugin(), "azure")
+
     def test_mc_get_network_dataplane(self):
         # Default, not set.
         ctx_1 = AKSManagedClusterContext(
@@ -10208,6 +10224,39 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
 
         self.assertEqual(dec_mc_6, ground_truth_mc_6)
+
+        # test update network policy
+        dec_7 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "network_plugin": "azure",
+                "network_plugin_mode": "overlay"
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_7 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="kubenet",
+            ),
+        )
+
+        dec_7.context.attach_mc(mc_7)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_7.update_network_plugin_settings(None)
+        dec_mc_7 = dec_7.update_network_plugin_settings(mc_7)
+
+        ground_truth_mc_7 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+            ),
+        )
+
+        self.assertEqual(dec_mc_7, ground_truth_mc_7)
 
     def test_update_mc_profile_default(self):
         import inspect

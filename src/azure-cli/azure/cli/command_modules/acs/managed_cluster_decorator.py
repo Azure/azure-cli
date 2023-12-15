@@ -2161,8 +2161,6 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string or None
         """
-        # read the original value passed by the command
-        network_plugin = self.raw_param.get("network_plugin")
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
             self.mc and
@@ -2170,6 +2168,10 @@ class AKSManagedClusterContext(BaseAKSContext):
             self.mc.network_profile.network_plugin is not None
         ):
             network_plugin = self.mc.network_profile.network_plugin
+
+        # read the original value passed by the command
+        if self.raw_param.get("network_plugin"):
+            network_plugin = self.raw_param.get("network_plugin")
 
         # this parameter does not need dynamic completion
         # validation
@@ -6799,6 +6801,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         network_plugin_mode = self.context.get_network_plugin_mode()
         if network_plugin_mode:
             mc.network_profile.network_plugin_mode = network_plugin_mode
+
+        network_plugin = self.context._get_network_plugin(enable_validation=False)
+        if network_plugin:
+            mc.network_profile.network_plugin = network_plugin
 
         (
             pod_cidr,

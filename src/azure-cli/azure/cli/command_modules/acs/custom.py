@@ -658,6 +658,7 @@ def aks_update(
     tags=None,
     disable_local_accounts=False,
     enable_local_accounts=False,
+    network_plugin=None,
     network_plugin_mode=None,
     network_dataplane=None,
     network_policy=None,
