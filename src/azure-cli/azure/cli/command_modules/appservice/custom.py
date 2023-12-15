@@ -1781,12 +1781,17 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
                                           image=None, registry_username=None,
                                           registry_password=None, slot=None, min_replicas=None, max_replicas=None,
+                                          enable_dapr=None, dapr_app_id=None, dapr_app_port=None,
+                                          dapr_http_max_request_size=None, dapr_http_read_buffer_size=None,
+                                          dapr_log_level=None, dapr_enable_api_logging=None,
                                           workload_profile_name=None, cpu=None, memory=None):
     if is_centauri_functionapp(cmd, resource_group_name, name):
         _validate_cpu_momory_functionapp(cpu, memory)
         update_resource_config(cmd, resource_group_name, name, cpu=cpu, memory=memory,
                                workload_profile_name=workload_profile_name)
-
+        update_dapr_config(cmd, resource_group_name, name, enable_dapr, dapr_app_id, dapr_app_port,
+                           dapr_http_max_request_size, dapr_http_read_buffer_size, dapr_log_level,
+                           dapr_enable_api_logging)
     return update_container_settings(cmd, resource_group_name, name, registry_server,
                                      image, registry_username, None,
                                      registry_password, multicontainer_config_type=None,
@@ -3778,6 +3783,23 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
             raise CLIError(ex)
 
 
+def update_dapr_config(cmd, resource_group_name, name, enabled=None, app_id=None, app_port=None,
+                       http_max_request_size=None, http_read_buffer_size=None, log_level=None,
+                       enable_api_logging=None):
+    site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    import inspect
+    frame = inspect.currentframe()
+    bool_flags = ['enabled', 'enable_api_logging']
+    int_flags = ['app_port', 'http_max_request_size', 'http_read_buffer_size']
+    args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
+    for arg in args[3:]:
+        if arg in int_flags and values[arg] is not None:
+            values[arg] = validate_and_convert_to_int(arg, values[arg])
+        if values.get(arg, None):
+            setattr(site.dapr_config, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
+    update_functionapp_polling(cmd, resource_group_name, name, site)
+
+
 def update_resource_config(cmd, resource_group_name, name, workload_profile_name=None, cpu=None, memory=None):
     site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
 
@@ -3800,8 +3822,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                        environment=None, min_replicas=None, max_replicas=None, workspace=None,
+                       enable_dapr=False, dapr_app_id=None, dapr_app_port=None, dapr_http_max_request_size=None,
+                       dapr_http_read_buffer_size=None, dapr_log_level=None, dapr_enable_api_logging=False,
                        workload_profile_name=None, cpu=None, memory=None):
-
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3820,12 +3843,22 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise RequiredArgumentMissingError("usage error: parameters --min-replicas and --max-replicas must be "
                                            "used with parameter --environment, please provide the name "
                                            "of the container app environment using --environment.")
+    if any([enable_dapr, dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
+            dapr_log_level, dapr_enable_api_logging]) and environment is None:
+        raise RequiredArgumentMissingError("usage error: parameters --enable-dapr, --dapr-app-id, "
+                                           "--dapr-app-port, --dapr-http-max-request-size, "
+                                           "--dapr-http-read-buffer-size, --dapr-log-level and "
+                                           "dapr-enable-api-logging must be used with parameter --environment,"
+                                           "please provide the name of the container app environment using "
+                                           "--environment.")
     from azure.mgmt.web.models import Site
-    SiteConfig, NameValuePair, ResourceConfig = cmd.get_models('SiteConfig', 'NameValuePair', 'ResourceConfig')
+    SiteConfig, NameValuePair, DaprConfig, ResourceConfig = cmd.get_models('SiteConfig', 'NameValuePair', 'DaprConfig', 'ResourceConfig')
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
     client = web_client_factory(cmd.cli_ctx)
+
+    dapr_config = DaprConfig()
 
     if vnet or subnet:
         if plan:
@@ -3856,7 +3889,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         subnet_resource_id = None
         vnet_route_all_enabled = None
 
-    functionapp_def = Site(location=None, site_config=site_config, tags=tags,
+    functionapp_def = Site(location=None, site_config=site_config, dapr_config=dapr_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
                            vnet_route_all_enabled=vnet_route_all_enabled)
 
@@ -4026,6 +4059,17 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             site_config.minimum_elastic_instance_count = min_replicas
         if max_replicas is not None:
             site_config.function_app_scale_limit = max_replicas
+
+        if enable_dapr:
+            logger.warning("Please note while using Dapr Extension for Azure Functions, app port is "
+                           "mandatory when using Dapr triggers and should be empty when using only Dapr bindings.")
+            dapr_config.enabled = True
+            dapr_config.app_id = dapr_app_id
+            dapr_config.app_port = dapr_app_port
+            dapr_config.http_max_request_size = dapr_http_max_request_size
+            dapr_config.http_read_buffer_size = dapr_http_read_buffer_size
+            dapr_config.log_level = dapr_log_level
+            dapr_config.enable_api_logging = dapr_enable_api_logging
 
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
         location = managed_environment.location
