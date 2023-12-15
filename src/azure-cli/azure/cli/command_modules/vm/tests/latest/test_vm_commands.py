@@ -3872,7 +3872,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         ])
         self.cmd('vmss list-instance-connection-info -n {vmss1} -g {rg}')
 
-        self.cmd('vmss create -n {vmss2} -g {rg} --image OpenLogic:CentOS:7.5:latest --orchestration-mode Uniform')
+        self.cmd('vmss create -n {vmss2} -g {rg} --image OpenLogic:CentOS:7.5:latest --orchestration-mode Uniform --lb-sku Basic')
         self.cmd('vmss show -n {vmss2} -g {rg}', checks=[
             self.exists('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools[0].id')
         ])
@@ -3895,11 +3895,9 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
         ])
         self.cmd('network lb show -n {vmss4}LB -g {rg}', checks=[
-            self.check('sku.name', 'Basic')
+            self.check('sku.name', 'Standard')
         ])
-        message = 'There is no connection information. If you are using NAT rule V2, please confirm whether the load balancer SKU is Standard'
-        with self.assertRaisesRegex(CLIError, message):
-            self.cmd('vmss list-instance-connection-info -n {vmss4} -g {rg}')
+        self.cmd('vmss list-instance-connection-info -n {vmss4} -g {rg}')
 
         self.cmd('vmss create -n {vmss5} -g {rg} --image OpenLogic:CentOS:7.5:latest --nat-rule-name {natrule2} --lb-sku Basic --orchestration-mode Uniform')
         self.cmd('vmss show -n {vmss5} -g {rg}', checks=[
@@ -3908,6 +3906,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         self.cmd('network lb show -n {vmss5}LB -g {rg}', checks=[
             self.check('sku.name', 'Basic')
         ])
+        message = 'There is no connection information. If you are using NAT rule V2, please confirm whether the load balancer SKU is Standard'
         with self.assertRaisesRegex(CLIError, message):
             self.cmd('vmss list-instance-connection-info -n {vmss5} -g {rg}')
 
@@ -8434,9 +8433,9 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_automatic_repairs_with_health_probe_')
     def test_vmss_update_automatic_repairs_with_health_probe(self, resource_group):
         self.kwargs.update({
-            'vmss': 'vmss1',
-            'probe': 'probe',
-            'lbrule': 'lbrule'
+            'vmss': self.create_random_name('vmss', 15),
+            'probe': self.create_random_name('probe', 15),
+            'lbrule': self.create_random_name('lbrule', 15)
         })
 
         # Prepare vmss
@@ -8455,7 +8454,7 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         ).get_output_in_json()['id']
         self.cmd(
             'network lb rule create -g {rg} --lb-name {vmss}LB -n {lbrule} --probe-name {probe} --protocol Tcp '
-            '--frontend-port 80 --backend-port 80'
+            '--frontend-port 81 --backend-port 81'
         )
         # Test enable automatic repairs with a health probe when update vmss
         self.cmd('vmss update -g {rg} -n {vmss} --set virtualMachineProfile.networkProfile.healthProbe.id={probe_id}',
