@@ -177,6 +177,11 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
     # Create mysql database if it does not exist
     database_name = DEFAULT_DB_NAME
     create_database(cmd, resource_group_name, server_name, database_name, engine_name)
+
+    logger.warning('The output includes secrets that you must protect. Be sure that you do not include these secrets in your '
+                   'source control. Also verify that no secrets are present in the logs of your command or script. '
+                   'For additional information, see http://aka.ms/clisecrets.')
+
     return form_response(server_result, administrator_login_password if administrator_login_password is not None else '*****',
                          host=host,
                          connection_string=create_mysql_connection_string(server_name, host, database_name, user, administrator_login_password),

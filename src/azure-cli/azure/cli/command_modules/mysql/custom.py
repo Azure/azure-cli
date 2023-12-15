@@ -446,6 +446,10 @@ def flexible_server_create(cmd, client,
 
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
+    logger.warning('The output includes secrets that you must protect. Be sure that you do not include these secrets in your '
+                   'source control. Also verify that no secrets are present in the logs of your command or script. '
+                   'For additional information, see http://aka.ms/clisecrets.')
+
     return _form_response(user, sku, loc, server_id, host, version,
                           administrator_login_password if administrator_login_password is not None else '*****',
                           _create_mysql_connection_string(host, database_name, user, administrator_login_password),
@@ -653,6 +657,10 @@ def flexible_server_import_create(cmd, client,
     logger.warning('Try using az \'mysql flexible-server connect\' command to test out connection.')
 
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
+
+    logger.warning('The output includes secrets that you must protect. Be sure that you do not include these secrets in your '
+                   'source control. Also verify that no secrets are present in the logs of your command or script. '
+                   'For additional information, see http://aka.ms/clisecrets.')
 
     return _form_response(user, sku, loc, server_id, host, version,
                           administrator_login_password if administrator_login_password is not None else '*****',
