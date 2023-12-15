@@ -558,7 +558,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         self.cmd('az keyvault create --hsm-name {hsm_name} -l {loc} -g {rg} --administrators {init_admin} '
                  '--retention-days 7')
 
-        self.cmd('az keyvault wait-hsm --hsm-name {hsm_name} --created')
+        self.cmd('az keyvault wait-hsm --hsm-name {hsm_name} --created -g {rg}')
 
         # download SD
         self.cmd('az keyvault security-domain download --hsm-name {hsm_name} --security-domain-file "{sdfile}" '
@@ -580,7 +580,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
                  '--retention-days 7 --no-wait')
 
         # wait until the HSM is ready for recovery
-        self.cmd('az keyvault wait-hsm --hsm-name {next_hsm_name} --created')
+        self.cmd('az keyvault wait-hsm --hsm-name {next_hsm_name} --created -g {rg}')
 
         # download the exchange key
         self.cmd('az keyvault security-domain init-recovery --hsm-name {next_hsm_name} '
@@ -638,7 +638,7 @@ class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
                                '--storage-account-name {storage_account} '
                                '--storage-container-SAS-token "{sas}"',
                                checks=[
-                                   # self.check('status', 'Succeeded'),
+                                   self.check('status', 'Succeeded'),
                                    # self.exists('startTime'),
                                    # self.exists('jobId'),
                                    self.exists('folderUrl')
@@ -664,20 +664,19 @@ class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
-    # @record_only()
-    @unittest.skip('cannot run')
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_hsm_full_backup')
+    @ManagedHSMPreparer(name_prefix='cli-test-hsm-bcup-', certs_path=CERTS_DIR, roles=['Managed HSM Crypto Officer', 'Managed HSM Crypto User'])
+    @StorageAccountPreparer(name_prefix='clitesthsmsa')
     @AllowLargeResponse()
-    def test_keyvault_hsm_full_backup_restore(self):
+    def test_keyvault_hsm_full_backup_restore(self, resource_group, managed_hsm, storage_account):
         self.kwargs.update({
-            'hsm_url': ACTIVE_HSM_URL,
-            'hsm_name': ACTIVE_HSM_NAME,
-            'storage_account': self.create_random_name('clitesthsmsa', 24),
+            'hsm_url': f'https://{managed_hsm}.managedhsm.azure.net',
+            'hsm_name': managed_hsm,
+            'storage_account': storage_account,
             'blob': self.create_random_name('clitesthsmblob', 24),
             'sas_start': (datetime.utcnow() - timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ'),
             'sas_expiry': (datetime.utcnow() + timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
         })
-        self.cmd('az storage account create -n {storage_account} -g {rg}')
         self.cmd('az storage container create -n {blob} --account-name {storage_account} -g {rg}')
 
         self.kwargs['sas'] = '?' + self.cmd('az storage account generate-sas --start {sas_start} --expiry {sas_expiry} '
@@ -689,7 +688,7 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                  '--storage-account-name {storage_account} '
                  '--storage-container-SAS-token "{sas}"',
                  checks=[
-                     # self.check('status', 'Succeeded'),
+                     self.check('status', 'Succeeded'),
                      # self.exists('startTime'),
                      # self.exists('jobId'),
                      self.exists('folderUrl')
@@ -699,7 +698,7 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                                '--storage-account-name {storage_account} '
                                '--storage-container-SAS-token "{sas}"',
                                checks=[
-                                   # self.check('status', 'Succeeded'),
+                                   self.check('status', 'Succeeded'),
                                    # self.exists('startTime'),
                                    # self.exists('jobId'),
                                    self.exists('folderUrl')
@@ -710,11 +709,6 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                  '--storage-account-name {storage_account} '
                  '--storage-container-SAS-token "{sas}" '
                  '--backup-folder "{backup_folder}"')
-                 # checks=[
-                 #     self.check('status', 'Succeeded'),
-                 #     self.exists('startTime'),
-                 #     self.exists('jobId')
-                 # ])
 
 
 class KeyVaultHSMSettingScenarioTest(ScenarioTest):
@@ -1350,16 +1344,12 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         self.cmd('keyvault key create --hsm-name {hsm_name} -n key2 --kty RSA-HSM --size 4096 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
 
-        # create OKP key
-        self.cmd('keyvault key create --hsm-name {hsm_name} -n okpkey --kty OKP-HSM --curve Ed25519',
-                 checks=[self.check('key.kty', 'OKP-HSM'), self.check('key.crv', 'Ed25519')])
-
-    # Since the MHSM has to be activated manually so we use fixed hsm resource and mark the test as record_only
-    @record_only()
-    def test_keyvault_hsm_key_random(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_hsm_key')
+    @ManagedHSMPreparer(name_prefix='clitesthsmkey', certs_path=CERTS_DIR, roles=['Managed HSM Crypto Officer', 'Managed HSM Crypto User'])
+    def test_keyvault_hsm_key_random(self, resource_group, managed_hsm):
         self.kwargs.update({
-            'hsm_name': TEST_HSM_NAME,
-            'hsm_url': TEST_HSM_URL
+            'hsm_name': managed_hsm,
+            'hsm_url': 'https://{}.managedhsm.azure.net'.format(managed_hsm),
         })
 
         result = self.cmd('keyvault key random --count 4 --hsm-name {hsm_name}').get_output_in_json()
@@ -1416,12 +1406,6 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         result = self.cmd('keyvault key set-attributes --policy {policy} --immutable -n {key2} --hsm-name {hsm_name}').get_output_in_json()
         self.assertIn('x-ms-sgx-is-debuggable', result['releasePolicy']['encodedPolicy'])
         self.assertEqual(result['releasePolicy']['immutable'], True)
-
-        # clear test resources
-        # self.cmd('keyvault key delete -n {key1} --hsm-name {hsm_name}')
-        # self.cmd('keyvault key purge -n {key1} --hsm-name {hsm_name}')
-        # self.cmd('keyvault key delete -n {key2} --hsm-name {hsm_name}')
-        # self.cmd('keyvault key purge -n {key2} --hsm-name {hsm_name}')
 
 
 class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):
@@ -2415,7 +2399,7 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         # recover and purge
         self.cmd('keyvault delete -n {kv} -g {rg}')
         self.cmd('keyvault recover -n {kv} --no-wait')
-        self.cmd('keyvault wait --updated -n {kv}')
+        self.cmd('keyvault wait --updated -n {kv} -g {rg}')
         self.cmd('keyvault delete -n {kv} -g {rg}')
         self.cmd('keyvault purge -n {kv}')
 

@@ -70,13 +70,16 @@ from .utils import (_normalize_sku,
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
-                           detect_os_from_src, get_current_stack_from_runtime, generate_default_app_name)
+                           detect_os_from_src, get_current_stack_from_runtime, generate_default_app_name,
+                           get_or_create_default_workspace, get_or_create_default_resource_group,
+                           get_workspace)
 from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX,
                          FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
-                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE)
+                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
+                         VERSION_2022_09_01)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -1776,7 +1779,14 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
 
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
                                           image=None, registry_username=None,
-                                          registry_password=None, slot=None, min_replicas=None, max_replicas=None):
+                                          registry_password=None, slot=None, min_replicas=None, max_replicas=None,
+                                          enable_dapr=None, dapr_app_id=None, dapr_app_port=None,
+                                          dapr_http_max_request_size=None, dapr_http_read_buffer_size=None,
+                                          dapr_log_level=None, dapr_enable_api_logging=None):
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        update_dapr_config(cmd, resource_group_name, name, enable_dapr, dapr_app_id, dapr_app_port,
+                           dapr_http_max_request_size, dapr_http_read_buffer_size, dapr_log_level,
+                           dapr_enable_api_logging)
     return update_container_settings(cmd, resource_group_name, name, registry_server,
                                      image, registry_username, None,
                                      registry_password, multicontainer_config_type=None,
@@ -2184,7 +2194,7 @@ app service environment, please use --location parameter and specify the region 
 has been deployed ".format(app_service_environment)
                 raise ResourceNotFoundError(err_msg)
         if hyper_v and ase.kind in ('ASEV1', 'ASEV2'):
-            raise ArgumentUsageError('Windows containers are only supported on v3 App Service Environments v3 or newer')
+            raise ArgumentUsageError('Windows containers are only supported on App Service Environment v3')
     else:  # Non-ASE
         ase_def = None
         if location is None:
@@ -2828,6 +2838,10 @@ def show_cors(cmd, resource_group_name, name, slot=None):
 
 
 def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
+    # ping the site first to ensure that the site container is running
+    # logsteam does not work if the site container is not running
+    # See https://github.com/Azure/azure-cli/issues/23058
+    ping_site(cmd, resource_group_name, name, slot)
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     streaming_url = scm_url + '/logstream'
     if provider:
@@ -2840,6 +2854,17 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
 
     while True:
         time.sleep(100)  # so that ctrl+c can stop the command
+
+
+def ping_site(cmd, resource_group_name, name, slot, timeout=230):
+    import urllib3
+    try:
+        site_url = _get_url(cmd, resource_group_name, name, slot)
+        http = urllib3.PoolManager(timeout=urllib3.Timeout(connect=timeout, read=timeout))
+        http.request('GET', site_url)
+    except Exception:  # pylint: disable=broad-except
+        logger.warning("Unable to reach the app.")
+        raise
 
 
 def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot=None):
@@ -2910,14 +2935,19 @@ def _get_log(url, headers, log_file=None):
                 f.write(data)
     else:  # streaming
         std_encoding = sys.stdout.encoding
-        for chunk in r.stream():
-            if chunk:
-                # Extra encode() and decode for stdout which does not surpport 'utf-8'
-                logger.warning(chunk.decode(encoding='utf-8', errors='replace')
-                               .encode(std_encoding, errors='replace')
-                               .decode(std_encoding, errors='replace')
-                               .rstrip('\n\r'))  # each line of log has CRLF.
-    r.release_conn()
+        try:
+            for chunk in r.stream():
+                if chunk:
+                    # Extra encode() and decode for stdout which does not support 'utf-8'
+                    logger.warning(chunk.decode(encoding='utf-8', errors='replace')
+                                   .encode(std_encoding, errors='replace')
+                                   .decode(std_encoding, errors='replace')
+                                   .rstrip('\n\r'))  # each line of log has CRLF.
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.error("Log stream interrupted. Exiting live log stream.")
+            logger.debug(ex)
+        finally:
+            r.release_conn()
 
 
 def upload_ssl_cert(cmd, resource_group_name,
@@ -3022,9 +3052,9 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         if kv_subscription.lower() != subscription_id.lower():
             diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
                                                                subscription_id=kv_subscription)
-            ascs = diff_subscription_client.app_service_certificate_orders.list()
+            ascs = diff_subscription_client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
         else:
-            ascs = client.app_service_certificate_orders.list()
+            ascs = client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
 
         kv_secret_name = None
         for asc in ascs:
@@ -3749,6 +3779,39 @@ def should_enable_distributed_tracing(consumption_plan_location, matched_runtime
         and image is None
 
 
+def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
+    try:
+        _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update', None, functionapp)
+    except Exception as ex:  # pylint: disable=broad-except
+        poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
+        if ex.response.status_code == 202 and poll_url:
+            r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+
+            while r.status_code != 200 and time.time() < poll_timeout:
+                time.sleep(5)
+                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+        else:
+            raise CLIError(ex)
+
+
+def update_dapr_config(cmd, resource_group_name, name, enabled=None, app_id=None, app_port=None,
+                       http_max_request_size=None, http_read_buffer_size=None, log_level=None,
+                       enable_api_logging=None):
+    site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    import inspect
+    frame = inspect.currentframe()
+    bool_flags = ['enabled', 'enable_api_logging']
+    int_flags = ['app_port', 'http_max_request_size', 'http_read_buffer_size']
+    args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
+    for arg in args[3:]:
+        if arg in int_flags and values[arg] is not None:
+            values[arg] = validate_and_convert_to_int(arg, values[arg])
+        if values.get(arg, None):
+            setattr(site.dapr_config, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
+    update_functionapp_polling(cmd, resource_group_name, name, site)
+
+
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
                        os_type=None, functions_version=None, runtime=None, runtime_version=None,
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
@@ -3757,7 +3820,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        registry_server=None, registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
-                       environment=None, min_replicas=None, max_replicas=None):
+                       environment=None, min_replicas=None, max_replicas=None, workspace=None,
+                       enable_dapr=False, dapr_app_id=None, dapr_app_port=None, dapr_http_max_request_size=None,
+                       dapr_http_read_buffer_size=None, dapr_log_level=None, dapr_enable_api_logging=False):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3772,12 +3837,22 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise RequiredArgumentMissingError("usage error: parameters --min-replicas and --max-replicas must be "
                                            "used with parameter --environment, please provide the name "
                                            "of the container app environment using --environment.")
+    if any([enable_dapr, dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
+            dapr_log_level, dapr_enable_api_logging]) and environment is None:
+        raise RequiredArgumentMissingError("usage error: parameters --enable-dapr, --dapr-app-id, "
+                                           "--dapr-app-port, --dapr-http-max-request-size, "
+                                           "--dapr-http-read-buffer-size, --dapr-log-level and "
+                                           "dapr-enable-api-logging must be used with parameter --environment,"
+                                           "please provide the name of the container app environment using "
+                                           "--environment.")
     from azure.mgmt.web.models import Site
-    SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
+    SiteConfig, NameValuePair, DaprConfig = cmd.get_models('SiteConfig', 'NameValuePair', 'DaprConfig')
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
     client = web_client_factory(cmd.cli_ctx)
+
+    dapr_config = DaprConfig()
 
     if vnet or subnet:
         if plan:
@@ -3808,7 +3883,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         subnet_resource_id = None
         vnet_route_all_enabled = None
 
-    functionapp_def = Site(location=None, site_config=site_config, tags=tags,
+    functionapp_def = Site(location=None, site_config=site_config, dapr_config=dapr_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
                            vnet_route_all_enabled=vnet_route_all_enabled)
 
@@ -3968,6 +4043,17 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if max_replicas is not None:
             site_config.function_app_scale_limit = max_replicas
 
+        if enable_dapr:
+            logger.warning("Please note while using Dapr Extension for Azure Functions, app port is "
+                           "mandatory when using Dapr triggers and should be empty when using only Dapr bindings.")
+            dapr_config.enabled = True
+            dapr_config.app_id = dapr_app_id
+            dapr_config.app_port = dapr_app_port
+            dapr_config.http_max_request_size = dapr_http_max_request_size
+            dapr_config.http_read_buffer_size = dapr_http_read_buffer_size
+            dapr_config.log_level = dapr_log_level
+            dapr_config.enable_api_logging = dapr_enable_api_logging
+
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
         location = managed_environment.location
         functionapp_def.location = location
@@ -4028,7 +4114,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     if create_app_insights:
         try:
-            try_create_application_insights(cmd, functionapp)
+            try_create_workspace_based_application_insights(cmd, functionapp, workspace)
             if should_enable_distributed_tracing(consumption_plan_location, matched_runtime, image):
                 update_app_settings(cmd, functionapp.resource_group, functionapp.name,
                                     ["APPLICATIONINSIGHTS_ENABLE_AGENT=true"])
@@ -4087,6 +4173,55 @@ def _get_content_share_name(app_name):
     share_name = app_name[0:50]
     suffix = str(uuid.uuid4()).split('-')[-1]
     return share_name.lower() + suffix
+
+
+def try_create_workspace_based_application_insights(cmd, functionapp, workspace_name):
+    creation_failed_warn = 'Unable to create the Application Insights for the Function App. ' \
+                           'Please use the Azure Portal to manually create and configure the Application Insights, ' \
+                           'if needed.'
+
+    ai_resource_group_name = functionapp.resource_group
+    ai_name = functionapp.name
+    ai_location = _normalize_location(cmd, functionapp.location)
+
+    workspace = get_workspace(cmd, workspace_name)
+
+    if workspace is None:
+        default_resource_group = get_or_create_default_resource_group(cmd, ai_location)
+        workspace = get_or_create_default_workspace(cmd, ai_location, default_resource_group.name)
+
+    app_insights_client = get_mgmt_service_client(
+        cmd.cli_ctx,
+        ApplicationInsightsManagementClient,
+        api_version='2020-02-02-preview'
+    )
+
+    ai_properties = {
+        "name": ai_name,
+        "location": ai_location,
+        "kind": "web",
+        "properties": {
+            "Application_Type": "web",
+            "WorkspaceResourceId": workspace.id
+        }
+    }
+
+    appinsights = app_insights_client.components.create_or_update(ai_resource_group_name, ai_name, ai_properties)
+    if appinsights is None or appinsights.instrumentation_key is None:
+        logger.warning(creation_failed_warn)
+        return
+
+    # We make this success message as a warning to no interfere with regular JSON output in stdout
+    logger.warning('Application Insights \"%s\" was created for this Function App. '
+                   'You can visit https://portal.azure.com/#resource%s/overview to view your '
+                   'Application Insights component', appinsights.name, appinsights.id)
+
+    if not is_centauri_functionapp(cmd, ai_resource_group_name, ai_name):
+        update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                            ['APPINSIGHTS_INSTRUMENTATIONKEY={}'.format(appinsights.instrumentation_key)])
+    else:
+        update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                            ['APPLICATIONINSIGHTS_CONNECTION_STRING={}'.format(appinsights.connection_string)])
 
 
 def try_create_application_insights(cmd, functionapp):
@@ -4724,6 +4859,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         name = generate_default_app_name(cmd)
 
     import os
+
     AppServicePlan = cmd.get_models('AppServicePlan')
     src_dir = os.getcwd()
     _src_path_escaped = "{}".format(src_dir.replace(os.sep, os.sep + os.sep))
@@ -4904,7 +5040,10 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
 
     if logs:
         _configure_default_logging(cmd, rg_name, name)
-        return get_streaming_log(cmd, rg_name, name)
+        try:
+            return get_streaming_log(cmd, rg_name, name)
+        except Exception:  # pylint: disable=broad-except
+            logger.warning("Unable to reach the app. Please run 'az webapp log tail' to view the logs.")
 
     _set_webapp_up_default_args(cmd, rg_name, sku, plan, loc, name)
 

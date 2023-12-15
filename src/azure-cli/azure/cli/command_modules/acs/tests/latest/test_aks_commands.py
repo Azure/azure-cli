@@ -7900,7 +7900,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # update to enable cilium dataplane
-        update_cmd = 'aks update -g {resource_group} -n {name} --network-dataplane=cilium'
+        update_cmd = 'aks update -g {resource_group} -n {name} --network-dataplane=cilium --network-policy=cilium'
 
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -9253,3 +9253,384 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    def test_aks_create_with_nsg_control(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+
+        port_ranges = [
+            {
+                'portEnd': 53,
+                'portStart': 53,
+                'protocol': 'UDP',
+            },
+            {
+                'portEnd': 80,
+                'portStart': 80,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 443,
+                'portStart': 443,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 5000,
+                'portStart': 4000,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 6000,
+                'portStart': 4000,
+                'protocol': "UDP",
+            }
+        ]
+
+        allowed_host_ports_arguments = []
+        for i, port_range in enumerate(port_ranges):
+            start, end, protocol = port_range['portStart'], port_range['portEnd'], port_range['protocol']
+            if start == end:
+                v = '{}/{}'.format(start, protocol)
+            else:
+                v = '{}-{}/{}'.format(start, end, protocol)
+            allowed_host_ports_arguments.append(v)
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'node_vm_size': 'standard_d2s_v3',
+            'asg1': 'asg1',
+            'asg2': 'asg2',
+            'allowed_host_ports_argument': '--nodepool-allowed-host-ports {}'.format(' '.join(allowed_host_ports_arguments)),
+        })
+
+        create_asg1 = 'network asg create --name {asg1} --resource-group {resource_group} -o json'
+        create_asg2 = 'network asg create --name {asg2} --resource-group {resource_group} -o json'
+        asg1 = self.cmd(create_asg1, checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
+        asg2 = self.cmd(create_asg2, checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
+        asg_ids = [asg1['id'], asg2['id']]
+
+        self.kwargs.update({
+            'asg1_id': asg1['id'],
+            'asg2_id': asg2['id'],
+        })
+        self.cmd(
+            'aks create '
+            '--resource-group={resource_group} '
+            '--name={name} '
+            '--location={location} '
+            '--ssh-key-value={ssh_key_value} '
+            '--node-count=1 '
+            '--node-vm-size={node_vm_size} ' 
+            '--nodepool-asg-ids={asg1_id} '
+            '--nodepool-asg-ids={asg2_id} '
+            '{allowed_host_ports_argument}',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('agentPoolProfiles[0].networkProfile.applicationSecurityGroups', asg_ids),
+                self.check('agentPoolProfiles[0].networkProfile.allowedHostPorts', port_ranges),
+            ],
+        )
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    def test_aks_nodepool_create_with_nsg_control(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        nodepool_name = self.create_random_name('n', 6)
+
+        port_ranges = [
+            {
+                'portEnd': 53,
+                'portStart': 53,
+                'protocol': 'UDP',
+            },
+            {
+                'portEnd': 80,
+                'portStart': 80,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 443,
+                'portStart': 443,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 5000,
+                'portStart': 4000,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 6000,
+                'portStart': 4000,
+                'protocol': "UDP",
+            }
+        ]
+
+        allowed_host_ports_arguments = []
+        for i, port_range in enumerate(port_ranges):
+            start, end, protocol = port_range['portStart'], port_range['portEnd'], port_range['protocol']
+            if start == end:
+                v = '{}/{}'.format(start, protocol)
+            else:
+                v = '{}-{}/{}'.format(start, end, protocol)
+            allowed_host_ports_arguments.append(v)
+
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'node_pool_name': nodepool_name,
+            'node_vm_size': 'standard_d2s_v3',
+            'asg1': 'asg1',
+            'asg2': 'asg2',
+            'allowed_host_ports_argument': '--allowed-host-ports {}'.format(' '.join(allowed_host_ports_arguments)),
+        })
+        create_asg1 = 'network asg create --name {asg1} --resource-group {resource_group} -o json'
+        create_asg2 = 'network asg create --name {asg2} --resource-group {resource_group} -o json'
+        asg1 = self.cmd(create_asg1, checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
+        asg2 = self.cmd(create_asg2, checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
+        asg_ids = [asg1['id'], asg2['id']]
+
+        self.kwargs.update({
+            'asg1_id': asg1['id'],
+            'asg2_id': asg2['id'],
+        })
+
+        self.cmd(
+            'aks create '
+            '--resource-group={resource_group} '
+            '--name={name} '
+            '--location={location} '
+            '--ssh-key-value={ssh_key_value} '
+            '--node-count=1 '
+            '--node-vm-size={node_vm_size} ',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+            ],
+        )
+
+        self.cmd(
+            'aks nodepool add '
+            '--resource-group={resource_group} '
+            '--cluster-name={name} '
+            '--name={node_pool_name} '
+            '--node-vm-size={node_vm_size} '
+            '--node-count=1 '
+            '--asg-ids={asg1_id} '
+            '--asg-ids={asg2_id} '
+            '{allowed_host_ports_argument}',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('networkProfile.applicationSecurityGroups', asg_ids),
+                self.check('networkProfile.allowedHostPorts', port_ranges),
+            ],
+        )
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    def test_aks_nodepool_update_with_nsg_control(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        nodepool_name = self.create_random_name('n', 6)
+
+        port_ranges = [
+            {
+                'portEnd': 53,
+                'portStart': 53,
+                'protocol': 'UDP',
+            },
+            {
+                'portEnd': 80,
+                'portStart': 80,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 443,
+                'portStart': 443,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 5000,
+                'portStart': 4000,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 6000,
+                'portStart': 4000,
+                'protocol': "UDP",
+            }
+        ]
+
+        allowed_host_ports_arguments = []
+        for i, port_range in enumerate(port_ranges):
+            start, end, protocol = port_range['portStart'], port_range['portEnd'], port_range['protocol']
+            if start == end:
+                v = '{}/{}'.format(start, protocol)
+            else:
+                v = '{}-{}/{}'.format(start, end, protocol)
+            allowed_host_ports_arguments.append(v)
+
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'node_pool_name': nodepool_name,
+            'node_vm_size': 'standard_d2s_v3',
+            'asg1': 'asg1',
+            'asg2': 'asg2',
+            'allowed_host_ports_argument': '--allowed-host-ports {}'.format(' '.join(allowed_host_ports_arguments)),
+        })
+        create_asg1 = 'network asg create --name {asg1} --resource-group {resource_group} -o json'
+        create_asg2 = 'network asg create --name {asg2} --resource-group {resource_group} -o json'
+        asg1 = self.cmd(create_asg1, checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
+        asg2 = self.cmd(create_asg2, checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
+        asg_ids = [asg1['id'], asg2['id']]
+
+        self.kwargs.update({
+            'asg1_id': asg1['id'],
+            'asg2_id': asg2['id'],
+        })
+
+        self.cmd(
+            'aks create '
+            '--resource-group={resource_group} '
+            '--name={name} '
+            '--location={location} '
+            '--ssh-key-value={ssh_key_value} '
+            '--nodepool-name={node_pool_name} '
+            '--node-count=1 '
+            '--node-vm-size={node_vm_size} ',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+            ],
+        )
+
+        self.cmd(
+            'aks nodepool update '
+            '--resource-group={resource_group} '
+            '--cluster-name={name} '
+            '--name={node_pool_name} '
+            '--asg-ids={asg1_id} '
+            '--asg-ids={asg2_id} '
+            '{allowed_host_ports_argument}',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('networkProfile.applicationSecurityGroups', asg_ids),
+                self.check('networkProfile.allowedHostPorts', port_ranges),
+            ],
+        )
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    # TODO(nilo19): uncomment this when the RP API is ready. The newly added field `backendPoolType` cannot be shown
+    # in the response body but the feature works.
+    # @AllowLargeResponse()
+    # @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    # def test_aks_create_or_update_with_load_balancer_backend_pool_type(self, resource_group, resource_group_location):
+    #     _, create_version = self._get_versions(resource_group_location)
+    #     aks_name = self.create_random_name('cliakstest', 16)
+    #     self.kwargs.update({
+    #         'resource_group': resource_group,
+    #         'name': aks_name,
+    #         'location': resource_group_location,
+    #         'k8s_version': create_version,
+    #         'ssh_key_value': self.generate_ssh_keys(),
+    #     })
+    #
+    #     # create
+    #     create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+    #                  '--ssh-key-value={ssh_key_value} ' \
+    #                  '--kubernetes-version={k8s_version} ' \
+    #                  '--load-balancer-backend-pool-type=nodeIP'
+    #     self.cmd(create_cmd, checks=[
+    #         self.check('networkProfile.loadBalancerProfile.backendPoolType', 'nodeIP'),
+    #     ])
+    #
+    #     # update
+    #     update_cmd = 'aks update -g {resource_group} -n {name} --load-balancer-backend-pool-type=nodeIPConfiguration'
+    #     self.cmd(update_cmd, checks=[
+    #         self.check('networkProfile.loadBalancerProfile.backendPoolType', 'nodeIPConfiguration'),
+    #     ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_node_public_ip_tags(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        nodepool_name = self.create_random_name('n', 6)
+        nodepool_name_1 = self.create_random_name('n', 6)
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'node_pool_name': nodepool_name,
+            'node_vm_size': 'standard_d2a_v4',
+            "node_public_ip_tags": "RoutingPreference=Internet"
+        })
+
+        self.cmd(
+            'aks create '
+            '--resource-group={resource_group} '
+            '--name={name} '
+            '--location={location} '
+            '--ssh-key-value={ssh_key_value} '
+            '--nodepool-name={node_pool_name} '
+            '--node-count=1 '
+            '--node-vm-size={node_vm_size} '
+            '--enable-node-public-ip '
+            '--node-public-ip-tags={node_public_ip_tags} ',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('agentPoolProfiles[0].networkProfile.nodePublicIpTags[0].ipTagType', "RoutingPreference"),
+                self.check('agentPoolProfiles[0].networkProfile.nodePublicIpTags[0].tag', "Internet"),
+            ],
+        )
+
+        self.kwargs.update({
+            'node_pool_name': nodepool_name_1,
+        })
+
+        self.cmd(
+            'aks nodepool add '
+            '--resource-group={resource_group} '
+            '--cluster-name={name} '
+            '--name={node_pool_name} '
+            '--node-vm-size={node_vm_size} '
+            '--enable-node-public-ip '
+            '--node-public-ip-tags={node_public_ip_tags} '
+            '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/NodePublicIPTagsPreview',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('networkProfile.nodePublicIpTags[0].ipTagType', "RoutingPreference"),
+                self.check('networkProfile.nodePublicIpTags[0].tag', "Internet"),
+            ],
+        )
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
