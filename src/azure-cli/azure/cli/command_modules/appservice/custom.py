@@ -1785,9 +1785,11 @@ def update_container_settings_functionapp(cmd, resource_group_name, name, regist
                                           dapr_http_max_request_size=None, dapr_http_read_buffer_size=None,
                                           dapr_log_level=None, dapr_enable_api_logging=None):
     if is_centauri_functionapp(cmd, resource_group_name, name):
-        update_dapr_config(cmd, resource_group_name, name, enable_dapr, dapr_app_id, dapr_app_port,
-                           dapr_http_max_request_size, dapr_http_read_buffer_size, dapr_log_level,
-                           dapr_enable_api_logging)
+        if any([enable_dapr, dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
+                dapr_log_level, dapr_enable_api_logging]):
+            update_dapr_config(cmd, resource_group_name, name, enable_dapr, dapr_app_id, dapr_app_port,
+                               dapr_http_max_request_size, dapr_http_read_buffer_size, dapr_log_level,
+                               dapr_enable_api_logging)
     return update_container_settings(cmd, resource_group_name, name, registry_server,
                                      image, registry_username, None,
                                      registry_password, multicontainer_config_type=None,
