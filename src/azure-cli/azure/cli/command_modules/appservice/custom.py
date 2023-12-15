@@ -4342,19 +4342,20 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
             break
         if deployment_status == "RuntimeFailed":
             error_text = ""
+            total_num_instances = int(deployment_properties.get('numberOfInstancesInProgress')) + \
+                int(deployment_properties.get('numberOfInstancesSuccessful')) + \
+                int(deployment_properties.get('numberOfInstancesFailed'))
             if int(deployment_properties.get('numberOfInstancesSuccessful')) > 0:
-                total_num_instances = int(deployment_properties.get('numberOfInstancesInProgress')) + \
-                    int(deployment_properties.get('numberOfInstancesSuccessful')) + \
-                    int(deployment_properties.get('numberOfInstancesFailed'))
                 error_text += "Site started with errors: {}/{} instances failed to start successfully\n".format(
                     deployment_properties.get('numberOfInstancesFailed'),
                     total_num_instances)
             else:
-                error_text += "Deployment failed because the site failed to start within timeout limits.\n"
-                error_text += "InprogressInstances: {}, SuccessfulInstances: {}, FailedInstances: {}\n".format(
-                    deployment_properties.get('numberOfInstancesInProgress'),
-                    deployment_properties.get('numberOfInstancesSuccessful'),
-                    deployment_properties.get('numberOfInstancesFailed'))
+                error_text += "Deployment failed because the site failed to start within 10 mins.\n"
+                if int(total_num_instances) > 0:
+                    error_text += "InprogressInstances: {}, SuccessfulInstances: {}, FailedInstances: {}\n".format(
+                        deployment_properties.get('numberOfInstancesInProgress'),
+                        deployment_properties.get('numberOfInstancesSuccessful'),
+                        deployment_properties.get('numberOfInstancesFailed'))
             errors = deployment_properties.get('errors')
             if errors is not None and len(errors) > 0:
                 error_extended_code = errors[0]['extendedCode']
