@@ -1545,10 +1545,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                         vnet_route_all_enabled=None,
                         generic_configurations=None,
                         min_replicas=None,
-                        max_replicas=None,
-                        always_ready_instances=None,
-                        maximum_instances=None,
-                        instance_size=None):
+                        max_replicas=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
@@ -1604,19 +1601,6 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         setattr(configs, 'ip_security_restrictions', None)
         setattr(configs, 'scm_ip_security_restrictions', None)
 
-    if always_ready_instances:
-        setattr(configs, 'minimum_elastic_instance_count', always_ready_instances)
-
-    if maximum_instances:
-        setattr(configs, 'function_app_scale_limit', maximum_instances)
-
-    if instance_size:
-        client = web_client_factory(cmd.cli_ctx)
-        webapp = client.web_apps.get(resource_group_name, name)
-        Site = cmd.get_models('Site')
-        updated_webapp = Site(container_size=instance_size, location=webapp.location)
-        _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update', slot, updated_webapp)
-
     if is_centauri_functionapp(cmd, resource_group_name, name):
         if min_replicas is not None:
             setattr(configs, 'minimum_elastic_instance_count', min_replicas)
@@ -1643,6 +1627,124 @@ def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
                 return r.json()
         else:
             raise CLIError(ex)
+
+def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
+    # check if the customer has a flex app
+    # is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+ 
+    # if not is_flex:
+    #     raise ValidationError("This command is only valid for Azure Functions on the FlexConsumption plan.")
+
+    # functionapp = client.web_apps.get(resource_group_name, name)
+    # functionapp_config = functionapp.functionapp_config
+    # always_ready_config = functionapp_config.always_ready
+    
+    # temp for testing purposes
+    always_ready_config = []
+    always_ready_config.append({'name': 'http', 'instanceCount': 16})
+    always_ready_config.append({'name': 'function__helloworld', 'instanceCount': 1})
+
+    updated_always_ready_config = [x for x in always_ready_config if x['name'] not in setting_names]
+   
+    logger.warning(updated_always_ready_config)
+    
+    # functionapp.functionapp_config.always_ready_config = updated_always_ready_config
+
+    # return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update', None, functionapp)
+
+
+def update_always_ready_settings(cmd, resource_group_name, name, settings):
+    # check if the customer has a flex app
+    # is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+ 
+    # if not is_flex:
+    #     raise ValidationError("This command is only valid for Azure Functions on the FlexConsumption plan.")
+
+    # functionapp = client.web_apps.get(resource_group_name, name)
+    # functionapp_config = functionapp.functionapp_config
+    # always_ready_config = functionapp_config.always_ready
+
+    # temp for testing purposes
+    always_ready_config = []
+    always_ready_config.append({'name': 'http', 'instanceCount': 16})
+    always_ready_config.append({'name': 'function__helloworld', 'instanceCount': 1})
+
+    updated_always_ready_dict = _parse_key_value_pairs(settings)
+    updated_always_ready_config = []
+
+    # Add new values
+    for name, value in updated_always_ready_dict.items():
+        updated_always_ready_config.append({'name': name, 'instanceCount': value})
+
+    # Add existing values
+    for always_ready_setting in always_ready_config:
+        if always_ready_setting['name'] not in updated_always_ready_dict:
+            updated_always_ready_config.append(always_ready_setting)
+
+    logger.warning(updated_always_ready_config)
+
+    # functionapp.functionapp_config.always_ready_config = updated_always_ready_config
+
+    # return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update', None, updated_webapp)
+
+
+def get_scale_config(cmd, resource_group_name, name):
+    # check if the customer has a flex app
+    # is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+ 
+    # if not is_flex:
+    #     raise ValidationError("This command is only valid for Azure Functions on the FlexConsumption plan.")
+
+    # functionapp = client.web_apps.get(resource_group_name, name)
+    # functionapp_config = functionapp.functionapp_config
+
+    # return functionapp_config
+    return None
+
+
+def update_scale_config(cmd, resource_group_name, name, maximum_instance_count=None, instance_memory=None, trigger_type=None, trigger_settings=None):
+    # check if the customer has a flex app 
+    # is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+ 
+    # if not is_flex:
+    #     raise ValidationError("This command is only valid for Azure Functions on the FlexConsumption plan.")
+
+    if (trigger_type is not None) != (trigger_settings is not None):
+        raise RequiredArgumentMissingError("usage error: --trigger-type must be used with parameter"
+                                           "trigger-settings.")
+
+    # functionapp = client.web_apps.get(resource_group_name, name)
+    # functionapp_config = functionapp.functionapp_config
+
+    functionapp_config = {} # TODO: replace with actual model when api version is relesed
+    functionapp_config['scaleAndConcurrency'] = {}
+    if maximum_instance_count:
+        # functionapp.functionapp_config.maximum_instance_count = maximum_instance_count
+        functionapp_config['scaleAndConcurrency']['maximumInstanceCount'] = maximum_instance_count
+    
+    if instance_memory:
+        # functionapp.functionapp_config.instance_memory_mb = instance_memory
+        functionapp_config['scaleAndConcurrency']['instanceMemoryMB'] = instance_memory
+
+    if trigger_type:
+        triggers_dict = _parse_key_value_pairs(trigger_settings)
+        triggers_config = {}
+        triggers_config[trigger_type] = {}
+        for name, value in triggers_dict.items():
+            triggers_config[trigger_type][name] = value
+        functionapp_config['scaleAndConcurrency']['triggers'] = triggers_config
+
+    # temp for testing purposes - to be removed
+    always_ready_config = []
+    always_ready_config.append({'name': 'http', 'instanceCount': 16})
+    always_ready_config.append({'name': 'function__helloworld', 'instanceCount': 1})
+    functionapp_config['scaleAndConcurrency']['alwaysReady'] = always_ready_config
+
+    return functionapp_config
+
+    # functionapp.functionapp_config = functionapp_config
+
+    # return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update', None, functionapp)
 
 
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
@@ -3936,7 +4038,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                        environment=None, min_replicas=None, max_replicas=None, workspace=None,
-                       always_ready_instances=None, maximum_instances=None, instance_size=None,
+                       always_ready_instances=None, maximum_instance_count=None, instance_memory=None,
                        flexconsumption_location=None, deployment_storage_name=None,
                        deployment_storage_container_name=None, deployment_storage_auth_type=None,
                        deployment_storage_auth_value=None):
@@ -3994,13 +4096,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 'Please try again with the --functions-version parameter set to 4.'
             )
 
-        if maximum_instances and always_ready_instances and maximum_instances < always_ready_instances:
-            raise ArgumentUsageError(
-                '--maximum-instances is less than --always-ready-instances. '
-                'Please try again with --always-ready-instances being less than or equal to --maximum-instances.'
-            )
-
-        if maximum_instances and maximum_instances > 1000:
+        # TODO: Might need to remove this validation if it will be done in the backend
+        if maximum_instance_count and maximum_instance_count > 1000:
             raise ValidationError(
                 '--maximum-instances exceeds the maximum allowed for Azure Functions on the Flex Consumption plan. '
                 'Please try again with a valid --maximum-instances value.'
@@ -4008,11 +4105,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
         flexconsumption_location = _normalize_flex_location(flexconsumption_location)
 
-    if (any([always_ready_instances, maximum_instances, instance_size, deployment_storage_name,
+    if (any([always_ready_instances, maximum_instance_count, instance_memory, deployment_storage_name,
         deployment_storage_container_name, deployment_storage_auth_type, deployment_storage_auth_value]) and
         flexconsumption_location is None):
-        raise RequiredArgumentMissingError("usage error: parameters --always-ready-instances, --maximum-instances, "
-                                           "--instance-size, --deployment-storage-name, "
+        raise RequiredArgumentMissingError("usage error: parameters --always-ready-instances, --maximum-instance-count, "
+                                           "--instance-memory, --deployment-storage-name, "
                                            "--deployment-storage-container-name, --deployment-storage-auth-type "
                                            "and --deployment-storage-auth-value must be used with parameter "
                                            "--flexconsumption-location, please provide the name of the flex plan "
@@ -4139,6 +4236,21 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_config['deployment']['storage']['authentication'] = {}
         functionapp_config['deployment']['storage']['authentication']['type'] = deployment_storage_auth_type
         functionapp_config['deployment']['storage']['authentication']['value'] = deployment_storage_auth_value
+
+        always_ready_dict = _parse_key_value_pairs(always_ready_instances)
+        always_ready_config = []
+
+        for name, value in always_ready_dict.items():
+            # TODO: Might need to discuss if we have to check this value against the value passed for maximum_instance_count
+            always_ready_config.append({'name': name, 'instanceCount': value})
+
+        functionapp_config['scaleAndConcurrency'] = {}
+        functionapp_config['scaleAndConcurrency']['maximumInstanceCount'] = maximum_instance_count
+        functionapp_config['scaleAndConcurrency']['instanceMemoryMB'] = instance_memory or DEFAULT_INSTANCE_SIZE
+        # TODO: To discuss where the validation for these settings would be handled - the client side or the backend side?
+        functionapp_config['scaleAndConcurrency']['alwaysReady'] = always_ready_config
+        # TODO: To discuss if we set this to none if it will be populated in the backend? or we might end up populating it with defaults from the function app stacks api?
+        functionapp_config['scaleAndConcurrency']['triggers'] = None
 
         logger.warning(functionapp_config) # TODO: remove - just for testing at the moment
 
@@ -4299,15 +4411,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.additional_properties["properties"] = existing_properties
         functionapp_def.additional_properties["properties"]["name"] = name
         functionapp_def.additional_properties["properties"]["managedEnvironmentId"] = managed_environment.id
-
-    if always_ready_instances:
-        site_config.minimum_elastic_instance_count = always_ready_instances
-
-    if maximum_instances:
-        site_config.function_app_scale_limit = maximum_instances
-
-    if flexconsumption_location is not None:
-        functionapp_def.container_size = instance_size or DEFAULT_INSTANCE_SIZE
 
     # temporary workaround for dotnet-isolated linux consumption apps
     if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
@@ -4580,7 +4683,7 @@ def _get_or_create_user_assigned_identity(cmd, resource_group_name, functionapp_
             user_assigned_identity = parse_resource_id(user_assigned_identity)['name']
         identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name, resource_name=user_assigned_identity)
     else:
-        user_assigned_identity_name = _normalize_functionapp_name(functionapp_name)[:24]
+        user_assigned_identity_name = "identity{}{:04}".format(_normalize_functionapp_name(functionapp_name)[:10], randint(0, 9999))
         logger.warning("Creating user assigned managed identity '%s' ...", user_assigned_identity_name)
         
         from azure.mgmt.msi.models import Identity
@@ -4620,6 +4723,24 @@ def _assign_deployment_storage_managed_identity_role(cli_ctx, deployment_storage
     RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'RoleAssignmentCreateParameters', mod='models', operation_group='role_assignments')
     parameters = RoleAssignmentCreateParameters(role_definition_id=role_definition_id, principal_id=principal_id, principal_type='ServicePrincipal')
     auth_client.role_assignments.create(scope=deployment_storage_account.id, role_assignment_name=str(uuid.uuid4()), parameters=parameters)
+
+
+def _parse_key_value_pairs(key_value_list):
+    key_value_list = key_value_list or []
+    result = {}
+    for kv in key_value_list:
+        try:
+            temp = shell_safe_json_parse(kv)
+            if isinstance(temp, list):
+                for t in temp:
+                    result[t['name']] = t['value']
+            else:
+                result.update(temp)
+        except CLIError:
+            name, value = kv.split('=', 1)
+            result[name] = value
+            result.update(result)
+    return result
 
 
 def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_account):
