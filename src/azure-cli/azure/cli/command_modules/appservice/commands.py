@@ -343,6 +343,14 @@ def load_command_table(self, _):
         g.custom_command('set', 'update_app_settings_functionapp', exception_handler=ex_handler_factory())
         g.custom_command('delete', 'delete_app_settings', exception_handler=ex_handler_factory())
 
+    with self.command_group('functionapp scale config') as g:
+        g.custom_command('show', 'get_scale_config', exception_handler=ex_handler_factory())
+        g.custom_command('set', 'update_scale_config', exception_handler=ex_handler_factory())
+
+    with self.command_group('functionapp scale config always-ready') as g:
+        g.custom_command('delete', 'delete_always_ready_settings', exception_handler=ex_handler_factory())
+        g.custom_command('set', 'update_always_ready_settings', exception_handler=ex_handler_factory())
+
     with self.command_group('functionapp config hostname') as g:
         g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_hostnames')

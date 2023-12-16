@@ -380,6 +380,52 @@ examples:
     text: az functionapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname cname.mycustomdomain.com
 """
 
+helps['functionapp scale config'] = """
+type: group
+short-summary: Manage a function app's scale configuration.
+"""
+
+helps['functionapp scale config set'] = """
+type: command
+short-summary: Update an existing function app's scale configuration.
+examples:
+  - name: Set the function app's instance memory configuration.
+    text: az functionapp scale config set --name MyFunctionApp --resource-group MyResourceGroup --instance-memory 2048
+  - name: Set the function app's maximum instance count configuration.
+    text: az functionapp scale config set --name MyFunctionApp --resource-group MyResourceGroup --maximum-instance-count 5
+  - name: Set the function app's trigger configuration.
+    text: az functionapp scale config set --name MyFunctionApp --resource-group MyResourceGroup --trigger-type http --trigger-settings perInstanceConcurrency=1
+"""
+
+helps['functionapp scale config show'] = """
+type: command
+short-summary: Get the details of a function app's scale configuration.
+examples:
+  - name: Get the details of a function app's scale configuration.
+    text: az functionapp scale config show --name MyFunctionApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp scale config always-ready'] = """
+type: group
+short-summary: Manage the always-ready settings in the scale configuration.
+"""
+
+helps['functionapp scale config always-ready delete'] = """
+type: command
+short-summary: Delete always-ready settings in the scale configuration.
+examples:
+  - name: Delete always-ready setings in the scale configuration.
+    text: az functionapp scale config always-ready delete --name MyFunctionApp --resource-group MyResourceGroup --setting-names key1 key2
+"""
+
+helps['functionapp scale config always-ready set'] = """
+type: command
+short-summary: Add or update existing always-ready settings in the scale configuration.
+examples:
+  - name: Add or update existing always-ready settings in the scale configuration.
+    text: az functionapp scale config always-ready set --name MyFunctionApp --resource-group MyResourceGroup --settings key1=value1 key2=value2
+"""
+
 helps['functionapp cors'] = """
 type: group
 short-summary: Manage Cross-Origin Resource Sharing (CORS)
