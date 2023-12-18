@@ -131,7 +131,7 @@ DEPENDENCIES = [
     'azure-synapse-artifacts~=0.18.0',
     'azure-synapse-managedprivateendpoints~=0.4.0',
     'azure-synapse-spark~=0.2.0',
-    'chardet~=3.0.4',
+    'chardet~=5.2.0',
     'colorama~=0.4.4',
     # On Linux, the distribution (Ubuntu, Debian, etc) and version are checked for `az feedback`
     'distro; sys_platform == "linux"',
