@@ -600,6 +600,7 @@ def aks_create(
     kubelet_config=None,
     linux_os_config=None,
     host_group_id=None,
+    crg_id=None,
     gpu_instance_profile=None,
     # azure monitor profile
     enable_azure_monitor_metrics=False,
@@ -2198,6 +2199,7 @@ def aks_agentpool_add(
     no_wait=False,
     aks_custom_headers=None,
     host_group_id=None,
+    crg_id=None,
     gpu_instance_profile=None,
     allowed_host_ports=None,
     asg_ids=None,

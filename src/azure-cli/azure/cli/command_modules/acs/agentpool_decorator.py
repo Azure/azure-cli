@@ -370,6 +370,25 @@ class AKSAgentPoolContext(BaseAKSContext):
             host_group_id = raw_value
         return host_group_id
 
+    def get_crg_id(self) -> Union[str, None]:
+        return self._get_crg_id()
+
+    def _get_crg_id(self) -> Union[str, None]:
+        """Obtain the value of crg_id.
+
+        :return: string or None
+        """
+        raw_value = self.raw_param.get("crg_id")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        value_from_agentpool = None
+        if self.agentpool and hasattr(self.agentpool, "capacity_reservation_group_id"):
+            value_from_agentpool = self.agentpool.capacity_reservation_group_id
+        if value_from_agentpool is not None:
+            crg_id = value_from_agentpool
+        else:
+            crg_id = raw_value
+        return crg_id
+
     def _get_kubernetes_version(self, read_only: bool = False) -> str:
         """Internal function to dynamically obtain the value of kubernetes_version according to the context.
 
@@ -1614,6 +1633,15 @@ class AKSAgentPoolAddDecorator:
         agentpool.gpu_instance_profile = self.context.get_gpu_instance_profile()
         return agentpool
 
+    def set_up_crg_id(self, agentpool: AgentPool) -> AgentPool:
+        """Set up crg related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+        agentpool.capacity_reservation_group_id = self.context.get_crg_id()
+        return agentpool
+
     def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:
         self._ensure_agentpool(agentpool)
 
@@ -1668,6 +1696,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_gpu_properties(agentpool)
         # set up agentpool network profile
         agentpool = self.set_up_agentpool_network_profile(agentpool)
+        # set up crg id
+        agentpool = self.set_up_crg_id(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)
