@@ -1787,11 +1787,14 @@ def update_container_settings_functionapp(cmd, resource_group_name, name, regist
                                           workload_profile_name=None, cpu=None, memory=None):
     if is_centauri_functionapp(cmd, resource_group_name, name):
         _validate_cpu_momory_functionapp(cpu, memory)
-        update_resource_config(cmd, resource_group_name, name, cpu=cpu, memory=memory,
-                               workload_profile_name=workload_profile_name)
-        update_dapr_config(cmd, resource_group_name, name, enable_dapr, dapr_app_id, dapr_app_port,
-                           dapr_http_max_request_size, dapr_http_read_buffer_size, dapr_log_level,
-                           dapr_enable_api_logging)
+        if any([cpu, memory, workload_profile_name]):
+            update_resource_config(cmd, resource_group_name, name, cpu=cpu, memory=memory,
+                                   workload_profile_name=workload_profile_name)
+        if any([enable_dapr, dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
+                dapr_log_level, dapr_enable_api_logging]):
+            update_dapr_config(cmd, resource_group_name, name, enable_dapr, dapr_app_id, dapr_app_port,
+                               dapr_http_max_request_size, dapr_http_read_buffer_size, dapr_log_level,
+                               dapr_enable_api_logging)
     return update_container_settings(cmd, resource_group_name, name, registry_server,
                                      image, registry_username, None,
                                      registry_password, multicontainer_config_type=None,
@@ -3852,7 +3855,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                            "please provide the name of the container app environment using "
                                            "--environment.")
     from azure.mgmt.web.models import Site
-    SiteConfig, NameValuePair, DaprConfig, ResourceConfig = cmd.get_models('SiteConfig', 'NameValuePair', 'DaprConfig', 'ResourceConfig')
+    SiteConfig, NameValuePair, DaprConfig, ResourceConfig = cmd.get_models('SiteConfig', 'NameValuePair',
+                                                                           'DaprConfig', 'ResourceConfig')
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
