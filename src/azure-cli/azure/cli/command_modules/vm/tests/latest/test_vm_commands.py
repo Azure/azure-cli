@@ -6534,6 +6534,12 @@ class VMGalleryImage(ScenarioTest):
         if self.is_live:
             time.sleep(30)
 
+        self.cmd('sig update -g {rg} -r {gallery}', checks=[
+            self.check('softDeletePolicy.isSoftDeleteEnabled', False)
+        ])
+        if self.is_live:
+            time.sleep(30)
+
         from azure.cli.core.azclierror import InvalidArgumentValueError
         with self.assertRaises(InvalidArgumentValueError):
             self.cmd('sig image-version undelete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} --gallery-image-version {version}')
