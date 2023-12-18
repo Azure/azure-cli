@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class ListDynamicRuleSets(AAZCommand):
     """List the regional application gateway waf manifest.
 
-    :example: List
+    :example: List application gateway waf manifest in the regional.
         az network application-gateway waf-config list-dynamic-rule-sets -l  westus
     """
 
