@@ -1787,14 +1787,11 @@ def update_container_settings_functionapp(cmd, resource_group_name, name, regist
                                           workload_profile_name=None, cpu=None, memory=None):
     if is_centauri_functionapp(cmd, resource_group_name, name):
         _validate_cpu_momory_functionapp(cpu, memory)
-        if any([cpu, memory, workload_profile_name]):
-            update_workload_profile_config(cmd, resource_group_name, name, cpu=cpu, memory=memory,
-                                           workload_profile_name=workload_profile_name)
         if any([enable_dapr, dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
-                dapr_log_level, dapr_enable_api_logging]):
-            update_dapr_config(cmd, resource_group_name, name, enable_dapr, dapr_app_id, dapr_app_port,
-                               dapr_http_max_request_size, dapr_http_read_buffer_size, dapr_log_level,
-                               dapr_enable_api_logging)
+                dapr_log_level, dapr_enable_api_logging, cpu, memory, workload_profile_name]):
+            update_dapr_and_workload_config(cmd, resource_group_name, name, enable_dapr, dapr_app_id, dapr_app_port,
+                                            dapr_http_max_request_size, dapr_http_read_buffer_size, dapr_log_level,
+                                            dapr_enable_api_logging, workload_profile_name, cpu, memory)
     return update_container_settings(cmd, resource_group_name, name, registry_server,
                                      image, registry_username, None,
                                      registry_password, multicontainer_config_type=None,
@@ -3806,9 +3803,8 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
     poll_url = response.headers.get('location', "")
     if response.status_code == 202 and poll_url:
         response = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
-        poll_timeout = time.time() + 60 * 2  # 2 minute timeout
 
-        while response.status_code != 200 and time.time() < poll_timeout:
+        while response.status_code != 200:
             time.sleep(5)
             response = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
 
@@ -3819,25 +3815,20 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
         return response
 
 
-def update_dapr_config(cmd, resource_group_name, name, enabled=None, app_id=None, app_port=None,
-                       http_max_request_size=None, http_read_buffer_size=None, log_level=None,
-                       enable_api_logging=None):
+def update_dapr_and_workload_config(cmd, resource_group_name, name, enabled=None, app_id=None, app_port=None,
+                                    http_max_request_size=None, http_read_buffer_size=None, log_level=None,
+                                    enable_api_logging=None, workload_profile_name=None, cpu=None, memory=None):
     site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['enabled', 'enable_api_logging']
     int_flags = ['app_port', 'http_max_request_size', 'http_read_buffer_size']
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
-    for arg in args[3:]:
+    for arg in args[3:9]:
         if arg in int_flags and values[arg] is not None:
             values[arg] = validate_and_convert_to_int(arg, values[arg])
         if values.get(arg, None):
             setattr(site.dapr_config, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
-    update_functionapp_polling(cmd, resource_group_name, name, site)
-
-
-def update_workload_profile_config(cmd, resource_group_name, name, workload_profile_name=None, cpu=None, memory=None):
-    site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
 
     if cpu is not None and memory is not None:
         setattr(site.resource_config, 'cpu', cpu)
