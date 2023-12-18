@@ -9374,9 +9374,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         asg_ids = [asg1['id'], asg2['id']]
 
         self.kwargs.update({
-            'asg1_id': asg1['id'],
-            'asg2_id': asg2['id'],
+            'asg_ids_argument': '--nodepool-asg-ids {}'.format(' '.join(asg_ids)),
         })
+
         self.cmd(
             'aks create '
             '--resource-group={resource_group} '
@@ -9385,8 +9385,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--ssh-key-value={ssh_key_value} '
             '--node-count=1 '
             '--node-vm-size={node_vm_size} ' 
-            '--nodepool-asg-ids={asg1_id} '
-            '--nodepool-asg-ids={asg2_id} '
+            '{asg_ids_argument} '
             '{allowed_host_ports_argument}',
             checks=[
                 self.check('provisioningState', 'Succeeded'),
@@ -9463,8 +9462,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         asg_ids = [asg1['id'], asg2['id']]
 
         self.kwargs.update({
-            'asg1_id': asg1['id'],
-            'asg2_id': asg2['id'],
+            'asg_ids_argument': '--asg-ids {}'.format(' '.join(asg_ids)),
         })
 
         self.cmd(
@@ -9487,8 +9485,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--name={node_pool_name} '
             '--node-vm-size={node_vm_size} '
             '--node-count=1 '
-            '--asg-ids={asg1_id} '
-            '--asg-ids={asg2_id} '
+            '{asg_ids_argument} '
             '{allowed_host_ports_argument}',
             checks=[
                 self.check('provisioningState', 'Succeeded'),
@@ -9565,8 +9562,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         asg_ids = [asg1['id'], asg2['id']]
 
         self.kwargs.update({
-            'asg1_id': asg1['id'],
-            'asg2_id': asg2['id'],
+            'asg_ids_argument': '--asg-ids {}'.format(' '.join(asg_ids)),
         })
 
         self.cmd(
@@ -9588,8 +9584,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--resource-group={resource_group} '
             '--cluster-name={name} '
             '--name={node_pool_name} '
-            '--asg-ids={asg1_id} '
-            '--asg-ids={asg2_id} '
+            '{asg_ids_argument} '
             '{allowed_host_ports_argument}',
             checks=[
                 self.check('provisioningState', 'Succeeded'),

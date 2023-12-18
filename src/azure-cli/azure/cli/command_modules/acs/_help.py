@@ -518,7 +518,7 @@ parameters:
     short-summary: Enable vertical pod autoscaler for cluster.
   - name: --nodepool-allowed-host-ports
     type: string
-    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. 80/TCP,443/TCP,4000-5000/TCP.
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
   - name: --nodepool-asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
@@ -1543,7 +1543,7 @@ parameters:
     short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
   - name: --allowed-host-ports
     type: string
-    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. 80/TCP,443/TCP,4000-5000/TCP.
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
   - name: --asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
@@ -1652,7 +1652,7 @@ parameters:
     short-summary: Comma-separated key-value pairs to specify custom headers.
   - name: --allowed-host-ports
     type: string
-    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. 80/TCP,443/TCP,4000-5000/TCP.
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
   - name: --asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
