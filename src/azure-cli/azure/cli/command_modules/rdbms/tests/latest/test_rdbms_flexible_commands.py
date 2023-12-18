@@ -2194,3 +2194,57 @@ class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
 
 
+class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
+    postgres_location = 'eastus'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    @ServerPreparer(engine_type='postgres', location=postgres_location)
+    def test_postgres_flexible_server_logs_mgmt(self, resource_group, server):
+        self._test_server_logs_mgmt('postgres', resource_group, server)
+
+
+    def _test_server_logs_mgmt(self, database_engine, resource_group, server):
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
+
+        # create a server
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none '
+                 '--tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+                 .format(database_engine, resource_group, server_name, location, 128))
+        
+        # enable server logs for server
+        self.cmd('{} flexible-server parameter set -g {} --server-name {} --name logfiles.download_enable --value on'
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('value', "on"),
+                            JMESPathCheck('name', "logfiles.download_enable")]).get_output_in_json()
+        
+        # set retention period for server logs for server
+        self.cmd('{} flexible-server parameter set -g {} --server-name {} --name logfiles.retention_days --value 1'
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('value', "1"),
+                            JMESPathCheck('name', "logfiles.retention_days")]).get_output_in_json()
+        
+        # wait for around 30 min to allow log files to be generated
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(30*60)
+
+        # list server log files
+        server_log_files = self.cmd('{} flexible-server server-logs list -g {} --server-name {} '
+                                    .format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertGreater(len(server_log_files), 0, "Server logFiles are not yet created")
+        
+        # download server log files
+        self.cmd('{} flexible-server server-logs download -g {} --server-name {} --name {}'
+                    .format(database_engine, resource_group, server_name, server_log_files[0]['name']),
+                    checks=NoneCheck())
+        
+        # disable server logs for server
+        self.cmd('{} flexible-server parameter set -g {} --server-name {} --name logfiles.download_enable --value off'
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('value', "off"),
+                            JMESPathCheck('name', "logfiles.download_enable")]).get_output_in_json()
+
+        # delete everything
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+
