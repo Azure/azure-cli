@@ -492,6 +492,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Show connection strings for PgBouncer.'
         )
 
+        promote_mode_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['standalone', 'switchover']),
+            help='Whether to promote read replica to an independent server or promite it as a primary server.'
+        )
+
+        promote_option_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['planned', 'forced']),
+            help='Whether to sync data before promoting read replica or promote as soon as possible.'
+        )
+
         virtual_endpoint_arg_type = CLIArgumentType(
             metavar='NAME',
             options_list=['--name', '-n'],
@@ -795,6 +805,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
             c.argument('server_name', arg_type=server_name_arg_type)
+
+        with self.argument_context('{} flexible-server replica promote'.format(command_group)) as c:
+            c.argument('server_name', arg_type=server_name_arg_type)
+            c.argument('promote_mode', options_list=['--promote-mode'], required=False, arg_type=promote_mode_arg_type)
+            c.argument('promote_option', options_list=['--promote-option'], required=False, arg_type=promote_option_arg_type)
+            c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server deploy setup'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
