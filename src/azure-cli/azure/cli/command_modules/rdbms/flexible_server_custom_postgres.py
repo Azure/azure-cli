@@ -341,25 +341,23 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if performance_tier:
         instance.storage.tier = performance_tier
 
-    if instance.storage.type is not None:
-        if instance.storage.type == "":
-            instance.storage.type = None
-            instance.storage.iops = None
-            instance.storage.throughput = None
-        elif instance.storage.type == "PremiumV2_LRS":
-            instance.storage.tier = None
+    if instance.storage.type == "":
+        instance.storage.type = None
+        instance.storage.iops = None
+        instance.storage.throughput = None
+    elif instance.storage.type == "PremiumV2_LRS":
+        instance.storage.tier = None
 
     if backup_retention:
         instance.backup.backup_retention_days = backup_retention
 
-    if maintenance_window:
+    if maintenance_window and maintenance_window.lower() == "disabled":
         # if disabled is pass in reset to default values
-        if maintenance_window.lower() == "disabled":
-            day_of_week = start_hour = start_minute = 0
-            custom_window = "Disabled"
-        else:
-            day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
-            custom_window = "Enabled"
+        day_of_week = start_hour = start_minute = 0
+        custom_window = "Disabled"
+    elif maintenance_window:
+        day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
+        custom_window = "Enabled"
 
         # set values - if maintenance_window when is None when created then create a new object
         instance.maintenance_window.day_of_week = day_of_week
@@ -391,12 +389,10 @@ def flexible_server_update_custom_func(cmd, client, instance,
     # High availability can't be updated with existing properties
     high_availability_param = postgresql_flexibleservers.models.HighAvailability()
     if high_availability:
-        if high_availability.lower() != "disabled":
-            high_availability_param.mode = high_availability
-            if standby_availability_zone:
-                high_availability_param.standby_availability_zone = standby_availability_zone
-        else:
-            high_availability_param.mode = high_availability
+        high_availability_param.mode = high_availability
+
+        if high_availability.lower() != "disabled" and standby_availability_zone:
+            high_availability_param.standby_availability_zone = standby_availability_zone
 
         params.high_availability = high_availability_param
 
