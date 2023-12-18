@@ -1788,7 +1788,7 @@ def update_container_settings_functionapp(cmd, resource_group_name, name, regist
     if is_centauri_functionapp(cmd, resource_group_name, name):
         _validate_cpu_momory_functionapp(cpu, memory)
         if any([cpu, memory, workload_profile_name]):
-            update_resource_config(cmd, resource_group_name, name, cpu=cpu, memory=memory,
+            update_workload_profile_config(cmd, resource_group_name, name, cpu=cpu, memory=memory,
                                    workload_profile_name=workload_profile_name)
         if any([enable_dapr, dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
                 dapr_log_level, dapr_enable_api_logging]):
@@ -3803,7 +3803,7 @@ def update_dapr_config(cmd, resource_group_name, name, enabled=None, app_id=None
     update_functionapp_polling(cmd, resource_group_name, name, site)
 
 
-def update_resource_config(cmd, resource_group_name, name, workload_profile_name=None, cpu=None, memory=None):
+def update_workload_profile_config(cmd, resource_group_name, name, workload_profile_name=None, cpu=None, memory=None):
     site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
 
     if cpu is not None and memory is not None:
