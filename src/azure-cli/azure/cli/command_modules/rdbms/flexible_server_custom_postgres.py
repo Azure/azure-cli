@@ -696,11 +696,45 @@ def flexible_replica_stop(client, resource_group_name, server_name):
     except Exception as e:
         raise ResourceNotFoundError(e)
 
-    if server_object.replication_role is not None and "replica" not in server_object.replication_role.lower():
+    if server_object.replica.role is not None and "replica" not in server_object.replica.role.lower():
         raise CLIError('Server {} is not a replica server.'.format(server_name))
 
     params = postgresql_flexibleservers.models.ServerForUpdate(
-        replication_role='None')
+        replica=postgresql_flexibleservers.models.Replica(
+            role='None',
+            promote_mode='standalone',
+            promote_option='planned'
+        )
+    )
+
+    return client.begin_update(resource_group_name, server_name, params)
+
+
+def flexible_replica_promote(client, resource_group_name, server_name, promote_mode='standalone', promote_option='planned'):
+    try:
+        server_object = client.get(resource_group_name, server_name)
+    except Exception as e:
+        raise ResourceNotFoundError(e)
+
+    if server_object.replica.role is not None and "replica" not in server_object.replica.role.lower():
+        raise CLIError('Server {} is not a replica server.'.format(server_name))
+
+    if promote_mode == "standalone":
+        params = postgresql_flexibleservers.models.ServerForUpdate(
+            replica=postgresql_flexibleservers.models.Replica(
+                role='None',
+                promote_mode=promote_mode,
+                promote_option=promote_option
+            )
+        )
+    else:
+        params = postgresql_flexibleservers.models.ServerForUpdate(
+            replica=postgresql_flexibleservers.models.Replica(
+                role='Primary',
+                promote_mode=promote_mode,
+                promote_option=promote_option
+            )
+        )
 
     return client.begin_update(resource_group_name, server_name, params)
 

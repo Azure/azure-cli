@@ -652,10 +652,11 @@ examples:
         --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
         --private-dns-zone testDNS.postgres.database.azure.com
-  - name: Create a read replica 'testReplicaServer' for 'testserver' with public or private access \\
-        in the specified location if available. Since zone is not passed, it will automatically pick up zone in the \\
-        replica location which is different from source server, if available, else will pick up zone same as source server \\
-        in the replica location if available, else will set the zone as None, i.e. No preference
+  - name: >
+      Create a read replica 'testReplicaServer' for 'testserver' with public or private access \
+      in the specified location if available. Since zone is not passed, it will automatically pick up zone in the \
+      replica location which is different from source server, if available, else will pick up zone same as source server \
+      in the replica location if available, else will set the zone as None, i.e. No preference
     text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --location testLocation
   - name: Create a read replica 'testReplicaServer' for 'testserver' with custom --storage-size and --sku.
     text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --sku-name Standard_D4ds_v5 --storage-size 256
@@ -675,6 +676,20 @@ short-summary: Stop replication to a read replica and make it a read/write serve
 examples:
   - name: Stop replication to 'testReplicaServer' and make it a read/write server.
     text: az postgres flexible-server replica stop-replication -g testGroup -n testReplicaServer
+"""
+
+helps['postgres flexible-server replica promote'] = """
+type: command
+short-summary: Stop replication of a read replica and promote it to an independent server or as a primary server.
+examples:
+  - name: Stop replication to 'testReplicaServer' and promote it a standalone read/write server.
+    text: az postgres flexible-server replica promote -g testGroup -n testReplicaServer
+  - name: Stop replication to 'testReplicaServer' and promote it a standalone read/write server with forced data sync.
+    text: az postgres flexible-server replica promote -g testGroup -n testReplicaServer --promote-mode standalone --promote-option forced
+  - name: >
+      Stop replication to 'testReplicaServer' and promote it to primary server with planned data sync. \
+      The replica you are promoting must have the reader virtual endpoint assigned, or you will receive an error on promotion.
+    text: az postgres flexible-server replica promote -g testGroup -n testReplicaServer --promote-mode switchover --promote-option planned
 """
 
 helps['postgres flexible-server geo-restore'] = """
