@@ -4413,14 +4413,18 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
                                deployments_log_url))
         # For any other status, redirect user to /deployments/<id> endpoint
         deployments_url = scm_url + f"/api/deployments/{deployment_id}"
-        raise CLIError("Timeout reached while tracking deployment status, however,"
-                       "the deployment operation is still on-going. "
-                       "Navigate to {} to check the deployment status of your app. "
-                       "InprogressInstances: {}, SuccessfulInstances: {}, FailedInstances: {}".format(
-                           deployments_url,
-                           deployment_properties.get('numberOfInstancesInProgress'),
-                           deployment_properties.get('numberOfInstancesSuccessful'),
-                           deployment_properties.get('numberOfInstancesFailed')))
+        error_text = ("Timeout reached while tracking deployment status, however, the deployment"
+                      " operation is still on-going. Navigate to {} to check the deployment status"
+                      " of your app. \n").format(deployments_url)
+        total_num_instances = int(deployment_properties.get('numberOfInstancesInProgress')) + \
+            int(deployment_properties.get('numberOfInstancesSuccessful')) + \
+            int(deployment_properties.get('numberOfInstancesFailed'))
+        if total_num_instances > 0:
+            error_text += "InprogressInstances: {}, SuccessfulInstances: {}, FailedInstances: {}".format(
+                          deployment_properties.get('numberOfInstancesInProgress'),
+                          deployment_properties.get('numberOfInstancesSuccessful'),
+                          deployment_properties.get('numberOfInstancesFailed'))
+        raise CLIError(error_text)
     return response_body
 
 
@@ -5519,7 +5523,7 @@ def _make_onedeploy_request(params):
                 is_linux = bool(webapp.site_config.linux_fx_version)
                 if not is_linux:
                     logger.warning("Deployment status tracking is currently only supported for linux webapps."
-                                   " Resuming deployment without tracking status.")
+                                   " Resuming without tracking status.")
                     response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name,
                                                                  params.webapp_name, deployment_status_url,
                                                                  params.slot, params.timeout)
@@ -5530,7 +5534,7 @@ def _make_onedeploy_request(params):
                                                               params.webapp_name, deployment_status_url, params.slot)
                     if deployment_id is None:
                         logger.warning("Failed to enable tracking runtime status for this deployment. "
-                                       "Resuming deployment without tracking status.")
+                                       "Resuming without tracking status.")
                         response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name,
                                                                      params.webapp_name, deployment_status_url,
                                                                      params.slot, params.timeout)
@@ -5540,7 +5544,7 @@ def _make_onedeploy_request(params):
                                                                          deployment_id, params.timeout)
                         if response_body is None:
                             logger.warning("Failed to track the runtime status for this deployment. "
-                                           "Resuming deployment without tracking status.")
+                                           "Resuming without tracking status.")
                             response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name,
                                                                          params.webapp_name, deployment_status_url,
                                                                          params.slot, params.timeout)
