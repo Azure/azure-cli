@@ -2214,16 +2214,16 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, location, 128))
         
         # enable server logs for server
-        self.cmd('{} flexible-server parameter set -g {} --server-name {} --name logfiles.download_enable --value on'
+        print(self.cmd('{} flexible-server parameter set -g {} --server-name {} --name logfiles.download_enable --value on'
                     .format(database_engine, resource_group, server_name),
                     checks=[JMESPathCheck('value', "on"),
-                            JMESPathCheck('name', "logfiles.download_enable")]).get_output_in_json()
+                            JMESPathCheck('name', "logfiles.download_enable")]).get_output_in_json())
         
         # set retention period for server logs for server
-        self.cmd('{} flexible-server parameter set -g {} --server-name {} --name logfiles.retention_days --value 1'
+        print(self.cmd('{} flexible-server parameter set -g {} --server-name {} --name logfiles.retention_days --value 1'
                     .format(database_engine, resource_group, server_name),
                     checks=[JMESPathCheck('value', "1"),
-                            JMESPathCheck('name', "logfiles.retention_days")]).get_output_in_json()
+                            JMESPathCheck('name', "logfiles.retention_days")]).get_output_in_json())
         
         # wait for around 30 min to allow log files to be generated
         os.environ.get(ENV_LIVE_TEST, False) and sleep(30*60)
