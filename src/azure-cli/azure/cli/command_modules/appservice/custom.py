@@ -3771,19 +3771,52 @@ def should_enable_distributed_tracing(consumption_plan_location, matched_runtime
 
 
 def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
-    try:
-        _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update', None, functionapp)
-    except Exception as ex:  # pylint: disable=broad-except
-        poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
-        if ex.response.status_code == 202 and poll_url:
-            r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
-            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(cmd.cli_ctx)
+    sub_id = get_subscription_id(cmd.cli_ctx)
+    base_url = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'.format(
+        sub_id,
+        resource_group_name,
+        name,
+        client.DEFAULT_API_VERSION
+    )
+    url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
-            while r.status_code != 200 and time.time() < poll_timeout:
-                time.sleep(5)
-                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
-        else:
-            raise CLIError(ex)
+    updated_functionapp = json.dumps(
+        {
+            "properties": {
+                "daprConfig": {
+                    "enabled": functionapp.dapr_config.enabled,
+                    "appId": functionapp.dapr_config.app_id,
+                    "appPort": functionapp.dapr_config.app_port,
+                    "httpReadBufferSize": functionapp.dapr_config.http_read_buffer_size,
+                    "httpMaxRequestSize": functionapp.dapr_config.http_max_request_size,
+                    "logLevel": functionapp.dapr_config.log_level,
+                    "enableApiLogging": functionapp.dapr_config.enable_api_logging
+                },
+                "workloadProfileName": functionapp.workload_profile_name,
+                "resourceConfig": {
+                    "cpu": functionapp.resource_config.cpu,
+                    "memory": functionapp.resource_config.memory
+                }
+            }
+        }
+    )
+    response = send_raw_request(cmd.cli_ctx, method='PATCH', url=url, body=updated_functionapp)
+    poll_url = response.headers.get('location', "")
+    if response.status_code == 202 and poll_url:
+        response = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+        poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+
+        while response.status_code != 200 and time.time() < poll_timeout:
+            time.sleep(5)
+            response = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+
+        if response.status_code == 200:
+            return response
+
+    else:
+        return response
 
 
 def update_dapr_config(cmd, resource_group_name, name, enabled=None, app_id=None, app_port=None,
