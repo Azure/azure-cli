@@ -508,6 +508,59 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
 
+
+class FunctionappDapr(LiveScenarioTest):
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="northeurope")
+    @StorageAccountPreparer()
+    def test_functionapp_dapr_config_e2e(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappdapr', 24)
+        managed_environment_name = self.create_random_name(
+            'managedenvironment', 40
+        )
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {} --logs-destination none'.format(
+            managed_environment_name,
+            resource_group,
+            "northeurope"
+        ))
+
+        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --dapr-app-id daprappid --dapr-app-port 800 --dhmrs 4 --dhrbs 50 --dapr-log-level debug --enable-dapr true --functions-version 4'.format(
+            resource_group,
+            functionapp_name,
+            storage_account,
+            managed_environment_name
+        )).assert_with_checks([
+            JMESPathCheck('daprConfig.enabled', True),
+            JMESPathCheck('daprConfig.appId', 'daprappid'),
+            JMESPathCheck('daprConfig.appPort', 800),
+            JMESPathCheck('daprConfig.httpReadBufferSize', 50),
+            JMESPathCheck('daprConfig.httpMaxRequestSize', 4),
+            JMESPathCheck('daprConfig.logLevel', 'debug'),
+            JMESPathCheck('daprConfig.enableApiLogging', False)
+        ])
+
+        time.sleep(1200)
+
+        self.cmd('functionapp config container set -g {} -n {} --dapr-app-id daprappid1 --dapr-app-port 80 --dal --dhmrs 6 --dhrbs 60 --dapr-log-level warn --enable-dapr false'.format(
+            resource_group,
+            functionapp_name
+        ))
+
+        time.sleep(1200)
+
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck('daprConfig.enabled', False),
+            JMESPathCheck('daprConfig.appId', 'daprappid1'),
+            JMESPathCheck('daprConfig.appPort', 80),
+            JMESPathCheck('daprConfig.httpReadBufferSize', 60),
+            JMESPathCheck('daprConfig.httpMaxRequestSize', 6),
+            JMESPathCheck('daprConfig.logLevel', 'warn'),
+            JMESPathCheck('daprConfig.enableApiLogging', True)
+        ])
+
+
 class FunctionAppManagedEnvironment(LiveScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2059,6 +2112,7 @@ class FunctionappIdentityTest(ScenarioTest):
         self.cmd('functionapp identity assign -g {} -n {}'.format(resource_group, functionapp_name))
         result = self.cmd('functionapp identity assign -g {} -n {} --identities {}'.format(
             resource_group, functionapp_name, msi_result['id'])).get_output_in_json()
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO=BAR'.format(resource_group, functionapp_name))
         self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             self.check('principalId', result['principalId']),
             self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
@@ -2066,6 +2120,7 @@ class FunctionappIdentityTest(ScenarioTest):
 
         self.cmd('functionapp identity remove -g {} -n {} --identities {}'.format(
             resource_group, functionapp_name, msi_result['id']))
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO2=BAR2'.format(resource_group, functionapp_name))
         self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             self.check('principalId', result['principalId']),
             self.check('userAssignedIdentities', None),
@@ -2092,6 +2147,7 @@ class FunctionappIdentityTest(ScenarioTest):
         self.cmd('functionapp identity assign -g {} -n {} --identities [system] {} {}'.format(
             resource_group, functionapp_name, msi_result['id'], msi2_result['id']))
 
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO=BAR'.format(resource_group, functionapp_name))
         result = self.cmd('functionapp identity remove -g {} -n {} --identities {}'.format(
             resource_group, functionapp_name, msi2_result['id'])).get_output_in_json()
         self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
@@ -2100,6 +2156,7 @@ class FunctionappIdentityTest(ScenarioTest):
         ])
 
         self.cmd('functionapp identity remove -g {} -n {}'.format(resource_group, functionapp_name))
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO2=BAR2'.format(resource_group, functionapp_name))
         self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             self.check('principalId', None),
             self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
@@ -2107,6 +2164,7 @@ class FunctionappIdentityTest(ScenarioTest):
 
         self.cmd('functionapp identity remove -g {} -n {} --identities [system] {}'.format(
             resource_group, functionapp_name, msi_result['id']))
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO3=BAR3'.format(resource_group, functionapp_name))
         self.cmd('functionapp identity show -g {} -n {}'.format(
             resource_group, functionapp_name), checks=self.is_empty())
 
