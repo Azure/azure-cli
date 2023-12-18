@@ -222,7 +222,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     _complex_params('postgres')
 
     # Flexible-server
-    # pylint: disable=too-many-statements, too-many-locals, too-many-branches
     def _flexible_server_params(command_group):
 
         server_name_arg_type = CLIArgumentType(
