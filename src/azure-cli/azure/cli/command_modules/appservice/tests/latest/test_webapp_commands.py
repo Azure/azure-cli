@@ -2705,6 +2705,8 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             JMESPathCheck('message', 'OneDeploy'),
         ])
 
+
+class TrackRuntimeStatusTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
     def test_webapp_track_runtimestatus_runtimesucessful(self, resource_group):
         webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
