@@ -3971,7 +3971,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
     if environment is not None:
-        site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
         if docker_registry_server_url is not None:
             site_config.app_settings.append(
                 NameValuePair(name='DOCKER_REGISTRY_SERVER_URL', value=docker_registry_server_url)
@@ -4079,11 +4078,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         location = managed_environment.location
         functionapp_def.location = location
 
-        functionapp_def.enable_additional_properties_sending()
-        existing_properties = functionapp_def.serialize()["properties"]
-        functionapp_def.additional_properties["properties"] = existing_properties
-        functionapp_def.additional_properties["properties"]["name"] = name
-        functionapp_def.additional_properties["properties"]["managedEnvironmentId"] = managed_environment.id
+        functionapp_def.managed_environment_id = managed_environment.id
 
     # temporary workaround for dotnet-isolated linux consumption apps
     if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
