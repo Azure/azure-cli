@@ -282,6 +282,23 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_host_group_id(), "test_host_group_id")
 
+    def common_get_crg_id(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"crg_id": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_crg_id(), None)
+        # custom
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            capacity_reservation_group_id="test_crg_id"
+        )
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(ctx_1.get_crg_id(), "test_crg_id")
+
     def common_get_kubernetes_version(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -1505,6 +1522,9 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_drain_timeout(self):
         self.common_get_drain_timeout()
 
+    def test_get_crg_id(self):
+        self.common_get_crg_id()
+
 class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -1661,6 +1681,9 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
 
     def test_get_drain_timeout(self):
         self.common_get_drain_timeout()
+
+    def test_get_crg_id(self):
+        self.common_get_crg_id()
 
 class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
     def _remove_defaults_in_agentpool(self, agentpool):
@@ -2184,6 +2207,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             mode=CONST_NODEPOOL_MODE_USER,
             scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
             host_group_id=None,
+            capacity_reservation_group_id=None,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
@@ -2327,6 +2351,7 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             enable_fips=False,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
             host_group_id=None,
+            capacity_reservation_group_id=None,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 

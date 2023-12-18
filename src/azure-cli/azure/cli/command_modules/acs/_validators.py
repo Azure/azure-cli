@@ -512,6 +512,15 @@ def validate_host_group_id(namespace):
             raise InvalidArgumentValueError("--host-group-id is not a valid Azure resource ID.")
 
 
+def validate_crg_id(namespace):
+    if namespace.crg_id is None:
+        return
+    from msrestazure.tools import is_valid_resource_id
+    if not is_valid_resource_id(namespace.crg_id):
+        raise InvalidArgumentValueError(
+            "--crg-id is not a valid Azure resource ID.")
+
+
 def extract_comma_separated_string(
     raw_string,
     enable_strip=False,
