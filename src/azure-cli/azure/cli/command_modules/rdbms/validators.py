@@ -300,7 +300,8 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                           auto_grow=None, replication_role=None, performance_tier=None, storage_type=None, iops=None, throughput=None):
+                           auto_grow=None, replication_role=None, performance_tier=None,
+                           storage_type=None, iops=None, throughput=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     if not instance:
         list_location_capability_info = get_postgres_location_capability_info(
@@ -318,8 +319,12 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
         tier = instance.sku.tier
-    supported_storageV2_size = sku_info[tier]["supported_storageV2_size"] if "supported_storageV2_size" in sku_info[tier] else None
-    _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier, supported_storageV2_size, iops, throughput, instance)
+    if "supported_storageV2_size" in sku_info[tier]:
+        supported_storageV2_size = sku_info[tier]["supported_storageV2_size"]
+    else:
+        supported_storageV2_size = None
+    _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier,
+                               supported_storageV2_size, iops, throughput, instance)
     _pg_storage_performance_tier_validator(performance_tier,
                                            sku_info,
                                            tier,
@@ -362,10 +367,12 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     storage_throughput = throughput if throughput is not None else instance.storage.throughput
 
     # find min and max values for storage
-    min_storage = instance.storage.storage_size_gb if instance is not None else sku_info[tier]["supported_storageV2_size"]
+    supported_storageV2_size = sku_info[tier]["supported_storageV2_size"]
+    min_storage = instance.storage.storage_size_gb if instance is not None else supported_storageV2_size
     max_storage = sku_info[tier]["supported_storageV2_size_max"]
-    if not (storage_gib >= min_storage and storage_gib <= max_storage):
-        raise CLIError('The requested value for storage size does not fall between {} and {} GiB.'.format(min_storage, max_storage))
+    if not (min_storage <= storage_gib <= max_storage):
+        raise CLIError('The requested value for storage size does not fall between {} and {} GiB.'
+                       .format(min_storage, max_storage))
 
     storage = storage_gib * 1.07374182
     # find min and max values for IOPS
@@ -375,8 +382,9 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     else:
         max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
 
-    if not (storage_iops >= min_iops and storage_iops <= max_iops):
-        raise CLIError('The requested value for IOPS does not fall between {} and {} operations/sec.'.format(min_iops, max_iops))
+    if not (min_iops <= storage_iops <= max_iops):
+        raise CLIError('The requested value for IOPS does not fall between {} and {} operations/sec.'
+                       .format(min_iops, max_iops))
 
     # find min and max values for throughout
     min_throughout = sku_info[tier]["supported_storageV2_throughput"]
@@ -389,8 +397,9 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     else:
         max_throughout = max_storage_throughout
 
-    if not (storage_throughput >= min_throughout and storage_throughput <= max_throughout):
-        raise CLIError('The requested value for throughput does not fall between {} and {} MB/sec.'.format(min_throughout, max_throughout))
+    if not (min_throughout <= storage_throughput <= max_throughout):
+        raise CLIError('The requested value for throughput does not fall between {} and {} MB/sec.'
+                       .format(min_throughout, max_throughout))
 
 
 def _pg_tier_validator(tier, sku_info):
@@ -768,7 +777,8 @@ def pg_auto_grow_validator(auto_grow, replication_role, high_availability, insta
         raise ValidationError("Storage Auto grow is not supported for replica servers.")
 
 
-def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier, supported_storageV2_size, iops, throughput, instance):
+def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier,
+                               supported_storageV2_size, iops, throughput, instance):
     is_create_ssdv2 = storage_type == "PremiumV2_LRS"
     is_update_ssdv2 = instance is not None and instance.storage.type == "PremiumV2_LRS"
 
@@ -778,7 +788,8 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
         if iops is None or throughput is None:
             raise CLIError('To set --storage-type, required to provide --iops and --throughput.')
     elif instance is None and (throughput is not None or iops is not None):
-        raise CLIError('To provide values for both --iops and --throughput, please set "--storage-type" to "PremiumV2_LRS".')
+        raise CLIError('To provide values for both --iops and --throughput, '
+                       'please set "--storage-type" to "PremiumV2_LRS".')
 
     if is_create_ssdv2 or is_update_ssdv2:
         if auto_grow and auto_grow.lower() != 'disabled':
