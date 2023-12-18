@@ -222,7 +222,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     _complex_params('postgres')
 
     # Flexible-server
-    # pylint: disable=too-many-statements, too-many-locals, too-many-branches
+    # pylint: disable=too-many-locals, too-many-branches
     def _flexible_server_params(command_group):
 
         server_name_arg_type = CLIArgumentType(
@@ -890,6 +890,21 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                        required=True,
                        help='State of advanced threat protection setting.',
                        arg_type=get_enum_type(['Enabled', 'Disabled']))
+
+        # server log files
+        for scope in ['download', 'list']:
+            argument_context_string = '{} flexible-server server-logs {}'.format(command_group, scope)
+            with self.argument_context(argument_context_string) as c:
+                c.argument('resource_group_name', arg_type=resource_group_name_type)
+                c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+
+        with self.argument_context('{} flexible-server server-logs download'.format(command_group)) as c:
+            c.argument('file_name', options_list=['--name', '-n'], nargs='+', help='Space-separated list of log filenames on the server to download.')
+
+        with self.argument_context('{} flexible-server server-logs list'.format(command_group)) as c:
+            c.argument('filename_contains', help='The pattern that file name should match.')
+            c.argument('file_last_written', type=int, help='Integer in hours to indicate file last modify time.', default=72)
+            c.argument('max_file_size', type=int, help='The file size limitation to filter files.')
 
         # GTID
         if command_group == 'mysql':

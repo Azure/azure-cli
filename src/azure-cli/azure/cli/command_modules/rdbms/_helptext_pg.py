@@ -852,3 +852,32 @@ examples:
   - name: Get the details of advanced threat protection setting for a flexible server using --ids parameter.
     text: az postgres flexible-server advanced-threat-protection-setting show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testServer
 """
+
+helps['postgres flexible-server server-logs'] = """
+type: group
+short-summary: Manage server logs (log files) for a PostgreSQL flexible server.
+"""
+
+helps['postgres flexible-server server-logs download'] = """
+type: command
+short-summary: Download log files for a PostgreSQL flexible server.
+examples:
+  - name: >
+      Downloads log files f1 and f2 to the current directory from the server 'testsvr'. Please note that f1 and f2 should match the log file name including the foldername, for instance serverlogs/f1.log
+    text: >
+      az postgres flexible-server server-logs download -g testgroup -s testsvr -n serverlogs/f1.log serverlogs/f2.log
+"""
+
+helps['postgres flexible-server server-logs list'] = """
+type: command
+short-summary: List log files for a PostgreSQL flexible server.
+examples:
+  - name: List log files for 'testsvr' modified in the last 72 hours (default value).
+    text: az postgres flexible-server server-logs list -g testgroup -s testsvr
+  - name: List log files for 'testsvr' modified in the last 10 hours.
+    text: az postgres flexible-server server-logs list -g testgroup -s testsvr --file-last-written 10
+  - name: List log files for 'testsvr' less than 30Kb in size.
+    text: az postgres flexible-server server-logs list -g testgroup -s testsvr --max-file-size 30
+  - name: List log files for 'testsvr' containing name 'serverlogs'.
+    text: az postgres flexible-server server-logs list -g testgroup -s testsvr --subscription testSubscription --filename-contains serverlogs
+"""
