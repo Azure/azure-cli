@@ -348,13 +348,13 @@ def _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throug
             original_size = instance.storage.storage_size_gb
             if original_size > storage_gb:
                 raise CLIError('Updating storage cannot be smaller than the original storage size {} GiB.'
-                        .format(original_size))
+                            .format(original_size))
         if not is_ssdv2:
             storage_sizes = get_postgres_storage_sizes(sku_info, tier)
             if storage_gb not in storage_sizes:
                 storage_sizes = sorted([int(size) for size in storage_sizes])
                 raise CLIError('Incorrect value for --storage-size : Allowed values(in GiB) : {}'
-                        .format(storage_sizes))
+                            .format(storage_sizes))
 
     # ssdv2 range validation
     if is_ssdv2 and (storage_gb is not None or throughput is not None or iops is not None):
