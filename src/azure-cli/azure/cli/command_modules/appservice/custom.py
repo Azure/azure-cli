@@ -4306,28 +4306,39 @@ def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
     num_trials = 0
     while num_trials < total_trials:
         time.sleep(2)
-        response = requests.get(deployment_status_url, headers=headers,
-                                verify=not should_disable_connection_verify())
         try:
-            res_dict = response.json()
+            response = requests.get(deployment_status_url, headers=headers,
+                                    verify=not should_disable_connection_verify())
+            try:
+                res_dict = response.json()
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.warning("Deployment status endpoint %s returned malformed data. Exception: %s "
+                               "\nRetrying...", deployment_status_url, ex)
+                return None
+            finally:
+                num_trials = num_trials + 1
+            if 'id' in res_dict and 'temp' not in res_dict['id']:
+                return res_dict['id']
+        # catch all errors
         except Exception as ex:  # pylint: disable=broad-except
-            logger.warning("Deployment status endpoint %s returned malformed data. Exception: %s "
-                           "\nRetrying...", deployment_status_url, ex)
-            return None
-        finally:
-            num_trials = num_trials + 1
-        if 'id' in res_dict and 'temp' not in res_dict['id']:
-            return res_dict['id']
+            logger.warning("Deployment status endpoint %s returned error: %s.", deployment_status_url, ex)
+            break
     return None
 
 
+# pylint: disable=too-many-branches
 def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment_id, timeout=None):
     max_time_sec = int(timeout) if timeout else 1000
     start_time = time.time()
     time_elapsed = 0
     deployment_status = None
+    response_body = None
     while time_elapsed < max_time_sec:
-        response_body = send_raw_request(params.cmd.cli_ctx, "GET", deploymentstatusapi_url).json()
+        try:
+            response_body = send_raw_request(params.cmd.cli_ctx, "GET", deploymentstatusapi_url).json()
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning("Deployment status endpoint %s returned error: %s.", deploymentstatusapi_url, ex)
+            break
         deployment_properties = response_body.get('properties')
         deployment_status = deployment_properties.get('status')
         time_elapsed = int(time.time() - start_time)
@@ -4345,7 +4356,8 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
             total_num_instances = int(deployment_properties.get('numberOfInstancesInProgress')) + \
                 int(deployment_properties.get('numberOfInstancesSuccessful')) + \
                 int(deployment_properties.get('numberOfInstancesFailed'))
-            if int(deployment_properties.get('numberOfInstancesSuccessful')) > 0:
+            site_started_partially = int(deployment_properties.get('numberOfInstancesSuccessful')) > 0
+            if site_started_partially:
                 error_text += "Site started with errors: {}/{} instances failed to start successfully\n".format(
                     deployment_properties.get('numberOfInstancesFailed'),
                     total_num_instances)
@@ -4368,6 +4380,9 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
             if failure_logs is not None and len(failure_logs) > 0:
                 failure_logs = failure_logs[0]
             error_text += "Please check the runtime logs for more info: {}\n".format(failure_logs)
+            if site_started_partially:
+                logger.warning(error_text)
+                break
             raise CLIError(error_text)
         if deployment_status == "BuildFailed":
             error_text = "Deployment failed because the build process failed\n"
@@ -4389,7 +4404,7 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
             raise CLIError(error_text)
         time.sleep(15)
 
-    if time_elapsed >= max_time_sec or deployment_status != "RuntimeSuccessful":
+    if time_elapsed >= max_time_sec and deployment_status != "RuntimeSuccessful":
         scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
         if deployment_status == "BuildInProgress":
             deployments_log_url = scm_url + f"/api/deployments/{deployment_id}/log"
@@ -5490,6 +5505,7 @@ def _make_onedeploy_request(params):
         poll_async_deployment_for_debugging = False
 
     # check the status of deployment
+    # pylint: disable=too-many-nested-blocks
     if response.status_code == 202 or response.status_code == 200:
         response_body = None
         if poll_async_deployment_for_debugging:
@@ -5522,6 +5538,12 @@ def _make_onedeploy_request(params):
                         deploymentstatusapi_url = _build_deploymentstatus_url(params, deployment_id)
                         response_body = _track_deployment_runtime_status(params, deploymentstatusapi_url,
                                                                          deployment_id, params.timeout)
+                        if response_body is None:
+                            logger.warning("Failed to track the runtime status for this deployment. "
+                                           "Resuming deployment without tracking status.")
+                            response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name,
+                                                                         params.webapp_name, deployment_status_url,
+                                                                         params.slot, params.timeout)
             else:
                 response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
                                                              deployment_status_url, params.slot, params.timeout)
