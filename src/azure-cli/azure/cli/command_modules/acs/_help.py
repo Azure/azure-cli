@@ -1759,6 +1759,16 @@ examples:
     crafted: true
 """
 
+helps['aks stop'] = """
+    type: command
+    short-summary: Stop a managed cluster.
+    long-summary: This can only be performed on Azure Virtual Machine Scale set backed clusters. Stopping a
+        cluster stops the control plane and agent nodes entirely, while maintaining all object and
+        cluster state. A cluster does not accrue charges while it is stopped. See `stopping a
+        cluster <https://docs.microsoft.com/azure/aks/start-stop-cluster>`_ for more details about
+        stopping a cluster.
+"""
+
 helps['aks update-credentials'] = """
 type: command
 short-summary: Update credentials for a managed Kubernetes cluster, like service principal.
