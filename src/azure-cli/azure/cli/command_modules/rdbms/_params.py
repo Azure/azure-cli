@@ -333,9 +333,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         )
 
         storage_type_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['PremiumV2_LRS']),
+            arg_type=get_enum_type(['PremiumV2_LRS', 'Premium_LRS']),
             options_list=['--storage-type'],
-            help='Storage type for the server. Allowed value is PremiumV2_LRS. Must set iops and throughput if using PremiumV2_LRS.'
+            help='Storage type for the server. Allowed values are Premium_LRS and PremiumV2_LRS. Default value is Premium_LRS.'
+                 'Must set iops and throughput if using PremiumV2_LRS.'
         )
 
         auto_scale_iops_arg_type = CLIArgumentType(

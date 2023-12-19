@@ -332,21 +332,20 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if auto_grow:
         instance.storage.auto_grow = auto_grow
 
-    if iops:
-        instance.storage.iops = iops
+    instance.storage.tier = performance_tier if performance_tier else None
 
-    if throughput:
-        instance.storage.throughput = throughput
+    if instance.storage.type == "PremiumV2_LRS":
+        instance.storage.tier = None
 
-    if performance_tier:
-        instance.storage.tier = performance_tier
+        if iops:
+            instance.storage.iops = iops
 
-    if instance.storage.type == "":
+        if throughput:
+            instance.storage.throughput = throughput
+    else:
         instance.storage.type = None
         instance.storage.iops = None
         instance.storage.throughput = None
-    elif instance.storage.type == "PremiumV2_LRS":
-        instance.storage.tier = None
 
     if backup_retention:
         instance.backup.backup_retention_days = backup_retention

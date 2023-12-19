@@ -802,6 +802,6 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
             raise ValidationError("Performance tier is not supported for servers with Premium SSD V2.")
     else:
         if throughput is not None:
-            raise CLIError('Updating throughput is only capable for server created with premium SSD v2.')
+            raise CLIError('Updating throughput is only capable for server created with Premium SSD v2.')
         if iops is not None:
-            raise CLIError('Updating storage iops is only capable for server created with premium SSD v2.')
+            raise CLIError('Updating storage iops is only capable for server created with Premium SSD v2.')
