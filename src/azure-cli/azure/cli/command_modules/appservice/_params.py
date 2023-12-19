@@ -37,6 +37,7 @@ ASE_LOADBALANCER_MODES = ['Internal', 'External']
 ASE_KINDS = ['ASEv2', 'ASEv3']
 ASE_OS_PREFERENCE_TYPES = ['Windows', 'Linux']
 PUBLIC_NETWORK_ACCESS_MODES = ['Enabled', 'Disabled']
+DAPR_LOG_LEVELS = ['debug', 'error', 'info', 'warn']
 
 
 # pylint: disable=too-many-statements, too-many-lines
@@ -397,8 +398,15 @@ subscription than the app service environment, please use the resource ID for --
                    help='the container registry server username')
         c.argument('registry_password', options_list=['--registry-password', '-p', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
                    help='the container registry server password')
-        c.argument('min_replicas', type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
-        c.argument('max_replicas', type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('min_replicas', type=int, help="The minimum number of replicas when create function app on container app", is_preview=True)
+        c.argument('max_replicas', type=int, help="The maximum number of replicas when create function app on container app", is_preview=True)
+        c.argument('enable_dapr', help="Enable/Disable Dapr for a function app on an Azure Container App environment", arg_type=get_three_state_flag(return_label=True))
+        c.argument('dapr_app_id', help="The Dapr application identifier.")
+        c.argument('dapr_app_port', type=int, help="The port Dapr uses to communicate to the application.")
+        c.argument('dapr_http_max_request_size', type=int, options_list=['--dapr-http-max-request-size', '--dhmrs'], help="Max size of request body http and grpc servers in MB to handle uploading of large files.")
+        c.argument('dapr_http_read_buffer_size', type=int, options_list=['--dapr-http-read-buffer-size', '--dhrbs'], help="Max size of http header read buffer in KB to handle when sending multi-KB headers.")
+        c.argument('dapr_log_level', help="The log level for the Dapr sidecar", arg_type=get_enum_type(DAPR_LOG_LEVELS))
+        c.argument('dapr_enable_api_logging', options_list=['--dapr-enable-api-logging', '--dal'], help="Enable/Disable API logging for the Dapr sidecar.", arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -737,8 +745,15 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('registry_username', options_list=['--registry-username', '-d', c.deprecate(target='--docker-registry-server-user', redirect='--registry-username')], help='The container registry server username.')
         c.argument('registry_password', options_list=['--registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
                    help='The container registry server password. Required for private registries.')
-        c.argument('min_replicas', type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
-        c.argument('max_replicas', type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('min_replicas', type=int, help="The minimum number of replicas when create function app on container app", is_preview=True)
+        c.argument('max_replicas', type=int, help="The maximum number of replicas when create function app on container app", is_preview=True)
+        c.argument('enable_dapr', help="Enable/Disable Dapr for a function app on an Azure Container App environment", arg_type=get_three_state_flag(return_label=True))
+        c.argument('dapr_app_id', help="The Dapr application identifier.")
+        c.argument('dapr_app_port', type=int, help="The port Dapr uses to communicate to the application.")
+        c.argument('dapr_http_max_request_size', type=int, options_list=['--dapr-http-max-request-size', '--dhmrs'], help="Max size of request body http and grpc servers in MB to handle uploading of large files.")
+        c.argument('dapr_http_read_buffer_size', type=int, options_list=['--dapr-http-read-buffer-size', '--dhrbs'], help="Max size of http header read buffer in KB to handle when sending multi-KB headers.")
+        c.argument('dapr_log_level', help="The log level for the Dapr sidecar", arg_type=get_enum_type(DAPR_LOG_LEVELS))
+        c.argument('dapr_enable_api_logging', options_list=['--dapr-enable-api-logging', '--dal'], help="Enable/Disable API logging for the Dapr sidecar.", arg_type=get_three_state_flag(return_label=True))
         c.argument('workspace', help="Name of an existing log analytics workspace to be used for the application insights component")
 
     with self.argument_context('functionapp cors credentials') as c:
