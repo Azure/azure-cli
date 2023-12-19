@@ -608,7 +608,7 @@ def load_arguments(self, _):
     # Managed Cassandra Datacenter
     with self.argument_context('managed-cassandra datacenter list') as c:
         c.argument('cluster_name', options_list=['--cluster-name', '-c'], help="Cluster Name", required=True)
-    
+
     # SQL database restore
     with self.argument_context('cosmosdb sql database restore') as c:
         c.argument('account_name', account_name_type, id_part=None, required=True)

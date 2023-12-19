@@ -2730,8 +2730,9 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
 
     return client.begin_create_update(resource_group_name, cluster_name, data_center_name, data_center_resource)
 
+
 def _handle_exists_exception(http_response_error):
-    
+
     if http_response_error.status_code == 404:
         return False
     raise http_response_error
@@ -2742,7 +2743,7 @@ def cli_cosmosdb_sql_database_restore(cmd,
                                       account_name,
                                       database_name,
                                       restore_timestamp=None):
-    
+
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
@@ -2790,7 +2791,7 @@ def cli_cosmosdb_sql_container_restore(cmd,
                                        database_name,
                                        container_name,
                                        restore_timestamp=None):
-    
+
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     # """Restores the deleted Azure Cosmos DB SQL container """
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
@@ -2889,7 +2890,7 @@ def cli_cosmosdb_mongodb_collection_restore(cmd,
                                             database_name,
                                             collection_name,
                                             restore_timestamp=None):
-    
+
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     # """Restores the Azure Cosmos DB MongoDB collection """
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
@@ -2933,13 +2934,14 @@ def cli_cosmosdb_mongodb_collection_restore(cmd,
                                                           collection_name,
                                                           mongodb_collection_create_update_resource)
 
+
 def cli_cosmosdb_gremlin_database_restore(cmd,
                                           client,
                                           resource_group_name,
                                           account_name,
                                           database_name,
                                           restore_timestamp=None):
-    
+
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
@@ -2987,7 +2989,7 @@ def cli_cosmosdb_gremlin_graph_restore(cmd,
                                        database_name,
                                        graph_name,
                                        restore_timestamp=None):
-    
+
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     # """Restores the deleted Azure Cosmos DB Gremlin graph """
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
@@ -3038,7 +3040,7 @@ def cli_cosmosdb_table_restore(cmd,
                                account_name,
                                table_name,
                                restore_timestamp=None):
-    
+
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     # """Restores the deleted Azure Cosmos DB Table"""
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
@@ -3078,6 +3080,7 @@ def cli_cosmosdb_table_restore(cmd,
                                             table_name,
                                             table_resource)
 
+
 # Create function for CosmosDB ComputeV2 services
 def cli_cosmosdb_service_create(client,
                                 account_name,
@@ -3085,7 +3088,7 @@ def cli_cosmosdb_service_create(client,
                                 service_name,
                                 instance_count=1,
                                 instance_size="Cosmos.D4s"):
-    
+
     service_kind = "SqlDedicatedGateway"
     params = ServiceResourceCreateUpdateParameters(service_type=service_kind,
                                                    instance_count=instance_count,
@@ -3100,7 +3103,7 @@ def cli_cosmosdb_service_update(client,
                                 service_name,
                                 instance_count,
                                 instance_size=None):
-    
+
     service_kind = "SqlDedicatedGateway"
     params = ServiceResourceCreateUpdateParameters(service_type=service_kind,
                                                    instance_count=instance_count,
