@@ -3793,8 +3793,8 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
                 },
                 "workloadProfileName": functionapp.workload_profile_name,
                 "resourceConfig": {
-                    "cpu": functionapp.resource_config.cpu if functionapp.resource_config else None,
-                    "memory": functionapp.resource_config.memory if functionapp.resource_config else None
+                    "cpu": functionapp.resource_config.cpu,
+                    "memory": functionapp.resource_config.memory
                 }
             }
         }
@@ -3824,7 +3824,7 @@ def update_dapr_and_workload_config(cmd, resource_group_name, name, enabled=None
     bool_flags = ['enabled', 'enable_api_logging']
     int_flags = ['app_port', 'http_max_request_size', 'http_read_buffer_size']
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
-    for arg in args[3:9]:
+    for arg in args[3:10]:
         if arg in int_flags and values[arg] is not None:
             values[arg] = validate_and_convert_to_int(arg, values[arg])
         if values.get(arg, None):
@@ -4144,7 +4144,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
-    if environment is not None and (workload_profile_name is not None or cpu is not None or memory is not None):
+    if environment is not None:
         functionapp = client.web_apps.get(resource_group_name, name)
 
     if consumption_plan_location and is_linux:
