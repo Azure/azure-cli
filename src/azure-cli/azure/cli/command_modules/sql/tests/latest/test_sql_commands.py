@@ -3110,8 +3110,7 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
         container = 'bacpacs'
 
         firewall_rule_1 = 'allowAllIps'
-        start_ip_address_1 = '0.0.0.0'
-        end_ip_address_1 = '0.0.0.0'
+        end_ip_address_1 = start_ip_address_1 = '0.0.0.0'
 
         # create server firewall rule
         self.cmd('sql server firewall-rule create --name {} -g {} --server {} '
