@@ -143,11 +143,11 @@ remove_basic_option_msg = "It's recommended to create with `%s`. " \
 
 subnet_disable_ple_msg = ("`--disable-private-endpoint-network-policies` will be deprecated in the future, if you wanna"
                           "disable network policy for private endpoint, please use "
-                          "`--private-endpoint-network-policy Disabled` instead.")
+                          "`--private-endpoint-network-policies Disabled` instead.")
 
 subnet_disable_pls_msg = ("`--disable-private-link-service-network-policies` will be deprecated in the future, if you "
                           "wanna disable network policy for private link service, please use "
-                          "`----private-link-service-network-policy Disabled` instead.")
+                          "`----private-link-service-network-policies Disabled` instead.")
 
 
 # region Utility methods
@@ -3968,7 +3968,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         )
 
     if sku.lower() == "basic":
-        logger.warning(remove_basic_option_msg, "--sku standard", "LB SKU")
+        logger.warning(remove_basic_option_msg, "--sku standard")
 
     tags = tags or {}
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
@@ -5163,7 +5163,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         zone = pip_obj['zones'] if 'zones' in pip_obj else None
 
     if sku.lower() == "basic":
-        logger.warning(remove_basic_option_msg, "--sku standard", "Public IP SKU")
+        logger.warning(remove_basic_option_msg, "--sku standard")
 
     if not allocation_method:
         if sku and sku.lower() == 'standard':
@@ -5623,10 +5623,10 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         # use string instead of bool
         if has_value(args.disable_private_endpoint_network_policies):
             logger.warning(subnet_disable_ple_msg)
-            args.private_endpoint_network_policy = args.disable_private_endpoint_network_policies
+            args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
         if has_value(args.disable_private_link_service_network_policies):
             logger.warning(subnet_disable_pls_msg)
-            args.private_link_service_network_policy = args.disable_private_link_service_network_policies
+            args.private_link_service_network_policies = args.disable_private_link_service_network_policies
 
 
 class VNetSubnetUpdate(_VNetSubnetUpdate):
@@ -5738,10 +5738,10 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         # use string instead of bool
         if has_value(args.disable_private_endpoint_network_policies):
             logger.warning(subnet_disable_ple_msg)
-            args.private_endpoint_network_policy = args.disable_private_endpoint_network_policies
+            args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
         if has_value(args.disable_private_link_service_network_policies):
             logger.warning(subnet_disable_pls_msg)
-            args.private_link_service_network_policy = args.disable_private_link_service_network_policies
+            args.private_link_service_network_policies = args.disable_private_link_service_network_policies
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.network_security_group.id):

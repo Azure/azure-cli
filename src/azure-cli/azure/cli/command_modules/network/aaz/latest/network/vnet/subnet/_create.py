@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-09-01",
+        "version": "2023-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2023-05-01"],
         ]
     }
 
@@ -88,14 +88,14 @@ class Create(AAZCommand):
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkSecurityGroups/{}",
             ),
         )
-        _args_schema.private_endpoint_network_policy = AAZStrArg(
-            options=["--ple-network-policy", "--private-endpoint-network-policy"],
-            help="Manage network policy for private endpoint.",
+        _args_schema.private_endpoint_network_policies = AAZStrArg(
+            options=["--ple-network-policies", "--private-endpoint-network-policies"],
+            help="Manage network policies for private endpoint.",
             default="Disabled",
-            enum={"Disabled": "Disabled", "Enabled": "Enabled", "NetworkSecurityGroupEnabled": "NetworkSecurityGroupEnabled", "RouteTableEnabled": "RouteTableEnabled"},
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
-        _args_schema.private_link_service_network_policy = AAZStrArg(
-            options=["--pls-network-policy", "--private-link-service-network-policy"],
+        _args_schema.private_link_service_network_policies = AAZStrArg(
+            options=["--pls-network-policies", "--private-link-service-network-policies"],
             help="Manage network policy for private link service.",
             default="Enabled",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
@@ -374,7 +374,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2023-05-01",
                     required=True,
                 ),
             }
@@ -410,8 +410,8 @@ class Create(AAZCommand):
                 properties.set_prop("delegations", AAZListType, ".delegated_services")
                 properties.set_prop("natGateway", AAZObjectType)
                 properties.set_prop("networkSecurityGroup", AAZObjectType)
-                properties.set_prop("privateEndpointNetworkPolicies", AAZStrType, ".private_endpoint_network_policy")
-                properties.set_prop("privateLinkServiceNetworkPolicies", AAZStrType, ".private_link_service_network_policy")
+                properties.set_prop("privateEndpointNetworkPolicies", AAZStrType, ".private_endpoint_network_policies")
+                properties.set_prop("privateLinkServiceNetworkPolicies", AAZStrType, ".private_link_service_network_policies")
                 properties.set_prop("routeTable", AAZObjectType)
                 properties.set_prop("serviceEndpointPolicies", AAZListType, ".policies")
                 properties.set_prop("serviceEndpoints", AAZListType, ".endpoints")
