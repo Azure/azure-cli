@@ -2161,17 +2161,17 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string or None
         """
+
+        network_plugin = self.raw_param.get("network_plugin")
+
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
+            not network_plugin and
             self.mc and
             self.mc.network_profile and
             self.mc.network_profile.network_plugin is not None
         ):
             network_plugin = self.mc.network_profile.network_plugin
-
-        # read the original value passed by the command
-        if self.raw_param.get("network_plugin"):
-            network_plugin = self.raw_param.get("network_plugin")
 
         # this parameter does not need dynamic completion
         # validation
