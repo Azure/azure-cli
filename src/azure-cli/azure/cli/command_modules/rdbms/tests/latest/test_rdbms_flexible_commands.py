@@ -1036,7 +1036,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
                           checks=[
-                              JMESPathCheck('replicationRole', primary_role),
+                              JMESPathCheck('replica.role', primary_role),
                               JMESPathCheck('storage.autoGrow', source_server_auto_grow)]).get_output_in_json()
         
         # test replica create
@@ -1050,8 +1050,10 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         replica_role = 'AsyncReplica'
         public_access_arg = ''
         public_access_check = []
+        virtual_endpoint_name = self.create_random_name(F'virtual-endpoint', 32)
+        read_write_endpoint_type = 'ReadWrite'
         master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
-        replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
+        replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(3)]
 
         if vnet_enabled:
             master_vnet = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
@@ -1072,7 +1074,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  .format(database_engine, resource_group, master_server, location, 256, master_vnet_args))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
-                          checks=[JMESPathCheck('replicationRole', primary_role)] + master_vnet_check).get_output_in_json()
+                          checks=[JMESPathCheck('replica.role', primary_role)] + master_vnet_check).get_output_in_json()
         
         # test replica create
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {} {}'
@@ -1083,9 +1085,9 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('sku.tier', result['sku']['tier']),
                      JMESPathCheck('sku.name', result['sku']['name']),
-                     JMESPathCheck('replicationRole', replica_role),
+                     JMESPathCheck('replica.role', replica_role),
                      JMESPathCheck('sourceServerResourceId', result['id']),
-                     JMESPathCheck('replicaCapacity', '0')] + replica_vnet_check[0] + public_access_check)
+                     JMESPathCheck('replica.capacity', '0')] + replica_vnet_check[0] + public_access_check)
         
         # test storage auto-grow not allowed for replica server update
         self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
@@ -1097,23 +1099,23 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  .format(database_engine, resource_group, master_server),
                  checks=[JMESPathCheck('length(@)', 1)])
 
-        # test replica stop
+        # test replica stop-replication
         self.cmd('{} flexible-server replica stop-replication -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[0]),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('replicationRole', primary_role),
+                     JMESPathCheck('replica.role', primary_role),
                      JMESPathCheck('sourceServerResourceId', 'None'),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+                     JMESPathCheck('replica.capacity', result['replica']['capacity'])])
 
         # test show server with replication info, master becomes normal server
         self.cmd('{} flexible-server show -g {} --name {}'
                  .format(database_engine, resource_group, master_server),
                  checks=[
-                     JMESPathCheck('replicationRole', primary_role),
+                     JMESPathCheck('replica.role', primary_role),
                      JMESPathCheck('sourceServerResourceId', 'None'),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+                     JMESPathCheck('replica.capacity', result['replica']['capacity'])])
 
         # test delete master server
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} {}'
@@ -1122,14 +1124,90 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                     JMESPathCheck('name', replicas[1]),
                     JMESPathCheck('resourceGroup', resource_group),
                     JMESPathCheck('sku.name', result['sku']['name']),
-                    JMESPathCheck('replicationRole', replica_role),
+                    JMESPathCheck('replica.role', replica_role),
                     JMESPathCheck('sourceServerResourceId', result['id']),
-                    JMESPathCheck('replicaCapacity', '0')] + replica_vnet_check[1])
+                    JMESPathCheck('replica.capacity', '0')] + replica_vnet_check[1])
 
         # in postgres we can't delete master server if it has replicas
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
                     .format(database_engine, resource_group, master_server),
                     expect_failure=True)
+
+        # test virtual-endpoint
+        if not vnet_enabled:
+            self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+                    .format(database_engine, resource_group, replicas[2], result['id']),
+                    checks=[
+                        JMESPathCheck('name', replicas[2]),
+                        JMESPathCheck('replica.role', replica_role),
+                        JMESPathCheck('sourceServerResourceId', result['id'])])
+
+            # test virtual-endpoint create
+            self.cmd('{} flexible-server virtual-endpoint create -g {} --server-name {} --name {} --endpoint-type {} --members {}'
+                    .format(database_engine, resource_group, master_server, virtual_endpoint_name, read_write_endpoint_type, master_server),
+                    checks=[
+                        JMESPathCheck('endpointType', read_write_endpoint_type),
+                        JMESPathCheck('name', virtual_endpoint_name),
+                        JMESPathCheck('length(virtualEndpoints)', 2)])
+
+            # test virtual-endpoint update
+            update_result = self.cmd('{} flexible-server virtual-endpoint update -g {} --server-name {} --name {} --endpoint-type {} --members {}'
+                    .format(database_engine, resource_group, master_server, virtual_endpoint_name, read_write_endpoint_type, replicas[2]),
+                    checks=[JMESPathCheck('length(members)', 2)]).get_output_in_json()
+
+            # test virtual-endpoint show
+            self.cmd('{} flexible-server virtual-endpoint show -g {} --server-name {} --name {}'
+                    .format(database_engine, resource_group, master_server, virtual_endpoint_name),
+                    checks=[JMESPathCheck('members', update_result['members'])])
+
+            # test replica switchover planned
+            switchover_result = self.cmd('{} flexible-server replica promote -g {} --name {} --promote-mode switchover --promote-option planned --yes'
+                    .format(database_engine, resource_group, replicas[2]),
+                    checks=[
+                        JMESPathCheck('name', replicas[2]),
+                        JMESPathCheck('replica.role', primary_role),
+                        JMESPathCheck('sourceServerResourceId', 'None'),
+                        JMESPathCheck('replica.capacity', result['replica']['capacity'])]).get_output_in_json()
+
+            # test show server with replication info, master became replica server
+            self.cmd('{} flexible-server show -g {} --name {}'
+                    .format(database_engine, resource_group, master_server),
+                    checks=[
+                        JMESPathCheck('replica.role',replica_role),
+                        JMESPathCheck('sourceServerResourceId', switchover_result['id']),
+                        JMESPathCheck('replica.capacity', '0')])
+
+            # test replica switchover forced
+            self.cmd('{} flexible-server replica promote -g {} --name {} --promote-mode switchover --promote-option forced --yes'
+                    .format(database_engine, resource_group, master_server),
+                    checks=[
+                        JMESPathCheck('name', master_server),
+                        JMESPathCheck('replica.role', primary_role),
+                        JMESPathCheck('sourceServerResourceId', 'None'),
+                        JMESPathCheck('replica.capacity', result['replica']['capacity'])])
+
+            # test promote replica standalone forced
+            self.cmd('{} flexible-server replica promote -g {} --name {} --promote-mode standalone --promote-option forced --yes'
+                    .format(database_engine, resource_group, replicas[2]),
+                    checks=[
+                        JMESPathCheck('name',replicas[2]),
+                        JMESPathCheck('replica.role', primary_role),
+                        JMESPathCheck('sourceServerResourceId', 'None'),
+                        JMESPathCheck('replica.capacity', result['replica']['capacity'])])
+
+            # test virtual-endpoint delete
+            self.cmd('{} flexible-server virtual-endpoint delete -g {} --server-name {} --name {} --yes'
+                    .format(database_engine, resource_group, master_server, virtual_endpoint_name))
+
+            # test virtual-endpoint list
+            self.cmd('{} flexible-server virtual-endpoint list -g {} --server-name {}'
+                    .format(database_engine, resource_group, master_server),
+                    checks=[JMESPathCheck('length(@)', 0)])
+
+            # delete standalone server
+            self.cmd('{} flexible-server delete -g {} --name {} --yes'
+                        .format(database_engine, resource_group, replicas[2]))
+
 
         # delete replica server first
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
@@ -1144,75 +1222,6 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
-
-
-class FlexibleServerVirtualEndpointSwitchoverMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
-
-    postgres_location = 'eastus'
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_flexible_server_virtual_endpoint_mgmt(self, resource_group):
-        self._test_flexible_server_virtual_endpoint_mgmt('postgres', resource_group)
-
-    def _test_flexible_server_virtual_endpoint_mgmt(self, database_engine, resource_group):
-        location = self.postgres_location
-        primary_role = 'Primary'
-        replica_role = 'AsyncReplica'
-        master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
-        replica = self.create_random_name(F'azuredbclirep', SERVER_NAME_MAX_LENGTH)
-        master_vnet_args = '--public-access none'
-        virtual_endpoint_name = self.create_random_name(F'virtual-endpoint', 32)
-        read_write_endpoint_type = 'ReadWrite'
-
-        # create a server
-        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
-                 .format(database_engine, resource_group, master_server, location, 256, master_vnet_args))
-        primary_result = self.cmd('{} flexible-server show -g {} --name {} '
-                          .format(database_engine, resource_group, master_server),
-                          checks=[JMESPathCheck('name', master_server)]).get_output_in_json()
-        self.assertEqual(primary_result['replica']['role'], primary_role)
-
-        # create replica
-        replica_result = self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
-                 .format(database_engine, resource_group, replica, master_server),
-                 checks=[
-                     JMESPathCheck('name', replica),
-                     JMESPathCheck('sourceServerResourceId', primary_result['id'])]).get_output_in_json()
-        self.assertEqual(replica_result['replica']['role'], replica_role)
-
-        # test virtual-endpoint create
-        self.cmd('{} flexible-server virtual-endpoint create -g {} --server-name {} --name {} --endpoint-type {} --members {}'
-                 .format(database_engine, resource_group, master_server, virtual_endpoint_name, read_write_endpoint_type, replica),
-                 checks=[
-                     JMESPathCheck('endpointType', read_write_endpoint_type),
-                     JMESPathCheck('name', virtual_endpoint_name),
-                     JMESPathCheck('length(virtualEndpoints)', 2)])
-
-        # test virtual-endpoint update
-        update_check = self.cmd('{} flexible-server virtual-endpoint update -g {} --server-name {} --name {} --endpoint-type {} --members {}'
-                 .format(database_engine, resource_group, master_server, virtual_endpoint_name, read_write_endpoint_type, master_server),
-                 checks=[JMESPathCheck('length(members)', 1)]).get_output_in_json()
-
-        # test virtual-endpoint show
-        self.cmd('{} flexible-server virtual-endpoint show -g {} --server-name {} --name {}'
-                 .format(database_engine, resource_group, master_server, virtual_endpoint_name),
-                 checks=[JMESPathCheck('members', update_check['members'])])
-
-        # test virtual-endpoint delete
-        self.cmd('{} flexible-server virtual-endpoint delete -g {} --server-name {} --name {} --yes'
-                 .format(database_engine, resource_group, master_server, virtual_endpoint_name))
-
-        # test virtual-endpoint list
-        self.cmd('{} flexible-server virtual-endpoint list -g {} --server-name {}'
-                 .format(database_engine, resource_group, master_server),
-                 checks=[JMESPathCheck('length(@)', 0)])
-
-        # clean up - in postgres we can't delete master server if it has replicas
-        self.cmd('{} flexible-server delete -g {} --name {} --yes'
-                    .format(database_engine, resource_group, replica))
-        self.cmd('{} flexible-server delete -g {} --name {} --yes'
-                    .format(database_engine, resource_group, master_server))
 
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
@@ -2180,6 +2189,60 @@ class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest
         self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
                     .format(database_engine, resource_group, server_name),
                     checks=[JMESPathCheck('state', "Disabled")]).get_output_in_json()
+
+        # delete everything
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+
+class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
+    postgres_location = 'eastus'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    @ServerPreparer(engine_type='postgres', location=postgres_location)
+    def test_postgres_flexible_server_logs_mgmt(self, resource_group, server):
+        self._test_server_logs_mgmt('postgres', resource_group, server)
+
+
+    def _test_server_logs_mgmt(self, database_engine, resource_group, server):
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
+
+        # create a server
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none '
+                 '--tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+                 .format(database_engine, resource_group, server_name, location, 128))
+        
+        # enable server logs for server
+        self.cmd('{} flexible-server parameter set -g {} --server-name {} --name logfiles.download_enable --value on'
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('value', "on"),
+                            JMESPathCheck('name', "logfiles.download_enable")]).get_output_in_json()
+        
+        # set retention period for server logs for server
+        self.cmd('{} flexible-server parameter set -g {} --server-name {} --name logfiles.retention_days --value 1'
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('value', "1"),
+                            JMESPathCheck('name', "logfiles.retention_days")]).get_output_in_json()
+        
+        # wait for around 30 min to allow log files to be generated
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(30*60)
+
+        # list server log files
+        server_log_files = self.cmd('{} flexible-server server-logs list -g {} --server-name {} '
+                                    .format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertGreater(len(server_log_files), 0, "Server logFiles are not yet created")
+        
+        # download server log files
+        self.cmd('{} flexible-server server-logs download -g {} --server-name {} --name {}'
+                    .format(database_engine, resource_group, server_name, server_log_files[0]['name']),
+                    checks=NoneCheck())
+        
+        # disable server logs for server
+        self.cmd('{} flexible-server parameter set -g {} --server-name {} --name logfiles.download_enable --value off'
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('value', "off"),
+                            JMESPathCheck('name', "logfiles.download_enable")]).get_output_in_json()
 
         # delete everything
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))

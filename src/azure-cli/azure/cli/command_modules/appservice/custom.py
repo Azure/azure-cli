@@ -79,7 +79,8 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
-                         VERSION_2022_09_01)
+                         VERSION_2022_09_01,
+                         RUNTIME_STATUS_TEXT_MAP)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -1780,7 +1781,16 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
 
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
                                           image=None, registry_username=None,
-                                          registry_password=None, slot=None, min_replicas=None, max_replicas=None):
+                                          registry_password=None, slot=None, min_replicas=None, max_replicas=None,
+                                          enable_dapr=None, dapr_app_id=None, dapr_app_port=None,
+                                          dapr_http_max_request_size=None, dapr_http_read_buffer_size=None,
+                                          dapr_log_level=None, dapr_enable_api_logging=None):
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        if any([enable_dapr, dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
+                dapr_log_level, dapr_enable_api_logging]):
+            update_dapr_config(cmd, resource_group_name, name, enable_dapr, dapr_app_id, dapr_app_port,
+                               dapr_http_max_request_size, dapr_http_read_buffer_size, dapr_log_level,
+                               dapr_enable_api_logging)
     return update_container_settings(cmd, resource_group_name, name, registry_server,
                                      image, registry_username, None,
                                      registry_password, multicontainer_config_type=None,
@@ -3756,6 +3766,39 @@ def should_enable_distributed_tracing(consumption_plan_location, matched_runtime
         and image is None
 
 
+def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
+    try:
+        _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update', None, functionapp)
+    except Exception as ex:  # pylint: disable=broad-except
+        poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
+        if ex.response.status_code == 202 and poll_url:
+            r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+
+            while r.status_code != 200 and time.time() < poll_timeout:
+                time.sleep(5)
+                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+        else:
+            raise CLIError(ex)
+
+
+def update_dapr_config(cmd, resource_group_name, name, enabled=None, app_id=None, app_port=None,
+                       http_max_request_size=None, http_read_buffer_size=None, log_level=None,
+                       enable_api_logging=None):
+    site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    import inspect
+    frame = inspect.currentframe()
+    bool_flags = ['enabled', 'enable_api_logging']
+    int_flags = ['app_port', 'http_max_request_size', 'http_read_buffer_size']
+    args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
+    for arg in args[3:]:
+        if arg in int_flags and values[arg] is not None:
+            values[arg] = validate_and_convert_to_int(arg, values[arg])
+        if values.get(arg, None):
+            setattr(site.dapr_config, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
+    update_functionapp_polling(cmd, resource_group_name, name, site)
+
+
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
                        os_type=None, functions_version=None, runtime=None, runtime_version=None,
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
@@ -3764,7 +3807,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        registry_server=None, registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
-                       environment=None, min_replicas=None, max_replicas=None, workspace=None):
+                       environment=None, min_replicas=None, max_replicas=None, workspace=None,
+                       enable_dapr=False, dapr_app_id=None, dapr_app_port=None, dapr_http_max_request_size=None,
+                       dapr_http_read_buffer_size=None, dapr_log_level=None, dapr_enable_api_logging=False):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3779,12 +3824,22 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise RequiredArgumentMissingError("usage error: parameters --min-replicas and --max-replicas must be "
                                            "used with parameter --environment, please provide the name "
                                            "of the container app environment using --environment.")
+    if any([enable_dapr, dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
+            dapr_log_level, dapr_enable_api_logging]) and environment is None:
+        raise RequiredArgumentMissingError("usage error: parameters --enable-dapr, --dapr-app-id, "
+                                           "--dapr-app-port, --dapr-http-max-request-size, "
+                                           "--dapr-http-read-buffer-size, --dapr-log-level and "
+                                           "dapr-enable-api-logging must be used with parameter --environment,"
+                                           "please provide the name of the container app environment using "
+                                           "--environment.")
     from azure.mgmt.web.models import Site
-    SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
+    SiteConfig, NameValuePair, DaprConfig = cmd.get_models('SiteConfig', 'NameValuePair', 'DaprConfig')
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
     client = web_client_factory(cmd.cli_ctx)
+
+    dapr_config = DaprConfig()
 
     if vnet or subnet:
         if plan:
@@ -3815,7 +3870,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         subnet_resource_id = None
         vnet_route_all_enabled = None
 
-    functionapp_def = Site(location=None, site_config=site_config, tags=tags,
+    functionapp_def = Site(location=None, site_config=site_config, dapr_config=dapr_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
                            vnet_route_all_enabled=vnet_route_all_enabled)
 
@@ -3893,7 +3948,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
     if environment is not None:
-        site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
         if docker_registry_server_url is not None:
             site_config.app_settings.append(
                 NameValuePair(name='DOCKER_REGISTRY_SERVER_URL', value=docker_registry_server_url)
@@ -3975,15 +4029,22 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if max_replicas is not None:
             site_config.function_app_scale_limit = max_replicas
 
+        if enable_dapr:
+            logger.warning("Please note while using Dapr Extension for Azure Functions, app port is "
+                           "mandatory when using Dapr triggers and should be empty when using only Dapr bindings.")
+            dapr_config.enabled = True
+            dapr_config.app_id = dapr_app_id
+            dapr_config.app_port = dapr_app_port
+            dapr_config.http_max_request_size = dapr_http_max_request_size
+            dapr_config.http_read_buffer_size = dapr_http_read_buffer_size
+            dapr_config.log_level = dapr_log_level
+            dapr_config.enable_api_logging = dapr_enable_api_logging
+
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
         location = managed_environment.location
         functionapp_def.location = location
 
-        functionapp_def.enable_additional_properties_sending()
-        existing_properties = functionapp_def.serialize()["properties"]
-        functionapp_def.additional_properties["properties"] = existing_properties
-        functionapp_def.additional_properties["properties"]["name"] = name
-        functionapp_def.additional_properties["properties"]["managedEnvironmentId"] = managed_environment.id
+        functionapp_def.managed_environment_id = managed_environment.id
 
     # temporary workaround for dotnet-isolated linux consumption apps
     if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
@@ -4294,6 +4355,137 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot
         raise CLIError("""Timeout reached by the command, however, the deployment operation
                        is still on-going. Navigate to your scm site to check the deployment status""")
     return res_dict
+
+
+def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+
+    headers = get_scm_site_headers(cmd.cli_ctx, name, rg_name, slot)
+    total_trials = 30
+    num_trials = 0
+    while num_trials < total_trials:
+        time.sleep(2)
+        try:
+            response = requests.get(deployment_status_url, headers=headers,
+                                    verify=not should_disable_connection_verify())
+            try:
+                res_dict = response.json()
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.warning("Deployment status endpoint %s returned malformed data. Exception: %s "
+                               "\nRetrying...", deployment_status_url, ex)
+                return None
+            finally:
+                num_trials = num_trials + 1
+            if 'id' in res_dict and 'temp' not in res_dict['id']:
+                return res_dict['id']
+        # catch all errors
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning("Deployment status endpoint %s returned error: %s.", deployment_status_url, ex)
+            break
+    return None
+
+
+# pylint: disable=too-many-branches
+def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment_id, timeout=None):
+    max_time_sec = int(timeout) if timeout else 1000
+    start_time = time.time()
+    time_elapsed = 0
+    deployment_status = None
+    response_body = None
+    while time_elapsed < max_time_sec:
+        try:
+            response_body = send_raw_request(params.cmd.cli_ctx, "GET", deploymentstatusapi_url).json()
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning("Deployment status endpoint %s returned error: %s.", deploymentstatusapi_url, ex)
+            break
+        deployment_properties = response_body.get('properties')
+        deployment_status = deployment_properties.get('status')
+        time_elapsed = int(time.time() - start_time)
+        status = RUNTIME_STATUS_TEXT_MAP.get(deployment_status)
+        status = deployment_status if status is None else status
+        logger.warning("Status: %s Time: %s(s)", status, time_elapsed)
+        if deployment_status == "RuntimeStarting":
+            logger.info("InprogressInstances: %s, SuccessfulInstances: %s",
+                        deployment_properties.get('numberOfInstancesInProgress'),
+                        deployment_properties.get('numberOfInstancesSuccessful'))
+        if deployment_status == "RuntimeSuccessful":
+            break
+        if deployment_status == "RuntimeFailed":
+            error_text = ""
+            total_num_instances = int(deployment_properties.get('numberOfInstancesInProgress')) + \
+                int(deployment_properties.get('numberOfInstancesSuccessful')) + \
+                int(deployment_properties.get('numberOfInstancesFailed'))
+            site_started_partially = int(deployment_properties.get('numberOfInstancesSuccessful')) > 0
+            if site_started_partially:
+                error_text += "Site started with errors: {}/{} instances failed to start successfully\n".format(
+                    deployment_properties.get('numberOfInstancesFailed'),
+                    total_num_instances)
+            else:
+                error_text += "Deployment failed because the site failed to start within 10 mins.\n"
+                if int(total_num_instances) > 0:
+                    error_text += "InprogressInstances: {}, SuccessfulInstances: {}, FailedInstances: {}\n".format(
+                        deployment_properties.get('numberOfInstancesInProgress'),
+                        deployment_properties.get('numberOfInstancesSuccessful'),
+                        deployment_properties.get('numberOfInstancesFailed'))
+            errors = deployment_properties.get('errors')
+            if errors is not None and len(errors) > 0:
+                error_extended_code = errors[0]['extendedCode']
+                error_message = errors[0]['message']
+                if error_message is not None:
+                    error_text += "Error: {}\n".format(error_message)
+                else:
+                    error_text += "Extended ErrorCode: {}\n".format(error_extended_code)
+            failure_logs = deployment_properties.get('failedInstancesLogs')
+            if failure_logs is not None and len(failure_logs) > 0:
+                failure_logs = failure_logs[0]
+            error_text += "Please check the runtime logs for more info: {}\n".format(failure_logs)
+            if site_started_partially:
+                logger.warning(error_text)
+                break
+            raise CLIError(error_text)
+        if deployment_status == "BuildFailed":
+            error_text = "Deployment failed because the build process failed\n"
+            errors = deployment_properties.get('errors')
+            if errors is not None and len(errors) > 0:
+                error_extended_code = errors[0]['extendedCode']
+                error_message = errors[0]['message']
+                if error_message is not None:
+                    error_text += "Error: {}\n".format(error_message)
+                else:
+                    error_text += "Extended ErrorCode: {}\n".format(error_extended_code)
+            deployment_logs = deployment_properties.get('failedInstancesLogs')
+            if deployment_logs is None or len(deployment_logs) == 0:
+                scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+                deployment_logs = scm_url + f"/api/deployments/{deployment_id}/log"
+            else:
+                deployment_logs = deployment_logs[0]
+            error_text += "Please check the build logs for more info: {}\n".format(deployment_logs)
+            raise CLIError(error_text)
+        time.sleep(15)
+
+    if time_elapsed >= max_time_sec and deployment_status != "RuntimeSuccessful":
+        scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+        if deployment_status == "BuildInProgress":
+            deployments_log_url = scm_url + f"/api/deployments/{deployment_id}/log"
+            raise CLIError("Timeout reached while build was still in progress. "
+                           "Navigate to {} to check the build logs for your app.".format(
+                               deployments_log_url))
+        # For any other status, redirect user to /deployments/<id> endpoint
+        deployments_url = scm_url + f"/api/deployments/{deployment_id}"
+        error_text = ("Timeout reached while tracking deployment status, however, the deployment"
+                      " operation is still on-going. Navigate to {} to check the deployment status"
+                      " of your app. \n").format(deployments_url)
+        total_num_instances = int(deployment_properties.get('numberOfInstancesInProgress')) + \
+            int(deployment_properties.get('numberOfInstancesSuccessful')) + \
+            int(deployment_properties.get('numberOfInstancesFailed'))
+        if total_num_instances > 0:
+            error_text += "InprogressInstances: {}, SuccessfulInstances: {}, FailedInstances: {}".format(
+                          deployment_properties.get('numberOfInstancesInProgress'),
+                          deployment_properties.get('numberOfInstancesSuccessful'),
+                          deployment_properties.get('numberOfInstancesFailed'))
+        raise CLIError(error_text)
+    return response_body
 
 
 def list_continuous_webjobs(cmd, resource_group_name, name, slot=None):
@@ -5139,19 +5331,19 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
             time.sleep(5)
 
 
-def perform_onedeploy(cmd,
-                      resource_group_name,
-                      name,
-                      src_path=None,
-                      src_url=None,
-                      target_path=None,
-                      artifact_type=None,
-                      is_async=None,
-                      restart=None,
-                      clean=None,
-                      ignore_stack=None,
-                      timeout=None,
-                      slot=None):
+def perform_onedeploy_functionapp(cmd,
+                                  resource_group_name,
+                                  name,
+                                  src_path=None,
+                                  src_url=None,
+                                  target_path=None,
+                                  artifact_type=None,
+                                  is_async=None,
+                                  restart=None,
+                                  clean=None,
+                                  ignore_stack=None,
+                                  timeout=None,
+                                  slot=None):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -5167,6 +5359,41 @@ def perform_onedeploy(cmd,
     params.should_ignore_stack = ignore_stack
     params.timeout = timeout
     params.slot = slot
+    params.track_status = False
+
+    return _perform_onedeploy_internal(params)
+
+
+def perform_onedeploy_webapp(cmd,
+                             resource_group_name,
+                             name,
+                             src_path=None,
+                             src_url=None,
+                             target_path=None,
+                             artifact_type=None,
+                             is_async=None,
+                             restart=None,
+                             clean=None,
+                             ignore_stack=None,
+                             timeout=None,
+                             slot=None,
+                             track_status=False):
+    params = OneDeployParams()
+
+    params.cmd = cmd
+    params.resource_group_name = resource_group_name
+    params.webapp_name = name
+    params.src_path = src_path
+    params.src_url = src_url
+    params.target_path = target_path
+    params.artifact_type = artifact_type
+    params.is_async_deployment = is_async
+    params.should_restart = restart
+    params.is_clean_deployment = clean
+    params.should_ignore_stack = ignore_stack
+    params.timeout = timeout
+    params.slot = slot
+    params.track_status = track_status
 
     return _perform_onedeploy_internal(params)
 
@@ -5188,6 +5415,7 @@ class OneDeployParams:
         self.should_ignore_stack = None
         self.timeout = None
         self.slot = None
+        self.track_status = False
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
 
@@ -5237,6 +5465,20 @@ def _build_onedeploy_arm_url(params):
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
 
+def _build_deploymentstatus_url(params, deployment_id):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(params.cmd.cli_ctx)
+    sub_id = get_subscription_id(params.cmd.cli_ctx)
+
+    slot_info = "/slots/" + params.slot if params.slot else ""
+    base_url = (
+        f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+        f"{params.webapp_name}{slot_info}/deploymentStatus/{deployment_id}"
+        f"?api-version={client.DEFAULT_API_VERSION}"
+    )
+    return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
+
+
 def _get_ondeploy_headers(params):
     if params.src_path:
         content_type = 'application/octet-stream'
@@ -5260,7 +5502,7 @@ def _get_onedeploy_request_body(params):
     import os
 
     if params.src_path:
-        logger.info('Deploying from local path: %s', params.src_path)
+        logger.warning('Deploying from local path: %s', params.src_path)
         try:
             with open(os.path.realpath(os.path.expanduser(params.src_path)), 'rb') as fs:
                 body = fs.read()
@@ -5268,7 +5510,7 @@ def _get_onedeploy_request_body(params):
             raise ResourceNotFoundError("Either '{}' is not a valid local file path or you do not have permissions to "
                                         "access it".format(params.src_path)) from e
     elif params.src_url:
-        logger.info('Deploying from URL: %s', params.src_url)
+        logger.warning('Deploying from URL: %s', params.src_url)
         body = {
             "properties": {
                 "packageUri": params.src_url,
@@ -5326,20 +5568,59 @@ def _make_onedeploy_request(params):
         response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
         poll_async_deployment_for_debugging = False
 
-    # check the status of async deployment
+    # check the status of deployment
+    # pylint: disable=too-many-nested-blocks
     if response.status_code == 202 or response.status_code == 200:
         response_body = None
         if poll_async_deployment_for_debugging:
-            logger.info('Polling the status of async deployment')
-            response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
-                                                         deployment_status_url, params.slot, params.timeout)
-            logger.info('Async deployment complete. Server response: %s', response_body)
+            logger.warning('Polling the status of %s deployment. Start Time: %s UTC',
+                           "async" if params.is_async_deployment else "sync",
+                           datetime.datetime.now(datetime.timezone.utc))
+            if params.track_status is not None and params.track_status:
+                # verify if the app is a linux app
+                webapp = _generic_site_operation(params.cmd.cli_ctx, params.resource_group_name,
+                                                 params.webapp_name, 'get', params.slot)
+                is_linux = bool(webapp.site_config.linux_fx_version)
+                if not is_linux:
+                    logger.warning("Deployment status tracking is currently only supported for linux webapps."
+                                   " Resuming without tracking status.")
+                    response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name,
+                                                                 params.webapp_name, deployment_status_url,
+                                                                 params.slot, params.timeout)
+                else:
+                    # get the deployment id
+                    # once deploymentstatus/latest is available, we can use it to track the deployment
+                    deployment_id = _get_latest_deployment_id(params.cmd, params.resource_group_name,
+                                                              params.webapp_name, deployment_status_url, params.slot)
+                    if deployment_id is None:
+                        logger.warning("Failed to enable tracking runtime status for this deployment. "
+                                       "Resuming without tracking status.")
+                        response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name,
+                                                                     params.webapp_name, deployment_status_url,
+                                                                     params.slot, params.timeout)
+                    else:
+                        deploymentstatusapi_url = _build_deploymentstatus_url(params, deployment_id)
+                        response_body = _track_deployment_runtime_status(params, deploymentstatusapi_url,
+                                                                         deployment_id, params.timeout)
+                        if response_body is None:
+                            logger.warning("Failed to track the runtime status for this deployment. "
+                                           "Resuming without tracking status.")
+                            response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name,
+                                                                         params.webapp_name, deployment_status_url,
+                                                                         params.slot, params.timeout)
+            else:
+                response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
+                                                             deployment_status_url, params.slot, params.timeout)
+            logger.info('Server response: %s', response_body)
         else:
             if 'application/json' in response.headers.get('content-type', ""):
                 state = response.json().get("properties", {}).get("provisioningState")
                 if state:
                     logger.warning("Deployment status is: \"%s\"", state)
                 response_body = response.json().get("properties", {})
+        logger.warning("Deployment has completed successfully")
+        logger.warning("You can visit your app at: %s", _get_url(params.cmd, params.resource_group_name,
+                                                                 params.webapp_name, params.slot))
         return response_body
 
     # API not available yet!
@@ -5354,8 +5635,12 @@ def _make_onedeploy_request(params):
 
     # check if an error occured during deployment
     if response.status_code:
-        raise CLIError("An error occured during deployment. Status Code: {}, Details: {}"
-                       .format(response.status_code, response.text))
+        scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+        latest_deploymentinfo_url = scm_url + "/api/deployments/latest"
+        raise CLIError("An error occurred during deployment. Status Code: {}, {} Please visit {}"
+                       " to get more information about your deployment"
+                       .format(response.status_code, f"Details: {response.text}," if response.text else "",
+                               latest_deploymentinfo_url))
 
 
 # OneDeploy
@@ -5365,9 +5650,8 @@ def _perform_onedeploy_internal(params):
     _update_artifact_type(params)
 
     # Now make the OneDeploy API call
-    logger.info("Initiating deployment")
+    logger.warning("Initiating deployment")
     response = _make_onedeploy_request(params)
-    logger.info("Deployment has completed successfully")
     return response
 
 
