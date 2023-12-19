@@ -279,7 +279,8 @@ class ContainerappIngressTests(ScenarioTest):
         # upload cert, add hostname & binding
         pfx_file = os.path.join(TEST_DIR, 'data', 'cert.pfx')
         testpassword = 'test12'
-        cert_id = self.cmd('containerapp ssl upload -n {} -g {} --environment {} --hostname {} --certificate-file "{}" --password {}'.format(ca_name, app_rg_name, env_id, hostname_1, pfx_file, testpassword), checks=[
+        cert_pfx_name = self.create_random_name(prefix='cert-pfx', length=24)
+        cert_id = self.cmd('containerapp ssl upload -n {} -g {} --environment {} --hostname {} --certificate-file "{}" --password {} -c {}'.format(ca_name, app_rg_name, env_id, hostname_1, pfx_file, testpassword, cert_pfx_name), checks=[
             JMESPathCheck('[0].name', hostname_1),
         ]).get_output_in_json()[0]["certificateId"]
 
