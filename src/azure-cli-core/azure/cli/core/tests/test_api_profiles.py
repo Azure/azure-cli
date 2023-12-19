@@ -264,11 +264,11 @@ class TestAPIProfiles(unittest.TestCase):
             )
 
     def test_get_versioned_sdk_path_semver(self):
-        test_profile = {'latest': {ResourceType.DATA_KEYVAULT: '7.2'}}
+        test_profile = {'latest': {ResourceType.DATA_KEYVAULT: '7.0'}}
         with mock.patch('azure.cli.core.profiles._shared.AZURE_API_PROFILES', test_profile):
             self.assertEqual(
                 get_versioned_sdk_path('latest', ResourceType.DATA_KEYVAULT),
-                "azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.v7_2"
+                "azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.v7_0"
             )
 
 

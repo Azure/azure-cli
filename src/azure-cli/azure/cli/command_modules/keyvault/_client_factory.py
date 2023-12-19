@@ -39,6 +39,9 @@ OPERATIONS_NAME = {
 KEYVAULT_TEMPLATE_STRINGS = {
     ResourceType.MGMT_KEYVAULT:
         'azure.mgmt.keyvault{api_version}.{module_name}#{class_name}{obj_name}',
+    ResourceType.DATA_KEYVAULT:
+        'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1{api_version}.'
+        'key_vault_client#{class_name}{obj_name}',
     ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP:
         'azure.keyvault.administration._backup_client#KeyVaultBackupClient{obj_name}',
     ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:

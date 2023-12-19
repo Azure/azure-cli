@@ -31,9 +31,7 @@ def _encode_hex(item):
 
 def keyvault_exception_handler(cmd, ex):
     from msrest.exceptions import ValidationError, ClientRequestError
-    from azure.cli.core.profiles import ResourceType
-    KeyVaultErrorException = cmd.get_models('KeyVaultErrorException', resource_type=ResourceType.DATA_KEYVAULT)
-    if isinstance(ex, (ValidationError, KeyVaultErrorException)):
+    if isinstance(ex, ValidationError):
         try:
             raise CLIError(ex.inner_exception.error.message)
         except AttributeError:
