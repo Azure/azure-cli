@@ -3793,8 +3793,8 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
                 },
                 "workloadProfileName": functionapp.workload_profile_name,
                 "resourceConfig": {
-                    "cpu": functionapp.resource_config.cpu,
-                    "memory": functionapp.resource_config.memory
+                    "cpu": functionapp.resource_config.cpu if functionapp.resource_config else None,
+                    "memory": functionapp.resource_config.memory if functionapp.resource_config else None
                 }
             }
         }
