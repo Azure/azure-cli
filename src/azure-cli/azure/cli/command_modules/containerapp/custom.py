@@ -3858,6 +3858,7 @@ def bind_hostname_logic(cmd, resource_group_name, name, hostname, thumbprint=Non
     passed, message = validate_hostname(cmd, resource_group_name, name, standardized_hostname)
     if not passed:
         raise ValidationError(message or 'Please configure the DNS records before adding the hostname.')
+
     env_name = _get_name(environment) if environment else None
     env_rg = resource_group_name
     if is_valid_resource_id(environment):
