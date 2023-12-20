@@ -2799,7 +2799,7 @@ class CosmosDBTests(ScenarioTest):
         assert locations_show['properties']['isSubscriptionRegionAccessAllowedForRegular'] != None
         assert locations_show['properties']['isSubscriptionRegionAccessAllowedForAz'] != None
         assert locations_show['properties']['status'] != None
-
+    
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_service', location='eastus2')
     def test_cosmosdb_service(self, resource_group):
         self.kwargs.update({
@@ -2820,7 +2820,7 @@ class CosmosDBTests(ScenarioTest):
         assert len(service_list) == 1
 
         self.cmd('az cosmosdb service delete -a {acc} -g {rg} --name "sqlDedicatedGateway" --yes')
-
+    
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_normal_database_restore')
     def test_cosmosdb_sql_normal_database_restore(self, resource_group):
@@ -2852,6 +2852,21 @@ class CosmosDBTests(ScenarioTest):
         })
 
         assert self.cmd('az cosmosdb sql database exists -g {rg} -a {acc} -n {db_name}').get_output_in_json()
+
+        self.cmd('az cosmosdb sql database delete -g {rg} -a {acc} -n {db_name} --yes')
+        database_list = self.cmd('az cosmosdb sql database list -g {rg} -a {acc}').get_output_in_json()
+        assert len(database_list) == 0
+
+        self.cmd('az cosmosdb sql database restore -g {rg} -a {acc} -n {db_name}')
+
+        database_restore = self.cmd('az cosmosdb sql database show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
+        assert database_restore["name"] == db_name
+
+        database_list = self.cmd('az cosmosdb sql database list -g {rg} -a {acc}').get_output_in_json()
+        assert len(database_list) == 1
+
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 0
 
         self.cmd('az cosmosdb sql database delete -g {rg} -a {acc} -n {db_name} --yes')
         database_list = self.cmd('az cosmosdb sql database list -g {rg} -a {acc}').get_output_in_json()
@@ -2921,6 +2936,24 @@ class CosmosDBTests(ScenarioTest):
         time.sleep(300)
 
         assert self.cmd('az cosmosdb sql container exists -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
+
+        self.cmd('az cosmosdb sql database delete -g {rg} -a {acc} -n {db_name} --yes')
+        database_list = self.cmd('az cosmosdb sql database list -g {rg} -a {acc}').get_output_in_json()
+        assert len(database_list) == 0
+
+        import time
+        time.sleep(500)
+
+        self.cmd('az cosmosdb sql database restore -g {rg} -a {acc} -n {db_name}')
+
+        database_restore = self.cmd('az cosmosdb sql database show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
+        assert database_restore["name"] == db_name
+
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 1
+
+        container_show = self.cmd('az cosmosdb sql container show -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
+        assert container_show["name"] == ctn_name
 
         self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
@@ -3029,6 +3062,92 @@ class CosmosDBTests(ScenarioTest):
 
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
+
+        self.cmd('az cosmosdb sql container restore -g {rg} -a {acc} -d {db_name} -n {ctn_name} --restore-timestamp {rts}')
+
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 1
+
+        container_show = self.cmd('az cosmosdb sql container show -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
+        assert container_show["name"] == ctn_name
+
+    #InAccount No timestamp restore validation
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_normal_database_prov_container_restore_nt')
+    def test_cosmosdb_sql_normal_database_prov_container_restore_nt(self, resource_group):
+        db_name = self.create_random_name(prefix='cli', length=15)
+        ctn_name = self.create_random_name(prefix='cli', length=15)
+        partition_key = "/thePartitionKey"
+        unique_key_policy = '"{\\"uniqueKeys\\": [{\\"paths\\": [\\"/path/to/key1\\"]}, {\\"paths\\": [\\"/path/to/key2\\"]}]}"'
+        conflict_resolution_policy = '"{\\"mode\\": \\"lastWriterWins\\", \\"conflictResolutionPath\\": \\"/path\\"}"'
+        indexing = '"{\\"indexingMode\\": \\"consistent\\", \\"automatic\\": true, \\"includedPaths\\": [{\\"path\\": \\"/*\\"}], \\"excludedPaths\\": [{\\"path\\": \\"/headquarters/employees/?\\"}]}"'
+        location = "WestUS"
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'ctn_name': ctn_name,
+            'part': partition_key,
+            'unique_key': unique_key_policy,
+            "conflict_resolution": conflict_resolution_policy,
+            "indexing": indexing,
+            'loc': location
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+
+        assert not self.cmd('az cosmosdb sql container exists -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
+
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --unique-key-policy {unique_key} --conflict-resolution-policy {conflict_resolution} --idx {indexing}').get_output_in_json()
+
+        assert container_create["name"] == ctn_name
+        assert container_create["resource"]["partitionKey"]["paths"][0] == partition_key
+        assert len(container_create["resource"]["uniqueKeyPolicy"]["uniqueKeys"]) == 2
+        assert container_create["resource"]["conflictResolutionPolicy"]["mode"] == "lastWriterWins"
+        assert container_create["resource"]["indexingPolicy"]["excludedPaths"][0]["path"] == "/headquarters/employees/?"
+
+        container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
+
+        container_show = self.cmd('az cosmosdb sql container show -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
+        assert container_show["name"] == ctn_name
+
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 1
+
+        restore_ts_string = datetime.utcnow().isoformat()
+
+        self.kwargs.update({
+            'rts': restore_ts_string
+        })
+        import time
+        time.sleep(300)
+
+        assert self.cmd('az cosmosdb sql container exists -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
+
+        self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 0
+
+        #self.assertRaises(Exception, lambda: self.cmd('az cosmosdb sql container restore -g {rg} -a {acc} -d {db_name} -n {ctn_name} --restore-timestamp {rts}'))
+        self.cmd('az cosmosdb sql container restore -g {rg} -a {acc} -d {db_name} -n {ctn_name}')
+
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 1
+
+        self.cmd('az cosmosdb sql database delete -g {rg} -a {acc} -n {db_name} --yes')
+        database_list = self.cmd('az cosmosdb sql database list -g {rg} -a {acc}').get_output_in_json()
+        assert len(database_list) == 0
+
+        self.cmd('az cosmosdb sql database restore -g {rg} -a {acc} -n {db_name}')
+
+        database_restore = self.cmd('az cosmosdb sql database show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
+        assert database_restore["name"] == db_name
+
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 0
+
+        self.assertRaises(Exception, lambda: self.cmd('az cosmosdb sql container restore -g {rg} -a {acc} -d {db_name} -n {ctn_name}'))
 
         self.cmd('az cosmosdb sql container restore -g {rg} -a {acc} -d {db_name} -n {ctn_name} --restore-timestamp {rts}')
 
@@ -3172,6 +3291,21 @@ class CosmosDBTests(ScenarioTest):
         import time
         time.sleep(300)
 
+        # Restore collection and validate collection got restored with no timestamp
+        self.cmd('az cosmosdb mongodb collection delete -g {rg} -a {acc} -d {db_name} -n {col_name} --yes')
+        collection_list = self.cmd(
+            'az cosmosdb mongodb collection list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(collection_list) == 0
+
+        self.cmd('az cosmosdb mongodb collection restore -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
+
+        collection_list = self.cmd(
+            'az cosmosdb mongodb collection list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(collection_list) == 1
+
+        import time
+        time.sleep(60)
+
         # Restore collection and validate collection got restored
         self.cmd('az cosmosdb mongodb collection delete -g {rg} -a {acc} -d {db_name} -n {col_name} --yes')
         collection_list = self.cmd(
@@ -3197,6 +3331,8 @@ class CosmosDBTests(ScenarioTest):
         collection_list = self.cmd(
             'az cosmosdb mongodb collection list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(collection_list) == 0
+
+        self.assertRaises(Exception, lambda: self.cmd('az cosmosdb mongodb collection restore -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json())
 
         # Restore collection and validate collection got restored
         self.cmd('az cosmosdb mongodb collection restore -g {rg} -a {acc} -d {db_name} -n {col_name} --restore-timestamp {rts}').get_output_in_json()
@@ -3370,10 +3506,32 @@ class CosmosDBTests(ScenarioTest):
 
         time.sleep(500)
 
+        self.cmd('az cosmosdb gremlin graph list -g {rg} -a {acc} -d {db_name}', checks=[
+            self.check('length(@)', 0)
+        ]).get_output_in_json()
+
+        # restore graph
+        self.cmd('az cosmosdb gremlin graph restore -g {rg} -a {acc} -d {db_name} -n {gp_name}')
+
+        time.sleep(150)
+
+        self.cmd('az cosmosdb gremlin graph show -g {rg} -a {acc} -d {db_name} -n {gp_name}', checks=[
+            self.check('name', gp_name)
+        ]).get_output_in_json()
+
+        self.cmd('az cosmosdb gremlin graph list -g {rg} -a {acc} -d {db_name}', checks=[
+            self.check('length(@)', 1)
+        ]).get_output_in_json()
+
+        #delete graph
+        self.cmd('az cosmosdb gremlin graph delete -g {rg} -a {acc} -d {db_name} -n {gp_name} --yes')
+
+        time.sleep(150)
+
         # restore graph
         self.cmd('az cosmosdb gremlin graph restore -g {rg} -a {acc} -d {db_name} -n {gp_name} --restore-timestamp {rts}')
 
-        time.sleep(500)
+        time.sleep(150)
 
         self.cmd('az cosmosdb gremlin graph show -g {rg} -a {acc} -d {db_name} -n {gp_name}', checks=[
             self.check('name', gp_name)
@@ -3390,11 +3548,29 @@ class CosmosDBTests(ScenarioTest):
             self.check('length(@)', 0)
         ]).get_output_in_json()
 
-        time.sleep(500)
+        time.sleep(150)
+
+        #restore with no timestamp
+        self.cmd('az cosmosdb gremlin database restore -g {rg} -a {acc} -n {db_name}')
+
+        time.sleep(120)
+
+        self.cmd('az cosmosdb gremlin database list -g {rg} -a {acc}', checks=[
+            self.check('length(@)', 1)
+        ]).get_output_in_json()
+
+        #delete database
+        self.cmd('az cosmosdb gremlin database delete -g {rg} -a {acc} -n {db_name} --yes')
+
+        self.cmd('az cosmosdb gremlin database list -g {rg} -a {acc}', checks=[
+            self.check('length(@)', 0)
+        ]).get_output_in_json()
+
+        time.sleep(150)
 
         self.cmd('az cosmosdb gremlin database restore -g {rg} -a {acc} -n {db_name} --restore-timestamp {rts}')
 
-        time.sleep(500)
+        time.sleep(150)
 
         self.cmd('az cosmosdb gremlin database list -g {rg} -a {acc}', checks=[
             self.check('length(@)', 1)
@@ -3455,9 +3631,30 @@ class CosmosDBTests(ScenarioTest):
             self.check('length(@)', 0)
         ]).get_output_in_json()
 
+        self.cmd('az cosmosdb table restore -g {rg} -a {acc} -n {table_name}').get_output_in_json()
+
+        time.sleep(150)
+
+        self.cmd('az cosmosdb table show -g {rg} -a {acc} -n {table_name}', checks=[
+            self.check('name', table_name)
+        ]).get_output_in_json()
+
+        self.cmd('az cosmosdb table list -g {rg} -a {acc}', checks=[
+            self.check('length(@)', 1)
+        ]).get_output_in_json()
+
+        import time
+        time.sleep(150)
+
+        self.cmd('az cosmosdb table delete -g {rg} -a {acc} -n {table_name} --yes')
+
+        self.cmd('az cosmosdb table list -g {rg} -a {acc}', checks=[
+            self.check('length(@)', 0)
+        ]).get_output_in_json()
+
         self.cmd('az cosmosdb table restore -g {rg} -a {acc} -n {table_name} --restore-timestamp {rts}').get_output_in_json()
 
-        time.sleep(500)
+        time.sleep(150)
 
         self.cmd('az cosmosdb table show -g {rg} -a {acc} -n {table_name}', checks=[
             self.check('name', table_name)

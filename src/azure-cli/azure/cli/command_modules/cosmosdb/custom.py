@@ -5,9 +5,11 @@
 
 # pylint: disable=too-many-lines
 
+import datetime
 from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
+import re
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from azure.cli.core.util import sdk_no_wait
 
@@ -2737,6 +2739,7 @@ def _handle_exists_exception(http_response_error):
         return False
     raise http_response_error
 
+
 def cli_cosmosdb_sql_database_restore(cmd,
                                       client,
                                       resource_group_name,
@@ -2748,22 +2751,59 @@ def cli_cosmosdb_sql_database_restore(cmd,
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
     restorable_database_accounts_list = list(restorable_database_accounts)
-    restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
     restorable_database_account = None
 
-    for account in restorable_database_accounts_list:
-        if account.account_name == account_name:
-            if account.deletion_time is not None:
-                if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
-                    raise CLIError("Cannot perform inaccount restore on a deleted database account {}".format(account_name))
-            else:
-                if restore_timestamp_datetime_utc >= account.creation_time:
-                    restorable_database_account = account
-                    break
+    if restore_timestamp is not None:
+        restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
+        for account in restorable_database_accounts_list:
+            if account.account_name == account_name:
+                if account.deletion_time is not None:
+                    if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
+                        raise CLIError("Cannot perform inaccount restore on a deleted database account {}".format(account_name))
+                else:
+                    if restore_timestamp_datetime_utc >= account.creation_time:
+                        restorable_database_account = account
+                        break
 
-    if restorable_database_account is None:
-        raise CLIError("Cannot find a database account with name {} that is online at {}".format(account_name, restore_timestamp))
+        if restorable_database_account is None:
+            raise CLIError("Cannot find a database account with name {} that is online at {}".format(account_name, restore_timestamp))
+    else:
+        latest_account_to_restore = None
+        for account in restorable_database_accounts_list:
+            if account.account_name == account_name:
+                if latest_account_to_restore is None:
+                    latest_account_to_restore = account
 
+                if account.creation_time > latest_account_to_restore.creation_time:
+                    if account.deletion_time is None:
+                        latest_account_to_restore = account
+
+        restorable_database_account = latest_account_to_restore
+
+        if restorable_database_account is None:
+            raise CLIError("Cannot find a database account with name {} that is online".format(account_name))
+
+        regex = "[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+        account_instance_id = re.findall(regex, restorable_database_account.id)[1]
+        latest_restore_time = datetime.datetime.utcfromtimestamp(0)
+        try:
+            from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_sql_databases
+            restorable_databases_client = cf_restorable_sql_databases(cmd.cli_ctx, [])
+            restorable_databases = restorable_databases_client.list(
+                restorable_database_account.location,
+                account_instance_id)
+
+            for restorable_database in restorable_databases:
+                database = restorable_database.resource
+                event_timestamp = datetime.datetime.strptime(database.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+                if database.operation_type == "Delete" and latest_restore_time < event_timestamp and database.owner_id == database_name:
+                    latest_restore_time = event_timestamp
+
+            restore_time = latest_restore_time + datetime.timedelta(seconds=-1)
+            restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%z")
+        except ResourceNotFoundError:
+            raise CLIError("Cannot find a database account with name {} that is online in location {}".format(account_name, restorable_database_account.location))
+    
     # """Restores the deleted Azure Cosmos DB SQL database"""
     create_mode = CreateMode.restore.value
     restore_parameters = RestoreParameters(
@@ -2797,21 +2837,92 @@ def cli_cosmosdb_sql_container_restore(cmd,
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
     restorable_database_accounts_list = list(restorable_database_accounts)
-    restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
     restorable_database_account = None
 
-    for account in restorable_database_accounts_list:
-        if account.account_name == account_name:
-            if account.deletion_time is not None:
-                if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
-                    raise CLIError("Cannot perform inaccount restore on a deleted database account {}".format(account_name))
-            else:
-                if restore_timestamp_datetime_utc >= account.creation_time:
-                    restorable_database_account = account
-                    break
+    if restore_timestamp is not None:
+        restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
+        for account in restorable_database_accounts_list:
+            if account.account_name == account_name:
+                if account.deletion_time is not None:
+                    if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
+                        raise CLIError("Cannot perform inaccount restore on a deleted database account {}".format(account_name))
+                else:
+                    if restore_timestamp_datetime_utc >= account.creation_time:
+                        restorable_database_account = account
+                        break
 
-    if restorable_database_account is None:
-        raise CLIError("Cannot find a database account with name {} that is online at {}".format(account_name, restore_timestamp))
+        if restorable_database_account is None:
+            raise CLIError("Cannot find a database account with name {} that is online at {}".format(account_name, restore_timestamp))
+    else:
+        latest_account_to_restore = None
+        for account in restorable_database_accounts_list:
+            if account.account_name == account_name:
+                if latest_account_to_restore is None:
+                    latest_account_to_restore = account
+
+                if account.creation_time > latest_account_to_restore.creation_time:
+                    if account.deletion_time is None:
+                        latest_account_to_restore = account
+
+        restorable_database_account = latest_account_to_restore
+        if restorable_database_account is None:
+            raise CLIError("Cannot find a database account with name {} that is online".format(account_name))
+
+        regex = "[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+        account_instance_id = re.findall(regex, restorable_database_account.id)[1]
+        latest_database_delete_time = datetime.datetime.utcfromtimestamp(0)
+        latest_database_create_or_recreate_time = datetime.datetime.utcfromtimestamp(0)
+        latest_collection_delete_time = datetime.datetime.utcfromtimestamp(0)
+        latest_collection_create_or_recreate_time = datetime.datetime.utcfromtimestamp(0)
+        database_rid = None
+        try:
+            from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_sql_databases
+            restorable_databases_client = cf_restorable_sql_databases(cmd.cli_ctx, [])
+            restorable_databases = restorable_databases_client.list(
+                restorable_database_account.location,
+                account_instance_id)
+            for restorable_database in restorable_databases:
+                resource = restorable_database.resource
+                if resource.owner_id == database_name:
+                    database_rid = resource.database.rid
+                    event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+                    if resource.operation_type == "Delete" and latest_database_delete_time < event_timestamp :
+                        latest_database_delete_time = event_timestamp
+                    if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_database_create_or_recreate_time < event_timestamp :
+                        latest_database_create_or_recreate_time = event_timestamp
+
+            latest_database_delete_time = datetime.datetime.max if latest_database_delete_time == datetime.datetime.utcfromtimestamp(0) else latest_database_delete_time
+            query_start_time = latest_database_create_or_recreate_time.strftime("%Y-%m-%dT%H:%M:%SZ")
+            query_end_time = latest_database_delete_time if latest_database_create_or_recreate_time < latest_database_delete_time else datetime.datetime.max.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+            from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_sql_containers
+            restorable_containers_client = cf_restorable_sql_containers(cmd.cli_ctx, [])
+            restorable_containers = restorable_containers_client.list(
+                restorable_database_account.location,
+                account_instance_id,
+                database_rid,
+                query_start_time,
+                query_end_time)
+
+            for restorable_container in restorable_containers:
+                resource = restorable_container.resource
+                if resource.owner_id == container_name:
+                    event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+                    if resource.operation_type == "Delete" and latest_collection_delete_time < event_timestamp :
+                        latest_collection_delete_time = event_timestamp
+                    if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_collection_delete_time < event_timestamp and latest_database_create_or_recreate_time < event_timestamp:
+                        latest_collection_create_or_recreate_time = event_timestamp
+
+            if latest_collection_delete_time < latest_collection_create_or_recreate_time and latest_collection_create_or_recreate_time <= latest_database_delete_time:
+                restore_time = latest_database_delete_time + datetime.timedelta(seconds=-1)
+            elif (latest_collection_delete_time > latest_collection_create_or_recreate_time and latest_collection_delete_time < latest_database_delete_time):
+                restore_time = latest_collection_delete_time + datetime.timedelta(seconds=-1)
+            else:
+                raise CLIError("No container with name {} existed in the current version of database. Please provide a restore timestamp for restoring the collection from different instance of the database".format(container_name))
+
+            restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%z")
+        except ResourceNotFoundError:
+            raise CLIError("Cannot find a database account with name {} that is online in location {}".format(account_name, restorable_database_account.location))
 
     # """Restores the deleted Azure Cosmos DB SQL container"""
     create_mode = CreateMode.restore.value
@@ -2842,27 +2953,64 @@ def cli_cosmosdb_mongodb_database_restore(cmd,
                                           account_name,
                                           database_name,
                                           restore_timestamp=None):
-    
+
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     # """Restores the deleted Azure Cosmos DB MongoDB database"""
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
     restorable_database_accounts_list = list(restorable_database_accounts)
-    restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
     restorable_database_account = None
 
-    for account in restorable_database_accounts_list:
-        if account.account_name == account_name:
-            if account.deletion_time is not None:
-                if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
-                    raise CLIError("Cannot perform inaccount restore on a deleted database account {}".format(account_name))
-            else:
-                if restore_timestamp_datetime_utc >= account.creation_time:
-                    restorable_database_account = account
-                    break
+    if restore_timestamp is not None:
+        restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
+        for account in restorable_database_accounts_list:
+            if account.account_name == account_name:
+                if account.deletion_time is not None:
+                    if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
+                        raise CLIError("Cannot perform inaccount restore on a deleted database account {}".format(account_name))
+                else:
+                    if restore_timestamp_datetime_utc >= account.creation_time:
+                        restorable_database_account = account
+                        break
 
-    if restorable_database_account is None:
-        raise CLIError("Cannot find a database account with name {} that is online at {}".format(account_name, restore_timestamp))
+        if restorable_database_account is None:
+            raise CLIError("Cannot find a database account with name {} that is online at {}".format(account_name, restore_timestamp))
+    else:
+        latest_account_to_restore = None
+        for account in restorable_database_accounts_list:
+            if account.account_name == account_name:
+                if latest_account_to_restore is None:
+                    latest_account_to_restore = account
+
+                if account.creation_time > latest_account_to_restore.creation_time:
+                    if account.deletion_time is None:
+                        latest_account_to_restore = account
+
+        restorable_database_account = latest_account_to_restore
+
+        if restorable_database_account is None:
+            raise CLIError("Cannot find a database account with name {} that is online".format(account_name))
+
+        regex = "[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+        account_instance_id = re.findall(regex, restorable_database_account.id)[1]
+        latest_restore_time = datetime.datetime.utcfromtimestamp(0)
+        try:
+            from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_mongodb_databases
+            restorable_databases_client = cf_restorable_mongodb_databases(cmd.cli_ctx, [])
+            restorable_databases = restorable_databases_client.list(
+                restorable_database_account.location,
+                account_instance_id)
+
+            for restorable_database in restorable_databases:
+                database = restorable_database.resource
+                event_timestamp = datetime.datetime.strptime(database.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+                if database.operation_type == "Delete" and latest_restore_time < event_timestamp and database.owner_id == database_name:
+                    latest_restore_time = event_timestamp
+
+            restore_time = latest_restore_time + datetime.timedelta(seconds=-1)
+            restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%z")
+        except ResourceNotFoundError:
+            raise CLIError("Cannot find a database account with name {} that is online in location {}".format(account_name, restorable_database_account.location))
 
     # """Restores the deleted Azure Cosmos DB MongoDB database"""
     create_mode = CreateMode.restore.value
@@ -2896,21 +3044,95 @@ def cli_cosmosdb_mongodb_collection_restore(cmd,
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
     restorable_database_accounts_list = list(restorable_database_accounts)
-    restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
     restorable_database_account = None
 
-    for account in restorable_database_accounts_list:
-        if account.account_name == account_name:
-            if account.deletion_time is not None:
-                if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
-                    raise CLIError("Cannot perform inaccount restore on a deleted database account {}".format(account_name))
-            else:
-                if restore_timestamp_datetime_utc >= account.creation_time:
-                    restorable_database_account = account
-                    break
+    if restore_timestamp is not None:
+        restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
+        for account in restorable_database_accounts_list:
+            if account.account_name == account_name:
+                if account.deletion_time is not None:
+                    if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
+                        raise CLIError("Cannot perform inaccount restore on a deleted database account {}".format(account_name))
+                else:
+                    if restore_timestamp_datetime_utc >= account.creation_time:
+                        restorable_database_account = account
+                        break
 
-    if restorable_database_account is None:
-        raise CLIError("Cannot find a database account with name {} that is online at {}".format(account_name, restore_timestamp))
+        if restorable_database_account is None:
+            raise CLIError("Cannot find a database account with name {} that is online at {}".format(account_name, restore_timestamp))
+    else:
+        latest_account_to_restore = None
+        for account in restorable_database_accounts_list:
+            if account.account_name == account_name:
+                if latest_account_to_restore is None:
+                    latest_account_to_restore = account
+
+                if account.creation_time > latest_account_to_restore.creation_time:
+                    if account.deletion_time is None:
+                        latest_account_to_restore = account
+
+        restorable_database_account = latest_account_to_restore
+
+        if restorable_database_account is None:
+            raise CLIError("Cannot find a database account with name {} that is online".format(account_name))
+
+        regex = "[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+        account_instance_id = re.findall(regex, restorable_database_account.id)[1]
+        latest_database_delete_time = datetime.datetime.utcfromtimestamp(0)
+        latest_database_create_or_recreate_time = datetime.datetime.utcfromtimestamp(0)
+        latest_collection_delete_time = datetime.datetime.utcfromtimestamp(0)
+        latest_collection_create_or_recreate_time = datetime.datetime.utcfromtimestamp(0)
+        database_rid = None
+        try:
+            from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_mongodb_databases
+            restorable_databases_client = cf_restorable_mongodb_databases(cmd.cli_ctx, [])
+            restorable_databases = restorable_databases_client.list(
+                restorable_database_account.location,
+                account_instance_id)
+            for restorable_database in restorable_databases:
+                resource = restorable_database.resource
+                if resource.owner_id == database_name:
+                    database_rid = resource.owner_resource_id
+                    event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+                    if resource.operation_type == "Delete" and latest_database_delete_time < event_timestamp :
+                        latest_database_delete_time = event_timestamp
+
+                    if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_database_create_or_recreate_time < event_timestamp :
+                        latest_database_create_or_recreate_time = event_timestamp
+
+            latest_database_delete_time = datetime.datetime.max if latest_database_delete_time == datetime.datetime.utcfromtimestamp(0) else latest_database_delete_time
+            query_start_time = latest_database_create_or_recreate_time.strftime("%Y-%m-%dT%H:%M:%SZ")
+            query_end_time = latest_database_delete_time if latest_database_create_or_recreate_time < latest_database_delete_time else datetime.datetime.max.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+            from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_mongodb_collections
+            restorable_collections_client = cf_restorable_mongodb_collections(cmd.cli_ctx, [])
+            restorable_collections = restorable_collections_client.list(
+                restorable_database_account.location,
+                account_instance_id,
+                database_rid,
+                query_start_time,
+                query_end_time)
+            
+            for restorable_collection in restorable_collections:
+                resource = restorable_collection.resource
+                if resource.owner_id == collection_name:
+                    event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+                    if resource.operation_type == "Delete" and latest_collection_delete_time < event_timestamp :
+                        latest_collection_delete_time = event_timestamp
+
+                    if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_collection_delete_time < event_timestamp and latest_database_create_or_recreate_time < event_timestamp:
+                        latest_collection_create_or_recreate_time = event_timestamp
+
+            if latest_collection_delete_time < latest_collection_create_or_recreate_time and latest_collection_create_or_recreate_time <= latest_database_delete_time:
+                restore_time = latest_database_delete_time + datetime.timedelta(seconds=-1)
+            elif (latest_collection_delete_time > latest_collection_create_or_recreate_time and latest_collection_delete_time < latest_database_delete_time):
+                restore_time = latest_collection_delete_time + datetime.timedelta(seconds=-1)
+            else:
+                raise CLIError("No collection with name {} existed in the current version of database. Please provide a restore timestamp for restoring the collection from different instance of the database".format(collection_name))
+
+            restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%z")
+        except ResourceNotFoundError:
+            raise CLIError("Cannot find a database account with name {} that is online in location {}".format(account_name, restorable_database_account.location))
 
     # """Restores the deleted Azure Cosmos DB MongoDB collection"""
     create_mode = CreateMode.restore.value
@@ -2946,21 +3168,57 @@ def cli_cosmosdb_gremlin_database_restore(cmd,
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
     restorable_database_accounts_list = list(restorable_database_accounts)
-    restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
     restorable_database_account = None
 
-    for account in restorable_database_accounts_list:
-        if account.account_name == account_name:
-            if account.deletion_time is not None:
-                if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
-                    raise CLIError("Cannot perform inaccount restore on a deleted database account {}".format(account_name))
-            else:
-                if restore_timestamp_datetime_utc >= account.creation_time:
-                    restorable_database_account = account
-                    break
+    if restore_timestamp is not None:
+        restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
+        for account in restorable_database_accounts_list:
+            if account.account_name == account_name:
+                if account.deletion_time is not None:
+                    if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
+                        raise CLIError("Cannot perform inaccount restore on a deleted database account {}".format(account_name))
+                else:
+                    if restore_timestamp_datetime_utc >= account.creation_time:
+                        restorable_database_account = account
+                        break
 
-    if restorable_database_account is None:
-        raise CLIError("Cannot find a Gremlin database account with name {} that is online at {}".format(account_name, restore_timestamp))
+        if restorable_database_account is None:
+            raise CLIError("Cannot find a Gremlin database account with name {} that is online at {}".format(account_name, restore_timestamp))
+    else:
+        latest_account_to_restore = None
+        for account in restorable_database_accounts_list:
+            if account.account_name == account_name:
+                if latest_account_to_restore is None:
+                    latest_account_to_restore = account
+
+                if account.creation_time > latest_account_to_restore.creation_time:
+                    if account.deletion_time is None:
+                        latest_account_to_restore = account
+
+        restorable_database_account = latest_account_to_restore
+
+        if restorable_database_account is None:
+            raise CLIError("Cannot find a database account with name {} that is online".format(account_name))
+
+        regex = "[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+        account_instance_id = re.findall(regex, restorable_database_account.id)[1]
+        latest_restore_time = datetime.datetime.utcfromtimestamp(0)
+        try:
+            from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_gremlin_databases
+            restorable_databases_client = cf_restorable_gremlin_databases(cmd.cli_ctx, [])
+            restorable_databases = restorable_databases_client.list(
+                restorable_database_account.location,
+                account_instance_id)
+            for restorable_database in restorable_databases:
+                database = restorable_database.resource
+                event_timestamp = datetime.datetime.strptime(database.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+                if database.operation_type == "Delete" and latest_restore_time < event_timestamp and database.owner_id == database_name:
+                    latest_restore_time = event_timestamp
+
+            restore_time = latest_restore_time + datetime.timedelta(seconds=-1)
+            restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%z")
+        except ResourceNotFoundError:
+            raise CLIError("Cannot find a database account with name {} that is online in location {}".format(account_name, restorable_database_account.location))
 
     # """Restores the deleted Azure Cosmos DB Gremlin database"""
     create_mode = CreateMode.restore.value
@@ -2995,21 +3253,94 @@ def cli_cosmosdb_gremlin_graph_restore(cmd,
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
     restorable_database_accounts_list = list(restorable_database_accounts)
-    restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
     restorable_database_account = None
 
-    for account in restorable_database_accounts_list:
-        if account.account_name == account_name:
-            if account.deletion_time is not None:
-                if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
-                    raise CLIError("Cannot perform inaccount restore on a deleted gremlin database account {}".format(account_name))
-            else:
-                if restore_timestamp_datetime_utc >= account.creation_time:
-                    restorable_database_account = account
-                    break
+    if restore_timestamp is not None:
+        restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
+        for account in restorable_database_accounts_list:
+            if account.account_name == account_name:
+                if account.deletion_time is not None:
+                    if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
+                        raise CLIError("Cannot perform inaccount restore on a deleted gremlin database account {}".format(account_name))
+                else:
+                    if restore_timestamp_datetime_utc >= account.creation_time:
+                        restorable_database_account = account
+                        break
 
-    if restorable_database_account is None:
-        raise CLIError("Cannot find a database account with name {} that is online at {}".format(account_name, restore_timestamp))
+        if restorable_database_account is None:
+            raise CLIError("Cannot find a database account with name {} that is online at {}".format(account_name, restore_timestamp))
+    else:
+        latest_account_to_restore = None
+        for account in restorable_database_accounts_list:
+            if account.account_name == account_name:
+                if latest_account_to_restore is None:
+                    latest_account_to_restore = account
+
+                if account.creation_time > latest_account_to_restore.creation_time:
+                    if account.deletion_time is None:
+                        latest_account_to_restore = account
+
+        restorable_database_account = latest_account_to_restore
+
+        if restorable_database_account is None:
+            raise CLIError("Cannot find a database account with name {} that is online".format(account_name))
+
+        regex = "[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+        account_instance_id = re.findall(regex, restorable_database_account.id)[1]
+        latest_database_delete_time = datetime.datetime.utcfromtimestamp(0)
+        latest_database_create_or_recreate_time = datetime.datetime.utcfromtimestamp(0)
+        latest_graph_delete_time = datetime.datetime.utcfromtimestamp(0)
+        latest_graph_create_or_recreate_time = datetime.datetime.utcfromtimestamp(0)
+        database_rid = None
+        try:
+            from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_gremlin_databases
+            restorable_databases_client = cf_restorable_gremlin_databases(cmd.cli_ctx, [])
+            restorable_databases = restorable_databases_client.list(
+                restorable_database_account.location,
+                account_instance_id)
+
+            for restorable_database in restorable_databases:
+                resource = restorable_database.resource
+                if resource.owner_id == database_name:
+                    database_rid = resource.owner_resource_id
+                    event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+                    if resource.operation_type == "Delete" and latest_database_delete_time < event_timestamp :
+                        latest_database_delete_time = event_timestamp
+                    if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_database_create_or_recreate_time < event_timestamp :
+                        latest_database_create_or_recreate_time = event_timestamp
+
+            latest_database_delete_time = datetime.datetime.max if latest_database_delete_time == datetime.datetime.utcfromtimestamp(0) else latest_database_delete_time
+            query_start_time = latest_database_create_or_recreate_time.strftime("%Y-%m-%dT%H:%M:%SZ")
+            query_end_time = latest_database_delete_time if latest_database_create_or_recreate_time < latest_database_delete_time else datetime.datetime.max.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+            from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_gremlin_graphs
+            restorable_graphs_client = cf_restorable_gremlin_graphs(cmd.cli_ctx, [])
+            restorable_graphs = restorable_graphs_client.list(
+                restorable_database_account.location,
+                account_instance_id,
+                database_rid,
+                query_start_time,
+                query_end_time)
+
+            for restorable_graph in restorable_graphs:
+                resource = restorable_graph.resource
+                if resource.owner_id == graph_name:
+                    event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+                    if resource.operation_type == "Delete" and latest_graph_delete_time < event_timestamp :
+                        latest_graph_delete_time = event_timestamp
+                    if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_graph_delete_time < event_timestamp and latest_database_create_or_recreate_time < event_timestamp:
+                        latest_graph_create_or_recreate_time = event_timestamp
+
+            if latest_graph_delete_time < latest_graph_create_or_recreate_time and latest_graph_create_or_recreate_time <= latest_database_delete_time:
+                restore_time = latest_database_delete_time + datetime.timedelta(seconds=-1)
+            elif (latest_graph_delete_time > latest_graph_create_or_recreate_time and latest_graph_delete_time < latest_database_delete_time):
+                restore_time = latest_graph_delete_time + datetime.timedelta(seconds=-1)
+            else:
+                raise CLIError("No container with name {} existed in the current version of database. Please provide a restore timestamp for restoring the collection from different instance of the database".format(graph_name))
+
+            restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%z")
+        except ResourceNotFoundError:
+            raise CLIError("Cannot find a database account with name {} that is online in location {}".format(account_name, restorable_database_account.location))
 
     # """Restores the deleted Azure Cosmos DB Gremlin graph"""
     create_mode = CreateMode.restore.value
@@ -3046,21 +3377,58 @@ def cli_cosmosdb_table_restore(cmd,
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
     restorable_database_accounts_list = list(restorable_database_accounts)
-    restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
     restorable_database_account = None
 
-    for account in restorable_database_accounts_list:
-        if account.account_name == account_name:
-            if account.deletion_time is not None:
-                if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
-                    raise CLIError("Cannot perform inaccount restore on a deleted table {}".format(account_name))
-            else:
-                if restore_timestamp_datetime_utc >= account.creation_time:
-                    restorable_database_account = account
-                    break
+    if restore_timestamp is not None:
+        restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp) 
+        for account in restorable_database_accounts_list:
+            if account.account_name == account_name:
+                if account.deletion_time is not None:
+                    if account.deletion_time >= restore_timestamp_datetime_utc >= account.creation_time:
+                        raise CLIError("Cannot perform inaccount restore on a deleted table {}".format(account_name))
+                else:
+                    if restore_timestamp_datetime_utc >= account.creation_time:
+                        restorable_database_account = account
+                        break
 
-    if restorable_database_account is None:
-        raise CLIError("Cannot find a account with name {} that is online at {}".format(account_name, restore_timestamp))
+        if restorable_database_account is None:
+            raise CLIError("Cannot find a account with name {} that is online at {}".format(account_name, restore_timestamp))
+    else:
+        latest_account_to_restore = None
+        for account in restorable_database_accounts_list:
+            if account.account_name == account_name:
+                if latest_account_to_restore is None:
+                    latest_account_to_restore = account
+
+                if account.creation_time > latest_account_to_restore.creation_time:
+                    if account.deletion_time is None:
+                        latest_account_to_restore = account
+
+        restorable_database_account = latest_account_to_restore
+
+        if restorable_database_account is None:
+            raise CLIError("Cannot find a database account with name {} that is online".format(account_name))
+
+        regex = "[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+        account_instance_id = re.findall(regex, restorable_database_account.id)[1]
+        latest_restore_time = datetime.datetime.utcfromtimestamp(0)
+        try:
+            from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_tables
+            restorable_tables_client = cf_restorable_tables(cmd.cli_ctx, [])
+            restorable_tables = restorable_tables_client.list(
+                restorable_database_account.location,
+                account_instance_id)
+
+            for restorable_table in restorable_tables:
+                resource = restorable_table.resource
+                event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+                if resource.operation_type == "Delete" and latest_restore_time < event_timestamp and resource.owner_id == table_name:
+                    latest_restore_time = event_timestamp
+
+            restore_time = latest_restore_time + datetime.timedelta(seconds=-1)
+            restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%z")
+        except ResourceNotFoundError:
+            raise CLIError("Cannot find a database account with name {} that is online in location {}".format(account_name, restorable_database_account.location))
 
     # """Restores the deleted Azure Cosmos DB Table"""
     create_mode = CreateMode.restore.value
