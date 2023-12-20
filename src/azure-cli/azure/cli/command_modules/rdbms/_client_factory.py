@@ -338,6 +338,10 @@ def cf_postgres_flexible_firewall_rules(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).firewall_rules
 
 
+def cf_postgres_flexible_virtual_endpoints(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).virtual_endpoints
+
+
 def cf_postgres_flexible_config(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).configurations
 
@@ -364,6 +368,14 @@ def cf_postgres_flexible_adadmin(cli_ctx, _):
 
 def cf_postgres_flexible_migrations(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).migrations
+
+
+def cf_postgres_flexible_server_threat_protection_settings(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).server_threat_protection_settings
+
+
+def cf_postgres_flexible_server_log_files(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).log_files
 
 
 def cf_postgres_check_resource_availability(cli_ctx, _):

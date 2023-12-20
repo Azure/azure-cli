@@ -31,9 +31,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2017-04-01",
+        "version": "2020-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/activitylogalerts/{}", "2017-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/activitylogalerts/{}", "2020-10-01"],
         ]
     }
 
@@ -66,30 +66,30 @@ class Update(AAZCommand):
         )
         _args_schema.action_groups = AAZListArg(
             options=["--action-groups"],
-            help="The list of activity log alerts.",
+            help="The list of the Action Groups.",
             nullable=True,
         )
         _args_schema.all_of = AAZListArg(
             options=["--all-of"],
-            help="The list of activity log alert conditions.",
+            help="The list of Activity Log Alert rule conditions.",
         )
         _args_schema.description = AAZStrArg(
             options=["--description"],
-            help="A description of this activity log alert.",
+            help="A description of this Activity Log Alert rule.",
             nullable=True,
         )
         _args_schema.enabled = AAZBoolArg(
             options=["--enabled"],
-            help="Indicates whether this activity log alert is enabled. If an activity log alert is not enabled, then none of its actions will be activated.",
+            help="Indicates whether this Activity Log Alert rule is enabled. If an Activity Log Alert rule is not enabled, then none of its actions will be activated.",
             nullable=True,
         )
         _args_schema.scopes = AAZListArg(
             options=["--scopes"],
-            help={"short-summary": "A list of resourceIds that will be used as prefixes.", "long-summary": "The alert will only apply to activityLogs with resourceIds that fall under one of these prefixes. This list must include at least one item."},
+            help="A list of resource IDs that will be used as prefixes. The alert will only apply to Activity Log events with resource IDs that fall under one of these prefixes. This list must include at least one item.",
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
-            help="Resource tags",
+            help="The tags of the resource.",
             nullable=True,
         )
 
@@ -101,16 +101,16 @@ class Update(AAZCommand):
         _element = cls._args_schema.action_groups.Element
         _element.action_group_id = AAZStrArg(
             options=["action-group-id"],
-            help="The resourceId of the action group. This cannot be null or empty.",
+            help="The resource ID of the Action Group. This cannot be null or empty.",
         )
-        _element.webhook_properties_raw = AAZDictArg(
-            options=["webhook-properties-raw"],
+        _element.webhook_properties = AAZDictArg(
+            options=["webhook-properties"],
             help="the dictionary of custom properties to include with the post operation. These data are appended to the webhook payload.",
             nullable=True,
         )
 
-        webhook_properties_raw = cls._args_schema.action_groups.Element.webhook_properties_raw
-        webhook_properties_raw.Element = AAZStrArg(
+        webhook_properties = cls._args_schema.action_groups.Element.webhook_properties
+        webhook_properties.Element = AAZStrArg(
             nullable=True,
         )
 
@@ -120,13 +120,57 @@ class Update(AAZCommand):
         )
 
         _element = cls._args_schema.all_of.Element
+        _element.any_of = AAZListArg(
+            options=["any-of"],
+            help="An Activity Log Alert rule condition that is met when at least one of its member leaf conditions are met.",
+            nullable=True,
+        )
+        _element.contains_any = AAZListArg(
+            options=["contains-any"],
+            help="The value of the event's field will be compared to the values in this array (case-insensitive) to determine if the condition is met.",
+            nullable=True,
+        )
         _element.equals = AAZStrArg(
             options=["equals"],
-            help="The field value will be compared to this value (case-insensitive) to determine if the condition is met.",
+            help="The value of the event's field will be compared to this value (case-insensitive) to determine if the condition is met.",
+            nullable=True,
         )
         _element.field = AAZStrArg(
             options=["field"],
-            help="The name of the field that this condition will examine. The possible values for this field are (case-insensitive): 'resourceId', 'category', 'caller', 'level', 'operationName', 'resourceGroup', 'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties.'.",
+            help="The name of the Activity Log event's field that this condition will examine. The possible values for this field are (case-insensitive): 'resourceId', 'category', 'caller', 'level', 'operationName', 'resourceGroup', 'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties'.",
+            nullable=True,
+        )
+
+        any_of = cls._args_schema.all_of.Element.any_of
+        any_of.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.all_of.Element.any_of.Element
+        _element.contains_any = AAZListArg(
+            options=["contains-any"],
+            help="The value of the event's field will be compared to the values in this array (case-insensitive) to determine if the condition is met.",
+            nullable=True,
+        )
+        _element.equals = AAZStrArg(
+            options=["equals"],
+            help="The value of the event's field will be compared to this value (case-insensitive) to determine if the condition is met.",
+            nullable=True,
+        )
+        _element.field = AAZStrArg(
+            options=["field"],
+            help="The name of the Activity Log event's field that this condition will examine. The possible values for this field are (case-insensitive): 'resourceId', 'category', 'caller', 'level', 'operationName', 'resourceGroup', 'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties'.",
+            nullable=True,
+        )
+
+        contains_any = cls._args_schema.all_of.Element.any_of.Element.contains_any
+        contains_any.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        contains_any = cls._args_schema.all_of.Element.contains_any
+        contains_any.Element = AAZStrArg(
+            nullable=True,
         )
 
         scopes = cls._args_schema.scopes
@@ -184,7 +228,7 @@ class Update(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/activityLogAlerts/{activityLogAlertName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts/{activityLogAlertName}",
                 **self.url_parameters
             )
 
@@ -218,7 +262,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2017-04-01",
+                    "api-version", "2020-10-01",
                     required=True,
                 ),
             }
@@ -267,7 +311,7 @@ class Update(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/activityLogAlerts/{activityLogAlertName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts/{activityLogAlertName}",
                 **self.url_parameters
             )
 
@@ -301,7 +345,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2017-04-01",
+                    "api-version", "2020-10-01",
                     required=True,
                 ),
             }
@@ -381,7 +425,7 @@ class Update(AAZCommand):
             _elements = _builder.get(".properties.actions.actionGroups[]")
             if _elements is not None:
                 _elements.set_prop("actionGroupId", AAZStrType, ".action_group_id", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("webhookProperties", AAZDictType, ".webhook_properties_raw")
+                _elements.set_prop("webhookProperties", AAZDictType, ".webhook_properties")
 
             webhook_properties = _builder.get(".properties.actions.actionGroups[].webhookProperties")
             if webhook_properties is not None:
@@ -397,8 +441,28 @@ class Update(AAZCommand):
 
             _elements = _builder.get(".properties.condition.allOf[]")
             if _elements is not None:
-                _elements.set_prop("equals", AAZStrType, ".equals", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("field", AAZStrType, ".field", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("anyOf", AAZListType, ".any_of")
+                _elements.set_prop("containsAny", AAZListType, ".contains_any")
+                _elements.set_prop("equals", AAZStrType, ".equals")
+                _elements.set_prop("field", AAZStrType, ".field")
+
+            any_of = _builder.get(".properties.condition.allOf[].anyOf")
+            if any_of is not None:
+                any_of.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.condition.allOf[].anyOf[]")
+            if _elements is not None:
+                _elements.set_prop("containsAny", AAZListType, ".contains_any")
+                _elements.set_prop("equals", AAZStrType, ".equals")
+                _elements.set_prop("field", AAZStrType, ".field")
+
+            contains_any = _builder.get(".properties.condition.allOf[].anyOf[].containsAny")
+            if contains_any is not None:
+                contains_any.set_elements(AAZStrType, ".")
+
+            contains_any = _builder.get(".properties.condition.allOf[].containsAny")
+            if contains_any is not None:
+                contains_any.set_elements(AAZStrType, ".")
 
             scopes = _builder.get(".properties.scopes")
             if scopes is not None:
@@ -441,9 +505,7 @@ class _UpdateHelper:
         activity_log_alert_resource_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        activity_log_alert_resource_read.location = AAZStrType(
-            flags={"required": True},
-        )
+        activity_log_alert_resource_read.location = AAZStrType()
         activity_log_alert_resource_read.name = AAZStrType(
             flags={"read_only": True},
         )
@@ -498,12 +560,30 @@ class _UpdateHelper:
         all_of.Element = AAZObjectType()
 
         _element = _schema_activity_log_alert_resource_read.properties.condition.all_of.Element
-        _element.equals = AAZStrType(
-            flags={"required": True},
+        _element.any_of = AAZListType(
+            serialized_name="anyOf",
         )
-        _element.field = AAZStrType(
-            flags={"required": True},
+        _element.contains_any = AAZListType(
+            serialized_name="containsAny",
         )
+        _element.equals = AAZStrType()
+        _element.field = AAZStrType()
+
+        any_of = _schema_activity_log_alert_resource_read.properties.condition.all_of.Element.any_of
+        any_of.Element = AAZObjectType()
+
+        _element = _schema_activity_log_alert_resource_read.properties.condition.all_of.Element.any_of.Element
+        _element.contains_any = AAZListType(
+            serialized_name="containsAny",
+        )
+        _element.equals = AAZStrType()
+        _element.field = AAZStrType()
+
+        contains_any = _schema_activity_log_alert_resource_read.properties.condition.all_of.Element.any_of.Element.contains_any
+        contains_any.Element = AAZStrType()
+
+        contains_any = _schema_activity_log_alert_resource_read.properties.condition.all_of.Element.contains_any
+        contains_any.Element = AAZStrType()
 
         scopes = _schema_activity_log_alert_resource_read.properties.scopes
         scopes.Element = AAZStrType()

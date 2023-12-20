@@ -163,7 +163,7 @@ parameters:
   - name: --load-balancer-managed-outbound-ipv6-count
     type: int
     short-summary: Load balancer managed outbound IPv6 IP count.
-    long-summary: Desired number of managed outbound IPv6 IPs for load balancer outbound connection. Valid for dual-stack (--ip-families IPv4,IPv6) only. If updated, it will wipe off the existing setting on Load balancer managed outbound IPv6 count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
+    long-summary: Desired number of managed outbound IPv6 IPs for load balancer outbound connection. Valid for dual-stack (--ip-families IPv4,IPv6) only.
   - name: --load-balancer-outbound-ips
     type: string
     short-summary: Load balancer outbound IP resource IDs.
@@ -180,6 +180,10 @@ parameters:
     type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
+  - name: --load-balancer-backend-pool-type
+    type: string
+    short-summary: Load balancer backend pool type.
+    long-summary: Define the LoadBalancer backend pool type of managed inbound backend pool. The nodeIP means the VMs will be attached to the LoadBalancer by adding its private IP address to the backend pool. The nodeIPConfiguration means the VMs will be attached to the LoadBalancer by referencing the backend pool ID in the VM's NIC.
   - name: --nat-gateway-managed-outbound-ip-count
     type: int
     short-summary: NAT gateway managed outbound IP count.
@@ -512,6 +516,18 @@ parameters:
   - name: --enable-vpa
     type: bool
     short-summary: Enable vertical pod autoscaler for cluster.
+  - name: --nodepool-allowed-host-ports
+    type: string
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
+  - name: --nodepool-asg-ids
+    type: string
+    short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
+  - name: --node-public-ip-tags
+    type: string
+    short-summary: The ipTags of the node public IPs.
+  - name: --crg-id
+    type: string
+    short-summary: The crg id used to associate the new cluster with the existed Capacity Reservation Group resource.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -586,6 +602,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
   - name: Create a kubernetes cluster with vertical pod autoscaler enaled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-vpa
+  - name: create a kubernetes cluster with a Capacity Reservation Group(CRG) ID.
+    text: az aks create -g MyResourceGroup -n MyMC --kubernetes-version 1.20.9 --node-vm-size VMSize --assign-identity "subscriptions/SubID/resourceGroups/RGName/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID" --enable-managed-identity --crg-id "subscriptions/SubID/resourceGroups/RGName/providers/Microsoft.ContainerService/CapacityReservationGroups/MyCRGID"
 """
 
 helps['aks update'] = """
@@ -637,19 +655,19 @@ parameters:
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
-    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. --load-balancer-managed-outbound-ip-count, --load-balancer-outbound-ips and --load-balancer-outbound-ip-prefixes are mutually exclusive. If updated, it will wipe off the existing setting on Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs. If the new value is greater than the original value, new additional outbound IPs will be created. If the value is less than the original value, existing outbound IPs will be deleted and outbound connections may fail due to configuration update.
+    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. If the new value is greater than the original value, new additional outbound IPs will be created. If the value is less than the original value, existing outbound IPs will be deleted and outbound connections may fail due to configuration update.
   - name: --load-balancer-managed-outbound-ipv6-count
     type: int
     short-summary: Load balancer managed outbound IPv6 IP count.
-    long-summary: Desired number of managed outbound IPv6 IPs for load balancer outbound connection. Valid for dual-stack (--ip-families IPv4,IPv6) only. If updated, it will wipe off the existing setting on Load balancer managed outbound IPv6 count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
+    long-summary: Desired number of managed outbound IPv6 IPs for load balancer outbound connection. Valid for dual-stack (--ip-families IPv4,IPv6) only.
   - name: --load-balancer-outbound-ips
     type: string
     short-summary: Load balancer outbound IP resource IDs.
-    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. --load-balancer-managed-outbound-ip-count, --load-balancer-outbound-ips and --load-balancer-outbound-ip-prefixes are mutually exclusive. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count and Load balancer outbound IP prefix resource IDs.
+    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
   - name: --load-balancer-outbound-ip-prefixes
     type: string
     short-summary: Load balancer outbound IP prefix resource IDs.
-    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. --load-balancer-managed-outbound-ip-count, --load-balancer-outbound-ips and --load-balancer-outbound-ip-prefixes are mutually exclusive. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count and Load balancer outbound IP resource IDs.
+    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
   - name: --load-balancer-outbound-ports
     type: int
     short-summary: Load balancer outbound allocated ports.
@@ -658,6 +676,10 @@ parameters:
     type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
+  - name: --load-balancer-backend-pool-type
+    type: string
+    short-summary: Load balancer backend pool type.
+    long-summary: Define the LoadBalancer backend pool type of managed inbound backend pool. The nodeIP means the VMs will be attached to the LoadBalancer by adding its private IP address to the backend pool. The nodeIPConfiguration means the VMs will be attached to the LoadBalancer by referencing the backend pool ID in the VM's NIC.
   - name: --nat-gateway-managed-outbound-ip-count
     type: int
     short-summary: NAT gateway managed outbound IP count.
@@ -1516,6 +1538,19 @@ parameters:
   - name: --gpu-instance-profile
     type: string
     short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
+  - name: --allowed-host-ports
+    type: string
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
+  - name: --asg-ids
+    type: string
+    short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
+  - name: --node-public-ip-tags
+    type: string
+    short-summary: The ipTags of the node public IPs.
+  - name: --crg-id
+    type: string
+    short-summary: The crg id used to associate the new nodepool with the existed Capacity Reservation Group resource.
+
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1531,6 +1566,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --kubernetes-version 1.20.9 --snapshot-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/snapshots/mysnapshot1"
   - name: create a nodepool in an existing AKS cluster with host group id
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --host-group-id /subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/hostGroups/myHostGroup --node-vm-size VMSize
+  - name: create a nodepool with a Capacity Reservation Group(CRG) ID.
+    text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --node-vm-size VMSize --crg-id "/subscriptions/SubID/resourceGroups/ResourceGroupName/providers/Microsoft.ContainerService/CapacityReservationGroups/MyCRGID"
 """
 
 helps['aks nodepool delete'] = """
@@ -1607,6 +1644,12 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+  - name: --allowed-host-ports
+    type: string
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
+  - name: --asg-ids
+    type: string
+    short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -1714,6 +1757,16 @@ examples:
   - name: Show the details for a managed Kubernetes cluster
     text: az aks show --name MyManagedCluster --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['aks stop'] = """
+    type: command
+    short-summary: Stop a managed cluster.
+    long-summary: This can only be performed on Azure Virtual Machine Scale set backed clusters. Stopping a
+        cluster stops the control plane and agent nodes entirely, while maintaining all object and
+        cluster state. A cluster does not accrue charges while it is stopped. See `stopping a
+        cluster <https://docs.microsoft.com/azure/aks/start-stop-cluster>`_ for more details about
+        stopping a cluster.
 """
 
 helps['aks update-credentials'] = """

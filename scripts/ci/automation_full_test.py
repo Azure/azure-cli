@@ -463,6 +463,12 @@ def get_pipeline_result(test_result_fp, pipeline_result):
                 for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'][0]['Details']:
                     if i['Module'] == module:
                         i['Status'] = 'Failed'
+                        # GitHub has a comment length limit of 65535, we must ensure that the length is less than 65535.
+                        # The azure cli bot will also add extra html characters.
+                        # So the number of characters cannot be accurately calculated.
+                        # Using indent=4 is just a rough estimate.
+                        if len(json.dumps(pipeline_result, indent=4)) + len(message) > 65535:
+                            message = 'The error message is too long, please check the pipeline log for details.'
                         i['Content'] = build_markdown_content(state, test_case, message, line, i['Content'])
                         break
             else:
@@ -525,7 +531,13 @@ class AutomaticScheduling(object):
     def get_all_modules(self):
         result = get_path_table()
         # only get modules and core, ignore extensions
-        self.modules = {**result['mod'], **result['core']}
+        result_mod = result['mod']
+        result_core = result['core']
+
+        # make sure the dictionary is in order, otherwise job assignments will be random.
+        from collections import OrderedDict
+        self.modules = OrderedDict(sorted((result_mod | result_core).items()))
+        logger.info(json.dumps(self.modules, indent=2))
 
     def get_extension_modules(self):
         out = subprocess.Popen(['azdev', 'extension', 'list', '-o', 'tsv'], stdout=subprocess.PIPE)
@@ -569,6 +581,7 @@ class AutomaticScheduling(object):
             self.works[idx][k] = v
         # instance_idx: 1~n, python list index: 0~n-1
         self.instance_idx -= 1
+        logger.info(json.dumps(self.works, indent=2))
         return self.works[self.instance_idx]
 
     def run_instance_modules(self, instance_modules):

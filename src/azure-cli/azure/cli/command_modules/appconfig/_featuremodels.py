@@ -8,6 +8,7 @@ import json
 from knack.log import get_logger
 from azure.cli.core.util import shell_safe_json_parse
 from azure.cli.core.azclierror import InvalidArgumentValueError
+from collections import namedtuple
 from ._models import KeyValue
 from ._constants import FeatureFlagConstants
 
@@ -56,7 +57,7 @@ class FeatureFlagValue:
                  description=None,
                  enabled=None,
                  conditions=None):
-        default_conditions = {'client_filters': []}
+        default_conditions = {FeatureFlagConstants.CLIENT_FILTERS: []}
 
         self.id = id_
         self.description = "" if description is None else description
@@ -65,10 +66,10 @@ class FeatureFlagValue:
 
     def __repr__(self):
         featureflagvalue = {
-            "id": self.id,
-            "description": self.description,
-            "enabled": self.enabled,
-            "conditions": custom_serialize_conditions(self.conditions)
+            FeatureFlagConstants.ID: self.id,
+            FeatureFlagConstants.DESCRIPTION: self.description,
+            FeatureFlagConstants.ENABLED: self.enabled,
+            FeatureFlagConstants.CONDITIONS: custom_serialize_conditions(self.conditions)
         }
 
         return json.dumps(featureflagvalue, indent=2, ensure_ascii=False)
@@ -149,8 +150,8 @@ class FeatureFilter:
 
     def __repr__(self):
         featurefilter = {
-            "name": self.name,
-            "parameters": self.parameters
+            FeatureFlagConstants.FILTER_NAME: self.name,
+            FeatureFlagConstants.FILTER_PARAMETERS: self.parameters
         }
         return json.dumps(featurefilter, indent=2, ensure_ascii=False)
 
@@ -162,7 +163,7 @@ def custom_serialize_conditions(conditions_dict):
         Helper Function to serialize Conditions
 
         Args:
-            conditions_dict - Dictionary of {str, List[FeatureFilter]}
+            conditions_dict - Dictionary of {str, Any}
 
         Return:
             JSON serializable Dictionary
@@ -170,10 +171,11 @@ def custom_serialize_conditions(conditions_dict):
     featurefilterdict = {}
 
     for key, value in conditions_dict.items():
-        featurefilters = []
-        for featurefilter in value:
-            featurefilters.append(featurefilter.__dict__)
-        featurefilterdict[key] = featurefilters
+        if key == FeatureFlagConstants.CLIENT_FILTERS:
+            featurefilterdict[key] = [feature_filter.__dict__ for feature_filter in value]
+        else:
+            featurefilterdict[key] = value
+
     return featurefilterdict
 
 
@@ -239,7 +241,7 @@ def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
     conditions = feature_flag_value.conditions
 
     # if conditions["client_filters"] list is not empty, make state conditional
-    filters = conditions["client_filters"]
+    filters = conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
     if filters and state == FeatureState.ON:
         state = FeatureState.CONDITIONAL
@@ -280,39 +282,40 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
 
         # Make sure value json has all the fields we support in the backend
         valid_fields = {
-            'id',
-            'description',
-            'enabled',
-            'conditions'}
+            FeatureFlagConstants.ID,
+            FeatureFlagConstants.DESCRIPTION,
+            FeatureFlagConstants.ENABLED,
+            FeatureFlagConstants.CONDITIONS}
         if valid_fields != feature_flag_dict.keys():
             logger.debug("'%s' feature flag is missing required values or it contains ", keyvalue.key +
                          "unsupported values. Setting missing value to defaults and ignoring unsupported values\n")
 
-        feature_name = feature_flag_dict.get('id', '')
+        feature_name = feature_flag_dict.get(FeatureFlagConstants.ID, '')
         if not feature_name:
             raise ValueError("Feature flag 'id' cannot be empty.")
 
-        conditions = feature_flag_dict.get('conditions', None)
+        conditions = feature_flag_dict.get(FeatureFlagConstants.CONDITIONS, None)
         if conditions:
-            client_filters = conditions.get('client_filters', [])
+            client_filters = conditions.get(FeatureFlagConstants.CLIENT_FILTERS, [])
 
             # Convert all filters to FeatureFilter objects
             client_filters_list = []
             for client_filter in client_filters:
                 # If there is a filter, it should always have a name
                 # In case it doesn't, ignore this filter
-                name = client_filter.get('name')
+                name = client_filter.get(FeatureFlagConstants.FILTER_NAME)
                 if name:
-                    params = client_filter.get('parameters', {})
+                    params = client_filter.get(FeatureFlagConstants.FILTER_PARAMETERS, {})
                     client_filters_list.append(FeatureFilter(name, params))
                 else:
-                    logger.warning("Ignoring this filter without the 'name' attribute:\n%s",
+                    logger.warning("Ignoring this filter without the %s attribute:\n%s",
+                                   FeatureFlagConstants.FILTER_NAME,
                                    json.dumps(client_filter, indent=2, ensure_ascii=False))
-            conditions['client_filters'] = client_filters_list
+            conditions[FeatureFlagConstants.CLIENT_FILTERS] = client_filters_list
 
         feature_flag_value = FeatureFlagValue(id_=feature_name,
-                                              description=feature_flag_dict.get('description', ''),
-                                              enabled=feature_flag_dict.get('enabled', False),
+                                              description=feature_flag_dict.get(FeatureFlagConstants.DESCRIPTION, ''),
+                                              enabled=feature_flag_dict.get(FeatureFlagConstants.ENABLED, False),
                                               conditions=conditions)
 
     except (InvalidArgumentValueError, TypeError, ValueError) as exception:
@@ -335,3 +338,25 @@ def is_feature_flag(kv):
     if kv and kv.key and isinstance(kv.key, str) and kv.content_type and isinstance(kv.content_type, str):
         return kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX) and kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
     return False
+
+
+class FeatureManagementReservedKeywords:
+    '''
+    Feature management keywords used in files in different naming conventions.
+    '''
+    FeatureFlagKeywords = namedtuple("FeatureFlagKeywords", ["feature_management", "enabled_for", "requirement_type"])
+
+    PASCAL = FeatureFlagKeywords(feature_management="FeatureManagement", enabled_for="EnabledFor",
+                                 requirement_type="RequirementType")
+    CAMEL = FeatureFlagKeywords(feature_management="featureManagement", enabled_for="enabledFor",
+                                requirement_type="requirementType")
+    UNDERSCORE = FeatureFlagKeywords(feature_management="feature_management", enabled_for="enabled_for",
+                                     requirement_type="requirement_type")
+    HYPHEN = FeatureFlagKeywords(feature_management="feature-management", enabled_for="enabled-for",
+                                 requirement_type="requirement-type")
+
+    ALL = (PASCAL, CAMEL, UNDERSCORE, HYPHEN)
+
+    @classmethod
+    def get_keywords(cls, naming_convention='pascal'):
+        return getattr(cls, naming_convention.upper(), cls.PASCAL)
