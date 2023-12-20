@@ -2922,7 +2922,7 @@ class NetworkPrivateLinkBotServiceScenarioTest(ScenarioTest):
 
 class NetworkPrivateLinkHDInsightScenarioTest(ScenarioTest):
 
-    @record_only()  # This test need to create hdinsight cluster in advance
+    @live_only()  # This test need to create hdinsight cluster in advance
     @ResourceGroupPreparer(name_prefix='test_hdi_private_link', random_name_length=40, location="southcentralus")
     def test_private_link_resource_hdinsight(self, resource_group):
         self.kwargs.update({
