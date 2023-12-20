@@ -1476,3 +1476,72 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @record_only()
+    def test_webapp_storageblob_smi_opt_out_public_network_and_config(self):
+        self.test_webapp_storageblob_opt_out(['public-network', 'config'])
+
+    def test_webapp_storageblob_smi_opt_out(self, opt_out_list):
+        
+        def check_config_len(config):
+            if 'config' in opt_out_list:
+                self.assertEqual(len(config), 0)
+            else:
+                self.assertEqual(len(config), 4)
+
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'wctest',
+            'site': 'servicelinker-storageblob-app',
+            'account': 'wctest'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+
+
+        # create connection
+        self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type python --opt-out {}'.format(name, source_id, 
+                                                                              target_id, ' '.join(opt_out_list)))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'dotnet')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        configurations = self.cmd(
+            'webapp connection list-configuration --id {}'.format(connection_id)
+        ).get_output_in_json()
+
+        check_config_len(configurations)
+
+        # update connection
+        self.cmd('webapp connection update storage-blob --id {} '
+                 '--client-type python --opt-out {}'.format(connection_id,
+                                                            ' '.join(opt_out_list)))
+
+        check_config_len(configurations)
+        
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id)).get_output_in_json()
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    
