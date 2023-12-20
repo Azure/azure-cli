@@ -1936,7 +1936,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             self.assertEqual(ctx_3.get_network_plugin(), "azure")
 
-        # update kubenet to azure cni overlay
+        # test update returns azure
         ctx_4 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
@@ -1949,8 +1949,40 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.UPDATE,
         )
 
-        with self.assertRaises(InvalidArgumentValueError):
-            self.assertEqual(ctx_4.get_network_plugin(), "azure")
+        self.assertEqual(ctx_4.get_network_plugin(), "azure")
+
+        # test update returns the value already on the mc
+        ctx_5 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "network_plugin": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        network_profile_5 = self.models.ContainerServiceNetworkProfile(network_plugin="azure")
+        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_5)
+        ctx_5.attach_mc(mc)
+        self.assertEqual(ctx_5.get_network_plugin(), "azure")
+
+        # test update from kubenet -> overlay
+        ctx_6 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "network_plugin": "azure",
+                    "network_plugin_mode": "overlay",
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        network_profile_6 = self.models.ContainerServiceNetworkProfile(network_plugin="kubenet", pod_cidr="100.112.0.0/12")
+        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_6)
+        ctx_6.attach_mc(mc)
+        self.assertEqual(ctx_6.get_network_plugin(), "azure")
 
     def test_mc_get_network_dataplane(self):
         # Default, not set.
