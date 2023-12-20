@@ -783,6 +783,8 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         export_separator_features_file_path = os.path.join(TEST_DIR, 'export_separator_features.json')
         import_separator_features_file_path = os.path.join(TEST_DIR, 'import_separator_features.json')
         import_features_alt_syntax_file_path = os.path.join(TEST_DIR, 'import_features_alt_syntax.json')
+        import_features_random_conditions_file_path = os.path.join(TEST_DIR, 'import_features_random_conditions.json')
+        import_features_invalid_requirement_type_file_path = os.path.join(TEST_DIR, 'import_features_invalid_requirement_type.json')
 
         self.kwargs.update({
             'label': 'KeyValuesWithFeatures',
@@ -885,7 +887,31 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
+
+        # Support including all properties in the feature flag conditions
+        self.kwargs.update({
+            'imported_file_path': import_features_random_conditions_file_path,
+            'label': 'RandomConditionsTest',
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+        with open(import_features_random_conditions_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
         os.remove(exported_file_path)
+
+        self.kwargs.update({
+            'imported_file_path': import_features_invalid_requirement_type_file_path
+        })
+
+        # Invalid requirement type should fail import
+        with self.assertRaisesRegex(CLIError, "Feature 'Timestamp' must have an any/all requirement type"):
+            self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2491,8 +2517,8 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
                                          self.check('label', entry_label),
                                          self.check('state', default_state)]).get_output_in_json()
 
-        conditions = response_dict.get('conditions')
-        list_filters = conditions.get('client_filters')
+        conditions = response_dict.get(FeatureFlagConstants.CONDITIONS)
+        list_filters = conditions.get(FeatureFlagConstants.CLIENT_FILTERS)
         assert len(list_filters) == 3
 
         # Enable feature

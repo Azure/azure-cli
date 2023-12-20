@@ -17,7 +17,6 @@ from azure.cli.core.extension import (get_extensions, build_extension_path, exte
                                       EXTENSIONS_MOD_PREFIX, EXT_METADATA_MINCLICOREVERSION, EXT_METADATA_MAXCLICOREVERSION)
 
 from azure.cli.core.extension.operations import list_available_extensions, add_extension, show_extension, remove_extension, list_extensions, update_extension
-from azure.cli.core.extension.tests.latest import IndexPatch, mock_ext
 
 # The test extension name
 EXT_NAME = 'myfirstcliextension'
@@ -51,6 +50,28 @@ def _install_test_extension3(system=None):  # pylint: disable=no-self-use
     zip_ref = zipfile.ZipFile(zip_file, 'r')
     zip_ref.extractall(build_extension_path(SECOND_EXT_NAME, system=system))
     zip_ref.close()
+
+
+def mock_ext(filename, version=None, download_url=None, digest=None, project_url=None, name=None, min_cli_version=None, max_cli_version=None):
+    d = {
+        'filename': filename,
+        'metadata': {
+            'name': name,
+            'version': version,
+            'extensions': {
+                'python.details': {
+                    'project_urls': {
+                        'Home': project_url or 'https://github.com/azure/some-extension'
+                    }
+                }
+            },
+            EXT_METADATA_MINCLICOREVERSION: min_cli_version,
+            EXT_METADATA_MAXCLICOREVERSION: max_cli_version,
+        },
+        'downloadUrl': download_url or 'http://contoso.com/{}'.format(filename),
+        'sha256Digest': digest
+    }
+    return d
 
 
 class TestExtensionsBase(unittest.TestCase):
@@ -329,8 +350,8 @@ class TestExtensions(TestExtensionsBase):
                 mock_ext(extension3, version='1.4.1a1', download_url=_get_test_data_file(extension3))
             ]
         }
-
-        with IndexPatch(mocked_index_data):
+        with mock.patch('azure.cli.core.extension._resolve.get_index_extensions',
+                        return_value=mocked_index_data):
             add_extension(self.cmd, extension_name=extension_name, allow_preview=False)
             ext = show_extension(extension_name)
             self.assertEqual(ext['name'], extension_name)
@@ -351,7 +372,8 @@ class TestExtensions(TestExtensionsBase):
             ]
         }
 
-        with IndexPatch(mocked_index_data):
+        with mock.patch('azure.cli.core.extension._resolve.get_index_extensions',
+                        return_value=mocked_index_data):
             add_extension(self.cmd, extension_name=extension_name, allow_preview=True)
             ext = show_extension(extension_name)
             self.assertEqual(ext['name'], extension_name)
@@ -371,7 +393,8 @@ class TestExtensions(TestExtensionsBase):
             ]
         }
         from knack.util import CLIError
-        with IndexPatch(mocked_index_data):
+        with mock.patch('azure.cli.core.extension._resolve.get_index_extensions',
+                        return_value=mocked_index_data):
             with self.assertRaisesRegex(CLIError, "No suitable stable version of 'extension-test-pkg' to install. Add `--allow-preview` to try preview versions"):
                 add_extension(cmd=self.cmd, extension_name=extension_name, allow_preview=False)
 
@@ -388,8 +411,8 @@ class TestExtensions(TestExtensionsBase):
                 mock_ext(extension3, version='1.4.1a1', download_url=_get_test_data_file(extension3))
             ]
         }
-
-        with IndexPatch(mocked_index_data):
+        with mock.patch('azure.cli.core.extension._resolve.get_index_extensions',
+                        return_value=mocked_index_data):
             add_extension(self.cmd, extension_name=extension_name, allow_preview=False)
             ext = show_extension(extension_name)
             self.assertEqual(ext['name'], extension_name)
