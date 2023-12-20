@@ -451,6 +451,74 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         ])
 
 
+class FunctionWorkloadProfile(ScenarioTest):
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="westus")
+    @StorageAccountPreparer()
+    def test_functionapp_workloadprofiles(self, resource_group, storage_account):
+        
+        location = "NorthCentralUS(Stage)"
+        functionapp_name = self.create_random_name(
+            'functionapp', 32)
+        managed_environment_name = self.create_random_name(
+            'managedenvironment', 40
+        )
+        workload_profile_name = self.create_random_name(
+            'wlp', 15
+        )
+        
+        workload_profile_name_2 = self.create_random_name(
+            'wlp', 15
+        )
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {} --enable-workload-profiles  --logs-destination none'.format(
+            managed_environment_name,
+            resource_group,
+            location,
+        ))
+        
+        self.cmd('containerapp env workload-profile add --name {} --resource-group {} --workload-profile-type D4 -w {} --min-nodes 3 --max-nodes 6'.format(
+            managed_environment_name,
+            resource_group,
+            workload_profile_name
+        ))
+        
+        self.cmd('containerapp env workload-profile add --name {} --resource-group {} --workload-profile-type D4 -w {} --min-nodes 3 --max-nodes 6'.format(
+            managed_environment_name,
+            resource_group,
+            workload_profile_name_2
+        ))
+
+        self.cmd('functionapp create -g {} -n {} -s {} --functions-version 4 --runtime dotnet-isolated --environment {} --workload-profile-name {} --cpu 1.0 --memory 1.0Gi'.format(
+            resource_group,
+            functionapp_name,
+            storage_account,
+            managed_environment_name,
+            workload_profile_name
+        )).assert_with_checks([
+            JMESPathCheck('resourceConfig.cpu', 1.0),
+            JMESPathCheck('resourceConfig.memory', '1Gi'),
+            JMESPathCheck('workloadProfileName', workload_profile_name)
+            ])
+        
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck('resourceConfig.cpu', 1.0),
+            JMESPathCheck('resourceConfig.memory', '1Gi'),
+            JMESPathCheck('workloadProfileName', workload_profile_name),
+        ])
+
+        self.cmd('functionapp config container set -g {} -n {} --workload-profile-name {} --cpu 0.75 --memory 2.0Gi'.format(
+            resource_group,
+            functionapp_name,
+            workload_profile_name_2
+        ))
+
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck('resourceConfig.cpu', 0.75),
+            JMESPathCheck('resourceConfig.memory', '2Gi'),
+            JMESPathCheck('workloadProfileName', workload_profile_name_2),
+        ])
+
 class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
