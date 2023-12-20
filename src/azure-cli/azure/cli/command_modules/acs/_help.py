@@ -2046,7 +2046,7 @@ helps['aks trustedaccess rolebinding create'] = """
           short-summary: Specify the role binding name.
         - name: --roles
           type: string
-          short-summary: Specify the space-separated roles.
+          short-summary: Specify the comma-separated roles.
         - name: --source-resource-id -r
           type: string
           short-summary: Specify the source resource id of the binding.
@@ -2065,7 +2065,7 @@ helps['aks trustedaccess rolebinding update'] = """
           short-summary: Specify the role binding name.
         - name: --roles
           type: string
-          short-summary: Specify the space-separated roles.
+          short-summary: Specify the comma-separated roles.
 """
 
 helps['aks trustedaccess rolebinding delete'] = """
