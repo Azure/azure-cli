@@ -7897,7 +7897,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus', preserve_default_location=True)
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2', preserve_default_location=True)
     def test_aks_kubenet_to_cni_overlay_migration(self, resource_group, resource_group_location):
         _, create_version = self._get_versions(resource_group_location)
         aks_name = self.create_random_name('cliakstest', 16)
