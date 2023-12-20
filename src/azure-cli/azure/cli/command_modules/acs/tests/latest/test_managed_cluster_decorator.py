@@ -10091,6 +10091,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             location="test_location",
             network_profile=self.models.ContainerServiceNetworkProfile(
                 network_plugin="azure",
+                network_plugin_mode="overlay",
                 pod_cidr="100.64.0.0/16",
                 service_cidr="192.168.0.0/16"
             ),
@@ -10106,6 +10107,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             location="test_location",
             network_profile=self.models.ContainerServiceNetworkProfile(
                 network_plugin="azure",
+                network_plugin_mode="overlay",
                 pod_cidr="100.64.0.0/10",
                 service_cidr="192.168.0.0/16",
             ),

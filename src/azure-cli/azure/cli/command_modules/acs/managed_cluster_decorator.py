@@ -2128,13 +2128,13 @@ class AKSManagedClusterContext(BaseAKSContext):
         # try to read the property value corresponding to the parameter from the `mc` object
 
         # if create, try and read from the mc object
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.network_plugin_mode is not None
-            ):
-                network_plugin_mode = self.mc.network_profile.network_plugin_mode
+        if (
+            not network_plugin_mode and
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.network_plugin_mode is not None
+        ):
+            network_plugin_mode = self.mc.network_profile.network_plugin_mode
 
         if enable_validation:
             # todo(tyler-lloyd) do we need any validation?
@@ -6802,7 +6802,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         if network_plugin_mode:
             mc.network_profile.network_plugin_mode = network_plugin_mode
 
-        network_plugin = self.context._get_network_plugin(enable_validation=False)
+        network_plugin = self.context.get_network_plugin()
         if network_plugin:
             mc.network_profile.network_plugin = network_plugin
 
