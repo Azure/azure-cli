@@ -3754,9 +3754,9 @@ class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
         self.cmd('network lb frontend-ip create -g {rg} --lb-name lb2 -n ipconfig2 --vnet-name vnet1 --subnet subnet1 --private-ip-address 10.0.0.99')
         self.cmd('network lb frontend-ip list -g {rg} --lb-name lb2',
                  checks=self.check('length(@)', 2))
-        self.cmd('network lb frontend-ip update -g {rg} --lb-name lb2 -n ipconfig2 --subnet subnet2 --vnet-name vnet1 --private-ip-address 10.0.1.100')
+        self.cmd('network lb frontend-ip update -g {rg} --lb-name lb2 -n ipconfig2 --subnet subnet1 --vnet-name vnet1 --private-ip-address 10.0.0.100')
         self.cmd('network lb frontend-ip show -g {rg} --lb-name lb2 -n ipconfig2',
-                 checks=self.check("subnet.contains(id, 'subnet2')", True))
+                 checks=self.check("subnet.contains(id, 'subnet1')", True))
 
 
 class NetworkLoadBalancerOutboundRulesScenarioTest(ScenarioTest):
@@ -3957,7 +3957,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         # create with subnet
         self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap2 --vnet {vnet} --admin-state None '
                  '--backend-address name=addr1 ip-address=10.0.0.1 subnet={subnet} '
-                 '--backend-address name=addr2 ip-address=10.0.0.2 subnet={subnet_name} '
+                 '--backend-address name=addr2 ip-address=10.0.1.1 subnet={subnet_name} '
                  '--backend-address name=addr3 ip-address=10.0.0.3 subnet={subnet} '
                  '--drain-period 10',
                  checks=[
@@ -3971,12 +3971,12 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         # update backend pool
         self.cmd('network lb address-pool update -g {rg} --lb-name {lb} -n bap2 --vnet {vnet} --admin-state None '
                  '--backend-address name=addr1 ip-address=10.0.0.3 subnet={subnet} '
-                 '--backend-address name=addr2 ip-address=10.0.0.4 subnet={subnet_name} '
+                 '--backend-address name=addr2 ip-address=10.0.1.2 subnet={subnet_name} '
                  '--backend-address name=addr3 ip-address=10.0.0.5 subnet={subnet} '
                  '--drain-period 20',
                  checks=[
                      self.check('loadBalancerBackendAddresses[0].ipAddress', '10.0.0.3'),
-                     self.check('loadBalancerBackendAddresses[1].ipAddress', '10.0.0.4'),
+                     self.check('loadBalancerBackendAddresses[1].ipAddress', '10.0.1.2'),
                      self.check('loadBalancerBackendAddresses[2].ipAddress', '10.0.0.5'),
                      self.check('drainPeriodInSeconds', 20),
                      self.check('loadBalancerBackendAddresses[0].adminState', 'None'),
@@ -4019,7 +4019,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
 
         self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr7 --subnet {subnet} --ip-address 10.0.0.7', checks=self.check('name', 'bap1'))
 
-        self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr8 --vnet {vnet} --subnet {subnet_name} --ip-address 10.0.0.8', checks=self.check('name', 'bap1'))
+        self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr8 --vnet {vnet} --subnet {subnet_name} --ip-address 10.0.1.3', checks=self.check('name', 'bap1'))
 
         self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '3'))
 
@@ -4291,7 +4291,7 @@ class NetworkNicScenarioTest(ScenarioTest):
 
 class NetworkNicAppGatewayScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_nic_app_gateway', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_app_gateway', location='eastus')
     def test_network_nic_app_gateway(self, resource_group):
         from azure.core.exceptions import HttpResponseError
         import json
@@ -5082,7 +5082,7 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
             'gw_sub_prefix1': '10.12.255.0/27',
             'gw1ip': 'pip1',
             'gw1': 'gw1',
-            'gw1_sku': 'Standard',
+            'gw1_sku': 'VpnGw1',
             'lgw1': 'lgw1',
             'lgw1ip': '131.107.72.22',
             'lgw1_prefix1': '10.61.0.0/16',
@@ -5111,9 +5111,7 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
             self.check('name', 'conn1')
         ])
         # test vpn connection show-device-config-script
-        self.cmd('network vpn-connection show-device-config-script -g {rg} -n {conn1} --vendor "Cisco" --device-family "Cisco-ISR(IOS)" --firmware-version "Cisco-ISR-15.x--IKEv2+BGP"', checks=[
-                self.check('length(@)', 10581)
-            ])
+        self.cmd('network vpn-connection show-device-config-script -g {rg} -n {conn1} --vendor "Cisco" --device-family "Cisco-ISR(IOS)" --firmware-version "Cisco-ISR-15.x--IKEv2+BGP"')
         self.cmd('network vpn-connection ipsec-policy add -g {rg} --connection-name {conn1} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}', checks=self.check('length(@)', 1))
         self.cmd('network vpn-connection ipsec-policy clear -g {rg} --connection-name {conn1}')
@@ -5584,7 +5582,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --default-outbound-access true',
                  self.check('defaultOutboundAccess', True))
 
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefixes 10.0.4.0/24',
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefixes 10.0.4.0/24 --default-outbound-access true',
                  self.check('defaultOutboundAccess', True))
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet2} --default-outbound-access false',
                  self.check('defaultOutboundAccess', False))

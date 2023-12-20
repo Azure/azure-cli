@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2023-09-01"],
         ]
     }
 
@@ -92,7 +92,7 @@ class Create(AAZCommand):
             options=["--ple-network-policies", "--private-endpoint-network-policies"],
             help="Manage network policies for private endpoint.",
             default="Disabled",
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+            enum={"Disabled": "Disabled", "Enabled": "Enabled", "NetworkSecurityGroupEnabled": "NetworkSecurityGroupEnabled", "RouteTableEnabled": "RouteTableEnabled"},
         )
         _args_schema.private_link_service_network_policies = AAZStrArg(
             options=["--pls-network-policies", "--private-link-service-network-policies"],
@@ -374,7 +374,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }

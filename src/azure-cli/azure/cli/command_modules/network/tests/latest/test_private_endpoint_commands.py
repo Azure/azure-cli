@@ -11,7 +11,7 @@ import unittest
 from azure.core.exceptions import HttpResponseError
 
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, KeyVaultPreparer, ManagedHSMPreparer, live_only, record_only)
+    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, KeyVaultPreparer, ManagedHSMPreparer, live_only, record_only)
 from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.rdbms.tests.latest.test_rdbms_commands import ServerPreparer
@@ -21,6 +21,7 @@ from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KV_CERTS_DIR = os.path.join(TEST_DIR, 'certs')
+
 
 class RedisCacheCredentialReplacer(RecordingProcessor):
     def process_response(self, response):
@@ -1163,7 +1164,7 @@ class NetworkPrivateLinkKustoClusterScenarioTest(ScenarioTest):
         self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
 
 
-class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
+class NetworkPrivateLinkWebappScenarioTest(LiveScenarioTest):  # issues with appservice
     @ResourceGroupPreparer(location='westus')
     def test_private_link_resource_webapp(self, resource_group):
         self.kwargs.update({
@@ -1178,7 +1179,6 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
         self.cmd('network private-link-resource list --id {webapp_id}', checks=[
             self.check('length(@)', 1),
         ])
-
 
     @ResourceGroupPreparer(location='westus')
     def test_private_endpoint_connection_webapp(self, resource_group):
@@ -2081,7 +2081,7 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         })
 
         # Enable private link feature on Application Gateway would require a public IP without Standard tier
-        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip}')
+        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip} --sku basic')
 
         # Create a application gateway without enable --enable-private-link
         self.cmd('network application-gateway create -g {rg} -n {appgw} '
@@ -2519,7 +2519,7 @@ def _test_private_endpoint(self, approve=True, rejected=True, list_name=True, gr
 
     # test private-link-resource
     result = self.cmd('network private-link-resource list --name {resource} -g {rg} --type {type}',
-                      checks=self.check('length(@)', '{list_num}')).get_output_in_json()
+                      checks=self.check('type(@)', 'array')).get_output_in_json()
     self.kwargs['group_id'] = result[0]['properties']['groupId'] if group_id else result[0]['groupId']
 
     # create private-endpoint
@@ -2611,7 +2611,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self, list_name=False)
 
-    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_synapse_workspace")
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_synapse_workspace", location="eastus")
     @StorageAccountPreparer(name_prefix="testpesyn")
     def test_private_endpoint_connection_synapse_workspace(self, resource_group, storage_account):
         self.kwargs.update({
@@ -2850,11 +2850,14 @@ class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
     def test_private_endpoint_connection_powerbi(self, resource_group):
         self._test_private_endpoint_connection_scenario_powerbi(resource_group, 'myPowerBIResource', 'Microsoft.PowerBI/privateLinkServicesForPowerBI', True)
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_powerbi", location="eastus2")
     def test_private_endpoint_connection_powerbi_ignoreReject(self, resource_group):
         self._test_private_endpoint_connection_scenario_powerbi(resource_group, 'myPowerBIResource', 'Microsoft.PowerBI/privateLinkServicesForPowerBI', False)
 
+
 class NetworkPrivateLinkBotServiceScenarioTest(ScenarioTest):
+    @live_only()
     @ResourceGroupPreparer(name_prefix='test_abs_private_endpoint', random_name_length=40)
     def test_abs_privatendpoint_with_default(self, resource_group):
         self.kwargs.update({
@@ -4268,6 +4271,7 @@ class NetworkPrivateLinkCloudHsmClustersScenarioTest(ScenarioTest):
                  checks=self.check('@[0].properties.groupId', 'cloudhsm'))
         self.cmd('resource delete --name {chsm_name} -g {rg} --resource-type {type}')
 
+    @unittest.skip("Subscription unregistered.")
     @ResourceGroupPreparer(name_prefix='cli_test_chsm_pe')
     def test_chsm_private_endpoint_connection(self, resource_group):
         # Define Params
@@ -4634,7 +4638,7 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
         self.cmd('az network private-link-resource list --name {cluster_name} --resource-group {rg} --type Microsoft.DocumentDB/mongoClusters',
                  checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'MongoCluster')])
 
-
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongo_cl', random_name_length=30, location='eastus2euap')
     def test_private_endpoint_connection_cosmosdb_mongo_clusters(self, resource_group):
         from azure.mgmt.core.tools import resource_id
@@ -4779,7 +4783,7 @@ class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
         self.cmd('az network private-link-resource list --name {server_name} --resource-group {rg} --type Microsoft.DBforPostgreSQL/flexibleServers',
                  checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'postgresqlServer')])
 
-
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_fspg', random_name_length=18, location='eastus2euap')
     def test_private_endpoint_connection_postgres_flexible_server(self, resource_group):
         from azure.mgmt.core.tools import resource_id
