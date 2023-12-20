@@ -2803,7 +2803,7 @@ def cli_cosmosdb_sql_database_restore(cmd,
             restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%z")
         except ResourceNotFoundError:
             raise CLIError("Cannot find a database account with name {} that is online in location {}".format(account_name, restorable_database_account.location))
-    
+
     # """Restores the deleted Azure Cosmos DB SQL database"""
     create_mode = CreateMode.restore.value
     restore_parameters = RestoreParameters(
@@ -2886,9 +2886,9 @@ def cli_cosmosdb_sql_container_restore(cmd,
                 if resource.owner_id == database_name:
                     database_rid = resource.database.rid
                     event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
-                    if resource.operation_type == "Delete" and latest_database_delete_time < event_timestamp :
+                    if resource.operation_type == "Delete" and latest_database_delete_time < event_timestamp:
                         latest_database_delete_time = event_timestamp
-                    if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_database_create_or_recreate_time < event_timestamp :
+                    if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_database_create_or_recreate_time < event_timestamp:
                         latest_database_create_or_recreate_time = event_timestamp
 
             latest_database_delete_time = datetime.datetime.max if latest_database_delete_time == datetime.datetime.utcfromtimestamp(0) else latest_database_delete_time
@@ -2908,7 +2908,7 @@ def cli_cosmosdb_sql_container_restore(cmd,
                 resource = restorable_container.resource
                 if resource.owner_id == container_name:
                     event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
-                    if resource.operation_type == "Delete" and latest_collection_delete_time < event_timestamp :
+                    if resource.operation_type == "Delete" and latest_collection_delete_time < event_timestamp:
                         latest_collection_delete_time = event_timestamp
                     if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_collection_delete_time < event_timestamp and latest_database_create_or_recreate_time < event_timestamp:
                         latest_collection_create_or_recreate_time = event_timestamp
@@ -3094,10 +3094,10 @@ def cli_cosmosdb_mongodb_collection_restore(cmd,
                 if resource.owner_id == database_name:
                     database_rid = resource.owner_resource_id
                     event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
-                    if resource.operation_type == "Delete" and latest_database_delete_time < event_timestamp :
+                    if resource.operation_type == "Delete" and latest_database_delete_time < event_timestamp:
                         latest_database_delete_time = event_timestamp
 
-                    if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_database_create_or_recreate_time < event_timestamp :
+                    if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_database_create_or_recreate_time < event_timestamp:
                         latest_database_create_or_recreate_time = event_timestamp
 
             latest_database_delete_time = datetime.datetime.max if latest_database_delete_time == datetime.datetime.utcfromtimestamp(0) else latest_database_delete_time
@@ -3112,12 +3112,12 @@ def cli_cosmosdb_mongodb_collection_restore(cmd,
                 database_rid,
                 query_start_time,
                 query_end_time)
-            
+
             for restorable_collection in restorable_collections:
                 resource = restorable_collection.resource
                 if resource.owner_id == collection_name:
                     event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
-                    if resource.operation_type == "Delete" and latest_collection_delete_time < event_timestamp :
+                    if resource.operation_type == "Delete" and latest_collection_delete_time < event_timestamp:
                         latest_collection_delete_time = event_timestamp
 
                     if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_collection_delete_time < event_timestamp and latest_database_create_or_recreate_time < event_timestamp:
@@ -3304,9 +3304,9 @@ def cli_cosmosdb_gremlin_graph_restore(cmd,
                 if resource.owner_id == database_name:
                     database_rid = resource.owner_resource_id
                     event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
-                    if resource.operation_type == "Delete" and latest_database_delete_time < event_timestamp :
+                    if resource.operation_type == "Delete" and latest_database_delete_time < event_timestamp:
                         latest_database_delete_time = event_timestamp
-                    if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_database_create_or_recreate_time < event_timestamp :
+                    if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_database_create_or_recreate_time < event_timestamp:
                         latest_database_create_or_recreate_time = event_timestamp
 
             latest_database_delete_time = datetime.datetime.max if latest_database_delete_time == datetime.datetime.utcfromtimestamp(0) else latest_database_delete_time
@@ -3326,7 +3326,7 @@ def cli_cosmosdb_gremlin_graph_restore(cmd,
                 resource = restorable_graph.resource
                 if resource.owner_id == graph_name:
                     event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
-                    if resource.operation_type == "Delete" and latest_graph_delete_time < event_timestamp :
+                    if resource.operation_type == "Delete" and latest_graph_delete_time < event_timestamp:
                         latest_graph_delete_time = event_timestamp
                     if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_graph_delete_time < event_timestamp and latest_database_create_or_recreate_time < event_timestamp:
                         latest_graph_create_or_recreate_time = event_timestamp
@@ -3380,7 +3380,7 @@ def cli_cosmosdb_table_restore(cmd,
     restorable_database_account = None
 
     if restore_timestamp is not None:
-        restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp) 
+        restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
         for account in restorable_database_accounts_list:
             if account.account_name == account_name:
                 if account.deletion_time is not None:
