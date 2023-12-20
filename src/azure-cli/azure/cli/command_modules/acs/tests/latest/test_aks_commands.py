@@ -5102,6 +5102,27 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_stop_and_start_private_cluster(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value} --enable-private-cluster'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        stop_cmd = 'aks stop --resource-group={resource_group} --name={name}'
+        self.cmd(stop_cmd)
+
+        start_cmd = 'aks start --resource-group={resource_group} --name={name}'
+        self.cmd(start_cmd)
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_abort(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -9314,9 +9335,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         asg_ids = [asg1['id'], asg2['id']]
 
         self.kwargs.update({
-            'asg1_id': asg1['id'],
-            'asg2_id': asg2['id'],
+            'asg_ids_argument': '--nodepool-asg-ids {}'.format(' '.join(asg_ids)),
         })
+
         self.cmd(
             'aks create '
             '--resource-group={resource_group} '
@@ -9325,8 +9346,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--ssh-key-value={ssh_key_value} '
             '--node-count=1 '
             '--node-vm-size={node_vm_size} ' 
-            '--nodepool-asg-ids={asg1_id} '
-            '--nodepool-asg-ids={asg2_id} '
+            '{asg_ids_argument} '
             '{allowed_host_ports_argument}',
             checks=[
                 self.check('provisioningState', 'Succeeded'),
@@ -9403,8 +9423,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         asg_ids = [asg1['id'], asg2['id']]
 
         self.kwargs.update({
-            'asg1_id': asg1['id'],
-            'asg2_id': asg2['id'],
+            'asg_ids_argument': '--asg-ids {}'.format(' '.join(asg_ids)),
         })
 
         self.cmd(
@@ -9427,8 +9446,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--name={node_pool_name} '
             '--node-vm-size={node_vm_size} '
             '--node-count=1 '
-            '--asg-ids={asg1_id} '
-            '--asg-ids={asg2_id} '
+            '{asg_ids_argument} '
             '{allowed_host_ports_argument}',
             checks=[
                 self.check('provisioningState', 'Succeeded'),
@@ -9505,8 +9523,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         asg_ids = [asg1['id'], asg2['id']]
 
         self.kwargs.update({
-            'asg1_id': asg1['id'],
-            'asg2_id': asg2['id'],
+            'asg_ids_argument': '--asg-ids {}'.format(' '.join(asg_ids)),
         })
 
         self.cmd(
@@ -9528,8 +9545,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--resource-group={resource_group} '
             '--cluster-name={name} '
             '--name={node_pool_name} '
-            '--asg-ids={asg1_id} '
-            '--asg-ids={asg2_id} '
+            '{asg_ids_argument} '
             '{allowed_host_ports_argument}',
             checks=[
                 self.check('provisioningState', 'Succeeded'),
@@ -9636,6 +9652,62 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_crg_id(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_pool_name = self.create_random_name('c', 6)
+        node_pool_name_second = self.create_random_name('c', 6)
+        crg_id = '/subscriptions/26fe00f8-9173-4872-9134-bb1d2e00343a/resourceGroups/STAGING-CRG-RG/providers/Microsoft.Compute/capacityReservationGroups/crg-1'
+        vm_size = 'Standard_D2s_v3'
+        count = 1
+        identity = '/subscriptions/26fe00f8-9173-4872-9134-bb1d2e00343a/resourceGroups/STAGING-CRG-RG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/crg-1-id'
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'count': count,
+            'location': resource_group_location,
+            'crg_id': crg_id,
+            'vm_size': vm_size,
+            'identity': identity,
+            'node_pool_name': node_pool_name,
+            'node_pool_name_second': node_pool_name_second,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--node-vm-size {vm_size} ' \
+                     '--nodepool-name {node_pool_name} -c 1 ' \
+                     '--enable-managed-identity ' \
+                     '--assign-identity {identity} ' \
+                     '--crg-id={crg_id} ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # nodepool get-upgrades
+        self.cmd('aks nodepool add '
+                 '--resource-group={resource_group} '
+                 '--cluster-name={name} '
+                 '--name={node_pool_name_second} '
+                 '--node-vm-size {vm_size} '
+                 '--crg-id={crg_id} '
+                 '-c 1 ',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
     def test_list_trustedaccess_roles(self):
         cmd = 'aks trustedaccess role list -l westus2'
         self.cmd(cmd, checks=[
@@ -9646,11 +9718,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_with_trustedaccess_rolebinding(self, resource_group, resource_group_location):
-        # reset the count so in replay mode the random names will start with 0
-        self.test_resources_count = 0
-        # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
