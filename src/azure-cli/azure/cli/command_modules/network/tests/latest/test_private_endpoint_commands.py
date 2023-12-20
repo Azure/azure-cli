@@ -11,7 +11,7 @@ import unittest
 from azure.core.exceptions import HttpResponseError
 
 from azure.cli.testsdk import (
-    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, KeyVaultPreparer, ManagedHSMPreparer, live_only, record_only)
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, KeyVaultPreparer, ManagedHSMPreparer, live_only, record_only)
 from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.rdbms.tests.latest.test_rdbms_commands import ServerPreparer
@@ -1164,7 +1164,7 @@ class NetworkPrivateLinkKustoClusterScenarioTest(ScenarioTest):
         self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
 
 
-class NetworkPrivateLinkWebappScenarioTest(LiveScenarioTest):  # issues with appservice
+class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus')
     def test_private_link_resource_webapp(self, resource_group):
         self.kwargs.update({
@@ -2850,14 +2850,12 @@ class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
     def test_private_endpoint_connection_powerbi(self, resource_group):
         self._test_private_endpoint_connection_scenario_powerbi(resource_group, 'myPowerBIResource', 'Microsoft.PowerBI/privateLinkServicesForPowerBI', True)
 
-    @live_only()
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_powerbi", location="eastus2")
     def test_private_endpoint_connection_powerbi_ignoreReject(self, resource_group):
         self._test_private_endpoint_connection_scenario_powerbi(resource_group, 'myPowerBIResource', 'Microsoft.PowerBI/privateLinkServicesForPowerBI', False)
 
 
 class NetworkPrivateLinkBotServiceScenarioTest(ScenarioTest):
-    @live_only()
     @ResourceGroupPreparer(name_prefix='test_abs_private_endpoint', random_name_length=40)
     def test_abs_privatendpoint_with_default(self, resource_group):
         self.kwargs.update({
@@ -2922,7 +2920,7 @@ class NetworkPrivateLinkBotServiceScenarioTest(ScenarioTest):
 
 class NetworkPrivateLinkHDInsightScenarioTest(ScenarioTest):
 
-    @live_only()  # This test need to create hdinsight cluster in advance
+    @record_only()  # This test need to create hdinsight cluster in advance
     @ResourceGroupPreparer(name_prefix='test_hdi_private_link', random_name_length=40, location="southcentralus")
     def test_private_link_resource_hdinsight(self, resource_group):
         self.kwargs.update({
@@ -4271,7 +4269,6 @@ class NetworkPrivateLinkCloudHsmClustersScenarioTest(ScenarioTest):
                  checks=self.check('@[0].properties.groupId', 'cloudhsm'))
         self.cmd('resource delete --name {chsm_name} -g {rg} --resource-type {type}')
 
-    @unittest.skip("Subscription unregistered.")
     @ResourceGroupPreparer(name_prefix='cli_test_chsm_pe')
     def test_chsm_private_endpoint_connection(self, resource_group):
         # Define Params
@@ -4638,7 +4635,6 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
         self.cmd('az network private-link-resource list --name {cluster_name} --resource-group {rg} --type Microsoft.DocumentDB/mongoClusters',
                  checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'MongoCluster')])
 
-    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongo_cl', random_name_length=30, location='eastus2euap')
     def test_private_endpoint_connection_cosmosdb_mongo_clusters(self, resource_group):
         from azure.mgmt.core.tools import resource_id
@@ -4783,7 +4779,6 @@ class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
         self.cmd('az network private-link-resource list --name {server_name} --resource-group {rg} --type Microsoft.DBforPostgreSQL/flexibleServers',
                  checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'postgresqlServer')])
 
-    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_fspg', random_name_length=18, location='eastus2euap')
     def test_private_endpoint_connection_postgres_flexible_server(self, resource_group):
         from azure.mgmt.core.tools import resource_id

@@ -3723,7 +3723,7 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
 
 class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_load_balancer_ip_config', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_load_balancer_ip_config', location='westus')
     def test_network_load_balancer_ip_config(self, resource_group):
 
         for i in range(1, 4):  # create 3 public IPs to use for the test
@@ -3757,9 +3757,9 @@ class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
         self.cmd('network lb frontend-ip create -g {rg} --lb-name lb2 -n ipconfig2 --vnet-name vnet1 --subnet subnet1 --private-ip-address 10.0.0.99')
         self.cmd('network lb frontend-ip list -g {rg} --lb-name lb2',
                  checks=self.check('length(@)', 2))
-        self.cmd('network lb frontend-ip update -g {rg} --lb-name lb2 -n ipconfig2 --subnet subnet1 --vnet-name vnet1 --private-ip-address 10.0.0.100')
+        self.cmd('network lb frontend-ip update -g {rg} --lb-name lb2 -n ipconfig2 --subnet subnet2 --vnet-name vnet1 --private-ip-address 10.0.1.100')
         self.cmd('network lb frontend-ip show -g {rg} --lb-name lb2 -n ipconfig2',
-                 checks=self.check("subnet.contains(id, 'subnet1')", True))
+                 checks=self.check("subnet.contains(id, 'subnet2')", True))
 
 
 class NetworkLoadBalancerOutboundRulesScenarioTest(ScenarioTest):
