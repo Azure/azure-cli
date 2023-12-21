@@ -35,8 +35,16 @@ examples:
         az postgres flexible-server create --location northeurope --resource-group testGroup \\
           --name testserver --admin-user username --admin-password password \\
           --sku-name Standard_B1ms --tier Burstable --public-access 153.24.26.117 --storage-size 128 \\
-          --tags "key=value" --version 13 --high-availability Enabled --zone 1 \\
+          --tags "key=value" --version 13 --high-availability ZoneRedundant --zone 1 \\
           --standby-zone 3
+  - name: >
+      Create a PostgreSQL flexible server using Premium SSD v2 Disks.
+    text: >
+      # set storage type to "PremiumV2_LRS" and provide values for Storage size (in GiB), IOPS (operations/sec), and Throughput (MB/sec).
+
+      az postgres flexible-server create --location northeurope --resource-group testGroup \\
+          --name testserver --admin-user username --admin-password password \\
+          --sku-name Standard_B1ms --tier Burstable --storage-type PremiumV2_LRS --storage-size 128 --iops 3000 --throughput 125
   - name: >
       Create a PostgreSQL flexible server with default parameters and public access enabled by default. \
       Resource group, server name, username, password, and default database will be created by CLI
@@ -200,14 +208,12 @@ examples:
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --geo-redundant-backup Enabled \\
         --key $keyIdentifier --identity testIdentity --backup-key $geoKeyIdentifier --backup-identity geoIdentity
 
-
   - name: >
       Create flexible server with custom storage performance tier. Accepted values "P4", "P6", "P10", "P15", "P20", "P30", \\
       "P40", "P50", "P60", "P70", "P80". Actual allowed values depend on the --storage-size selection for flexible server creation. \\
       Default value for storage performance tier depends on the --storage-size selected for flexible server creation.
     text: >
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --performance-tier P15
-
 
   - name: >
       create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
@@ -267,6 +273,10 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --storage-auto-grow Enabled
   - name: Update a flexible server's storage to set custom storage performance tier.
     text: az postgres flexible-server update --resource-group testGroup --name testserver --performance-tier P15
+  - name: Update a flexible server's storage to set IOPS (operations/sec). Server must be using Premium SSD v2 Disks.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --iops 3000
+  - name: Update a flexible server's storage to set Throughput (MB/sec). Server must be using Premium SSD v2 Disks.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --throughput 125
 """
 
 helps['postgres flexible-server restore'] = """

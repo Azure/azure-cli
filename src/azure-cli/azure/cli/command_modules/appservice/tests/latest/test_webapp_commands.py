@@ -2705,6 +2705,51 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             JMESPathCheck('message', 'OneDeploy'),
         ])
 
+
+class TrackRuntimeStatusTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
+    def test_webapp_track_runtimestatus_runtimesucessful(self, resource_group):
+        webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
+        plan_name = self.create_random_name('webapp-runtimestatus-plan', 40)
+        war_file = os.path.join(TEST_DIR, 'data', 'sample.war')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+        self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --async --track-status'.format(resource_group, webapp_name, war_file)).assert_with_checks([
+            JMESPathCheck('resourceGroup', resource_group),
+            JMESPathCheck('properties.errors', None),
+            JMESPathCheck('properties.numberOfInstancesFailed', '0'),
+            JMESPathCheck('properties.numberOfInstancesInProgress', '0'),
+            JMESPathCheck('properties.numberOfInstancesSuccessful', '1'),
+            JMESPathCheck('properties.status', 'RuntimeSuccessful'),
+            JMESPathCheck('type', 'Microsoft.Web/sites/deploymentStatus'),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
+    def test_webapp_track_runtimestatus_buildfailed(self, resource_group):
+        webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
+        plan_name = self.create_random_name('webapp-runtimestatus-plan', 40)
+        zip_file = os.path.join(TEST_DIR, 'data', 'nodebuildfailed.zip')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
+        with self.assertRaisesRegexp(CLIError, "Deployment failed because the build process failed"):
+            self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async --track-status'.format(resource_group, webapp_name, zip_file))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
+    def test_webapp_track_runtimestatus_runtimefailed(self, resource_group):
+        webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
+        plan_name = self.create_random_name('webapp-runtimestatus-plan', 40)
+        zip_file = os.path.join(TEST_DIR, 'data', 'noderuntimefailed.zip')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
+        with self.assertRaisesRegexp(CLIError, "Deployment failed because the site failed to start within 10 mins."):
+            self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async --track-status'.format(resource_group, webapp_name, zip_file))
+
 class DomainScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_domain_create(self, resource_group):
