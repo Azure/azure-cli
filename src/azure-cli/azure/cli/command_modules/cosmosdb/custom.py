@@ -1804,7 +1804,7 @@ def cli_cosmosdb_restore(cmd,
     from datetime import timezone
     current_dateTime = datetime.datetime.utcnow()
     if restore_timestamp_datetime_utc.tzinfo is not None and restore_timestamp_datetime_utc.tzinfo.utcoffset(restore_timestamp_datetime_utc) is not None:
-        current_dateTime = datetime.now(timezone.utc)
+        current_dateTime = datetime.datetime.now(timezone.utc)
 
     # Fail if provided restoretimesamp is greater than current timestamp
     if restore_timestamp_datetime_utc > current_dateTime:
@@ -2997,7 +2997,7 @@ def cli_cosmosdb_mongodb_database_restore(cmd,
 
             if (latest_restore_time == datetime.datetime.utcfromtimestamp(0)):
                 raise CLIError("Cannot find a deleted database with name {} in this account with name {} that is online in location {}".format(database_name, account_name, restorable_database_account.location))
-            
+
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
             restore_time = latest_restore_time + datetime.timedelta(seconds=-1)
             restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%Z")
@@ -3200,7 +3200,7 @@ def cli_cosmosdb_gremlin_database_restore(cmd,
 
             if (latest_restore_time == datetime.datetime.utcfromtimestamp(0)):
                 raise CLIError("Cannot find a deleted database with name {} in this account with name {} that is online in location {}".format(database_name, account_name, restorable_database_account.location))
-            
+
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
             restore_time = latest_restore_time + datetime.timedelta(seconds=-1)
             restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%Z")
@@ -3405,7 +3405,7 @@ def cli_cosmosdb_table_restore(cmd,
 
             if (latest_restore_time == datetime.datetime.utcfromtimestamp(0)):
                 raise CLIError("Cannot find a deleted table with name {} in this account with name {} that is online in location {}".format(table_name, account_name, restorable_database_account.location))
-            
+
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
             restore_time = latest_restore_time + datetime.timedelta(seconds=-1)
             restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%Z")
