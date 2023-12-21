@@ -7,8 +7,13 @@ jobs:
     runs-on: ubuntu-20.04
     name: Say thanks for the Issue
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@128a63446a954579617e875aaab7d2978154e969 # v2.4.0
+        with:
+          egress-policy: audit
+
       - name: comment on the issue
-        uses: hasura/comment-progress@v2.2.0
+        uses: hasura/comment-progress@1d904b435730dd3d43ffa8a45522b8d06ebfbb43 # v2.2.0
         with:
           github-token: ${{ secrets.CLI_BOT }}
           repository: 'Azure/azure-cli'
