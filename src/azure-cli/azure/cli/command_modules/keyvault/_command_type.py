@@ -29,7 +29,7 @@ def _encode_hex(item):
     return item
 
 
-def keyvault_exception_handler(cmd, ex):
+def keyvault_exception_handler(ex):
     from msrest.exceptions import ValidationError, ClientRequestError
     if isinstance(ex, ValidationError):
         try:
@@ -132,7 +132,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
                         show_exception_handler(ex)
                     except Exception:  # pylint: disable=broad-except
                         pass
-                return keyvault_exception_handler(self.command_loader, ex)
+                return keyvault_exception_handler(ex)
 
         self.command_loader._cli_command(command_name, handler=keyvault_command_handler,  # pylint: disable=protected-access
                                          argument_loader=keyvault_arguments_loader,

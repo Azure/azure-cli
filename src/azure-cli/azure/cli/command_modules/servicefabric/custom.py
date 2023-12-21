@@ -1119,10 +1119,9 @@ def _create_certificate(cmd,
             vault_uri = vault.properties.vault_uri
             certificate_name = _get_certificate_name(certificate_subject_name, resource_group_name)
 
-            from azure.cli.command_modules.keyvault.custom import _default_certificate_profile
             from azure.cli.command_modules.keyvault._validators import build_certificate_policy
             from knack.util import todict
-            policy = _default_certificate_profile(cmd)
+            policy = _get_default_policy(certificate_subject_name)
             policyObj = build_certificate_policy(cli_ctx, todict(policy))
             logger.info("Creating self-signed certificate")
             result = _create_self_signed_key_vault_certificate(
@@ -1484,10 +1483,50 @@ def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, s
             raise ex
 
 
+def _get_default_policy(subject):
+    if subject.lower().startswith('cn') is not True:
+        subject = "CN={0}".format(subject)
+    cert_policy = {
+        'issuer_parameters': {
+            'name': 'Self'
+        },
+        'key_properties': {
+            'exportable': True,
+            'key_size': 2048,
+            'key_type': 'RSA',
+            'reuse_key': True
+        },
+        'lifetime_actions': [{
+            'action': {
+                'action_type': 'AutoRenew'
+            },
+            'trigger': {
+                'days_before_expiry': 90
+            }
+        }],
+        'secret_properties': {
+            'content_type': 'application/x-pkcs12'
+        },
+        'x509_certificate_properties': {
+            'key_usage': [
+                'cRLSign',
+                'dataEncipherment',
+                'digitalSignature',
+                'keyEncipherment',
+                'keyAgreement',
+                'keyCertSign'
+            ],
+            'subject': subject,
+            'validity_in_months': 12
+        }
+    }
+    return cert_policy
+
+
 def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certificate_name, certificate_policy, certificate_output_folder=None, disabled=False, tags=None, validity=None):
     logger.info("Starting long-running operation 'keyvault certificate create'")
     if validity:
-        certificate_policy._validity_in_months = validity
+        certificate_policy._validity_in_months = validity  # pylint: disable=protected-access
     client = _get_keyvault_cert_client(cli_ctx, vault_base_url)
     client.begin_create_certificate(certificate_name, certificate_policy, enabled=not disabled, tags=tags).result()
 
@@ -1513,6 +1552,7 @@ def _get_keyvault_cert_client(cli_ctx, vault_base_url):
     from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_certificate_client
     command_args = {'vault_base_url': vault_base_url}
     return data_plane_azure_keyvault_certificate_client(cli_ctx, command_args)
+
 
 def _create_keyvault(cmd,
                      cli_ctx,

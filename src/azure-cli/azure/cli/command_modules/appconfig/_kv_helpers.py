@@ -346,12 +346,6 @@ def __read_kv_from_config_store(azconfig_client,
     elif top is None:
         top = 100
 
-    if cli_ctx:
-        from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-        keyvault_client = keyvault_data_plane_factory(cli_ctx)
-    else:
-        keyvault_client = None
-
     for setting in configsetting_iterable:
         kv = convert_configurationsetting_to_keyvalue(setting)
 
@@ -365,8 +359,8 @@ def __read_kv_from_config_store(azconfig_client,
 
             if kv.content_type and kv.value:
                 # resolve key vault reference
-                if keyvault_client and __is_key_vault_ref(kv):
-                    __resolve_secret(keyvault_client, kv)
+                if cli_ctx and __is_key_vault_ref(kv):
+                    __resolve_secret(cli_ctx, kv)
 
         # trim unwanted fields from kv object instead of leaving them as null.
         if fields:
@@ -828,14 +822,15 @@ def __compact_key_values(key_values):
     return compacted
 
 
-def __resolve_secret(keyvault_client, keyvault_reference):
+def __resolve_secret(cli_ctx, keyvault_reference):
     try:
         secret_id = json.loads(keyvault_reference.value)["uri"]
         kv_identifier = parse_key_vault_id(source_id=secret_id)
+        from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_secret_client
+        keyvault_client = data_plane_azure_keyvault_secret_client(cli_ctx, kv_identifier.vault_url)
 
-        secret = keyvault_client.get_secret(vault_base_url=kv_identifier.vault_url,
-                                            secret_name=kv_identifier.name,
-                                            secret_version=kv_identifier.version)
+        secret = keyvault_client.get_secret(name=kv_identifier.name,
+                                            version=kv_identifier.version)
         keyvault_reference.value = secret.value
         return keyvault_reference
     except (TypeError, ValueError):
