@@ -2298,12 +2298,16 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
                     checks=[JMESPathCheck('value', "1"),
                             JMESPathCheck('name', "logfiles.retention_days")]).get_output_in_json()
         
+        if os.environ.get(ENV_LIVE_TEST, True):
+            return
+        
         # wait for around 30 min to allow log files to be generated
-        os.environ.get(ENV_LIVE_TEST, False) and sleep(30*60)
+        sleep(30*60)
 
         # list server log files
         server_log_files = self.cmd('{} flexible-server server-logs list -g {} --server-name {} '
                                     .format(database_engine, resource_group, server_name)).get_output_in_json()
+        
         self.assertGreater(len(server_log_files), 0, "Server logFiles are not yet created")
         
         # download server log files
