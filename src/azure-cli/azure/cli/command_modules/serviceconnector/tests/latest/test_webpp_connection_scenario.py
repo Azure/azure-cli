@@ -1480,18 +1480,17 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
     @record_only()
     def test_webapp_storageblob_secret_opt_out_public_network_and_config(self):
-        self.test_webapp_storageblob_secret_opt_out(['public-network', 'config'])
+        self._test_webapp_storageblob_secret_opt_out(['public-network', 'config'])
     
     @record_only()
     def test_webapp_storageblob_secret_opt_out_public_network(self):
-        self.test_webapp_storageblob_secret_opt_out(['public-network'])
+        self._test_webapp_storageblob_secret_opt_out(['public-network'])
     
     @record_only()
     def test_webapp_storageblob_secret_opt_out_config(self):
-        self.test_webapp_storageblob_secret_opt_out(['config'])
+        self._test_webapp_storageblob_secret_opt_out(['config'])
 
-    @record_only()
-    def test_webapp_storageblob_secret_opt_out(self, opt_out_list):
+    def _test_webapp_storageblob_secret_opt_out(self, opt_out_list):
 
         def clear_firewall_rules():
             network = self.cmd(
