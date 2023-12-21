@@ -513,8 +513,8 @@ examples:
           "SourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
           "SecretParameters": {
             "AdminCredentials": {
-              "SourceServerPassword": "pppppppp",
-              "TargetServerPassword": "pppppppp"
+              "SourceServerPassword": "password",
+              "TargetServerPassword": "password"
             },
             "SourceServerUserName": "testuser@pg-single-1",
             "TargetServerUserName": "fspguser"
@@ -538,8 +538,8 @@ examples:
           "SourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
           "SecretParameters": {
             "AdminCredentials": {
-              "SourceServerPassword": "pppppppp",
-              "TargetServerPassword": "pppppppp"
+              "SourceServerPassword": "password",
+              "TargetServerPassword": "password"
             },
             "SourceServerUserName": "testuser@pg-single-1",
             "TargetServerUserName": "fspguser"
@@ -569,8 +569,8 @@ examples:
           "SourceDBServerResourceId": "20.66.25.58:5432@postgres",
           "SecretParameters": {
             "AdminCredentials": {
-              "SourceServerPassword": "pppppppp",
-              "TargetServerPassword": "pppppppp"
+              "SourceServerPassword": "password",
+              "TargetServerPassword": "password"
             },
             "SourceServerUserName": "postgres",
             "TargetServerUserName": "fspguser"
