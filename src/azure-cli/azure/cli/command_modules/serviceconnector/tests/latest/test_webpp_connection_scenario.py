@@ -1435,7 +1435,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-config-store-app-euap',# 'servicelinker-storageblob-app',
+            'site': 'servicelinker-storageblob-app',
             'slot': 'slot1',
             'account': 'servicelinkerstorage'
         })
@@ -1490,6 +1490,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
     def test_webapp_storageblob_secret_opt_out_config(self):
         self.test_webapp_storageblob_secret_opt_out(['config'])
 
+    @record_only()
     def test_webapp_storageblob_secret_opt_out(self, opt_out_list):
 
         def clear_firewall_rules():
