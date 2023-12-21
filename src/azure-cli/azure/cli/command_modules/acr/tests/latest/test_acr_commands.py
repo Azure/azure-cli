@@ -809,3 +809,60 @@ class AcrCommandsTests(ScenarioTest):
         result_identities = [identity.lower() for identity in result['userAssignedIdentities'].keys()]
         self.assertEqual(len(result['userAssignedIdentities']), len(query_identities))
         self.assertEqual(sorted(result_identities), sorted(query_identities))
+
+    @ResourceGroupPreparer()
+    def test_acr_create_with_metadata_search_enabled(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': resource_group_location,
+            'sku': 'Premium'
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --metadata-search Enabled',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Premium'),
+                         self.check('sku.tier', 'Premium'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('metadataSearch', 'Enabled')])
+
+        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --metadata-search Disabled',
+            checks=[self.check('name', '{registry_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('metadataSearch', 'Disabled')])
+
+        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --metadata-search Enabled',
+            checks=[self.check('name', '{registry_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('metadataSearch', 'Enabled')])
+
+        self._core_registry_scenario(registry_name, resource_group, resource_group_location)
+
+    @ResourceGroupPreparer()
+    def test_acr_create_with_metadata_search_disabled(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': resource_group_location,
+            'sku': 'Premium'
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Premium'),
+                         self.check('sku.tier', 'Premium'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('metadataSearch', 'Disabled')])
+
+        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --metadata-search Enabled',
+            checks=[self.check('name', '{registry_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('metadataSearch', 'Enabled')])
+
+        self._core_registry_scenario(registry_name, resource_group, resource_group_location)
