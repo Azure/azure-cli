@@ -43,10 +43,11 @@ def request_error_assistance(command: Union[str, None] = None,
         if len(_cached_token_session) == 0:
             _cached_token_session = _refresh_cached_token_session(cli_ctx)
 
-        retry_count: int = 5
+        retry_count: int = 1
+
         current_retry: int = 0
 
-        while len(_cached_token_session) == 2 and current_retry < retry_count:
+        while len(_cached_token_session) == 2 and current_retry <= retry_count:
             # The while statement ensure there are at least two element in the tuple _cached_token_session
 
             (deepprompt_token, session_id) = _cached_token_session  # pylint: disable=unbalanced-tuple-unpacking
