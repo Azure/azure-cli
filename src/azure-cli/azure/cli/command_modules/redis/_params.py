@@ -8,7 +8,7 @@ from knack.arguments import CLIArgumentType
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
-    from azure.mgmt.redis.models import RebootType, RedisKeyType, SkuName, TlsVersion, ReplicationRole
+    from azure.mgmt.redis.models import RebootType, RedisKeyType, SkuName, TlsVersion, ReplicationRole, UpdateChannel
     from azure.cli.command_modules.redis._validators import JsonString, ScheduleEntryList
     from azure.cli.command_modules.redis.custom import allowed_c_family_sizes, allowed_p_family_sizes, allowed_auth_methods
     from azure.cli.core.commands.parameters import get_enum_type, tags_type, zones_type
@@ -49,6 +49,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('redis_version', help='Redis version. This should be in the form \'major[.minor]\' (only \'major\' is required) or the value \'latest\' which refers to the latest stable Redis version that is available. Supported versions: 4.0, 6.0 (latest). Default value is \'latest\'.')
         c.argument('mi_system_assigned', arg_type=system_identity_type)
         c.argument('mi_user_assigned', arg_type=user_identity_type)
+        c.argument('update_channel', arg_type=get_enum_type(UpdateChannel), help='Specifies the update channel for the monthly Redis updates your Redis Cache will receive. Caches using "Preview" update channel get latest Redis updates at least 4 weeks ahead of "Stable" channel caches. Default value is "Stable".')
 
     with self.argument_context('redis firewall-rules list') as c:
         c.argument('cache_name', arg_type=cache_name, id_part=None)
