@@ -1435,7 +1435,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storageblob-app',
+            'site': 'servicelinker-config-store-app-euap',# 'servicelinker-storageblob-app',
             'slot': 'slot1',
             'account': 'servicelinkerstorage'
         })
@@ -1479,16 +1479,58 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     @record_only()
-    def test_webapp_storageblob_smi_opt_out_public_network_and_config(self):
-        self.test_webapp_storageblob_opt_out(['public-network', 'config'])
+    def test_webapp_storageblob_secret_opt_out_public_network_and_config(self):
+        self.test_webapp_storageblob_secret_opt_out(['public-network', 'config'])
+    
+    @record_only()
+    def test_webapp_storageblob_secret_opt_out_public_network(self):
+        self.test_webapp_storageblob_secret_opt_out(['public-network'])
+    
+    @record_only()
+    def test_webapp_storageblob_secret_opt_out_config(self):
+        self.test_webapp_storageblob_secret_opt_out(['config'])
 
-    def test_webapp_storageblob_smi_opt_out(self, opt_out_list):
-        
-        def check_config_len(config):
+    def test_webapp_storageblob_secret_opt_out(self, opt_out_list):
+
+        def clear_firewall_rules():
+            network = self.cmd(
+                'storage account network-rule list '
+                '--account-name {account} -g {target_resource_group}'.format(**self.kwargs)
+                ).get_output_in_json()
+            ip_rules = [ip_rule['ipAddressOrRange'] for ip_rule in network['ipRules']]
+            self.cmd(
+                'storage account network-rule remove '
+                '--account-name {account} -g {target_resource_group} '
+                '--ip-address {}'.format(' '.join(ip_rules), **self.kwargs))
+
+        def validate_config(connection_id):
+            # validate config
+            # list configuration
+            configurations = self.cmd(
+                'webapp connection list-configuration --id {}'.format(connection_id)
+            ).get_output_in_json()['configurations']
             if 'config' in opt_out_list:
-                self.assertEqual(len(config), 0)
+                self.assertEqual(len(configurations), 0)
             else:
-                self.assertEqual(len(config), 4)
+                self.assertEqual(len(configurations), 1)
+
+        def validate_firewall():
+            network = self.cmd(
+                'storage account network-rule list '
+                '--account-name {account} -g {target_resource_group}'.format(**self.kwargs)
+                ).get_output_in_json()
+            if 'public-network' in opt_out_list:
+                self.assertEqual(len(network['ipRules']), 0)
+            else:
+                webapp = self.cmd(
+                    'webapp show -g {source_resource_group} -n {site}'.format(**self.kwargs)
+                ).get_output_in_json()
+                ips = webapp['possibleOutboundIpAddresses']
+                self.assertEqual(len(network['ipRules']), len(ips.split(',')))
+
+        def validate_connection(connection_id):
+            validate_config(connection_id)
+            validate_firewall()
 
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -1496,52 +1538,44 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'target_resource_group': 'wctest',
             'site': 'servicelinker-storageblob-app',
             'account': 'wctest'
-        })
+        })     
 
         # prepare params
         name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
 
+        # clear firewall rules
+        clear_firewall_rules()
 
         # create connection
         self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type python --opt-out {}'.format(name, source_id, 
-                                                                              target_id, ' '.join(opt_out_list)))
+                 '--secret --client-type dotnet --opt-out {}'.format(name, source_id, 
+                                                                     target_id, ' '.join(opt_out_list)))
 
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
             checks = [
                 self.check('length(@)', 1),
-                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].authInfo.authType', 'secret'),
                 self.check('[0].clientType', 'dotnet')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
 
-        # list configuration
-        configurations = self.cmd(
-            'webapp connection list-configuration --id {}'.format(connection_id)
-        ).get_output_in_json()
-
-        check_config_len(configurations)
+        # if opt out config, linker validation is expected to fail
+        validate_connection(connection_id)
 
         # update connection
         self.cmd('webapp connection update storage-blob --id {} '
                  '--client-type python --opt-out {}'.format(connection_id,
                                                             ' '.join(opt_out_list)))
 
-        check_config_len(configurations)
-        
-        # validate connection
-        self.cmd('webapp connection validate --id {}'.format(connection_id)).get_output_in_json()
+        validate_connection(connection_id)
 
         # show connection
         self.cmd('webapp connection show --id {}'.format(connection_id))
 
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
-
-
-    

@@ -412,7 +412,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
             'customizedKeys': customized_keys,
             'action': config_action
         },
-        'publicNetworkSolution':{
+        'publicNetworkSolution': {
             'action': public_network_action
         }
     }
@@ -667,7 +667,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
 
     if linker.get('configurationInfo') and linker.get('configurationInfo').get('customizedKeys'):
         customized_keys = customized_keys or linker.get('configurationInfo').get('customizedKeys')
-    
+
     config_action = 'optOut' if (opt_out_set is not None and 'config' in opt_out_set) else None
     public_network_action = 'optOut' if (opt_out_set is not None and 'public-network' in opt_out_set) else None
 
@@ -684,7 +684,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
             'customizedKeys': customized_keys,
             'action': config_action
         },
-        'publicNetworkSolution':{
+        'publicNetworkSolution': {
             'action': public_network_action
         }
     }
@@ -1055,7 +1055,7 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
             'customizedKeys': customized_keys,
             'action': config_action
         },
-        'publicNetworkSolution':{
+        'publicNetworkSolution': {
             'action': public_network_action
         }
     }
@@ -1195,7 +1195,7 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                 'customizedKeys': customized_keys,
                 'action': config_action
             },
-            'publicNetworkSolution':{
+            'publicNetworkSolution': {
                 'action': public_network_action
             }
         }

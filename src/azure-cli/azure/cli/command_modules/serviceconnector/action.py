@@ -217,10 +217,10 @@ class AddServicePrincipalAuthInfo(argparse.Action):
 
 class AddOptOut(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string)
+        action = self.get_action(values)
         namespace.opt_out_set = action
 
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+    def get_action(self, values):  # pylint: disable=no-self-use
         opt_out_set = set()
         opt_out_options = {'public-network', 'config'}
 
@@ -228,8 +228,7 @@ class AddOptOut(argparse.Action):
             if x not in opt_out_options:
                 raise ValidationError('Unsupported value {} is provided for parameter --opt-out. All '
                                       'possible values are: {}'.format(x, ', '.join(opt_out_options)))
-            else:
-                opt_out_set.add(x)
+            opt_out_set.add(x)
 
         if len(opt_out_set) == 0:
             raise ValidationError('At least one value is required for parameter --opt-out. '
