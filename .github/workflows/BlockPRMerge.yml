@@ -1,4 +1,4 @@
-name: Prevent Merge on "do-not-merge" Label
+name: Block PR merging on "do-not-merge" label
 
 on:
   pull_request_target:
@@ -14,8 +14,8 @@ jobs:
           script: |
             const labels = context.payload.pull_request.labels.map(label => label.name);
             if (labels.includes("do-not-merge")) {
-              console.log("PR contains 'do-not-merge' label. Blocking merge.");
+              console.log("It is not allowed to merge a PR with 'do-not-merge' label.");
               process.exit(1); // Exit with a non-zero status code to block merge
             } else {
-              console.log("PR does not contain 'do-not-merge' label. Allow merge.");
+              console.log("It is allowed to merge a PR without 'do-not-merge' label.");
             }
