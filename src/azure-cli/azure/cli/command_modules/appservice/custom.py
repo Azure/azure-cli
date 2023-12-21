@@ -1784,13 +1784,15 @@ def update_container_settings_functionapp(cmd, resource_group_name, name, regist
                                           registry_password=None, slot=None, min_replicas=None, max_replicas=None,
                                           enable_dapr=None, dapr_app_id=None, dapr_app_port=None,
                                           dapr_http_max_request_size=None, dapr_http_read_buffer_size=None,
-                                          dapr_log_level=None, dapr_enable_api_logging=None):
+                                          dapr_log_level=None, dapr_enable_api_logging=None,
+                                          workload_profile_name=None, cpu=None, memory=None):
     if is_centauri_functionapp(cmd, resource_group_name, name):
+        _validate_cpu_momory_functionapp(cpu, memory)
         if any([enable_dapr, dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
-                dapr_log_level, dapr_enable_api_logging]):
-            update_dapr_config(cmd, resource_group_name, name, enable_dapr, dapr_app_id, dapr_app_port,
-                               dapr_http_max_request_size, dapr_http_read_buffer_size, dapr_log_level,
-                               dapr_enable_api_logging)
+                dapr_log_level, dapr_enable_api_logging, cpu, memory, workload_profile_name]):
+            update_dapr_and_workload_config(cmd, resource_group_name, name, enable_dapr, dapr_app_id, dapr_app_port,
+                                            dapr_http_max_request_size, dapr_http_read_buffer_size, dapr_log_level,
+                                            dapr_enable_api_logging, workload_profile_name, cpu, memory)
     return update_container_settings(cmd, resource_group_name, name, registry_server,
                                      image, registry_username, None,
                                      registry_password, multicontainer_config_type=None,
@@ -3767,35 +3769,75 @@ def should_enable_distributed_tracing(consumption_plan_location, matched_runtime
 
 
 def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
-    try:
-        _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update', None, functionapp)
-    except Exception as ex:  # pylint: disable=broad-except
-        poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
-        if ex.response.status_code == 202 and poll_url:
-            r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
-            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(cmd.cli_ctx)
+    sub_id = get_subscription_id(cmd.cli_ctx)
+    base_url = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'.format(
+        sub_id,
+        resource_group_name,
+        name,
+        client.DEFAULT_API_VERSION
+    )
+    url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
-            while r.status_code != 200 and time.time() < poll_timeout:
-                time.sleep(5)
-                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
-        else:
-            raise CLIError(ex)
+    updated_functionapp = json.dumps(
+        {
+            "properties": {
+                "daprConfig": {
+                    "enabled": functionapp.dapr_config.enabled,
+                    "appId": functionapp.dapr_config.app_id,
+                    "appPort": functionapp.dapr_config.app_port,
+                    "httpReadBufferSize": functionapp.dapr_config.http_read_buffer_size,
+                    "httpMaxRequestSize": functionapp.dapr_config.http_max_request_size,
+                    "logLevel": functionapp.dapr_config.log_level,
+                    "enableApiLogging": functionapp.dapr_config.enable_api_logging
+                },
+                "workloadProfileName": functionapp.workload_profile_name,
+                "resourceConfig": {
+                    "cpu": functionapp.resource_config.cpu,
+                    "memory": functionapp.resource_config.memory
+                }
+            }
+        }
+    )
+    response = send_raw_request(cmd.cli_ctx, method='PATCH', url=url, body=updated_functionapp)
+    poll_url = response.headers.get('location', "")
+    if response.status_code == 202 and poll_url:
+        response = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+
+        while response.status_code != 200:
+            time.sleep(5)
+            response = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+
+        if response.status_code == 200:
+            return response
+
+    else:
+        return response
 
 
-def update_dapr_config(cmd, resource_group_name, name, enabled=None, app_id=None, app_port=None,
-                       http_max_request_size=None, http_read_buffer_size=None, log_level=None,
-                       enable_api_logging=None):
+def update_dapr_and_workload_config(cmd, resource_group_name, name, enabled=None, app_id=None, app_port=None,
+                                    http_max_request_size=None, http_read_buffer_size=None, log_level=None,
+                                    enable_api_logging=None, workload_profile_name=None, cpu=None, memory=None):
     site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['enabled', 'enable_api_logging']
     int_flags = ['app_port', 'http_max_request_size', 'http_read_buffer_size']
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
-    for arg in args[3:]:
+    for arg in args[3:10]:
         if arg in int_flags and values[arg] is not None:
             values[arg] = validate_and_convert_to_int(arg, values[arg])
         if values.get(arg, None):
             setattr(site.dapr_config, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
+
+    if cpu is not None and memory is not None:
+        setattr(site.resource_config, 'cpu', cpu)
+        setattr(site.resource_config, 'memory', memory)
+
+    if workload_profile_name is not None:
+        setattr(site, 'workload_profile_name', workload_profile_name)
+
     update_functionapp_polling(cmd, resource_group_name, name, site)
 
 
@@ -3809,7 +3851,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                        environment=None, min_replicas=None, max_replicas=None, workspace=None,
                        enable_dapr=False, dapr_app_id=None, dapr_app_port=None, dapr_http_max_request_size=None,
-                       dapr_http_read_buffer_size=None, dapr_log_level=None, dapr_enable_api_logging=False):
+                       dapr_http_read_buffer_size=None, dapr_log_level=None, dapr_enable_api_logging=False,
+                       workload_profile_name=None, cpu=None, memory=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3817,6 +3860,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functions_version = '3'
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
+    if any([cpu, memory, workload_profile_name]) and environment is None:
+        raise RequiredArgumentMissingError("usage error: parameters --cpu, -memory, --workload-profile-name "
+                                           "must be used with parameter --environment, please provide the "
+                                           "name of the container app environment using --environment.")
     if environment is None and bool(plan) == bool(consumption_plan_location):
         raise MutuallyExclusiveArgumentError("usage error: You must specify one of these parameter "
                                              "--plan NAME_OR_ID | --consumption-plan-location LOCATION")
@@ -3833,7 +3880,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                            "please provide the name of the container app environment using "
                                            "--environment.")
     from azure.mgmt.web.models import Site
-    SiteConfig, NameValuePair, DaprConfig = cmd.get_models('SiteConfig', 'NameValuePair', 'DaprConfig')
+    SiteConfig, NameValuePair, DaprConfig, ResourceConfig = cmd.get_models('SiteConfig', 'NameValuePair',
+                                                                           'DaprConfig', 'ResourceConfig')
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
@@ -4017,6 +4065,17 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.is_xenon = None
         functionapp_def.type = 'Microsoft.Web/sites'
 
+        # validate cpu and memory parameters.
+        _validate_cpu_momory_functionapp(cpu, memory)
+
+        if (workload_profile_name is not None):
+            functionapp_def.workload_profile_name = workload_profile_name
+
+        if (cpu is not None and memory is not None):
+            functionapp_def.resource_config = ResourceConfig()
+            functionapp_def.resource_config.cpu = cpu
+            functionapp_def.resource_config.memory = memory
+
         site_config.net_framework_version = None
         site_config.java_version = None
         site_config.use32_bit_worker_process = None
@@ -4086,6 +4145,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
+    if environment is not None:
+        functionapp = client.web_apps.get(resource_group_name, name)
+
     if consumption_plan_location and is_linux:
         logger.warning("Your Linux function app '%s', that uses a consumption plan has been successfully "
                        "created but is not active until content is published using "
@@ -4118,6 +4180,29 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp.identity = identity
 
     return functionapp
+
+
+def _validate_cpu_momory_functionapp(cpu=None, memory=None):
+    # validate either both cpu and memory are provided or none is provided. throw error otherwise
+    if cpu is None and memory is None:
+        return
+
+    if cpu is not None and memory is None:
+        raise ArgumentUsageError("The --memory argument is required with --cpu. Please provide both or none.")
+
+    if cpu is None and memory is not None:
+        raise ArgumentUsageError("The --cpu argument is required with --memory. Please provide both or none.")
+
+    # validate that memory is number and ends with Gi
+    if not memory.lower().endswith("gi"):
+        raise ValidationError("The --memory argument should end with Gi. Please provide a correct value. e.g. 4.0Gi.")
+
+    try:
+        float(memory[:-2])
+    except ValueError:
+        raise ValidationError("The --memory argument is not valid. Please provide a correct value. e.g. 4.0Gi.")
+
+    return
 
 
 def _get_extension_version_functionapp(functions_version):

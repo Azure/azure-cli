@@ -23,6 +23,10 @@ class FeatureFlagConstants:
     FILTER_NAME = "name"
     FILTER_PARAMETERS = "parameters"
 
+    # Requirement type options
+    REQUIREMENT_TYPE_ALL = "all"
+    REQUIREMENT_TYPE_ANY = "any"
+
 
 class KeyVaultConstants:
     KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
