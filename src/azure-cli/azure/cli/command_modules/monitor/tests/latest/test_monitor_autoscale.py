@@ -10,12 +10,13 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 class TestMonitorAutoscaleScenario(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale')
     def test_monitor_autoscale_basic(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss1'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testadmin --admin-password TestTest12#$')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.cmd('monitor autoscale create --resource {vmss_id} --count 3 ', checks=[
@@ -50,12 +51,13 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         ])
         self.cmd('monitor autoscale delete -g {rg} -n {vmss}')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_refine')
     def test_monitor_autoscale_refined(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss1'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testadmin --admin-password TestTest12#$')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.cmd('monitor autoscale create --resource {vmss_id} --count 3 --action email abc@example.com efg@example.com opq@example.com --action webhook https://www.contoso.com/alert apiKey=value', checks=[
@@ -96,12 +98,13 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
 
         self.cmd('monitor autoscale delete -g {rg} -n {vmss}')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_rules')
     def test_monitor_autoscale_rules(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss1'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testadmin --admin-password TestTest12#$')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.cmd('monitor autoscale create --resource {vmss_id} --min-count 1 --count 3 --max-count 5')
@@ -187,13 +190,14 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         list_4 = self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}').get_output_in_json()
         self.assertTrue(len(list_4) == 0)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_rule_with_dimensions')
     def test_monitor_autoscale_rule_with_dimensions(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss1'
         })
         self.cmd(
-            'vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$ --instance-count 2')
+            'vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testadmin --admin-password TestTest12#$ --instance-count 2')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.cmd('monitor autoscale create --resource {vmss_id} --min-count 1 --count 3 --max-count 5')
@@ -267,13 +271,14 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             self.check('length(@)', 3)
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_fixed')
     def test_monitor_autoscale_fixed(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss1',
             'sched': 'Christmas'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testadmin --admin-password TestTest12#$')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.cmd('monitor autoscale create --resource {vmss_id} --count 3')
@@ -300,6 +305,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                  checks=self.check('length(@)', 1))
 
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_recurring')
     def test_monitor_autoscale_recurring(self, resource_group):
         import json
@@ -310,7 +316,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testname --admin-password TestTest12#$')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testname --admin-password TestTest12#$')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.cmd('monitor autoscale create --resource {vmss_id} --count 3')
@@ -359,6 +365,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}',
                  checks=self.check('length(@)', 1))
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_predictive_policy')
     def test_monitor_autoscale_predictive_policy(self, resource_group):
         self.kwargs.update({
@@ -368,7 +375,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             'new-scale-mode': 'ForecastOnly'
         })
         self.cmd(
-            'vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+            'vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testadmin --admin-password TestTest12#$')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.cmd('monitor autoscale create --resource {vmss_id} --count 3 --scale-mode {scale-mode}', checks=[
@@ -392,6 +399,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         ])
         self.cmd('monitor autoscale delete -g {rg} -n {vmss}')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_show_predictive_metric')
     def test_monitor_autoscale_show_predictive_metric(self, resource_group):
         self.kwargs.update({
@@ -400,7 +408,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             'scale-mode': 'Enabled',
         })
         self.cmd(
-            'vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+            'vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testadmin --admin-password TestTest12#$')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.cmd('monitor autoscale create --resource {vmss_id} --count 3 --max-count 5 --min-count 1 '

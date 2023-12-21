@@ -84,7 +84,7 @@ type: command
 short-summary: Export data stored in a Redis cache.
 examples:
   - name: Use managed identity to export cache data
-    text: az redis export -n testCacheName -g testResourceGroup --prefix examplePrefix --container containerUrl  --preferred-data-archive-auth-method ManagedIdentity
+    text: az redis export -n testCacheName -g testResourceGroup --prefix examplePrefix --container containerUrl  --preferred-data-archive-auth-method ManagedIdentity --storage-subscription-id 1a6574ss-ddad-1111-a111-8d756312d1dd
     crafted: true
 """
 
@@ -109,7 +109,7 @@ type: command
 short-summary: Import data into a Redis cache.
 examples:
   - name: Use managed identity to import cache data
-    text: az redis import -n testCacheName -g testResourceGroup --files blobUrl --preferred-data-archive-auth-method ManagedIdentity
+    text: az redis import -n testCacheName -g testResourceGroup --files blobUrl --preferred-data-archive-auth-method ManagedIdentity --storage-subscription-id 1a6574ss-ddad-1111-a111-8d756312d1dd
     crafted: true
 """
 

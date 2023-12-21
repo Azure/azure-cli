@@ -35,8 +35,16 @@ examples:
         az postgres flexible-server create --location northeurope --resource-group testGroup \\
           --name testserver --admin-user username --admin-password password \\
           --sku-name Standard_B1ms --tier Burstable --public-access 153.24.26.117 --storage-size 128 \\
-          --tags "key=value" --version 13 --high-availability Enabled --zone 1 \\
+          --tags "key=value" --version 13 --high-availability ZoneRedundant --zone 1 \\
           --standby-zone 3
+  - name: >
+      Create a PostgreSQL flexible server using Premium SSD v2 Disks.
+    text: >
+      # set storage type to "PremiumV2_LRS" and provide values for Storage size (in GiB), IOPS (operations/sec), and Throughput (MB/sec).
+
+      az postgres flexible-server create --location northeurope --resource-group testGroup \\
+          --name testserver --admin-user username --admin-password password \\
+          --sku-name Standard_B1ms --tier Burstable --storage-type PremiumV2_LRS --storage-size 128 --iops 3000 --throughput 125
   - name: >
       Create a PostgreSQL flexible server with default parameters and public access enabled by default. \
       Resource group, server name, username, password, and default database will be created by CLI
@@ -200,9 +208,16 @@ examples:
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --geo-redundant-backup Enabled \\
         --key $keyIdentifier --identity testIdentity --backup-key $geoKeyIdentifier --backup-identity geoIdentity
 
+  - name: >
+      Create flexible server with custom storage performance tier. Accepted values "P4", "P6", "P10", "P15", "P20", "P30", \\
+      "P40", "P50", "P60", "P70", "P80". Actual allowed values depend on the --storage-size selection for flexible server creation. \\
+      Default value for storage performance tier depends on the --storage-size selected for flexible server creation.
+    text: >
+      az postgres flexible-server create -g testGroup -n testServer --location testLocation --performance-tier P15
 
-      # create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
-
+  - name: >
+      create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
+    text: >
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --storage-auto-grow Enabled
 """
 
@@ -256,6 +271,12 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --private-dns-zone /subscriptions/{SubId2}/resourceGroups/{testGroup2}/providers/Microsoft.Network/privateDnsZones/testDNS.postgres.database.azure.com
   - name: Update a flexible server's storage to enable / disable storage auto-grow.
     text: az postgres flexible-server update --resource-group testGroup --name testserver --storage-auto-grow Enabled
+  - name: Update a flexible server's storage to set custom storage performance tier.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --performance-tier P15
+  - name: Update a flexible server's storage to set IOPS (operations/sec). Server must be using Premium SSD v2 Disks.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --iops 3000
+  - name: Update a flexible server's storage to set Throughput (MB/sec). Server must be using Premium SSD v2 Disks.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --throughput 125
 """
 
 helps['postgres flexible-server restore'] = """
@@ -266,6 +287,19 @@ examples:
     text: az postgres flexible-server restore --resource-group testGroup --name testserverNew --source-server testserver --restore-time "2017-06-15T13:10:00Z"
   - name: Restore 'testserver' to current point-in-time as a new server 'testserverNew'.
     text: az postgres flexible-server restore --resource-group testGroup --name testserverNew --source-server testserver
+  - name: >
+      Restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different resource group. \\
+      Here --restore-group is for the target server's resource group, and --source-server must be passed as resource ID.
+    text: >
+      az postgres flexible-server restore --resource-group testGroup --name testserverNew \\
+        --source-server /subscriptions/{testSubscription}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
+  - name: >
+      Restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different subscription. \\
+      Here --restore-group is for the target server's resource group, and --source-server must be passed as resource ID. \\
+      This resource ID can be in a subscription different than the subscription used for az account set.
+    text: >
+      az postgres flexible-server restore --resource-group testGroup --name testserverNew \\
+        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
 """
 
 helps['postgres flexible-server restart'] = """
@@ -413,6 +447,53 @@ short-summary: Delete a firewall rule.
 examples:
   - name: Delete a firewall rule.
     text: az postgres flexible-server firewall-rule delete --rule-name testRule --resource-group testGroup --name testserver
+"""
+
+helps['postgres flexible-server virtual-endpoint'] = """
+type: group
+short-summary: Manage virtual endpoints for a PostgreSQL flexible server.
+"""
+
+helps['postgres flexible-server virtual-endpoint create'] = """
+type: command
+short-summary: Create a new virtual endpoint for a flexible server.
+examples:
+  - name: >
+      Create a virtual endpoint with writer endpoint.
+    text: >
+      az postgres flexible-server virtual-endpoint create --resource-group testGroup --server-name testserver --name test_virtual_endpoint --endpoint-type ReadWrite --members testReplica1
+"""
+
+helps['postgres flexible-server virtual-endpoint list'] = """
+type: command
+short-summary: List all virtual endpoints for a flexible server.
+example:
+  - name: List all virtual endpoints for a flexible server.
+    text: az postgres flexible-server virtual-endpoint list --resource-group testGroup --server-name testserver
+"""
+
+helps['postgres flexible-server virtual-endpoint show'] = """
+type: command
+short-summary: Get the details of a virtual endpoint.
+examples:
+  - name: Get the details of a virtual endpoint.
+    text: az postgres flexible-server virtual-endpoint show --resource-group testGroup --server-name testserver --name test_virtual_endpoint
+"""
+
+helps['postgres flexible-server virtual-endpoint update'] = """
+type: command
+short-summary: Update a virtual endpoint.
+examples:
+  - name: Update a virtual endpoint.
+    text: az postgres flexible-server virtual-endpoint update --resource-group testGroup --server-name testserver --name test_virtual_endpoint --endpoint-type ReadWrite --members testReplica1
+"""
+
+helps['postgres flexible-server virtual-endpoint delete'] = """
+type: command
+short-summary: Delete a virtual endpoint.
+examples:
+  - name: Delete a virtual endpoint.
+    text: az postgres flexible-server virtual-endpoint delete --resource-group testGroup --server-name testserver --name test_virtual_endpoint
 """
 
 helps['postgres flexible-server migration'] = """
@@ -581,11 +662,14 @@ examples:
         --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
         --private-dns-zone testDNS.postgres.database.azure.com
-  - name: Create a read replica 'testReplicaServer' for 'testserver' with public or private access \\
-        in the specified location if available. Since zone is not passed, it will automatically pick up zone in the \\
-        replica location which is different from source server, if available, else will pick up zone same as source server \\
-        in the replica location if available, else will set the zone as None, i.e. No preference
+  - name: >
+      Create a read replica 'testReplicaServer' for 'testserver' with public or private access \
+      in the specified location if available. Since zone is not passed, it will automatically pick up zone in the \
+      replica location which is different from source server, if available, else will pick up zone same as source server \
+      in the replica location if available, else will set the zone as None, i.e. No preference
     text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --location testLocation
+  - name: Create a read replica 'testReplicaServer' for 'testserver' with custom --storage-size and --sku.
+    text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --sku-name Standard_D4ds_v5 --storage-size 256
 """
 
 helps['postgres flexible-server replica list'] = """
@@ -604,6 +688,20 @@ examples:
     text: az postgres flexible-server replica stop-replication -g testGroup -n testReplicaServer
 """
 
+helps['postgres flexible-server replica promote'] = """
+type: command
+short-summary: Stop replication of a read replica and promote it to an independent server or as a primary server.
+examples:
+  - name: Stop replication to 'testReplicaServer' and promote it a standalone read/write server.
+    text: az postgres flexible-server replica promote -g testGroup -n testReplicaServer
+  - name: Stop replication to 'testReplicaServer' and promote it a standalone read/write server with forced data sync.
+    text: az postgres flexible-server replica promote -g testGroup -n testReplicaServer --promote-mode standalone --promote-option forced
+  - name: >
+      Stop replication to 'testReplicaServer' and promote it to primary server with planned data sync. \
+      The replica you are promoting must have the reader virtual endpoint assigned, or you will receive an error on promotion.
+    text: az postgres flexible-server replica promote -g testGroup -n testReplicaServer --promote-mode switchover --promote-option planned
+"""
+
 helps['postgres flexible-server geo-restore'] = """
 type: command
 short-summary: Geo-restore a flexible server from backup.
@@ -619,6 +717,13 @@ examples:
         --source-server testserver --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
         --private-dns-zone testDNS.postgres.database.azure.com --location newLocation
+  - name: >
+      Geo-restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different subscription / resource group. \\
+      Here --restore-group is for the target server's resource group, and --source-server must be passed as resource ID. \\
+      This resource ID can be in a subscription different than the subscription used for az account set.
+    text: >
+      az postgres flexible-server geo-restore --resource-group testGroup --name testserverNew --location newLocation \\
+        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
 """
 
 helps['postgres flexible-server revive-dropped'] = """
@@ -725,4 +830,64 @@ examples:
     text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --exists
   - name: Wait for an Active Directory administrator to be deleted.
     text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --deleted
+"""
+
+helps['postgres flexible-server advanced-threat-protection-setting'] = """
+type: group
+short-summary: Manage advanced threat protection setting for a PostgreSQL flexible server.
+"""
+
+helps['postgres flexible-server advanced-threat-protection-setting update'] = """
+type: command
+short-summary: Updates advanced threat protection setting state for a flexible server.
+examples:
+  - name: >
+      Enable advanced threat protection setting for a PostgreSQL flexible server.
+    text: >
+      az postgres flexible-server advanced-threat-protection-setting update --resource-group testGroup --server-name testserver --state Enabled
+  - name: >
+      Disable advanced threat protection setting for a PostgreSQL flexible server.
+    text: >
+      az postgres flexible-server advanced-threat-protection-setting update --resource-group testGroup --server-name testserver --state Disabled
+"""
+
+helps['postgres flexible-server advanced-threat-protection-setting show'] = """
+type: command
+short-summary: Get advanced threat protection settings for a PostgreSL flexible server.
+examples:
+  - name: Get the details of advanced threat protection setting for a flexible server.
+    text: az postgres flexible-server advanced-threat-protection-setting show --resource-group testGroup --server-name testserver
+  - name: Get the details of advanced threat protection setting for a flexible server in a different subscription.
+    text: az postgres flexible-server advanced-threat-protection-setting show --subscription testSubscription --resource-group testGroup --server-name testserver
+  - name: Get the details of advanced threat protection setting for a flexible server using --ids parameter.
+    text: az postgres flexible-server advanced-threat-protection-setting show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testServer
+"""
+
+helps['postgres flexible-server server-logs'] = """
+type: group
+short-summary: Manage server logs (log files) for a PostgreSQL flexible server.
+"""
+
+helps['postgres flexible-server server-logs download'] = """
+type: command
+short-summary: Download log files for a PostgreSQL flexible server.
+examples:
+  - name: >
+      Downloads log files f1 and f2 to the current directory from the server 'testsvr'. Please note that f1 and f2 should match the log file name including the foldername, for instance serverlogs/f1.log
+    text: >
+      az postgres flexible-server server-logs download -g testgroup -s testsvr -n serverlogs/f1.log serverlogs/f2.log
+"""
+
+helps['postgres flexible-server server-logs list'] = """
+type: command
+short-summary: List log files for a PostgreSQL flexible server.
+examples:
+  - name: List log files for 'testsvr' modified in the last 72 hours (default value).
+    text: az postgres flexible-server server-logs list -g testgroup -s testsvr
+  - name: List log files for 'testsvr' modified in the last 10 hours.
+    text: az postgres flexible-server server-logs list -g testgroup -s testsvr --file-last-written 10
+  - name: List log files for 'testsvr' less than 30Kb in size.
+    text: az postgres flexible-server server-logs list -g testgroup -s testsvr --max-file-size 30
+  - name: List log files for 'testsvr' containing name 'serverlogs'.
+    text: az postgres flexible-server server-logs list -g testgroup -s testsvr --subscription testSubscription --filename-contains serverlogs
 """
