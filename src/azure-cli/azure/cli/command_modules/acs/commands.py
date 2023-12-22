@@ -81,7 +81,7 @@ def load_command_table(self, _):
         g.custom_command('rotate-certs', 'aks_rotate_certs', supports_no_wait=True,
                          confirmation='Kubernetes will be unavailable during certificate rotation process.\n' +
                          'Are you sure you want to perform this operation?')
-        g.command('stop', 'begin_stop', supports_no_wait=True, min_api='2020-09-01')
+        g.custom_command('stop', 'aks_stop', supports_no_wait=True, min_api='2020-09-01')
         g.command('start', 'begin_start', supports_no_wait=True, min_api='2020-09-01')
         g.wait_command('wait')
         g.custom_command('use-dev-spaces', 'aks_use_dev_spaces', deprecate_info=g.deprecate())
