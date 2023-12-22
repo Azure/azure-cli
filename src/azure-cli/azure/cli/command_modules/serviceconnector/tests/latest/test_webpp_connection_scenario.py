@@ -1480,7 +1480,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
     @record_only()
     def test_webapp_storageblob_secret_opt_out_public_network_and_config(self):
-        self._test_webapp_storageblob_secret_opt_out(['public-network', 'config'])
+        self._test_webapp_storageblob_secret_opt_out(['public-network', 'configinfo'])
     
     @record_only()
     def test_webapp_storageblob_secret_opt_out_public_network(self):
@@ -1488,7 +1488,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
     
     @record_only()
     def test_webapp_storageblob_secret_opt_out_config(self):
-        self._test_webapp_storageblob_secret_opt_out(['config'])
+        self._test_webapp_storageblob_secret_opt_out(['configinfo'])
 
     def _test_webapp_storageblob_secret_opt_out(self, opt_out_list):
 
@@ -1509,7 +1509,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             configurations = self.cmd(
                 'webapp connection list-configuration --id {}'.format(connection_id)
             ).get_output_in_json()['configurations']
-            if 'config' in opt_out_list:
+            if 'configinfo' in opt_out_list:
                 self.assertEqual(len(configurations), 0)
             else:
                 self.assertEqual(len(configurations), 1)

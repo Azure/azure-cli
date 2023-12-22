@@ -29,11 +29,12 @@ from ._resource_config import (
     SUPPORTED_CLIENT_TYPE,
     TARGET_SUPPORT_SERVICE_ENDPOINT,
     TARGET_SUPPORT_PRIVATE_ENDPOINT,
-    LOCAL_CONNECTION_PARAMS
+    LOCAL_CONNECTION_PARAMS,
+    OPT_OUT_OPTION
 )
 from ._addon_factory import AddonFactory
 from knack.arguments import CLIArgumentType
-from .action import AddCustomizedKeys, AddOptOut
+from .action import AddCustomizedKeys
 
 
 def add_source_resource_block(context, source, enable_id=True, validate_source_id=False):
@@ -237,9 +238,9 @@ def add_confluent_kafka_argument(context):
 
 
 def add_opt_out_argument(context):
-    context.argument('opt_out_set', options_list=['--opt-out'],
+    context.argument('opt_out_list', options_list=['--opt-out'],
                      default=None, nargs='+',
-                     action=AddOptOut,
+                     arg_type=get_enum_type(OPT_OUT_OPTION),
                      help='Whether to disable configuration steps. '
                      'Add config to disbale configuration changes on source. '
                      'Add public-network to disable public network access configuration.'
