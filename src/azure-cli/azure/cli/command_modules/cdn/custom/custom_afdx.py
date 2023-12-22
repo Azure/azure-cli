@@ -263,15 +263,18 @@ class AFDOriginUpdate(_AFDOriginUpdate):
         })
 
         shared_private_link_resource = None
+        # if no enable_private_link is specified and origin doesn't have private link resource, then no change
         if (not has_value(args.enable_private_link) and 'sharedPrivateLinkResource' not in existing) or \
                 (has_value(args.enable_private_link) and args.enable_private_link.to_serialized_data() is False):
             shared_private_link_resource = None
+        # if any private link related parameter is specified, then update the private link resource
         elif ((has_value(args.private_link_location) or
               has_value(args.private_link_resource) or
               has_value(args.private_link_request_message) or
               has_value(args.private_link_sub_resource_type)) or
               args.enable_private_link.to_serialized_data() is True or
               'sharedPrivateLinkResource' in existing):
+            # no specified private link related parameter, then use existing private link resource
             existing_private_link_location = None if 'sharedPrivateLinkResource' not in existing or \
                 'privateLinkLocation' not in existing['sharedPrivateLinkResource'] \
                 else existing['sharedPrivateLinkResource']['privateLinkLocation']
@@ -497,10 +500,12 @@ class AFDRouteUpdate(_AFDRouteUpdate):
             }
         }
 
+        # if not specified, then use existing cache configuration
         if not has_value(args.enable_caching):
             if 'cacheConfiguration' not in existing or existing['cacheConfiguration'] is None:
                 cache_configuration = None
             else:
+                # if already has cache configuration, then use existing cache configuration
                 if not has_value(args.query_string_caching_behavior):
                     if ('cacheConfiguration' in existing and
                             'queryStringCachingBehavior' in existing['cacheConfiguration']):
@@ -523,7 +528,9 @@ class AFDRouteUpdate(_AFDRouteUpdate):
                             existing['cacheConfiguration']['compressionSettings']['isCompressionEnabled']
         elif args.enable_caching.to_serialized_data() is False:
             cache_configuration = None
+        # if caching setting specified and set to true, check compression setting
         else:
+            # if not specified, then use existing compression settings
             if (not has_value(args.enable_compression) and 'cacheConfiguration' in existing and
                     'compressionSettings' in existing['cacheConfiguration'] and
                     'contentTypesToCompress' in existing['cacheConfiguration']['compressionSettings']):
@@ -532,6 +539,7 @@ class AFDRouteUpdate(_AFDRouteUpdate):
             elif args.enable_compression.to_serialized_data() is False:
                 cache_configuration['compression_settings']['content_types_to_compress'] = []
             else:
+                # if compression setting specified and set to true, check content types to compress
                 if (not has_value(args.content_types_to_compress) or
                         args.content_types_to_compress.to_serialized_data() is None):
                     cache_configuration['compression_settings']['content_types_to_compress'] = default_content_types()
