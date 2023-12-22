@@ -704,3 +704,16 @@ class TestLogProfileScenarios(ScenarioTest):
                  ])
 
         self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')
+
+    @ResourceGroupPreparer(name_prefix='test_monitor_log_analytics_workspace_link_target', location='WestUs')
+    @AllowLargeResponse()
+    def test_monitor_log_analytics_workspace_link_target_available_service(self, resource_group):
+        self.kwargs.update({
+            'ws_name': self.create_random_name('ws-', 10),
+        })
+
+        self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
+        from azure.core.exceptions import ResourceNotFoundError
+        with self.assertRaises(ResourceNotFoundError):
+            self.cmd("monitor log-analytics workspace list-link-target")
+        self.cmd("monitor log-analytics workspace list-available-service-tier -g {rg} --workspace-name {ws_name}")

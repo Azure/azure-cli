@@ -14,7 +14,10 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_backups,
     cf_postgres_flexible_replica,
     cf_postgres_flexible_adadmin,
-    cf_postgres_flexible_migrations)
+    cf_postgres_flexible_migrations,
+    cf_postgres_flexible_virtual_endpoints,
+    cf_postgres_flexible_server_threat_protection_settings,
+    cf_postgres_flexible_server_log_files)
 
 from ._transformers import (
     table_transform_output,
@@ -76,6 +79,21 @@ def load_flexibleserver_command_table(self, _):
         client_factory=cf_postgres_flexible_migrations
     )
 
+    postgres_flexible_virtual_endpoints_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#VirtualEndpointsOperations.{}',
+        client_factory=cf_postgres_flexible_virtual_endpoints
+    )
+
+    postgres_flexible_server_threat_protection_settings_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#ServerThreatProtectionSettingsOperations.{}',
+        client_factory=cf_postgres_flexible_server_threat_protection_settings
+    )
+
+    postgres_flexible_server_log_files_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#LogFilesOperations.{}',
+        client_factory=cf_postgres_flexible_server_log_files
+    )
+
     # MERU COMMANDS
     flexible_server_custom_common = CliCommandType(
         operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_common#{}')
@@ -127,6 +145,15 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('update', 'migration_update_func', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('check-name-availability', 'migration_check_name_availability', custom_command_type=flexible_servers_custom_postgres)
 
+    with self.command_group('postgres flexible-server virtual-endpoint', postgres_flexible_virtual_endpoints_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_virtual_endpoints) as g:
+        g.custom_command('create', 'virtual_endpoint_create_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('delete', 'virtual_endpoint_delete_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_show_command('show', 'virtual_endpoint_show_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('list', 'virtual_endpoint_list_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('update', 'virtual_endpoint_update_func', custom_command_type=flexible_servers_custom_postgres)
+
     with self.command_group('postgres flexible-server parameter', postgres_flexible_config_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_config, table_transformer=table_transform_output_parameters) as g:
@@ -167,6 +194,7 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_servers) as g:
         g.custom_command('create', 'flexible_replica_create', supports_no_wait=True)
         g.custom_command('stop-replication', 'flexible_replica_stop', confirmation=True)
+        g.custom_command('promote', 'flexible_replica_promote', confirmation=True)
 
     with self.command_group('postgres flexible-server identity', postgres_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
@@ -184,3 +212,15 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('list', 'flexible_server_ad_admin_list')
         g.custom_show_command('show', 'flexible_server_ad_admin_show')
         g.custom_wait_command('wait', 'flexible_server_ad_admin_show')
+
+    with self.command_group('postgres flexible-server advanced-threat-protection-setting', postgres_flexible_server_threat_protection_settings_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_server_threat_protection_settings) as g:
+        g.custom_show_command('show', 'flexible_server_threat_protection_get', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('update', 'flexible_server_threat_protection_update', custom_command_type=flexible_servers_custom_postgres)
+
+    with self.command_group('postgres flexible-server server-logs', postgres_flexible_server_log_files_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_server_log_files) as g:
+        g.custom_command('list', 'flexible_server_list_log_files_with_filter', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('download', 'flexible_server_download_log_files', custom_command_type=flexible_servers_custom_postgres)
