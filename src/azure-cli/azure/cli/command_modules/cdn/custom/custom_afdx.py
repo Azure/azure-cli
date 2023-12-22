@@ -2,14 +2,18 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=too-many-locals, too-many-statements too-many-boolean-expressions too-many-branches ungrouped-imports
+# pylint: disable=too-many-locals, too-many-statements too-many-boolean-expressions too-many-branches protected-access
 
-from azure.mgmt.cdn.models import (ForwardingProtocol, AfdQueryStringCachingBehavior)
+from azure.mgmt.cdn.models import (ForwardingProtocol, AfdQueryStringCachingBehavior, SkuName)
 from knack.log import get_logger
 from azure.cli.core.aaz._base import has_value
 from azure.cli.core.commands.client_factory import get_subscription_id
 from .custom_rule_util import (create_condition, create_action,
                                create_conditions_from_existing, create_actions_from_existing)
+from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.core.exceptions import ResourceNotFoundError
+from azure.cli.command_modules.cdn.aaz.latest.afd.custom_domain import Create as _AFDCustomDomainCreate, \
+    Update as _AFDCustomDomainUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin import Create as _AFDOriginCreate, Update as _AFDOriginUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.route import Show as _AFDRouteShow, \
     Create as _AFDRouteCreate, Update as _AFDRouteUpdate
@@ -72,6 +76,49 @@ def default_content_types():
             'text/x-java-source']
 
 
+class AFDCustomDomainCreate(_AFDCustomDomainCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.azure_dns_zone) and "/dnszones/" not in args.azure_dns_zone.to_serialized_data().lower():
+            raise InvalidArgumentValueError('azure_dns_zone should be valid Azure dns zone ID.')
+        if has_value(args.secret) and "/secrets/" not in args.secret.to_serialized_data().lower():
+            args.secret = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
+                          f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/secrets/{args.secret}'
+
+
+class AFDCustomDomainUpdate(_AFDCustomDomainUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.azure_dns_zone) and "/dnszones/" not in args.azure_dns_zone.to_serialized_data().lower():
+            raise InvalidArgumentValueError('azure_dns_zone should be valid Azure dns zone ID.')
+        if has_value(args.secret) and "/secrets/" not in args.secret.to_serialized_data().lower():
+            args.secret = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
+                          f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/secrets/{args.secret}'
+
+
+class AFDProfileShow(_AFDProfileShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
+
+    def _defoutput(self, *args, **kwargs):
+        existing = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        if existing['sku']['name'] not in (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door):
+            logger.warning('Unexpected SKU type, only Standard_AzureFrontDoor and Premium_AzureFrontDoor are supported')
+            raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
+
+
 class AFDProfileCreate(_AFDProfileCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -98,6 +145,9 @@ class AFDProfileUpdate(_AFDProfileUpdate):
             'resource_group': args.resource_group,
             'profile_name': args.profile_name
         })
+        if existing['sku']['name'] not in (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door):
+            logger.warning('Unexpected SKU type, only Standard_AzureFrontDoor and Premium_AzureFrontDoor are supported')
+            raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
         existing_location = None if 'location' not in existing else existing['location']
         args.location = existing_location
 
@@ -847,6 +897,11 @@ class AFDSecretCreate(_AFDSecretCreate):
 
     def pre_operations(self):
         args = self.ctx.args
+        if "/secrets/" not in args.secret_source.to_serialized_data().lower():
+            raise InvalidArgumentValueError('secret_source should be valid Azure key vault certificate ID.')
+
+        if has_value(args.use_latest_version) and not args.use_latest_version.to_serialized_data():
+            raise InvalidArgumentValueError('Either specify secret_version or enable use_latest_version.')
         parameters = None
         if has_value(args.use_latest_version) and args.use_latest_version.to_serialized_data() is True:
             parameters = {
@@ -940,6 +995,12 @@ class AFDSecurityPolicyCreate(_AFDSecurityPolicyCreate):
 
     def pre_operations(self):
         args = self.ctx.args
+
+        if any(("/afdendpoints/" not in domain.lower() and
+                "/customdomains/" not in domain.lower()) for domain in args.domains.to_serialized_data()):
+            raise InvalidArgumentValueError('Domain should either be endpoint ID or custom domain ID.')
+        if has_value(args.waf_policy) and "/frontdoorwebapplicationfirewallpolicies/" not in args.waf_policy.to_serialized_data().lower():
+            raise InvalidArgumentValueError('waf_policy should be Front Door WAF policy ID.')
 
         domains = []
         if has_value(args.domains):

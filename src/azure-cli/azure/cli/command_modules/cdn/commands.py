@@ -245,6 +245,15 @@ def load_command_table(self, _):
                          doc_string_source='azure.mgmt.cdn.models#Rule')
         g.custom_command('list', 'list_afd_rule_action')
 
+    from .custom.custom_afdx import AFDCustomDomainCreate
+    self.command_table['afd custom-domain create'] = AFDCustomDomainCreate(loader=self)
+
+    from .custom.custom_afdx import AFDCustomDomainUpdate
+    self.command_table['afd custom-domain update'] = AFDCustomDomainUpdate(loader=self)
+
+    from .custom.custom_afdx import AFDProfileShow
+    self.command_table['afd profile show'] = AFDProfileShow(loader=self)
+
     from .custom.custom_afdx import AFDProfileCreate
     self.command_table['afd profile create'] = AFDProfileCreate(loader=self)
 
