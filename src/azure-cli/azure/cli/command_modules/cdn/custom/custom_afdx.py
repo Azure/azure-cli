@@ -5,11 +5,8 @@
 # pylint: disable=too-many-locals, too-many-statements too-many-boolean-expressions too-many-branches protected-access
 
 from azure.mgmt.cdn.models import (ForwardingProtocol, AfdQueryStringCachingBehavior, SkuName)
-from knack.log import get_logger
 from azure.cli.core.aaz._base import has_value
 from azure.cli.core.commands.client_factory import get_subscription_id
-from .custom_rule_util import (create_condition, create_action,
-                               create_conditions_from_existing, create_actions_from_existing)
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.command_modules.cdn.aaz.latest.afd.custom_domain import Create as _AFDCustomDomainCreate, \
@@ -28,7 +25,9 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDPro
 from azure.cli.command_modules.cdn.aaz.latest.afd.endpoint import Show as _AFDEndpointShow, \
     Create as _AFDEndpointCreate, Update as _AFDEndpointUpdate
 from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZDateArg
-
+from knack.log import get_logger
+from .custom_rule_util import (create_condition, create_action,
+                               create_conditions_from_existing, create_actions_from_existing)
 logger = get_logger(__name__)
 
 
@@ -1000,7 +999,8 @@ class AFDSecurityPolicyCreate(_AFDSecurityPolicyCreate):
         if any(("/afdendpoints/" not in domain.lower() and
                 "/customdomains/" not in domain.lower()) for domain in args.domains.to_serialized_data()):
             raise InvalidArgumentValueError('Domain should either be endpoint ID or custom domain ID.')
-        if has_value(args.waf_policy) and "/frontdoorwebapplicationfirewallpolicies/" not in args.waf_policy.to_serialized_data().lower():
+        if (has_value(args.waf_policy) and
+                "/frontdoorwebapplicationfirewallpolicies/" not in args.waf_policy.to_serialized_data().lower()):
             raise InvalidArgumentValueError('waf_policy should be Front Door WAF policy ID.')
 
         domains = []
