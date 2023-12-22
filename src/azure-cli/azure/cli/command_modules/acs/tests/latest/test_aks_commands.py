@@ -9691,6 +9691,101 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse()
+    def test_list_trustedaccess_roles(self):
+        cmd = 'aks trustedaccess role list -l westus2'
+        self.cmd(cmd, checks=[
+            StringContainCheck("sourceResourceType"),
+            StringContainCheck("apiGroups"),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_trustedaccess_rolebinding(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'vm_size': 'Standard_D4s_v3',
+            'node_count': 1,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        create_cmd = ' '.join([
+            'aks', 'create', '--resource-group={resource_group}', '--name={name}', '--location={location}',
+            '--node-vm-size {vm_size}',
+            '--node-count {node_count}',
+            '--ssh-key-value={ssh_key_value}'
+        ])
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        nodeRG = self.cmd('az aks show -g {resource_group} -n {name}'). \
+            get_output_in_json().get("nodeResourceGroup")
+        self.kwargs.update({
+            'nodeRG': nodeRG
+        })
+
+        vmss_id = self.cmd('az vmss list -g {nodeRG}').get_output_in_json()[0]['id']
+        self.kwargs.update({
+            'vmss_id': vmss_id
+        })
+
+        list_binding_cmd = 'aks trustedaccess rolebinding list ' \
+            '--cluster-name={name} ' \
+            '--resource-group={resource_group}'
+        self.cmd(list_binding_cmd, checks=[
+            self.is_empty(),
+        ])
+
+        create_binding_cmd = 'aks trustedaccess rolebinding create ' \
+            '--resource-group={resource_group} ' \
+            '--cluster-name={name} ' \
+            '-n testbinding ' \
+            '-r {vmss_id} ' \
+            '--roles Microsoft.Compute/virtualMachineScaleSets/test-node-reader '
+        self.cmd(create_binding_cmd)
+        self.cmd(list_binding_cmd, checks=[
+            self.check('[0].type', 'Microsoft.ContainerService/managedClusters/trustedAccessRoleBindings'),
+            self.check('[0].name', 'testbinding'),
+        ])
+
+        get_binding_cmd = 'aks trustedaccess rolebinding show ' \
+            '-n testbinding ' \
+            '--resource-group={resource_group} ' \
+            '--cluster-name={name}'
+        self.cmd(get_binding_cmd, checks=[
+            self.check('type', 'Microsoft.ContainerService/managedClusters/trustedAccessRoleBindings'),
+            self.check('name', 'testbinding'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        update_binding_cmd = 'aks trustedaccess rolebinding update ' \
+            '--cluster-name={name} ' \
+            '-n testbinding ' \
+            '--resource-group={resource_group} ' \
+            '--roles Microsoft.Compute/virtualMachineScaleSets/test-pod-reader '
+        self.cmd(update_binding_cmd, checks=[
+            self.check('roles[0]', 'Microsoft.Compute/virtualMachineScaleSets/test-pod-reader'),
+        ])
+
+        delete_binding_cmd = 'aks trustedaccess rolebinding delete ' \
+            '--cluster-name={name} ' \
+            '-n testbinding ' \
+            '--resource-group={resource_group} -y'
+        self.cmd(delete_binding_cmd)
+        self.cmd(list_binding_cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_with_crg_id(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
