@@ -903,7 +903,7 @@ class AFDSecretCreate(_AFDSecretCreate):
         if has_value(args.use_latest_version) and not args.use_latest_version.to_serialized_data():
             raise InvalidArgumentValueError('Either specify secret_version or enable use_latest_version.')
         parameters = None
-        if has_value(args.use_latest_version) and args.use_latest_version.to_serialized_data() is True:
+        if has_value(args.secret_version) and args.use_latest_version.to_serialized_data() is True:
             parameters = {
                 'customer-certificate': {
                     'secret-source': {'id': args.secret_source},
