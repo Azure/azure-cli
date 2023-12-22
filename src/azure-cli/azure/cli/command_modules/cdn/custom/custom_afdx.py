@@ -112,11 +112,12 @@ class AFDProfileShow(_AFDProfileShow):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         return args_schema
 
-    def _defoutput(self, *args, **kwargs):
+    def _output(self, *args, **kwargs):
         existing = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         if existing['sku']['name'] not in (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door):
             logger.warning('Unexpected SKU type, only Standard_AzureFrontDoor and Premium_AzureFrontDoor are supported')
             raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
+        return existing
 
 
 class AFDProfileCreate(_AFDProfileCreate):
