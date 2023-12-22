@@ -592,7 +592,7 @@ def update_containerapp_logic(cmd,
         scale_def["maxReplicas"] = max_replicas
     # so we don't overwrite rules
     if safe_get(new_containerapp, "properties", "template", "scale", "rules"):
-        new_containerapp["properties"]["template"]["scale"].pop(["rules"])
+        new_containerapp["properties"]["template"]["scale"].pop("rules")
     if scale_rule_name:
         if not scale_rule_type:
             scale_rule_type = "http"
