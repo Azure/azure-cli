@@ -1667,7 +1667,7 @@ examples:
 
 helps['cosmosdb sql container restore'] = """
 type: command
-short-summary: "Restore a deleted sql container within the same account."
+short-summary: Restore a deleted sql container within the same account.
 examples:
   - name: Restore a deleted sql container within the same account.
     text: |
@@ -1676,7 +1676,7 @@ examples:
 
 helps['cosmosdb mongodb database restore'] = """
 type: command
-short-summary: "Restore a deleted mongodb database within the same account."
+short-summary: Restore a deleted mongodb database within the same account.
 examples:
   - name: Restore a deleted mongodb database within the same account.
     text: |
@@ -1685,7 +1685,7 @@ examples:
 
 helps['cosmosdb mongodb collection restore'] = """
 type: command
-short-summary: "Restore a deleted mongodb collection within the same account."
+short-summary: Restore a deleted mongodb collection within the same account.
 examples:
   - name: Restore a deleted mongodb collection within the same account.
     text: |
@@ -1694,7 +1694,7 @@ examples:
 
 helps['cosmosdb gremlin database restore'] = """
 type: command
-short-summary: "Restore a deleted gremlin database within the same account."
+short-summary: Restore a deleted gremlin database within the same account.
 examples:
   - name: Restore a deleted gremlin database within the same account.
     text: |
@@ -1703,7 +1703,7 @@ examples:
 
 helps['cosmosdb gremlin graph restore'] = """
 type: command
-short-summary: "Restore a deleted gremlin graph within the same account."
+short-summary: Restore a deleted gremlin graph within the same account.
 examples:
   - name: Restore a deleted gremlin graph within the same account.
     text: |
@@ -1712,7 +1712,7 @@ examples:
 
 helps['cosmosdb table restore'] = """
 type: command
-short-summary: "Restore a deleted table within the same account."
+short-summary: Restore a deleted table within the same account.
 examples:
   - name: Restore a deleted table within the same account.
     text: |
