@@ -957,6 +957,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Name of the migration.')
                     c.argument('migration_mode', arg_type=migration_id_arg_type, options_list=['--migration-mode'], required=False,
                                help='Either offline or online(with CDC) migration', choices=['offline', 'online'], default='offline')
+                    c.argument('migration_option', arg_type=migration_id_arg_type, options_list=['--migration-option'], required=False,
+                               help='Supported Migration Option. Default is ValidateAndMigrate.', choices=['Validate', 'ValidateAndMigrate', 'Migrate'], default='ValidateAndMigrate')
                     c.argument('tags', tags_type)
                     c.argument('location', arg_type=get_location_type(self.cli_ctx))
                 elif scope == "show":

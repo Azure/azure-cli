@@ -505,10 +505,87 @@ helps['postgres flexible-server migration create'] = """
 type: command
 short-summary: Create a new migration workflow for a flexible server.
 examples:
-  - name: Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. Use --migration-mode online for Online(with CDC) migration
-    text: az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration --properties "migrationConfig.json" --migration-mode online
-  - name: Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. Use --migration-mode offline or no --migration-mode flag for Offline Migration.
-    text: az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration --properties "migrationConfig.json"
+  - name: >
+      Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. \
+      Use --migration-mode offline for Offline migration. Sample migrationConfig.json will look like this:
+      {
+        "properties": {
+          "SourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
+          "SecretParameters": {
+            "AdminCredentials": {
+              "SourceServerPassword": "password",
+              "TargetServerPassword": "password"
+            },
+            "SourceServerUserName": "testuser@pg-single-1",
+            "TargetServerUserName": "fspguser"
+          }
+          "dBsToMigrate": [
+            "postgres"
+          ],
+          "OverwriteDbsInTarget": "true",
+          "SourceType": "PostgreSQLSingleServer",
+          "SslMode": "VerifyFull"
+        }
+      }
+    text: >
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
+        --migration-name testmigration --properties "migrationConfig.json" --migration-mode offline
+  - name: >
+      Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. \
+      Use --migration-mode online for Online(with CDC) migration, with this sample migrationConfig.json. Use migration-option Validate for validate only request
+      {
+        "properties": {
+          "SourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
+          "SecretParameters": {
+            "AdminCredentials": {
+              "SourceServerPassword": "password",
+              "TargetServerPassword": "password"
+            },
+            "SourceServerUserName": "testuser@pg-single-1",
+            "TargetServerUserName": "fspguser"
+          }
+          "dBsToMigrate": [
+            "postgres"
+          ],
+          "OverwriteDbsInTarget": "true"
+        }
+      }
+      The sourceType and sslmode parameters are automatically set to 'PostgreSQL Single server' and 'VerifyFull' respectively, if the source resource id \
+        follows the /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/{rg-name}/providers/Microsoft.DBforPostgreSQL/servers/{single-server-name} server pattern. Any values passed in the CLI/SDK for these parameters will be ignored.
+    text: >
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
+       --migration-name testmigration --properties "migrationConfig.json" --migration-mode online --migration-option Validate
+  - name: >
+      Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. \
+      Use --migration-option Migrate for Migrate Only request.
+    text: >
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
+        --migration-name testmigration --properties "migrationConfig.json" --migration-option Migrate
+  - name: >
+      Default migration-option is ValidateAndMigrate. SoureType and SslMode must be passed for migrations other than PostgreSQLSingleServer. \
+      Migration parameters in json file should look like below:
+      {
+        "properties": {
+          "SourceDBServerResourceId": "20.66.25.58:5432@postgres",
+          "SecretParameters": {
+            "AdminCredentials": {
+              "SourceServerPassword": "password",
+              "TargetServerPassword": "password"
+            },
+            "SourceServerUserName": "postgres",
+            "TargetServerUserName": "fspguser"
+          }
+          "dBsToMigrate": [
+            "ticketdb","timedb","inventorydb"
+          ],
+          "OverwriteDbsInTarget": "true",
+          "SourceType": "OnPremises",
+          "SslMode": "Prefer"
+        }
+      }
+    text: >
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
+        --migration-name testmigration --properties "migrationConfig.json"
 """
 
 helps['postgres flexible-server migration list'] = """
