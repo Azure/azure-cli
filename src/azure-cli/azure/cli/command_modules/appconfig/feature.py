@@ -45,6 +45,7 @@ def set_feature(cmd,
                 name=None,
                 label=None,
                 description=None,
+                requirement_type=None,
                 yes=False,
                 connection_string=None,
                 auth_mode="key",
@@ -66,6 +67,9 @@ def set_feature(cmd,
     # when creating a new Feature flag, these defaults will be used
     tags = {}
     default_conditions = {FeatureFlagConstants.CLIENT_FILTERS: []}
+
+    if requirement_type:
+        default_conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
 
     default_value = {
         FeatureFlagConstants.ID: feature,
@@ -113,6 +117,9 @@ def set_feature(cmd,
                 # User can only update description if the key already exists
                 if description is not None:
                     feature_flag_value.description = description
+
+                if requirement_type is not None:
+                    feature_flag_value.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
 
                 set_kv = KeyValue(key=key,
                                   label=label,

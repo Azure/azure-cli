@@ -79,6 +79,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
+    def test_flexible_server_ssdv2_mgmt(self, resource_group):
+        self._test_flexible_server_ssdv2_mgmt('postgres', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_restore_mgmt(self, resource_group):
         self._test_flexible_server_restore_mgmt('postgres', resource_group)
 
@@ -197,6 +202,74 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, restore_server_name), checks=NoneCheck())
+
+
+    def _test_flexible_server_ssdv2_mgmt(self, database_engine, resource_group):
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        version = '15'
+        storage_size = 200
+        location = self.postgres_location
+        sku_name = 'Standard_D2s_v3'
+        tier = 'GeneralPurpose'
+        storage_type = 'PremiumV2_LRS'
+        iops = 3000
+        throughput = 125
+        backup_retention = 7
+        database_name = 'testdb'
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        # test create
+        self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --storage-type {} \
+                  --iops {} --throughput {} --public-access None'.format(database_engine, resource_group, server_name,
+                                                                                    backup_retention, sku_name, tier, storage_size,
+                                                                                    'dbadmin', version, database_name, storage_type,
+                                                                                    iops, throughput))
+
+        basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(basic_info['name'], server_name)
+        self.assertEqual(str(basic_info['location']).replace(' ', '').lower(), location)
+        self.assertEqual(basic_info['resourceGroup'], resource_group)
+        self.assertEqual(basic_info['sku']['name'], sku_name)
+        self.assertEqual(basic_info['sku']['tier'], tier)
+        self.assertEqual(basic_info['version'], version)
+        self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
+        self.assertEqual(basic_info['storage']['type'], storage_type)
+        self.assertEqual(basic_info['storage']['iops'], iops)
+        self.assertEqual(basic_info['storage']['throughput'], throughput)
+        self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
+
+        # test updates
+        self.cmd('{} flexible-server update -g {} -n {} --storage-size 300'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storage.storageSizeGb', 300 )])
+
+        self.cmd('{} flexible-server update -g {} -n {} --iops 3500'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storage.iops', 3500 )])
+
+        self.cmd('{} flexible-server update -g {} -n {} --throughput 400'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storage.throughput', 400 )])
+
+        # test failures
+        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
+                 .format(database_engine, resource_group, server_name),
+                 expect_failure=True)
+
+        self.cmd('{} flexible-server update -g {} -n {} --high-availability SameZone'
+                 .format(database_engine, resource_group, server_name),
+                 expect_failure=True)
+
+        replica_name = 'rep-ssdv2-' + server_name
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+                 .format(database_engine, resource_group, replica_name, basic_info['id']),
+                 expect_failure=True)
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
 
     def _test_flexible_server_restore_mgmt(self, database_engine, resource_group):
@@ -2225,12 +2298,16 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
                     checks=[JMESPathCheck('value', "1"),
                             JMESPathCheck('name', "logfiles.retention_days")]).get_output_in_json()
         
+        if os.environ.get(ENV_LIVE_TEST, True):
+            return
+        
         # wait for around 30 min to allow log files to be generated
-        os.environ.get(ENV_LIVE_TEST, False) and sleep(30*60)
+        sleep(30*60)
 
         # list server log files
         server_log_files = self.cmd('{} flexible-server server-logs list -g {} --server-name {} '
                                     .format(database_engine, resource_group, server_name)).get_output_in_json()
+        
         self.assertGreater(len(server_log_files), 0, "Server logFiles are not yet created")
         
         # download server log files
