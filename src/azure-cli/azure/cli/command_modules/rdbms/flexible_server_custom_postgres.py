@@ -1088,7 +1088,7 @@ def flexible_server_list_log_files_with_filter(client, resource_group_name, serv
 
 
 def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_mode="offline",
-                          migration_name=None, tags=None, location=None):
+                          migration_name=None, migration_option=None, tags=None, location=None):
 
     logging_name = 'PostgreSQL'
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1112,7 +1112,12 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
         # Convert a UUID to a string of hex digits in standard form
         migration_name = str(uuid.uuid4())
 
-    return _create_migration(logging_name, client, subscription_id, resource_group_name, server_name, migration_name, migration_mode, migration_parameters, tags, location)
+    if migration_option is None:
+        # Use default migration_option as 'ValidateAndMigrate'
+        migration_option = "ValidateAndMigrate"
+
+    return _create_migration(logging_name, client, subscription_id, resource_group_name, server_name, migration_name,
+                             migration_mode, migration_option, migration_parameters, tags, location)
 
 
 def migration_show_func(cmd, client, resource_group_name, server_name, migration_name):
@@ -1335,7 +1340,8 @@ def _get_pg_replica_zone(availabilityZones, sourceServerZone, replicaZone):
     return pg_replica_zone
 
 
-def _create_migration(logging_name, client, subscription_id, resource_group_name, target_db_server_name, migration_name, migration_mode, parameters, tags, location):
+def _create_migration(logging_name, client, subscription_id, resource_group_name, target_db_server_name,
+                      migration_name, migration_mode, migration_option, parameters, tags, location):
     logger.warning('Creating %s Migration for server \'%s\' in group \'%s\' and subscription \'%s\'...', logging_name, target_db_server_name, resource_group_name, subscription_id)
 
     parameter_keys = list(parameters.keys())
@@ -1343,6 +1349,8 @@ def _create_migration(logging_name, client, subscription_id, resource_group_name
     secret_parameter_keys = list(secret_parameter_dictionary.keys())
     admin_credentials_dictionary = get_case_insensitive_key_value("AdminCredentials", secret_parameter_keys, secret_parameter_dictionary)
     admin_credentials_keys = list(admin_credentials_dictionary.keys())
+    source_type = get_case_insensitive_key_value("SourceType", parameter_keys, parameters)
+    ssl_mode = get_case_insensitive_key_value("SslMode", parameter_keys, parameters)
 
     admin_credentials = postgresql_flexibleservers.models.AdminCredentials(
         source_server_password=get_case_insensitive_key_value("SourceServerPassword", admin_credentials_keys, admin_credentials_dictionary),
@@ -1359,7 +1367,10 @@ def _create_migration(logging_name, client, subscription_id, resource_group_name
         secret_parameters=secret_parameters,
         dbs_to_migrate=get_case_insensitive_key_value("DbsToMigrate", parameter_keys, parameters),
         setup_logical_replication_on_source_db_if_needed=get_enum_value_true_false(get_case_insensitive_key_value("SetupLogicalReplicationOnSourceDbIfNeeded", parameter_keys, parameters), "SetupLogicalReplicationOnSourceDbIfNeeded"),
-        overwrite_dbs_in_target=get_enum_value_true_false(get_case_insensitive_key_value("OverwriteDbsInTarget", parameter_keys, parameters), "OverwriteDbsInTarget"))
+        overwrite_dbs_in_target=get_enum_value_true_false(get_case_insensitive_key_value("OverwriteDbsInTarget", parameter_keys, parameters), "OverwriteDbsInTarget"),
+        source_type=source_type,
+        migration_option=migration_option,
+        ssl_mode=ssl_mode)
 
     return client.create(subscription_id, resource_group_name, target_db_server_name, migration_name, migration_parameters)
 
