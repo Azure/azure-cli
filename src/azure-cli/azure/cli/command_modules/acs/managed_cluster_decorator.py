@@ -2125,9 +2125,8 @@ class AKSManagedClusterContext(BaseAKSContext):
     def _get_network_plugin_mode(self, enable_validation: bool = False) -> Union[str, None]:
         # read the original value passed by the command
         network_plugin_mode = self.raw_param.get("network_plugin_mode")
-        # try to read the property value corresponding to the parameter from the `mc` object
 
-        # if create, try and read from the mc object
+        # try to read the property value corresponding to the parameter from the `mc` object
         if (
             not network_plugin_mode and
             self.mc and
