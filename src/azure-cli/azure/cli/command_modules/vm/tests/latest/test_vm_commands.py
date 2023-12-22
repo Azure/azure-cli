@@ -2902,7 +2902,7 @@ class VMCreateCustomIP(ScenarioTest):
             'dns': 'vrfmyvm00110011z',
             'public_ip_sku': 'Standard'
         })
-
+        # Basic option will be removed in the future. Now the default should be "Standard" sku with "Static" allocation method
         self.cmd('vm create -n {vm} -g {rg} --image OpenLogic:CentOS:7.5:latest --admin-username user11 --private-ip-address 10.0.0.5 --public-ip-sku {public_ip_sku} --public-ip-address-dns-name {dns} --generate-ssh-keys --nsg-rule NONE')
 
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', checks=[
@@ -2912,13 +2912,6 @@ class VMCreateCustomIP(ScenarioTest):
         ])
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
                  checks=self.check('ipConfigurations[0].privateIPAllocationMethod', 'Static'))
-
-        # verify the default should be "Basic" sku with "Dynamic" allocation method
-        self.cmd('vm create -n {vm2} -g {rg} --image OpenLogic:CentOS:7.5:latest --admin-username user11 --generate-ssh-keys --nsg-rule NONE')
-        self.cmd('network public-ip show -n {vm2}PublicIP -g {rg}', checks=[
-            self.check('publicIPAllocationMethod', 'Dynamic'),
-            self.check('sku.name', 'Basic')
-        ])
 
 
 class VMDiskAttachDetachTest(ScenarioTest):
@@ -3855,11 +3848,9 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'vmss2': self.create_random_name('vmss', 15),
             'vmss3': self.create_random_name('vmss', 15),
             'vmss4': self.create_random_name('vmss', 15),
-            'vmss5': self.create_random_name('vmss', 15),
             'vmss6': self.create_random_name('vmss', 15),
             'natrule': self.create_random_name('natrule', 15),
             'natrule1': self.create_random_name('natrule', 15),
-            'natrule2': self.create_random_name('natrule', 15),
             'natpool': self.create_random_name('natpool', 15),
         })
 
@@ -3872,7 +3863,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         ])
         self.cmd('vmss list-instance-connection-info -n {vmss1} -g {rg}')
 
-        self.cmd('vmss create -n {vmss2} -g {rg} --image OpenLogic:CentOS:7.5:latest --orchestration-mode Uniform')
+        self.cmd('vmss create -n {vmss2} -g {rg} --image OpenLogic:CentOS:7.5:latest --lb-sku Basic --orchestration-mode Uniform')
         self.cmd('vmss show -n {vmss2} -g {rg}', checks=[
             self.exists('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools[0].id')
         ])
@@ -3890,7 +3881,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         ])
         self.cmd('vmss list-instance-connection-info -n {vmss3} -g {rg}')
 
-        self.cmd('vmss create -n {vmss4} -g {rg} --image OpenLogic:CentOS:7.5:latest --nat-rule-name {natrule1} --orchestration-mode Uniform')
+        self.cmd('vmss create -n {vmss4} -g {rg} --image OpenLogic:CentOS:7.5:latest --nat-rule-name {natrule1} --lb-sku Basic --orchestration-mode Uniform')
         self.cmd('vmss show -n {vmss4} -g {rg}', checks=[
             self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
         ])
@@ -3900,16 +3891,6 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         message = 'There is no connection information. If you are using NAT rule V2, please confirm whether the load balancer SKU is Standard'
         with self.assertRaisesRegex(CLIError, message):
             self.cmd('vmss list-instance-connection-info -n {vmss4} -g {rg}')
-
-        self.cmd('vmss create -n {vmss5} -g {rg} --image OpenLogic:CentOS:7.5:latest --nat-rule-name {natrule2} --lb-sku Basic --orchestration-mode Uniform')
-        self.cmd('vmss show -n {vmss5} -g {rg}', checks=[
-            self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
-        ])
-        self.cmd('network lb show -n {vmss5}LB -g {rg}', checks=[
-            self.check('sku.name', 'Basic')
-        ])
-        with self.assertRaisesRegex(CLIError, message):
-            self.cmd('vmss list-instance-connection-info -n {vmss5} -g {rg}')
 
         self.cmd('vmss create -n {vmss6} -g {rg} --image OpenLogic:CentOS:7.5:latest --nat-pool-name {natpool} --lb-sku Standard --orchestration-mode Uniform')
         self.cmd('vmss show -n {vmss6} -g {rg}', checks=[
@@ -4062,7 +4043,7 @@ class VMSSUpdateTests(ScenarioTest):
             'vmss4': self.create_random_name('vmss', 10),
             'img4': 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest',
         })
-        self.cmd('vmss create -n {vmss2} -g {rg} --image {img2} --admin-username vmtest --admin-password Test123456789#')
+        self.cmd('vmss create -n {vmss2} -g {rg} --image {img2} --admin-username vmtest --admin-password Test123456789# --orchestration-mode Uniform')
         self.cmd('vmss update -g {rg} -n {vmss2} --set virtualMachineProfile.storageProfile.imageReference.sku={img2_sku_gen2} --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true', checks=[
             self.check('virtualMachineProfile.storageProfile.imageReference.offer', 'windowsserver'),
             self.check('virtualMachineProfile.storageProfile.imageReference.sku', '{img2_sku_gen2}'),
@@ -4071,7 +4052,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
         ])
 
-        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest --generate-ssh-keys', checks=[
+        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest --generate-ssh-keys --orchestration-mode Uniform', checks=[
             self.check('vmss.virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
         ])
         self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch', checks=[
@@ -4086,7 +4067,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', False),
         ])
 
-        self.cmd('vmss create -n {vmss4} -g {rg} --image {img4} --admin-username vmtest --admin-password Test123456789# --vm-sku Standard_DC2as_v5 --security-type ConfidentialVM --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type VMGuestStateOnly', checks=[
+        self.cmd('vmss create -n {vmss4} -g {rg} --image {img4} --admin-username vmtest --admin-password Test123456789# --vm-sku Standard_DC2as_v5 --security-type ConfidentialVM --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type VMGuestStateOnly --orchestration-mode Uniform', checks=[
             self.check('vmss.virtualMachineProfile.securityProfile.securityType', 'ConfidentialVM'),
         ])
         with self.assertRaisesRegex(InvalidArgumentValueError, r'vmss.* is already configured with ConfidentialVM\..*'):
@@ -7008,7 +6989,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
 # region dedicated host tests
 class DedicatedHostScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_management_')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_management_', location='eastus')
     def test_vm_host_management(self, resource_group):
         self.kwargs.update({
             'host-group': 'my-host-group',
