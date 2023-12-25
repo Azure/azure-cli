@@ -17,8 +17,8 @@ Extension version identifiers are separated into up to four segments:
 - pre: pre-release or preview indicator, started with `b` and ended with numeric identifier, non-negative integers, no leading zeroes
 
 #### Note
-- Each segment MUST increase numerically
-- Precedence is determined by the first difference when comparing each of these segments from left to right as follows: Major, minor, and patch versions numerically. And, pre version is smaller than corresponding release version. For instance: 1.9.0 < 2.0.0b1 < 2.0.0b2 < 2.0.0 < 2.1.0
+- Each segment MUST increase numerically. If MAJOR number is incremented, MINOR and PATCH number should be reset to 0. And PATCH number should be reset to 0 if MINOR number is incremented
+- Precedence is determined by the first difference when comparing each of these segments from left to right as follows: Major, minor, and patch versions numerically. And, preview-release version is smaller than corresponding stable-release version. For instance: 1.9.0 < 2.0.0b1 < 2.0.0b2 < 2.0.0 < 2.1.0
 
 ## Versioning Practice
 
