@@ -1509,6 +1509,13 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         )
 
+        self.cmd(
+            'webapp connection show --id {}'.format(conn_id),
+            checks = [
+                self.check('configurationInfo.configurationStore.appConfigurationId', appconfig_id)
+            ]
+        )
+
         configurations = self.cmd(
             'webapp connection list-configuration --id {}'.format(conn_id)
         ).get_output_in_json().get('configurations')
@@ -1516,7 +1523,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # check app config
         for config in configurations:
             self.cmd(
-                'appconfig kv list --name {config_store} --key {}'.format(config['key'], **self.kwargs),
+                'appconfig kv list --name {config_store} --key {}'.format(config['name'], **self.kwargs),
                 checks=[
                     self.check('[0].value', config['value'])
                 ]
