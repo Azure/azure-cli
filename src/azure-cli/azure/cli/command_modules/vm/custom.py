@@ -4575,6 +4575,9 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
         else:
             gallery.soft_delete_policy = {'is_soft_delete_enabled': soft_delete}
     else:
+        # This is a workaround to solve historical legacy issues,
+        # send None to the service will let service not modify this property.
+        # We can delete this logic when the service no longer checks AFEC in the future.
         gallery.soft_delete_policy = None
 
     client = _compute_client_factory(cmd.cli_ctx)
