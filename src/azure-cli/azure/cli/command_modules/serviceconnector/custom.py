@@ -393,7 +393,6 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
             client_type = CLIENT_TYPE.DotnetConnectionString.value
         else:
             logger.warning('client_type is not dotnet, ignore "--config-connstr"')
-
     parameters = {
         'target_service': {
             "type": "AzureResource",
@@ -425,7 +424,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
             and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use secret-name')
-    
+
     if app_config_id:
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_app_config_connection_if_not_exist
@@ -1029,7 +1028,7 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
-    
+
     if app_config_id:
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_app_config_connection_if_not_exist
@@ -1148,7 +1147,7 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
         if app_config_id:
             client = set_user_token_header(client, cmd.cli_ctx)
             from ._utils import create_app_config_connection_if_not_exist
-            create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id, scope)
+            create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id)
 
         parameters = {
             'targetService': server_linker.get('targetService'),
@@ -1195,7 +1194,7 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
         if app_config_id:
             client = set_user_token_header(client, cmd.cli_ctx)
             from ._utils import create_app_config_connection_if_not_exist
-            create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id, scope)
+            create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id)
 
         parameters = {
             'targetService': schema_linker.get('targetService'),
