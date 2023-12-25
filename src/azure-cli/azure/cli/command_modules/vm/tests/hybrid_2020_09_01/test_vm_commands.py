@@ -284,7 +284,9 @@ class VMVMSSWindowsLicenseTest(ScenarioTest):
         self.cmd('vm update -g {rg} -n {vm} --license-type None', checks=[
             self.check('licenseType', 'None')
         ])
-        self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1', checks=[
+            self.check('vmss.orchestrationMode', 'Uniform')
+        ])
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.licenseType', 'Windows_Server')
         ])
