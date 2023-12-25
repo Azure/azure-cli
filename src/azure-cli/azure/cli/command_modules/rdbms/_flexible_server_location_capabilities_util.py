@@ -75,7 +75,7 @@ def _postgres_parse_list_capability(result):
                 for storage_info in storage_edition.supported_storage_mb:
                     storage_sizes.add(int(storage_info.storage_size_mb // 1024))
                 tier_dict["storage_edition"] = storage_edition
-            else:
+            elif storage_edition.name == "ManagedDiskV2" and len(storage_edition.supported_storage_mb) > 0:
                 tier_dict["supported_storageV2_size"] = int(storage_edition.supported_storage_mb[0].storage_size_mb // 1024)
                 tier_dict["supported_storageV2_size_max"] = int(storage_edition.supported_storage_mb[0].maximum_storage_size_mb // 1024)
                 tier_dict["supported_storageV2_iops"] = storage_edition.supported_storage_mb[0].supported_iops

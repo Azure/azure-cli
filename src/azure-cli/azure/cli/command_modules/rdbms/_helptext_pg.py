@@ -35,8 +35,16 @@ examples:
         az postgres flexible-server create --location northeurope --resource-group testGroup \\
           --name testserver --admin-user username --admin-password password \\
           --sku-name Standard_B1ms --tier Burstable --public-access 153.24.26.117 --storage-size 128 \\
-          --tags "key=value" --version 13 --high-availability Enabled --zone 1 \\
+          --tags "key=value" --version 13 --high-availability ZoneRedundant --zone 1 \\
           --standby-zone 3
+  - name: >
+      Create a PostgreSQL flexible server using Premium SSD v2 Disks.
+    text: >
+      # set storage type to "PremiumV2_LRS" and provide values for Storage size (in GiB), IOPS (operations/sec), and Throughput (MB/sec).
+
+      az postgres flexible-server create --location northeurope --resource-group testGroup \\
+          --name testserver --admin-user username --admin-password password \\
+          --sku-name Standard_B1ms --tier Burstable --storage-type PremiumV2_LRS --storage-size 128 --iops 3000 --throughput 125
   - name: >
       Create a PostgreSQL flexible server with default parameters and public access enabled by default. \
       Resource group, server name, username, password, and default database will be created by CLI
@@ -200,14 +208,12 @@ examples:
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --geo-redundant-backup Enabled \\
         --key $keyIdentifier --identity testIdentity --backup-key $geoKeyIdentifier --backup-identity geoIdentity
 
-
   - name: >
       Create flexible server with custom storage performance tier. Accepted values "P4", "P6", "P10", "P15", "P20", "P30", \\
       "P40", "P50", "P60", "P70", "P80". Actual allowed values depend on the --storage-size selection for flexible server creation. \\
       Default value for storage performance tier depends on the --storage-size selected for flexible server creation.
     text: >
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --performance-tier P15
-
 
   - name: >
       create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
@@ -267,6 +273,10 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --storage-auto-grow Enabled
   - name: Update a flexible server's storage to set custom storage performance tier.
     text: az postgres flexible-server update --resource-group testGroup --name testserver --performance-tier P15
+  - name: Update a flexible server's storage to set IOPS (operations/sec). Server must be using Premium SSD v2 Disks.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --iops 3000
+  - name: Update a flexible server's storage to set Throughput (MB/sec). Server must be using Premium SSD v2 Disks.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --throughput 125
 """
 
 helps['postgres flexible-server restore'] = """
@@ -495,10 +505,87 @@ helps['postgres flexible-server migration create'] = """
 type: command
 short-summary: Create a new migration workflow for a flexible server.
 examples:
-  - name: Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. Use --migration-mode online for Online(with CDC) migration
-    text: az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration --properties "migrationConfig.json" --migration-mode online
-  - name: Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. Use --migration-mode offline or no --migration-mode flag for Offline Migration.
-    text: az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration --properties "migrationConfig.json"
+  - name: >
+      Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. \
+      Use --migration-mode offline for Offline migration. Sample migrationConfig.json will look like this:
+      {
+        "properties": {
+          "SourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
+          "SecretParameters": {
+            "AdminCredentials": {
+              "SourceServerPassword": "password",
+              "TargetServerPassword": "password"
+            },
+            "SourceServerUserName": "testuser@pg-single-1",
+            "TargetServerUserName": "fspguser"
+          }
+          "dBsToMigrate": [
+            "postgres"
+          ],
+          "OverwriteDbsInTarget": "true",
+          "SourceType": "PostgreSQLSingleServer",
+          "SslMode": "VerifyFull"
+        }
+      }
+    text: >
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
+        --migration-name testmigration --properties "migrationConfig.json" --migration-mode offline
+  - name: >
+      Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. \
+      Use --migration-mode online for Online(with CDC) migration, with this sample migrationConfig.json. Use migration-option Validate for validate only request
+      {
+        "properties": {
+          "SourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
+          "SecretParameters": {
+            "AdminCredentials": {
+              "SourceServerPassword": "password",
+              "TargetServerPassword": "password"
+            },
+            "SourceServerUserName": "testuser@pg-single-1",
+            "TargetServerUserName": "fspguser"
+          }
+          "dBsToMigrate": [
+            "postgres"
+          ],
+          "OverwriteDbsInTarget": "true"
+        }
+      }
+      The sourceType and sslmode parameters are automatically set to 'PostgreSQL Single server' and 'VerifyFull' respectively, if the source resource id \
+        follows the /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/{rg-name}/providers/Microsoft.DBforPostgreSQL/servers/{single-server-name} server pattern. Any values passed in the CLI/SDK for these parameters will be ignored.
+    text: >
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
+       --migration-name testmigration --properties "migrationConfig.json" --migration-mode online --migration-option Validate
+  - name: >
+      Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. \
+      Use --migration-option Migrate for Migrate Only request.
+    text: >
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
+        --migration-name testmigration --properties "migrationConfig.json" --migration-option Migrate
+  - name: >
+      Default migration-option is ValidateAndMigrate. SoureType and SslMode must be passed for migrations other than PostgreSQLSingleServer. \
+      Migration parameters in json file should look like below:
+      {
+        "properties": {
+          "SourceDBServerResourceId": "20.66.25.58:5432@postgres",
+          "SecretParameters": {
+            "AdminCredentials": {
+              "SourceServerPassword": "password",
+              "TargetServerPassword": "password"
+            },
+            "SourceServerUserName": "postgres",
+            "TargetServerUserName": "fspguser"
+          }
+          "dBsToMigrate": [
+            "ticketdb","timedb","inventorydb"
+          ],
+          "OverwriteDbsInTarget": "true",
+          "SourceType": "OnPremises",
+          "SslMode": "Prefer"
+        }
+      }
+    text: >
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
+        --migration-name testmigration --properties "migrationConfig.json"
 """
 
 helps['postgres flexible-server migration list'] = """
@@ -851,4 +938,33 @@ examples:
     text: az postgres flexible-server advanced-threat-protection-setting show --subscription testSubscription --resource-group testGroup --server-name testserver
   - name: Get the details of advanced threat protection setting for a flexible server using --ids parameter.
     text: az postgres flexible-server advanced-threat-protection-setting show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testServer
+"""
+
+helps['postgres flexible-server server-logs'] = """
+type: group
+short-summary: Manage server logs (log files) for a PostgreSQL flexible server.
+"""
+
+helps['postgres flexible-server server-logs download'] = """
+type: command
+short-summary: Download log files for a PostgreSQL flexible server.
+examples:
+  - name: >
+      Downloads log files f1 and f2 to the current directory from the server 'testsvr'. Please note that f1 and f2 should match the log file name including the foldername, for instance serverlogs/f1.log
+    text: >
+      az postgres flexible-server server-logs download -g testgroup -s testsvr -n serverlogs/f1.log serverlogs/f2.log
+"""
+
+helps['postgres flexible-server server-logs list'] = """
+type: command
+short-summary: List log files for a PostgreSQL flexible server.
+examples:
+  - name: List log files for 'testsvr' modified in the last 72 hours (default value).
+    text: az postgres flexible-server server-logs list -g testgroup -s testsvr
+  - name: List log files for 'testsvr' modified in the last 10 hours.
+    text: az postgres flexible-server server-logs list -g testgroup -s testsvr --file-last-written 10
+  - name: List log files for 'testsvr' less than 30Kb in size.
+    text: az postgres flexible-server server-logs list -g testgroup -s testsvr --max-file-size 30
+  - name: List log files for 'testsvr' containing name 'serverlogs'.
+    text: az postgres flexible-server server-logs list -g testgroup -s testsvr --subscription testSubscription --filename-contains serverlogs
 """

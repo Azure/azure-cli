@@ -239,6 +239,128 @@ class ContainerappIngressTests(ScenarioTest):
             self.assertEqual(revision["properties"]["trafficWeight"], 50)
 
     @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="westeurope")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
+    def test_containerapp_custom_domains_app_in_different_rg(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        env_name = self.create_random_name(prefix='containerapp-env', length=24)
+        ca_name = self.create_random_name(prefix='containerapp', length=24)
+        app_rg_name = self.create_random_name(prefix='app-rg', length=24)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+        self.cmd(f'group create -n {app_rg_name}')
+        env_id = self.cmd('containerapp env show -n {} -g {}'.format(env_name, resource_group)).get_output_in_json()["id"]
+
+        app = self.cmd('containerapp create -g {} -n {} --environment {} --ingress external --target-port 80'.format(app_rg_name, ca_name, env_id)).get_output_in_json()
+
+        self.cmd('containerapp hostname list -g {} -n {}'.format(app_rg_name, ca_name), checks=[
+            JMESPathCheck('length(@)', 0),
+        ])
+
+        # list hostnames with a wrong location
+        self.cmd('containerapp hostname list -g {} -n {} -l "{}"'.format(app_rg_name, ca_name, "eastus2"), checks={
+            JMESPathCheck('length(@)', 0),
+        }, expect_failure=True)
+
+        # create an App service domain and update its txt records
+        contacts = os.path.join(TEST_DIR, 'data', 'domain-contact.json')
+        zone_name = "{}.com".format(ca_name)
+        subdomain_1 = "devtest"
+        subdomain_2 = "clitest"
+        txt_name_1 = "asuid.{}".format(subdomain_1)
+        txt_name_2 = "asuid.{}".format(subdomain_2)
+        hostname_1 = "{}.{}".format(subdomain_1, zone_name)
+        hostname_2 = "{}.{}".format(subdomain_2, zone_name)
+        verification_id = app["properties"]["customDomainVerificationId"]
+        self.cmd("appservice domain create -g {} --hostname {} --contact-info=@'{}' --accept-terms".format(resource_group, zone_name, contacts)).get_output_in_json()
+        self.cmd('network dns record-set txt add-record -g {} -z {} -n {} -v {}'.format(resource_group, zone_name, txt_name_1, verification_id)).get_output_in_json()
+        self.cmd('network dns record-set txt add-record -g {} -z {} -n {} -v {}'.format(resource_group, zone_name, txt_name_2, verification_id)).get_output_in_json()
+
+        # upload cert, add hostname & binding
+        pfx_file = os.path.join(TEST_DIR, 'data', 'cert.pfx')
+        testpassword = 'test12'
+        cert_pfx_name = self.create_random_name(prefix='cert-pfx', length=24)
+        cert_id = self.cmd('containerapp ssl upload -n {} -g {} --environment {} --hostname {} --certificate-file "{}" --password {} -c {}'.format(ca_name, app_rg_name, env_id, hostname_1, pfx_file, testpassword, cert_pfx_name), checks=[
+            JMESPathCheck('[0].name', hostname_1),
+        ]).get_output_in_json()[0]["certificateId"]
+
+        self.cmd('containerapp hostname list -g {} -n {}'.format(app_rg_name, ca_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', hostname_1),
+            JMESPathCheck('[0].bindingType', "SniEnabled"),
+            JMESPathCheck('[0].certificateId', cert_id),
+        ])
+
+        # get cert thumbprint
+        cert_thumbprint = self.cmd('containerapp env certificate list -n {} -g {} -c {}'.format(env_name, resource_group, cert_id), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].id', cert_id),
+        ]).get_output_in_json()[0]["properties"]["thumbprint"]
+
+        self.cmd('containerapp hostname bind -g {} -n {} --hostname {} --thumbprint {} -e {}'.format(app_rg_name, ca_name, hostname_2, cert_thumbprint, env_id), checks=[
+            JMESPathCheck('length(@)', 2),
+        ])
+
+        self.cmd('containerapp hostname list -g {} -n {}'.format(app_rg_name, ca_name), checks=[
+            JMESPathCheck('length(@)', 2),
+            JMESPathCheck('[0].bindingType', "SniEnabled"),
+            JMESPathCheck('[0].certificateId', cert_id),
+            JMESPathCheck('[1].bindingType', "SniEnabled"),
+            JMESPathCheck('[1].certificateId', cert_id),
+        ])
+
+        # delete hostname with a wrong location
+        self.cmd('containerapp hostname delete -g {} -n {} --hostname {} -l "{}" --yes'.format(app_rg_name, ca_name, hostname_1, "eastus2"), expect_failure=True)
+
+        self.cmd('containerapp hostname delete -g {} -n {} --hostname {} -l "{}" --yes'.format(app_rg_name, ca_name, hostname_1, app["location"]), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', hostname_2),
+            JMESPathCheck('[0].bindingType', "SniEnabled"),
+            JMESPathCheck('[0].certificateId', cert_id),
+        ]).get_output_in_json()
+
+        self.cmd('containerapp hostname list -g {} -n {}'.format(app_rg_name, ca_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', hostname_2),
+            JMESPathCheck('[0].bindingType', "SniEnabled"),
+            JMESPathCheck('[0].certificateId', cert_id),
+        ])
+
+        self.cmd('containerapp hostname delete -g {} -n {} --hostname {} --yes'.format(app_rg_name, ca_name, hostname_2), checks=[
+            JMESPathCheck('length(@)', 0),
+        ]).get_output_in_json()
+
+        # add binding by cert id
+        self.cmd('containerapp hostname bind -g {} -n {} --hostname {} --certificate {}'.format(app_rg_name, ca_name, hostname_2, cert_id), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].bindingType', "SniEnabled"),
+            JMESPathCheck('[0].certificateId', cert_id),
+            JMESPathCheck('[0].name', hostname_2),
+        ]).get_output_in_json()
+
+        self.cmd('containerapp hostname delete -g {} -n {} --hostname {} --yes'.format(app_rg_name, ca_name, hostname_2), checks=[
+            JMESPathCheck('length(@)', 0),
+        ]).get_output_in_json()
+
+        # add binding by cert name, with and without environment
+        cert_name = parse_resource_id(cert_id)["resource_name"]
+
+        self.cmd('containerapp hostname bind -g {} -n {} --hostname {} --certificate {}'.format(app_rg_name, ca_name, hostname_1, cert_name), expect_failure=True)
+
+        self.cmd('containerapp hostname bind -g {} -n {} --hostname {} --certificate {} -e {}'.format(app_rg_name, ca_name, hostname_1, cert_name, env_id), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].bindingType', "SniEnabled"),
+            JMESPathCheck('[0].certificateId', cert_id),
+            JMESPathCheck('[0].name', hostname_1),
+        ]).get_output_in_json()
+
+        self.cmd('containerapp hostname delete -g {} -n {} --hostname {} --yes'.format(app_rg_name, ca_name, hostname_1), checks=[
+            JMESPathCheck('length(@)', 0),
+        ]).get_output_in_json()
+
+        self.cmd(f'group delete -n {app_rg_name} --yes')
+
+    @AllowLargeResponse(8192)
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
     @ResourceGroupPreparer(location="westeurope")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
@@ -263,7 +385,7 @@ class ContainerappIngressTests(ScenarioTest):
         }, expect_failure=True)
 
         # create an App service domain and update its txt records
-        contacts = os.path.join(TEST_DIR, 'domain-contact.json')
+        contacts = os.path.join(TEST_DIR, 'data', 'domain-contact.json')
         zone_name = "{}.com".format(ca_name)
         subdomain_1 = "devtest"
         subdomain_2 = "clitest"
@@ -277,8 +399,8 @@ class ContainerappIngressTests(ScenarioTest):
         self.cmd('network dns record-set txt add-record -g {} -z {} -n {} -v {}'.format(resource_group, zone_name, txt_name_2, verification_id)).get_output_in_json()
 
         # upload cert, add hostname & binding
-        pfx_file = os.path.join(TEST_DIR, 'cert.pfx')
-        testpassword = 'abc123'
+        pfx_file = os.path.join(TEST_DIR, 'data', 'cert.pfx')
+        testpassword = 'test12'
         cert_id = self.cmd('containerapp ssl upload -n {} -g {} --environment {} --hostname {} --certificate-file "{}" --password {}'.format(ca_name, resource_group, env_name, hostname_1, pfx_file, testpassword), checks=[
             JMESPathCheck('[0].name', hostname_1),
         ]).get_output_in_json()[0]["certificateId"]
