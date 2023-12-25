@@ -1,6 +1,6 @@
 # Versioning of Azure CLI Extension
 
-To keep a unified versioning strategy across azure cli extension modules, azure cli set up a simple list of rules and requirements on how cli extension version numbers are assigned and incremented, based on [Semantic Versioning] (https://semver.org/#semantic-versioning-200) 
+To keep a unified versioning strategy across azure cli extension modules, azure cli set up a simple list of rules and requirements on how cli extension version numbers are assigned and incremented, based on [Semantic Versioning](https://semver.org/#semantic-versioning-200) 
 
 ## Versioning Scheme
 
@@ -16,7 +16,7 @@ Extension version identifiers are separated into up to four segments:
 - PATCH: version patch number, numeric identifier, non-negative integers, no leading zeroes
 - pre: pre-release or preview indicator, started with `b` and ended with numeric identifier, non-negative integers, no leading zeroes
 
-#### Note
+#### Notes
 - Each segment MUST increase numerically. If MAJOR number is incremented, MINOR and PATCH number should be reset to 0. And PATCH number should be reset to 0 if MINOR number is incremented
 - Precedence is determined by the first difference when comparing each of these segments from left to right as follows: Major, minor, and patch versions numerically. And, preview-release version is smaller than corresponding stable-release version. For instance: 1.9.0 < 2.0.0b1 < 2.0.0b2 < 2.0.0 < 2.1.0
 
@@ -24,7 +24,7 @@ Extension version identifiers are separated into up to four segments:
 
 ### Initialization
 
-Extension modules released as stable version should use version scheme: MAJOR.MINOR.PATCH and version number should start with 1.0.0. While modules released as preview version use scheme: MAJOR.MINOR.PATCH{a|b}[0-9]+ and initialization starts with 1.0.0b1. Existing modules should comply with this scheme in future releases, and those already did need to increase their version as following increment rule.
+Extension modules released as stable version should use version scheme: MAJOR.MINOR.PATCH and version number should start with 1.0.0. While modules released as preview version use scheme: MAJOR.MINOR.PATCHb[0-9]+ and initialization starts with 1.0.0b1. Existing modules should comply with this scheme in future releases, and those already did need to increase their version as following increment rule.
 
 ### CLI Extension Version Increment Rules
 CLI extension holds the following rules:
@@ -43,7 +43,7 @@ CLI extension holds the following rules:
      - if breaking change added, next version will be x+1.x.xb1
      - if new features added but no breaking change, next version will be x.x.xbx+1
      - if only bug fixes, next version will be x.x.xbx+1
-   - if last version is stable as x.x.x (<1.0.0) or preview as x.x.xbx (< 1.0.0b1), next preview version is 1.0.0b1
+   - if last version is stable as x.x.x (<1.0.0) or preview as x.x.xbx (< 1.0.0b1), next preview version should be 1.0.0b1
 
 ### CLI Extension Version Transition Table
 
@@ -138,10 +138,10 @@ Considering version increment rules above, version transition table can be summa
 
 ## Backward Compatibility of Extension Version Tags
 
-Previous extension module has a combination of semantic scheme and extra tags (`azext.isExperimental` and `azext.isPreview`) to mark module release version. To keep backward compatibility:
-- `azext.isPreview` is reserved for all preview extension releases and `azext.isExperimental` is jointed into `azext.isPreview` for tag simplicity. 
+Previous extension module has a combination of semantic scheme and extra metadata tags (`azext.isExperimental` and `azext.isPreview`) to mark module release version. To keep backward compatibility:
+- `azext.isPreview` is reserved for all preview extension releases and `azext.isExperimental` is jointed into `azext.isPreview` for version tag simplicity. 
 - For all stable extension releases, neither `azext.isPreview` nor `azext.isExperimental` can be added into module metadata.
 
 ## Extension Installation Upgrade
 
-To distinguish `stable-only` extension installation with `preview-included` extension installation, `--allow-preview` is added into `az extension add/update` and `az upgrade` and the `stable/preview` justification is made based on this extension versioning specification.
+To distinguish `stable-only` extension installation with `preview-included` extension installation, `--allow-preview` is added into `az extension add/update` and `az upgrade` and the `stable/preview` justification is made based on this extension versioning specification from cli version `2.56.0`. Default value for `--allow-preview` is `True` for user compatibility and will be reset to `False` in next breaking change window (by May 2024).
