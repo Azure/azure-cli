@@ -385,7 +385,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
     if not new_addon and not target_id:
         raise RequiredArgumentMissingError(err_msg.format('--target-id'))
-    
+
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
                                          system_identity_auth_info, service_principal_auth_info_secret, new_addon)
 
