@@ -1477,7 +1477,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+    @live_only()
+    @unittest.skip('Need to install private SDK')
     def test_webapp_storageblob_store_in_app_config(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
