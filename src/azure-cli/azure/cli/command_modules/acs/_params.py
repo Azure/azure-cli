@@ -41,7 +41,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_ABSOLUTEMONTHLY_MAINTENANCE_SCHEDULE, CONST_RELATIVEMONTHLY_MAINTENANCE_SCHEDULE,
     CONST_WEEKINDEX_FIRST, CONST_WEEKINDEX_SECOND,
     CONST_WEEKINDEX_THIRD, CONST_WEEKINDEX_FOURTH,
-    CONST_WEEKINDEX_LAST)
+    CONST_WEEKINDEX_LAST,
+    CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
+    CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION)
 from azure.cli.command_modules.acs._validators import (
     validate_acr, validate_agent_pool_name, validate_assign_identity,
     validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
@@ -68,7 +70,9 @@ from azure.cli.command_modules.acs._validators import (
     validate_nodepool_taints, validate_vm_set_type, validate_vnet_subnet_id, validate_k8s_support_plan,
     validate_utc_offset, validate_start_date, validate_start_time,
     validate_force_upgrade_disable_and_enable_parameters,
-    validate_allowed_host_ports, validate_application_security_groups)
+    validate_allowed_host_ports, validate_application_security_groups,
+    validate_node_public_ip_tags,
+    validate_crg_id)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -171,6 +175,11 @@ week_indexes = [
     CONST_WEEKINDEX_LAST,
 ]
 
+backend_pool_types = [
+    CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
+    CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION,
+]
+
 
 def load_arguments(self, _):
 
@@ -217,6 +226,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ip_prefixes', validator=validate_load_balancer_outbound_ip_prefixes)
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
+        c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types))
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
@@ -320,6 +330,7 @@ def load_arguments(self, _):
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
+        c.argument('crg_id', validator=validate_crg_id)
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
         c.argument('nodepool_allowed_host_ports', nargs='+', validator=validate_allowed_host_ports, help="allowed host ports for agentpool")
         c.argument('nodepool_asg_ids', nargs='+', validator=validate_application_security_groups, help="application security groups for agentpool")
@@ -330,6 +341,8 @@ def load_arguments(self, _):
         c.argument('ksm_metric_annotations_allow_list')
         c.argument('grafana_resource_id', validator=validate_grafanaresourceid)
         c.argument('enable_windows_recording_rules', action='store_true')
+        c.argument('node_public_ip_tags', arg_type=tags_type, validator=validate_node_public_ip_tags,
+                   help='space-separated tags: key[=value] [key[=value] ...].')
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
@@ -343,6 +356,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ip_prefixes', validator=validate_load_balancer_outbound_ip_prefixes)
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
+        c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types))
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('network_dataplane', arg_type=get_enum_type(network_dataplanes))
@@ -569,9 +583,12 @@ def load_arguments(self, _):
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
+        c.argument('crg_id', validator=validate_crg_id)
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
         c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
+        c.argument('node_public_ip_tags', arg_type=tags_type, validator=validate_node_public_ip_tags,
+                   help='space-separated tags: key[=value] [key[=value] ...].')
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
@@ -634,6 +651,22 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('snapshot_name', options_list=['--name', '-n'], required=True, validator=validate_snapshot_name, help='The nodepool snapshot name.')
             c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+
+    with self.argument_context('aks trustedaccess rolebinding') as c:
+        c.argument('cluster_name', help='The cluster name.')
+
+    for scope in ['aks trustedaccess rolebinding show', 'aks trustedaccess rolebinding create',
+                  'aks trustedaccess rolebinding update', 'aks trustedaccess rolebinding delete']:
+        with self.argument_context(scope) as c:
+            c.argument('role_binding_name', options_list=[
+                       '--name', '-n'], required=True, help='The role binding name.')
+
+    with self.argument_context('aks trustedaccess rolebinding create') as c:
+        c.argument('roles', help='comma-separated roles: Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer,...')
+        c.argument('source_resource_id', options_list=['--source-resource-id', '-r'], help='The source resource id of the binding')
+
+    with self.argument_context('aks trustedaccess rolebinding update') as c:
+        c.argument('roles', help='comma-separated roles: Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer,...')
 
 
 def _get_default_install_location(exe_name):
