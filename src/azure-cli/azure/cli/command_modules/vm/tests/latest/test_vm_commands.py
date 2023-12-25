@@ -9419,6 +9419,45 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_', location='eastus2euap')
+    def test_vm_vmss_proxy_agent(self, resource_group):
+        self.kwargs.update({
+            'vm1': self.create_random_name('vm', 10),
+            'vm2': self.create_random_name('vm', 10),
+            'vmss1': self.create_random_name('vmss', 10),
+            'vmss2': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vm create -g {rg} -n {vm1} --image ubuntu2204 --enable-proxy-agent --proxy-agent-mode Audit --size Standard_D2s_v3')
+        self.cmd('vm show -g {rg} -n {vm1}', checks=[
+            self.check('securityProfile.proxyAgentSettings.enabled', True),
+            self.check('securityProfile.proxyAgentSettings.mode', 'Audit')
+        ])
+        self.cmd('vm update -g {rg} -n {vm1} --enable-proxy-agent False --proxy-agent-mode Enforce', checks=[
+            self.check('securityProfile.proxyAgentSettings.enabled', False),
+            self.check('securityProfile.proxyAgentSettings.mode', 'Enforce')
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm2} --image ubuntu2204 --size Standard_D2s_v3')
+        self.cmd('vm update -g {rg} -n {vm2} --enable-proxy-agent True --proxy-agent-mode Enforce')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('securityProfile.proxyAgentSettings.enabled', True),
+            self.check('securityProfile.proxyAgentSettings.mode', 'Enforce')
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss1} --image ubuntu2204 --enable-proxy-agent --proxy-agent-mode Audit --vm-sku Standard_D2s_v3', checks=[
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.mode', 'Audit')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss1} --enable-proxy-agent False --proxy-agent-mode Enforce', checks=[
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', False),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.mode', 'Enforce')
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss2} --image ubuntu2204 --vm-sku Standard_D2s_v3')
+        self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent True --proxy-agent-mode Audit', checks=[
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.mode', 'Audit')
+        ])
 
 class DiskHibernationScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_disk_hibernation_')
