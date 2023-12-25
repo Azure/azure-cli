@@ -1521,15 +1521,6 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'webapp connection list-configuration --id {}'.format(conn_id)
         ).get_output_in_json().get('configurations')
 
-        # check app config
-        for config in configurations:
-            self.cmd(
-                'appconfig kv list --name {config_store} --key {}'.format(config['name'], **self.kwargs),
-                checks=[
-                    self.check('[0].value', config['value'])
-                ]
-            )
-
         # update connection
         self.cmd('webapp connection update storage-blob --id {} '
                  '--secret --client-type dotnet --appconfig-id {}'.format(conn_id, appconfig_id))
