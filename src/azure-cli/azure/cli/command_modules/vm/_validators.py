@@ -594,6 +594,14 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             'usage error: The "--os-disk-secure-vm-disk-encryption-set" can only be passed in '
             'when "--os-disk-security-encryption-type" is "DiskWithVMGuestState"')
 
+    if (getattr(namespace, 'os_disk_security_encryption_type', None) and
+            namespace.os_disk_security_encryption_type.lower() == 'nonpersistedtpm'):
+        if (getattr(namespace, 'security_type', None) != 'ConfidentialVM' or
+                getattr(namespace, 'enable_vtpm', None) is not True):
+            raise ArgumentUsageError(
+                'usage error: The "--os-disk-security-encryption-type NonPersistedTPM" can only be passed in '
+                'when "--security-type" is "ConfidentialVM" and "--enable-vtpm" is True')
+
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 

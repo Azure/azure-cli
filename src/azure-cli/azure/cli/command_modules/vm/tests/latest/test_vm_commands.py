@@ -8227,6 +8227,33 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.diskControllerType', 'SCSI')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_vmss_non_persisted_tpm_', location='centralus')
+    def test_vm_vmss_non_persisted_tpm(self, resource_group):
+        self.kwargs.update({
+            'vm1': self.create_random_name('vm', 10),
+            'vmss1': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vm create -g {rg} -n {vm1} --image Canonical:0001-com-ubuntu-confidential-vm-jammy:22_04-lts-cvm:latest --size Standard_DC2es_v5 --enable-vtpm --enable-secure-boot --os-disk-security-encryption-type NonPersistedTPM --security-type ConfidentialVM --admin-password azuretest01!! --storage-sku StandardSSD_LRS')
+        self.cmd('vm show -g {rg} -n {vm1}', checks=[
+            self.check('securityProfile.securityType', 'ConfidentialVM'),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('storageProfile.osDisk.managedDisk.securityProfile.securityEncryptionType', 'NonPersistedTPM')
+        ])
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:0001-com-ubuntu-confidential-vm-jammy:22_04-lts-cvm:latest --vm-sku Standard_DC2es_v5 --enable-vtpm --enable-secure-boot --os-disk-security-encryption-type NonPersistedTPM --security-type ConfidentialVM --admin-password azuretest01!! --storage-sku StandardSSD_LRS', checks=[
+            self.check('vmss.virtualMachineProfile.securityProfile.securityType', 'ConfidentialVM'),
+            self.check('vmss.virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.managedDisk.securityProfile.securityEncryptionType','NonPersistedTPM')
+        ])
+        message = 'usage error: The "--os-disk-security-encryption-type NonPersistedTPM" can only be passed in when "--security-type" is "ConfidentialVM" and "--enable-vtpm" is True'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vm create -g {rg} -n {vm1} --image Canonical:0001-com-ubuntu-confidential-vm-jammy:22_04-lts-cvm:latest --size Standard_DC2es_v5 --os-disk-security-encryption-type NonPersistedTPM --security-type ConfidentialVM --admin-password azuretest01!! --storage-sku StandardSSD_LRS')
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vm create -g {rg} -n {vm1} --image Canonical:0001-com-ubuntu-confidential-vm-jammy:22_04-lts-cvm:latest --size Standard_DC2es_v5 --enable-vtpm --enable-secure-boot --os-disk-security-encryption-type NonPersistedTPM --admin-password azuretest01!! --storage-sku StandardSSD_LRS')
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:0001-com-ubuntu-confidential-vm-jammy:22_04-lts-cvm:latest --vm-sku Standard_DC2es_v5 --os-disk-security-encryption-type NonPersistedTPM --security-type ConfidentialVM --admin-password azuretest01!! --storage-sku StandardSSD_LRS')
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:0001-com-ubuntu-confidential-vm-jammy:22_04-lts-cvm:latest --vm-sku Standard_DC2es_v5 --enable-vtpm --enable-secure-boot --os-disk-security-encryption-type NonPersistedTPM --admin-password azuretest01!! --storage-sku StandardSSD_LRS')
+
 
 class DiskAccessTest(ScenarioTest):
 
