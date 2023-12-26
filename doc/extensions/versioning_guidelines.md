@@ -7,14 +7,14 @@ To keep a unified versioning strategy across azure cli extension modules, azure 
 The published cli extension modules MUST comply with the following version scheme:
 
 ```
-MAJOR.MINOR.PATCH[b[0-9]*]
+MAJOR.MINOR.PATCH[pre]
 ```
 Extension version identifiers are separated into up to four segments:
 
 - MAJOR: version major number, numeric identifier, non-negative integers, no leading zeroes
 - MINOR: version minor number, numeric identifier, non-negative integers, no leading zeroes
 - PATCH: version patch number, numeric identifier, non-negative integers, no leading zeroes
-- pre: preview (or pre-release) indicator, started with `b` and ended with numeric identifier, non-negative integers, no leading zeroes
+- pre: preview (or pre-release) indicator, `b[1-9][0-9]*`, started with `b` and ended with numeric identifier, positive integers, no leading zeroes
 
 #### Notes
 - Azure cli extension only holds two kinds of public releases: stable and preview
