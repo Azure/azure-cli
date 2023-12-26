@@ -16,14 +16,14 @@ from azure.cli.command_modules.serviceconnector._resource_config import (
     SOURCE_RESOURCES,
     TARGET_RESOURCES
 )
-from ._test_utils import CredentialReplacer
+from ._test_utils import CredentialReplacer, ConfigCredentialReplacer
 
 class WebAppConnectionScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
         super(WebAppConnectionScenarioTest, self).__init__(
             method_name,
-            recording_processors=[CredentialReplacer()]
+            recording_processors=[CredentialReplacer(), ConfigCredentialReplacer()]
         )
 
     @record_only()
@@ -1481,9 +1481,9 @@ class WebAppConnectionScenarioTest(ScenarioTest):
     def test_webapp_app_insights_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
-            'source_resource_group': 'servicelinker-test-linux-group',
+            'source_resource_group': 'clitest',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-insight-app',
+            'site': 'servicelinker-insight-app-euap',
             'appinsights': 'servicelinker-insight'
         })
 
