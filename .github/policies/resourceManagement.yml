@@ -2792,11 +2792,11 @@ configuration:
       - and:
         - not:
             titleContains:
-              pattern: az network dns
+              pattern: '\b(az network dns)\b'
               isRegex: True
         - not:
             bodyContains:
-              pattern: az network dns
+              pattern: '\b(az network dns)\b'
               isRegex: True
       then:
       - addLabel:
@@ -2940,7 +2940,7 @@ configuration:
             pattern: '\b([Ss][Tt][Oo][Rr][Aa][Gg][Ee])\b'
             isRegex: True
         - bodyContains:
-            pattern: az storage
+            pattern: '\b(az storage)\b'
             isRegex: True
       then:
       - addLabel:
@@ -3106,10 +3106,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az keyvault
+            pattern: '\b(az keyvault)\b'
             isRegex: True
         - bodyContains:
-            pattern: az keyvault
+            pattern: '\b(az keyvault)\b'
             isRegex: True
       - or:
         - isAction:
@@ -3184,11 +3184,11 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az role
-            isRegex: False
+            pattern: '\b(az role)\b'
+            isRegex: True
         - bodyContains:
-            pattern: az role
-            isRegex: False
+            pattern: '\b(az role)\b'
+            isRegex: True
       - or:
         - isAction:
             action: Opened
@@ -3254,10 +3254,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az sql
+            pattern: '\b(az sql)\b'
             isRegex: True
         - bodyContains:
-            pattern: az sql
+            pattern: '\b(az sql)\b'
             isRegex: True
       - or:
         - isAction:
@@ -3274,10 +3274,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az acr
+            pattern: '\b(az acr)\b'
             isRegex: True
         - bodyContains:
-            pattern: az acr
+            pattern: '\b(az acr)\b'
             isRegex: True
       - or:
         - isAction:
@@ -3294,10 +3294,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az login
+            pattern: '\b(az login)\b'
             isRegex: True
         - bodyContains:
-            pattern: az login
+            pattern: '\b(az login)\b'
             isRegex: True
       - or:
         - isAction:
@@ -3361,10 +3361,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az functionapp
+            pattern: '\b(az functionapp)\b'
             isRegex: True
         - bodyContains:
-            pattern: az functionapp
+            pattern: '\b(az functionapp)\b'
             isRegex: True
       - or:
         - isAction:
@@ -3398,10 +3398,10 @@ configuration:
           action: Opened
       - or:
         - titleContains:
-            pattern: az functionapp
+            pattern: '\b(az functionapp)\b'
             isRegex: True
         - bodyContains:
-            pattern: az functionapp
+            pattern: '\b(az functionapp)\b'
             isRegex: True
       then:
       - requestReview:
@@ -3420,10 +3420,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az apim
+            pattern: '\b(az apim)\b'
             isRegex: True
         - bodyContains:
-            pattern: az apim
+            pattern: '\b(az apim)\b'
             isRegex: True
       - or:
         - isAction:
@@ -3488,11 +3488,11 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az interactive
-            isRegex: False
+            pattern: '\b(az interactive)\b'
+            isRegex: True
         - bodyContains:
-            pattern: az interactive
-            isRegex: False
+            pattern: '\b(az interactive)\b'
+            isRegex: True
       then:
       - addLabel:
           label: Auto-Assign
@@ -3513,11 +3513,11 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az upgrade
-            isRegex: False
+            pattern: '\b(az upgrade)\b'
+            isRegex: True
         - bodyContains:
-            pattern: az upgrade
-            isRegex: False
+            pattern: '\b(az upgrade)\b'
+            isRegex: True
       then:
       - addLabel:
           label: Auto-Assign
@@ -3538,10 +3538,10 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az servicebus
+            pattern: '\b(az servicebus)\b'
             isRegex: True
         - bodyContains:
-            pattern: az servicebus
+            pattern: '\b(az servicebus)\b'
             isRegex: True
       then:
       - addLabel:
@@ -3558,10 +3558,10 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az ml
+            pattern: '\b(az ml)\b'
             isRegex: True
         - bodyContains:
-            pattern: az ml
+            pattern: '\b(az ml)\b'
             isRegex: True
       then:
       - addLabel:
@@ -3578,11 +3578,11 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az lab
-            isRegex: False
+            pattern: '\b(az lab)\b'
+            isRegex: True
         - bodyContains:
-            pattern: az lab
-            isRegex: False
+            pattern: '\b(az lab)\b'
+            isRegex: True
       then:
       - addLabel:
           label: Auto-Assign
@@ -3598,11 +3598,11 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az config
-            isRegex: False
+            pattern: '\b(az config)\b'
+            isRegex: True
         - bodyContains:
-            pattern: az config
-            isRegex: False
+            pattern: '\b(az config)\b'
+            isRegex: True
       then:
       - addLabel:
           label: Auto-Assign
@@ -3644,10 +3644,10 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az netappfiles
+            pattern: '\b(az netappfiles)\b'
             isRegex: True
         - bodyContains:
-            pattern: az netappfiles
+            pattern: '\b(az netappfiles)\b'
             isRegex: True
       then:
       - addLabel:
@@ -3664,10 +3664,10 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az cosmosdb
+            pattern: '\b(az cosmosdb)\b'
             isRegex: True
         - bodyContains:
-            pattern: az cosmosdb
+            pattern: '\b(az cosmosdb)\b'
             isRegex: True
       then:
       - addLabel:
@@ -3684,10 +3684,10 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az staticwebapp
+            pattern: '\b(az staticwebapp)\b'
             isRegex: True
         - bodyContains:
-            pattern: az staticwebapp
+            pattern: '\b(az staticwebapp)\b'
             isRegex: True
       then:
       - addLabel:
@@ -3737,11 +3737,11 @@ configuration:
           action: Opened
       - or:
         - titleContains:
-            pattern: az login
-            isRegex: False
+            pattern: '\b(az login)\b'
+            isRegex: True
         - bodyContains:
-            pattern: az login
-            isRegex: False
+            pattern: '\b(az login)\b'
+            isRegex: True
       then:
       - addLabel:
           label: Auto-Assign
@@ -3858,10 +3858,10 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az eventgrid
+            pattern: '\b(az eventgrid)\b'
             isRegex: True
         - bodyContains:
-            pattern: az eventgrid
+            pattern: '\b(az eventgrid)\b'
             isRegex: True
       then:
       - addLabel:
@@ -3906,11 +3906,11 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az automation
-            isRegex: False
+            pattern: '\b(az automation)\b'
+            isRegex: True
         - bodyContains:
-            pattern: az automation
-            isRegex: False
+            pattern: '\b(az automation)\b'
+            isRegex: True
       then:
       - addLabel:
           label: Auto-Assign
@@ -3925,10 +3925,10 @@ configuration:
           action: Opened
       - or:
         - titleContains:
-            pattern: az appconfig
+            pattern: '\b(az appconfig)\b'
             isRegex: True
         - bodyContains:
-            pattern: az appconfig
+            pattern: '\b(az appconfig)\b'
             isRegex: True
       then:
       - requestReview:
@@ -4143,10 +4143,10 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az cdn
+            pattern: '\b(az cdn)\b'
             isRegex: True
         - bodyContains:
-            pattern: az cdn
+            pattern: '\b(az cdn)\b'
             isRegex: True
       then:
       - addLabel:
@@ -4191,10 +4191,10 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az redis
+            pattern: '\b(az redis)\b'
             isRegex: True
         - bodyContains:
-            pattern: az redis
+            pattern: '\b(az redis)\b'
             isRegex: True
       then:
       - addLabel:
@@ -4241,10 +4241,10 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az sf
+            pattern: '\b(az sf)\b'
             isRegex: True
         - bodyContains:
-            pattern: az sf
+            pattern: '\b(az sf)\b'
             isRegex: True
       then:
       - addLabel:
@@ -4287,10 +4287,10 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az ssh
+            pattern: '\b(az ssh)\b'
             isRegex: True
         - bodyContains:
-            pattern: az ssh
+            pattern: '\b(az ssh)\b'
             isRegex: True
       then:
       - addLabel:
@@ -4309,10 +4309,10 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az postgres
+            pattern: '\b(az postgres)\b'
             isRegex: True
         - bodyContains:
-            pattern: az postgres
+            pattern: '\b(az postgres)\b'
             isRegex: True
       then:
       - addLabel:
@@ -4329,10 +4329,10 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az synapse
+            pattern: '\b(az synapse)\b'
             isRegex: True
         - bodyContains:
-            pattern: az synapse
+            pattern: '\b(az synapse)\b'
             isRegex: True
       then:
       - addLabel:
@@ -4372,10 +4372,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az portal
+            pattern: '\b(az portal)\b'
             isRegex: True
         - bodyContains:
-            pattern: az portal
+            pattern: '\b(az portal)\b'
             isRegex: True
       - or:
         - isAction:
@@ -4535,10 +4535,10 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az pipelines
+            pattern: '\b(az pipelines)\b'
             isRegex: True
         - bodyContains:
-            pattern: az pipelines
+            pattern: '\b(az pipelines)\b'
             isRegex: True
       then:
       - addLabel:
@@ -4690,10 +4690,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az network bastion
+            pattern: '\b(az network bastion)\b'
             isRegex: True
         - bodyContains:
-            pattern: az network bastion
+            pattern: '\b(az network bastion)\b'
             isRegex: True
       - or:
         - isAction:
@@ -4736,10 +4736,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az desktopvirtualization
+            pattern: '\b(az desktopvirtualization)\b'
             isRegex: True
         - bodyContains:
-            pattern: az desktopvirtualization
+            pattern: '\b(az desktopvirtualization)\b'
             isRegex: True
       - or:
         - isAction:
@@ -4785,10 +4785,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az backup
+            pattern: '\b(az backup)\b'
             isRegex: True
         - bodyContains:
-            pattern: az backup
+            pattern: '\b(az backup)\b'
             isRegex: True
       - or:
         - isAction:
@@ -4833,10 +4833,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az containerapp
+            pattern: '\b(az containerapp)\b'
             isRegex: True
         - bodyContains:
-            pattern: az containerapp
+            pattern: '\b(az containerapp)\b'
             isRegex: True
       - or:
         - isAction:
@@ -4909,10 +4909,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az batch
+            pattern: '\b(az batch)\b'
             isRegex: True
         - bodyContains:
-            pattern: az batch
+            pattern: '\b(az batch)\b'
             isRegex: True
       - or:
         - isAction:
@@ -4985,10 +4985,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az sql vm
+            pattern: '\b(az sql vm)\b'
             isRegex: True
         - bodyContains:
-            pattern: az sql vm
+            pattern: '\b(az sql vm)\b'
             isRegex: True
       - or:
         - isAction:
@@ -5238,10 +5238,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az appconfig
+            pattern: '\b(az appconfig)\b'
             isRegex: True
         - bodyContains:
-            pattern: az appconfig
+            pattern: '\b(az appconfig)\b'
             isRegex: True
       - or:
         - isAction:
@@ -5374,10 +5374,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az datafactory
+            pattern: '\b(az datafactory)\b'
             isRegex: True
         - bodyContains:
-            pattern: az datafactory
+            pattern: '\b(az datafactory)\b'
             isRegex: True
       - or:
         - isAction:
@@ -5397,10 +5397,10 @@ configuration:
           action: Opened
       - or:
         - titleContains:
-            pattern: az datafactory
+            pattern: '\b(az datafactory)\b'
             isRegex: True
         - bodyContains:
-            pattern: az datafactory
+            pattern: '\b(az datafactory)\b'
             isRegex: True
       then:
       - requestReview:
@@ -5465,10 +5465,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az backup restore
+            pattern: '\b(az backup restore)\b'
             isRegex: True
         - bodyContains:
-            pattern: az backup restore
+            pattern: '\b(az backup restore)\b'
             isRegex: True
       - or:
         - isAction:
@@ -5485,10 +5485,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az bot
+            pattern: '\b(az bot)\b'
             isRegex: True
         - bodyContains:
-            pattern: az bot
+            pattern: '\b(az bot)\b'
             isRegex: True
       - or:
         - isAction:
@@ -5505,10 +5505,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az advisor
+            pattern: '\b(az advisor)\b'
             isRegex: True
         - bodyContains:
-            pattern: az advisor
+            pattern: '\b(az advisor)\b'
             isRegex: True
       - or:
         - isAction:
@@ -5527,11 +5527,11 @@ configuration:
           action: Opened
       - or:
         - titleContains:
-            pattern: az appservice ase
-            isRegex: False
+            pattern: '\b(az appservice ase)\b'
+            isRegex: True
         - bodyContains:
-            pattern: az appservice ase
-            isRegex: False
+            pattern: '\b(az appservice ase)\b'
+            isRegex: True
       then:
       - addLabel:
           label: app-service-ase
@@ -5549,11 +5549,11 @@ configuration:
           action: Opened
       - or:
         - titleContains:
-            pattern: az webapp auth
-            isRegex: False
+            pattern: '\b(az webapp auth)\b'
+            isRegex: True
         - bodyContains:
-            pattern: az webapp auth
-            isRegex: False
+            pattern: '\b(az webapp auth)\b'
+            isRegex: True
       then:
       - addLabel:
           label: app-service-authentication
@@ -5615,11 +5615,11 @@ configuration:
           action: Opened
       - or:
         - titleContains:
-            pattern: az webapp deploy
-            isRegex: False
+            pattern: '\b(az webapp deploy)\b'
+            isRegex: True
         - bodyContains:
-            pattern: az webapp deploy
-            isRegex: False
+            pattern: '\b(az webapp deploy)\b'
+            isRegex: True
       then:
       - addLabel:
           label: app-service-deployment
@@ -5659,11 +5659,11 @@ configuration:
           action: Opened
       - or:
         - titleContains:
-            pattern: az appservice kube
-            isRegex: False
+            pattern: '\b(az appservice kube)\b'
+            isRegex: True
         - bodyContains:
-            pattern: az appservice kube
-            isRegex: False
+            pattern: '\b(az appservice kube)\b'
+            isRegex: True
       then:
       - addLabel:
           label: app-service-kube
@@ -5745,10 +5745,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az artifacts
+            pattern: '\b(az artifacts)\b'
             isRegex: True
         - bodyContains:
-            pattern: az artifacts
+            pattern: '\b(az artifacts)\b'
             isRegex: True
       - or:
         - isAction:
@@ -5765,10 +5765,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az k8s-configuration
+            pattern: '\b(az k8s-configuration)\b'
             isRegex: True
         - bodyContains:
-            pattern: az k8s-configuration
+            pattern: '\b(az k8s-configuration)\b'
             isRegex: True
       - or:
         - isAction:
@@ -5787,10 +5787,10 @@ configuration:
           action: Opened
       - or:
         - titleContains:
-            pattern: az eventhubs
+            pattern: '\b(az eventhubs)\b'
             isRegex: True
         - bodyContains:
-            pattern: az eventhubs
+            pattern: '\b(az eventhubs)\b'
             isRegex: True
       then:
       - addLabel:
@@ -5809,10 +5809,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az reservations
+            pattern: '\b(az reservations)\b'
             isRegex: True
         - bodyContains:
-            pattern: az reservations
+            pattern: '\b(az reservations)\b'
             isRegex: True
       - or:
         - isAction:
@@ -5849,10 +5849,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az aro
+            pattern: '\b(az aro)\b'
             isRegex: True
         - bodyContains:
-            pattern: az aro
+            pattern: '\b(az aro)\b'
             isRegex: True
       - or:
         - isAction:
@@ -5871,10 +5871,10 @@ configuration:
           action: Opened
       - or:
         - titleContains:
-            pattern: az aro
+            pattern: '\b(az aro)\b'
             isRegex: True
         - bodyContains:
-            pattern: az aro
+            pattern: '\b(az aro)\b'
             isRegex: True
       then:
       - addLabel:
