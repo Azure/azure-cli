@@ -14,9 +14,10 @@ Extension version identifiers are separated into up to four segments:
 - MAJOR: version major number, numeric identifier, non-negative integers, no leading zeroes
 - MINOR: version minor number, numeric identifier, non-negative integers, no leading zeroes
 - PATCH: version patch number, numeric identifier, non-negative integers, no leading zeroes
-- pre: pre-release or preview indicator, started with `b` and ended with numeric identifier, non-negative integers, no leading zeroes
+- pre: preview (or pre-release) indicator, started with `b` and ended with numeric identifier, non-negative integers, no leading zeroes
 
 #### Notes
+- Azure cli extension only holds two kinds of public releases: stable and preview
 - Each segment MUST increase numerically. If MAJOR number is incremented, MINOR and PATCH number should be reset to 0. And PATCH number should be reset to 0 if MINOR number is incremented
 - Precedence is determined by the first difference when comparing each of these segments from left to right as follows: Major, minor, and patch versions numerically. And, preview-release version is smaller than corresponding stable-release version. For instance: 1.9.0 < 2.0.0b1 < 2.0.0b2 < 2.0.0 < 2.1.0
 
@@ -29,11 +30,11 @@ Extension modules released as stable version should use version scheme: MAJOR.MI
 ### CLI Extension Version Increment Rules
 CLI extension holds the following rules:
 1. if next version is stable,
-   - if previous version is stable as x.x.x (>= 1.0.0):
+   - if last version is stable as x.x.x (>= 1.0.0):
      - if breaking change introduced, next version will be x+1.x.x
      - if new features added but no breaking change, next version will be x.x+1.x
      - if only bug fixes made, next version will be x.x.x+1
-   - if no previous version (or previous version < 1.0.0), next version will be the first stable version 1.0.0
+   - if no last version (or last version < 1.0.0), next version will be the first stable version 1.0.0
 2. if next version is preview,
    - if last version is stable as x.x.x (>= 1.0.0):
      - if breaking change introduced, next version will be x+1.x.xb1
@@ -133,13 +134,14 @@ Considering version increment rules above, version transition table can be summa
 - &#10004; means yes
 - &#10006; means no
 - \- means skip check
-- The major version number of preview can increase by at most one compared to the last stable version. For example, the last stable version os 2.0.0, if there are breaking changes for next preview release, the version will be 3.0.0b1. Then another breaking changes for the next preview release, the version will be 3.0.0b2
-- If previous version is less than 1.0.0, then, the next preview version should be 1.0.0b1 and the next stable one should be 1.0.0
+- The major version number of preview can increase by at most one compared to the last stable version. For example, the last stable version is 2.0.0, if there are breaking changes for next preview release, the version will be 3.0.0b1. Then another breaking changes for the next preview release, the version will be 3.0.0b2
+- If last version is less than 1.0.0, then, the next preview version should be 1.0.0b1 and the next stable one should be 1.0.0
 
 ## Backward Compatibility of Extension Version Tags
 
-Previous extension module has a combination of semantic scheme and extra metadata tags (`azext.isExperimental` and `azext.isPreview`) to mark module release version. To keep backward compatibility:
-- `azext.isPreview` is reserved for all preview extension releases and `azext.isExperimental` is jointed into `azext.isPreview` for version tag simplicity. 
+Current extension module has a combination of semantic scheme and extra metadata tags (`azext.isExperimental` and `azext.isPreview`) to mark module release version. To keep backward compatibility:
+- `azext.isPreview` is reserved for all preview extension releases.
+- `azext.isExperimental` is deprecated and will be replaced by `azext.isPreview` for version tag simplicity, since cli extension only supports two types of public releases now: stable and preview
 - For all stable extension releases, neither `azext.isPreview` nor `azext.isExperimental` can be added into module metadata.
 
 ## Extension Installation Upgrade
