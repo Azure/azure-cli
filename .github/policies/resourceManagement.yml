@@ -3067,7 +3067,7 @@ configuration:
             pattern: '\b([Ii][Oo][Tt])\b'
             isRegex: True
         - bodyContains:
-            pattern: '\b([Ii][Oo][Tt])\b'
+            pattern: '\b(az iot)\b'
             isRegex: True
       - or:
         - isAction:
@@ -3623,11 +3623,11 @@ configuration:
             action: Opened
       - or:
         - titleContains:
-            pattern: az rest
-            isRegex: False
+            pattern: '\b(az rest)\b'
+            isRegex: true
         - bodyContains:
-            pattern: az rest
-            isRegex: False
+            pattern: '\b(az rest)\b'
+            isRegex: true
       then:
       - addLabel:
           label: Auto-Assign
@@ -4477,27 +4477,27 @@ configuration:
       - requestReview:
           reviewer: calvinhzy
       description: '[graph] Auto assign labels and reviewers based on PR title/description.'
-    - if:
-      - payloadType: Issues
-      - or:
-        - titleContains:
-            pattern: '\b([Ii][Nn][Ss][Tt][Aa][Ll][Ll])\b'
-            isRegex: True
-        - bodyContains:
-            pattern: '\b([Ii][Nn][Ss][Tt][Aa][Ll][Ll])\b'
-            isRegex: True
-      - or:
-        - isAction:
-            action: Opened
-      then:
-      - addLabel:
-          label: Auto-Assign
-      - addLabel:
-          label: Installation
-      - assignTo:
-          users:
-          - jiasli
-      description: '[install] auto assign labels and users based on issue description.'
+#    - if:
+#      - payloadType: Issues
+#      - or:
+#        - titleContains:
+#            pattern: '\b([Ii][Nn][Ss][Tt][Aa][Ll][Ll])\b'
+#            isRegex: True
+#        - bodyContains:
+#            pattern: '\b([Ii][Nn][Ss][Tt][Aa][Ll][Ll])\b'
+#            isRegex: True
+#      - or:
+#        - isAction:
+#            action: Opened
+#      then:
+#      - addLabel:
+#          label: Auto-Assign
+#      - addLabel:
+#          label: Installation
+#      - assignTo:
+#          users:
+#          - jiasli
+#      description: '[install] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
       - isAction:
