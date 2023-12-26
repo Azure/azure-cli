@@ -49,7 +49,7 @@ class RESOURCE(Enum):
     SignalR = 'signalr'
     WebPubSub = 'webpubsub'
     ConfluentKafka = 'confluent-cloud'
-    AppInsights= 'app-insights'
+    AppInsights = 'app-insights'
 
     @classmethod
     def value_of(cls, value):
@@ -144,7 +144,7 @@ TARGET_RESOURCES = {
     RESOURCE.SignalR: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.SignalRService/SignalR/{signalr}',
     RESOURCE.WebPubSub: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.SignalRService/WebPubSub/{webpubsub}',
     RESOURCE.ConfluentKafka: '#',  # special target resource, no arm resource id
-    RESOURCE.AppInsights: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/microsoft.insights/components/{appinsights}', 
+    RESOURCE.AppInsights: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/microsoft.insights/components/{appinsights}',
 }
 
 
