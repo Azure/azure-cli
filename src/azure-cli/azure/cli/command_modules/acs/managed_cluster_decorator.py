@@ -2206,6 +2206,12 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return self._get_network_plugin(enable_validation=True)
 
+    def get_network_policy(self) -> Union[str, None]:
+        """Get the value of network_dataplane.
+        :return: str or None
+        """
+        return self.raw_param.get("network_policy")
+
     def get_network_dataplane(self) -> Union[str, None]:
         """Get the value of network_dataplane.
 
@@ -6793,6 +6799,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         if pod_cidr:
             mc.network_profile.pod_cidr = pod_cidr
+
+        network_policy = self.context.get_network_policy()
+        if network_policy:
+            mc.network_profile.network_policy = network_policy
+
         return mc
 
     def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:

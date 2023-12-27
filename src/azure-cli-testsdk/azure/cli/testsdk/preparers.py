@@ -138,6 +138,8 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             template = 'az storage account create -n {} -g {} -l {} --sku {} --kind {} --https-only'
             if not self.allow_blob_public_access:
                 template += ' --allow-blob-public-access false'
+            else:
+                template += ' --allow-blob-public-access true'
             if self.hns:
                 template += ' --hns'
             self.live_only_execute(self.cli_ctx, template.format(
@@ -233,7 +235,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, certs_path, name_prefix='clitest', location='uksouth', key='hsm', name_len=24,
                  parameter_name='managed_hsm', resource_group_parameter_name='resource_group',
-                 administrators=None, roles=[], additional_params=None):
+                 administrators=None, roles=[], additional_params=None, skip_delete=False, skip_purge=False):
         super(ManagedHSMPreparer, self).__init__(name_prefix, name_len)
         self.cli_ctx = get_dummy_cli()
         self.location = location
@@ -244,6 +246,8 @@ class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.administrators = administrators
         self.roles = roles
         self.additional_params = additional_params
+        self.skip_delete = skip_delete
+        self.skip_purge = skip_purge
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
@@ -273,12 +277,16 @@ class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         security_domain = os.path.join(self.certs_path, f'{name}-SD.json').replace('\\', '\\\\')
         if os.path.exists(security_domain):
             os.remove(security_domain)
-        group = self._get_resource_group(**kwargs)
-        self.live_only_execute(self.cli_ctx, 'az keyvault delete --hsm-name {} -g {}'.format(name, group))
         from azure.core.exceptions import HttpResponseError
         try:
+            if not self.skip_delete:
+                group = self._get_resource_group(**kwargs)
+                self.live_only_execute(self.cli_ctx, 'az keyvault delete --hsm-name {} -g {}'.format(name, group))
+            if self.skip_purge:
+                return
             self.live_only_execute(self.cli_ctx, 'az keyvault purge --hsm-name {} -l {}'.format(name, self.location))
         except HttpResponseError:
+            # delete operation will fail with HttpResponseError when there's ongoing updates
             # purge operation will fail with HttpResponseError when --enable-purge-protection
             pass
 

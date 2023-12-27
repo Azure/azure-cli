@@ -54,6 +54,10 @@ from ._client_factory import (
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
 
+    acr_artifact_streaming_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.artifact_streaming#{}'
+    )
+
     acr_custom_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.custom#{}',
         table_transformer=registry_output_format,
@@ -208,6 +212,13 @@ def load_command_table(self, _):
 
     with self.command_group('acr', acr_import_util) as g:
         g.command('import', 'acr_import', supports_no_wait=True)
+
+    with self.command_group('acr artifact-streaming', acr_artifact_streaming_util, is_preview=True) as g:
+        g.show_command('operation show', 'acr_artifact_streaming_operation_show')
+        g.command('operation cancel', 'acr_artifact_streaming_operation_cancel')
+        g.command('create', 'acr_artifact_streaming_create', supports_no_wait=True)
+        g.show_command('show', 'acr_artifact_streaming_show')
+        g.command('update', 'acr_artifact_streaming_update')
 
     with self.command_group('acr credential', acr_cred_util) as g:
         g.show_command('show', 'acr_credential_show')
