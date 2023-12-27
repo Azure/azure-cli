@@ -308,6 +308,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       webpubsub=None,                                        # Resource.WebPubSub
                       signalr=None,                                          # Resource.SignalR
                       appinsights=None,                                      # Resource.AppInsights
+                      target_app_name=None,                                  # Resource.ContainerAppAsTarget
                       ):
 
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,

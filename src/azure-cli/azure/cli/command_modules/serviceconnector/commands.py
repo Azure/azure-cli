@@ -66,6 +66,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                     if target in TARGET_RESOURCES_DEPRECATED:
                         ig.custom_command(target.value, 'connection_create', deprecate_info=self.deprecate(hide=False),
                                           supports_no_wait=True, transform=transform_linker_properties)
+                    elif target == RESOURCE.ContainerAppAsTarget:
+                        ig.custom_command(target.value, 'connection_create', is_experimental=True,
+                                          supports_no_wait=True, transform=transform_linker_properties)
                     else:
                         ig.custom_command(target.value, 'connection_create',
                                           supports_no_wait=True, transform=transform_linker_properties)
@@ -73,6 +76,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                                         connection_type, client_factory=cf_linker) as ig:
                     if target in TARGET_RESOURCES_DEPRECATED:
                         ig.custom_command(target.value, 'connection_update', deprecate_info=self.deprecate(hide=False),
+                                          supports_no_wait=True, transform=transform_linker_properties)
+                    elif target == RESOURCE.ContainerAppAsTarget:
+                        ig.custom_command(target.value, 'connection_update', is_experimental=True,
                                           supports_no_wait=True, transform=transform_linker_properties)
                     else:
                         ig.custom_command(target.value, 'connection_update',
