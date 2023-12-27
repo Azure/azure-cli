@@ -58,7 +58,7 @@ class CheckQuotaAvailability(AAZCommand):
             required=True,
         )
         _args_schema.resource_group = AAZStrArg(
-            options=["--resource-group"],
+            options=["-g", "--resource-group"],
             arg_group="Body",
             help="Resource group name.",
             required=True,

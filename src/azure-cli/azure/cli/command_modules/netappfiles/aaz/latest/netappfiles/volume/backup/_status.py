@@ -12,18 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles check-name-availability",
+    "netappfiles volume backup status",
 )
-class CheckNameAvailability(AAZCommand):
-    """Check if a resource name is available.
-
-    Check if a resource name is available
+class Status(AAZCommand):
+    """Get the status of the backup for a volume
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2022-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/checknameavailability", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/backupstatus", "2022-11-01"],
         ]
     }
 
@@ -43,38 +41,45 @@ class CheckNameAvailability(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.location = AAZResourceLocationArg(
+        _args_schema.account_name = AAZStrArg(
+            options=["-a", "--account-name"],
+            help="The name of the NetApp account",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+            ),
         )
-
-        # define Arg Group "Body"
-
-        _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["--name"],
-            arg_group="Body",
-            help="Resource name to verify.",
+        _args_schema.pool_name = AAZStrArg(
+            options=["-p", "--pool-name"],
+            help="The name of the capacity pool",
+            required=True,
+            id_part="child_name_1",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                max_length=64,
+                min_length=1,
+            ),
+        )
+        _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.resource_group = AAZStrArg(
-            options=["-g", "--resource-group"],
-            arg_group="Body",
-            help="Resource group name.",
+        _args_schema.volume_name = AAZStrArg(
+            options=["-n", "-v", "--volume-name"],
+            help="The name of the volume",
             required=True,
-        )
-        _args_schema.type = AAZStrArg(
-            options=["--type"],
-            arg_group="Body",
-            help="Resource type used for verification.",
-            required=True,
-            enum={"Microsoft.NetApp/netAppAccounts": "Microsoft.NetApp/netAppAccounts", "Microsoft.NetApp/netAppAccounts/capacityPools": "Microsoft.NetApp/netAppAccounts/capacityPools", "Microsoft.NetApp/netAppAccounts/capacityPools/volumes": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes", "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/snapshots": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/snapshots"},
+            id_part="child_name_2",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$",
+                max_length=64,
+                min_length=1,
+            ),
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.NetAppResourceCheckNameAvailability(ctx=self.ctx)()
+        self.BackupsGetStatus(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -89,7 +94,7 @@ class CheckNameAvailability(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class NetAppResourceCheckNameAvailability(AAZHttpOperation):
+    class BackupsGetStatus(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -103,13 +108,13 @@ class CheckNameAvailability(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.NetApp/locations/{location}/checkNameAvailability",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/backupStatus",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "POST"
+            return "GET"
 
         @property
         def error_format(self):
@@ -119,11 +124,23 @@ class CheckNameAvailability(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "location", self.ctx.args.location,
+                    "accountName", self.ctx.args.account_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "poolName", self.ctx.args.pool_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "volumeName", self.ctx.args.volume_name,
                     required=True,
                 ),
             }
@@ -133,7 +150,7 @@ class CheckNameAvailability(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2022-11-01",
                     required=True,
                 ),
             }
@@ -143,26 +160,10 @@ class CheckNameAvailability(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
-            )
-            _builder.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("resourceGroup", AAZStrType, ".resource_group", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("type", AAZStrType, ".type", typ_kwargs={"flags": {"required": True}})
-
-            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -182,17 +183,43 @@ class CheckNameAvailability(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.is_available = AAZBoolType(
-                serialized_name="isAvailable",
+            _schema_on_200.error_message = AAZStrType(
+                serialized_name="errorMessage",
+                flags={"read_only": True},
             )
-            _schema_on_200.message = AAZStrType()
-            _schema_on_200.reason = AAZStrType()
+            _schema_on_200.healthy = AAZBoolType(
+                flags={"read_only": True},
+            )
+            _schema_on_200.last_transfer_size = AAZIntType(
+                serialized_name="lastTransferSize",
+                flags={"read_only": True},
+            )
+            _schema_on_200.last_transfer_type = AAZStrType(
+                serialized_name="lastTransferType",
+                flags={"read_only": True},
+            )
+            _schema_on_200.mirror_state = AAZStrType(
+                serialized_name="mirrorState",
+                flags={"read_only": True},
+            )
+            _schema_on_200.relationship_status = AAZStrType(
+                serialized_name="relationshipStatus",
+                flags={"read_only": True},
+            )
+            _schema_on_200.total_transfer_bytes = AAZIntType(
+                serialized_name="totalTransferBytes",
+                flags={"read_only": True},
+            )
+            _schema_on_200.unhealthy_reason = AAZStrType(
+                serialized_name="unhealthyReason",
+                flags={"read_only": True},
+            )
 
             return cls._schema_on_200
 
 
-class _CheckNameAvailabilityHelper:
-    """Helper class for CheckNameAvailability"""
+class _StatusHelper:
+    """Helper class for Status"""
 
 
-__all__ = ["CheckNameAvailability"]
+__all__ = ["Status"]

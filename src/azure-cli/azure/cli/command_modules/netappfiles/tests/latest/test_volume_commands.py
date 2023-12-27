@@ -547,3 +547,26 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
             self.cmd("az netappfiles volume get-groupid-list-for-ldapuser -g {rg} -a %s -p %s -v %s --username %s" % (account_name, pool_name, volume_name, username))
         self.assertIn('GroupIdListForLDAPUserNotSupportedVolumes', str(
             cm.exception))
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_network_sibling_sets(self):
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        self.kwargs.update({
+            'subnet_id': volume['subnetId'],
+            'networkSiblingSetId': volume['networkSiblingSetId'],
+            'loc': RG_LOCATION
+        })
+        # call query-network-sibling-set
+        networkSiblingSet = self.cmd("az netappfiles query-network-sibling-set -l {loc} --subnet-id {subnet_id} --network-sibling-set-id {networkSiblingSetId}" ).get_output_in_json()
+        self.kwargs.update({
+            'networkSiblingSetStateId': networkSiblingSet['networkSiblingSetStateId'],
+            'networkFeatures':'Standard'
+        })
+
+        networkSiblingSet = self.cmd("az netappfiles update-network-sibling-set -l {loc} --subnet-id {subnet_id} --network-sibling-set-id {networkSiblingSetId} --network-sibling-set-state-id {networkSiblingSetStateId} --network-features {networkFeatures}").get_output_in_json()

@@ -346,11 +346,11 @@ class VolumeCreate(_VolumeCreate):
             isNfs41 = False
             isNfs3 = False
             cifs = False
-            rule_index = int(args.rule_index.to_serialized_data()) or 1
-            # if not has_value(args.rule_index):
-            #     rule_index = 1
-            # else:
-            #     rule_index = args.rule_index
+
+            if not has_value(args.rule_index):
+                rule_index = 1
+            else:
+                rule_index = int(args.rule_index.to_serialized_data()) or 1
             if "NFSv4.1" in args.protocol_types:
                 isNfs41 = True
                 if not has_value(args.allowed_clients):
