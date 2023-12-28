@@ -238,7 +238,13 @@ long-summary: Requires certificates/manageissuers/getissuers permission.
 helps['keyvault create'] = """
 type: command
 short-summary: Create a Vault or HSM.
-long-summary: If `--enable-rbac-authorization` is not specified, then default permissions are created for the current user or service principal unless the `--no-self-perms` flag is specified.
+long-summary: >-
+    Default permissions are created for the current user or service principal unless the `--no-self-perms` 
+    or `--enable-rbac-authorization` flag is specified. 
+
+
+    If you want to assign the default permission, you have to change the default subscription with `az account set`
+    first, instead of using `--subscription`.
 examples:
 
   - name: Create a key vault with network ACLs specified (use --network-acls to specify IP and VNet rules by using a JSON string).

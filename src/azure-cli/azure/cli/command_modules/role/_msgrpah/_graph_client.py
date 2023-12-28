@@ -19,6 +19,11 @@ class GraphClient:
     GraphClient should NEVER be instantiated directly, but always through the client factory
     azure.cli.command_modules.role.graph_client_factory.
 
+    This class internally calls azure.cli.core.util.send_raw_request to make REST API calls.
+
+    The authentication is based on the implementation of send_raw_request, so the default account's
+    auth context is used (the one shown by `az account show`).
+
     For full documentation, see doc/microsoft_graph_client.md in this repo.
     """
 
