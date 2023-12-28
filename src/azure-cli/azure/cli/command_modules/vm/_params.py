@@ -385,6 +385,15 @@ def load_arguments(self, _):
     for scope in ['image builder optimizer add', 'image builder optimizer update']:
         with self.argument_context(scope, min_api='2022-07-01') as c:
             c.argument('enable_vm_boot', arg_type=get_three_state_flag(), help='If this parameter is set to true, VM boot time will be improved by optimizing the final customized image output.')
+
+    with self.argument_context('image builder error-handler add', min_api='2023-07-01') as c:
+        from azure.mgmt.imagebuilder.models import OnBuildError
+        c.argument('on_customizer_error', arg_type=get_enum_type(OnBuildError),
+                   help='If there is a customizer error and this field is set to "cleanup", the build VM and associated network resources will be cleaned up. This is the default behavior. '
+                        'If there is a customizer error and this field is set to "abort", the build VM will be preserved.')
+        c.argument('on_validation_error', arg_type=get_enum_type(OnBuildError),
+                   help='If there is a validation error and this field is set to "cleanup", the build VM and associated network resources will be cleaned up. This is the default behavior. '
+                        'If there is a validation error and this field is set to "abort", the build VM will be preserved.')
     # endregion
 
     # region AvailabilitySets
