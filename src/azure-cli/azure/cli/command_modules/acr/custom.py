@@ -146,7 +146,7 @@ def acr_update_custom(cmd,
 
     if default_action is not None:
         _configure_default_action(cmd, instance, default_action)
-    
+
     if metadata_search is not None:
         instance.metadata_search = metadata_search
 
