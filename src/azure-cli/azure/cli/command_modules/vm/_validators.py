@@ -1707,6 +1707,7 @@ def process_vmss_create_namespace(cmd, namespace):
             raise ArgumentUsageError('usage error: please specify the --image when you want to specify the VM SKU')
 
         _validate_trusted_launch(namespace)
+        _validate_generation_version_and_trusted_launch(cmd, namespace)
         if namespace.image:
 
             if namespace.vm_sku is None:
