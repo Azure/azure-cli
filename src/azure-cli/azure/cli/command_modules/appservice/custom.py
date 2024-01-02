@@ -104,7 +104,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
-                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, public_network_access=None):
+                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, public_network_access=None, acr_use_managed_identity_creds=None):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -187,6 +187,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     if using_webapp_up:
         https_only = using_webapp_up
+
+    if acr_use_managed_identity_creds:
+        site_config.acr_use_managed_identity_creds = acr_use_managed_identity_creds
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,

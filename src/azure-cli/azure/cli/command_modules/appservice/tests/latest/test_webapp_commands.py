@@ -2208,6 +2208,49 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
             self.check('[0].roleDefinitionName', role)
         ])
 
+class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='webapp_hyperv_acr_use_managed_identity_creds',location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_hyperv_acr_use_managed_identity_creds(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-hyperv', length=24)
+        plan = self.create_random_name(prefix='plan-hyperv', length=24)
+
+        self.cmd('appservice plan create -g {} -n {} --hyper-v --sku P1V3'.format(resource_group, plan))
+
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-container-image-name "DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest" --assign-identity --acr-use-managed-identity-creds'
+                 .format(resource_group, webapp_name, plan), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('windowsFxVersion',
+                          "DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"),
+            JMESPathCheck('linuxFxVersion', ""),
+            JMESPathCheck('acrUseManagedIdentityCreds', True)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='webapp_linux_acr_use_managed_identity_creds',location=LINUX_ASP_LOCATION_WEBAPP)
+    def test_webapp_linux_acr_use_managed_identity_creds(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-linux', length=24)
+        plan = self.create_random_name(prefix='plan-linux', length=24)
+
+        self.cmd(
+            'appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|16-lts" --assign-identity --acr-use-managed-identity-creds'
+                 .format(resource_group, webapp_name, plan, TEST_REPO_URL), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('windowsFxVersion', None),
+            JMESPathCheck('linuxFxVersion', "NODE|16-lts"),
+            JMESPathCheck('acrUseManagedIdentityCreds', True)
+        ])
 
 class WebappNetworkConnectionTests(ScenarioTest):
     @AllowLargeResponse()
