@@ -20,7 +20,8 @@ def sshkey_create(client,
                   ssh_public_key_name,
                   location,
                   tags=None,
-                  public_key=None):
+                  public_key=None,
+                  encryption_type=None):
     import time
     from pathlib import Path
     parameters = {
@@ -33,8 +34,11 @@ def sshkey_create(client,
                   parameters=parameters)
     if public_key is None:  # Generate one if public key is None
         logger.warning('No public key is provided. A key pair is being generated for you.')
+        parameters = {
+            'encryption_type': encryption_type
+        }
         key_pair = client.generate_key_pair(
-            resource_group_name=resource_group_name, ssh_public_key_name=ssh_public_key_name)
+            resource_group_name=resource_group_name, ssh_public_key_name=ssh_public_key_name, parameters=parameters)
         # Save keys to local files
         private_key = key_pair.private_key
         public_key = key_pair.public_key
