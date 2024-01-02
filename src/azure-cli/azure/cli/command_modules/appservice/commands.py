@@ -337,6 +337,9 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name="get_functionapp", setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
                                  custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk,
                                  validator=validate_functionapp_on_containerapp_update)
+    
+    with self.command_group('functionapp deployment config') as g:
+        g.custom_command('set', 'update_deployment_configs')
 
     with self.command_group('functionapp config') as g:
         g.custom_command('set', 'update_site_configs', validator=validate_functionapp_on_containerapp_site_config_set, exception_handler=ex_handler_factory())

@@ -1238,6 +1238,23 @@ def is_guid(guid):
     except ValueError:
         return False
 
+def parse_storage_connection_string(connection_string):
+    # Split the connection string into parts
+    parts = connection_string.split(";")
+
+    # Initialize a dictionary to hold the parsed values
+    parsed_values = {}
+
+    # Loop over each part
+    for part in parts:
+        # Split the part into key and value
+        key, value = part.split("=", 1)
+
+        # Add the key and value to the dictionary
+        parsed_values[key] = value
+
+    # Return the parsed values
+    return parsed_values
 
 def handle_version_update():
     """Clean up information in local files that may be invalidated

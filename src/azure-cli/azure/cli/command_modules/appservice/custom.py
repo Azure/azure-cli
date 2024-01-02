@@ -1317,7 +1317,8 @@ def list_runtimes(cmd, os_type=None, linux=False):
     return runtime_helper.get_stack_names_only(delimiter=":")
 
 
-def list_function_app_runtimes(cmd, os_type=None):
+def list_function_app_runtimes(cmd, os_type=None, sku=None):
+    
     # show both linux and windows stacks by default
     linux = True
     windows = True
@@ -1325,6 +1326,17 @@ def list_function_app_runtimes(cmd, os_type=None):
         linux = False
     if os_type == LINUX_OS_NAME:
         windows = False
+    
+    is_flex = False
+    if sku is not None:
+        is_flex = sku.lower() == 'flex'
+        if not is_flex:
+            raise ValidationError("only support --sku flex")
+        elif (is_flex and not linux):
+            raise ValidationError("--sku flex is only supported on Linux")
+        
+    if is_flex:
+        return Flex_Runtimes
 
     runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
     linux_stacks = [r.to_dict() for r in runtime_helper.stacks if r.linux]
@@ -1530,6 +1542,89 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
     # Decode base64 encoded byte array into string
     return b64encode(config_file_bytes).decode('utf-8')
 
+def update_deployment_configs(cmd, resource_group_name, name,
+                              deployment_storage_name=None,
+                              deployment_storage_container_name=None, deployment_storage_auth_type=None,
+                              deployment_storage_auth_value=None):
+    
+    logger.warning("checking the flex app. Params: deployment_storage_container_name: %s", deployment_storage_container_name)
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    if not is_flex:
+         raise ValidationError("This command is only valid for Azure Functions on the FlexConsumption plan.")
+
+    if not any ([deployment_storage_name, deployment_storage_container_name]): # todo: I need to find if the deployment_storage_name is required or not.
+        raise ValidationError("[--deployment-storage-name and --deployment-storage-container-name are required.") #TODO: work on the message. 
+
+    functionapp = client.web_apps.get(resource_group_name, name)
+
+    if not deployment_storage_name:
+        storage_account = functionapp.site_config.app_settings['AzureWebJobsStorage']
+        deployment_storage_name = get_storage_name_from_connection_string(storage_account)
+        deployment_storage = storage_account
+    else:
+        deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx, resource_group_name, deployment_storage_name)
+
+    deployment_storage_container = _get_or_create_deployment_storage_container(cmd, resource_group_name, name, deployment_storage_name, deployment_storage_container_name)
+    deployment_storage_container_name = deployment_storage_container.name
+
+    deployment_config_storage_value = getattr(deployment_storage.primary_endpoints, 'blob') + deployment_storage_container_name
+
+    deployment_storage_auth_type = deployment_storage_auth_type or 'systemAssignedIdentity'
+
+    if deployment_storage_auth_value and deployment_storage_auth_type != 'userAssignedIdentity':
+        raise ArgumentUsageError(
+            '--deployment-storage-auth-value is only a valid input for --deployment-storage-auth-type set to userAssignedIdentity. '
+            'Please try again with --deployment-storage-auth-type set to userAssignedIdentity.'
+        )
+
+    if deployment_storage_auth_type == 'userAssignedIdentity':
+        deployment_storage_user_assigned_identity = _get_or_create_user_assigned_identity(cmd, resource_group_name, name, deployment_storage_auth_value, flexconsumption_location)
+        deployment_storage_auth_value = deployment_storage_user_assigned_identity.id
+    elif deployment_storage_auth_type == 'storageAccountConnectionString':
+        deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
+        site_config.app_settings.append(NameValuePair(name='DEPLOYMENT_STORAGE_CONNECTION_STRING',
+                                                        value=deployment_storage_conn_string))
+        deployment_storage_auth_value = 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
+
+    if (functionapp_config is None):
+        functionapp_config = {} #TODO: replace with actual model when api version is relesed
+
+    if (functionapp_config['deployment'] is None):
+        functionapp_config['deployment'] = {} #TODO: replace with the model if needed.
+
+    if (functionapp_config['deployment']['storage'] is None):
+        functionapp_config['deployment']['storage'] = {} #TODO: replace with the model if needed.
+
+    #TODO: replace with the model properties if needed.
+    functionapp_config['deployment']['storage']['type'] = 'blobContainer'
+    functionapp_config['deployment']['storage']['value'] = deployment_config_storage_value
+    functionapp_config['deployment']['storage']['authentication'] = {}
+    functionapp_config['deployment']['storage']['authentication']['type'] = deployment_storage_auth_type
+    functionapp_config['deployment']['storage']['authentication']['value'] = deployment_storage_auth_value
+
+    logger.warning(functionapp_config) # TODO: remove - just for testing at the moment
+
+    if deployment_storage_auth_type == 'userAssignedIdentity':
+        assign_identities = [deployment_storage_auth_value]
+        _assign_deployment_storage_managed_identity_role(cmd.cli_ctx, deployment_storage, deployment_storage_user_assigned_identity.principal_id)
+    elif deployment_storage_auth_type == 'systemAssignedIdentity':
+        assign_identities = ['[system]']
+
+    if assign_identities is not None:
+        identity = assign_identity(cmd, resource_group_name, name, assign_identities,
+                                   role, None, scope)
+        functionapp.identity = identity
+
+    if deployment_storage_auth_type == 'systemAssignedIdentity':
+        _assign_deployment_storage_managed_identity_role(cmd.cli_ctx, deployment_storage, functionapp.identity.principal_id)
+
+    return functionapp
+
+
+def get_storage_name_from_connection_string(connection_string):
+    from azure.cli.core.util import parse_storage_connection_string
+    return parse_storage_connection_string(connection_string)['AccountName']
 
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
