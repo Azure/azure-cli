@@ -65,6 +65,8 @@ GENERATE_RANDOM_APP_NAMES = os.path.abspath(os.path.join(os.path.abspath(__file_
 
 PUBLIC_CLOUD = "AzureCloud"
 
+VERSION_2022_09_01 = "2022-09-01"
+
 LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
     'node': 'AppService/linux/nodejs-webapp-on-azure.yml',
     'python': 'AppService/linux/python-webapp-on-azure.yml',
@@ -129,3 +131,12 @@ DEFAULT_INSTANCE_SIZE = 2048
 DEPLOYMENT_STORAGE_AUTH_TYPES = ['systemAssignedIdentity', 'userAssignedIdentity', 'storageAccountConnectionString']
 
 STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+
+RUNTIME_STATUS_TEXT_MAP = {
+    "BuildInProgress": "Building the app...",
+    "BuildSuccessful": "Build successful.",
+    "BuildFailed": "Build failed.",
+    "RuntimeStarting": "Starting the site...",
+    "RuntimeSuccessful": "Site started successfully.",
+    "RuntimeFailed": "Site failed to start."
+}
