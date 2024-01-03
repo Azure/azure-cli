@@ -24,7 +24,7 @@ Release History
 
 **App Config**
 
-* `appconfig feature set`: Add requirement type to feature command (#28065)
+* `az appconfig feature set`: Add requirement type to feature command (#28065)
 
 **App Service**
 
@@ -90,7 +90,8 @@ Release History
 * `az postgres flexible-server replica promote`: Add capability to stop replication and promote to primary or standalone server with the selection of planned/force data syncs. (#28013)
 * `az postgres flexible-server server-logs list`: List server log files for PostgreSQL flexible server (#28020)
 * `az postgres flexible-server server-logs download`: Download server log files for PostgreSQL flexible server (#28020)
-* Add support for provisioning and updating Premium SSDV2 Disks in CLI for PostgreSQL flexible servers (#28039)
+* [RDBMS] az postgres flexible-server create: Add capability to set storage type to PremiumV2_LRS and provide values for IOPS and Throughput during creation (#28039)
+* [RDBMS] az postgres flexible-server update: Add capability to update the values of IOPS and Throughput during update (#28039)
 * `az postgres flexible-server migration create`: Add migration option like Migrate, Validate and ValidateAndMigrate using parameter `--migration-option` and json file for Migration configuration to support additional properties like sourceType and sslMode (#28066)
 
 **Redis**
