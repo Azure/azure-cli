@@ -74,7 +74,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            get_or_create_default_workspace, get_or_create_default_resource_group,
                            get_workspace)
 from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX,
-                         FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
+                         FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
