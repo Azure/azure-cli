@@ -3219,6 +3219,7 @@ def restore_long_term_retention_backup(
         target_database_name,
         target_server_name,
         target_resource_group_name,
+        sku,
         assign_identity=False,
         user_assigned_identity_id=None,
         keys=None,
@@ -3244,6 +3245,14 @@ def restore_long_term_retention_backup(
 
     kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
+
+    # If sku.name is not specified, resolve the requested sku name
+    # using capabilities.
+    kwargs['sku'] = _find_db_sku_from_capabilities(
+        cmd.cli_ctx,
+        kwargs['location'],
+        sku,
+        compute_model=kwargs['compute_model'])
 
     # Check backup storage redundancy configurations
     if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
