@@ -3561,7 +3561,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             return d
 
     def __init__(self, cmd, linux=False, windows=False):
-        self.disallowed_functions_versions = {"~1", "~2"}
+        self.disallowed_functions_versions = {"~1", "~2", "~3"}
         self.KEYS = FUNCTIONS_STACKS_API_KEYS()
         super().__init__(cmd, linux=linux, windows=windows)
 
@@ -3855,9 +3855,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        workload_profile_name=None, cpu=None, memory=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
-        logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
-                       "be required. To create a 3.x function you would pass in the flag `--functions-version 3`")
-        functions_version = '3'
+        logger.warning("No functions version specified so defaulting to 4. In the future, specifying a version will "
+                       "be required. To create a 4.x function you would pass in the flag `--functions-version 4`")
+        functions_version = '4'
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if any([cpu, memory, workload_profile_name]) and environment is None:
@@ -3974,10 +3974,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         docker_registry_server_url = registry_server
     else:
         docker_registry_server_url = parse_docker_image_name(image, environment)
-
-    if functions_version == '2' and functionapp_def.location in FUNCTIONS_NO_V2_REGIONS:
-        raise ValidationError("2.x functions are not supported in this region. To create a 3.x function, "
-                              "pass in the flag '--functions-version 3'")
 
     if is_linux and not runtime and (consumption_plan_location or not image):
         raise ArgumentUsageError(
@@ -4208,7 +4204,7 @@ def _validate_cpu_momory_functionapp(cpu=None, memory=None):
 def _get_extension_version_functionapp(functions_version):
     if functions_version is not None:
         return '~{}'.format(functions_version)
-    return '~2'
+    return '~4'
 
 
 def _get_app_setting_set_functionapp(site_config, app_setting):
