@@ -31,6 +31,7 @@ class RESOURCE(Enum):
     CosmosMongo = 'cosmos-mongo'
     CosmosSql = 'cosmos-sql'
     CosmosTable = 'cosmos-table'
+    CosmosPostgreSql = 'cosmos-postgresql'
     StorageBlob = 'storage-blob'
     StorageQueue = 'storage-queue'
     StorageFile = 'storage-file'
@@ -130,6 +131,7 @@ TARGET_RESOURCES = {
     RESOURCE.CosmosMongo: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DocumentDB/databaseAccounts/{account}/mongodbDatabases/{database}',
     RESOURCE.CosmosSql: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DocumentDB/databaseAccounts/{account}/sqlDatabases/{database}',
     RESOURCE.CosmosTable: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DocumentDB/databaseAccounts/{account}/tables/{table}',
+    RESOURCE.CosmosPostgreSql: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/{cluster}/databases/{database}',
 
     RESOURCE.StorageBlob: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Storage/storageAccounts/{account}/blobServices/default',
     RESOURCE.StorageQueue: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Storage/storageAccounts/{account}/queueServices/default',
@@ -502,6 +504,23 @@ TARGET_RESOURCES_PARAMS = {
             'placeholder': 'MyTable'
         }
     },
+    RESOURCE.CosmosPostgreSql: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the cosmos database account',
+            'placeholder': 'CosmosRG'
+        },
+        'cluster': {
+            'options': ['--cluster'],
+            'help': 'Name of the cluster of cosmos db for postgresql',
+            'placeholder': 'MyCluster'
+        },
+        'database': {
+            'options': ['--database'],
+            'help': 'Name of the database',
+            'placeholder': 'MyDB'
+        }
+    },
     RESOURCE.StorageBlob: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
@@ -652,6 +671,7 @@ TARGET_SUPPORT_PRIVATE_ENDPOINT = [
     RESOURCE.CosmosGremlin,
     RESOURCE.CosmosMongo,
     RESOURCE.CosmosTable,
+    RESOURCE.CosmosPostgreSql,
     RESOURCE.Redis,
     RESOURCE.Postgres,
     RESOURCE.Mysql,
@@ -732,6 +752,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.CosmosMongo: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.CosmosTable: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.CosmosSql: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosPostgreSql: [AUTH_TYPE.Secret],
 
         RESOURCE.StorageBlob: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageQueue: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
@@ -760,6 +781,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.CosmosMongo: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.CosmosTable: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.CosmosSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosPostgreSql: [AUTH_TYPE.Secret],
 
         RESOURCE.StorageBlob: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageQueue: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -788,6 +810,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.CosmosMongo: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.CosmosTable: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.CosmosSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosPostgreSql: [AUTH_TYPE.Secret],
 
         RESOURCE.StorageBlob: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageQueue: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -844,6 +867,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.CosmosMongo: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.CosmosTable: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.CosmosSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosPostgreSql: [AUTH_TYPE.Secret],
 
         RESOURCE.StorageBlob: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageQueue: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -998,13 +1022,23 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.SpringBoot,
             CLIENT_TYPE.Blank
         ],
-        RESOURCE.StorageBlob: [
+        RESOURCE.CosmosPostgreSql: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
             CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
+        ],
+        RESOURCE.StorageBlob: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Ruby,
+            CLIENT_TYPE.Php,
             CLIENT_TYPE.Blank
         ],
         RESOURCE.StorageQueue: [
