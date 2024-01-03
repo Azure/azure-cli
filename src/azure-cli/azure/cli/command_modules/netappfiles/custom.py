@@ -211,7 +211,7 @@ class VolumeCreate(_VolumeCreate):
         args_schema.vnet = AAZStrArg(
             options=["--vnet"],
             arg_group="Properties",
-            help="Name or Resource ID of the vnet. If you want to use a vnet in other resource group or subscription, please provide the Resource ID instead of the name of the vnet.",
+            help="Name or Resource ID of the vnet. If you want to use a vnet in other resource group, please provide the Resource ID instead of the name of the vnet.",
             required=False
         )
 
