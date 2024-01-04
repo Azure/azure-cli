@@ -3856,8 +3856,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        workload_profile_name=None, cpu=None, memory=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
-        logger.warning("No functions version specified so defaulting to 4. In the future, specifying a version will "
-                       "be required. To create a 4.x function you would pass in the flag `--functions-version 4`")
+        logger.warning("No functions version specified so defaulting to 4.")
         functions_version = '4'
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
