@@ -1550,7 +1550,7 @@ def update_deployment_configs(cmd, resource_group_name, name,
                               deployment_storage_auth_value=None, slot=None):
     
     # NameValuePair = cmd.get_models('NameValuePair')
-    Site, SiteConfig, NameValuePair, AppSettings = cmd.get_models('Site', 'SiteConfig', 'NameValuePair', 'AppSettings')
+    NameValuePair = cmd.get_models('NameValuePair')
     
     logger.warning("checking the flex app. Params: deployment_storage_container_name: %s", deployment_storage_container_name)
     is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
@@ -1561,8 +1561,8 @@ def update_deployment_configs(cmd, resource_group_name, name,
     logger.warning("deployment_storage_name: %s deployment_storage_container_name: %s", deployment_storage_name, deployment_storage_container_name)
     logger.warning("deployment_storage_auth_type: %s deployment_storage_auth_value: %s", deployment_storage_auth_type, deployment_storage_auth_value)
 
-    if deployment_storage_name == None or deployment_storage_container_name == None:
-        raise ValidationError("--deployment-storage-name and --deployment-storage-container-name are required.")
+    if (deployment_storage_name == None) == (deployment_storage_container_name != None):
+        raise ValidationError("Please provide both --deployment-storage-name and --deployment-storage-container-name or neither.")
     
     client = web_client_factory(cmd.cli_ctx)
     functionapp = client.web_apps.get(resource_group_name, name)
@@ -1570,10 +1570,18 @@ def update_deployment_configs(cmd, resource_group_name, name,
     if functionapp is not None:
         logger.warning("functionapp %s in %s found", functionapp.name, functionapp.location)
 
-    deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx, resource_group_name, deployment_storage_name)
-    deployment_storage_container = _get_deployment_storage_container(cmd, resource_group_name, deployment_storage_name, deployment_storage_container_name)
-    deployment_storage_container_name = deployment_storage_container.name
-    deployment_config_storage_value = getattr(deployment_storage.primary_endpoints, 'blob') + deployment_storage_container_name
+    deployment_config_storage_value = None
+    if (deployment_storage_name is not None):
+        deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx, resource_group_name, deployment_storage_name)
+        deployment_storage_container = _get_deployment_storage_container(cmd, resource_group_name, deployment_storage_name, deployment_storage_container_name)
+        deployment_storage_container_name = deployment_storage_container.name
+        deployment_config_storage_value = getattr(deployment_storage.primary_endpoints, 'blob') + deployment_storage_container_name
+    else:
+        # update_flex_functionapp_functions_configuration();
+        # todo: hard-coded for testing. Use existing deployment config. 
+        deployment_storage_name = 'khkhflexstorage'
+        deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx, resource_group_name, deployment_storage_name)
+    
     deployment_storage_auth_type = deployment_storage_auth_type or 'systemAssignedIdentity'
 
     if deployment_storage_auth_value and deployment_storage_auth_type != 'userAssignedIdentity':
@@ -1608,7 +1616,10 @@ def update_deployment_configs(cmd, resource_group_name, name,
 
     #TODO: replace with the model properties if needed.
     functionapp_config['deployment']['storage']['type'] = 'blobContainer'
-    functionapp_config['deployment']['storage']['value'] = deployment_config_storage_value
+    
+    if (deployment_config_storage_value is None):
+        functionapp_config['deployment']['storage']['value'] = deployment_config_storage_value
+        
     functionapp_config['deployment']['storage']['authentication'] = {}
     functionapp_config['deployment']['storage']['authentication']['type'] = deployment_storage_auth_type
     functionapp_config['deployment']['storage']['authentication']['value'] = deployment_storage_auth_value
