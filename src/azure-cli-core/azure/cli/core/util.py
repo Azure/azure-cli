@@ -68,8 +68,11 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
     exit_code = 1
     az_error = None
 
-    # command is not set in the regular mode because the call is from knack. In interative mode, the command is set to the command that's run by the user inside the interactive mode
-    if not command and (cli_ctx and cli_ctx.invocation and cli_ctx.invocation.parser and cli_ctx.invocation.parser.full_command):
+    # command is not set in the regular mode because the call is from knack.
+    # In interative mode, the command is set to the command that's run by the user inside the interactive mode
+    is_command_unset = not command
+    has_ctx_command = cli_ctx and cli_ctx.invocation and cli_ctx.invocation.parser and cli_ctx.invocation.parser.full_command  # pylint: disable=line-too-long
+    if is_command_unset and has_ctx_command:
         command = cli_ctx.invocation.parser.full_command
 
     if isinstance(ex, azclierror.AzCLIError):
