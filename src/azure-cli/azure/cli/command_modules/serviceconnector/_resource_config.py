@@ -1108,6 +1108,6 @@ SUPPORTED_CLIENT_TYPE[RESOURCE.FunctionApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.Web
 
 # The dict defines the options for opt-out
 class OPT_OUT_OPTION(Enum):
-    PUBLIC_NETWORK = 'public-network'
+    PUBLIC_NETWORK = 'publicnetwork'
     CONFIGURATION_INFO = 'configinfo'
     # AUTHENTICATION = 'auth'

@@ -1480,11 +1480,11 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
     @record_only()
     def test_webapp_storageblob_secret_opt_out_public_network_and_config(self):
-        self._test_webapp_storageblob_secret_opt_out(['public-network', 'configinfo'])
+        self._test_webapp_storageblob_secret_opt_out(['publicnetwork', 'configinfo'])
     
     @record_only()
     def test_webapp_storageblob_secret_opt_out_public_network(self):
-        self._test_webapp_storageblob_secret_opt_out(['public-network'])
+        self._test_webapp_storageblob_secret_opt_out(['publicnetwork'])
     
     @record_only()
     def test_webapp_storageblob_secret_opt_out_config(self):
@@ -1519,7 +1519,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
                 'storage account network-rule list '
                 '--account-name {account} -g {target_resource_group}'.format(**self.kwargs)
                 ).get_output_in_json()
-            if 'public-network' in opt_out_list:
+            if 'publicnetwork' in opt_out_list:
                 self.assertEqual(len(network['ipRules']), 0)
             else:
                 webapp = self.cmd(
@@ -1537,7 +1537,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'wctest',
             'site': 'servicelinker-storageblob-app',
-            'account': 'wctest'
+            'account': 'storagetestwc'
         })     
 
         # prepare params
