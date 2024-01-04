@@ -1319,6 +1319,8 @@ def list_runtimes(cmd, os_type=None, linux=False):
 
 def list_function_app_runtimes(cmd, os_type=None, sku=None):
     
+    from ._constants import (FLEX_RUNTIMES)
+    
     # show both linux and windows stacks by default
     linux = True
     windows = True
@@ -1331,12 +1333,12 @@ def list_function_app_runtimes(cmd, os_type=None, sku=None):
     if sku is not None:
         is_flex = sku.lower() == 'flex'
         if not is_flex:
-            raise ValidationError("only support --sku flex")
+            raise ValidationError("The --sku parameter only supports 'flex'.")
         elif (is_flex and not linux):
-            raise ValidationError("--sku flex is only supported on Linux")
+            raise ArgumentUsageError("The flex sku is only supported on Linux. Please try removing the --os-type parameter.")
         
     if is_flex:
-        return Flex_Runtimes
+        return FLEX_RUNTIMES
 
     runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
     linux_stacks = [r.to_dict() for r in runtime_helper.stacks if r.linux]
@@ -1587,7 +1589,6 @@ def update_deployment_configs(cmd, resource_group_name, name,
         logger.warning("deployment_storage_auth_type is %s", deployment_storage_auth_type)
         deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
         configs = get_site_configs(cmd, resource_group_name, name, slot)
-        logger.warning("configs is %s", configs)
         if configs.app_settings is None:
             configs.app_settings = []
         configs.app_settings.append(NameValuePair(name='DEPLOYMENT_STORAGE_CONNECTION_STRING',
