@@ -3584,7 +3584,8 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 "8": "8.0",
                 "7": "7.0",
                 "6.0": "6",
-                "1.8": "8.0"
+                "1.8": "8.0",
+                "17": "17.0"
             }
             new_version = old_to_new_version.get(version)
             matched_runtime_version = next((r for r in runtimes if r.version == new_version), None)
