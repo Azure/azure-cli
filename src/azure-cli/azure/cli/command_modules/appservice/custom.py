@@ -1614,17 +1614,14 @@ def update_deployment_configs(cmd, resource_group_name, name,
     if (functionapp_config['deployment'].get('storage') is None):
         functionapp_config['deployment']['storage'] = {} #TODO: replace with the model if needed.
 
-    #TODO: replace with the model properties if needed.
-    functionapp_config['deployment']['storage']['type'] = 'blobContainer'
     
     if (deployment_config_storage_value is None):
+        functionapp_config['deployment']['storage']['type'] = 'blobContainer'
         functionapp_config['deployment']['storage']['value'] = deployment_config_storage_value
         
     functionapp_config['deployment']['storage']['authentication'] = {}
     functionapp_config['deployment']['storage']['authentication']['type'] = deployment_storage_auth_type
     functionapp_config['deployment']['storage']['authentication']['value'] = deployment_storage_auth_value
-
-    logger.warning(functionapp_config) # TODO: remove - just for testing at the moment
 
     if deployment_storage_auth_type == 'userAssignedIdentity':
         assign_identities = [deployment_storage_auth_value]
