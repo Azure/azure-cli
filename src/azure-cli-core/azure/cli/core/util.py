@@ -53,7 +53,7 @@ DISALLOWED_USER_NAMES = [
 ]
 
 
-def handle_exception(ex, cli_ctx=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
+def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from jmespath.exceptions import JMESPathError
     from msrestazure.azure_exceptions import CloudError
@@ -68,9 +68,8 @@ def handle_exception(ex, cli_ctx=None):  # pylint: disable=too-many-locals, too-
     exit_code = 1
     az_error = None
 
-    command = None
-
-    if cli_ctx and cli_ctx.invocation and cli_ctx.invocation.parser and cli_ctx.invocation.parser.full_command:
+    # command is not set in the regular mode because the call is from knack. In interative mode, the command is set to the command that's run by the user inside the interactive mode
+    if not command and (cli_ctx and cli_ctx.invocation and cli_ctx.invocation.parser and cli_ctx.invocation.parser.full_command):
         command = cli_ctx.invocation.parser.full_command
 
     if isinstance(ex, azclierror.AzCLIError):
