@@ -163,6 +163,7 @@ if "%TARGET%"=="msi" (
 ) else (
     copy %REPO_ROOT%\build_scripts\windows\scripts\az.cmd %BUILDING_DIR%\wbin\
     powershell -Command "(Get-Content '%BUILDING_DIR%\wbin\az.cmd') -replace 'SET AZ_INSTALLER=MSI','SET AZ_INSTALLER=ZIP' | Set-Content '%BUILDING_DIR%\wbin\az.cmd'"
+    copy %REPO_ROOT%\build_scripts\windows\scripts\azps_zip.ps1 %BUILDING_DIR%\wbin\azps.ps1
 )
 if %errorlevel% neq 0 goto ERROR
 copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
