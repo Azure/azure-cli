@@ -53,9 +53,6 @@ def load_arguments(self, _):
                    'If this property is not initially provided when the resource is created, the publicKey property '
                    'will be populated when generateKeyPair is called. If the public key is provided upon resource '
                    'creation, the provided public key needs to be at least 2048-bit and in ssh-rsa format.')
-        c.argument('encryption_type', arg_type=get_enum_type(['RSA', 'Ed25519']),
-                   help='The encryption type of the SSH keys to be generated. '
-                        'If not provided, will default to RSA')
 
     with self.argument_context('sshkey delete') as c:
         c.argument('resource_group_name', resource_group_name_type)
