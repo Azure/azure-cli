@@ -638,7 +638,7 @@ class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
                                '--storage-account-name {storage_account} '
                                '--storage-container-SAS-token "{sas}"',
                                checks=[
-                                   # self.check('status', 'Succeeded'),
+                                   self.check('status', 'Succeeded'),
                                    # self.exists('startTime'),
                                    # self.exists('jobId'),
                                    self.exists('folderUrl')
@@ -664,20 +664,19 @@ class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
-    # @record_only()
-    @unittest.skip('cannot run')
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_hsm_full_backup')
+    @ManagedHSMPreparer(name_prefix='cli-test-hsm-bcup-', certs_path=CERTS_DIR, roles=['Managed HSM Crypto Officer', 'Managed HSM Crypto User'])
+    @StorageAccountPreparer(name_prefix='clitesthsmsa')
     @AllowLargeResponse()
-    def test_keyvault_hsm_full_backup_restore(self):
+    def test_keyvault_hsm_full_backup_restore(self, resource_group, managed_hsm, storage_account):
         self.kwargs.update({
-            'hsm_url': ACTIVE_HSM_URL,
-            'hsm_name': ACTIVE_HSM_NAME,
-            'storage_account': self.create_random_name('clitesthsmsa', 24),
+            'hsm_url': f'https://{managed_hsm}.managedhsm.azure.net',
+            'hsm_name': managed_hsm,
+            'storage_account': storage_account,
             'blob': self.create_random_name('clitesthsmblob', 24),
             'sas_start': (datetime.utcnow() - timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ'),
             'sas_expiry': (datetime.utcnow() + timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
         })
-        self.cmd('az storage account create -n {storage_account} -g {rg}')
         self.cmd('az storage container create -n {blob} --account-name {storage_account} -g {rg}')
 
         self.kwargs['sas'] = '?' + self.cmd('az storage account generate-sas --start {sas_start} --expiry {sas_expiry} '
@@ -689,7 +688,7 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                  '--storage-account-name {storage_account} '
                  '--storage-container-SAS-token "{sas}"',
                  checks=[
-                     # self.check('status', 'Succeeded'),
+                     self.check('status', 'Succeeded'),
                      # self.exists('startTime'),
                      # self.exists('jobId'),
                      self.exists('folderUrl')
@@ -699,7 +698,7 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                                '--storage-account-name {storage_account} '
                                '--storage-container-SAS-token "{sas}"',
                                checks=[
-                                   # self.check('status', 'Succeeded'),
+                                   self.check('status', 'Succeeded'),
                                    # self.exists('startTime'),
                                    # self.exists('jobId'),
                                    self.exists('folderUrl')
@@ -710,11 +709,6 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                  '--storage-account-name {storage_account} '
                  '--storage-container-SAS-token "{sas}" '
                  '--backup-folder "{backup_folder}"')
-                 # checks=[
-                 #     self.check('status', 'Succeeded'),
-                 #     self.exists('startTime'),
-                 #     self.exists('jobId')
-                 # ])
 
 
 class KeyVaultHSMSettingScenarioTest(ScenarioTest):

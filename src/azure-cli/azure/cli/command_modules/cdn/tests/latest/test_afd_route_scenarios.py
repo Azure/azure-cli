@@ -198,7 +198,7 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('originGroup.id', origin_group_id),
                          JMESPathCheck('length(ruleSets)', 0),
                          JMESPathCheck('cacheConfiguration.queryStringCachingBehavior', "UseQueryString")]
-        options = '--rule-sets --https-redirect Disabled'
+        options = '--rule-sets null --https-redirect Disabled'
         self.afd_route_update_cmd(resource_group,
                                   profile_name,
                                   endpoint_name,

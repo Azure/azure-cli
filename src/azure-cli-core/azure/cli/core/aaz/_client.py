@@ -2,14 +2,18 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+from knack.log import get_logger
 from azure.core import PipelineClient
 from azure.core.configuration import Configuration
 from azure.core.polling.base_polling import LocationPolling, StatusCheckPolling
 from abc import abstractmethod
 
 from ._poller import AAZNoPolling, AAZBasePolling
-from azure.cli.core.cloud import CloudNameEnum as _CloudNameEnum
+from azure.cli.core.cloud import (CloudEndpointNotSetException, CloudSuffixNotSetException,
+                                  CloudNameEnum as _CloudNameEnum)
+
+
+logger = get_logger(__name__)
 
 registered_clients = {}
 CloudNameEnum = _CloudNameEnum  # redefine CloudNameEnum in aaz to decouple with cloud for aaz generated commands.
@@ -66,8 +70,11 @@ class AAZBaseClient(PipelineClient):
     """Base Client"""
 
     def __init__(self, ctx, credential, **kwargs):
+        base_url = self._build_base_url(ctx, **kwargs)
+        if not base_url:
+            raise CloudEndpointNotSetException()
         super().__init__(
-            base_url=self._build_base_url(ctx, **kwargs),
+            base_url=base_url,
             config=self._build_configuration(ctx, credential, **kwargs),
             per_call_policies=self._build_per_call_policies(ctx, **kwargs)
         )
@@ -121,6 +128,81 @@ class AAZBaseClient(PipelineClient):
             deserialization_callback=deserialization_callback
         )
         return polling
+
+    @classmethod
+    def get_cloud_endpoint(cls, ctx, arm_idx):
+        from azure.cli.core.cloud import CloudEndpoints
+        endpoints = None
+        # retrieve by indexes mapping
+        for property_name, value in CloudEndpoints.ARM_METADATA_INDEX.items():
+            if value == arm_idx:
+                try:
+                    endpoints = getattr(ctx.cli_ctx.cloud.endpoints, property_name)
+                except CloudEndpointNotSetException:
+                    break
+
+        # retrieve from arm response
+        if not endpoints:
+            endpoints = cls._retrieve_value_in_arm_cloud_metadata(ctx, arm_idx)
+        return endpoints
+
+    @classmethod
+    def get_cloud_suffix(cls, ctx, arm_idx):
+        from azure.cli.core.cloud import CloudSuffixes
+        # retrieve by indexes mapping
+        suffixes = None
+        for property_name, value in CloudSuffixes.ARM_METADATA_INDEX.items():
+            if value == arm_idx:
+                try:
+                    suffixes = getattr(ctx.cli_ctx.cloud.suffixes, property_name)
+                except CloudSuffixNotSetException:
+                    break
+
+        if not suffixes:
+            # retrieve from arm response
+            suffixes = cls._retrieve_value_in_arm_cloud_metadata(ctx, arm_idx)
+        if suffixes and not suffixes.startswith('.'):
+            # always add '.' when suffixes is not None
+            suffixes = '.' + suffixes
+        return suffixes
+
+    @staticmethod
+    def _retrieve_value_in_arm_cloud_metadata(ctx, arm_idx):
+        from azure.cli.core.cloud import retrieve_arm_cloud_metadata, get_active_cloud_name
+        from ._utils import AAZShortHandSyntaxParser, AAZInvalidShorthandSyntaxError
+
+        cloud_name = get_active_cloud_name(ctx.cli_ctx)
+        arm_cloud = None
+        try:
+            arm_cloud_metadata = retrieve_arm_cloud_metadata()
+            for cloud in arm_cloud_metadata:
+                if cloud.get('name', None) == cloud_name:
+                    arm_cloud = cloud
+                    break
+            if not arm_cloud:
+                return None
+        except Exception:  # pylint: disable=broad-except
+            return None
+
+        try:
+            value = arm_cloud
+            for key in AAZShortHandSyntaxParser.parse_partial_value_key(arm_idx):
+                value = value[key]
+        except AAZInvalidShorthandSyntaxError as err:
+            logger.warning('Invalid metadata index: %s', err)
+            raise err
+        except LookupError:
+            logger.debug(
+                "Failed to retrieve '%s' property in cloud metadata from the url specified by ARM_CLOUD_METADATA_URL",
+                arm_idx
+            )
+            return None
+        if not isinstance(value, str):
+            logger.debug(
+                "Failed to retrieve '%s' property in cloud metadata from the url specified by ARM_CLOUD_METADATA_URL: "
+                "property is not a string", arm_idx)
+            return None
+        return value
 
 
 @register_client("MgmtClient")

@@ -11,6 +11,9 @@ afd profile update:
             - option_length_too_long
 afd origin create:
     parameters:
+        shared_private_link_resource:
+            rule_exclusions:
+            - option_length_too_long
         private_link_location:
             rule_exclusions:
             - option_length_too_long
@@ -28,6 +31,9 @@ afd origin create:
             - option_length_too_long
 afd origin update:
     parameters:
+        shared_private_link_resource:
+            rule_exclusions:
+            - option_length_too_long
         private_link_location:
             rule_exclusions:
             - option_length_too_long
@@ -45,6 +51,15 @@ afd origin update:
             - option_length_too_long
 afd origin-group create:
     parameters:
+        additional_latency_in_milliseconds:
+            rule_exclusions:
+            - option_length_too_long
+        successful_samples_required:
+            rule_exclusions:
+            - option_length_too_long
+        traffic_restoration_time_to_healed_or_new_endpoints_in_minutes:
+            rule_exclusions:
+            - option_length_too_long
         load_balancing_additional_latency_in_milliseconds:
             rule_exclusions:
             - option_length_too_long
@@ -59,6 +74,15 @@ afd origin-group create:
             - option_length_too_long
 afd origin-group update:
     parameters:
+        additional_latency_in_milliseconds:
+            rule_exclusions:
+            - option_length_too_long
+        successful_samples_required:
+            rule_exclusions:
+            - option_length_too_long
+        traffic_restoration_time_to_healed_or_new_endpoints_in_minutes:
+            rule_exclusions:
+            - option_length_too_long
         load_balancing_additional_latency_in_milliseconds:
             rule_exclusions:
             - option_length_too_long
@@ -73,6 +97,9 @@ afd origin-group update:
             - option_length_too_long
 afd route create:
     parameters:
+        formatted_custom_domains:
+            rule_exclusions:
+            - option_length_too_long
         content_types_to_compress:
             rule_exclusions:
             - option_length_too_long
@@ -84,6 +111,9 @@ afd route create:
             - option_length_too_long
 afd route update:
     parameters:
+        formatted_custom_domains:
+            rule_exclusions:
+            - option_length_too_long
         content_types_to_compress:
             rule_exclusions:
             - option_length_too_long
@@ -104,12 +134,33 @@ afd rule create:
         match_processing_behavior:
             rule_exclusions:
             - option_length_too_long
+afd rule update:
+    parameters:
+        preserve_unmatched_path:
+            rule_exclusions:
+            - option_length_too_long
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        match_processing_behavior:
+            rule_exclusions:
+            - option_length_too_long
 afd rule action add:
     parameters:
         preserve_unmatched_path:
             rule_exclusions:
             - option_length_too_long
         query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+afd security-policy create:
+    parameters:
+        web_application_firewall:
+            rule_exclusions:
+            - option_length_too_long
+afd security-policy update:
+    parameters:
+        web_application_firewall:
             rule_exclusions:
             - option_length_too_long
 cdn endpoint waf policy set:

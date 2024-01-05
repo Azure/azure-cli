@@ -2172,7 +2172,11 @@ def full_backup(cmd, client, storage_resource_uri=None, storage_account_name=Non
     if not storage_resource_uri:
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
-    return client.begin_backup(storage_resource_uri, sas_token=token, use_managed_identity=use_managed_identity)
+    poller = client.begin_backup(storage_resource_uri, sas_token=token, use_managed_identity=use_managed_identity)
+    from knack.util import todict
+    result = todict(poller.result())
+    result['status'] = poller.status()
+    return result
 
 
 def full_restore(cmd, client, folder_to_restore,

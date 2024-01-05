@@ -9,7 +9,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - spring-cloud connection create cosmos-sql
+      - spring connection create cosmos-sql
       Connection:
       - keep-alive
       Content-Length:
@@ -19,41 +19,41 @@ interactions:
       ParameterSetName:
       - --connection --source-id --target-id --system-identity --client-type
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn_smi?api-version=2022-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi?api-version=2023-04-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
         "name": "testconn_smi", "type": "microsoft.servicelinker/linkers", "systemData":
         {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
-        "2023-07-03T05:10:18.598486Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
-        "User", "lastModifiedAt": "2023-07-03T05:10:18.598486Z"}, "properties": {"provisioningState":
+        "2023-11-23T02:32:29.8002298Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-11-23T02:32:29.8002298Z"}, "properties": {"provisioningState":
         "Accepted", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB",
         "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"roles":
         null, "userName": null, "authType": "systemAssignedIdentity", "deleteOrUpdateBehavior":
         null}, "vNetSolution": null, "clientType": "springBoot", "secretStore": {"keyVaultId":
         null, "keyVaultSecretName": null}, "scope": null, "publicNetworkSolution":
         null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
-        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null}}}'
+        null, "additionalConnectionStringProperties": null, "deleteOrUpdateBehavior":
+        null, "action": null, "daprProperties": null}}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d9d1de5-3fb0-4eb9-8590-fc9600eb857d*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8?api-version=2021-01-01-privatepreview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/9d25ab63-44f9-4899-bf43-cf38fb059f5a*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363035514566731&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=cRwvHtQxsS2AlQFXZMrC55QUEb0IRLAq9g96hsi12-6M3V8Zp21hyLJ1LEgb9Wej8On6bkjpNz6_hwKZ333fXsBoDDA6RXP9LzWRw6D1BI88d0TfVv3nzEtXRygZ4gSl6zEzhKaOD2inhCfC0sLS1XFE0R2w0Asc5602tGMY72ynIuCks9VPsI4vu3fw52T5LqSmU5FME10h6C3EKDp0LxVGTAheYjGNaWGB7SPgIAbpBqhfGjtM0kfNkCAjx_X_yyYgp5kYd7G-WJnIS_5ZWmg-SmkGR5Es6OPvgEbstSJPXfPlqgaBCvyvUdblbrBPR4CWgPz-aiWobJMHYpPAVA&h=SwK_AZ_zGaszgNE4ZMjKntcJeHq4qnToZ0vcNcyLZlE
       cache-control:
       - no-cache
       content-length:
-      - '1318'
+      - '1353'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:10:19 GMT
+      - Thu, 23 Nov 2023 02:32:31 GMT
       etag:
-      - '"d700d056-0000-0100-0000-64a2583b0000"'
+      - '"0100e0c8-0000-3400-0000-655eb9bf0000"'
       expires:
       - '-1'
       mise-correlation-id:
-      - b2282abf-3e3b-4ac3-9020-bb071d51f89e
+      - 28af58c0-9190-4c62-b3d9-dba101b6b11b
       pragma:
       - no-cache
       strict-transport-security:
@@ -75,33 +75,32 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - spring-cloud connection create cosmos-sql
+      - spring connection create cosmos-sql
       Connection:
       - keep-alive
       ParameterSetName:
       - --connection --source-id --target-id --system-identity --client-type
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d9d1de5-3fb0-4eb9-8590-fc9600eb857d*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8?api-version=2021-01-01-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/9d25ab63-44f9-4899-bf43-cf38fb059f5a*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363035514566731&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=cRwvHtQxsS2AlQFXZMrC55QUEb0IRLAq9g96hsi12-6M3V8Zp21hyLJ1LEgb9Wej8On6bkjpNz6_hwKZ333fXsBoDDA6RXP9LzWRw6D1BI88d0TfVv3nzEtXRygZ4gSl6zEzhKaOD2inhCfC0sLS1XFE0R2w0Asc5602tGMY72ynIuCks9VPsI4vu3fw52T5LqSmU5FME10h6C3EKDp0LxVGTAheYjGNaWGB7SPgIAbpBqhfGjtM0kfNkCAjx_X_yyYgp5kYd7G-WJnIS_5ZWmg-SmkGR5Es6OPvgEbstSJPXfPlqgaBCvyvUdblbrBPR4CWgPz-aiWobJMHYpPAVA&h=SwK_AZ_zGaszgNE4ZMjKntcJeHq4qnToZ0vcNcyLZlE
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d9d1de5-3fb0-4eb9-8590-fc9600eb857d*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "name": "7d9d1de5-3fb0-4eb9-8590-fc9600eb857d*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
-        "status": "Accepted", "startTime": "2023-07-03T05:10:19.7409572Z"}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/9d25ab63-44f9-4899-bf43-cf38fb059f5a*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "name": "9d25ab63-44f9-4899-bf43-cf38fb059f5a*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
+        "status": "Accepted", "startTime": "2023-11-23T02:32:31.075134Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '673'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:10:20 GMT
+      - Thu, 23 Nov 2023 02:32:32 GMT
       etag:
-      - '"0f02e707-0000-0100-0000-64a2583b0000"'
+      - '"0e008f13-0000-3400-0000-655eb9bf0000"'
       expires:
       - '-1'
       pragma:
@@ -125,33 +124,32 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - spring-cloud connection create cosmos-sql
+      - spring connection create cosmos-sql
       Connection:
       - keep-alive
       ParameterSetName:
       - --connection --source-id --target-id --system-identity --client-type
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d9d1de5-3fb0-4eb9-8590-fc9600eb857d*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8?api-version=2021-01-01-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/9d25ab63-44f9-4899-bf43-cf38fb059f5a*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363035514566731&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=cRwvHtQxsS2AlQFXZMrC55QUEb0IRLAq9g96hsi12-6M3V8Zp21hyLJ1LEgb9Wej8On6bkjpNz6_hwKZ333fXsBoDDA6RXP9LzWRw6D1BI88d0TfVv3nzEtXRygZ4gSl6zEzhKaOD2inhCfC0sLS1XFE0R2w0Asc5602tGMY72ynIuCks9VPsI4vu3fw52T5LqSmU5FME10h6C3EKDp0LxVGTAheYjGNaWGB7SPgIAbpBqhfGjtM0kfNkCAjx_X_yyYgp5kYd7G-WJnIS_5ZWmg-SmkGR5Es6OPvgEbstSJPXfPlqgaBCvyvUdblbrBPR4CWgPz-aiWobJMHYpPAVA&h=SwK_AZ_zGaszgNE4ZMjKntcJeHq4qnToZ0vcNcyLZlE
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d9d1de5-3fb0-4eb9-8590-fc9600eb857d*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "name": "7d9d1de5-3fb0-4eb9-8590-fc9600eb857d*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
-        "status": "Accepted", "startTime": "2023-07-03T05:10:19.7409572Z"}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/9d25ab63-44f9-4899-bf43-cf38fb059f5a*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "name": "9d25ab63-44f9-4899-bf43-cf38fb059f5a*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
+        "status": "Accepted", "startTime": "2023-11-23T02:32:31.075134Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '673'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:10:51 GMT
+      - Thu, 23 Nov 2023 02:33:01 GMT
       etag:
-      - '"0f02e707-0000-0100-0000-64a2583b0000"'
+      - '"0e008f13-0000-3400-0000-655eb9bf0000"'
       expires:
       - '-1'
       pragma:
@@ -175,34 +173,32 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - spring-cloud connection create cosmos-sql
+      - spring connection create cosmos-sql
       Connection:
       - keep-alive
       ParameterSetName:
       - --connection --source-id --target-id --system-identity --client-type
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d9d1de5-3fb0-4eb9-8590-fc9600eb857d*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8?api-version=2021-01-01-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/9d25ab63-44f9-4899-bf43-cf38fb059f5a*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363035514566731&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=cRwvHtQxsS2AlQFXZMrC55QUEb0IRLAq9g96hsi12-6M3V8Zp21hyLJ1LEgb9Wej8On6bkjpNz6_hwKZ333fXsBoDDA6RXP9LzWRw6D1BI88d0TfVv3nzEtXRygZ4gSl6zEzhKaOD2inhCfC0sLS1XFE0R2w0Asc5602tGMY72ynIuCks9VPsI4vu3fw52T5LqSmU5FME10h6C3EKDp0LxVGTAheYjGNaWGB7SPgIAbpBqhfGjtM0kfNkCAjx_X_yyYgp5kYd7G-WJnIS_5ZWmg-SmkGR5Es6OPvgEbstSJPXfPlqgaBCvyvUdblbrBPR4CWgPz-aiWobJMHYpPAVA&h=SwK_AZ_zGaszgNE4ZMjKntcJeHq4qnToZ0vcNcyLZlE
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d9d1de5-3fb0-4eb9-8590-fc9600eb857d*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "name": "7d9d1de5-3fb0-4eb9-8590-fc9600eb857d*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
-        "status": "Succeeded", "startTime": "2023-07-03T05:10:19.7409572Z", "endTime":
-        "2023-07-03T05:11:15.4153941Z", "properties": {"Message": null}}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/9d25ab63-44f9-4899-bf43-cf38fb059f5a*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "name": "9d25ab63-44f9-4899-bf43-cf38fb059f5a*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
+        "status": "Accepted", "startTime": "2023-11-23T02:32:31.075134Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '759'
+      - '673'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:11:21 GMT
+      - Thu, 23 Nov 2023 02:33:32 GMT
       etag:
-      - '"0f02860a-0000-0100-0000-64a258730000"'
+      - '"0e008f13-0000-3400-0000-655eb9bf0000"'
       expires:
       - '-1'
       pragma:
@@ -226,26 +222,76 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - spring-cloud connection create cosmos-sql
+      - spring connection create cosmos-sql
       Connection:
       - keep-alive
       ParameterSetName:
       - --connection --source-id --target-id --system-identity --client-type
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn_smi?api-version=2022-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/9d25ab63-44f9-4899-bf43-cf38fb059f5a*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363035514566731&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=cRwvHtQxsS2AlQFXZMrC55QUEb0IRLAq9g96hsi12-6M3V8Zp21hyLJ1LEgb9Wej8On6bkjpNz6_hwKZ333fXsBoDDA6RXP9LzWRw6D1BI88d0TfVv3nzEtXRygZ4gSl6zEzhKaOD2inhCfC0sLS1XFE0R2w0Asc5602tGMY72ynIuCks9VPsI4vu3fw52T5LqSmU5FME10h6C3EKDp0LxVGTAheYjGNaWGB7SPgIAbpBqhfGjtM0kfNkCAjx_X_yyYgp5kYd7G-WJnIS_5ZWmg-SmkGR5Es6OPvgEbstSJPXfPlqgaBCvyvUdblbrBPR4CWgPz-aiWobJMHYpPAVA&h=SwK_AZ_zGaszgNE4ZMjKntcJeHq4qnToZ0vcNcyLZlE
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/9d25ab63-44f9-4899-bf43-cf38fb059f5a*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "name": "9d25ab63-44f9-4899-bf43-cf38fb059f5a*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
+        "status": "Succeeded", "startTime": "2023-11-23T02:32:31.075134Z", "endTime":
+        "2023-11-23T02:33:38.9786663Z", "properties": {"Message": null}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '750'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Nov 2023 02:34:03 GMT
+      etag:
+      - '"0e00d913-0000-3400-0000-655eba020000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection create cosmos-sql
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --connection --source-id --target-id --system-identity --client-type
+      User-Agent:
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi?api-version=2023-04-01-preview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
         "name": "testconn_smi", "type": "microsoft.servicelinker/linkers", "systemData":
         {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
-        "2023-07-03T05:10:18.598486Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
-        "User", "lastModifiedAt": "2023-07-03T05:10:18.598486Z"}, "properties": {"publicNetworkSolution":
+        "2023-11-23T02:32:29.8002298Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-11-23T02:32:29.8002298Z"}, "properties": {"publicNetworkSolution":
         null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
-        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null},
-        "provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB",
+        null, "additionalConnectionStringProperties": null, "deleteOrUpdateBehavior":
+        null, "action": null, "daprProperties": null}, "provisioningState": "Succeeded",
+        "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB",
         "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"roles":
         null, "userName": null, "authType": "systemAssignedIdentity", "deleteOrUpdateBehavior":
         null}, "clientType": "springBoot", "scope": null, "vNetSolution": null, "secretStore":
@@ -254,17 +300,17 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1319'
+      - '1354'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:11:22 GMT
+      - Thu, 23 Nov 2023 02:34:05 GMT
       etag:
-      - '"d7001e5a-0000-0100-0000-64a258730000"'
+      - '"0100f0c8-0000-3400-0000-655eba020000"'
       expires:
       - '-1'
       mise-correlation-id:
-      - c4596287-d17b-42ed-a1b6-8683f8c16313
+      - fcb5aa0a-03ed-4a10-af67-6857995230d9
       pragma:
       - no-cache
       strict-transport-security:
@@ -288,26 +334,26 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - spring-cloud connection list
+      - spring connection list
       Connection:
       - keep-alive
       ParameterSetName:
       - --source-id
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers?api-version=2022-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers?api-version=2023-04-01-preview
   response:
     body:
-      string: '{"value": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
+      string: '{"value": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
         "name": "testconn_smi", "type": "microsoft.servicelinker/linkers", "systemData":
         {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
-        "2023-07-03T05:10:18.598486Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
-        "User", "lastModifiedAt": "2023-07-03T05:10:18.598486Z"}, "properties": {"publicNetworkSolution":
+        "2023-11-23T02:32:29.8002298Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-11-23T02:32:29.8002298Z"}, "properties": {"publicNetworkSolution":
         null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
-        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null},
-        "provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB",
+        null, "additionalConnectionStringProperties": null, "deleteOrUpdateBehavior":
+        null, "action": null, "daprProperties": null}, "provisioningState": "Succeeded",
+        "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB",
         "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"roles":
         null, "userName": null, "authType": "systemAssignedIdentity", "deleteOrUpdateBehavior":
         null}, "clientType": "springBoot", "scope": null, "vNetSolution": null, "secretStore":
@@ -316,15 +362,15 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1332'
+      - '1367'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:11:34 GMT
+      - Thu, 23 Nov 2023 02:34:13 GMT
       expires:
       - '-1'
       mise-correlation-id:
-      - ded773eb-d987-4356-b78a-0782bc201148
+      - 31611162-a718-4268-83e9-abd178f8eed1
       pragma:
       - no-cache
       strict-transport-security:
@@ -356,29 +402,33 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn_smi/listConfigurations?api-version=2022-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi/listConfigurations?api-version=2023-04-01-preview
   response:
     body:
       string: '{"configurations": [{"name": "spring.cloud.azure.cosmos.endpoint",
-        "value": "https://servicelinker-sql-cosmos.documents.azure.com:443/"}, {"name":
-        "spring.cloud.azure.cosmos.database", "value": "coreDB"}, {"name": "spring.cloud.azure.cosmos.credential.managed-identity-enabled",
-        "value": "True"}]}'
+        "value": "https://servicelinker-sql-cosmos.documents.azure.com:443/", "configType":
+        "Default", "keyVaultReferenceIdentity": null, "description": "For Spring Cloud
+        Azure version 4.0 and above."}, {"name": "spring.cloud.azure.cosmos.database",
+        "value": "coreDB", "configType": "Default", "keyVaultReferenceIdentity": null,
+        "description": "For Spring Cloud Azure version 4.0 and above."}, {"name":
+        "spring.cloud.azure.cosmos.credential.managed-identity-enabled", "value":
+        "True", "configType": "Default", "keyVaultReferenceIdentity": null, "description":
+        "For Spring Cloud Azure version 4.0 and above."}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '297'
+      - '669'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:11:38 GMT
+      - Thu, 23 Nov 2023 02:34:18 GMT
       expires:
       - '-1'
       mise-correlation-id:
-      - 4fe4a94e-d2e9-48d0-95b4-4b1ef8d00af7
+      - 23a208fd-d8d3-475b-802a-291a79a0b1f1
       pragma:
       - no-cache
       strict-transport-security:
@@ -410,20 +460,20 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn_smi?api-version=2022-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi?api-version=2023-04-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
         "name": "testconn_smi", "type": "microsoft.servicelinker/linkers", "systemData":
         {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
-        "2023-07-03T05:10:18.598486Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
-        "User", "lastModifiedAt": "2023-07-03T05:10:18.598486Z"}, "properties": {"publicNetworkSolution":
+        "2023-11-23T02:32:29.8002298Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-11-23T02:32:29.8002298Z"}, "properties": {"publicNetworkSolution":
         null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
-        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null},
-        "provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB",
+        null, "additionalConnectionStringProperties": null, "deleteOrUpdateBehavior":
+        null, "action": null, "daprProperties": null}, "provisioningState": "Succeeded",
+        "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB",
         "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"roles":
         null, "userName": null, "authType": "systemAssignedIdentity", "deleteOrUpdateBehavior":
         null}, "clientType": "springBoot", "scope": null, "vNetSolution": null, "secretStore":
@@ -432,17 +482,17 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1319'
+      - '1354'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:11:42 GMT
+      - Thu, 23 Nov 2023 02:34:21 GMT
       etag:
-      - '"d7001e5a-0000-0100-0000-64a258730000"'
+      - '"0100f0c8-0000-3400-0000-655eba020000"'
       expires:
       - '-1'
       mise-correlation-id:
-      - 971d3227-c566-4331-bd38-f4471c71b0fa
+      - 8bef43fd-748c-4c9a-94e9-7dd5a943a969
       pragma:
       - no-cache
       strict-transport-security:
@@ -474,16 +524,15 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn_smi/validateLinker?api-version=2022-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi/validateLinker?api-version=2023-04-01-preview
   response:
     body:
       string: 'null'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d3d3626-9bff-48e2-8b71-6ee8ab19a87f*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8?api-version=2021-01-01-privatepreview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/474bab96-d99f-4b09-8b2d-a3b80c1f0710*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363037151282064&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=DezMJaLHkOmscgoEY6GsMgzWJ5QSiV3-_XD9_LVBkZkS50HjmYPZo7r5TNaszQ974Jw12GkjcwdWpqtaVU_5miFAnlVIi_m-rZ9msS6l0YPqPiHIIwIHglNcHAqeaqgQoiVsI5Cdfw3LPTIt0CYg6bSBDLimgk4B_xlzunWCVN1S1tx8kF1cj8AfQGCEbGfzOXg7EBfNGYTX7Rc2O8kkMRQW8kwEjCK84z9iL4JYRa-X3xaPl7i8GCttm4mkYHczSeoV_DmoR5OdzK-U_mIgOGHBStO0JNaubDoQbs0fs7bFazZ8B39krHA7hYvsbdIk0Z6IbrriknUkVjwQwwNmgQ&h=5zUHm47WisPpQokGheaigDpdfWhTSOPantGh44447u8
       cache-control:
       - no-cache
       content-length:
@@ -491,13 +540,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:11:43 GMT
+      - Thu, 23 Nov 2023 02:35:14 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d3d3626-9bff-48e2-8b71-6ee8ab19a87f*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8?api-version=2021-01-01-privatepreview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/474bab96-d99f-4b09-8b2d-a3b80c1f0710*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363037151282064&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=DezMJaLHkOmscgoEY6GsMgzWJ5QSiV3-_XD9_LVBkZkS50HjmYPZo7r5TNaszQ974Jw12GkjcwdWpqtaVU_5miFAnlVIi_m-rZ9msS6l0YPqPiHIIwIHglNcHAqeaqgQoiVsI5Cdfw3LPTIt0CYg6bSBDLimgk4B_xlzunWCVN1S1tx8kF1cj8AfQGCEbGfzOXg7EBfNGYTX7Rc2O8kkMRQW8kwEjCK84z9iL4JYRa-X3xaPl7i8GCttm4mkYHczSeoV_DmoR5OdzK-U_mIgOGHBStO0JNaubDoQbs0fs7bFazZ8B39krHA7hYvsbdIk0Z6IbrriknUkVjwQwwNmgQ&h=5zUHm47WisPpQokGheaigDpdfWhTSOPantGh44447u8
       mise-correlation-id:
-      - 4cdb1549-4206-4f44-9724-3209f1cb206c
+      - 00ffdd6f-cb0c-4c91-a643-3dab7b3d4c76
       pragma:
       - no-cache
       strict-transport-security:
@@ -525,29 +574,32 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d3d3626-9bff-48e2-8b71-6ee8ab19a87f*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8?api-version=2021-01-01-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/474bab96-d99f-4b09-8b2d-a3b80c1f0710*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363037151282064&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=DezMJaLHkOmscgoEY6GsMgzWJ5QSiV3-_XD9_LVBkZkS50HjmYPZo7r5TNaszQ974Jw12GkjcwdWpqtaVU_5miFAnlVIi_m-rZ9msS6l0YPqPiHIIwIHglNcHAqeaqgQoiVsI5Cdfw3LPTIt0CYg6bSBDLimgk4B_xlzunWCVN1S1tx8kF1cj8AfQGCEbGfzOXg7EBfNGYTX7Rc2O8kkMRQW8kwEjCK84z9iL4JYRa-X3xaPl7i8GCttm4mkYHczSeoV_DmoR5OdzK-U_mIgOGHBStO0JNaubDoQbs0fs7bFazZ8B39krHA7hYvsbdIk0Z6IbrriknUkVjwQwwNmgQ&h=5zUHm47WisPpQokGheaigDpdfWhTSOPantGh44447u8
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d3d3626-9bff-48e2-8b71-6ee8ab19a87f*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "name": "7d3d3626-9bff-48e2-8b71-6ee8ab19a87f*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
-        "status": "Accepted", "startTime": "2023-07-03T05:11:42.640892Z"}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/474bab96-d99f-4b09-8b2d-a3b80c1f0710*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "name": "474bab96-d99f-4b09-8b2d-a3b80c1f0710*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
+        "status": "Accepted", "startTime": "2023-11-23T02:34:22.4891276Z"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/eastus2euap/operationStatuses/474bab96-d99f-4b09-8b2d-a3b80c1f0710*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363037161595274&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=f1sJtDdp1Vmkp6gRH4JTq2BSVmzGol_beLcb4uEvlVT7mFcBkY4NxZjtiESCPhS_6KDqdKQIq2FMZEiaplcqcKxOLb2Il1CFCnxOOJ8P-_sausHlzvc834b_B6iUO0scpf0Issk3qqUhyJQgMWJxIQ1YAjakdkwsHdPpRZ_6hKvtYBxzNCwANygucSz06zvemAuQ3kwQLdtqJowunZe2heVa3UFlej77KdauJtFoOMTla3qDScLUVhXz0SRqHVToh7hAWPiiJ-89OBoZaspHu6zz7QSt-xxoGYRQWgfH3myImNyisLFeCVfDwVwX7_8XaMm5_PK-gIv1dAXG-tZCjg&h=L6B9xtI45O1lTB-B-MQwvOlMb6ycj01w1gBin2khjY0
       cache-control:
       - no-cache
       content-length:
-      - '681'
+      - '674'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:11:44 GMT
+      - Thu, 23 Nov 2023 02:35:15 GMT
       etag:
-      - '"0f02c80b-0000-0100-0000-64a2588e0000"'
+      - '"0e000c14-0000-3400-0000-655eba2e0000"'
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/eastus2euap/operationStatuses/474bab96-d99f-4b09-8b2d-a3b80c1f0710*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363037161750895&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=UqMRN0zmVWdLD1HJmwdaMar0nzTCuZ_m43R9FoglOLYLyEMk2PefMqCB3hzzRe6jJDWEM-7eQBXgkgrfb91Pzxw-GAUkJnrdVL6weQj5ZVdZ-fBNwrc_NPVX0FDC-u1qGWfneOwwlFfiQ_A1o-C1oPn5YdTAp-zWaY_1DB8TFpUn2yNn8cp90htU2M6HKwmEBsiQmjEoth5gB2g52gsZp8Ri-craJgJ61rm83-5Su2XgVMQK43OAqSMfUvhXJXGH4-pJEav8qeilqa4AYL85Tq9pJ2zPiuYa5LCjwlbJoFxC864T_PfQ8adfV9uPFh2PzUKWEMYqbo9VhXcMgZ9x4A&h=QwgyKaxBQti-qnMrP-CHe2Sw6TmFlso71Cv3oXIhwD4
       pragma:
       - no-cache
       strict-transport-security:
@@ -571,22 +623,21 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d3d3626-9bff-48e2-8b71-6ee8ab19a87f*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8?api-version=2021-01-01-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/474bab96-d99f-4b09-8b2d-a3b80c1f0710*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363037151282064&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=DezMJaLHkOmscgoEY6GsMgzWJ5QSiV3-_XD9_LVBkZkS50HjmYPZo7r5TNaszQ974Jw12GkjcwdWpqtaVU_5miFAnlVIi_m-rZ9msS6l0YPqPiHIIwIHglNcHAqeaqgQoiVsI5Cdfw3LPTIt0CYg6bSBDLimgk4B_xlzunWCVN1S1tx8kF1cj8AfQGCEbGfzOXg7EBfNGYTX7Rc2O8kkMRQW8kwEjCK84z9iL4JYRa-X3xaPl7i8GCttm4mkYHczSeoV_DmoR5OdzK-U_mIgOGHBStO0JNaubDoQbs0fs7bFazZ8B39krHA7hYvsbdIk0Z6IbrriknUkVjwQwwNmgQ&h=5zUHm47WisPpQokGheaigDpdfWhTSOPantGh44447u8
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d3d3626-9bff-48e2-8b71-6ee8ab19a87f*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "name": "7d3d3626-9bff-48e2-8b71-6ee8ab19a87f*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
-        "status": "Succeeded", "startTime": "2023-07-03T05:11:42.640892Z", "endTime":
-        "2023-07-03T05:11:54.5477532Z", "properties": {"Message": "{\"ConnectionName\":\"testconn_smi\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"Target
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/474bab96-d99f-4b09-8b2d-a3b80c1f0710*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "name": "474bab96-d99f-4b09-8b2d-a3b80c1f0710*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
+        "status": "Succeeded", "startTime": "2023-11-23T02:34:22.4891276Z", "endTime":
+        "2023-11-23T02:35:24.8604589Z", "properties": {"Message": "{\"ConnectionName\":\"testconn_smi\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"Target
         resource existence validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Target
         service firewall validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Configured
         connection information validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Managed
         Identity existence validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Managed
-        Identity permissions validated.\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2023-07-03T05:11:44.0134039Z\",\"ReportEndTimeUtc\":\"2023-07-03T05:11:53.4109909Z\",\"SourceId\":null,\"TargetId\":null,\"AuthType\":\"systemAssignedIdentity\"}",
+        Identity permissions validated.\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2023-11-23T02:35:16.0789914Z\",\"ReportEndTimeUtc\":\"2023-11-23T02:35:23.3728303Z\",\"SourceId\":null,\"TargetId\":null,\"AuthType\":\"systemAssignedIdentity\"}",
         "linkerName": "testconn_smi", "isConnectionAvailable": true, "validationDetail":
         [{"name": "Target resource existence validated.", "description": null, "result":
         "success"}, {"name": "Target service firewall validated.", "description":
@@ -594,20 +645,20 @@ interactions:
         "description": null, "result": "success"}, {"name": "Managed Identity existence
         validated.", "description": null, "result": "success"}, {"name": "Managed
         Identity permissions validated.", "description": null, "result": "success"}],
-        "reportStartTimeUtc": "2023-07-03T05:11:44.0134039Z", "reportEndTimeUtc":
-        "2023-07-03T05:11:53.4109909Z", "sourceId": null, "targetId": null, "authType":
+        "reportStartTimeUtc": "2023-11-23T02:35:16.0789914Z", "reportEndTimeUtc":
+        "2023-11-23T02:35:23.3728303Z", "sourceId": null, "targetId": null, "authType":
         "systemAssignedIdentity"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2206'
+      - '2199'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:12:13 GMT
+      - Thu, 23 Nov 2023 02:35:45 GMT
       etag:
-      - '"0f025e0c-0000-0100-0000-64a2589a0000"'
+      - '"0e006614-0000-3400-0000-655eba6c0000"'
       expires:
       - '-1'
       pragma:
@@ -637,22 +688,21 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d3d3626-9bff-48e2-8b71-6ee8ab19a87f*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8?api-version=2021-01-01-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/474bab96-d99f-4b09-8b2d-a3b80c1f0710*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363037151282064&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=DezMJaLHkOmscgoEY6GsMgzWJ5QSiV3-_XD9_LVBkZkS50HjmYPZo7r5TNaszQ974Jw12GkjcwdWpqtaVU_5miFAnlVIi_m-rZ9msS6l0YPqPiHIIwIHglNcHAqeaqgQoiVsI5Cdfw3LPTIt0CYg6bSBDLimgk4B_xlzunWCVN1S1tx8kF1cj8AfQGCEbGfzOXg7EBfNGYTX7Rc2O8kkMRQW8kwEjCK84z9iL4JYRa-X3xaPl7i8GCttm4mkYHczSeoV_DmoR5OdzK-U_mIgOGHBStO0JNaubDoQbs0fs7bFazZ8B39krHA7hYvsbdIk0Z6IbrriknUkVjwQwwNmgQ&h=5zUHm47WisPpQokGheaigDpdfWhTSOPantGh44447u8
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7d3d3626-9bff-48e2-8b71-6ee8ab19a87f*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "name": "7d3d3626-9bff-48e2-8b71-6ee8ab19a87f*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
-        "status": "Succeeded", "startTime": "2023-07-03T05:11:42.640892Z", "endTime":
-        "2023-07-03T05:11:54.5477532Z", "properties": {"Message": "{\"ConnectionName\":\"testconn_smi\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"Target
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/474bab96-d99f-4b09-8b2d-a3b80c1f0710*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "name": "474bab96-d99f-4b09-8b2d-a3b80c1f0710*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
+        "status": "Succeeded", "startTime": "2023-11-23T02:34:22.4891276Z", "endTime":
+        "2023-11-23T02:35:24.8604589Z", "properties": {"Message": "{\"ConnectionName\":\"testconn_smi\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"Target
         resource existence validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Target
         service firewall validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Configured
         connection information validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Managed
         Identity existence validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Managed
-        Identity permissions validated.\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2023-07-03T05:11:44.0134039Z\",\"ReportEndTimeUtc\":\"2023-07-03T05:11:53.4109909Z\",\"SourceId\":null,\"TargetId\":null,\"AuthType\":\"systemAssignedIdentity\"}",
+        Identity permissions validated.\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2023-11-23T02:35:16.0789914Z\",\"ReportEndTimeUtc\":\"2023-11-23T02:35:23.3728303Z\",\"SourceId\":null,\"TargetId\":null,\"AuthType\":\"systemAssignedIdentity\"}",
         "linkerName": "testconn_smi", "isConnectionAvailable": true, "validationDetail":
         [{"name": "Target resource existence validated.", "description": null, "result":
         "success"}, {"name": "Target service firewall validated.", "description":
@@ -660,20 +710,20 @@ interactions:
         "description": null, "result": "success"}, {"name": "Managed Identity existence
         validated.", "description": null, "result": "success"}, {"name": "Managed
         Identity permissions validated.", "description": null, "result": "success"}],
-        "reportStartTimeUtc": "2023-07-03T05:11:44.0134039Z", "reportEndTimeUtc":
-        "2023-07-03T05:11:53.4109909Z", "sourceId": null, "targetId": null, "authType":
+        "reportStartTimeUtc": "2023-11-23T02:35:16.0789914Z", "reportEndTimeUtc":
+        "2023-11-23T02:35:23.3728303Z", "sourceId": null, "targetId": null, "authType":
         "systemAssignedIdentity"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2206'
+      - '2199'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:12:13 GMT
+      - Thu, 23 Nov 2023 02:35:46 GMT
       etag:
-      - '"0f025e0c-0000-0100-0000-64a2589a0000"'
+      - '"0e006614-0000-3400-0000-655eba6c0000"'
       expires:
       - '-1'
       pragma:
@@ -703,20 +753,20 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn_smi?api-version=2022-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi?api-version=2023-04-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
         "name": "testconn_smi", "type": "microsoft.servicelinker/linkers", "systemData":
         {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
-        "2023-07-03T05:10:18.598486Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
-        "User", "lastModifiedAt": "2023-07-03T05:10:18.598486Z"}, "properties": {"publicNetworkSolution":
+        "2023-11-23T02:32:29.8002298Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-11-23T02:32:29.8002298Z"}, "properties": {"publicNetworkSolution":
         null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
-        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null},
-        "provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB",
+        null, "additionalConnectionStringProperties": null, "deleteOrUpdateBehavior":
+        null, "action": null, "daprProperties": null}, "provisioningState": "Succeeded",
+        "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB",
         "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"roles":
         null, "userName": null, "authType": "systemAssignedIdentity", "deleteOrUpdateBehavior":
         null}, "clientType": "springBoot", "scope": null, "vNetSolution": null, "secretStore":
@@ -725,17 +775,17 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1319'
+      - '1354'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:12:15 GMT
+      - Thu, 23 Nov 2023 02:35:48 GMT
       etag:
-      - '"d7001e5a-0000-0100-0000-64a258730000"'
+      - '"0100f0c8-0000-3400-0000-655eba020000"'
       expires:
       - '-1'
       mise-correlation-id:
-      - 689dd66e-9551-4f24-81f8-376d33010e4a
+      - d0423f26-3f03-402f-889f-90acf12cfa8b
       pragma:
       - no-cache
       strict-transport-security:
@@ -767,16 +817,15 @@ interactions:
       ParameterSetName:
       - --id --yes
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn_smi?api-version=2022-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi?api-version=2023-04-01-preview
   response:
     body:
       string: 'null'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7992061d-13e9-4b95-bef4-647a1e586a52*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8?api-version=2021-01-01-privatepreview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/a294a94c-c67f-42c4-9987-69ddffd33945*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363037595044105&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=mIAAxicteXMQoyZYWI6_JjaYChYXFAZIvjJjol5xVANjqY9mBSPbcpN_omhiWIJR8tdCjqDOGC6vzmRYEblofDlVk2tzUqi342hSS7sQ6j_uL98TURPaJYe9HodQLoIi7M-kXG8NtdOfCMAVI19gxbV6r6LzIaBl0MUVFXwVn9P7d-5VPz-suftPs7-G9CH3LneAv0yN6YzFerSTWi-ugO324AJ7S7fX2ldsCgAehF--qXRlFToKFfwwyPo99vM50qxKyWoX6M2xcwc5tbGDlCRYBsE6mX6O1GIvkicA149GGWQDcqMBAsmfyX05Pt3h80ezCFrdjaGTr9KsssBoVA&h=80rpWcgSO_MEVcwUl0Ion2pmPLVD0ii15PnTTzyi_gY
       cache-control:
       - no-cache
       content-length:
@@ -784,15 +833,15 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:12:22 GMT
+      - Thu, 23 Nov 2023 02:35:59 GMT
       etag:
-      - '"d700225e-0000-0100-0000-64a258b70000"'
+      - '"010005c9-0000-3400-0000-655eba8f0000"'
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7992061d-13e9-4b95-bef4-647a1e586a52*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8?api-version=2021-01-01-privatepreview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/a294a94c-c67f-42c4-9987-69ddffd33945*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363037595044105&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=mIAAxicteXMQoyZYWI6_JjaYChYXFAZIvjJjol5xVANjqY9mBSPbcpN_omhiWIJR8tdCjqDOGC6vzmRYEblofDlVk2tzUqi342hSS7sQ6j_uL98TURPaJYe9HodQLoIi7M-kXG8NtdOfCMAVI19gxbV6r6LzIaBl0MUVFXwVn9P7d-5VPz-suftPs7-G9CH3LneAv0yN6YzFerSTWi-ugO324AJ7S7fX2ldsCgAehF--qXRlFToKFfwwyPo99vM50qxKyWoX6M2xcwc5tbGDlCRYBsE6mX6O1GIvkicA149GGWQDcqMBAsmfyX05Pt3h80ezCFrdjaGTr9KsssBoVA&h=80rpWcgSO_MEVcwUl0Ion2pmPLVD0ii15PnTTzyi_gY
       mise-correlation-id:
-      - e8cb50cd-e173-436d-9937-6cf9e8b8e557
+      - a4dc8315-72b7-4b6d-a193-f00c6ee33ef2
       pragma:
       - no-cache
       strict-transport-security:
@@ -820,29 +869,32 @@ interactions:
       ParameterSetName:
       - --id --yes
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7992061d-13e9-4b95-bef4-647a1e586a52*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8?api-version=2021-01-01-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/a294a94c-c67f-42c4-9987-69ddffd33945*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363037595044105&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=mIAAxicteXMQoyZYWI6_JjaYChYXFAZIvjJjol5xVANjqY9mBSPbcpN_omhiWIJR8tdCjqDOGC6vzmRYEblofDlVk2tzUqi342hSS7sQ6j_uL98TURPaJYe9HodQLoIi7M-kXG8NtdOfCMAVI19gxbV6r6LzIaBl0MUVFXwVn9P7d-5VPz-suftPs7-G9CH3LneAv0yN6YzFerSTWi-ugO324AJ7S7fX2ldsCgAehF--qXRlFToKFfwwyPo99vM50qxKyWoX6M2xcwc5tbGDlCRYBsE6mX6O1GIvkicA149GGWQDcqMBAsmfyX05Pt3h80ezCFrdjaGTr9KsssBoVA&h=80rpWcgSO_MEVcwUl0Ion2pmPLVD0ii15PnTTzyi_gY
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7992061d-13e9-4b95-bef4-647a1e586a52*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "name": "7992061d-13e9-4b95-bef4-647a1e586a52*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
-        "status": "Deleting", "startTime": "2023-07-03T05:12:23.0203774Z"}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/a294a94c-c67f-42c4-9987-69ddffd33945*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "name": "a294a94c-c67f-42c4-9987-69ddffd33945*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
+        "status": "Deleting", "startTime": "2023-11-23T02:35:59.2601573Z"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/eastus2euap/operationStatuses/a294a94c-c67f-42c4-9987-69ddffd33945*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363037605981810&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=LgYcbj20G5LuOp0rxfGCyhHhRuWICbCWxfGd8QTprie3tA1rzKLbuRY2RQWwn9Rcbjvr88I5Hnqh4EBVtDnxfCD8B7wQpgrKxd8hty-rlYsE27p1FJnQSmgO7KY8gz-56fE0VCVK59cDznkyUBKtnz8Q_gIG3ZIbMPk-IdwKWdaywjUr3Ph5R4OAuneMaDMeEVajBJ0pLw8Mjv4WVnETXX3FEhRMcB-sZgmMwr3SKmhUN9e0SwAsUTscxVUrtBcvPj2YTnIVqGLnfkogU4CHyW_Xo4APEE2BRjkB99ciPbuULD6pzXqbkVlxmbqiyMxw2WnHjHvPY7ohraekkIbU0Q&h=nD0cEGrlt9Y-8TbhC0Dfz6ZfBRbxaNBbnytI0OgB5jc
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '674'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:12:23 GMT
+      - Thu, 23 Nov 2023 02:36:00 GMT
       etag:
-      - '"0f02880d-0000-0100-0000-64a258b70000"'
+      - '"0e008f14-0000-3400-0000-655eba8f0000"'
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/eastus2euap/operationStatuses/a294a94c-c67f-42c4-9987-69ddffd33945*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363037606138040&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=O7p8qH0sQpfl-wZpC0-5bo6f8KwmRuDnvXLI-fuGbhS8DEpMnMJSDnGi2SP1iZqPIQjcPtcbeWKWTPT8H5p7DyHpzzKbNlO2vdU18yUtBelt7pUQpgNIxVoGLjvqTgorpwaB22rwOxVhyDjQvg5Js3c_59I7yu9ZT0lB9PY7sZ7VRacCM1h3c6NR2nECCW6PPWuWqFkLmyyxuFG7oDrFYn9nThKSmCV0SA78LIhB4lsTTieK5BTdnx6JAerri3TUkuaQbVxfsRe2jY5jd6inJV1LZcSIdriebKGT0iqEqBDcJdNjG0WFfjzhap7yURI5qrzYY9DWoFagBRWeuQSPeQ&h=zpDrJOUnjlk7nSVkrx4_1i7y9cmk2ZiP_XElZlQ0aAs
       pragma:
       - no-cache
       strict-transport-security:
@@ -866,28 +918,27 @@ interactions:
       ParameterSetName:
       - --id --yes
       User-Agent:
-      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.54.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7992061d-13e9-4b95-bef4-647a1e586a52*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8?api-version=2021-01-01-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/a294a94c-c67f-42c4-9987-69ddffd33945*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8?api-version=2021-01-01-privatepreview&t=638363037595044105&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=mIAAxicteXMQoyZYWI6_JjaYChYXFAZIvjJjol5xVANjqY9mBSPbcpN_omhiWIJR8tdCjqDOGC6vzmRYEblofDlVk2tzUqi342hSS7sQ6j_uL98TURPaJYe9HodQLoIi7M-kXG8NtdOfCMAVI19gxbV6r6LzIaBl0MUVFXwVn9P7d-5VPz-suftPs7-G9CH3LneAv0yN6YzFerSTWi-ugO324AJ7S7fX2ldsCgAehF--qXRlFToKFfwwyPo99vM50qxKyWoX6M2xcwc5tbGDlCRYBsE6mX6O1GIvkicA149GGWQDcqMBAsmfyX05Pt3h80ezCFrdjaGTr9KsssBoVA&h=80rpWcgSO_MEVcwUl0Ion2pmPLVD0ii15PnTTzyi_gY
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7992061d-13e9-4b95-bef4-647a1e586a52*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "name": "7992061d-13e9-4b95-bef4-647a1e586a52*3A6AE74A154D76BFCE689DDEDF575533A4472DC8B02DCAD51B4C608CB67386B8",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
-        "status": "Succeeded", "startTime": "2023-07-03T05:12:23.0203774Z", "endTime":
-        "2023-07-03T05:12:27.7537498Z", "properties": null}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/a294a94c-c67f-42c4-9987-69ddffd33945*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "name": "a294a94c-c67f-42c4-9987-69ddffd33945*95EC8BE28BF517A9056581008FB83478641B4B26F7A7B6FEB5EA7043A653DEC8",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud-canary/apps/cosmossql/providers/Microsoft.ServiceLinker/linkers/testconn_smi",
+        "status": "Succeeded", "startTime": "2023-11-23T02:35:59.2601573Z", "endTime":
+        "2023-11-23T02:36:05.2585287Z", "properties": null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '746'
+      - '738'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jul 2023 05:12:53 GMT
+      - Thu, 23 Nov 2023 02:36:30 GMT
       etag:
-      - '"0f02bf0d-0000-0100-0000-64a258bb0000"'
+      - '"0e009d14-0000-3400-0000-655eba950000"'
       expires:
       - '-1'
       pragma:

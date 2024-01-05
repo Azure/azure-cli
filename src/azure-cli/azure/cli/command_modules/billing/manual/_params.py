@@ -52,7 +52,7 @@ def load_arguments(self, _):
             help="The download token with document source and document ID",
         )
         c.argument(
-            "download_urls", help="Space-separated list of download urls for individual"
+            "download_urls", nargs='+', help="Space-separated list of download urls for individual"
         )
 
     with self.argument_context("billing invoice show") as c:
@@ -72,6 +72,12 @@ def load_arguments(self, _):
             action="store_true",
             help="When provided, it must work with --invoice-name to get an invoice by subscription ID and invoice ID",
         )
+
+    with self.argument_context('billing invoice list') as c:
+        c.argument('period_start_date', help='The start date to fetch the invoices. The date should be '
+                   'specified in YYYY-MM-DD format.')
+        c.argument('period_end_date', help='The end date to fetch the invoices. The date should be specified '
+                   'in YYYY-MM-DD format.')
 
     with self.argument_context("billing policy") as c:
         c.argument(

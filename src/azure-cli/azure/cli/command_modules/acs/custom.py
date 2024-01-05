@@ -62,7 +62,7 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorEarlyExitException,
 )
 
-from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.addonconfiguration import (
@@ -88,6 +88,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import in_cloud_console, sdk_no_wait
+from azure.core.exceptions import ResourceNotFoundError as ResourceNotFoundErrorAzCore
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
@@ -498,6 +499,7 @@ def aks_create(
     load_balancer_outbound_ip_prefixes=None,
     load_balancer_outbound_ports=None,
     load_balancer_idle_timeout=None,
+    load_balancer_backend_pool_type=None,
     nat_gateway_managed_outbound_ip_count=None,
     nat_gateway_idle_timeout=None,
     outbound_type=None,
@@ -584,6 +586,8 @@ def aks_create(
     nodepool_tags=None,
     nodepool_labels=None,
     nodepool_taints=None,
+    nodepool_allowed_host_ports=None,
+    nodepool_asg_ids=None,
     node_osdisk_type=None,
     node_osdisk_size=None,
     vm_set_type=None,
@@ -597,6 +601,7 @@ def aks_create(
     kubelet_config=None,
     linux_os_config=None,
     host_group_id=None,
+    crg_id=None,
     gpu_instance_profile=None,
     # azure monitor profile
     enable_azure_monitor_metrics=False,
@@ -609,6 +614,7 @@ def aks_create(
     yes=False,
     no_wait=False,
     aks_custom_headers=None,
+    node_public_ip_tags=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -653,6 +659,7 @@ def aks_update(
     tags=None,
     disable_local_accounts=False,
     enable_local_accounts=False,
+    network_plugin=None,
     network_plugin_mode=None,
     network_dataplane=None,
     network_policy=None,
@@ -663,6 +670,7 @@ def aks_update(
     load_balancer_outbound_ip_prefixes=None,
     load_balancer_outbound_ports=None,
     load_balancer_idle_timeout=None,
+    load_balancer_backend_pool_type=None,
     nat_gateway_managed_outbound_ip_count=None,
     nat_gateway_idle_timeout=None,
     outbound_type=None,
@@ -896,6 +904,16 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
 def aks_show(cmd, client, resource_group_name, name):
     mc = client.get(resource_group_name, name)
     return _remove_nulls([mc])[0]
+
+
+def aks_stop(cmd, client, resource_group_name, name, no_wait=False):
+    instance = client.get(resource_group_name, name)
+    # print warning when stopping a private link cluster
+    if check_is_private_link_cluster(instance):
+        logger.warning('Your private cluster apiserver IP might get changed when it\'s stopped and started.\n'
+                       'Any user provisioned private endpoints linked to this private cluster will need to be deleted and created again. '
+                       'Any user managed DNS record also needs to be updated with the new IP.')
+    return sdk_no_wait(no_wait, client.begin_stop, resource_group_name, name)
 
 
 def aks_list(cmd, client, resource_group_name=None):
@@ -2192,7 +2210,11 @@ def aks_agentpool_add(
     no_wait=False,
     aks_custom_headers=None,
     host_group_id=None,
+    crg_id=None,
     gpu_instance_profile=None,
+    allowed_host_ports=None,
+    asg_ids=None,
+    node_public_ip_tags=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2237,6 +2259,8 @@ def aks_agentpool_update(
     scale_down_mode=None,
     no_wait=False,
     aks_custom_headers=None,
+    allowed_host_ports=None,
+    asg_ids=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2592,3 +2616,53 @@ def aks_nodepool_snapshot_list(cmd, client, resource_group_name=None):  # pylint
 
 def aks_rotate_service_account_signing_keys(cmd, client, resource_group_name, name, no_wait=True):
     return sdk_no_wait(no_wait, client.begin_rotate_service_account_signing_keys, resource_group_name, name)
+
+
+def aks_trustedaccess_role_list(cmd, client, location):  # pylint: disable=unused-argument
+    return client.list(location)
+
+
+def aks_trustedaccess_role_binding_list(cmd, client, resource_group_name, cluster_name):   # pylint: disable=unused-argument
+    return client.list(resource_group_name, cluster_name)
+
+
+def aks_trustedaccess_role_binding_get(cmd, client, resource_group_name, cluster_name, role_binding_name):
+    return client.get(resource_group_name, cluster_name, role_binding_name)
+
+
+def aks_trustedaccess_role_binding_create(cmd, client, resource_group_name, cluster_name, role_binding_name,
+                                          source_resource_id, roles):
+    TrustedAccessRoleBinding = cmd.get_models(
+        "TrustedAccessRoleBinding",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="trusted_access_role_bindings",
+    )
+    existedBinding = None
+    try:
+        existedBinding = client.get(resource_group_name, cluster_name, role_binding_name)
+    except ResourceNotFoundErrorAzCore:
+        pass
+
+    if existedBinding:
+        raise InvalidArgumentValueError("TrustedAccess RoleBinding " + role_binding_name + " already existed, please use 'az aks trustedaccess rolebinding update' command to update!")
+
+    roleList = roles.split(',')
+    roleBinding = TrustedAccessRoleBinding(source_resource_id=source_resource_id, roles=roleList)
+    return client.begin_create_or_update(resource_group_name, cluster_name, role_binding_name, roleBinding)
+
+
+def aks_trustedaccess_role_binding_update(cmd, client, resource_group_name, cluster_name, role_binding_name, roles):
+    TrustedAccessRoleBinding = cmd.get_models(
+        "TrustedAccessRoleBinding",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="trusted_access_role_bindings",
+    )
+    existedBinding = client.get(resource_group_name, cluster_name, role_binding_name)
+
+    roleList = roles.split(',')
+    roleBinding = TrustedAccessRoleBinding(source_resource_id=existedBinding.source_resource_id, roles=roleList)
+    return client.begin_create_or_update(resource_group_name, cluster_name, role_binding_name, roleBinding)
+
+
+def aks_trustedaccess_role_binding_delete(cmd, client, resource_group_name, cluster_name, role_binding_name):
+    return client.begin_delete(resource_group_name, cluster_name, role_binding_name)

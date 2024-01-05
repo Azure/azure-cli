@@ -37,8 +37,7 @@ from ._utils import (
     get_local_conn_auth_info,
     _get_azext_module,
     _get_or_add_extension,
-    springboot_migration_warning,
-    decorate_springboot_cosmossql_config
+    springboot_migration_warning
 )
 from ._credential_free import is_passwordless_command
 # pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test,too-many-statements,too-many-locals
@@ -181,8 +180,6 @@ def connection_list_configuration(client,
     configurations = auto_register(client.list_configurations,
                                    resource_uri=source_id,
                                    linker_name=connection_name)
-
-    decorate_springboot_cosmossql_config(configurations)
 
     return configurations
 
@@ -379,7 +376,6 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            customized_keys=None,
                            **kwargs,
                            ):
-
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
     if not new_addon and not target_id:
@@ -418,7 +414,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     if key_vault_id:
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
-        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id, scope)
     elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
             and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use secret-name')
@@ -681,7 +677,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
     if key_vault_id:
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
-        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id, scope)
     elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
             and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use secret-name')

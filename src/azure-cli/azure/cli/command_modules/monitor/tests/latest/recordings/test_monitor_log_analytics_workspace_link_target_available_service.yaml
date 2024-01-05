@@ -1,0 +1,246 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.55.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.6 (macOS-14.2-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_monitor_log_analytics_workspace_link_target000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_monitor_log_analytics_workspace_link_target000001","name":"test_monitor_log_analytics_workspace_link_target000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_log_analytics_workspace_link_target_available_service","date":"2023-12-14T03:54:12Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '481'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 14 Dec 2023 03:54:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"publicNetworkAccessForIngestion":
+      "Enabled", "publicNetworkAccessForQuery": "Enabled", "retentionInDays": 30,
+      "sku": {"name": "PerGB2018"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '179'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.28.0 Python/3.10.6 (macOS-14.2-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_monitor_log_analytics_workspace_link_target000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002?api-version=2022-10-01
+  response:
+    body:
+      string: '{"properties":{"customerId":"0888bf59-3e9c-4c3e-8934-83b82cfab1e1","provisioningState":"Creating","sku":{"name":"PerGB2018","lastSkuUpdate":"2023-12-14T03:54:25.5051558Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":-1.0,"quotaNextResetTime":"2023-12-15T00:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2023-12-14T03:54:25.5051558Z","modifiedDate":"2023-12-14T03:54:25.5051558Z"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_monitor_log_analytics_workspace_link_target000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002","name":"ws-000002","type":"Microsoft.OperationalInsights/workspaces","etag":"\"1c0449af-0000-0700-0000-657a7c710000\""}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '913'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 14 Dec 2023 03:54:25 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_monitor_log_analytics_workspace_link_target000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002?api-version=2022-10-01
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.28.0 Python/3.10.6 (macOS-14.2-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_monitor_log_analytics_workspace_link_target000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002?api-version=2022-10-01
+  response:
+    body:
+      string: '{"properties":{"customerId":"0888bf59-3e9c-4c3e-8934-83b82cfab1e1","provisioningState":"Creating","sku":{"name":"PerGB2018","lastSkuUpdate":"2023-12-14T03:54:25.5051558Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":-1.0,"quotaNextResetTime":"2023-12-15T00:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2023-12-14T03:54:25.5051558Z","modifiedDate":"2023-12-14T03:54:25.5051558Z"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_monitor_log_analytics_workspace_link_target000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002","name":"ws-000002","type":"Microsoft.OperationalInsights/workspaces","etag":"\"1c0449af-0000-0700-0000-657a7c710000\""}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '913'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 14 Dec 2023 03:54:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace list-link-target
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.28.0 Python/3.10.6 (macOS-14.2-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/linkTargets?api-version=2015-03-20
+  response:
+    body:
+      string: ''
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 14 Dec 2023 03:54:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace list-available-service-tier
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --workspace-name
+      User-Agent:
+      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.28.0 Python/3.10.6 (macOS-14.2-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_monitor_log_analytics_workspace_link_target000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002/availableServiceTiers?api-version=2020-08-01
+  response:
+    body:
+      string: '[{"serviceTier":"PerGB2018","enabled":true,"minimumRetention":30,"maximumRetention":730,"defaultRetention":30},{"serviceTier":"CapacityReservation","enabled":true,"minimumRetention":30,"maximumRetention":730,"defaultRetention":31,"lastSkuUpdate":"2023-12-14T03:54:25.5051558Z"}]'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '278'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 14 Dec 2023 03:54:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

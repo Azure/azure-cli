@@ -5080,6 +5080,10 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
     def _get_full_maintenance_id(self, name):
         return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
             self.get_subscription_id(), name)
+    
+    def _get_full_instance_pool_id(self, rg_name, pool_name):
+        return "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/instancePools/{}".format(
+            self.get_subscription_id(), rg_name, pool_name)
 
     def test_sql_managed_instance_cmw(self):
         # Values of existing resources in order to test this feature
@@ -5104,14 +5108,15 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
             'family': 'Gen5',
             'collation': ManagedInstancePreparer.collation,
             'proxy_override': "Proxy",
-            'maintenance_id': self._get_full_maintenance_id(self.MMI1)
+            'maintenance_id': self._get_full_maintenance_id(self.MMI1),
+            'intance_pool_name': ''
         })
 
         # test create sql managed_instance with FMW
         managed_instance = self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
                                     '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
-                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}"',
+                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}" --instance-pool-name "{intance_pool_name}"',
                                     checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),
@@ -5126,13 +5131,12 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
                                         self.check('collation', '{collation}'),
                                         self.check('proxyOverride', '{proxy_override}'),
                                         self.check('publicDataEndpointEnabled', 'True'),
-                                        self.check('maintenanceConfigurationId',
-                                                   self._get_full_maintenance_id(self.MMI1))]).get_output_in_json()
+                                        self.check('maintenanceConfigurationId', self._get_full_maintenance_id(self.MMI1)),
+                                        self.check('instancePoolId', None)]).get_output_in_json()
 
         # test delete sql managed instance 2
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
-
 
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
     DEFAULT_MC = "SQL_Default"
@@ -5466,6 +5470,11 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
 
 class SqlManagedInstancePoolScenarioTest(ScenarioTest):
     # Instance pool test should be deprecated and also it takes more then 5 hours to record.
+
+    def _get_full_maintenance_id(self, name):
+        return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
+            self.get_subscription_id(), name)
+
     @live_only()
     @ManagedInstancePreparer()
     def test_sql_instance_pool(self, mi, rg):
@@ -5478,6 +5487,7 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         edition = ManagedInstancePreparer.edition
         family = ManagedInstancePreparer.family
         resource_group = rg
+        maintenance_configuration_id = self._get_full_maintenance_id("SQL_WestCentralUS_MI_1")
 
         subnet = ManagedInstancePreparer.subnet
         num_pools = len(self.cmd('sql instance-pool list -g {}'.format(resource_group)).get_output_in_json())
@@ -5485,15 +5495,16 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         # test create sql managed_instance
         self.cmd(
             'sql instance-pool create -g {} -n {} -l {} '
-            '--subnet {} --license-type {} --capacity {} -e {} -f {}'.format(
-                resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family),
+            '--subnet {} --license-type {} --capacity {} -e {} -f {} --maintenance-configuration-id {}'.format(
+                resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family, maintenance_configuration_id),
             checks=[
                 JMESPathCheck('name', instance_pool_name_1),
                 JMESPathCheck('resourceGroup', resource_group),
                 JMESPathCheck('vCores', v_cores),
                 JMESPathCheck('licenseType', license_type),
                 JMESPathCheck('sku.tier', edition),
-                JMESPathCheck('sku.family', family)])
+                JMESPathCheck('sku.family', family),
+                JMESPathCheck('sku.maintenanceConfigurationId', maintenance_configuration_id)])
 
         # test show sql instance pool
         self.cmd('sql instance-pool show -g {} -n {}'
@@ -5519,6 +5530,16 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                      JMESPathCheck('name', instance_pool_name_1),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('tags', {})])
+
+        # test updating vcore/edition/family of an instance pool
+        self.cmd('sql instance-pool update -g {} -n {} --capacity {} -e {} -f {}'
+                 .format(resource_group, instance_pool_name_1, 8, edition, family),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('vCores', 8),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('sku.family', family)])
 
         # Instance Pool 2
         self.cmd(
@@ -5557,6 +5578,14 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                      JMESPathCheck('name', instance_pool_name_2),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('tags', {})])
+
+        # test updating maintanace conf id of an instance pool
+        self.cmd('sql instance-pool update -g {} -n {} -maintenance-configuration-id {}'
+                 .format(resource_group, instance_pool_name_2, maintenance_configuration_id),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.maintenanceConfigurationId', maintenance_configuration_id)])
 
         self.cmd('sql instance-pool list -g {}'
                  .format(resource_group),

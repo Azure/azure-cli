@@ -22,10 +22,11 @@ def set_load_balancer_sku(sku, kubernetes_version):
 
 
 def update_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips,
-                                 outbound_ip_prefixes, outbound_ports, idle_timeout, profile, models):
+                                 outbound_ip_prefixes, outbound_ports,
+                                 idle_timeout, backend_pool_type, profile, models):
     """parse and update an existing load balancer profile"""
     if not is_load_balancer_profile_provided(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips,
-                                             outbound_ip_prefixes, outbound_ports, idle_timeout):
+                                             outbound_ip_prefixes, outbound_ports, backend_pool_type, idle_timeout):
         return profile
     if not profile:
         if isinstance(models, SimpleNamespace):
@@ -34,14 +35,15 @@ def update_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv
             ManagedClusterLoadBalancerProfile = models.get("ManagedClusterLoadBalancerProfile")
         profile = ManagedClusterLoadBalancerProfile()
     return configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips,
-                                           outbound_ip_prefixes, outbound_ports, idle_timeout, profile, models)
+                                           outbound_ip_prefixes, outbound_ports, idle_timeout,
+                                           backend_pool_type, profile, models)
 
 
 def create_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips,
-                                 outbound_ip_prefixes, outbound_ports, idle_timeout, models):
+                                 outbound_ip_prefixes, outbound_ports, idle_timeout, backend_pool_type, models):
     """parse and build load balancer profile"""
     if not is_load_balancer_profile_provided(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips,
-                                             outbound_ip_prefixes, outbound_ports, idle_timeout):
+                                             outbound_ip_prefixes, outbound_ports, backend_pool_type, idle_timeout):
         return None
 
     if isinstance(models, SimpleNamespace):
@@ -50,11 +52,13 @@ def create_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv
         ManagedClusterLoadBalancerProfile = models.get("ManagedClusterLoadBalancerProfile")
     profile = ManagedClusterLoadBalancerProfile()
     return configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips,
-                                           outbound_ip_prefixes, outbound_ports, idle_timeout, profile, models)
+                                           outbound_ip_prefixes, outbound_ports, idle_timeout,
+                                           backend_pool_type, profile, models)
 
 
 def configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips,
-                                    outbound_ip_prefixes, outbound_ports, idle_timeout, profile, models):
+                                    outbound_ip_prefixes, outbound_ports, idle_timeout,
+                                    backend_pool_type, profile, models):
     """configure a load balancer with customer supplied values"""
     if any([managed_outbound_ip_count,
             managed_outbound_ipv6_count,
@@ -110,17 +114,20 @@ def configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_
         profile.allocated_outbound_ports = outbound_ports
     if idle_timeout:
         profile.idle_timeout_in_minutes = idle_timeout
+    if backend_pool_type:
+        profile.backend_pool_type = backend_pool_type
     return profile
 
 
 def is_load_balancer_profile_provided(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips, ip_prefixes,
-                                      outbound_ports, idle_timeout):
+                                      outbound_ports, backend_pool_type, idle_timeout):
     return any([managed_outbound_ip_count,
                 managed_outbound_ipv6_count,
                 outbound_ips,
                 ip_prefixes,
                 outbound_ports,
-                idle_timeout])
+                idle_timeout,
+                backend_pool_type])
 
 
 def _get_load_balancer_outbound_ips(load_balancer_outbound_ips, models):

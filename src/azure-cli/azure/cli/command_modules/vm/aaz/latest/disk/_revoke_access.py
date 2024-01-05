@@ -25,9 +25,9 @@ class RevokeAccess(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-07-02",
+        "version": "2023-04-02",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/disks/{}/endgetaccess", "2022-07-02"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/disks/{}/endgetaccess", "2023-04-02"],
         ]
     }
 
@@ -136,7 +136,7 @@ class RevokeAccess(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-07-02",
+                    "api-version", "2023-04-02",
                     required=True,
                 ),
             }

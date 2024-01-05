@@ -393,8 +393,11 @@ configuration:
       - if:
         - hasLabel:
             label: Service Attention
-        - hasLabel:
-            label: ARM - Templates
+        - or:
+          - hasLabel:
+              label: ARM - Templates
+          - hasLabel:
+              label: Azure Deployments
         then:
         - mentionUsers:
             mentionees:
@@ -3206,10 +3209,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: '[Aa]z \b(account|group|resource|provider|feature|tag|deployment|policy|lock|managedapp|resourcemanagement)\b'
+            pattern: '[Aa]z \b(account|group|resource|provider|feature|tag|policy|lock|managedapp|resourcemanagement)\b'
             isRegex: True
         - bodyContains:
-            pattern: '[Aa]z \b(account|group|resource|provider|feature|tag|deployment|policy|lock|managedapp|resourcemanagement)\b'
+            pattern: '[Aa]z \b(account|group|resource|provider|feature|tag|policy|lock|managedapp|resourcemanagement)\b'
             isRegex: True
       - or:
         - isAction:
@@ -3231,10 +3234,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: '[Aa]z \b(ts|bicep|private-link)\b'
+            pattern: '[Aa]z \b(private-link)\b'
             isRegex: True
         - bodyContains:
-            pattern: '[Aa]z \b(ts|bicep|private-link)\b'
+            pattern: '[Aa]z \b(private-link)\b'
             isRegex: True
       - or:
         - isAction:
@@ -5826,10 +5829,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az stack
+            pattern: (az deployment|az bicep|az stack|az deployment-scripts|az ts|az group export)
             isRegex: True
         - bodyContains:
-            pattern: az stack
+            pattern: (az deployment|az bicep|az stack|az deployment-scripts|az ts|az group export)
             isRegex: True
       - or:
         - isAction:
@@ -5838,10 +5841,10 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: ARM
+          label: Azure Deployments
       - addLabel:
           label: Service Attention
-      description: '[ARM-stack] auto assign labels and users based on issue description.'
+      description: '[Azure Deployments] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
       - or:

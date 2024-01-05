@@ -81,7 +81,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
             'site': 'servicelinker-cassandra-cosmos-asp-app',
-            'account': 'servicelinker-cassandra-cosmos',
+            'account': 'servicelinker-cassandra-cosmos1',
             'key_space': 'coredb'
         })
 
@@ -557,7 +557,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'target_resource_group': 'servicelinker-test-linux-group',
             'site': 'servicelinker-flexiblepostgresql-app',
             'server': 'servicelinker-flexiblepostgresql',
-            'database': 'test'
+            'database': 'testdb'
         })
 
         # prepare password
@@ -815,7 +815,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'target_resource_group': 'servicelinker-test-linux-group',
             'site': 'servicelinker-postgresql-app',
             'server': 'servicelinker-postgresql',
-            'database': 'test'
+            'database': 'testdb'
         })
 
         # prepare password

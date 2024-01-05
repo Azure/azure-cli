@@ -12,6 +12,7 @@ from azure.mgmt.cdn.models import (SkuName, CustomHttpsProvisioningState, Protoc
 
 from azure.core.exceptions import (HttpResponseError, ResourceNotFoundError, ResourceExistsError)
 
+
 class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_cdn_domain')
     def test_cdn_custom_domain_errors(self, resource_group):

@@ -19,12 +19,17 @@ from azure.cli.command_modules.acs._consts import (
 from azure.cli.command_modules.acs.custom import (
     _get_command_context,
     _update_addons,
+    aks_stop,
     k8s_install_kubectl,
     k8s_install_kubelogin,
     merge_kubernetes_configurations,
 )
+from azure.cli.command_modules.acs.managed_cluster_decorator import (
+    AKSManagedClusterModels,
+)
 from azure.cli.command_modules.acs.tests.latest.mocks import (
     MockCLI,
+    MockClient,
     MockCmd,
     MockUrlretrieveUrlValidator,
 )
@@ -33,6 +38,7 @@ from azure.cli.command_modules.acs.tests.latest.utils import (
     get_test_data_file_path,
 )
 from azure.cli.core.util import CLIError
+from azure.cli.core.profiles import ResourceType
 from azure.mgmt.containerservice.v2020_03_01.models import (
     ManagedClusterAddonProfile,
 )
@@ -676,6 +682,37 @@ class AcsCustomCommandTest(unittest.TestCase):
             mock_url_retrieve.assert_called_with(MockUrlretrieveUrlValidator(test_source_url, test_ver), mock.ANY)
         finally:
             shutil.rmtree(temp_dir)
+
+class TestAKSCommand(unittest.TestCase):
+    def setUp(self):
+        self.cli_ctx = MockCLI()
+        self.cmd = MockCmd(self.cli_ctx)
+        self.models = AKSManagedClusterModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
+        self.client = MockClient()
+
+    def test_aks_stop(self):
+        # public cluster: call begin_stop
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        self.client.get = mock.Mock(
+            return_value=mc_1
+        )
+        self.client.begin_stop = mock.Mock(
+            return_value=None
+        )
+        self.assertEqual(aks_stop(self.cmd, self.client, "rg", "name"), None)
+
+        # private cluster: call begin_stop
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
+        api_server_access_profile.enable_private_cluster = True
+        mc_2.api_server_access_profile = api_server_access_profile
+        self.client.get = mock.Mock(
+            return_value=mc_2
+        )
+        self.client.begin_stop = mock.Mock(
+            return_value=None
+        )
+        self.assertEqual(aks_stop(self.cmd, self.client, "rg", "name", False), None)
 
 
 class TestRunCommand(unittest.TestCase):

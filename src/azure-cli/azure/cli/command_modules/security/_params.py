@@ -75,8 +75,8 @@ workspace_setting_target_workspace_arg_type = CLIArgumentType(options_list=('--t
 # Assessments
 assessment_assessed_resource_id_arg_type = CLIArgumentType(options_list=('--assessed-resource-id'), metavar='ASSESSEDRESOURCEID', help='The target resource for this assessment')
 assessment_additional_data_arg_type = CLIArgumentType(options_list=('--additional-data'), metavar='ADDITIONALDATA', help='Data that is attached to the assessment result for better investigations or status clarity')
-assessment_status_code_arg_type = CLIArgumentType(options_list=('--status-code'), metavar='STATUSCODE', help='Progremmatic code for the result of the assessment. can be "Healthy", "Unhealthy" or "NotApplicable"')
-assessment_status_cause_arg_type = CLIArgumentType(options_list=('--status-cause'), metavar='STATUSCAUSE', help='Progremmatic code for the cause of the assessment result')
+assessment_status_code_arg_type = CLIArgumentType(options_list=('--status-code'), metavar='STATUSCODE', help='Programmatic code for the result of the assessment. can be "Healthy", "Unhealthy" or "NotApplicable"')
+assessment_status_cause_arg_type = CLIArgumentType(options_list=('--status-cause'), metavar='STATUSCAUSE', help='Programmatic code for the cause of the assessment result')
 assessment_status_description_arg_type = CLIArgumentType(options_list=('--status-description'), metavar='STATUSDESCRIPTION', help='Human readable description of the cause of the assessment result')
 
 # Assessment metadata

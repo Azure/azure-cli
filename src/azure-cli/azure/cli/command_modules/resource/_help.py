@@ -2837,6 +2837,8 @@ examples:
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag} --force"
   - name: Publish a bicep file with documentation uri.
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --documentationUri {documentationUri}
+  - name: Publish a bicep file with documentation uri and include source code
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --documentationUri {documentationUri} --with-source
 """
 
 helps['bicep restore'] = """

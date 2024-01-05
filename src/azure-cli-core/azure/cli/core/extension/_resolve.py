@@ -5,7 +5,7 @@
 from packaging.version import parse
 from typing import Callable, List, NamedTuple, Union
 
-from azure.cli.core.extension import ext_compat_with_cli, WHEEL_INFO_RE
+from azure.cli.core.extension import ext_compat_with_cli, WHEEL_INFO_RE, is_stable_from_metadata
 from azure.cli.core.extension._index import get_index_extensions
 
 from knack.log import get_logger
@@ -77,7 +77,8 @@ def _get_version_compatibility_feedback(candidates: List[dict]) -> str:
         return e.args[0]
 
 
-def resolve_from_index(extension_name, cur_version=None, index_url=None, target_version=None, cli_ctx=None):
+def resolve_from_index(extension_name, cur_version=None, index_url=None, target_version=None, cli_ctx=None,
+                       allow_preview=None):
     """Gets the download Url and digest for the matching extension
 
     Args:
@@ -86,6 +87,7 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
         index_url (str, optional):  Defaults to None.
         target_version (str, optional): Version of extension to install. Defaults to latest version.
         cli_ctx (, optional): CLI Context. Defaults to None.
+        allow_preview(bool, optional): Flag to allow installing preview extensions. Default to None.
 
     Raises:
         NoExtensionCandidatesError when an extension:
@@ -112,6 +114,14 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
             on_empty_results_message=f"No suitable extensions found for '{extension_name}'."
         )
     ]
+
+    if not allow_preview:
+        candidate_filters += [
+            _ExtensionFilter(
+                filter=list_filter(is_stable_from_metadata),
+                on_empty_results_message=f"No suitable stable version of '{extension_name}' to install. "
+                                         f"Add `--allow-preview` to try preview versions"
+            )]
 
     if target_version:
         candidate_filters += [

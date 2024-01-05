@@ -19,9 +19,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-07-02",
+        "version": "2023-04-02",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/disks/{}", "2022-07-02"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/disks/{}", "2023-04-02"],
         ]
     }
 
@@ -117,7 +117,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-07-02",
+                    "api-version", "2023-04-02",
                     required=True,
                 ),
             }
@@ -188,6 +188,10 @@ class Show(AAZCommand):
             managed_by_extended.Element = AAZStrType()
 
             properties = cls._schema_on_200.properties
+            properties.last_ownership_update_time = AAZStrType(
+                serialized_name="LastOwnershipUpdateTime",
+                flags={"read_only": True},
+            )
             properties.bursting_enabled = AAZBoolType(
                 serialized_name="burstingEnabled",
             )
@@ -290,6 +294,9 @@ class Show(AAZCommand):
             creation_data.create_option = AAZStrType(
                 serialized_name="createOption",
                 flags={"required": True},
+            )
+            creation_data.elastic_san_resource_id = AAZStrType(
+                serialized_name="elasticSanResourceId",
             )
             creation_data.gallery_image_reference = AAZObjectType(
                 serialized_name="galleryImageReference",
