@@ -2628,6 +2628,17 @@ class FunctionAppConfigTest(ScenarioTest):
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
+class FunctionAppLanguageEOLTest(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_language_runtime_version_deprecated(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 32)
+        
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime node --runtime-version 10'
+                    .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
 
 if __name__ == '__main__':
     unittest.main()

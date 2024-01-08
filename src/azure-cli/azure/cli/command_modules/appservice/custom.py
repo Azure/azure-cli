@@ -80,7 +80,7 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
                          VERSION_2022_09_01,
-                         RUNTIME_STATUS_TEXT_MAP)
+                         RUNTIME_STATUS_TEXT_MAP, LANGUAGE_EOL_DEPRECATION_NOTICES)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -3560,10 +3560,36 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 d["linux_fx_version"] = self.site_config_dict.linux_fx_version
             return d
 
+    class RuntimeEOL:
+        def __init__(self, name=None, version=None, eol=None):
+            self.name = name
+            self.version = version
+            self.eol = eol
+            self.display_name = "{}|{}".format(name, version)
+            self.deprecation_link = LANGUAGE_EOL_DEPRECATION_NOTICES.get(self.display_name)
+
     def __init__(self, cmd, linux=False, windows=False):
         self.disallowed_functions_versions = {"~1", "~2"}
         self.KEYS = FUNCTIONS_STACKS_API_KEYS()
+        self.end_of_life_dates = []
         super().__init__(cmd, linux=linux, windows=windows)
+
+    def validate_end_of_life_date(self, runtime, version):
+        from dateutil.relativedelta import relativedelta
+        today = datetime.datetime.now(datetime.timezone.utc)
+        six_months = today + relativedelta(months=+6)
+        runtimes_eol = [r for r in self.end_of_life_dates if runtime == r.name]
+        matched_runtime_eol = next((r for r in runtimes_eol if r.version == version), None)
+        if matched_runtime_eol:
+            eol = matched_runtime_eol.eol
+            runtime_deprecation_link = matched_runtime_eol.deprecation_link or ''
+
+            if eol < today:
+                raise ValidationError('{} has reached EOL on {} and is no longer supported. {}'
+                                      .format(runtime, eol.date(), runtime_deprecation_link))
+            if eol < six_months:
+                logger.warning('%s will reach EOL on %s and will no longer be supported. %s',
+                               runtime, eol.date(), runtime_deprecation_link)
 
     def resolve(self, runtime, version=None, functions_version=None, linux=False, disable_version_error=False):
         stacks = self.stacks
@@ -3575,7 +3601,12 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                                   "Run 'az functionapp list-runtimes' for more details on supported runtimes. "
                                   .format(runtime, os, supported_runtimes))
         if version is None:
-            return self.get_default_version(runtime, functions_version, linux)
+            matched_runtime_version = self.get_default_version(runtime, functions_version, linux)
+            self.validate_end_of_life_date(
+                matched_runtime_version.name,
+                matched_runtime_version.version
+            )
+            return matched_runtime_version
         matched_runtime_version = next((r for r in runtimes if r.version == version), None)
         if not matched_runtime_version:
             # help convert previously acceptable versions into correct ones if match not found
@@ -3588,6 +3619,14 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             }
             new_version = old_to_new_version.get(version)
             matched_runtime_version = next((r for r in runtimes if r.version == new_version), None)
+            if matched_runtime_version is not None:
+                version = new_version
+
+        self.validate_end_of_life_date(
+            runtime,
+            version
+        )
+
         if not matched_runtime_version:
             versions = [r.version for r in runtimes]
             if disable_version_error:
@@ -3645,7 +3684,10 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 valid_versions.append(self._format_version_name(v))
         return valid_versions
 
-    def _parse_minor_version(self, runtime_settings, major_version_name, minor_version_name, runtime_to_version):
+    def _parse_minor_version(self, runtime_settings, major_version_name, minor_version_name, runtime_to_version,
+                             runtime_to_version_eol):
+        runtime_name = (runtime_settings.app_settings_dictionary.get(self.KEYS.FUNCTIONS_WORKER_RUNTIME) or
+                        major_version_name)
         if not runtime_settings.is_deprecated:
             functions_versions = self._get_valid_function_versions(runtime_settings)
             if functions_versions:
@@ -3659,10 +3701,13 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                     self.KEYS.GIT_HUB_ACTION_SETTINGS: runtime_settings.git_hub_action_settings
                 }
 
-                runtime_name = (runtime_settings.app_settings_dictionary.get(self.KEYS.FUNCTIONS_WORKER_RUNTIME) or
-                                major_version_name)
                 runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
                 runtime_to_version[runtime_name][minor_version_name] = runtime_version_properties
+
+        # obtain end of life date for all runtime versions
+        if runtime_settings.end_of_life_date is not None:
+            runtime_to_version_eol[runtime_name] = runtime_to_version_eol.get(runtime_name, dict())
+            runtime_to_version_eol[runtime_name][minor_version_name] = runtime_settings.end_of_life_date
 
     def _create_runtime_from_properties(self, runtime_name, version_name, version_properties, linux):
         supported_func_versions = version_properties[self.KEYS.SUPPORTED_EXTENSION_VERSIONS]
@@ -3682,6 +3727,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
         # build a map of runtime -> runtime version -> runtime version properties
         runtime_to_version_linux = {}
         runtime_to_version_windows = {}
+        runtime_to_version_end_of_life = {}
         for runtime in stacks:
             for major_version in runtime.major_versions:
                 for minor_version in major_version.minor_versions:
@@ -3693,16 +3739,19 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                         self._parse_minor_version(runtime_settings=linux_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
-                                                  runtime_to_version=runtime_to_version_linux)
+                                                  runtime_to_version=runtime_to_version_linux,
+                                                  runtime_to_version_eol=runtime_to_version_end_of_life)
 
                     if windows_settings is not None and not windows_settings.is_hidden:
                         self._parse_minor_version(runtime_settings=windows_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
-                                                  runtime_to_version=runtime_to_version_windows)
+                                                  runtime_to_version=runtime_to_version_windows,
+                                                  runtime_to_version_eol=runtime_to_version_end_of_life)
 
         runtime_to_version_linux = self._format_version_names(runtime_to_version_linux)
         runtime_to_version_windows = self._format_version_names(runtime_to_version_windows)
+        runtime_to_version_end_of_life = self._format_version_names(runtime_to_version_end_of_life)
 
         for runtime_name, versions in runtime_to_version_windows.items():
             for version_name, version_properties in versions.items():
@@ -3713,6 +3762,11 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             for version_name, version_properties in versions.items():
                 r = self._create_runtime_from_properties(runtime_name, version_name, version_properties, linux=True)
                 self._stacks.append(r)
+
+        for runtime_name, versions in runtime_to_version_end_of_life.items():
+            for version_name, version_eol in versions.items():
+                r = self.RuntimeEOL(name=runtime_name, version=version_name, eol=version_eol)
+                self.end_of_life_dates.append(r)
 
 
 def get_app_insights_key(cli_ctx, resource_group, name):
