@@ -1283,7 +1283,7 @@ def _set_edge_zones_trigger_restore_properties(cmd, trigger_restore_properties, 
     # TODO: As the subscription we currently use does not have access to Edge Zones, no tests have been written for
     # this. We have manually validated it, but tests should be added to validate all (successful + exceptional)
     # cases as soon as is viable.
-    if restore_to_edge_zone is not None:
+    if restore_to_edge_zone is not None and not restore_to_edge_zone:
         # If CSR or CRR, error
         if target_subscription != get_subscription_id(cmd.cli_ctx) or use_secondary_region:
             raise InvalidArgumentValueError("The restore-to-edge-zone parameter can't be used for cross region "
