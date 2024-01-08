@@ -2333,12 +2333,13 @@ class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_private_endpoint_mgmt(self, resource_group):
-        self._test_private_endpoint_connection('postgres', resource_group)
+    @ServerPreparer(engine_type='postgres', location=postgres_location)
+    def test_postgres_flexible_server_private_endpoint_mgmt(self, resource_group, server):
+        self._test_private_endpoint_connection('postgres', resource_group, server)
+        self._test_private_link_resource('postgres', resource_group, server, 'postgresqlServer')
 
-    def _test_private_endpoint_connection(self, database_engine, resource_group):
+    def _test_private_endpoint_connection(self, database_engine, resource_group, server_name):
         loc = self.postgres_location
-        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         vnet = self.create_random_name('cli-vnet-', 24)
         subnet = self.create_random_name('cli-subnet-', 24)
         pe_name_auto = self.create_random_name('cli-pe-', 24)
@@ -2347,11 +2348,6 @@ class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
         pe_connection_name_auto = self.create_random_name('cli-pec-', 24)
         pe_connection_name_manual_approve = self.create_random_name('cli-pec-', 24)
         pe_connection_name_manual_reject = self.create_random_name('cli-pec-', 24)
-
-        # create a server
-        self.cmd('{} flexible-server create -g {} --name {} -l {} --public-access none '
-                 '--tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
-                 .format(database_engine, resource_group, server_name, self.postgres_location))
 
         result = self.cmd('{} flexible-server show -n {} -g {}'.format(database_engine, server_name, resource_group),
                                checks=[JMESPathCheck('resourceGroup', resource_group),
@@ -2495,6 +2491,10 @@ class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
 
+        self.cmd('{} flexible-server private-endpoint-connection list -g {} --server-name {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type(@)', 'array'),
+                         JMESPathCheck('length(@)', 1)])
+
         self.cmd('{} flexible-server private-endpoint-connection show --server-name {} -g {} --name {}'
                  .format(database_engine, server_name, resource_group, server_pec_name),
                  checks=[
@@ -2520,5 +2520,11 @@ class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
                           .format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(len(result['privateEndpointConnections']), 0)
 
-        # delete everything
-        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+    def _test_private_link_resource(self, database_engine, resource_group, server, group_id):
+        result = self.cmd('{} flexible-server private-link-resource list -g {} -s {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        self.assertEqual(result[0]['groupId'], group_id)
+
+        result = self.cmd('{} flexible-server private-link-resource show -g {} -s {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        self.assertEqual(result['groupId'], group_id)

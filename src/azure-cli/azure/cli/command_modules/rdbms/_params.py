@@ -941,13 +941,18 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                     c.argument('server_name', options_list=['--server-name', '-s'], id_part='name', arg_type=server_name_arg_type, required=False,
                                help='Name of the Server. Required if --id is not specified')
                     c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
-                            help='The name of the private endpoint connection associated with the Server. '
-                                    'Required if --id is not specified')
+                               help='The name of the private endpoint connection associated with the Server. '
+                               'Required if --id is not specified')
                     c.extra('connection_id', options_list=['--id'], required=False,
                             help='The ID of the private endpoint connection associated with the Server. '
-                                'If specified --server-name/-s and --name/-n, this should be omitted.')
+                            'If specified --server-name/-s and --name/-n, this should be omitted.')
                 if scope == "approve" or scope == "reject":
                     c.argument('description', help='Comments for {} operation.'.format(scope), required=True)
+
+        for scope in ['list', 'show']:
+            with self.argument_context('{} flexible-server private-link-resource {}'.format(command_group, scope)) as c:
+                c.argument('resource_group_name', arg_type=resource_group_name_type)
+                c.argument('server_name', options_list=['--server-name', '-s'], id_part='name', arg_type=server_name_arg_type, required=False)
 
         # GTID
         if command_group == 'mysql':

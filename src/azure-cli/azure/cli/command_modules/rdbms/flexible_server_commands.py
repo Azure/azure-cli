@@ -18,6 +18,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_migrations,
     cf_postgres_flexible_private_endpoint_connection,
     cf_postgres_flexible_private_endpoint_connections,
+    cf_postgres_flexible_private_link_resources,
     cf_postgres_flexible_virtual_endpoints,
     cf_postgres_flexible_server_threat_protection_settings,
     cf_postgres_flexible_server_log_files)
@@ -105,6 +106,11 @@ def load_flexibleserver_command_table(self, _):
     postgres_flexible_server_private_endpoint_connections_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#PrivateEndpointConnectionsOperations.{}',
         client_factory=cf_postgres_flexible_private_endpoint_connections
+    )
+
+    postgres_flexible_server_private_link_resources_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#PrivateLinkResourcesOperations.{}',
+        client_factory=cf_postgres_flexible_private_link_resources
     )
 
     # MERU COMMANDS
@@ -250,3 +256,9 @@ def load_flexibleserver_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'flexible_server_reject_private_endpoint_connection', custom_command_type=flexible_servers_custom_postgres,
                          validator=validate_private_endpoint_connection_id)
+
+    with self.command_group('postgres flexible-server private-link-resource', postgres_flexible_server_private_link_resources_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_private_link_resources) as g:
+        g.command('list', 'list_by_server')
+        g.custom_show_command('show', 'flexible_server_private_link_resource_get', custom_command_type=flexible_servers_custom_postgres)

@@ -25,7 +25,7 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
     cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_servers, \
     cf_postgres_check_resource_availability_with_location, \
     cf_postgres_flexible_private_dns_zone_suffix_operations, \
-    cf_postgres_flexible_private_endpoint_connections 
+    cf_postgres_flexible_private_endpoint_connections
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, \
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
     _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false
@@ -1233,7 +1233,7 @@ def virtual_endpoint_update_func(client, resource_group_name, server_name, virtu
 
 
 def flexible_server_approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
-                                        description=None):
+                                                        description=None):
     """Approve a private endpoint connection request for a server."""
 
     return _update_private_endpoint_connection_status(
@@ -1242,12 +1242,26 @@ def flexible_server_approve_private_endpoint_connection(cmd, client, resource_gr
 
 
 def flexible_server_reject_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
-                                       description=None):
+                                                       description=None):
     """Reject a private endpoint connection request for a server."""
 
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=False,
         description=description)
+
+
+def flexible_server_private_link_resource_get(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Gets a private link resource for a PostgreSQL flexible server.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        group_name="postgresqlServer")
 
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,
