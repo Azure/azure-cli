@@ -24,7 +24,8 @@ from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
     cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_servers, \
     cf_postgres_check_resource_availability_with_location, \
-    cf_postgres_flexible_private_dns_zone_suffix_operations
+    cf_postgres_flexible_private_dns_zone_suffix_operations, \
+    cf_postgres_flexible_private_endpoint_connections 
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, \
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
     _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false
@@ -1229,6 +1230,45 @@ def virtual_endpoint_update_func(client, resource_group_name, server_name, virtu
         server_name,
         virtual_endpoint_name,
         parameters)
+
+
+def flexible_server_approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
+                                        description=None):
+    """Approve a private endpoint connection request for a server."""
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=True,
+        description=description)
+
+
+def flexible_server_reject_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
+                                       description=None):
+    """Reject a private endpoint connection request for a server."""
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=False,
+        description=description)
+
+
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
+    private_endpoint_connections_client = cf_postgres_flexible_private_endpoint_connections(cmd.cli_ctx, None)
+    private_endpoint_connection = private_endpoint_connections_client.get(resource_group_name=resource_group_name,
+                                                                          server_name=server_name,
+                                                                          private_endpoint_connection_name=private_endpoint_connection_name)
+    new_status = 'Approved' if is_approved else 'Rejected'
+
+    private_link_service_connection_state = {
+        'status': new_status,
+        'description': description
+    }
+
+    private_endpoint_connection.private_link_service_connection_state = private_link_service_connection_state
+
+    return client.begin_update(resource_group_name=resource_group_name,
+                               server_name=server_name,
+                               private_endpoint_connection_name=private_endpoint_connection_name,
+                               parameters=private_endpoint_connection)
 
 
 def _create_postgresql_connection_strings(host, user, password, database, port):

@@ -7,6 +7,7 @@ import time
 
 from datetime import datetime
 from time import sleep
+from azure.cli.core.util import parse_proxy_resource_id
 from dateutil import parser
 from dateutil.tz import tzutc
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
@@ -2325,3 +2326,199 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
 
 
+
+class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
+
+    postgres_location = 'eastus'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_private_endpoint_mgmt(self, resource_group):
+        self._test_private_endpoint_connection('postgres', resource_group)
+
+    def _test_private_endpoint_connection(self, database_engine, resource_group):
+        loc = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        vnet = self.create_random_name('cli-vnet-', 24)
+        subnet = self.create_random_name('cli-subnet-', 24)
+        pe_name_auto = self.create_random_name('cli-pe-', 24)
+        pe_name_manual_approve = self.create_random_name('cli-pe-', 24)
+        pe_name_manual_reject = self.create_random_name('cli-pe-', 24)
+        pe_connection_name_auto = self.create_random_name('cli-pec-', 24)
+        pe_connection_name_manual_approve = self.create_random_name('cli-pec-', 24)
+        pe_connection_name_manual_reject = self.create_random_name('cli-pec-', 24)
+
+        # create a server
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --public-access none '
+                 '--tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+                 .format(database_engine, resource_group, server_name, self.postgres_location))
+
+        result = self.cmd('{} flexible-server show -n {} -g {}'.format(database_engine, server_name, resource_group),
+                               checks=[JMESPathCheck('resourceGroup', resource_group),
+                                       JMESPathCheck('name', server_name)]).get_output_in_json()
+        self.assertEqual(''.join(result['location'].lower().split()), self.postgres_location)
+
+        # Prepare network and disable network policies
+        self.cmd('network vnet create -n {} -g {} -l {} --subnet-name {}'
+                 .format(vnet, resource_group, loc, subnet),
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {} --vnet-name {} -g {} '
+                 '--disable-private-endpoint-network-policies true'
+                 .format(subnet, vnet, resource_group),
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Get Server Id and Group Id
+        result = self.cmd('{} flexible-server show -g {} -n {}'
+                          .format(database_engine, resource_group, server_name)).get_output_in_json()
+        server_id = result['id']
+        group_id = 'postgresqlServer'
+
+        approval_description = 'You are approved!'
+        rejection_description = 'You are rejected!'
+
+        # Testing Auto-Approval workflow
+        # Create a private endpoint connection
+        private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                                    '--connection-name {} --private-connection-resource-id {} '
+                                    '--group-id {}'
+                                    .format(resource_group, pe_name_auto, vnet, subnet, loc, pe_connection_name_auto,
+                                            server_id, group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_auto)
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], pe_connection_name_auto)
+        self.assertEqual(
+            private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Approved')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        # Get Private Endpoint Connection Name and Id
+        result = self.cmd('{} flexible-server show -g {} -n {}'
+                          .format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(
+            result['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Approved')
+        server_pec_id = result['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+
+        self.cmd('{} flexible-server private-endpoint-connection show --server-name {} -g {} --name {}'
+                 .format(database_engine, server_name, resource_group, server_pec_name),
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('privateLinkServiceConnectionState.status', 'Approved')
+                 ])
+        
+        self.cmd('{} flexible-server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server_name, resource_group, server_pec_name, approval_description))
+
+        self.cmd('{} flexible-server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server_name, resource_group, server_pec_name, rejection_description))
+
+        self.cmd('{} flexible-server private-endpoint-connection delete --server-name {} -g {} --id {}'
+                 .format(database_engine, server_name, resource_group, server_pec_id))
+
+        # Testing Manual-Approval workflow [Approval]
+        # Create a private endpoint connection
+        private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                                    '--connection-name {} --private-connection-resource-id {} '
+                                    '--group-id {} --manual-request'
+                                    .format(resource_group, pe_name_manual_approve, vnet, subnet, loc,
+                                            pe_connection_name_manual_approve, server_id,
+                                            group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_manual_approve)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'],
+                         pe_connection_name_manual_approve)
+        self.assertEqual(
+            private_endpoint['manualPrivateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Pending')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        # Get Private Endpoint Connection Name and Id
+        result = self.cmd('{} flexible-server show -g {} -n {}'
+                          .format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(
+            result['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Pending')
+        server_pec_id = result['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+
+        self.cmd('{} flexible-server private-endpoint-connection show --server-name {} -g {} --name {}'
+                 .format(database_engine, server_name, resource_group, server_pec_name),
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('privateLinkServiceConnectionState.status', 'Pending'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('{} flexible-server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
+                 .format(database_engine, server_name, resource_group, server_pec_name, approval_description),
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('privateLinkServiceConnectionState.description', approval_description),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('{} flexible-server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server_name, resource_group, server_pec_name, rejection_description))
+
+        self.cmd('{} flexible-server private-endpoint-connection delete --server-name {} -g {}  --id {}'
+                 .format(database_engine, server_name, resource_group, server_pec_id))
+
+        # Testing Manual-Approval workflow [Rejection]
+        # Create a private endpoint connection
+        private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                                    '--connection-name {} --private-connection-resource-id {} '
+                                    '--group-id {} --manual-request true'
+                                    .format(resource_group, pe_name_manual_reject, vnet, subnet, loc,
+                                            pe_connection_name_manual_reject, server_id, group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_manual_reject)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'],
+                         pe_connection_name_manual_reject)
+        self.assertEqual(
+            private_endpoint['manualPrivateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Pending')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        # Get Private Endpoint Connection Name and Id
+        result = self.cmd('{} flexible-server show -g {} -n {}'
+                          .format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(
+            result['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Pending')
+        server_pec_id = result['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+
+        self.cmd('{} flexible-server private-endpoint-connection show --server-name {} -g {} --name {}'
+                 .format(database_engine, server_name, resource_group, server_pec_name),
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('privateLinkServiceConnectionState.status', 'Pending'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('{} flexible-server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
+                 .format(database_engine, server_name, resource_group, server_pec_name, rejection_description),
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', rejection_description),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('{} flexible-server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server_name, resource_group, server_pec_name, approval_description), expect_failure=True)
+
+        self.cmd('{} flexible-server private-endpoint-connection delete --server-name {} -g {}  --id {}'
+                 .format(database_engine, server_name, resource_group, server_pec_id))
+        result = self.cmd('{} flexible-server show -g {} -n {}'
+                          .format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(len(result['privateEndpointConnections']), 0)
+
+        # delete everything
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
