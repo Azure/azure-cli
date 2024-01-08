@@ -1274,17 +1274,21 @@ def _get_alr_restore_mode(target_vm_name, target_vnet_name, target_vnet_resource
         """)
 
 
-def _set_edge_zones_restore_properties(cmd, trigger_restore_properties, restore_to_edge_zone, recovery_point,
+def _set_edge_zones_trigger_restore_properties(cmd, trigger_restore_properties, restore_to_edge_zone, recovery_point,
                                        target_subscription, use_secondary_region, restore_mode):
+    # TODO: As the subscription we currently use does not have access to Edge Zones, no tests have been written for
+    # this. We have manually validated it, but tests should be added to validate all (successful + exceptional)
+    # cases as soon as is viable.
     if restore_to_edge_zone is not None:
         # If CSR or CRR, error
         if target_subscription != get_subscription_id(cmd.cli_ctx) or use_secondary_region:
-            raise InvalidArgumentValueError()
-        if restore_to_edge_zone is not None:
-            if recovery_point.properties.extended_location is None \
-                or recovery_point.properties.extended_location.name is None \
-                or recovery_point.properties.extended_location.name == "":
-                raise InvalidArgumentValueError()
+            raise InvalidArgumentValueError("The restore-to-edge-zone parameter can't be used for cross region "
+                                            "or cross subscription restore")
+        if recovery_point.properties.extended_location is None \
+            or recovery_point.properties.extended_location.name is None \
+            or recovery_point.properties.extended_location.name == "":
+            raise InvalidArgumentValueError("Please make sure that the recovery point belongs to an edge zone VM "
+                                            "and contains extended location")
         trigger_restore_properties.extended_location = recovery_point.properties.extended_location
 
     if restore_mode == "OriginalLocation":
@@ -1405,9 +1409,10 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                     target_subscription, use_secondary_region)
 
     # Edge zones-specific code. Not using existing set/get properties code as it is messy and prone to errors
-    trigger_restore_properties = _set_edge_zones_restore_properties(trigger_restore_properties, restore_to_edge_zone,
-                                                                    recovery_point, target_subscription,
-                                                                    use_secondary_region, restore_mode)
+    trigger_restore_properties = _set_edge_zones_trigger_restore_properties(cmd, trigger_restore_properties,
+                                                                            restore_to_edge_zone,
+                                                                            recovery_point, target_subscription,
+                                                                            use_secondary_region, restore_mode)
 
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
