@@ -194,9 +194,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr manifest show') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)
         c.argument('raw_output', help='Output the raw manifest text with no formatting.', options_list=['--raw'], action='store_true')
+        c.argument('verbose', help="Include manifest metadata in the response", options_list=['--enriched', '-e'], action='store_true')
 
     with self.argument_context('acr manifest list') as c:
         c.positional('repo_id', arg_type=repo_id_type)
+        c.argument('verbose', help="Include manifest metadata in the response", options_list=['--enriched', '-e'], action='store_true')
 
     with self.argument_context('acr manifest delete') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)

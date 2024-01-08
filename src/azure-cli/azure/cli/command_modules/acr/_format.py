@@ -147,11 +147,19 @@ def list_referrers_output_format(result):
 def manifest_output_format(result):
     manifests = []
     for manifest in result:
-        manifests.append(OrderedDict([
-            ('MediaType', _get_value(manifest, 'mediaType')),
-            ('ArtifactType', _get_value(manifest, 'artifactType')),
-            ('SubjectDigest', _get_value(manifest, 'subject', 'digest'))
-        ]))
+        if 'ref' in manifest:
+            manifests.append(OrderedDict([
+                ('Digest', _get_value(manifest, 'ref')),
+                ('MediaType', _get_value(manifest, 'manifest', 'mediaType')),
+                ('ArtifactType', _get_value(manifest, 'manifest', 'artifactType')),
+                ('SubjectDigest', _get_value(manifest, 'manifest', 'subject', 'digest'))
+            ]))
+        else:
+            manifests.append(OrderedDict([
+                ('MediaType', _get_value(manifest, 'mediaType')),
+                ('ArtifactType', _get_value(manifest, 'artifactType')),
+                ('SubjectDigest', _get_value(manifest, 'subject', 'digest'))
+            ]))
     return manifests
 
 
