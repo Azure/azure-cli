@@ -52,6 +52,7 @@ PortRange = TypeVar("PortRange")
 Snapshot = TypeVar("Snapshot")
 KubeletConfig = TypeVar("KubeletConfig")
 LinuxOSConfig = TypeVar("LinuxOSConfig")
+IPTag = TypeVar("IPTag")
 
 # TODO:
 # 1. Add extra type checking for getter functions
@@ -368,6 +369,25 @@ class AKSAgentPoolContext(BaseAKSContext):
         else:
             host_group_id = raw_value
         return host_group_id
+
+    def get_crg_id(self) -> Union[str, None]:
+        return self._get_crg_id()
+
+    def _get_crg_id(self) -> Union[str, None]:
+        """Obtain the value of crg_id.
+
+        :return: string or None
+        """
+        raw_value = self.raw_param.get("crg_id")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        value_from_agentpool = None
+        if self.agentpool and hasattr(self.agentpool, "capacity_reservation_group_id"):
+            value_from_agentpool = self.agentpool.capacity_reservation_group_id
+        if value_from_agentpool is not None:
+            crg_id = value_from_agentpool
+        else:
+            crg_id = raw_value
+        return crg_id
 
     def _get_kubernetes_version(self, read_only: bool = False) -> str:
         """Internal function to dynamically obtain the value of kubernetes_version according to the context.
@@ -1294,6 +1314,17 @@ class AKSAgentPoolContext(BaseAKSContext):
             ))
         return port_ranges
 
+    def get_ip_tags(self) -> Union[List[IPTag], None]:
+        ip_tags = self.raw_param.get("node_public_ip_tags")
+        res = []
+        if ip_tags:
+            for k, v in ip_tags.items():
+                res.append(self.models.IPTag(
+                    ip_tag_type=k,
+                    tag=v,
+                ))
+        return res
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -1578,6 +1609,15 @@ class AKSAgentPoolAddDecorator:
         agentpool.gpu_instance_profile = self.context.get_gpu_instance_profile()
         return agentpool
 
+    def set_up_crg_id(self, agentpool: AgentPool) -> AgentPool:
+        """Set up crg related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+        agentpool.capacity_reservation_group_id = self.context.get_crg_id()
+        return agentpool
+
     def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:
         self._ensure_agentpool(agentpool)
 
@@ -1587,6 +1627,13 @@ class AKSAgentPoolAddDecorator:
             agentpool.network_profile = self.models.AgentPoolNetworkProfile()
             agentpool.network_profile.allowed_host_ports = allowed_host_ports
             agentpool.network_profile.application_security_groups = asg_ids
+
+        ip_tags = self.context.get_ip_tags()
+        if ip_tags:
+            if not agentpool.network_profile:
+                agentpool.network_profile = self.models.AgentPoolNetworkProfile()
+            agentpool.network_profile.node_public_ip_tags = ip_tags
+
         return agentpool
 
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
@@ -1625,6 +1672,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_gpu_properties(agentpool)
         # set up agentpool network profile
         agentpool = self.set_up_agentpool_network_profile(agentpool)
+        # set up crg id
+        agentpool = self.set_up_crg_id(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)
@@ -1833,7 +1882,7 @@ class AKSAgentPoolUpdateDecorator:
 
         asg_ids = self.context.get_asg_ids()
         allowed_host_ports = self.context.get_allowed_host_ports()
-        if asg_ids or allowed_host_ports:
+        if (asg_ids or allowed_host_ports) and not agentpool.network_profile:
             agentpool.network_profile = self.models.AgentPoolNetworkProfile()
         if asg_ids is not None:
             agentpool.network_profile.application_security_groups = asg_ids
