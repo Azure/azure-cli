@@ -47,73 +47,77 @@ import azure.cli.command_modules.backup.custom_help as cust_help
 logger = get_logger(__name__)
 
 # Mapping of workload type
-secondary_region_map = {"ussecwest": "usseceast",
-                        "usseceast": "ussecwest",
-                        "usnateast": "usnatwest",
-                        "usnatwest": "usnateast",
-                        "swedencentral": "swedensouth",
-                        "swedensouth": "swedencentral",
-                        "norwaywest": "norwayeast",
-                        "norwayeast": "norwaywest",
-                        "germanynorth": "germanywestcentral",
-                        "germanywestcentral": "germanynorth",
-                        "westus3": "eastus",
-                        "eastasia": "southeastasia",
-                        "southeastasia": "eastasia",
-                        "australiaeast": "australiasoutheast",
-                        "australiasoutheast": "australiaeast",
-                        "australiacentral": "australiacentral2",
-                        "australiacentral2": "australiacentral",
-                        "brazilsouth": "southcentralus",
-                        "brazilsoutheast": "brazilsouth",
-                        "canadacentral": "canadaeast",
-                        "canadaeast": "canadacentral",
-                        "chinanorth": "chinaeast",
-                        "chinaeast": "chinanorth",
-                        "chinanorth2": "chinaeast2",
-                        "chinaeast2": "chinanorth2",
-                        "chinanorth3": "chinaeast3",
-                        "chinaeast3": "chinanorth3",
-                        "northeurope": "westeurope",
-                        "westeurope": "northeurope",
-                        "francecentral": "francesouth",
-                        "francesouth": "francecentral",
-                        "germanycentral": "germanynortheast",
-                        "germanynortheast": "germanycentral",
-                        "centralindia": "southindia",
-                        "southindia": "centralindia",
-                        "westindia": "southindia",
-                        "japaneast": "japanwest",
-                        "japanwest": "japaneast",
-                        "koreacentral": "koreasouth",
-                        "koreasouth": "koreacentral",
-                        "eastus": "westus",
-                        "westus": "eastus",
-                        "eastus2": "centralus",
-                        "centralus": "eastus2",
-                        "northcentralus": "southcentralus",
-                        "southcentralus": "northcentralus",
-                        "westus2": "westcentralus",
-                        "westcentralus": "westus2",
-                        "centraluseuap": "eastus2euap",
-                        "eastus2euap": "centraluseuap",
-                        "southafricanorth": "southafricawest",
-                        "southafricawest": "southafricanorth",
-                        "switzerlandnorth": "switzerlandwest",
-                        "switzerlandwest": "switzerlandnorth",
-                        "ukwest": "uksouth",
-                        "uksouth": "ukwest",
-                        "uaenorth": "uaecentral",
-                        "uaecentral": "uaenorth",
-                        "usdodeast": "usdodcentral",
-                        "usdodcentral": "usdodeast",
-                        "usgovarizona": "usgovtexas",
-                        "usgovtexas": "usgovarizona",
-                        "usgoviowa": "usgovvirginia",
-                        "usgovvirginia": "usgovtexas",
-                        "malaysiasouth": "japanwest",
-                        "jioindiacentral": "jioindiawest",
-                        "jioindiawest": "jioindiacentral"}
+secondary_region_map = {
+    "australiacentral": "australiacentral2",
+    "australiacentral2": "australiacentral",
+    "australiaeast": "australiasoutheast",
+    "australiasoutheast": "australiaeast",
+    "brazilsouth": "southcentralus",
+    "brazilsoutheast": "brazilsouth",
+    "canadacentral": "canadaeast",
+    "canadaeast": "canadacentral",
+    "centralindia": "southindia",
+    "centralus": "eastus2",
+    "centraluseuap": "eastus2euap",
+    "chinaeast": "chinanorth",
+    "chinaeast2": "chinanorth2",
+    "chinaeast3": "chinanorth3",
+    "chinanorth": "chinaeast",
+    "chinanorth2": "chinaeast2",
+    "chinanorth3": "chinaeast3",
+    "eastasia": "southeastasia",
+    "eastus": "westus",
+    "eastus2": "centralus",
+    "eastus2euap": "centraluseuap",
+    "francecentral": "francesouth",
+    "francesouth": "francecentral",
+    "germanycentral": "germanynortheast",
+    "germanynorth": "germanywestcentral",
+    "germanynortheast": "germanycentral",
+    "germanywestcentral": "germanynorth",
+    "japaneast": "japanwest",
+    "japanwest": "japaneast",
+    "jioindiacentral": "jioindiawest",
+    "jioindiawest": "jioindiacentral",
+    "koreacentral": "koreasouth",
+    "koreasouth": "koreacentral",
+    "malaysiasouth": "japanwest",
+    "northcentralus": "southcentralus",
+    "northeurope": "westeurope",
+    "norwayeast": "norwaywest",
+    "norwaywest": "norwayeast",
+    "southafricanorth": "southafricawest",
+    "southafricawest": "southafricanorth",
+    "southcentralus": "northcentralus",
+    "southeastasia": "eastasia",
+    "southindia": "centralindia",
+    "swedencentral": "swedensouth",
+    "swedensouth": "swedencentral",
+    "switzerlandnorth": "switzerlandwest",
+    "switzerlandwest": "switzerlandnorth",
+    "taiwannorth": "taiwannorthwest",
+    "taiwannorthwest": "taiwannorth",
+    "uaecentral": "uaenorth",
+    "uaenorth": "uaecentral",
+    "uksouth": "ukwest",
+    "ukwest": "uksouth",
+    "usdodcentral": "usdodeast",
+    "usdodeast": "usdodcentral",
+    "usgovarizona": "usgovtexas",
+    "usgoviowa": "usgovvirginia",
+    "usgovtexas": "usgovarizona",
+    "usgovvirginia": "usgovtexas",
+    "usnateast": "usnatwest",
+    "usnatwest": "usnateast",
+    "usseceast": "ussecwest",
+    "ussecwest": "usseceast",
+    "westcentralus": "westus2",
+    "westeurope": "northeurope",
+    "westindia": "southindia",
+    "westus": "eastus",
+    "westus2": "westcentralus",
+    "westus3": "eastus"
+}
 
 fabric_name = "Azure"
 default_policy_name = "DefaultPolicy"
@@ -1275,7 +1279,7 @@ def _get_alr_restore_mode(target_vm_name, target_vnet_name, target_vnet_resource
 
 
 def _set_edge_zones_trigger_restore_properties(cmd, trigger_restore_properties, restore_to_edge_zone, recovery_point,
-                                       target_subscription, use_secondary_region, restore_mode):
+                                               target_subscription, use_secondary_region, restore_mode):
     # TODO: As the subscription we currently use does not have access to Edge Zones, no tests have been written for
     # this. We have manually validated it, but tests should be added to validate all (successful + exceptional)
     # cases as soon as is viable.
@@ -1285,18 +1289,18 @@ def _set_edge_zones_trigger_restore_properties(cmd, trigger_restore_properties, 
             raise InvalidArgumentValueError("The restore-to-edge-zone parameter can't be used for cross region "
                                             "or cross subscription restore")
         if recovery_point.properties.extended_location is None \
-            or recovery_point.properties.extended_location.name is None \
-            or recovery_point.properties.extended_location.name == "":
+                or recovery_point.properties.extended_location.name is None \
+                or recovery_point.properties.extended_location.name == "":
             raise InvalidArgumentValueError("Please make sure that the recovery point belongs to an edge zone VM "
                                             "and contains extended location")
         trigger_restore_properties.extended_location = recovery_point.properties.extended_location
 
     if restore_mode == "OriginalLocation":
         if recovery_point.properties.extended_location is not None \
-            and recovery_point.properties.extended_location.name is not None \
-            and recovery_point.properties.extended_location.name != "":
+                and recovery_point.properties.extended_location.name is not None \
+                and recovery_point.properties.extended_location.name != "":
             trigger_restore_properties.extended_location = recovery_point.properties.extended_location
-    
+
     return trigger_restore_properties
 
 
