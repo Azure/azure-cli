@@ -414,7 +414,7 @@ class NetworkPrivateLinkService(ScenarioTest):
             self.check('length(ipConfigurations)', 1),
             self.check('length(loadBalancerFrontendIpConfigurations)', 1)
         ])
-
+        self.cmd('network private-link-service list-auto-approved -l westus', self.check('type(@)', 'array'))
         self.cmd('network private-link-service delete -g {rg} -n {lks1}')
 
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies false', checks=[
@@ -2244,6 +2244,9 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
         self.cmd('network application-gateway waf-config list-dynamic-rule-sets -l westus',
                  self.check('type(@)', 'array'))
 
+        self.cmd('network application-gateway waf-config list-dynamic-rule-sets-default -l westus',
+                 self.check('type(@)', 'array'))
+
 
 class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
@@ -3041,6 +3044,10 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
                 self.check('publicIp.provisioningState', 'Succeeded')
             ])
 
+        # test ddos protection statu
+        self.cmd('network application-gateway create -g {rg} -n testag --public-ip-address {ip1} --sku Standard_v2 --priority 1001')
+        self.cmd('network public-ip ddos-protection-statu -g {rg} -n {ip1}', self.check('isWorkloadProtected', False))
+
         self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Disabled --ddos-protection-plan null',
                  checks=[
                      self.check('ddosSettings.protectionMode', 'Disabled'),
@@ -3050,6 +3057,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
                  ])
         self.cmd('network ddos-protection delete -g {rg} -n {ddos}')
 
+        self.cmd('network application-gateway delete -g {rg} -n testag')
         self.cmd('network public-ip delete -g {rg} -n {ip1}')
         self.cmd('network public-ip list -g {rg}',
                  checks=self.check("length[?name == '{ip1}']", None))
@@ -6629,6 +6637,80 @@ class NetworkVirtualApplianceIdentityScenarioTest(ScenarioTest):
                      self.check('identity.type', 'UserAssigned')
                  ])
         self.cmd('network virtual-appliance delete -n {nva_name4} -g {rg} -y')
+
+    @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance_connection')
+    @AllowLargeResponse(size_kb=9999)
+    def test_network_virtual_appliance_connection(self, resource_group):
+        from time import sleep
+        self.kwargs.update({
+            'vwan': 'clitestvwan',
+            'vhub': 'clittestvhub',
+            'nva_name1': 'clivirtualappliance1',
+            'firewall': 'clitestfirewall',
+            'vpngateway': 'clitestgateway',
+            'route': 'clitestroute',
+            'routetable': 'clitestroutetable',
+            'route_map_name1': 'cliroutemap1',
+            'route_map_name2': 'cliroutemap2',
+            'connection_name': 'clitestconnectionname1',
+            'rg': resource_group,
+        })
+        self.cmd('extension add -n virtual-wan')
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard')
+        routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+        retry_count = 0
+        while routing_state != 'Provisioned':
+            if retry_count == 20:
+                break
+            retry_count += 1
+            sleep(360)
+            routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+
+        firewall = self.cmd(
+            'network firewall create -g {rg} -n {firewall} --vhub {vhub} --sku AZFW_Hub --count 1').get_output_in_json()
+        self.cmd('network vpn-gateway create -n {vpngateway} -g {rg} --vhub {vhub} -l westcentralus')
+        self.kwargs['firewall_id'] = firewall['id']
+        route_table = self.cmd('network vhub route-table create -n {routetable} -g {rg} --vhub-name {vhub} --route-name {route} --destination-type CIDR --destinations 20.10.0.0/16 20.20.0.0/16 --next-hop-type ResourceId --next-hop {firewall_id} --labels label1 label2', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['routetable'])
+        ]).get_output_in_json()
+        route_map1 = self.cmd("network vhub route-map create -n {route_map_name1} -g {rg} --vhub-name {vhub}", checks=[
+            self.check('name', '{route_map_name1}')
+        ]).get_output_in_json()
+        route_map2 = self.cmd("network vhub route-map create -n {route_map_name2} -g {rg} --vhub-name {vhub}", checks=[
+            self.check('name', '{route_map_name2}')
+        ]).get_output_in_json()
+        self.kwargs.update({
+            'route_table': route_table['id'],
+            'route_map1': route_map1['id'],
+            'route_map2': route_map2['id']
+        })
+        self.cmd('network virtual-appliance create -n {nva_name1} -g {rg} --vhub {vhub} --vendor "checkpoint" '
+                 '--scale-unit 2 -v latest --asn 64512 --init-config "echo $abc" ',
+                 checks=[
+                     self.check('name', '{nva_name1}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                     ])
+        self.cmd('network virtual-appliance connection create -g {rg} --appliance-name {nva_name1} -n {connection_name} '
+                 '--resource-name {connection_name} --asn 64512 --enable-internet-security False --bgp-peer-address "169.254.16.13" "169.254.16.14" --tunnel-identifier 0 '
+                 '--routing-config {{"associated-route-table":{route_table},"propagated-route-tables":{{"labels":["label1"],"ids":[{{"id":{route_table}}}]}},"inbound-route-map":{route_map1},"outbound-route-map":{route_map2}}}')
+        self.cmd('network virtual-appliance connection list -g {rg} --appliance-name {nva_name1}',
+                 checks=self.check("type(@)", "array"))
+        self.cmd('network virtual-appliance connection show -g {rg} --appliance-name {nva_name1} -n {connection_name}',
+                 checks=[
+                     self.check('name', '{connection_name}'),
+                     self.check('properties.asn', 64512),
+                     self.check('properties.routingConfiguration.associatedRouteTable.id', "{route_table}"),
+                 ])
+        self.cmd('network virtual-appliance connection update -g {rg} --appliance-name {nva_name1} -n {connection_name}'
+                 '--resource-name {connection_name} --routing-config {{"propagated-route-tables":{{"labels":["label2"]}}}}',
+                 checks=[
+                     self.check('name', '{connection_name}'),
+                     self.check('properties.routingConfiguration.propagatedRouteTables.labels[0]', "label2"),
+                 ])
+        self.cmd('network virtual-appliance connection delete -g {rg} --appliance-name {nva_name1} -n {connection_name} -y')
 
 class NetworkExtendedLocation(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_network_lb_edge_zone', location='eastus2euap')
