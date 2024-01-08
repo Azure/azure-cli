@@ -2227,12 +2227,11 @@ class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    @ServerPreparer(engine_type='postgres', location=postgres_location)
-    def test_postgres_flexible_server_advanced_threat_protection_setting_mgmt(self, resource_group, server):
-        self._test_advanced_threat_protection_setting_mgmt('postgres', resource_group, server)
+    def test_postgres_flexible_server_advanced_threat_protection_setting_mgmt(self, resource_group):
+        self._test_advanced_threat_protection_setting_mgmt('postgres', resource_group)
 
 
-    def _test_advanced_threat_protection_setting_mgmt(self, database_engine, resource_group, server):
+    def _test_advanced_threat_protection_setting_mgmt(self, database_engine, resource_group):
         location = self.postgres_location
         server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
 
@@ -2249,6 +2248,8 @@ class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest
         # Enable advanced threat protection setting for server
         self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} --server-name {} --state Enabled'
                     .format(database_engine, resource_group, server_name))
+
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(2 * 60)
         
         # show advanced threat protection setting for server
         self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
@@ -2258,7 +2259,9 @@ class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest
         # Disable advanced threat protection setting for server
         self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} --server-name {} --state Disabled'
                     .format(database_engine, resource_group, server_name))
-        
+
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(2 * 60)
+
         # show advanced threat protection setting for server
         self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
                     .format(database_engine, resource_group, server_name),
@@ -2273,12 +2276,11 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    @ServerPreparer(engine_type='postgres', location=postgres_location)
-    def test_postgres_flexible_server_logs_mgmt(self, resource_group, server):
-        self._test_server_logs_mgmt('postgres', resource_group, server)
+    def test_postgres_flexible_server_logs_mgmt(self, resource_group):
+        self._test_server_logs_mgmt('postgres', resource_group)
 
 
-    def _test_server_logs_mgmt(self, database_engine, resource_group, server):
+    def _test_server_logs_mgmt(self, database_engine, resource_group):
         location = self.postgres_location
         server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
 
@@ -2298,10 +2300,10 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
                     .format(database_engine, resource_group, server_name),
                     checks=[JMESPathCheck('value', "1"),
                             JMESPathCheck('name', "logfiles.retention_days")]).get_output_in_json()
-        
+
         if os.environ.get(ENV_LIVE_TEST, True):
             return
-        
+
         # wait for around 30 min to allow log files to be generated
         sleep(30*60)
 
