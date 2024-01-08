@@ -996,7 +996,7 @@ short-summary: Approve the specified private endpoint connection associated with
 examples:
   - name: Approve a private endpoint connection associated with a PostgreSQL flexible server.
     text: >
-      az postgres flexible-server private-endpoint-connection reject -g testgroup -s testsvr \
+      az postgres flexible-server private-endpoint-connection approve -g testgroup -s testsvr \
         -n pec-connection.40e3d3a8-7d8f-41eb-8462-1cd05bc3e33b \
         --description "Approve connection"
 """
@@ -1018,7 +1018,7 @@ short-summary: Delete the specified private endpoint connection associated with 
 examples:
   - name: Delete a private endpoint connection associated with a PostgreSQL flexible server.
     text: >
-      az postgres flexible-server private-endpoint-connection reject -g testgroup -s testsvr \
+      az postgres flexible-server private-endpoint-connection delete -g testgroup -s testsvr \
         --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testgroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testsvr/privateEndpointConnections/pec-connection.40e3d3a8-7d8f-41eb-8462-1cd05bc3e33b
 """
 
