@@ -203,14 +203,14 @@ class ContainerappScenarioTest(ScenarioTest):
         ])
 
         # Update Container App with ACR
-        update_string = 'containerapp update -g {} -n {} --min-replicas 1 --max-replicas 1 --set-env-vars testenv=testing'.format(
+        update_string = 'containerapp update -g {} -n {} --min-replicas 0 --max-replicas 1 --set-env-vars testenv=testing'.format(
             resource_group, containerapp_name)
         self.cmd(update_string, checks=[
             JMESPathCheck('name', containerapp_name),
             JMESPathCheck('properties.configuration.registries[0].server', registry_server),
             JMESPathCheck('properties.configuration.registries[0].username', registry_username),
             JMESPathCheck('length(properties.configuration.secrets)', 1),
-            JMESPathCheck('properties.template.scale.minReplicas', '1'),
+            JMESPathCheck('properties.template.scale.minReplicas', '0'),
             JMESPathCheck('properties.template.scale.maxReplicas', '1'),
             JMESPathCheck('length(properties.template.containers[0].env)', 1),
             JMESPathCheck('properties.template.containers[0].env[0].name', "testenv"),
