@@ -11,14 +11,17 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "network vnet-gateway vpn-client generate-vpn-profile",
+)
 class GenerateVpnProfile(AAZCommand):
     """Generates VPN profile for P2S client of the virtual network gateway in the specified resource group. Used for IKEV2 and radius based authentication.
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}/generatevpnprofile", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}/generatevpnprofile", "2023-09-01"],
         ]
     }
 
@@ -160,7 +163,7 @@ class GenerateVpnProfile(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
