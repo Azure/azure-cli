@@ -286,8 +286,8 @@ class AzCliCommandParser(CLICommandParser):
         self._raw_arguments = args
         if args:
             # The shell may already process args and we may not run them directly on the shell anymore without escape.
-            # We use shlex.join to get the command line that can be run on the shell. An example is that the argument value
-            # contains spaces and we need to put quotes around them.
+            # We use shlex.join to get the command line that can be run on the shell. An example is that the argument
+            # value contains spaces and we need to put quotes around them.
             from shlex import join
             full_raw_arguments = join(args)
             self.full_command = f"{self.prog} {full_raw_arguments}"
