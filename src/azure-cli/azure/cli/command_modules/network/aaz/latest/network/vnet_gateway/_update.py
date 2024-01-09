@@ -59,6 +59,11 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
         )
+        _args_schema.enable_private_ip_address = AAZBoolArg(
+            options=["--enable-private-ip-address"],
+            help="Whether private IP needs to be enabled on this gateway for connections or not.",
+            nullable=True,
+        )
         _args_schema.gateway_default_site = AAZStrArg(
             options=["--gateway-default-site"],
             help="Name or ID of a local network gateway representing a local network site with default routes.",
@@ -634,6 +639,7 @@ class Update(AAZCommand):
                 properties.set_prop("bgpSettings", AAZObjectType)
                 properties.set_prop("customRoutes", AAZObjectType)
                 properties.set_prop("enableBgp", AAZBoolType, ".enable_bgp")
+                properties.set_prop("enablePrivateIpAddress", AAZBoolType, ".enable_private_ip_address")
                 properties.set_prop("gatewayDefaultSite", AAZObjectType)
                 properties.set_prop("gatewayType", AAZStrType, ".gateway_type")
                 properties.set_prop("ipConfigurations", AAZListType, ".ip_configurations")
