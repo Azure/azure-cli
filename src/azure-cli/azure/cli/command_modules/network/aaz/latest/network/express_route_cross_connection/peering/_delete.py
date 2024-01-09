@@ -12,20 +12,17 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network express-route port delete",
+    "network express-route-cross-connection peering delete",
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Delete an ExpressRoute port.
-
-    :example: Delete an ExpressRoute port.
-        az network express-route port delete --name MyExpressRoutePort --resource-group MyResourceGroup
+    """Delete the specified peering from the express route cross connection.
     """
 
     _aaz_info = {
         "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutecrossconnections/{}/peerings/{}", "2023-09-01"],
         ]
     }
 
@@ -46,11 +43,17 @@ class Delete(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="ExpressRoute port name.",
+        _args_schema.cross_connection_name = AAZStrArg(
+            options=["--cross-connection-name"],
+            help="The name of the ExpressRouteCrossConnection.",
             required=True,
             id_part="name",
+        )
+        _args_schema.peering_name = AAZStrArg(
+            options=["-n", "--name", "--peering-name"],
+            help="The name of the peering.",
+            required=True,
+            id_part="child_name_1",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -59,7 +62,7 @@ class Delete(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.ExpressRoutePortsDelete(ctx=self.ctx)()
+        yield self.ExpressRouteCrossConnectionPeeringsDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -70,7 +73,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class ExpressRoutePortsDelete(AAZHttpOperation):
+    class ExpressRouteCrossConnectionPeeringsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -109,7 +112,7 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ExpressRoutePorts/{expressRoutePortName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteCrossConnections/{crossConnectionName}/peerings/{peeringName}",
                 **self.url_parameters
             )
 
@@ -125,7 +128,11 @@ class Delete(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "expressRoutePortName", self.ctx.args.name,
+                    "crossConnectionName", self.ctx.args.cross_connection_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "peeringName", self.ctx.args.peering_name,
                     required=True,
                 ),
                 **self.serialize_url_param(

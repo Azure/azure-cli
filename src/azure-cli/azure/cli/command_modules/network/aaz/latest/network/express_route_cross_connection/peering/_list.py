@@ -12,19 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network express-route peering list",
+    "network express-route-cross-connection peering list",
 )
 class List(AAZCommand):
-    """List peering settings of an ExpressRoute circuit.
-
-    :example: List peering settings of an ExpressRoute circuit.
-        az network express-route peering list -g MyResourceGroup --circuit-name MyCircuit
+    """List all peerings in a specified express route cross connection.
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutecircuits/{}/peerings", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutecrossconnections/{}/peerings", "2023-09-01"],
         ]
     }
 
@@ -45,9 +42,9 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.circuit_name = AAZStrArg(
-            options=["--circuit-name"],
-            help="ExpressRoute circuit name.",
+        _args_schema.cross_connection_name = AAZStrArg(
+            options=["--cross-connection-name"],
+            help="The name of the ExpressRouteCrossConnection.",
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -57,7 +54,7 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.ExpressRouteCircuitPeeringsList(ctx=self.ctx)()
+        self.ExpressRouteCrossConnectionPeeringsList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -73,7 +70,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class ExpressRouteCircuitPeeringsList(AAZHttpOperation):
+    class ExpressRouteCrossConnectionPeeringsList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -87,7 +84,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteCircuits/{circuitName}/peerings",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteCrossConnections/{crossConnectionName}/peerings",
                 **self.url_parameters
             )
 
@@ -103,7 +100,7 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "circuitName", self.ctx.args.circuit_name,
+                    "crossConnectionName", self.ctx.args.cross_connection_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -121,7 +118,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -156,6 +153,7 @@ class List(AAZCommand):
             _schema_on_200 = cls._schema_on_200
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
+                flags={"read_only": True},
             )
             _schema_on_200.value = AAZListType()
 
@@ -171,17 +169,11 @@ class List(AAZCommand):
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
 
             properties = cls._schema_on_200.value.Element.properties
             properties.azure_asn = AAZIntType(
                 serialized_name="azureASN",
-            )
-            properties.connections = AAZListType()
-            properties.express_route_connection = AAZObjectType(
-                serialized_name="expressRouteConnection",
+                flags={"read_only": True},
             )
             properties.gateway_manager_etag = AAZStrType(
                 serialized_name="gatewayManagerEtag",
@@ -200,15 +192,12 @@ class List(AAZCommand):
             properties.peer_asn = AAZIntType(
                 serialized_name="peerASN",
             )
-            properties.peered_connections = AAZListType(
-                serialized_name="peeredConnections",
-                flags={"read_only": True},
-            )
             properties.peering_type = AAZStrType(
                 serialized_name="peeringType",
             )
             properties.primary_azure_port = AAZStrType(
                 serialized_name="primaryAzurePort",
+                flags={"read_only": True},
             )
             properties.primary_peer_address_prefix = AAZStrType(
                 serialized_name="primaryPeerAddressPrefix",
@@ -217,12 +206,9 @@ class List(AAZCommand):
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
-            properties.route_filter = AAZObjectType(
-                serialized_name="routeFilter",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.route_filter)
             properties.secondary_azure_port = AAZStrType(
                 serialized_name="secondaryAzurePort",
+                flags={"read_only": True},
             )
             properties.secondary_peer_address_prefix = AAZStrType(
                 serialized_name="secondaryPeerAddressPrefix",
@@ -231,66 +217,8 @@ class List(AAZCommand):
                 serialized_name="sharedKey",
             )
             properties.state = AAZStrType()
-            properties.stats = AAZObjectType()
             properties.vlan_id = AAZIntType(
                 serialized_name="vlanId",
-            )
-
-            connections = cls._schema_on_200.value.Element.properties.connections
-            connections.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.connections.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.connections.Element.properties
-            properties.address_prefix = AAZStrType(
-                serialized_name="addressPrefix",
-            )
-            properties.authorization_key = AAZStrType(
-                serialized_name="authorizationKey",
-            )
-            properties.circuit_connection_status = AAZStrType(
-                serialized_name="circuitConnectionStatus",
-                flags={"read_only": True},
-            )
-            properties.express_route_circuit_peering = AAZObjectType(
-                serialized_name="expressRouteCircuitPeering",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.express_route_circuit_peering)
-            properties.ipv6_circuit_connection_config = AAZObjectType(
-                serialized_name="ipv6CircuitConnectionConfig",
-            )
-            properties.peer_express_route_circuit_peering = AAZObjectType(
-                serialized_name="peerExpressRouteCircuitPeering",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.peer_express_route_circuit_peering)
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-
-            ipv6_circuit_connection_config = cls._schema_on_200.value.Element.properties.connections.Element.properties.ipv6_circuit_connection_config
-            ipv6_circuit_connection_config.address_prefix = AAZStrType(
-                serialized_name="addressPrefix",
-            )
-            ipv6_circuit_connection_config.circuit_connection_status = AAZStrType(
-                serialized_name="circuitConnectionStatus",
-                flags={"read_only": True},
-            )
-
-            express_route_connection = cls._schema_on_200.value.Element.properties.express_route_connection
-            express_route_connection.id = AAZStrType(
-                flags={"read_only": True},
             )
 
             ipv6_peering_config = cls._schema_on_200.value.Element.properties.ipv6_peering_config
@@ -304,68 +232,13 @@ class List(AAZCommand):
             ipv6_peering_config.route_filter = AAZObjectType(
                 serialized_name="routeFilter",
             )
-            _ListHelper._build_schema_sub_resource_read(ipv6_peering_config.route_filter)
             ipv6_peering_config.secondary_peer_address_prefix = AAZStrType(
                 serialized_name="secondaryPeerAddressPrefix",
             )
             ipv6_peering_config.state = AAZStrType()
 
-            peered_connections = cls._schema_on_200.value.Element.properties.peered_connections
-            peered_connections.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.peered_connections.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.peered_connections.Element.properties
-            properties.address_prefix = AAZStrType(
-                serialized_name="addressPrefix",
-            )
-            properties.auth_resource_guid = AAZStrType(
-                serialized_name="authResourceGuid",
-            )
-            properties.circuit_connection_status = AAZStrType(
-                serialized_name="circuitConnectionStatus",
-                flags={"read_only": True},
-            )
-            properties.connection_name = AAZStrType(
-                serialized_name="connectionName",
-            )
-            properties.express_route_circuit_peering = AAZObjectType(
-                serialized_name="expressRouteCircuitPeering",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.express_route_circuit_peering)
-            properties.peer_express_route_circuit_peering = AAZObjectType(
-                serialized_name="peerExpressRouteCircuitPeering",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.peer_express_route_circuit_peering)
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-
-            stats = cls._schema_on_200.value.Element.properties.stats
-            stats.primarybytes_in = AAZIntType(
-                serialized_name="primarybytesIn",
-            )
-            stats.primarybytes_out = AAZIntType(
-                serialized_name="primarybytesOut",
-            )
-            stats.secondarybytes_in = AAZIntType(
-                serialized_name="secondarybytesIn",
-            )
-            stats.secondarybytes_out = AAZIntType(
-                serialized_name="secondarybytesOut",
-            )
+            route_filter = cls._schema_on_200.value.Element.properties.ipv6_peering_config.route_filter
+            route_filter.id = AAZStrType()
 
             return cls._schema_on_200
 
@@ -421,21 +294,6 @@ class _ListHelper:
         _schema.customer_asn = cls._schema_express_route_circuit_peering_config_read.customer_asn
         _schema.legacy_mode = cls._schema_express_route_circuit_peering_config_read.legacy_mode
         _schema.routing_registry_name = cls._schema_express_route_circuit_peering_config_read.routing_registry_name
-
-    _schema_sub_resource_read = None
-
-    @classmethod
-    def _build_schema_sub_resource_read(cls, _schema):
-        if cls._schema_sub_resource_read is not None:
-            _schema.id = cls._schema_sub_resource_read.id
-            return
-
-        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
-
-        sub_resource_read = _schema_sub_resource_read
-        sub_resource_read.id = AAZStrType()
-
-        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["List"]

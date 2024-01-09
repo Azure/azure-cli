@@ -12,19 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network express-route list-service-providers",
+    "network express-route-port link list",
 )
-class ListServiceProviders(AAZCommand):
-    """List available ExpressRoute service providers.
-
-    :example: List available ExpressRoute service providers.
-        az network express-route list-service-providers
+class List(AAZCommand):
+    """List the ExpressRouteLink sub-resources of the specified ExpressRoutePort resource.
     """
 
     _aaz_info = {
         "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/expressrouteserviceproviders", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}/links", "2023-09-01"],
         ]
     }
 
@@ -43,11 +40,21 @@ class ListServiceProviders(AAZCommand):
         cls._args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         # define Arg Group ""
+
+        _args_schema = cls._args_schema
+        _args_schema.express_route_port_name = AAZStrArg(
+            options=["--express-route-port-name"],
+            help="The name of the ExpressRoutePort resource.",
+            required=True,
+        )
+        _args_schema.resource_group = AAZResourceGroupNameArg(
+            required=True,
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.ExpressRouteServiceProvidersList(ctx=self.ctx)()
+        self.ExpressRouteLinksList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -63,7 +70,7 @@ class ListServiceProviders(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class ExpressRouteServiceProvidersList(AAZHttpOperation):
+    class ExpressRouteLinksList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -77,7 +84,7 @@ class ListServiceProviders(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/expressRouteServiceProviders",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ExpressRoutePorts/{expressRoutePortName}/links",
                 **self.url_parameters
             )
 
@@ -92,6 +99,14 @@ class ListServiceProviders(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
+                **self.serialize_url_param(
+                    "expressRoutePortName", self.ctx.args.express_route_port_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
@@ -145,53 +160,68 @@ class ListServiceProviders(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType()
-            _element.location = AAZStrType()
-            _element.name = AAZStrType(
+            _element.etag = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
 
             properties = cls._schema_on_200.value.Element.properties
-            properties.bandwidths_offered = AAZListType(
-                serialized_name="bandwidthsOffered",
+            properties.admin_state = AAZStrType(
+                serialized_name="adminState",
             )
-            properties.peering_locations = AAZListType(
-                serialized_name="peeringLocations",
+            properties.colo_location = AAZStrType(
+                serialized_name="coloLocation",
+                flags={"read_only": True},
+            )
+            properties.connector_type = AAZStrType(
+                serialized_name="connectorType",
+                flags={"read_only": True},
+            )
+            properties.interface_name = AAZStrType(
+                serialized_name="interfaceName",
+                flags={"read_only": True},
+            )
+            properties.mac_sec_config = AAZObjectType(
+                serialized_name="macSecConfig",
+            )
+            properties.patch_panel_id = AAZStrType(
+                serialized_name="patchPanelId",
+                flags={"read_only": True},
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
-
-            bandwidths_offered = cls._schema_on_200.value.Element.properties.bandwidths_offered
-            bandwidths_offered.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.bandwidths_offered.Element
-            _element.offer_name = AAZStrType(
-                serialized_name="offerName",
+            properties.rack_id = AAZStrType(
+                serialized_name="rackId",
+                flags={"read_only": True},
             )
-            _element.value_in_mbps = AAZIntType(
-                serialized_name="valueInMbps",
+            properties.router_name = AAZStrType(
+                serialized_name="routerName",
+                flags={"read_only": True},
             )
 
-            peering_locations = cls._schema_on_200.value.Element.properties.peering_locations
-            peering_locations.Element = AAZStrType()
-
-            tags = cls._schema_on_200.value.Element.tags
-            tags.Element = AAZStrType()
+            mac_sec_config = cls._schema_on_200.value.Element.properties.mac_sec_config
+            mac_sec_config.cak_secret_identifier = AAZStrType(
+                serialized_name="cakSecretIdentifier",
+            )
+            mac_sec_config.cipher = AAZStrType()
+            mac_sec_config.ckn_secret_identifier = AAZStrType(
+                serialized_name="cknSecretIdentifier",
+            )
+            mac_sec_config.sci_state = AAZStrType(
+                serialized_name="sciState",
+            )
 
             return cls._schema_on_200
 
 
-class _ListServiceProvidersHelper:
-    """Helper class for ListServiceProviders"""
+class _ListHelper:
+    """Helper class for List"""
 
 
-__all__ = ["ListServiceProviders"]
+__all__ = ["List"]

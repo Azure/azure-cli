@@ -12,20 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network express-route peering peer-connection show",
-    is_preview=True,
+    "network express-route-port link show",
 )
 class Show(AAZCommand):
-    """Get the specified Peer Express Route Circuit Connection from the specified express route circuit.
-
-    :example: Show ExpressRouteCircuit Connection
-        az network express-route peering peer-connection show --circuit-name MyCircuit --name MyPeeringConnection --peering-name MyPeering --resource-group MyResourceGroup
+    """Get the specified ExpressRouteLink resource.
     """
 
     _aaz_info = {
         "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutecircuits/{}/peerings/{}/peerconnections/{}", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}/links/{}", "2023-09-01"],
         ]
     }
 
@@ -45,21 +41,15 @@ class Show(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.circuit_name = AAZStrArg(
-            options=["--circuit-name"],
-            help="ExpressRoute circuit name.",
+        _args_schema.express_route_port_name = AAZStrArg(
+            options=["--express-route-port-name"],
+            help="The name of the ExpressRoutePort resource.",
             required=True,
             id_part="name",
         )
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="Name of the peering connection.",
-            required=True,
-            id_part="child_name_2",
-        )
-        _args_schema.peering_name = AAZStrArg(
-            options=["--peering-name"],
-            help="Name of BGP peering (i.e. AzurePrivatePeering).",
+        _args_schema.link_name = AAZStrArg(
+            options=["-n", "--name", "--link-name"],
+            help="The name of the ExpressRouteLink resource.",
             required=True,
             id_part="child_name_1",
         )
@@ -70,7 +60,7 @@ class Show(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.PeerExpressRouteCircuitConnectionsGet(ctx=self.ctx)()
+        self.ExpressRouteLinksGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -85,7 +75,7 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class PeerExpressRouteCircuitConnectionsGet(AAZHttpOperation):
+    class ExpressRouteLinksGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -99,7 +89,7 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteCircuits/{circuitName}/peerings/{peeringName}/peerConnections/{connectionName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ExpressRoutePorts/{expressRoutePortName}/links/{linkName}",
                 **self.url_parameters
             )
 
@@ -115,15 +105,11 @@ class Show(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "circuitName", self.ctx.args.circuit_name,
+                    "expressRoutePortName", self.ctx.args.express_route_port_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "connectionName", self.ctx.args.name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "peeringName", self.ctx.args.peering_name,
+                    "linkName", self.ctx.args.link_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -182,35 +168,53 @@ class Show(AAZCommand):
             _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200.type = AAZStrType(
-                flags={"read_only": True},
-            )
 
             properties = cls._schema_on_200.properties
-            properties.address_prefix = AAZStrType(
-                serialized_name="addressPrefix",
+            properties.admin_state = AAZStrType(
+                serialized_name="adminState",
             )
-            properties.auth_resource_guid = AAZStrType(
-                serialized_name="authResourceGuid",
-            )
-            properties.circuit_connection_status = AAZStrType(
-                serialized_name="circuitConnectionStatus",
+            properties.colo_location = AAZStrType(
+                serialized_name="coloLocation",
                 flags={"read_only": True},
             )
-            properties.connection_name = AAZStrType(
-                serialized_name="connectionName",
+            properties.connector_type = AAZStrType(
+                serialized_name="connectorType",
+                flags={"read_only": True},
             )
-            properties.express_route_circuit_peering = AAZObjectType(
-                serialized_name="expressRouteCircuitPeering",
+            properties.interface_name = AAZStrType(
+                serialized_name="interfaceName",
+                flags={"read_only": True},
             )
-            _ShowHelper._build_schema_sub_resource_read(properties.express_route_circuit_peering)
-            properties.peer_express_route_circuit_peering = AAZObjectType(
-                serialized_name="peerExpressRouteCircuitPeering",
+            properties.mac_sec_config = AAZObjectType(
+                serialized_name="macSecConfig",
             )
-            _ShowHelper._build_schema_sub_resource_read(properties.peer_express_route_circuit_peering)
+            properties.patch_panel_id = AAZStrType(
+                serialized_name="patchPanelId",
+                flags={"read_only": True},
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
+            )
+            properties.rack_id = AAZStrType(
+                serialized_name="rackId",
+                flags={"read_only": True},
+            )
+            properties.router_name = AAZStrType(
+                serialized_name="routerName",
+                flags={"read_only": True},
+            )
+
+            mac_sec_config = cls._schema_on_200.properties.mac_sec_config
+            mac_sec_config.cak_secret_identifier = AAZStrType(
+                serialized_name="cakSecretIdentifier",
+            )
+            mac_sec_config.cipher = AAZStrType()
+            mac_sec_config.ckn_secret_identifier = AAZStrType(
+                serialized_name="cknSecretIdentifier",
+            )
+            mac_sec_config.sci_state = AAZStrType(
+                serialized_name="sciState",
             )
 
             return cls._schema_on_200
@@ -218,21 +222,6 @@ class Show(AAZCommand):
 
 class _ShowHelper:
     """Helper class for Show"""
-
-    _schema_sub_resource_read = None
-
-    @classmethod
-    def _build_schema_sub_resource_read(cls, _schema):
-        if cls._schema_sub_resource_read is not None:
-            _schema.id = cls._schema_sub_resource_read.id
-            return
-
-        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
-
-        sub_resource_read = _schema_sub_resource_read
-        sub_resource_read.id = AAZStrType()
-
-        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Show"]
