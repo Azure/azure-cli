@@ -15,6 +15,7 @@ from importlib import import_module
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 from azure.core.exceptions import ResourceNotFoundError
+from azure.core.rest import HttpRequest
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.command_modules.mysql.random.generate import generate_username
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
@@ -27,7 +28,8 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
     cf_mysql_firewall_rules
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
     replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
-    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, GITHUB_ACTION_PATH
+    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, \
+    ImportFromStorageProgressHook, OperationProgressBar, GITHUB_ACTION_PATH
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, \
@@ -626,7 +628,8 @@ def flexible_server_import_create(cmd, client,
                                           availability_zone=zone,
                                           data_encryption=data_encryption,
                                           source_server_id=source_server_id,
-                                          import_source_properties=import_source_properties)
+                                          import_source_properties=import_source_properties,
+                                          data_source_type = data_source_type)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
@@ -1375,7 +1378,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
 
 
 def _import_create_server(db_context, cmd, resource_group_name, server_name, create_mode, source_server_id, tags, location, sku, administrator_login, administrator_login_password,
-                          storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, import_source_properties):
+                          storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, import_source_properties, data_source_type):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -1400,10 +1403,18 @@ def _import_create_server(db_context, cmd, resource_group_name, server_name, cre
         source_server_resource_id=source_server_id,
         create_mode=create_mode,
         import_source_properties=import_source_properties)
+    
+    import_poller = server_client.begin_create(resource_group_name, server_name, parameters)
+
+    import_progress_bar = None
+
+    if data_source_type.lower() == "azure_blob":
+        import_progress_bar = OperationProgressBar(cmd.cli_ctx, import_poller, ImportFromStorageProgressHook())
 
     return resolve_poller(
-        server_client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
-        '{} Server Import Create'.format(logging_name))
+        import_poller, cmd.cli_ctx, 
+        '{} Server Import Create'.format(logging_name),
+        progress_bar=import_progress_bar)
 
 
 def flexible_server_connection_string(
