@@ -401,6 +401,27 @@ def parse_docker_image_name(deployment_container_image_name, environment=None):
     return "https://{}".format(hostname)
 
 
+def check_language_runtime(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    app = client.web_apps.get(resource_group_name, name)
+    is_linux = app.reserved
+    if is_functionapp(app):
+        runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, is_linux)
+        runtime = runtime_info['app_runtime']
+        runtime_version = runtime_info['app_runtime_version']
+        functions_version = runtime_info['functionapp_version']
+        runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=is_linux, windows=(not is_linux))
+        try:
+            runtime_helper.resolve(runtime, runtime_version, functions_version, is_linux)
+        except ValidationError as e:
+            logger.warning(e.error_msg)
+
+
+def update_app_settings_functionapp(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
+    check_language_runtime(cmd, resource_group_name, name)
+    return update_app_settings(cmd, resource_group_name, name, settings, slot, slot_settings)
+
+
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
     if not settings and not slot_settings:
         raise MutuallyExclusiveArgumentError('Usage Error: --settings |--slot-settings')
@@ -550,6 +571,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
 
 
 def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
+    check_language_runtime(cmd, resource_group_name, name)
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     if app is None:
@@ -1779,6 +1801,28 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
                                                                           slot=slot))
 
 
+def update_site_configs_functionapp(cmd, resource_group_name, name, slot=None, number_of_workers=None,
+                                    linux_fx_version=None, windows_fx_version=None, pre_warmed_instance_count=None,
+                                    php_version=None, python_version=None, net_framework_version=None,
+                                    power_shell_version=None, java_version=None, java_container=None,
+                                    java_container_version=None, remote_debugging_enabled=None,
+                                    web_sockets_enabled=None, always_on=None, auto_heal_enabled=None,
+                                    use32_bit_worker_process=None, min_tls_version=None,
+                                    http20_enabled=None, app_command_line=None, ftps_state=None,
+                                    vnet_route_all_enabled=None, generic_configurations=None, min_replicas=None,
+                                    max_replicas=None):
+    check_language_runtime(cmd, resource_group_name, name)
+    return update_site_configs(cmd, resource_group_name, name, slot, number_of_workers, linux_fx_version,
+                               windows_fx_version, pre_warmed_instance_count, php_version,
+                               python_version, net_framework_version, power_shell_version,
+                               java_version, java_container, java_container_version,
+                               remote_debugging_enabled, web_sockets_enabled,
+                               always_on, auto_heal_enabled,
+                               use32_bit_worker_process, min_tls_version, http20_enabled, app_command_line,
+                               ftps_state, vnet_route_all_enabled, generic_configurations, min_replicas,
+                               max_replicas)
+
+
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
                                           image=None, registry_username=None,
                                           registry_password=None, slot=None, min_replicas=None, max_replicas=None,
@@ -1786,6 +1830,7 @@ def update_container_settings_functionapp(cmd, resource_group_name, name, regist
                                           dapr_http_max_request_size=None, dapr_http_read_buffer_size=None,
                                           dapr_log_level=None, dapr_enable_api_logging=None,
                                           workload_profile_name=None, cpu=None, memory=None):
+    check_language_runtime(cmd, resource_group_name, name)
     if is_centauri_functionapp(cmd, resource_group_name, name):
         _validate_cpu_momory_functionapp(cpu, memory)
         if any([enable_dapr, dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
