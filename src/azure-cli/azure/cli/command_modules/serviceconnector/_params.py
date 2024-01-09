@@ -29,7 +29,8 @@ from ._resource_config import (
     SUPPORTED_CLIENT_TYPE,
     TARGET_SUPPORT_SERVICE_ENDPOINT,
     TARGET_SUPPORT_PRIVATE_ENDPOINT,
-    LOCAL_CONNECTION_PARAMS
+    LOCAL_CONNECTION_PARAMS,
+    OPT_OUT_OPTION
 )
 from ._addon_factory import AddonFactory
 from knack.arguments import CLIArgumentType
@@ -191,6 +192,11 @@ def add_secret_store_argument(context):
         '--vault-id'], help='The id of key vault to store secret value')
 
 
+def add_configuration_store_argument(context):
+    context.argument('app_config_id', options_list=[
+        '--appconfig-id'], help='The app configuration id to store configuration')
+
+
 def add_vnet_block(context, target):
     if target not in TARGET_SUPPORT_SERVICE_ENDPOINT:
         context.ignore('service_endpoint')
@@ -236,6 +242,16 @@ def add_confluent_kafka_argument(context):
                      help='Name of the connection', validator=validate_kafka_params)
 
 
+def add_opt_out_argument(context):
+    context.argument('opt_out_list', options_list=['--opt-out'],
+                     default=None, nargs='+',
+                     arg_type=get_enum_type(OPT_OUT_OPTION),
+                     help='Whether to disable configuration steps. '
+                     'Add config to disbale configuration changes on source. '
+                     'Add public-network to disable public network access configuration.'
+                     )
+
+
 def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     for source in SOURCE_RESOURCES_PARAMS:
@@ -275,18 +291,22 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_auth_block(c, source, target)
                 add_new_addon_argument(c, source, target)
                 add_secret_store_argument(c)
+                add_configuration_store_argument(c)
                 add_vnet_block(c, target)
                 add_connection_string_argument(c, source, target)
                 add_customized_keys_argument(c)
+                add_opt_out_argument(c)
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)
                 add_source_resource_block(c, source)
                 add_auth_block(c, source, target)
                 add_secret_store_argument(c)
+                add_configuration_store_argument(c)
                 add_vnet_block(c, target)
                 add_connection_string_argument(c, source, target)
                 add_customized_keys_argument(c)
+                add_opt_out_argument(c)
 
         # special target resource: independent implementation
         target = RESOURCE.ConfluentKafka
@@ -295,13 +315,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             add_source_resource_block(c, source, enable_id=False)
             add_confluent_kafka_argument(c)
             add_secret_store_argument(c)
+            add_configuration_store_argument(c)
             add_customized_keys_argument(c)
+            add_opt_out_argument(c)
         with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
             add_client_type_argument(c, source, target)
             add_source_resource_block(c, source, enable_id=False)
             add_confluent_kafka_argument(c)
             add_secret_store_argument(c)
+            add_configuration_store_argument(c)
             add_customized_keys_argument(c)
+            add_opt_out_argument(c)
 
     # local connection
     with self.argument_context('connection list') as c:
@@ -337,6 +361,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             add_auth_block(c, source, target)
             add_new_addon_argument(c, source, target)
             add_secret_store_argument(c)
+            add_configuration_store_argument(c)
             add_vnet_block(c, target)
             add_local_connection_block(c)
             add_customized_keys_argument(c)
@@ -344,6 +369,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             add_client_type_argument(c, source, target)
             add_auth_block(c, source, target)
             add_secret_store_argument(c)
+            add_configuration_store_argument(c)
             add_vnet_block(c, target)
             add_local_connection_block(c)
             add_customized_keys_argument(c)
@@ -354,12 +380,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         add_client_type_argument(c, source, target)
         add_confluent_kafka_argument(c)
         add_secret_store_argument(c)
+        add_configuration_store_argument(c)
         add_local_connection_block(c, show_id=False)
         add_customized_keys_argument(c)
     with self.argument_context('connection update {}'.format(target.value)) as c:
         add_client_type_argument(c, source, target)
         add_confluent_kafka_argument(c)
         add_secret_store_argument(c)
+        add_configuration_store_argument(c)
         add_local_connection_block(c, show_id=False)
         add_customized_keys_argument(c)
     with self.argument_context('connection preview-configuration {}'.format(target.value)) as c:

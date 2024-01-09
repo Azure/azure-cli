@@ -20,7 +20,8 @@ from ._resource_config import (
     SUPPORTED_CLIENT_TYPE,
     TARGET_RESOURCES,
     AUTH_TYPE,
-    RESOURCE
+    RESOURCE,
+    OPT_OUT_OPTION,
 )
 from ._validators import (
     get_source_resource_name,
@@ -290,10 +291,12 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       user_identity_auth_info=None, system_identity_auth_info=None,
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
+                      app_config_id=None,                                    # configuration store
                       service_endpoint=None,
                       private_endpoint=None,
                       store_in_connection_string=False,
                       customized_keys=None,
+                      opt_out_list=None,
                       new_addon=False, no_wait=False,
                       cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
                       site=None, slot=None,                                  # Resource.WebApp
@@ -306,6 +309,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       namespace=None,                                        # Resource.EventHub
                       webpubsub=None,                                        # Resource.WebPubSub
                       signalr=None,                                          # Resource.SignalR
+                      appinsights=None,                                      # Resource.AppInsights
+                      target_app_name=None,                                  # Resource.ContainerAppAsTarget
                       ):
 
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
@@ -326,7 +331,9 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                                       store_in_connection_string,
                                                       new_addon, no_wait,
                                                       cluster, scope, enable_csi,
-                                                      customized_keys=customized_keys)
+                                                      customized_keys=customized_keys,
+                                                      app_config_id=app_config_id,
+                                                      opt_out_list=opt_out_list)
         raise CLIInternalError("Fail to install `serviceconnector-passwordless` extension. Please manually install it"
                                " with `az extension add --name serviceconnector-passwordless --upgrade`"
                                " and rerun the command")
@@ -344,6 +351,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                   # Resource.KubernetesCluster
                                   cluster, scope, enable_csi,
                                   customized_keys=customized_keys,
+                                  app_config_id=app_config_id,
+                                  opt_out_list=opt_out_list,
                                   )
 
 
@@ -374,6 +383,8 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            signalr=None,                                          # Resource.SignalR
                            enable_mi_for_db_linker=None,
                            customized_keys=None,
+                           app_config_id=None,
+                           opt_out_list=None,
                            **kwargs,
                            ):
     if not source_id:
@@ -390,6 +401,11 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         else:
             logger.warning('client_type is not dotnet, ignore "--config-connstr"')
 
+    config_action = 'optOut' if (opt_out_list is not None and
+                                 OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
+    public_network_action = 'optOut' if (opt_out_list is not None and
+                                         OPT_OUT_OPTION.PUBLIC_NETWORK.value in opt_out_list) else None
+
     parameters = {
         'target_service': {
             "type": "AzureResource",
@@ -402,7 +418,14 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         'client_type': client_type,
         'scope': scope,
         'configurationInfo': {
-            'customizedKeys': customized_keys
+            'customizedKeys': customized_keys,
+            'configurationStore': {
+                'appConfigurationId': app_config_id,
+            },
+            'action': config_action
+        },
+        'publicNetworkSolution': {
+            'action': public_network_action
         }
     }
 
@@ -418,6 +441,11 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
             and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use secret-name')
+
+    if app_config_id:
+        client = set_user_token_header(client, cmd.cli_ctx)
+        from ._utils import create_app_config_connection_if_not_exist
+        create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id, scope)
 
     if service_endpoint:
         client = set_user_token_header(client, cmd.cli_ctx)
@@ -497,6 +525,7 @@ def local_connection_create(cmd, client,  # pylint: disable=too-many-locals,too-
                             namespace=None,                                        # Resource.EventHub
                             webpubsub=None,                                        # Resource.WebPubSub
                             signalr=None,                                          # Resource.SignalR
+                            appinsights=None,                                      # Resource.AppInsights
                             ):
     auth_info = get_local_conn_auth_info(secret_auth_info, secret_auth_info_auto,
                                          user_account_auth_info, service_principal_auth_info_secret)
@@ -600,6 +629,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
                       user_identity_auth_info=None, system_identity_auth_info=None,
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
+                      app_config_id=None,
                       service_endpoint=None,
                       private_endpoint=None,
                       store_in_connection_string=False,
@@ -609,6 +639,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
                       site=None, slot=None,                                   # Resource.WebApp
                       spring=None, app=None, deployment=None,                 # Resource.SpringCloud
                       customized_keys=None,
+                      opt_out_list=None,
                       ):
 
     linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
@@ -655,6 +686,12 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
 
     if linker.get('configurationInfo') and linker.get('configurationInfo').get('customizedKeys'):
         customized_keys = customized_keys or linker.get('configurationInfo').get('customizedKeys')
+
+    config_action = 'optOut' if (opt_out_list is not None and
+                                 OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
+    public_network_action = 'optOut' if (opt_out_list is not None and
+                                         OPT_OUT_OPTION.PUBLIC_NETWORK.value in opt_out_list) else None
+
     parameters = {
         'target_service': linker.get('targetService'),
         'auth_info': auth_info,
@@ -665,7 +702,14 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
         # scope can be updated in container app while cannot be updated in aks due to some limitations
         'scope': scope or linker.get('scope'),
         'configurationInfo': {
-            'customizedKeys': customized_keys
+            'customizedKeys': customized_keys,
+            'configurationStore': {
+                'appConfigurationId': app_config_id
+            },
+            'action': config_action
+        },
+        'publicNetworkSolution': {
+            'action': public_network_action
         }
     }
 
@@ -681,6 +725,11 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
     elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
             and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use secret-name')
+
+    if app_config_id:
+        client = set_user_token_header(client, cmd.cli_ctx)
+        from ._utils import create_app_config_connection_if_not_exist
+        create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id, scope)
 
     parameters['v_net_solution'] = linker.get('vNetSolution')
     if service_endpoint:
@@ -986,11 +1035,13 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                             schema_key,
                             schema_secret,
                             key_vault_id=None,
+                            app_config_id=None,
                             connection_name=None,
                             client_type=None,
                             source_resource_group=None,
                             source_id=None,
                             customized_keys=None,
+                            opt_out_list=None,
                             cluster=None, scope=None,          # Resource.Kubernetes
                             site=None, slot=None,              # Resource.WebApp
                             deployment=None,
@@ -1007,6 +1058,15 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+
+    if app_config_id:
+        client = set_user_token_header(client, cmd.cli_ctx)
+        from ._utils import create_app_config_connection_if_not_exist
+        create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id, scope)
+    config_action = 'optOut' if (opt_out_list is not None and
+                                 OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
+    public_network_action = 'optOut' if (opt_out_list is not None and
+                                         OPT_OUT_OPTION.PUBLIC_NETWORK.value in opt_out_list) else None
 
     # create bootstrap-server
     parameters = {
@@ -1028,8 +1088,15 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
         'client_type': client_type,
         'scope': scope,
         'configurationInfo': {
-            'customizedKeys': customized_keys
+            'customizedKeys': customized_keys,
+            'configurationStore': {
+                'appConfigurationId': app_config_id,
+            },
+            'action': config_action
         },
+        'publicNetworkSolution': {
+            'action': public_network_action
+        }
     }
     logger.warning('Start creating a connection for bootstrap server ...')
     server_linker = client.begin_create_or_update(resource_uri=source_id,
@@ -1057,7 +1124,12 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
             'key_vault_id': key_vault_id,
         },
         'client_type': client_type,
-        'scope': scope
+        'scope': scope,
+        'configurationInfo': {
+            'configurationStore': {
+                'appConfigurationId': app_config_id,
+            },
+        },
     }
     logger.warning('Start creating a connection for schema registry ...')
     registry_linker = client.begin_create_or_update(resource_uri=source_id,
@@ -1082,10 +1154,12 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                             schema_key=None,
                             schema_secret=None,
                             key_vault_id=None,
+                            app_config_id=None,
                             client_type=None,
                             source_resource_group=None,
                             source_id=None,
                             customized_keys=None,
+                            opt_out_list=None,
                             cluster=None,
                             site=None, slot=None,              # Resource.WebApp
                             deployment=None,
@@ -1109,6 +1183,11 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
         if server_linker.get('configurationInfo') and server_linker.get('configurationInfo').get('customizedKeys'):
             customized_keys = customized_keys or server_linker.get('configurationInfo').get('customizedKeys')
 
+        if app_config_id:
+            client = set_user_token_header(client, cmd.cli_ctx)
+            from ._utils import create_app_config_connection_if_not_exist
+            create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id)
+
         parameters = {
             'targetService': server_linker.get('targetService'),
             'auth_info': {
@@ -1123,7 +1202,10 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             # scope does not support update due to aks solution's limitation
             'scope': server_linker.get('scope'),
             'configurationInfo': {
-                'customizedKeys': customized_keys
+                'customizedKeys': customized_keys,
+                'configurationStore': {
+                    'appConfigurationId': app_config_id,
+                },
             },
         }
         if schema_registry:
@@ -1148,6 +1230,15 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
         if schema_linker.get('configurationInfo') and schema_linker.get('configurationInfo').get('customizedKeys'):
             customized_keys = customized_keys or schema_linker.get('configurationInfo').get('customizedKeys')
 
+        if app_config_id:
+            client = set_user_token_header(client, cmd.cli_ctx)
+            from ._utils import create_app_config_connection_if_not_exist
+            create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id)
+        config_action = 'optOut' if (opt_out_list is not None and
+                                     OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
+        public_network_action = 'optOut' if (opt_out_list is not None and
+                                             OPT_OUT_OPTION.PUBLIC_NETWORK.value in opt_out_list) else None
+
         parameters = {
             'targetService': schema_linker.get('targetService'),
             'auth_info': {
@@ -1160,8 +1251,15 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             },
             'client_type': client_type or schema_linker.get('clientType'),
             'configurationInfo': {
-                'customizedKeys': customized_keys
+                'customizedKeys': customized_keys,
+                'configurationStore': {
+                    'appConfigurationId': app_config_id,
+                },
+                'action': config_action
             },
+            'publicNetworkSolution': {
+                'action': public_network_action
+            }
         }
         if bootstrap_server:
             parameters['targetService'] = {
