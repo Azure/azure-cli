@@ -3810,7 +3810,7 @@ def _validate_lock_params_match_lock(
         _resource_namespace = resource.get('namespace', None)
         if _resource_group is None:
             return
-        if resource_group != _resource_group:
+        if resource_group and resource_group.lower() != _resource_group.lower():
             raise CLIError(
                 'Unexpected --resource-group for lock {}, expected {}'.format(
                     name, _resource_group))

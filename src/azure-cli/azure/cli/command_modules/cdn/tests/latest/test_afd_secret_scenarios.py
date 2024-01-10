@@ -34,7 +34,7 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                use_latest_version=False,
                                secret_version=secret_version)
 
-        secret_version = "255adcc454844929a2f95c2aa3b6c61f"
+        secret_version = "e8900af0ca17408a9b2937f548026890"
         checks = [JMESPathCheck('provisioningState', 'Succeeded')]
         self.afd_secret_create_cmd(resource_group,
                                    profile_name,
@@ -72,7 +72,7 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         # Create a secret
         secret_name = self.create_random_name(prefix='secret', length=24)
         secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc-int/secrets/localdev-multi"
-        latest_version = "255adcc454844929a2f95c2aa3b6c61f"
+        latest_version = "e8900af0ca17408a9b2937f548026890"
         checks = [JMESPathCheck('provisioningState', 'Succeeded')]
         self.afd_secret_create_cmd(resource_group,
                                    profile_name,
