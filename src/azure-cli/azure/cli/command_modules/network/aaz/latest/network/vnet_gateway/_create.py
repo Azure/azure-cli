@@ -72,8 +72,8 @@ class Create(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
-        _args_schema.enable_private_ip_address = AAZBoolArg(
-            options=["--enable-private-ip-address"],
+        _args_schema.enable_private_ip = AAZBoolArg(
+            options=["--enable-private-ip"],
             help="Whether private IP needs to be enabled on this gateway for connections or not.",
         )
         _args_schema.gateway_default_site = AAZStrArg(
@@ -474,7 +474,7 @@ class Create(AAZCommand):
                 properties.set_prop("bgpSettings", AAZObjectType)
                 properties.set_prop("customRoutes", AAZObjectType)
                 properties.set_prop("enableBgp", AAZBoolType, ".enable_bgp")
-                properties.set_prop("enablePrivateIpAddress", AAZBoolType, ".enable_private_ip_address")
+                properties.set_prop("enablePrivateIpAddress", AAZBoolType, ".enable_private_ip")
                 properties.set_prop("gatewayDefaultSite", AAZObjectType)
                 properties.set_prop("gatewayType", AAZStrType, ".gateway_type")
                 properties.set_prop("ipConfigurations", AAZListType, ".ip_configurations")

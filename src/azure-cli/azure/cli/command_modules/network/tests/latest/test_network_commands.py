@@ -6740,10 +6740,10 @@ class NetworkExtendedLocation(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet} -l eastus --address-prefix 10.1.0.0/16 --subnet-name Frontend --subnet-prefix 10.1.0.0/24')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n GatewaySubnet --address-prefix 10.1.255.0/27')
         self.cmd('network public-ip create -g {rg} -n {ip}')
-        self.cmd('network vnet-gateway create -g {rg} -n {vnet_gateway} --vnet {vnet} --public-ip-address {ip} --gateway-type Vpn --sku VpnGw2 --vpn-gateway-generation Generation2 --enable-private-ip-address true -l eastus --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {vnet_gateway} --vnet {vnet} --public-ip-address {ip} --gateway-type Vpn --sku VpnGw2 --vpn-gateway-generation Generation2 --enable-private-ip true -l eastus --no-wait')
         self.cmd('network vnet-gateway show -g {rg} -n {vnet_gateway}', checks=self.check("enablePrivateIpAddress", True))
         self.cmd('network vnet-gateway wait -g {rg} -n {vnet_gateway} --created')
-        self.cmd('network vnet-gateway update -g {rg} -n {vnet_gateway} --enable-private-ip-address false')
+        self.cmd('network vnet-gateway update -g {rg} -n {vnet_gateway} --enable-private-ip false')
         self.cmd('network vnet-gateway show -g {rg} -n {vnet_gateway}', checks=self.check("enablePrivateIpAddress", False))
 
     @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_edge_zone', location='eastus2euap')
