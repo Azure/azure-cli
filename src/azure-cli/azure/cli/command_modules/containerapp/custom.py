@@ -496,11 +496,11 @@ def update_containerapp_logic(cmd,
                         volume_mount_def["volumeName"] = volume_def["name"]
                         volume_mount_def["mountPath"] = secret_volume_mount
 
-                        if "volumes" not in new_containerapp["properties"]["template"]:
+                        if "volumes" not in new_containerapp["properties"]["template"] or new_containerapp["properties"]["template"]["volumes"] is None:
                             new_containerapp["properties"]["template"]["volumes"] = [volume_def]
                         else:
                             new_containerapp["properties"]["template"]["volumes"].append(volume_def)
-                        c["volumeMounts"] = volume_mount_def
+                        c["volumeMounts"] = [volume_mount_def]
                     else:
                         if len(c["volumeMounts"]) > 1:
                             raise ValidationError("Usage error: --secret-volume-mount can only be used with a container that has a single volume mount, to define multiple volumes and mounts please use --yaml")
@@ -819,7 +819,7 @@ def create_managed_environment(cmd,
                                hostname=None,
                                certificate_file=None,
                                certificate_password=None,
-                               enable_workload_profiles=False,
+                               enable_workload_profiles=True,
                                mtls_enabled=None,
                                no_wait=False):
     raw_parameters = locals()
@@ -2702,13 +2702,27 @@ def enable_cors_policy(cmd, name, resource_group_name, allowed_origins, allowed_
     if not containerapp_def:
         raise ResourceNotFoundError(f"The containerapp '{name}' does not exist in group '{resource_group_name}'")
 
+    reset_max_age = False
+    if max_age == "":
+        reset_max_age = True
+
     containerapp_patch = {}
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedOrigins", value=allowed_origins)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedMethods", value=allowed_methods)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedHeaders", value=allowed_headers)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "exposeHeaders", value=expose_headers)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowCredentials", value=allow_credentials)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "maxAge", value=max_age)
+    if allowed_origins is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedOrigins", value=allowed_origins)
+    if allowed_methods is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedMethods", value=allowed_methods)
+    if allowed_headers is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedHeaders", value=allowed_headers)
+    if expose_headers is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "exposeHeaders", value=expose_headers)
+    if allow_credentials is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowCredentials", value=allow_credentials)
+    if max_age is not None:
+        if reset_max_age:
+            safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "maxAge", value=None)
+        else:
+            safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "maxAge", value=max_age)
+
     try:
         r = ContainerAppClient.update(
             cmd=cmd, resource_group_name=resource_group_name, name=name, container_app_envelope=containerapp_patch, no_wait=no_wait)
@@ -3846,23 +3860,28 @@ def bind_hostname_logic(cmd, resource_group_name, name, hostname, thumbprint=Non
         raise ValidationError(message or 'Please configure the DNS records before adding the hostname.')
 
     env_name = _get_name(environment) if environment else None
+    env_rg = resource_group_name
+    if is_valid_resource_id(environment):
+        env_dict = parse_resource_id(environment)
+        env_name = env_dict.get('name')
+        env_rg = env_dict.get('resource_group')
 
     if certificate:
         if is_valid_resource_id(certificate):
             cert_id = certificate
         else:
-            certs = list_certificates(cmd, env_name, resource_group_name, location, certificate, thumbprint)
+            certs = list_certificates(cmd, env_name, env_rg, location, certificate, thumbprint)
             if len(certs) == 0:
                 msg = "'{}' with thumbprint '{}'".format(certificate, thumbprint) if thumbprint else "'{}'".format(certificate)
                 raise ResourceNotFoundError(f"The certificate {msg} does not exist in Container app environment '{env_name}'.")
             cert_id = certs[0]["id"]
     elif thumbprint:
-        certs = list_certificates(cmd, env_name, resource_group_name, location, certificate, thumbprint)
+        certs = list_certificates(cmd, env_name, env_rg, location, certificate, thumbprint)
         if len(certs) == 0:
             raise ResourceNotFoundError(f"The certificate with thumbprint '{thumbprint}' does not exist in Container app environment '{env_name}'.")
         cert_id = certs[0]["id"]
     else:  # look for or create a managed certificate if no certificate info provided
-        managed_certs = get_managed_certificates(cmd, env_name, resource_group_name, None, None)
+        managed_certs = get_managed_certificates(cmd, env_name, env_rg, None, None)
         managed_cert = [cert for cert in managed_certs if cert["properties"]["subjectName"].lower() == standardized_hostname]
         if len(managed_cert) > 0 and managed_cert[0]["properties"]["provisioningState"] in [SUCCEEDED_STATUS, PENDING_STATUS]:
             cert_id = managed_cert[0]["id"]
@@ -3871,7 +3890,7 @@ def bind_hostname_logic(cmd, resource_group_name, name, hostname, thumbprint=Non
             cert_name = None
             while not cert_name:
                 random_name = generate_randomized_managed_cert_name(standardized_hostname, env_name)
-                available = check_managed_cert_name_availability(cmd, resource_group_name, env_name, cert_name)
+                available = check_managed_cert_name_availability(cmd, env_rg, env_name, cert_name)
                 if available:
                     cert_name = random_name
             logger.warning("Creating managed certificate '%s' for %s.\nIt may take up to 20 minutes to create and issue a managed certificate.", cert_name, standardized_hostname)
@@ -3882,9 +3901,9 @@ def bind_hostname_logic(cmd, resource_group_name, name, hostname, thumbprint=Non
             while validation not in ["TXT", "CNAME", "HTTP"]:
                 validation = prompt_str('\nPlease choose one of the following domain validation methods: TXT, CNAME, HTTP\nYour answer: ').upper()
 
-            certificate_envelop = prepare_managed_certificate_envelop(cmd, env_name, resource_group_name, standardized_hostname, validation, location)
+            certificate_envelop = prepare_managed_certificate_envelop(cmd, env_name, env_rg, standardized_hostname, validation, location)
             try:
-                managed_cert = ManagedEnvironmentClient.create_or_update_managed_certificate(cmd, resource_group_name, env_name, cert_name, certificate_envelop, False, validation == 'TXT')
+                managed_cert = ManagedEnvironmentClient.create_or_update_managed_certificate(cmd, env_rg, env_name, cert_name, certificate_envelop, False, validation == 'TXT')
             except Exception as e:
                 handle_raw_exception(e)
             cert_id = managed_cert["id"]
@@ -4898,7 +4917,7 @@ def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
     return update_managed_environment(cmd, env_name, resource_group_name, workload_profile_type=workload_profile_type, workload_profile_name=workload_profile_name, min_nodes=min_nodes, max_nodes=max_nodes)
 
 
-def update_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, workload_profile_type=None, min_nodes=None, max_nodes=None):
+def update_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, min_nodes=None, max_nodes=None):
     try:
         r = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=env_name)
     except CLIError as e:
@@ -4911,7 +4930,7 @@ def update_workload_profile(cmd, resource_group_name, env_name, workload_profile
     if workload_profile_name.lower() not in workload_profiles_lower:
         raise ValidationError(f"Workload profile with name {workload_profile_name} does not exist in this environment. The workload profiles available in this environment are {','.join([p['name'] for p in workload_profiles])}")
 
-    return update_managed_environment(cmd, env_name, resource_group_name, workload_profile_type=workload_profile_type, workload_profile_name=workload_profile_name, min_nodes=min_nodes, max_nodes=max_nodes)
+    return update_managed_environment(cmd, env_name, resource_group_name, workload_profile_name=workload_profile_name, min_nodes=min_nodes, max_nodes=max_nodes)
 
 
 def delete_workload_profile(cmd, resource_group_name, env_name, workload_profile_name):
@@ -4928,11 +4947,11 @@ def delete_workload_profile(cmd, resource_group_name, env_name, workload_profile
 
     workload_profiles = [p for p in r["properties"]["workloadProfiles"] if p["name"].lower() != workload_profile_name.lower()]
 
-    r["properties"]["workloadProfiles"] = workload_profiles
-
+    managed_env_def = {}
+    safe_set(managed_env_def, "properties", "workloadProfiles", value=workload_profiles)
     try:
-        r = ManagedEnvironmentClient.create(
-            cmd=cmd, resource_group_name=resource_group_name, name=env_name, managed_environment_envelope=r)
+        r = ManagedEnvironmentClient.update(
+            cmd=cmd, resource_group_name=resource_group_name, name=env_name, managed_environment_envelope=managed_env_def)
 
         return r
     except Exception as e:

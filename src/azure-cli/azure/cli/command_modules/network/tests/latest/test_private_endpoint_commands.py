@@ -22,6 +22,7 @@ from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KV_CERTS_DIR = os.path.join(TEST_DIR, 'certs')
 
+
 class RedisCacheCredentialReplacer(RecordingProcessor):
     def process_response(self, response):
         import json
@@ -55,11 +56,10 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  checks=self.check('@[0].properties.groupId', 'vault'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_hsm_plr_rg')
-    @ManagedHSMPreparer(name_prefix='cli-test-hsm-plr-', certs_path=KV_CERTS_DIR, location='centraluseuap')
+    @ManagedHSMPreparer(name_prefix='cli-test-hsm-plr-', certs_path=KV_CERTS_DIR)
     def test_mhsm_private_link_resource(self, resource_group, managed_hsm):
         self.kwargs.update({
             'hsm': managed_hsm,
-            'loc': 'centraluseuap'
         })
         self.cmd('network private-link-resource list '
                  '--name {hsm} '
@@ -68,10 +68,10 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  checks=self.check('@[0].properties.groupId', 'managedhsm'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pe')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-pe-', location='centraluseuap')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-pe-', location='uksouth')
     def test_private_endpoint_connection_keyvault(self, resource_group):
         self.kwargs.update({
-            'loc': 'centraluseuap',
+            'loc': 'uksouth',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
             'pe': self.create_random_name('cli-pe-', 24),
@@ -214,7 +214,7 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
         self.kwargs['pe_id'] = pe['id']
 
         # Show the connection at vault side
-        keyvault = self.cmd('keyvault show --hsm-name {hsm}',
+        keyvault = self.cmd('keyvault show --hsm-name {hsm} -g {rg}',
                             checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
         self.kwargs['hsm_pe_id'] = keyvault['properties']['privateEndpointConnections'][0]['id']
 
@@ -1180,7 +1180,6 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
             self.check('length(@)', 1),
         ])
 
-
     @ResourceGroupPreparer(location='westus')
     def test_private_endpoint_connection_webapp(self, resource_group):
         self.kwargs.update({
@@ -2082,7 +2081,7 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         })
 
         # Enable private link feature on Application Gateway would require a public IP without Standard tier
-        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip}')
+        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip} --sku basic')
 
         # Create a application gateway without enable --enable-private-link
         self.cmd('network application-gateway create -g {rg} -n {appgw} '
@@ -2520,7 +2519,7 @@ def _test_private_endpoint(self, approve=True, rejected=True, list_name=True, gr
 
     # test private-link-resource
     result = self.cmd('network private-link-resource list --name {resource} -g {rg} --type {type}',
-                      checks=self.check('length(@)', '{list_num}')).get_output_in_json()
+                      checks=self.check('type(@)', 'array')).get_output_in_json()
     self.kwargs['group_id'] = result[0]['properties']['groupId'] if group_id else result[0]['groupId']
 
     # create private-endpoint
@@ -2612,7 +2611,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self, list_name=False)
 
-    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_synapse_workspace")
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_synapse_workspace", location="eastus")
     @StorageAccountPreparer(name_prefix="testpesyn")
     def test_private_endpoint_connection_synapse_workspace(self, resource_group, storage_account):
         self.kwargs.update({
@@ -2854,6 +2853,7 @@ class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_powerbi", location="eastus2")
     def test_private_endpoint_connection_powerbi_ignoreReject(self, resource_group):
         self._test_private_endpoint_connection_scenario_powerbi(resource_group, 'myPowerBIResource', 'Microsoft.PowerBI/privateLinkServicesForPowerBI', False)
+
 
 class NetworkPrivateLinkBotServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_abs_private_endpoint', random_name_length=40)
@@ -4635,7 +4635,6 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
         self.cmd('az network private-link-resource list --name {cluster_name} --resource-group {rg} --type Microsoft.DocumentDB/mongoClusters',
                  checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'MongoCluster')])
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongo_cl', random_name_length=30, location='eastus2euap')
     def test_private_endpoint_connection_cosmosdb_mongo_clusters(self, resource_group):
         from azure.mgmt.core.tools import resource_id
@@ -4756,3 +4755,149 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
             time.sleep(600) # Wait for 10 minutes
             state = self.get_provisioning_state_for_mongocluster_resource()
         print("creation succeeded!")
+
+
+class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_fspg', random_name_length=18, location='eastus2euap')
+    def test_private_link_resource_postgres_flexible_server(self, resource_group):
+        password = "aBcD1234!@#$"
+        username = "admin123"
+        self.kwargs.update({
+            'server_name': self.create_random_name(prefix='clitest', length=15),
+            'sub': self.get_subscription_id(),
+            'body': f"""{{\\"location\\": \\"eastus2euap\\", \\"sku\\": {{\\"name\\": \\"Standard_D2ds_v4\\", \\"tier\\": \\"GeneralPurpose\\"}}, \\"properties\\": {{\\"administratorLogin\\": \\"{username}\\", \\"administratorLoginPassword\\": \\"{password}\\", \\"version\\": \\"15\\", \\"storage\\": {{\\"storageSizeGB\\": 64, \\"autoGrow\\": \\"Disabled\\"}}, \\"authConfig\\": {{\\"activeDirectoryAuth\\": \\"Disabled\\", \\"passwordAuth\\": \\"Enabled\\",  \\"tenantId\\": \\"\\"}}, \\"backup\\": {{\\"backupRetentionDays\\": 7, \\"geoRedundantBackup\\": \\"Disabled\\"}}, \\"highAvailability\\": {{\\"mode\\": \\"Disabled\\"}}, \\"createMode\\": \\"Create\\"}}}}""",
+            'headers': '{\\"Content-Type\\":\\"application/json\\"}'
+        })
+
+        response = self.cmd('az rest --method "PUT" --headers "{headers}" \
+                        --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{server_name}?api-version=2023-06-01-preview" \
+                        --body "{body}"')
+
+        self.check_provisioning_state_for_postgresql_flexible_server()
+
+        self.cmd('az network private-link-resource list --name {server_name} --resource-group {rg} --type Microsoft.DBforPostgreSQL/flexibleServers',
+                 checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'postgresqlServer')])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_fspg', random_name_length=18, location='eastus2euap')
+    def test_private_endpoint_connection_postgres_flexible_server(self, resource_group):
+        from azure.mgmt.core.tools import resource_id
+        namespace = 'Microsoft.DBforPostgreSQL'
+        instance_type = 'flexibleServers'
+        resource_name = self.create_random_name(prefix='clitest', length=15)
+        target_resource_id = resource_id(
+            subscription=self.get_subscription_id(),
+            resource_group=resource_group,
+            namespace=namespace,
+            type=instance_type,
+            name=resource_name,
+        )
+        password = "aBcD1234!@#$"
+        username = "admin123"
+        self.kwargs.update({
+            'server_name': resource_name,
+            'target_resource_id': target_resource_id,
+            'location': 'eastus2euap',
+            'storage': 64,
+            'resource_type': 'Microsoft.DBforPostgreSQL/flexibleServers',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+            'sub': self.get_subscription_id(),
+            'body': f"""{{\\"location\\": \\"eastus2euap\\", \\"sku\\": {{\\"name\\": \\"Standard_D2ds_v4\\", \\"tier\\": \\"GeneralPurpose\\"}}, \\"properties\\": {{\\"administratorLogin\\": \\"{username}\\", \\"administratorLoginPassword\\": \\"{password}\\", \\"version\\": \\"15\\", \\"storage\\": {{\\"storageSizeGB\\": 64, \\"autoGrow\\": \\"Disabled\\"}}, \\"authConfig\\": {{\\"activeDirectoryAuth\\": \\"Disabled\\", \\"passwordAuth\\": \\"Enabled\\",  \\"tenantId\\": \\"\\"}}, \\"backup\\": {{\\"backupRetentionDays\\": 7, \\"geoRedundantBackup\\": \\"Disabled\\"}}, \\"highAvailability\\": {{\\"mode\\": \\"Disabled\\"}}, \\"createMode\\": \\"Create\\"}}}}""",
+            'headers': '{\\"Content-Type\\":\\"application/json\\"}'
+        })
+
+        self.cmd('az network vnet create -n {vnet} -g {rg} -l {location} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        response = self.cmd('az rest --method "PUT" --headers "{headers}" \
+                        --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{server_name}?api-version=2023-06-01-preview" \
+                        --body "{body}"')
+        self.check_provisioning_state_for_postgresql_flexible_server()
+
+        target_private_link_resource = self.cmd('az network private-link-resource list --name {server_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
+        self.kwargs.update({
+            'group_id': target_private_link_resource[0]['properties']['groupId']
+        })
+
+        # Create a private endpoint connection
+        pe = self.cmd(
+            'az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} '
+            '--connection-name {pe_connection} --private-connection-resource-id {target_resource_id} '
+            '--group-id {group_id} --manual-request').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+
+        # Show the connection at PostgreSQL side
+        list_private_endpoint_conn = self.cmd('az network private-endpoint-connection list --name {server_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
+        self.kwargs.update({
+            "pec_id": list_private_endpoint_conn[0]['id']
+        })
+
+        self.kwargs.update({
+            "pec_name": self.kwargs['pec_id'].split('/')[-1]
+        })
+        self.cmd('az network private-endpoint-connection show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+        self.cmd('az network private-endpoint-connection show --resource-name {server_name} -n {pec_name} -g {rg} --type {resource_type}')
+
+        self.cmd(
+            "az network private-endpoint-connection show --resource-name {server_name} -n {pec_name} -g {rg} --type {resource_type}",
+            checks=self.check('properties.privateLinkServiceConnectionState.status', 'Pending')
+        )
+
+        # Approve / reject private endpoint
+        self.kwargs.update({
+            'approval_desc': 'Approved.',
+            'rejection_desc': 'Rejected.'
+        })
+        self.cmd(
+            'az network private-endpoint-connection approve --resource-name {server_name} --resource-group {rg} --name {pec_name} --type {resource_type} '
+            '--description "{approval_desc}"', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+        self.cmd('az network private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+                 ])
+        self.cmd('az network private-endpoint-connection list --name {server_name} --resource-group {rg} --type {resource_type}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        # Test delete
+        self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
+
+
+    def get_provisioning_state_for_postgresql_flexible_server(self):
+        # get provisioning state
+        response = self.cmd('az rest --method "GET" \
+                        --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{server_name}?api-version=2023-06-01-preview" \
+                        ').get_output_in_json()
+
+        return response['properties']['state']
+
+
+    def check_provisioning_state_for_postgresql_flexible_server(self):
+
+        # Wait for a moment before the server provisioning has begun to avoid inaccurate 404 errors.
+        time.sleep(10) 
+        count = 0
+        print("checking status of creation...........")
+        state = self.get_provisioning_state_for_postgresql_flexible_server()
+        print(state)
+        while state!="Ready":
+            if state == "Provisioning":
+                print("instance not yet created. waiting for 1 more min...")
+                time.sleep(60) # Wait for 1 minute
+            elif (count == 15):
+                print("TimeOut after waiting for 15 mins!")
+                self.assertTrue(False)
+            count+=1
+            state = self.get_provisioning_state_for_postgresql_flexible_server()
+        print("Server creation succeeded!")

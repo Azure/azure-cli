@@ -25,7 +25,7 @@ def register_providers():
     _register_one_provider("Microsoft.Cache/Redis", "2021-06-01", True)
     # "Microsoft.Cache/redisEnterprise", "2021-03-01", True
     _register_one_provider('Microsoft.CognitiveServices/accounts', '2022-03-01', True)
-    _register_one_provider('Microsoft.Compute/diskAccesses', '2020-09-30', True)
+    _register_one_provider('Microsoft.Compute/diskAccesses', '2023-04-02', True)
     _register_one_provider('Microsoft.ContainerRegistry/registries', '2019-12-01-preview', True)
     _register_one_provider('Microsoft.Dashboard/grafana', '2022-05-01-preview', True)
     _register_one_provider('Microsoft.DBforMySQL/servers', '2018-06-01', False, '2017-12-01-preview')
@@ -81,6 +81,7 @@ def register_providers():
     _register_one_provider("Microsoft.MachineLearningServices/registries", '2022-10-01-preview', True)
     _register_one_provider('Microsoft.DBforMySQL/flexibleServers', '2022-09-30-privatepreview', False)
     _register_one_provider("Microsoft.DocumentDB/mongoClusters", '2023-03-01-preview', True)
+    _register_one_provider('Microsoft.DBforPostgreSQL/flexibleServers', '2023-06-01-preview', False)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long

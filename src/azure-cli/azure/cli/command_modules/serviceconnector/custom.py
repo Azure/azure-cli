@@ -37,8 +37,7 @@ from ._utils import (
     get_local_conn_auth_info,
     _get_azext_module,
     _get_or_add_extension,
-    springboot_migration_warning,
-    decorate_springboot_cosmossql_config
+    springboot_migration_warning
 )
 from ._credential_free import is_passwordless_command
 # pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test,too-many-statements,too-many-locals
@@ -55,7 +54,7 @@ def connection_list(client,
                     source_id=None,
                     cluster=None,
                     site=None, slot=None,
-                    spring=None, app=None, deployment='default'):
+                    spring=None, app=None, deployment=None):
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
     return auto_register(client.list, resource_uri=source_id)
@@ -109,7 +108,7 @@ def connection_show(client,
                     indentifier=None,
                     cluster=None,
                     site=None, slot=None,
-                    spring=None, app=None, deployment='default'):
+                    spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(
             err_msg.format('--source-id, --connection'))
@@ -139,7 +138,7 @@ def connection_delete(client,
                       indentifier=None,
                       cluster=None,
                       site=None, slot=None,
-                      spring=None, app=None, deployment='default',
+                      spring=None, app=None, deployment=None,
                       no_wait=False):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
@@ -175,14 +174,12 @@ def connection_list_configuration(client,
                                   indentifier=None,
                                   cluster=None,
                                   site=None, slot=None,
-                                  spring=None, app=None, deployment='default'):
+                                  spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
     configurations = auto_register(client.list_configurations,
                                    resource_uri=source_id,
                                    linker_name=connection_name)
-
-    decorate_springboot_cosmossql_config(configurations)
 
     return configurations
 
@@ -253,7 +250,7 @@ def connection_validate(cmd, client,
                         indentifier=None,
                         cluster=None,
                         site=None, slot=None,
-                        spring=None, app=None, deployment='default'):
+                        spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
 
@@ -300,7 +297,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       new_addon=False, no_wait=False,
                       cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
                       site=None, slot=None,                                  # Resource.WebApp
-                      spring=None, app=None, deployment='default',           # Resource.SpringCloud
+                      spring=None, app=None, deployment=None,                # Resource.SpringCloud
                       server=None, database=None,                            # Resource.*Postgres, Resource.*Sql*
                       vault=None,                                            # Resource.KeyVault
                       account=None,                                          # Resource.Storage*
@@ -309,6 +306,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       namespace=None,                                        # Resource.EventHub
                       webpubsub=None,                                        # Resource.WebPubSub
                       signalr=None,                                          # Resource.SignalR
+                      appinsights=None,                                      # Resource.AppInsights
                       ):
 
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
@@ -365,7 +363,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            new_addon=False, no_wait=False,
                            cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
                            site=None, slot=None,                                  # Resource.WebApp
-                           spring=None, app=None, deployment='default',           # Resource.SpringCloud
+                           spring=None, app=None, deployment=None,                # Resource.SpringCloud
                            # Resource.*Postgres, Resource.*Sql*
                            server=None, database=None,
                            vault=None,                                            # Resource.KeyVault
@@ -379,7 +377,6 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            customized_keys=None,
                            **kwargs,
                            ):
-
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
     if not new_addon and not target_id:
@@ -418,7 +415,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     if key_vault_id:
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
-        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id, scope)
     elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
             and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use secret-name')
@@ -501,6 +498,7 @@ def local_connection_create(cmd, client,  # pylint: disable=too-many-locals,too-
                             namespace=None,                                        # Resource.EventHub
                             webpubsub=None,                                        # Resource.WebPubSub
                             signalr=None,                                          # Resource.SignalR
+                            appinsights=None,                                      # Resource.AppInsights
                             ):
     auth_info = get_local_conn_auth_info(secret_auth_info, secret_auth_info_auto,
                                          user_account_auth_info, service_principal_auth_info_secret)
@@ -611,7 +609,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
                       scope=None,
                       cluster=None, enable_csi=False,                         # Resource.Kubernetes
                       site=None, slot=None,                                   # Resource.WebApp
-                      spring=None, app=None, deployment='default',            # Resource.SpringCloud
+                      spring=None, app=None, deployment=None,                 # Resource.SpringCloud
                       customized_keys=None,
                       ):
 
@@ -681,7 +679,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
     if key_vault_id:
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
-        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id, scope)
     elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
             and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use secret-name')
@@ -997,7 +995,7 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                             customized_keys=None,
                             cluster=None, scope=None,          # Resource.Kubernetes
                             site=None, slot=None,              # Resource.WebApp
-                            deployment='default',
+                            deployment=None,
                             spring=None, app=None):            # Resource.SpringCloud
 
     from ._transformers import transform_linker_properties
@@ -1092,7 +1090,7 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                             customized_keys=None,
                             cluster=None,
                             site=None, slot=None,              # Resource.WebApp
-                            deployment='default',
+                            deployment=None,
                             spring=None, app=None):            # Resource.SpringCloud
 
     # use the suffix to decide the connection type

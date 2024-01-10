@@ -68,6 +68,10 @@ CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING = "userDefinedRouting"
 CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY = "managedNATGateway"
 CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY = "userAssignedNATGateway"
 
+# load balancer backend pool type
+CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP = "nodeIP"
+CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION = "nodeIPConfiguration"
+
 # private dns zone mode
 CONST_PRIVATE_DNS_ZONE_SYSTEM = "system"
 CONST_PRIVATE_DNS_ZONE_NONE = "none"
@@ -102,6 +106,12 @@ CONST_NETWORK_PLUGIN_MODE_OVERLAY = "overlay"
 # network dataplane
 CONST_NETWORK_DATAPLANE_AZURE = "azure"
 CONST_NETWORK_DATAPLANE_CILIUM = "cilium"
+
+# network policy
+CONST_NETWORK_POLICY_AZURE = "azure"
+CONST_NETWORK_POLICY_CILIUM = "cilium"
+CONST_NETWORK_POLICY_CALICO = "calico"
+CONST_NETWORK_POLICY_NONE = "none"
 
 # consts for addons
 # http application routing

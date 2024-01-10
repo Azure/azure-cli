@@ -3,27 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
-from azure.cli.command_modules.acs.azuremonitormetrics.constants import MapToClosestMACRegion
-from azure.cli.command_modules.acs.azuremonitormetrics.dc.defaults import get_default_region, sanitize_name
+from azure.cli.command_modules.acs.azuremonitormetrics.dc.defaults import get_default_dcr_name
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import (
-    DC_TYPE,
     DC_API
 )
 from knack.util import CLIError
 
 
-def get_default_dcr_name(cmd, mac_region, cluster_name):
-    region = get_default_region(cmd)
-    if dict.get(MapToClosestMACRegion, mac_region):
-        region = MapToClosestMACRegion[mac_region]
-    default_dcr_name = "MSProm-" + region + "-" + cluster_name
-    return sanitize_name(default_dcr_name, DC_TYPE.DCR, 64)
-
-
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements,line-too-long
 def create_dcr(cmd, mac_region, azure_monitor_workspace_resource_id, cluster_subscription, cluster_resource_group_name, cluster_name, dce_resource_id):
     from azure.cli.core.util import send_raw_request
-    dcr_name = get_default_dcr_name(cmd, mac_region, cluster_name)
+    dcr_name = get_default_dcr_name(mac_region, cluster_name)
     dcr_resource_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Insights/dataCollectionRules/{2}".format(
         cluster_subscription,
         cluster_resource_group_name,

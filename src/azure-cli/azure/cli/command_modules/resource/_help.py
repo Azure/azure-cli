@@ -70,7 +70,6 @@ short-summary: Backfill Tenant Subscription Operations for Management Groups
 helps['account management-group tenant-backfill get'] = """
 type: command
 short-summary: Get the backfill status for a tenant.
-long-summary: Get the backfill status for a tenant.
 examples:
   - name: Get the backfill status for a tenant.
     text: >
@@ -80,7 +79,6 @@ examples:
 helps['account management-group tenant-backfill start'] = """
 type: command
 short-summary: Start backfilling subscriptions for a tenant.
-long-summary: Start backfilling subscriptions for a tenant.
 examples:
   - name: Start backfilling subscriptions for a tenant.
     text: >
@@ -90,7 +88,6 @@ examples:
 helps['account management-group check-name-availability'] = """
 type: command
 short-summary: Check if a Management Group Name is Valid.
-long-summary: Check if a Management Group Name is Valid.
 parameters:
   - name: --name -n
     type: string
@@ -104,7 +101,6 @@ examples:
 helps['account management-group create'] = """
 type: command
 short-summary: Create a new management group.
-long-summary: Create a new management group.
 parameters:
   - name: --name -n
     type: string
@@ -133,7 +129,6 @@ examples:
 helps['account management-group delete'] = """
 type: command
 short-summary: Delete an existing management group.
-long-summary: Delete an existing management group.
 parameters:
   - name: --name -n
     type: string
@@ -146,8 +141,7 @@ examples:
 
 helps['account management-group list'] = """
 type: command
-short-summary: List all management groups.
-long-summary: List of all management groups in the current tenant.
+short-summary: List all management groups in the current tenant.
 examples:
   - name: List all management groups
     text: >
@@ -156,8 +150,7 @@ examples:
 
 helps['account management-group show'] = """
 type: command
-short-summary: Get a specific management group.
-long-summary: Get the details of the management group.
+short-summary: Get the details of the management group.
 parameters:
   - name: --name -n
     type: string
@@ -188,7 +181,6 @@ short-summary: Subscription operations for Management Groups.
 helps['account management-group subscription add'] = """
 type: command
 short-summary: Add a subscription to a management group.
-long-summary: Add a subscription to a management group.
 parameters:
   - name: --name -n
     type: string
@@ -205,7 +197,6 @@ examples:
 helps['account management-group subscription show'] = """
 type: command
 short-summary: Show the details of a subscription under a known management group.
-long-summary: Show the details of a subscription under a known management group.
 parameters:
   - name: --name -n
     type: string
@@ -222,7 +213,6 @@ examples:
 helps['account management-group subscription show-sub-under-mg'] = """
 type: command
 short-summary: Get the subscription under a management group.
-long-summary: Get the subscription under a management group.
 parameters:
   - name: --name -n
     type: string
@@ -241,7 +231,6 @@ short-summary: Entity operations (Management Group and Subscriptions) for Manage
 helps['account management-group entities list'] = """
 type: command
 short-summary: List all entities for the authenticated user.
-long-summary: List all entities for the authenticated user.
 examples:
   - name: List all entities for the authenticated user.
     text: >
@@ -251,7 +240,6 @@ examples:
 helps['account management-group subscription remove'] = """
 type: command
 short-summary: Remove an existing subscription from a management group.
-long-summary: Remove an existing subscription from a management group.
 parameters:
   - name: --name -n
     type: string
@@ -268,7 +256,6 @@ examples:
 helps['account management-group update'] = """
 type: command
 short-summary: Update an existing management group.
-long-summary: Update an existing management group.
 parameters:
   - name: --name -n
     type: string
@@ -299,7 +286,6 @@ short-summary: Provide operations for hierarchy settings defined at the manageme
 helps['account management-group hierarchy-settings create'] = """
 type: command
 short-summary: Create hierarchy settings defined at the Management Group level.
-long-summary: Create hierarchy settings defined at the Management Group level.
 parameters:
   - name: --name -n
     type: string
@@ -328,7 +314,6 @@ examples:
 helps['account management-group hierarchy-settings list'] = """
 type: command
 short-summary: Get all the hierarchy settings defined at the Management Group level.
-long-summary: Get all the hierarchy settings defined at the Management Group level.
 parameters:
   - name: --name -n
     type: string
@@ -342,7 +327,6 @@ examples:
 helps['account management-group hierarchy-settings delete'] = """
 type: command
 short-summary: Delete the hierarchy settings defined at the Management Group level.
-long-summary: Delete the hierarchy settings defined at the Management Group level.
 parameters:
   - name: --name -n
     type: string
@@ -356,7 +340,6 @@ examples:
 helps['account management-group hierarchy-settings update'] = """
 type: command
 short-summary: Update the hierarchy settings defined at the Management Group level.
-long-summary: Update the hierarchy settings defined at the Management Group level.
 parameters:
   - name: --name -n
     type: string
@@ -2734,7 +2717,7 @@ helps['bicep'] = """
 type: group
 short-summary: Bicep CLI command group.
 long-summary: |
-  Bicep CLI command group. There are two configurations that can be set for the command group, including bicep.check_version and bicep.use_binary_from_path:
+  There are two configurations that can be set for the command group, including bicep.check_version and bicep.use_binary_from_path:
 
   [1] az config set bicep.check_version=True/False
       Turn on/off Bicep CLI version check when executing az bicep commands.
@@ -2854,6 +2837,8 @@ examples:
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag} --force"
   - name: Publish a bicep file with documentation uri.
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --documentationUri {documentationUri}
+  - name: Publish a bicep file with documentation uri and include source code
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --documentationUri {documentationUri} --with-source
 """
 
 helps['bicep restore'] = """

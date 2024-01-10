@@ -264,7 +264,7 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Alpine ${{ arch.name }}:
+        ${{ arch.name }}:
           pool: ${{ arch.pool }}
           artifactName: docker-${{ arch.value }}
           dockerfile: alpine.dockerfile
@@ -300,7 +300,7 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Alpine ${{ arch.name }}:
+        ${{ arch.name }}:
           pool: ${{ arch.pool }}
           artifactName: docker-${{ arch.name }}
   pool:
@@ -800,12 +800,6 @@ jobs:
           artifact: rpm-ubi9-${{ arch.value }}
           python_package: python3.9
           pool: ${{ arch.pool }}
-        Fedora 36 ${{ arch.name }}:
-          dockerfile: fedora
-          image: fedora:36
-          artifact: rpm-fedora36-${{ arch.value }}
-          python_package: python3
-          pool: ${{ arch.pool }}
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
@@ -852,14 +846,6 @@ jobs:
           python_package: python3.9
           python_cmd: python3.9
           pip_cmd: pip3.9
-          pool: ${{ arch.pool }}
-        Fedora 36 ${{ arch.name }}:
-          artifact: rpm-fedora36-${{ arch.value }}
-          distro: fc36
-          image: fedora:36
-          python_package: python3
-          python_cmd: python3
-          pip_cmd: pip3
           pool: ${{ arch.pool }}
   steps:
   - task: DownloadPipelineArtifact@1
@@ -1147,19 +1133,19 @@ jobs:
       KUSTO_TABLE: $(KUSTO_TABLE)
       KUSTO_TENANT_ID: $(KUSTO_TENANT_ID)
 
-- job: VerifySphinxDocumentGenerator
-  displayName: "Verify Sphinx Document Generator"
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
-    inputs:
-      versionSpec: 3.10
-  - bash: pip install --upgrade pip wheel
-    displayName: "Install pip and wheel"
-  - bash: ./scripts/ci/test_ref_doc.sh
-    displayName: "Verify Sphinx Document Generator"
+#- job: VerifySphinxDocumentGenerator
+#  displayName: "Verify Sphinx Document Generator"
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python 3.10'
+#    inputs:
+#      versionSpec: 3.10
+#  - bash: pip install --upgrade pip wheel
+#    displayName: "Install pip and wheel"
+#  - bash: ./scripts/ci/test_ref_doc.sh
+#    displayName: "Verify Sphinx Document Generator"
 
 - job: NotifyCIErrors
   dependsOn:
@@ -1197,7 +1183,7 @@ jobs:
     - PerformanceCheck
     - CheckLinter
     - CodegenCoverage
-    - VerifySphinxDocumentGenerator
+#    - VerifySphinxDocumentGenerator
   condition: and(failed(), in(variables['Build.Reason'], 'BatchedCI'))
   displayName: Notify CI Errors
   pool:

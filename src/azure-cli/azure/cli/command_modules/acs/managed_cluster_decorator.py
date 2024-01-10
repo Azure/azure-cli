@@ -1874,6 +1874,19 @@ class AKSManagedClusterContext(BaseAKSContext):
             "load_balancer_idle_timeout"
         )
 
+    def get_load_balancer_backend_pool_type(self) -> Union[str, None]:
+        """Obtain the value of load_balancer_backend_pool_type.
+        :return: string
+        """
+        # read the original value passed by the command
+        load_balancer_backend_pool_type = self.raw_param.get(
+            "load_balancer_backend_pool_type"
+        )
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return load_balancer_backend_pool_type
+
     def get_nat_gateway_managed_outbound_ip_count(self) -> Union[int, None]:
         """Obtain the value of nat_gateway_managed_outbound_ip_count.
 
@@ -2112,16 +2125,15 @@ class AKSManagedClusterContext(BaseAKSContext):
     def _get_network_plugin_mode(self, enable_validation: bool = False) -> Union[str, None]:
         # read the original value passed by the command
         network_plugin_mode = self.raw_param.get("network_plugin_mode")
-        # try to read the property value corresponding to the parameter from the `mc` object
 
-        # if create, try and read from the mc object
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.network_plugin_mode is not None
-            ):
-                network_plugin_mode = self.mc.network_profile.network_plugin_mode
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            not network_plugin_mode and
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.network_plugin_mode is not None
+        ):
+            network_plugin_mode = self.mc.network_profile.network_plugin_mode
 
         if enable_validation:
             # todo(tyler-lloyd) do we need any validation?
@@ -2148,10 +2160,12 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string or None
         """
-        # read the original value passed by the command
+
         network_plugin = self.raw_param.get("network_plugin")
+
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
+            not network_plugin and
             self.mc and
             self.mc.network_profile and
             self.mc.network_profile.network_plugin is not None
@@ -2205,6 +2219,12 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
 
         return self._get_network_plugin(enable_validation=True)
+
+    def get_network_policy(self) -> Union[str, None]:
+        """Get the value of network_dataplane.
+        :return: str or None
+        """
+        return self.raw_param.get("network_policy")
 
     def get_network_dataplane(self) -> Union[str, None]:
         """Get the value of network_dataplane.
@@ -5339,6 +5359,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             self.context.get_load_balancer_outbound_ip_prefixes(),
             self.context.get_load_balancer_outbound_ports(),
             self.context.get_load_balancer_idle_timeout(),
+            self.context.get_load_balancer_backend_pool_type(),
             models=self.models.load_balancer_models,
         )
 
@@ -6594,6 +6615,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 outbound_ip_prefixes=self.context.get_load_balancer_outbound_ip_prefixes(),
                 outbound_ports=self.context.get_load_balancer_outbound_ports(),
                 idle_timeout=self.context.get_load_balancer_idle_timeout(),
+                backend_pool_type=self.context.get_load_balancer_backend_pool_type(),
                 profile=mc.network_profile.load_balancer_profile,
                 models=self.models.load_balancer_models)
         return mc
@@ -6779,6 +6801,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         if network_plugin_mode:
             mc.network_profile.network_plugin_mode = network_plugin_mode
 
+        network_plugin = self.context.get_network_plugin()
+        if network_plugin:
+            mc.network_profile.network_plugin = network_plugin
+
         (
             pod_cidr,
             _,
@@ -6793,6 +6819,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         if pod_cidr:
             mc.network_profile.pod_cidr = pod_cidr
+
+        network_policy = self.context.get_network_policy()
+        if network_policy:
+            mc.network_profile.network_policy = network_policy
+
         return mc
 
     def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:

@@ -31,7 +31,8 @@ def load_arguments(self, _):
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction)
     from azure.cli.command_modules.resource.parameters import TagUpdateOperation
 
-    ExemptionCategory = self.get_models('ExemptionCategory', operation_group='policy_exemptions')
+    ExemptionCategory = self.get_models('ExemptionCategory', resource_type=ResourceType.MGMT_RESOURCE_POLICY,
+                                        operation_group='policy_exemptions')
     DeploymentMode, WhatIfResultFormat, ChangeType = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType')
 
     # BASIC PARAMETER CONFIGURATION
@@ -845,6 +846,7 @@ def load_arguments(self, _):
                                                       help="The target location where the Bicep module will be published."))
         c.argument('documentationUri', arg_type=CLIArgumentType(options_list=['--documentationUri', '-d'],
                                                                 help="The documentation uri of the Bicep module."))
+        c.argument('with_source', options_list=['--with-source'], action='store_true', help="Publish source code with the module.", is_preview=True)
         c.argument('force', arg_type=bicep_force_type, help="Allow overwriting an existing Bicep module version.")
 
     with self.argument_context('bicep install') as c:
