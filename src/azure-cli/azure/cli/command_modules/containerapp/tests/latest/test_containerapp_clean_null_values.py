@@ -28,6 +28,7 @@ class UtilsTest(unittest.TestCase):
         test_dict = {
             "properties": {
                 "environmentId": None,
+                "test": {},
                 "configuration": {
                     "secrets": None,
                     "activeRevisionsMode": None,
@@ -70,6 +71,7 @@ class UtilsTest(unittest.TestCase):
         test_dict = {
             "properties": {
                 "environmentId": None,
+                "test": {},
                 "configuration": {
                     "secrets": None,
                     "activeRevisionsMode": "Single",
@@ -126,6 +128,9 @@ class UtilsTest(unittest.TestCase):
         test_dict = {
             "properties": {
                 "environmentId": None,
+                "test": {
+                    "secrets": "secretTest",
+                },
                 "configuration": {
                     "secrets": None,
                     "activeRevisionsMode": "Single",
@@ -161,6 +166,9 @@ class UtilsTest(unittest.TestCase):
         result_old = old_clean_null_values(test_dict)
         expect_result_for_new = {
             'properties': {
+                "test": {
+                    "secrets": "secretTest",
+                },
                 'configuration': {
                     'activeRevisionsMode': 'Single',
                     'ingress': {
@@ -179,6 +187,9 @@ class UtilsTest(unittest.TestCase):
         }
         expect_result_for_old = {
             'properties': {
+                "test": {
+                    "secrets": "secretTest",
+                },
                 'configuration': {
                     'activeRevisionsMode': 'Single',
                     'ingress': {

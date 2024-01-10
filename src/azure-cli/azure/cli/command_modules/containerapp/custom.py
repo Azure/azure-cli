@@ -1565,6 +1565,10 @@ def start_containerappjob_execution_yaml(cmd, name, resource_group_name, file_na
 
     containerappjobexec_def = _convert_object_from_snake_to_camel_case(_object_to_dict(containerappjobexec_def))
 
+    # Remove "additionalProperties" and read-only attributes that are introduced in the deserialization. Need this since we're not using SDK
+    _remove_additional_attributes(containerappjobexec_def)
+    _remove_readonly_attributes(containerappjobexec_def)
+
     # Clean null values since this is an update
     containerappjobexec_def = clean_null_values(containerappjobexec_def)
 

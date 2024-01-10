@@ -944,7 +944,7 @@ def _remove_readonly_attributes(containerapp_def):
     for unneeded_property in unneeded_properties:
         if unneeded_property in containerapp_def:
             del containerapp_def[unneeded_property]
-        elif unneeded_property in containerapp_def['properties']:
+        elif containerapp_def.get('properties') and unneeded_property in containerapp_def.get('properties'):
             del containerapp_def['properties'][unneeded_property]
 
 
@@ -954,7 +954,7 @@ def clean_null_values(d):
         return {
             k: v
             for k, v in ((k, clean_null_values(v)) for k, v in d.items())
-            if (isinstance(v, dict) and len(v.items()) > 0) or (not isinstance(v, dict) and v is not None) or isinstance(v, list)
+            if (isinstance(v, dict) and len(v.items()) > 0) or (not isinstance(v, dict) and v is not None)
         }
     if isinstance(d, list):
         return [v for v in map(clean_null_values, d) if v]
