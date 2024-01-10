@@ -1094,7 +1094,10 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
             'key_vault_id': key_vault_id,
         },
         'client_type': client_type,
-        'scope': scope
+        'scope': scope,
+        'configurationInfo': {
+            'action': config_action
+        }
     }
     logger.warning('Start creating a connection for schema registry ...')
     registry_linker = client.begin_create_or_update(resource_uri=source_id,
@@ -1129,6 +1132,11 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                             deployment=None,
                             spring=None, app=None):            # Resource.SpringCloud
 
+    config_action = 'optOut' if (opt_out_list is not None and
+                                 OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
+    public_network_action = 'optOut' if (opt_out_list is not None and
+                                         OPT_OUT_OPTION.PUBLIC_NETWORK.value in opt_out_list) else None
+
     # use the suffix to decide the connection type
     if connection_name.endswith('_schema'):  # the schema registry connection
         if schema_secret is None:
@@ -1161,7 +1169,8 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             # scope does not support update due to aks solution's limitation
             'scope': server_linker.get('scope'),
             'configurationInfo': {
-                'customizedKeys': customized_keys
+                'customizedKeys': customized_keys,
+                'action': config_action,
             },
         }
         if schema_registry:
@@ -1185,11 +1194,6 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
         if schema_linker.get('configurationInfo') and schema_linker.get('configurationInfo').get('customizedKeys'):
             customized_keys = customized_keys or schema_linker.get('configurationInfo').get('customizedKeys')
-
-        config_action = 'optOut' if (opt_out_list is not None and
-                                     OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
-        public_network_action = 'optOut' if (opt_out_list is not None and
-                                             OPT_OUT_OPTION.PUBLIC_NETWORK.value in opt_out_list) else None
 
         parameters = {
             'targetService': schema_linker.get('targetService'),
