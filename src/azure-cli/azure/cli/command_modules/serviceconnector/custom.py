@@ -387,8 +387,11 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     if not new_addon and not target_id:
         raise RequiredArgumentMissingError(err_msg.format('--target-id'))
 
+    auth_action = 'optOut' if (opt_out_list is not None and
+                                 OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
-                                         system_identity_auth_info, service_principal_auth_info_secret, new_addon)
+                                         system_identity_auth_info, service_principal_auth_info_secret, new_addon,
+                                         auth_action)
 
     if store_in_connection_string:
         if client_type == CLIENT_TYPE.Dotnet.value:
@@ -659,6 +662,8 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
     if client_type is None and not all_auth_info:
         raise ValidationError(
             'Either client type or auth info should be specified to update')
+    if auth_info is not None:
+        auth_info['action'] = auth_action
 
     if linker.get('secretStore') and linker.get('secretStore').get('keyVaultId'):
         key_vault_id = key_vault_id or linker.get('secretStore').get('keyVaultId')
