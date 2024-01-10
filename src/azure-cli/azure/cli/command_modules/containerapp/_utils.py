@@ -954,7 +954,7 @@ def clean_null_values(d):
         return {
             k: v
             for k, v in ((k, clean_null_values(v)) for k, v in d.items())
-            if v is not None or isinstance(v, list)
+            if v or isinstance(v, list)
         }
     if isinstance(d, list):
         return [v for v in map(clean_null_values, d) if v]

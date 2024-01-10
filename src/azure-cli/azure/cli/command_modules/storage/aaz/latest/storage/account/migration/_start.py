@@ -18,7 +18,7 @@ class Start(AAZCommand):
     """Account Migration request can be triggered for a storage account to change its redundancy level. The migration updates the non-zonal redundant storage account to a zonal redundant account or vice-versa in order to have better reliability and availability. Zone-redundant storage (ZRS) replicates your storage account synchronously across three Azure availability zones in the primary region.
 
     :example: migration start
-        az storage account migration start --account-name "storage_account_name" -g "resource_group_name" --sku Standard_ZRS --no-wait
+        az storage account migration start --account-name "storage_account_name" -g "resource_group_name" --sku Standard_ZRS --name default --no-wait
     """
 
     _aaz_info = {

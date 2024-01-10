@@ -312,10 +312,31 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                  'To learn more about IOPS based on compute and storage, refer to IOPS in Azure Database for MySQL Flexible Server'
         )
 
+        iops_v2_arg_type = CLIArgumentType(
+            type=int,
+            options_list=['--iops'],
+            help='Value of IOPS in (operations/sec) to be allocated for this server. '
+                 'This value can only be updated if flexible server is using Premium SSD v2 Disks.'
+        )
+
+        throughput_arg_type = CLIArgumentType(
+            type=int,
+            options_list=['--throughput'],
+            help='Storage throughput in (MB/sec) for the server. '
+                 'This value can only be updated if flexible server is using Premium SSD v2 Disks.'
+        )
+
         auto_grow_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--storage-auto-grow'],
             help='Enable or disable autogrow of the storage. Default value is Enabled.'
+        )
+
+        storage_type_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['PremiumV2_LRS', 'Premium_LRS']),
+            options_list=['--storage-type'],
+            help='Storage type for the server. Allowed values are Premium_LRS and PremiumV2_LRS. Default value is Premium_LRS.'
+                 'Must set iops and throughput if using PremiumV2_LRS.'
         )
 
         auto_scale_iops_arg_type = CLIArgumentType(
@@ -538,6 +559,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', default='Enabled', arg_type=password_auth_arg_type)
                 c.argument('auto_grow', default='Disabled', arg_type=auto_grow_arg_type)
+                c.argument('storage_type', default=None, arg_type=storage_type_arg_type)
+                c.argument('iops', default=None, arg_type=iops_v2_arg_type)
+                c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
@@ -669,6 +693,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             elif command_group == 'postgres':
                 c.argument('auto_grow', arg_type=auto_grow_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
+                c.argument('iops', default=None, arg_type=iops_v2_arg_type)
+                c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', arg_type=password_auth_arg_type)
@@ -906,6 +932,28 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('file_last_written', type=int, help='Integer in hours to indicate file last modify time.', default=72)
             c.argument('max_file_size', type=int, help='The file size limitation to filter files.')
 
+        for scope in ['list', 'show', 'delete', 'approve', 'reject']:
+            with self.argument_context('{} flexible-server private-endpoint-connection {}'.format(command_group, scope)) as c:
+                c.argument('resource_group_name', arg_type=resource_group_name_type)
+                if scope == "list":
+                    c.argument('server_name', options_list=['--server-name', '-s'], id_part='name', arg_type=server_name_arg_type, required=False)
+                else:
+                    c.argument('server_name', options_list=['--server-name', '-s'], id_part='name', arg_type=server_name_arg_type, required=False,
+                               help='Name of the Server. Required if --id is not specified')
+                    c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                               help='The name of the private endpoint connection associated with the Server. '
+                               'Required if --id is not specified')
+                    c.extra('connection_id', options_list=['--id'], required=False,
+                            help='The ID of the private endpoint connection associated with the Server. '
+                            'If specified --server-name/-s and --name/-n, this should be omitted.')
+                if scope == "approve" or scope == "reject":
+                    c.argument('description', help='Comments for {} operation.'.format(scope), required=True)
+
+        for scope in ['list', 'show']:
+            with self.argument_context('{} flexible-server private-link-resource {}'.format(command_group, scope)) as c:
+                c.argument('resource_group_name', arg_type=resource_group_name_type)
+                c.argument('server_name', options_list=['--server-name', '-s'], id_part='name', arg_type=server_name_arg_type, required=False)
+
         # GTID
         if command_group == 'mysql':
             with self.argument_context('{} flexible-server gtid reset'.format(command_group)) as c:
@@ -931,6 +979,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Name of the migration.')
                     c.argument('migration_mode', arg_type=migration_id_arg_type, options_list=['--migration-mode'], required=False,
                                help='Either offline or online(with CDC) migration', choices=['offline', 'online'], default='offline')
+                    c.argument('migration_option', arg_type=migration_id_arg_type, options_list=['--migration-option'], required=False,
+                               help='Supported Migration Option. Default is ValidateAndMigrate.', choices=['Validate', 'ValidateAndMigrate', 'Migrate'], default='ValidateAndMigrate')
                     c.argument('tags', tags_type)
                     c.argument('location', arg_type=get_location_type(self.cli_ctx))
                 elif scope == "show":
