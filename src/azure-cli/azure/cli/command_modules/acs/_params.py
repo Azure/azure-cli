@@ -360,6 +360,7 @@ def load_arguments(self, _):
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('network_dataplane', arg_type=get_enum_type(network_dataplanes))
+        c.argument('network_plugin', arg_type=get_enum_type(network_plugins))
         c.argument('network_policy')
         c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
@@ -651,6 +652,22 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('snapshot_name', options_list=['--name', '-n'], required=True, validator=validate_snapshot_name, help='The nodepool snapshot name.')
             c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+
+    with self.argument_context('aks trustedaccess rolebinding') as c:
+        c.argument('cluster_name', help='The cluster name.')
+
+    for scope in ['aks trustedaccess rolebinding show', 'aks trustedaccess rolebinding create',
+                  'aks trustedaccess rolebinding update', 'aks trustedaccess rolebinding delete']:
+        with self.argument_context(scope) as c:
+            c.argument('role_binding_name', options_list=[
+                       '--name', '-n'], required=True, help='The role binding name.')
+
+    with self.argument_context('aks trustedaccess rolebinding create') as c:
+        c.argument('roles', help='comma-separated roles: Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer,...')
+        c.argument('source_resource_id', options_list=['--source-resource-id', '-r'], help='The source resource id of the binding')
+
+    with self.argument_context('aks trustedaccess rolebinding update') as c:
+        c.argument('roles', help='comma-separated roles: Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer,...')
 
 
 def _get_default_install_location(exe_name):
