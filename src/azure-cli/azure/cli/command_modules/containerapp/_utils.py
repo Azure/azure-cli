@@ -944,7 +944,7 @@ def _remove_readonly_attributes(containerapp_def):
     for unneeded_property in unneeded_properties:
         if unneeded_property in containerapp_def:
             del containerapp_def[unneeded_property]
-        elif containerapp_def.get('properties') and unneeded_property in containerapp_def.get('properties'):
+        elif unneeded_property in containerapp_def['properties']:
             del containerapp_def['properties'][unneeded_property]
 
 
