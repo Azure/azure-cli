@@ -392,7 +392,7 @@ def update_containerapp_logic(cmd,
                         e["value"] = ""
 
     update_map = {}
-    update_map['scale'] = min_replicas or max_replicas or scale_rule_name
+    update_map['scale'] = min_replicas is not None or max_replicas is not None or scale_rule_name
     update_map['container'] = image or container_name or set_env_vars is not None or remove_env_vars is not None or replace_env_vars is not None or remove_all_env_vars or cpu or memory or startup_command is not None or args is not None or secret_volume_mount is not None
     update_map['ingress'] = ingress or target_port
     update_map['registry'] = registry_server or registry_user or registry_pass
@@ -1564,6 +1564,9 @@ def start_containerappjob_execution_yaml(cmd, name, resource_group_name, file_na
         raise InvalidArgumentValueError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapp job execution YAML.') from ex
 
     containerappjobexec_def = _convert_object_from_snake_to_camel_case(_object_to_dict(containerappjobexec_def))
+
+    # Remove "additionalProperties" attributes that are introduced in the deserialization.
+    _remove_additional_attributes(containerappjobexec_def)
 
     # Clean null values since this is an update
     containerappjobexec_def = clean_null_values(containerappjobexec_def)
