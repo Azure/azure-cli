@@ -2125,16 +2125,15 @@ class AKSManagedClusterContext(BaseAKSContext):
     def _get_network_plugin_mode(self, enable_validation: bool = False) -> Union[str, None]:
         # read the original value passed by the command
         network_plugin_mode = self.raw_param.get("network_plugin_mode")
-        # try to read the property value corresponding to the parameter from the `mc` object
 
-        # if create, try and read from the mc object
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.network_plugin_mode is not None
-            ):
-                network_plugin_mode = self.mc.network_profile.network_plugin_mode
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            not network_plugin_mode and
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.network_plugin_mode is not None
+        ):
+            network_plugin_mode = self.mc.network_profile.network_plugin_mode
 
         if enable_validation:
             # todo(tyler-lloyd) do we need any validation?
@@ -2161,10 +2160,12 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string or None
         """
-        # read the original value passed by the command
+
         network_plugin = self.raw_param.get("network_plugin")
+
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
+            not network_plugin and
             self.mc and
             self.mc.network_profile and
             self.mc.network_profile.network_plugin is not None
@@ -6799,6 +6800,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         network_plugin_mode = self.context.get_network_plugin_mode()
         if network_plugin_mode:
             mc.network_profile.network_plugin_mode = network_plugin_mode
+
+        network_plugin = self.context.get_network_plugin()
+        if network_plugin:
+            mc.network_profile.network_plugin = network_plugin
 
         (
             pod_cidr,

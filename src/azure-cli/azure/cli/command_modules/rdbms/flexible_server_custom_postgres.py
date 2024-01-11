@@ -24,7 +24,8 @@ from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
     cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_servers, \
     cf_postgres_check_resource_availability_with_location, \
-    cf_postgres_flexible_private_dns_zone_suffix_operations
+    cf_postgres_flexible_private_dns_zone_suffix_operations, \
+    cf_postgres_flexible_private_endpoint_connections
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, \
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
     _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false
@@ -1088,7 +1089,7 @@ def flexible_server_list_log_files_with_filter(client, resource_group_name, serv
 
 
 def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_mode="offline",
-                          migration_name=None, tags=None, location=None):
+                          migration_name=None, migration_option=None, tags=None, location=None):
 
     logging_name = 'PostgreSQL'
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1112,7 +1113,12 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
         # Convert a UUID to a string of hex digits in standard form
         migration_name = str(uuid.uuid4())
 
-    return _create_migration(logging_name, client, subscription_id, resource_group_name, server_name, migration_name, migration_mode, migration_parameters, tags, location)
+    if migration_option is None:
+        # Use default migration_option as 'ValidateAndMigrate'
+        migration_option = "ValidateAndMigrate"
+
+    return _create_migration(logging_name, client, subscription_id, resource_group_name, server_name, migration_name,
+                             migration_mode, migration_option, migration_parameters, tags, location)
 
 
 def migration_show_func(cmd, client, resource_group_name, server_name, migration_name):
@@ -1226,6 +1232,59 @@ def virtual_endpoint_update_func(client, resource_group_name, server_name, virtu
         parameters)
 
 
+def flexible_server_approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
+                                                        description=None):
+    """Approve a private endpoint connection request for a server."""
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=True,
+        description=description)
+
+
+def flexible_server_reject_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
+                                                       description=None):
+    """Reject a private endpoint connection request for a server."""
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=False,
+        description=description)
+
+
+def flexible_server_private_link_resource_get(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Gets a private link resource for a PostgreSQL flexible server.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        group_name="postgresqlServer")
+
+
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
+    private_endpoint_connections_client = cf_postgres_flexible_private_endpoint_connections(cmd.cli_ctx, None)
+    private_endpoint_connection = private_endpoint_connections_client.get(resource_group_name=resource_group_name,
+                                                                          server_name=server_name,
+                                                                          private_endpoint_connection_name=private_endpoint_connection_name)
+    new_status = 'Approved' if is_approved else 'Rejected'
+
+    private_link_service_connection_state = {
+        'status': new_status,
+        'description': description
+    }
+
+    private_endpoint_connection.private_link_service_connection_state = private_link_service_connection_state
+
+    return client.begin_update(resource_group_name=resource_group_name,
+                               server_name=server_name,
+                               private_endpoint_connection_name=private_endpoint_connection_name,
+                               parameters=private_endpoint_connection)
+
+
 def _create_postgresql_connection_strings(host, user, password, database, port):
 
     result = {
@@ -1335,7 +1394,8 @@ def _get_pg_replica_zone(availabilityZones, sourceServerZone, replicaZone):
     return pg_replica_zone
 
 
-def _create_migration(logging_name, client, subscription_id, resource_group_name, target_db_server_name, migration_name, migration_mode, parameters, tags, location):
+def _create_migration(logging_name, client, subscription_id, resource_group_name, target_db_server_name,
+                      migration_name, migration_mode, migration_option, parameters, tags, location):
     logger.warning('Creating %s Migration for server \'%s\' in group \'%s\' and subscription \'%s\'...', logging_name, target_db_server_name, resource_group_name, subscription_id)
 
     parameter_keys = list(parameters.keys())
@@ -1343,6 +1403,8 @@ def _create_migration(logging_name, client, subscription_id, resource_group_name
     secret_parameter_keys = list(secret_parameter_dictionary.keys())
     admin_credentials_dictionary = get_case_insensitive_key_value("AdminCredentials", secret_parameter_keys, secret_parameter_dictionary)
     admin_credentials_keys = list(admin_credentials_dictionary.keys())
+    source_type = get_case_insensitive_key_value("SourceType", parameter_keys, parameters)
+    ssl_mode = get_case_insensitive_key_value("SslMode", parameter_keys, parameters)
 
     admin_credentials = postgresql_flexibleservers.models.AdminCredentials(
         source_server_password=get_case_insensitive_key_value("SourceServerPassword", admin_credentials_keys, admin_credentials_dictionary),
@@ -1359,7 +1421,10 @@ def _create_migration(logging_name, client, subscription_id, resource_group_name
         secret_parameters=secret_parameters,
         dbs_to_migrate=get_case_insensitive_key_value("DbsToMigrate", parameter_keys, parameters),
         setup_logical_replication_on_source_db_if_needed=get_enum_value_true_false(get_case_insensitive_key_value("SetupLogicalReplicationOnSourceDbIfNeeded", parameter_keys, parameters), "SetupLogicalReplicationOnSourceDbIfNeeded"),
-        overwrite_dbs_in_target=get_enum_value_true_false(get_case_insensitive_key_value("OverwriteDbsInTarget", parameter_keys, parameters), "OverwriteDbsInTarget"))
+        overwrite_dbs_in_target=get_enum_value_true_false(get_case_insensitive_key_value("OverwriteDbsInTarget", parameter_keys, parameters), "OverwriteDbsInTarget"),
+        source_type=source_type,
+        migration_option=migration_option,
+        ssl_mode=ssl_mode)
 
     return client.create(subscription_id, resource_group_name, target_db_server_name, migration_name, migration_parameters)
 
