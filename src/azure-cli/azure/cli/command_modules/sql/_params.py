@@ -31,7 +31,9 @@ from azure.mgmt.sql.models import (
     ServerConnectionType,
     ServerKeyType,
     StorageKeyType,
-    TransparentDataEncryptionState
+    TransparentDataEncryptionState,
+    FreemiumType,
+    ManagedInstanceDatabaseFormat
 )
 
 from azure.cli.core.commands.parameters import (
@@ -2285,6 +2287,18 @@ def load_arguments(self, _):
 
         c.argument('zone_redundant',
                    arg_type=zone_redundant_param_type)
+
+        c.argument('database_format', 
+                   options_list=['--database-format', '-df'],
+                   arg_type=get_enum_type(ManagedInstanceDatabaseFormat)
+                   help='Managed Instance database format specific to the SQL. Allowed values include: '
+                   'AlwaysUpToDate, SQLServer2022.')
+
+        c.argument('pricing_model', 
+                   options_list=['--pricing-model', '-pm'],
+                   arg_type=get_enum_type(FreemiumType)
+                   help='Managed Instance pricing model. Allowed values include: '
+                   'Regular, Freemium.')
 
     with self.argument_context('sql mi create') as c:
         c.argument('location',

@@ -5109,14 +5109,16 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
             'collation': ManagedInstancePreparer.collation,
             'proxy_override': "Proxy",
             'maintenance_id': self._get_full_maintenance_id(self.MMI1),
-            'intance_pool_name': ''
+            'intance_pool_name': '',
+            'database_format': 'SQLServer2022',
+            'pricing_model': 'Regular'
         })
 
         # test create sql managed_instance with FMW
         managed_instance = self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
                                     '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
-                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}" --instance-pool-name "{intance_pool_name}"',
+                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}" --instance-pool-name "{intance_pool_name}" --database_format "{database_format}" --pricing_model "{pricing_model}"',
                                     checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),
@@ -5132,7 +5134,9 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
                                         self.check('proxyOverride', '{proxy_override}'),
                                         self.check('publicDataEndpointEnabled', 'True'),
                                         self.check('maintenanceConfigurationId', self._get_full_maintenance_id(self.MMI1)),
-                                        self.check('instancePoolId', None)]).get_output_in_json()
+                                        self.check('instancePoolId', None),
+                                        self.check('database_format', '{database_format}'),
+                                        self.check('pricing_model', '{pricing_model}')]).get_output_in_json()
 
         # test delete sql managed instance 2
         self.cmd('sql mi delete --ids {} --yes'
