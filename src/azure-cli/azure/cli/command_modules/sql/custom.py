@@ -3207,6 +3207,7 @@ def restore_long_term_retention_backup(
         target_database_name,
         target_server_name,
         target_resource_group_name,
+        sku,
         assign_identity=False,
         user_assigned_identity_id=None,
         keys=None,
@@ -3225,10 +3226,23 @@ def restore_long_term_retention_backup(
     if not long_term_retention_backup_resource_id:
         raise CLIError('Please specify a long term retention backup.')
 
+    backup_name = long_term_retention_backup_resource_id.split("/")[-1].split(";")
+    if len(backup_name) == 3 and backup_name[-1] != "Hot":
+        raise CLIError('Restore operation on "' + backup_name[-1] + '" backup is not allowed. '
+                       'Only "Hot" backups can be restored')
+
     kwargs['location'] = _get_server_location(
         cmd.cli_ctx,
         server_name=target_server_name,
         resource_group_name=target_resource_group_name)
+
+    # If sku.name is not specified, resolve the requested sku name
+    # using capabilities.
+    kwargs['sku'] = _find_db_sku_from_capabilities(
+        cmd.cli_ctx,
+        kwargs['location'],
+        sku,
+        compute_model=kwargs['compute_model'])
 
     kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id

@@ -1284,6 +1284,7 @@ def load_arguments(self, _):
 
         c.argument('backup_storage_access_tier',
                    options_list=['--access-tier', '--backup-storage-access-tier'],
+                   arg_type=get_enum_type(["Hot", "Archive"]),
                    help='The access tier of a LTR backup.'
                    'Possible values = [Hot, Archive]')
 
