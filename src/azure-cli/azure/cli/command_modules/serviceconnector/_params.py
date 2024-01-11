@@ -241,9 +241,9 @@ def add_opt_out_argument(context):
     context.argument('opt_out_list', options_list=['--opt-out'],
                      default=None, nargs='+',
                      arg_type=get_enum_type(OPT_OUT_OPTION),
-                     help='Whether to disable configuration steps. '
-                     'Add config to disbale configuration changes on source. '
-                     'Add public-network to disable public network access configuration.'
+                     help='Whether to disable some configuration steps. '
+                     'Use configinfo to disbale configuration information changes on source. '
+                     'Use publicnetwork to disable public network access configuration.'
                      )
 
 
