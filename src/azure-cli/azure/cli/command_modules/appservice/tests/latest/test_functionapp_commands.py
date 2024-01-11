@@ -451,6 +451,74 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         ])
 
 
+class FunctionWorkloadProfile(ScenarioTest):
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="westus")
+    @StorageAccountPreparer()
+    def test_functionapp_workloadprofiles(self, resource_group, storage_account):
+        
+        location = "NorthCentralUS(Stage)"
+        functionapp_name = self.create_random_name(
+            'functionapp', 32)
+        managed_environment_name = self.create_random_name(
+            'managedenvironment', 40
+        )
+        workload_profile_name = self.create_random_name(
+            'wlp', 15
+        )
+        
+        workload_profile_name_2 = self.create_random_name(
+            'wlp', 15
+        )
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {} --enable-workload-profiles  --logs-destination none'.format(
+            managed_environment_name,
+            resource_group,
+            location,
+        ))
+        
+        self.cmd('containerapp env workload-profile add --name {} --resource-group {} --workload-profile-type D4 -w {} --min-nodes 3 --max-nodes 6'.format(
+            managed_environment_name,
+            resource_group,
+            workload_profile_name
+        ))
+        
+        self.cmd('containerapp env workload-profile add --name {} --resource-group {} --workload-profile-type D4 -w {} --min-nodes 3 --max-nodes 6'.format(
+            managed_environment_name,
+            resource_group,
+            workload_profile_name_2
+        ))
+
+        self.cmd('functionapp create -g {} -n {} -s {} --functions-version 4 --runtime dotnet-isolated --environment {} --workload-profile-name {} --cpu 1.0 --memory 1.0Gi'.format(
+            resource_group,
+            functionapp_name,
+            storage_account,
+            managed_environment_name,
+            workload_profile_name
+        )).assert_with_checks([
+            JMESPathCheck('resourceConfig.cpu', 1.0),
+            JMESPathCheck('resourceConfig.memory', '1Gi'),
+            JMESPathCheck('workloadProfileName', workload_profile_name)
+            ])
+        
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck('resourceConfig.cpu', 1.0),
+            JMESPathCheck('resourceConfig.memory', '1Gi'),
+            JMESPathCheck('workloadProfileName', workload_profile_name),
+        ])
+
+        self.cmd('functionapp config container set -g {} -n {} --workload-profile-name {} --cpu 0.75 --memory 2.0Gi'.format(
+            resource_group,
+            functionapp_name,
+            workload_profile_name_2
+        ))
+
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck('resourceConfig.cpu', 0.75),
+            JMESPathCheck('resourceConfig.memory', '2Gi'),
+            JMESPathCheck('workloadProfileName', workload_profile_name_2),
+        ])
+
 class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1123,6 +1191,26 @@ class FunctionAppWithAppInsightsKey(ScenarioTest):
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
+class FunctionAppWithAppInsightsConnString(ScenarioTest):
+    def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None, random_config_dir=False):
+        super().__init__(method_name, config_file, recording_name, recording_processors, replay_processors, recording_patches, replay_patches, random_config_dir)
+        self.cmd('extension add -n application-insights')
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_with_app_insights_conn_string(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(prefix='functionappwithappinsights', length=40)
+        workspace_name = self.create_random_name(prefix='existingworkspace', length=40)
+        app_insights_name = self.create_random_name(prefix='existingappinsights', length=40)
+        workspace = self.cmd('monitor log-analytics workspace create -g {} -n {} -l {}'.format(resource_group, workspace_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        app_insights = self.cmd('monitor app-insights component create --app {} --location {} --kind web -g {} --application-type web'.format(app_insights_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, resource_group)).get_output_in_json()
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --app-insights {} --functions-version 4'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account, app_insights_name))
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck(
+                "[?name=='APPLICATIONINSIGHTS_CONNECTION_STRING'].value|[0]", app_insights['connectionString'])
+        ])
+
+
 class FunctionAppASPZoneRedundant(ScenarioTest):
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_functionapp_zone_redundant_plan(self, resource_group):
@@ -1196,7 +1284,7 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
 
         app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
                                                                                     functionapp_name)).get_output_in_json()
-        self.assertTrue('APPINSIGHTS_INSTRUMENTATIONKEY' in [
+        self.assertTrue('APPLICATIONINSIGHTS_CONNECTION_STRING' in [
                         kp['name'] for kp in app_set])
         self.assertTrue('AzureWebJobsDashboard' not in [
                         kp['name'] for kp in app_set])
@@ -1216,7 +1304,7 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
 
         app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
                                                                                     functionapp_name)).get_output_in_json()
-        self.assertTrue('APPINSIGHTS_INSTRUMENTATIONKEY' not in [
+        self.assertTrue('APPLICATIONINSIGHTS_CONNECTION_STRING' not in [
                         kp['name'] for kp in app_set])
         self.assertTrue('AzureWebJobsDashboard' in [
                         kp['name'] for kp in app_set])
