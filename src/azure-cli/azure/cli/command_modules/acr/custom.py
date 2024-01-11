@@ -57,7 +57,7 @@ def acr_create(cmd,
                allow_trusted_services=None,
                allow_exports=None,
                tags=None,
-               metadata_search=None):
+               metadata_search_enabled=None):
 
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
@@ -70,7 +70,7 @@ def acr_create(cmd,
 
     Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
     registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled,
-                        zone_redundancy=zone_redundancy, tags=tags, metadata_search=metadata_search)
+                        zone_redundancy=zone_redundancy, tags=tags)
     if default_action:
         registry.network_rule_set = NetworkRuleSet(default_action=default_action)
 
@@ -79,6 +79,9 @@ def acr_create(cmd,
 
     if identity or key_encryption_key:
         _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_key)
+
+    if metadata_search_enabled is not None:
+        _configure_metadata_search(cmd, registry, metadata_search_enabled)
 
     _handle_network_bypass(cmd, registry, allow_trusted_services)
     _handle_export_policy(cmd, registry, allow_exports)
@@ -124,7 +127,7 @@ def acr_update_custom(cmd,
                       anonymous_pull_enabled=None,
                       allow_exports=None,
                       tags=None,
-                      metadata_search=None):
+                      metadata_search_enabled=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
         instance.sku = Sku(name=sku)
@@ -147,8 +150,8 @@ def acr_update_custom(cmd,
     if default_action is not None:
         _configure_default_action(cmd, instance, default_action)
 
-    if metadata_search is not None:
-        instance.metadata_search = metadata_search
+    if metadata_search_enabled is not None:
+        _configure_metadata_search(cmd, instance, metadata_search_enabled)
 
     _handle_network_bypass(cmd, instance, allow_trusted_services)
     _handle_export_policy(cmd, instance, allow_exports)
@@ -614,3 +617,7 @@ def _ensure_identity_resource_id(subscription_id, resource_group, resource):
 def list_private_link_resources(cmd, client, registry_name, resource_group_name=None):
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
     return client.list_private_link_resources(resource_group_name, registry_name)
+
+def _configure_metadata_search(cmd, registry, enabled):
+    MetadataSearch = cmd.get_models('MetadataSearch')
+    registry.metadata_search = (MetadataSearch.enabled if enabled else MetadataSearch.disabled)
