@@ -88,12 +88,17 @@ class AddSecretAuthInfoAuto(argparse.Action):
         return d
 
 
+def is_mysql_target(command_name):
+    target_name = command_name.split(' ')[-1]
+    return target_name.lower() == "mysql-flexible"
+
+
 class AddUserAssignedIdentityAuthInfo(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string)
+        action = self.get_action(values, option_string, namespace.command)
         namespace.user_identity_auth_info = action
 
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+    def get_action(self, values, option_string, command_name):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
@@ -109,22 +114,26 @@ class AddUserAssignedIdentityAuthInfo(argparse.Action):
                 d['client_id'] = v[0]
             elif kl == 'subs-id':
                 d['subscription_id'] = v[0]
+            elif is_mysql_target(command_name) and kl == 'mysql-identity-id':
+                d['mysql-identity-id'] = v[0]
             else:
                 raise ValidationError('Unsupported Key {} is provided for parameter --user-identity. All '
-                                      'possible keys are: client-id, subs-id'.format(k))
-        if len(d) != 2:
-            raise ValidationError('Required keys missing for parameter --user-identity. '
-                                  'All possible keys are: client-id, subs-id')
+                                      'possible keys are: client-id, subs-id{}'.format(
+                                          k, ', mysql-identity-id' if is_mysql_target(command_name) else ''))
+
+        if 'client_id' not in d or 'subscription_id' not in d:
+            raise ValidationError(
+                'Required keys missing for parameter --user-identity: client-id, subs-id')
         d['auth_type'] = 'userAssignedIdentity'
         return d
 
 
 class AddSystemAssignedIdentityAuthInfo(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string)
+        action = self.get_action(values, option_string, namespace.command)
         namespace.system_identity_auth_info = action
 
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+    def get_action(self, values, option_string, command_name):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
@@ -135,7 +144,7 @@ class AddSystemAssignedIdentityAuthInfo(argparse.Action):
         d = {}
         for k in properties:
             v = properties[k]
-            if k.lower() == 'mysql-identity-id':
+            if is_mysql_target(command_name) and k.lower() == 'mysql-identity-id':
                 d['mysql-identity-id'] = v[0]
             else:
                 raise ValidationError('Unsupported Key {} is provided for parameter --system-identity')
@@ -173,10 +182,10 @@ class AddUserAccountAuthInfo(argparse.Action):
 
 class AddServicePrincipalAuthInfo(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string)
+        action = self.get_action(values, option_string, namespace.command)
         namespace.service_principal_auth_info_secret = action
 
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+    def get_action(self, values, option_string, command_name):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
@@ -194,9 +203,12 @@ class AddServicePrincipalAuthInfo(argparse.Action):
                 d['principal_id'] = v[0]
             elif kl == 'secret':
                 d['secret'] = v[0]
+            elif is_mysql_target(command_name) and kl == 'mysql-identity-id':
+                d['mysql-identity-id'] = v[0]
             else:
-                raise ValidationError('Unsupported Key {} is provided for parameter --service-principal. All possible '
-                                      'keys are: client-id, object-id, secret'.format(k))
+                raise ValidationError('Unsupported Key {} is provided for parameter --service-principal. Possible '
+                                      'keys are: client-id, object-id, secret{}'.format(
+                                          k, ', mysql-identity-id' if is_mysql_target(command_name) else ''))
         if 'client_id' not in d or 'secret' not in d:
             raise ValidationError('Required keys missing for parameter --service-principal. '
                                   'Required keys are: client-id, secret')
