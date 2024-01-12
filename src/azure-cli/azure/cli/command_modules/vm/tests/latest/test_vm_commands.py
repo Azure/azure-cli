@@ -4662,11 +4662,11 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
 
 class VMSSNicScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_nics')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_nics', location='eastus')
     def test_vmss_nics(self):
 
         self.kwargs.update({
-            'vmss': 'vmss1',
+            'vmss': self.create_random_name('vmss', 10)
         })
 
         self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter --orchestration-mode Uniform')
