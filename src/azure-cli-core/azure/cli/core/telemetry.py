@@ -72,6 +72,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.poll_end_time = None
         self.allow_broker = None
         self.msal_telemetry = None
+        self.user_agent = None
 
     def add_event(self, name, properties):
         for key in self.instrumentation_key:
@@ -151,6 +152,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             'Context.Default.VS.Core.Distro.Name': _get_distro_name(),  # eg. 'CentOS Linux 8'
             'Context.Default.VS.Core.Distro.Id': _get_distro_id(),  # eg. 'centos'
             'Context.Default.VS.Core.Distro.Version': _get_distro_version(),  # eg. '8.4.2105'
+            'Context.Dafault.VS.Core.Istty': sys.stdin.isatty(),
             'Context.Default.VS.Core.User.Id': _get_installation_id(),
             'Context.Default.VS.Core.User.IsMicrosoftInternal': 'False',
             'Context.Default.VS.Core.User.IsOptedIn': 'True',
@@ -181,6 +183,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result,
                               'ClientRequestId',
                               lambda: self.application.data['headers'].get('x-ms-client-request-id', ''))
+        set_custom_properties(result, 'UserAgent', self.user_agent)
         set_custom_properties(result, 'CoreVersion', _get_core_version)
         set_custom_properties(result, 'TelemetryVersion', "2.0")
         set_custom_properties(result, 'InstallationId', _get_installation_id)
@@ -465,6 +468,12 @@ def set_broker_info(allow_broker):
 def set_msal_telemetry(msal_telemetry):
     if not _session.msal_telemetry:
         _session.msal_telemetry = msal_telemetry
+
+
+@decorators.suppress_all_exceptions()
+def set_user_agent(user_agent):
+    if not _session.user_agent:
+        _session.user_agent = user_agent
 
 
 @decorators.suppress_all_exceptions()

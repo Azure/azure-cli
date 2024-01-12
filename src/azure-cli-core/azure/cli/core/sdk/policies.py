@@ -45,6 +45,9 @@ class SafeNetworkTraceLoggingPolicy(SansIOHTTPPolicy):
                     if header.lower() in self.headers_to_redact:
                         value = '*****'
                     _LOGGER.debug("    %r: %r", header, value)
+                    if header.lower() == 'user-agent':
+                        from azure.cli.core.telemetry import set_user_agent
+                        set_user_agent(value)
                 _LOGGER.debug("Request body:")
 
                 # We don't want to log the binary data of a file upload.
