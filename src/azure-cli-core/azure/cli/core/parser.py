@@ -25,6 +25,7 @@ from knack.log import get_logger
 from knack.parser import CLICommandParser
 from knack.util import CLIError
 
+
 logger = get_logger(__name__)
 
 EXTENSION_REFERENCE = ("If the command is from an extension, "
@@ -60,6 +61,7 @@ class AzCompletionFinder(argcomplete.CompletionFinder):
                                                                                        last_wordbreak_pos)
 
 
+# pylint: disable=too-many-instance-attributes
 class AzCliCommandParser(CLICommandParser):
     """ArgumentParser implementation specialized for the Azure CLI utility."""
 
@@ -70,6 +72,7 @@ class AzCliCommandParser(CLICommandParser):
         self._suggestion_msg = []
         self.subparser_map = {}
         self.specified_arguments = []
+        self.full_command = None
         super(AzCliCommandParser, self).__init__(cli_ctx, cli_help=cli_help, **kwargs)
 
     def load_command_table(self, command_loader):
@@ -144,7 +147,10 @@ class AzCliCommandParser(CLICommandParser):
                 _parser=command_parser)
 
     def validation_error(self, message):
-        az_error = ValidationError(message)
+        cli_ctx = self._get_underlying_cli_ctx()
+
+        az_error = ValidationError(message, command=self.full_command)
+        az_error.request_error_assistance(cli_ctx)
         az_error.print_error()
         az_error.send_telemetry()
         self.exit(2)
@@ -152,24 +158,25 @@ class AzCliCommandParser(CLICommandParser):
     def error(self, message):
         # Get a recommended command from the CommandRecommender
         command_arguments = self._get_failure_recovery_arguments()
-        cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
+        cli_ctx = self._get_underlying_cli_ctx()
         recommender = CommandRecommender(*command_arguments, message, cli_ctx)
         recommender.set_help_examples(self.get_examples(self.prog))
         recommendations = recommender.provide_recommendations()
 
-        az_error = ArgumentUsageError(message)
+        az_error = ArgumentUsageError(message, command=self.full_command)
         if 'unrecognized arguments' in message:
-            az_error = UnrecognizedArgumentError(message)
+            az_error = UnrecognizedArgumentError(message, command=self.full_command)
         elif 'arguments are required' in message:
-            az_error = RequiredArgumentMissingError(message)
+            az_error = RequiredArgumentMissingError(message, command=self.full_command)
         elif 'invalid' in message:
-            az_error = InvalidArgumentValueError(message)
+            az_error = InvalidArgumentValueError(message, command=self.full_command)
 
         if '--query' in message:
             from azure.cli.core.util import QUERY_REFERENCE
             az_error.set_recommendation(QUERY_REFERENCE)
         elif recommendations:
             az_error.set_aladdin_recommendation(recommendations)
+        az_error.request_error_assistance(cli_ctx)
         az_error.print_error()
         az_error.send_telemetry()
         self.exit(2)
@@ -277,6 +284,16 @@ class AzCliCommandParser(CLICommandParser):
     def parse_known_args(self, args=None, namespace=None):
         # retrieve the raw argument list in case parsing known arguments fails.
         self._raw_arguments = args
+        if args:
+            # The shell may already process args and we may not run them directly on the shell anymore without escape.
+            # We use shlex.join to get the command line that can be run on the shell. An example is that the argument
+            # value contains spaces and we need to put quotes around them.
+            from shlex import join
+            full_raw_arguments = join(args)
+            self.full_command = f"{self.prog} {full_raw_arguments}"
+        else:
+            self.full_command = self.prog
+
         # if parsing known arguments succeeds, get the command namespace and the argument list
         self._namespace, self._raw_arguments = super().parse_known_args(args=args, namespace=namespace)
         return self._namespace, self._raw_arguments
@@ -285,9 +302,7 @@ class AzCliCommandParser(CLICommandParser):
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
         if action.choices is not None and value not in action.choices:  # pylint: disable=too-many-nested-blocks
-            # self.cli_ctx is None when self.prog is beyond 'az', such as 'az iot'.
-            # use cli_ctx from cli_help which is not lost.
-            cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
+            cli_ctx = self._get_underlying_cli_ctx()
 
             command_name_inferred = self.prog
             use_dynamic_install = 'no'
@@ -300,7 +315,7 @@ class AzCliCommandParser(CLICommandParser):
                 use_dynamic_install = try_install_extension(self, args)
                 # parser has no `command_source`, value is part of command itself
                 error_msg = "'{value}' is misspelled or not recognized by the system.".format(value=value)
-                az_error = CommandNotFoundError(error_msg)
+                az_error = CommandNotFoundError(error_msg, command=self.full_command)
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
                 if candidates:
                     # use the most likely candidate to replace the misspelled command
@@ -311,12 +326,14 @@ class AzCliCommandParser(CLICommandParser):
                 parameter = action.option_strings[0] if action.option_strings else action.dest
                 error_msg = "{prog}: '{value}' is not a valid value for '{param}'. Allowed values: {choices}.".format(
                     prog=self.prog, value=value, param=parameter, choices=', '.join([str(x) for x in action.choices]))
-                az_error = InvalidArgumentValueError(error_msg)
+                az_error = InvalidArgumentValueError(error_msg, command=self.full_command)
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
 
             command_arguments = self._get_failure_recovery_arguments(action)
             if candidates:
                 az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
+
+            az_error.request_error_assistance(cli_ctx)
 
             # recommend a command for user
             recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
@@ -335,3 +352,8 @@ class AzCliCommandParser(CLICommandParser):
             az_error.send_telemetry()
 
             self.exit(2)
+
+    def _get_underlying_cli_ctx(self):
+        # self.cli_ctx is None when self.prog is beyond 'az', such as 'az iot'.
+        # use cli_ctx from cli_help which is not lost.
+        return self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
