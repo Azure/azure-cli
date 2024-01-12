@@ -461,7 +461,7 @@ examples:
   - name: >
       Create a virtual endpoint with writer endpoint.
     text: >
-      az postgres flexible-server virtual-endpoint create --resource-group testGroup --server-name testserver --name test_virtual_endpoint --endpoint-type ReadWrite --members testReplica1
+      az postgres flexible-server virtual-endpoint create --resource-group testGroup --server-name testserver --name test-virtual-endpoint --endpoint-type ReadWrite --members testReplica1
 """
 
 helps['postgres flexible-server virtual-endpoint list'] = """
@@ -477,7 +477,7 @@ type: command
 short-summary: Get the details of a virtual endpoint.
 examples:
   - name: Get the details of a virtual endpoint.
-    text: az postgres flexible-server virtual-endpoint show --resource-group testGroup --server-name testserver --name test_virtual_endpoint
+    text: az postgres flexible-server virtual-endpoint show --resource-group testGroup --server-name testserver --name test-virtual-endpoint
 """
 
 helps['postgres flexible-server virtual-endpoint update'] = """
@@ -485,7 +485,7 @@ type: command
 short-summary: Update a virtual endpoint.
 examples:
   - name: Update a virtual endpoint.
-    text: az postgres flexible-server virtual-endpoint update --resource-group testGroup --server-name testserver --name test_virtual_endpoint --endpoint-type ReadWrite --members testReplica1
+    text: az postgres flexible-server virtual-endpoint update --resource-group testGroup --server-name testserver --name test-virtual-endpoint --endpoint-type ReadWrite --members testReplica1
 """
 
 helps['postgres flexible-server virtual-endpoint delete'] = """
@@ -493,7 +493,7 @@ type: command
 short-summary: Delete a virtual endpoint.
 examples:
   - name: Delete a virtual endpoint.
-    text: az postgres flexible-server virtual-endpoint delete --resource-group testGroup --server-name testserver --name test_virtual_endpoint
+    text: az postgres flexible-server virtual-endpoint delete --resource-group testGroup --server-name testserver --name test-virtual-endpoint
 """
 
 helps['postgres flexible-server migration'] = """
