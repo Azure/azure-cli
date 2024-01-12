@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.55.0"
+VERSION = "2.56.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -75,11 +75,11 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
     'azure-mgmt-cognitiveservices~=13.5.0',
-    'azure-mgmt-compute~=30.3.0',
+    'azure-mgmt-compute~=30.4.0',
     'azure-mgmt-containerinstance==10.1.0',
     'azure-mgmt-containerregistry==10.1.0',
     'azure-mgmt-containerservice~=28.0.0',
-    'azure-mgmt-cosmosdb==9.3.0',
+    'azure-mgmt-cosmosdb==9.4.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=10.0.0',
@@ -124,14 +124,14 @@ DEPENDENCIES = [
     'azure-mgmt-storage==21.1.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
-    'azure-mgmt-web==7.0.0',
+    'azure-mgmt-web==7.2.0',
     'azure-multiapi-storage~=1.2.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
-    'azure-synapse-artifacts~=0.17.0',
+    'azure-synapse-artifacts~=0.18.0',
     'azure-synapse-managedprivateendpoints~=0.4.0',
     'azure-synapse-spark~=0.2.0',
-    'chardet~=3.0.4',
+    'chardet~=5.2.0',
     'colorama~=0.4.4',
     # On Linux, the distribution (Ubuntu, Debian, etc) and version are checked for `az feedback`
     'distro; sys_platform == "linux"',

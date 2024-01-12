@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.command_modules.rdbms.validators import validate_private_endpoint_connection_id
 from azure.cli.core.commands import CliCommandType
 
 from azure.cli.command_modules.rdbms._client_factory import (
@@ -15,8 +16,12 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_replica,
     cf_postgres_flexible_adadmin,
     cf_postgres_flexible_migrations,
+    cf_postgres_flexible_private_endpoint_connection,
+    cf_postgres_flexible_private_endpoint_connections,
+    cf_postgres_flexible_private_link_resources,
     cf_postgres_flexible_virtual_endpoints,
-    cf_postgres_flexible_server_threat_protection_settings)
+    cf_postgres_flexible_server_threat_protection_settings,
+    cf_postgres_flexible_server_log_files)
 
 from ._transformers import (
     table_transform_output,
@@ -86,6 +91,26 @@ def load_flexibleserver_command_table(self, _):
     postgres_flexible_server_threat_protection_settings_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#ServerThreatProtectionSettingsOperations.{}',
         client_factory=cf_postgres_flexible_server_threat_protection_settings
+    )
+
+    postgres_flexible_server_log_files_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#LogFilesOperations.{}',
+        client_factory=cf_postgres_flexible_server_log_files
+    )
+
+    postgres_flexible_server_private_endpoint_connection_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#PrivateEndpointConnectionOperations.{}',
+        client_factory=cf_postgres_flexible_private_endpoint_connection
+    )
+
+    postgres_flexible_server_private_endpoint_connections_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#PrivateEndpointConnectionsOperations.{}',
+        client_factory=cf_postgres_flexible_private_endpoint_connections
+    )
+
+    postgres_flexible_server_private_link_resources_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#PrivateLinkResourcesOperations.{}',
+        client_factory=cf_postgres_flexible_private_link_resources
     )
 
     # MERU COMMANDS
@@ -188,6 +213,7 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_servers) as g:
         g.custom_command('create', 'flexible_replica_create', supports_no_wait=True)
         g.custom_command('stop-replication', 'flexible_replica_stop', confirmation=True)
+        g.custom_command('promote', 'flexible_replica_promote', confirmation=True)
 
     with self.command_group('postgres flexible-server identity', postgres_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
@@ -211,3 +237,28 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_server_threat_protection_settings) as g:
         g.custom_show_command('show', 'flexible_server_threat_protection_get', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('update', 'flexible_server_threat_protection_update', custom_command_type=flexible_servers_custom_postgres)
+
+    with self.command_group('postgres flexible-server server-logs', postgres_flexible_server_log_files_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_server_log_files) as g:
+        g.custom_command('list', 'flexible_server_list_log_files_with_filter', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('download', 'flexible_server_download_log_files', custom_command_type=flexible_servers_custom_postgres)
+
+    with self.command_group('postgres flexible-server private-endpoint-connection', postgres_flexible_server_private_endpoint_connections_sdk) as g:
+        g.command('list', 'list_by_server')
+        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
+
+    with self.command_group('postgres flexible-server private-endpoint-connection', postgres_flexible_server_private_endpoint_connection_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_private_endpoint_connection) as g:
+        g.command('delete', 'begin_delete', validator=validate_private_endpoint_connection_id)
+        g.custom_command('approve', 'flexible_server_approve_private_endpoint_connection', custom_command_type=flexible_servers_custom_postgres,
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'flexible_server_reject_private_endpoint_connection', custom_command_type=flexible_servers_custom_postgres,
+                         validator=validate_private_endpoint_connection_id)
+
+    with self.command_group('postgres flexible-server private-link-resource', postgres_flexible_server_private_link_resources_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_private_link_resources) as g:
+        g.command('list', 'list_by_server')
+        g.custom_show_command('show', 'flexible_server_private_link_resource_get', custom_command_type=flexible_servers_custom_postgres)
