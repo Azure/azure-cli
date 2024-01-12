@@ -453,8 +453,8 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
                             replicaCompletionCount: 1
                             parallelism: 1
                             scale:
-                                minExecutions: 0
-                                maxExecutions: 10
+                                minExecutions: 1
+                                maxExecutions: 11
                                 rules:
                                 - name: github-runner-test
                                   type: github-runner
@@ -527,8 +527,8 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
             JMESPathCheck('properties.template.containers[0].resources.memory', "1Gi"),
             JMESPathCheck('properties.configuration.eventTriggerConfig.replicaCompletionCount', 1),
             JMESPathCheck('properties.configuration.eventTriggerConfig.parallelism', 1),
-            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 0),
-            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 10),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 1),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 11),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].type', "github-runner"),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].metadata.runnerScope', "repo"),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].auth[0].secretRef',
@@ -556,7 +556,7 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
                             replicaCompletionCount: 2
                             parallelism: 2
                             scale:
-                                minExecutions: 5
+                                minExecutions: 0
                                 maxExecutions: 95
                                 rules:
                                 - name: github-runner-testv2
@@ -588,7 +588,7 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
             JMESPathCheck('properties.template.containers[0].image', "mcr.microsoft.com/k8se/quickstart-jobs:latest"),
             JMESPathCheck('properties.configuration.eventTriggerConfig.replicaCompletionCount', 2),
             JMESPathCheck('properties.configuration.eventTriggerConfig.parallelism', 2),
-            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 5),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 0),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 95),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].name', "github-runner-testv2"),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].metadata.runnerScope', "repo"),
