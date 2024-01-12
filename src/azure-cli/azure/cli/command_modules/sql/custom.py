@@ -2993,7 +2993,7 @@ def update_long_term_retention(
         raise CLIError('Please specify week of year for yearly retention.')
 
     if backup_storage_access_tier and backup_storage_access_tier.lower() not in BACKUP_STORAGE_ACCESS_TIERS:
-        raise CLIError('Please specify a valid backup storage access tier type for backup storage access tier.' 
+        raise CLIError('Please specify a valid backup storage access tier type for backup storage access tier.'
                        'See \'--help\' for more details.')
 
     kwargs['weekly_retention'] = weekly_retention
