@@ -759,7 +759,7 @@ examples:
 
 helps['postgres flexible-server replica stop-replication'] = """
 type: command
-short-summary: Stop replication to a read replica and make it a read/write server.
+short-summary: Stop replication to a read replica and make it a read/write server. This command is deprecated. Use 'az postgres flexible-server replica promote' instead.
 examples:
   - name: Stop replication to 'testReplicaServer' and make it a read/write server.
     text: az postgres flexible-server replica stop-replication -g testGroup -n testReplicaServer
