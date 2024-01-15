@@ -273,25 +273,25 @@ short-summary: Manage access policy assignments for Redis Cache
 helps['redis access-policy-assignment create'] = """
 type: command
 short-summary: Adds an access policy assignment to the Redis Cache
-long-summary: Usage example - az redis access-policy-assignment create -g testResourceGroup -n testCacheName --object-id 932b5c60-66e4-4fbf-b8b0-xxxxxxxxxxxx --object-id-alias testAlias --access-policy-name testAccessPolicy --access-policy-assignment testAccessPolicyAssignment
+long-summary: Usage example - az redis access-policy-assignment create -g testResourceGroup -n testCacheName --object-id 932b5c60-66e4-4fbf-b8b0-xxxxxxxxxxxx --object-id-alias testAlias --access-policy-name testAccessPolicy --assignment-name testAccessPolicyAssignment
 """
 
 helps['redis access-policy-assignment update'] = """
 type: command
 short-summary: Updates an access policy assignment of the Redis Cache
-long-summary: Usage example - az redis access-policy-assignment update -g testResourceGroup -n testCacheName --object-id 932b5c60-66e4-4fbf-b8b0-xxxxxxxxxxxx --object-id-alias testAlias --access-policy-name testAccessPolicy --access-policy-assignment testAccessPolicyAssignment
+long-summary: Usage example - az redis access-policy-assignment update -g testResourceGroup -n testCacheName --object-id 932b5c60-66e4-4fbf-b8b0-xxxxxxxxxxxx --object-id-alias testAlias --access-policy-name testAccessPolicy --assignment-name testAccessPolicyAssignment
 """
 
 helps['redis access-policy-assignment delete'] = """
 type: command
 short-summary: Deletes an access policy assignment from the Redis Cache
-long-summary: Usage example - az redis access-policy-assignment delete -g testResourceGroup -n testCacheName --access-policy-assignment testAccessPolicyAssignment
+long-summary: Usage example - az redis access-policy-assignment delete -g testResourceGroup -n testCacheName --assignment-name testAccessPolicyAssignment
 """
 
 helps['redis access-policy-assignment show'] = """
 type: command
 short-summary: Gets the detailed information about an access policy assignment of the Redis Cache
-long-summary: Usage example - az redis access-policy-assignment show -g testResourceGroup -n testCacheName --access-policy-assignment testAccessPolicyAssignment
+long-summary: Usage example - az redis access-policy-assignment show -g testResourceGroup -n testCacheName --assignment-name testAccessPolicyAssignment
 """
 
 helps['redis access-policy-assignment list'] = """

@@ -16,7 +16,7 @@ premium_size = 'P1'
 basic_size = 'C0'
 name_prefix = 'cliredis'
 # These tests rely on an already existing user assigned managed identity. You will need to create it and paste the id below:
-user_identity = '/subscriptions/3f43c5ac-2f70-4e2c-87ff-9a6822cbc0dc/resourceGroups/Test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testoscar'
+user_identity = '/subscriptions/6b9ac7d2-7f6d-4de4-962c-43fda44bc3f2/resourcegroups/kj-aad-testing/providers/Microsoft.ManagedIdentity/userAssignedIdentities/kj-aad-testing-mi'
 
 class RedisCacheTests(ScenarioTest):
 
@@ -161,7 +161,7 @@ class RedisCacheTests(ScenarioTest):
         self.assertTrue(result['permissions'] == "+get allkeys")
 
         # Create access policy assignment
-        result = self.cmd('az redis access-policy-assignment create -n {name} -g {rg} --access-policy-assignment-name {access-policy-assignment-name} --access-policy-name {access-policy-name} --object-id {object-id} --object-id-alias {object-id-alias1}').get_output_in_json()
+        result = self.cmd('az redis access-policy-assignment create -n {name} -g {rg} --assignment-name {access-policy-assignment-name} --access-policy-name {access-policy-name} --object-id {object-id} --object-id-alias {object-id-alias1}').get_output_in_json()
         self.assertTrue(result['name'] == self.kwargs['access-policy-assignment-name'])
         self.assertTrue(result['accessPolicyName'] == self.kwargs['access-policy-name'])
         self.assertTrue(result['objectId'] == self.kwargs['object-id'])
@@ -172,21 +172,21 @@ class RedisCacheTests(ScenarioTest):
         self.assertTrue(len(result) == 1)
 
         # Update access policy assignment
-        result = self.cmd('az redis access-policy-assignment update -n {name} -g {rg} --access-policy-assignment-name {access-policy-assignment-name} --access-policy-name {access-policy-name} --object-id {object-id} --object-id-alias {object-id-alias2}').get_output_in_json()
+        result = self.cmd('az redis access-policy-assignment update -n {name} -g {rg} --assignment-name {access-policy-assignment-name} --access-policy-name {access-policy-name} --object-id {object-id} --object-id-alias {object-id-alias2}').get_output_in_json()
         self.assertTrue(result['name'] == self.kwargs['access-policy-assignment-name'])
         self.assertTrue(result['accessPolicyName'] == self.kwargs['access-policy-name'])
         self.assertTrue(result['objectId'] == self.kwargs['object-id'])
         self.assertTrue(result['objectIdAlias'] == self.kwargs['object-id-alias2'])
 
         # Get access policy assignment
-        result = self.cmd('az redis access-policy-assignment show -n {name} -g {rg} --access-policy-assignment-name {access-policy-assignment-name}').get_output_in_json()
+        result = self.cmd('az redis access-policy-assignment show -n {name} -g {rg} --assignment-name {access-policy-assignment-name}').get_output_in_json()
         self.assertTrue(result['name'] == self.kwargs['access-policy-assignment-name'])
         self.assertTrue(result['accessPolicyName'] == self.kwargs['access-policy-name'])
         self.assertTrue(result['objectId'] == self.kwargs['object-id'])
         self.assertTrue(result['objectIdAlias'] == self.kwargs['object-id-alias2'])
 
         # Delete access policy assignment
-        self.cmd('az redis access-policy-assignment delete -n {name} -g {rg} --access-policy-assignment-name {access-policy-assignment-name}')
+        self.cmd('az redis access-policy-assignment delete -n {name} -g {rg} --assignment-name {access-policy-assignment-name}')
 
         # List access policy assignments
         result = self.cmd('az redis access-policy-assignment list -n {name} -g {rg}').get_output_in_json()
@@ -295,7 +295,7 @@ class RedisCacheTests(ScenarioTest):
             'storageName': "str"+randName[:-3],
             'containerName': "testcontainer",
             'userIdentity': user_identity,
-            'storageSubscriptionId': "7c4785eb-d3cf-4349-b811-8d756312d1ff",
+            'storageSubscriptionId': "6b9ac7d2-7f6d-4de4-962c-43fda44bc3f2",
             'startTime': (datetime.datetime.utcnow() - datetime.timedelta(minutes=60)).strftime(f"%Y-%m-%dT%H:%MZ"),
             'expiryTime': (datetime.datetime.utcnow() + datetime.timedelta(minutes=200)).strftime(f"%Y-%m-%dT%H:%MZ")
         }
