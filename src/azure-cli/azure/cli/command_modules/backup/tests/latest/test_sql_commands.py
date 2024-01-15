@@ -34,7 +34,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # Make sure that the container is not already registered since the start of the test
 
     # Note: Archive test uses different subscription. Please comment them out when running the whole test suite at once. And run those tests individually.
-    @record_only()
+    # @record_only()
     def test_backup_wl_sql_container(self):
 
         self.kwargs.update({

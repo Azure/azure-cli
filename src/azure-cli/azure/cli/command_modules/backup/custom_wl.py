@@ -135,8 +135,8 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
     param = ProtectionContainerResource(properties=properties)
 
     # Trigger register and wait for completion
-    result = client.register(vault_name, resource_group_name, fabric_name, container_name, param,
-                             cls=cust_help.get_pipeline_response)
+    result = client.begin_register(vault_name, resource_group_name, fabric_name, container_name, param,
+                             cls=cust_help.get_pipeline_response, polling=False).result()
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
@@ -171,8 +171,8 @@ def re_register_wl_container(cmd, client, vault_name, resource_group_name, workl
                                                         source_resource_id=source_resource_id)
     param = ProtectionContainerResource(properties=properties)
     # Trigger register and wait for completion
-    result = client.register(vault_name, resource_group_name, fabric_name, container_name, param,
-                             cls=cust_help.get_pipeline_response)
+    result = client.begin_register(vault_name, resource_group_name, fabric_name, container_name, param,
+                             cls=cust_help.get_pipeline_response, polling=False).result()
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
