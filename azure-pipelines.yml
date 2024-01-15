@@ -233,8 +233,6 @@ jobs:
   displayName: Build Windows ZIP
   strategy:
     matrix:
-      x86:
-        Platform: x86
       x64:
         Platform: x64
 
@@ -306,8 +304,6 @@ jobs:
   dependsOn: BuildWindowsZIP
   strategy:
     matrix:
-      x86:
-        Platform: x86
       x64:
         Platform: x64
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
@@ -1246,6 +1242,8 @@ jobs:
     - VerifyVersions
     - BuildWindowsMSI
     - TestMsiInstallation
+    - BuildWindowsZIP
+    - TestZipPackage
     - BuildDockerImageAlpine
     - TestDockerImageAlpine
     - BuildDockerImageAzureLinux

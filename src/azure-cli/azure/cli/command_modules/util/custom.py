@@ -141,10 +141,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         elif installer == 'MSI':
             _upgrade_on_windows()
         elif installer == 'ZIP':
-            if platform.architecture()[0] == '32bit':
-                zip_url = 'https://aka.ms/installazurecliwindowszip'
-            else:
-                zip_url = 'https://aka.ms/installazurecliwindowszipx64'
+            zip_url = 'https://aka.ms/installazurecliwindowszipx64'
             logger.warning("Please download the latest ZIP from %s, delete the old installation folder and extract the "
                            "new version to the same location", zip_url)
         else:
