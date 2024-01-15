@@ -786,6 +786,9 @@ def aks_upgrade(cmd,
                 control_plane_only=False,
                 node_image_only=False,
                 no_wait=False,
+                enable_force_upgrade=False,
+                disable_force_upgrade=False,
+                upgrade_override_until=None,
                 yes=False):
     msg = 'Kubernetes may be unavailable during cluster upgrades.\n Are you sure you want to perform this operation?'
     if not yes and not prompt_y_n(msg, default="n"):
