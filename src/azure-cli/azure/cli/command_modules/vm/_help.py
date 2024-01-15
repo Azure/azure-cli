@@ -436,6 +436,37 @@ examples:
         az image builder optimizer show -n myTemplate -g myGroup --defer
 """
 
+helps['image builder error-handler'] = """
+type: group
+short-summary: Manage image builder template error handler.
+"""
+
+helps['image builder error-handler add'] = """
+type: command
+short-summary: Add error handler to an existing image builder template.
+long-summary: Must be used with --defer
+"""
+
+helps['image builder error-handler remove'] = """
+type: command
+short-summary: Remove error handler from an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Remove error handler from an existing image builder template.
+    text: |
+        az image builder error-handler remove -n myTemplate -g myGroup --defer
+"""
+
+helps['image builder error-handler show'] = """
+type: command
+short-summary: Show error handler of an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Show error handler of an existing image builder template.
+    text: |
+        az image builder error-handler show -n myTemplate -g myGroup --defer
+"""
+
 helps['image builder identity'] = """
 type: group
 short-summary: Manage identities of an image builder template.
