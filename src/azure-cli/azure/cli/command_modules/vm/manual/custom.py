@@ -34,9 +34,10 @@ def sshkey_create(client,
                   parameters=parameters)
     if public_key is None:  # Generate one if public key is None
         logger.warning('No public key is provided. A key pair is being generated for you.')
-        parameters = {
-            'encryption_type': encryption_type
-        }
+        if encryption_type:
+            parameters = {
+                'encryption_type': encryption_type
+            }
         key_pair = client.generate_key_pair(
             resource_group_name=resource_group_name, ssh_public_key_name=ssh_public_key_name, parameters=parameters)
         # Save keys to local files
