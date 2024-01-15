@@ -1572,7 +1572,7 @@ examples:
         az vm create -n MyVm -g MyResourceGroup --image Debian11 --vnet-name MyVnet --subnet subnet1 \\
             --availability-set MyAvailabilitySet --public-ip-address-dns-name MyUniqueDnsName \\
             --ssh-key-values @key-file
-  - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, two data disks (10GB and 20GB), and then generate ssh key pairs.
+  - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, two data disks (10GB and 20GB), and then generate RSA ssh key pairs.
     text: |
         az vm create -n MyVm -g MyResourceGroup --public-ip-address-dns-name MyUniqueDnsName \\
             --image Ubuntu2204 --data-disk-sizes-gb 10 20 --size Standard_DS2_v2 \\
