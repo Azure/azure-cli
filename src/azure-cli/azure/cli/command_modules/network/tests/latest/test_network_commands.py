@@ -3737,16 +3737,16 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
             'publicip': self.create_random_name("publicip", 12),
         })
         
-        # vnet = self.cmd('network vnet create -n {vnet} -g {rg2} --subnet-name {subnet} --subscription {aux_sub}', checks=[
-        #     self.check('newVNet.name', '{vnet}'),
-        # ]).get_output_in_json()
-        #
-        # self.kwargs['vnet_id'] = vnet['newVNet']['id']
-        # self.kwargs['subnet_id'] = vnet['newVNet']['subnets'][0]['id']
-        #
-        # self.cmd('network lb create -g {rg} -n {lb} --subnet {subnet_id} --sku Standard', checks=[
-        #     self.check('loadBalancer.name', '{lb}')
-        # ])
+        vnet = self.cmd('network vnet create -n {vnet} -g {rg2} --subnet-name {subnet} --subscription {aux_sub}', checks=[
+            self.check('newVNet.name', '{vnet}'),
+        ]).get_output_in_json()
+
+        self.kwargs['vnet_id'] = vnet['newVNet']['id']
+        self.kwargs['subnet_id'] = vnet['newVNet']['subnets'][0]['id']
+
+        self.cmd('network lb create -g {rg} -n {lb} --subnet {subnet_id} --sku Standard', checks=[
+            self.check('loadBalancer.name', '{lb}')
+        ])
 
         public_ip_address_id = self.cmd('network public-ip create -g {rg2} -n {publicip} --subscription {aux_sub}', checks=[
             self.check('publicIp.name', '{publicip}')
