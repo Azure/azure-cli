@@ -66,8 +66,8 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
                                            workload_type="AzureFileShare")
         param = ProtectionContainerResource(properties=properties)
         result = protection_containers_client.begin_register(vault_name, resource_group_name, fabric_name,
-                                                       storage_account.name, param, cls=helper.get_pipeline_response,
-                                                       polling=False).result()
+                                                             storage_account.name, param, polling=False,
+                                                             cls=helper.get_pipeline_response).result()
         helper.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, storage_account.name)
 
     protectable_item = _get_protectable_item_for_afs(cmd.cli_ctx, vault_name, resource_group_name, afs_name,
