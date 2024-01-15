@@ -12,9 +12,9 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network public-ip show-ddos-protection-statu",
+    "network public-ip ddos-protection-statu show",
 )
-class ShowDdosProtectionStatu(AAZCommand):
+class Show(AAZCommand):
     """Gets the Ddos Protection Status of a Public IP Address
 
     :example: Gets the Ddos Protection Status of a Public IP Address
@@ -186,8 +186,8 @@ class ShowDdosProtectionStatu(AAZCommand):
             return cls._schema_on_200
 
 
-class _ShowDdosProtectionStatuHelper:
-    """Helper class for ShowDdosProtectionStatu"""
+class _ShowHelper:
+    """Helper class for Show"""
 
 
-__all__ = ["ShowDdosProtectionStatu"]
+__all__ = ["Show"]

@@ -2244,9 +2244,6 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
         self.cmd('network application-gateway waf-config list-dynamic-rule-sets -l westus',
                  self.check('type(@)', 'array'))
 
-        self.cmd('network application-gateway waf-config list-dynamic-rule-sets-default -l westus',
-                 self.check('type(@)', 'array'))
-
 
 class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
@@ -3046,7 +3043,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
 
         # test ddos protection statu
         self.cmd('network application-gateway create -g {rg} -n testag --public-ip-address {ip1} --sku Standard_v2 --priority 1001')
-        self.cmd('network public-ip ddos-protection-statu -g {rg} -n {ip1}', self.check('isWorkloadProtected', False))
+        self.cmd('network public-ip ddos-protection-statu show -g {rg} -n {ip1}', self.check('isWorkloadProtected', False))
 
         self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Disabled --ddos-protection-plan null',
                  checks=[

@@ -8,10 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
-from ._create import *
-from ._delete import *
-from ._list import *
-from ._show import *
-from ._update import *
-from ._wait import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "network public-ip ddos-protection-statu",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage public IP ddos protection statu.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]
