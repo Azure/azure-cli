@@ -1565,6 +1565,9 @@ def start_containerappjob_execution_yaml(cmd, name, resource_group_name, file_na
 
     containerappjobexec_def = _convert_object_from_snake_to_camel_case(_object_to_dict(containerappjobexec_def))
 
+    # Remove "additionalProperties" attributes that are introduced in the deserialization.
+    _remove_additional_attributes(containerappjobexec_def)
+
     # Clean null values since this is an update
     containerappjobexec_def = clean_null_values(containerappjobexec_def)
 

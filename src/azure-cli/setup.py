@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.55.0"
+VERSION = "2.56.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -89,7 +89,7 @@ DEPENDENCIES = [
     'azure-mgmt-eventhub~=10.1.0',
     'azure-mgmt-extendedlocation==1.0.0b2',
     'azure-mgmt-hdinsight~=9.0.0',
-    'azure-mgmt-imagebuilder~=1.2.0',
+    'azure-mgmt-imagebuilder~=1.3.0',
     'azure-mgmt-iotcentral~=10.0.0b1',
     'azure-mgmt-iothub==3.0.0',
     'azure-mgmt-iothubprovisioningservices==1.1.0',
