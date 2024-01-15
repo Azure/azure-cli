@@ -48,8 +48,8 @@ helps['sshkey create'] = """
                az sshkey create --location "westus" --resource-group "myResourceGroup" --name "mySshPublicKeyName"
       - name: Create a new SSH public key resource with Ed25519 encryption.
         text: |-
-               az sshkey create --location "westus" --resource-group "myResourceGroup" --name "mySshPublicKeyName \
---encryption-type Ed25519"
+               az sshkey create --location "westus" --resource-group "myResourceGroup" --name "mySshPublicKeyName" \
+--encryption-type "Ed25519"
 """
 
 helps['sshkey update'] = """
