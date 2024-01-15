@@ -15,7 +15,7 @@ class CdnAfdProfileScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         profile_name = self.create_random_name(prefix='profile', length=24)
 
-        tags = 'tag1=value1 tag2=value2'
+        tags = '{{tag1:value1,tag2:value2}}'
         self.afd_profile_create_cmd(resource_group, profile_name, tags=tags, options="--origin-response-timeout-seconds 100")
 
         list_checks = [JMESPathCheck('length(@)', 1),
@@ -43,7 +43,7 @@ class CdnAfdProfileScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('tags.tag3', 'value3'),
                          JMESPathCheck('tags.tag4', 'value4'),
                          JMESPathCheck('originResponseTimeoutSeconds', 100)]
-        tags = 'tag3=value3 tag4=value4'
+        tags = '{{tag3:value3,tag4:value4}}'
         self.afd_profile_update_cmd(resource_group,
                                     profile_name,
                                     tags=tags,
@@ -61,7 +61,7 @@ class CdnAfdProfileScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                     options='--origin-response-timeout-seconds 30',
                                     checks=update_checks)
 
-        usage_checks = [JMESPathCheck('length(@)', 6)]
+        usage_checks = [JMESPathCheck('length(@)', 7)]
         self.cmd(f"afd profile usage -g {resource_group} --profile-name {profile_name}", checks=usage_checks)
 
         self.afd_profile_delete_cmd(resource_group, profile_name)

@@ -7897,6 +7897,48 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2', preserve_default_location=True)
+    def test_aks_kubenet_to_cni_overlay_migration(self, resource_group, resource_group_location):
+        _, create_version = self._get_versions(resource_group_location)
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'k8s_version': create_version,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--network-plugin kubenet --ssh-key-value={ssh_key_value} --kubernetes-version {k8s_version} ' \
+                     '--service-cidr 172.56.0.0/16 --dns-service-ip 172.56.0.10 --pod-cidr 100.112.0.0/12 ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureOverlayPreview'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.networkPlugin', 'kubenet'),
+            self.check('networkProfile.networkPluginMode', None),
+            self.check('networkProfile.podCidr', '100.112.0.0/12'),
+            self.check('networkProfile.serviceCidr', '172.56.0.0/16'),
+        ])
+
+        # update
+        update_cmd = 'aks update -g {resource_group} -n {name} --network-plugin azure --network-plugin-mode overlay ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureOverlayPreview'
+
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.networkPlugin', 'azure'),
+            self.check('networkProfile.networkPluginMode', 'overlay'),
+            self.check('networkProfile.podCidr', '100.112.0.0/12'),
+            self.check('networkProfile.serviceCidr', '172.56.0.0/16'),
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus', preserve_default_location=True)
     def test_aks_migrate_cluster_to_cilium_dataplane(self, resource_group, resource_group_location):
         _, create_version = self._get_versions(resource_group_location)
@@ -9648,6 +9690,95 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
         self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
+    def test_list_trustedaccess_roles(self):
+        cmd = 'aks trustedaccess role list -l westus2'
+        self.cmd(cmd, checks=[
+            StringContainCheck("sourceResourceType"),
+            StringContainCheck("apiGroups"),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_trustedaccess_rolebinding(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'vm_size': 'Standard_D4s_v3',
+            'node_count': 1,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        create_cmd = ' '.join([
+            'aks', 'create', '--resource-group={resource_group}', '--name={name}', '--location={location}',
+            '--node-vm-size {vm_size}',
+            '--node-count {node_count}',
+            '--ssh-key-value={ssh_key_value}'
+        ])
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        list_binding_cmd = 'aks trustedaccess rolebinding list ' \
+            '--cluster-name={name} ' \
+            '--resource-group={resource_group}'
+        self.cmd(list_binding_cmd, checks=[
+            self.is_empty(),
+        ])
+
+        subscription_id = self.get_subscription_id()
+        sid = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.MachineLearningServices/workspaces/fake_workspace'.format(subscription_id, resource_group)
+        self.kwargs.update({
+            'sid': sid
+        })
+        create_binding_cmd = 'aks trustedaccess rolebinding create ' \
+            '--resource-group={resource_group} ' \
+            '--cluster-name={name} ' \
+            '-n testbinding ' \
+            '-r {sid} ' \
+            '--roles Microsoft.MachineLearningServices/workspaces/mlworkload'
+        self.cmd(create_binding_cmd)
+        self.cmd(list_binding_cmd, checks=[
+            self.check('[0].type', 'Microsoft.ContainerService/managedClusters/trustedAccessRoleBindings'),
+            self.check('[0].name', 'testbinding'),
+        ])
+
+        get_binding_cmd = 'aks trustedaccess rolebinding show ' \
+            '-n testbinding ' \
+            '--resource-group={resource_group} ' \
+            '--cluster-name={name}'
+        self.cmd(get_binding_cmd, checks=[
+            self.check('type', 'Microsoft.ContainerService/managedClusters/trustedAccessRoleBindings'),
+            self.check('name', 'testbinding'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        update_binding_cmd = 'aks trustedaccess rolebinding update ' \
+            '--cluster-name={name} ' \
+            '-n testbinding ' \
+            '--resource-group={resource_group} ' \
+            '--roles Microsoft.MachineLearningServices/workspaces/mlworkload'
+        self.cmd(update_binding_cmd, checks=[
+            self.check('roles[0]', 'Microsoft.MachineLearningServices/workspaces/mlworkload'),
+        ])
+
+        delete_binding_cmd = 'aks trustedaccess rolebinding delete ' \
+            '--cluster-name={name} ' \
+            '-n testbinding ' \
+            '--resource-group={resource_group} -y'
+        self.cmd(delete_binding_cmd)
+        self.cmd(list_binding_cmd, checks=[
             self.is_empty(),
         ])
 
