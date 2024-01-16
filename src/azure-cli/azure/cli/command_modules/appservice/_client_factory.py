@@ -14,7 +14,7 @@ def ex_handler_factory(creating_plan=False, no_throw=False):
             if creating_plan:
                 if 'Requested features are not supported in region' in detail:
                     detail = ("Selected plan is not supported in current region. " +
-                        "Original error: " + detail)
+                              "Original error: " + detail)
             ex = CLIError(detail)
         except Exception:  # pylint: disable=broad-except
             pass
