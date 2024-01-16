@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-locals, too-many-statements too-many-boolean-expressions too-many-branches protected-access
 
-from azure.mgmt.cdn.models import (MinimumTlsVersion, ProtocolType, SkuName, UpdateRule, DeleteRule, CertificateType)
+from azure.mgmt.cdn.models import (MinimumTlsVersion, ProtocolType, SkuName, UpdateRule, DeleteRule, CertificateType,
+                                   UrlPathMatchConditionParameters, UrlFileExtensionMatchConditionParameters)
 from azure.cli.core.aaz._base import has_value
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.command_modules.cdn.aaz.latest.cdn.custom_domain import EnableCustomHttp as _CDNEnableCustomHttp
@@ -15,11 +16,39 @@ from azure.cli.command_modules.cdn.aaz.latest.cdn.origin import Create as _CDNOr
     Update as _CDNOriginUpdate
 from azure.cli.command_modules.cdn.aaz.latest.cdn.origin_group import Create as _CDNOriginGroupCreate, \
     Update as _CDNOriginGroupUpdate, Show as _CDNOriginGroupShow
+from azure.cli.command_modules.cdn.aaz.latest.cdn.endpoint import Create as _CDNEndpointCreate, \
+    Update as _CDNEndpointUpdate, Show as _CDNEndpointShow
+from .custom_rule_util import (create_condition, create_action,
+                               create_conditions_from_existing, create_actions_from_existing)
 
 from knack.util import CLIError
 from knack.log import get_logger
 
 logger = get_logger(__name__)
+
+
+def default_content_types():
+    return ["text/plain",
+            "text/html",
+            "text/css",
+            "text/javascript",
+            "application/x-javascript",
+            "application/javascript",
+            "application/json",
+            "application/xml"]
+
+
+def _convert_to_unified_delivery_rules(policy):
+    for existing_rule in policy.rules:
+        if existing_rule.conditions:
+            for con in existing_rule.conditions:
+                if con.parameters.operator is None and con.parameters.match_values is None:
+                    if con.parameters.type_name == UrlPathMatchConditionParameters.type_name:
+                        con.parameters.operator = con.parameters.additional_properties["matchType"]
+                        con.parameters.match_values = con.parameters.additional_properties["path"].split(',')
+                    if con.parameters.type_name == UrlFileExtensionMatchConditionParameters.type_name:
+                        con.parameters.operator = "Any"
+                        con.parameters.match_values = con.parameters.additional_properties["extensions"]
 
 
 @register_command('cdn profile show')
@@ -263,7 +292,7 @@ def _parse_ranges(ranges: str):
     return [parse_range(error_range) for error_range in ranges.split(',')]
 
 
-class CDNOriginGroupCreate(_CDNOriginCreate):
+class CDNOriginGroupCreate(_CDNOriginGroupCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -447,3 +476,505 @@ class CDNOriginGroupUpdate(_CDNOriginGroupUpdate):
                 'response_based_failover_threshold_percentage': args.response_error_detection_failover_threshold
             }
         args.response_based_error_detection_settings = response_based_error_detection_settings
+
+
+class CDNEndpointCreate(_CDNEndpointCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if not has_value(args.is_compression_enabled):
+            args.is_compression_enabled = False
+        if not has_value(args.is_http_allowed):
+            args.is_http_allowed = True
+        if not has_value(args.is_https_allowed):
+            args.is_https_allowed = True
+        if args.is_http_allowed.to_serialized_data() and not has_value(args.content_types_to_compress):
+            args.content_types_to_compress = default_content_types()
+
+
+class CDNEndpointUpdate(_CDNEndpointUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        existing = _CDNEndpointShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name,
+            'endpoint_name': args.endpoint_name
+        })
+        if not has_value(args.default_content_types):
+            if '/' not in args.default_origin_group.to_serialized_data():
+                args.default_origin_group = f'{args.id}/originGroups/{args.default_origin_group}'
+        if not has_value(args.is_compression_enabled):
+            args.is_compression_enabled = existing['is_compression_enabled']
+        if args.is_compression_enabled.to_serialized_data() and not has_value(args.content_types_to_compress):
+            args.content_types_to_compress = existing['content_types_to_compress']
+
+
+class CDNEndpointRuleAdd(_CDNEndpointUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.action_name = AAZStrArg(
+            options=['--action-name'],
+            help='The name of the action for the delivery rule: '
+            'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-actions.',
+            required=True
+        )
+        args_schema.order = AAZIntArg(
+            options=['--order'],
+            help='The order in which the rules are applied for the endpoint. Possible values {0,1,2,3,………}. '
+            'A rule with a lower order will be applied before one with a higher order. '
+            'Rule with order 0 is a special rule. It does not require any condition and '
+            'actions listed in it will always be applied.',
+            required=True
+        )
+        args_schema.cache_behavior = AAZStrArg(
+            options=['--cache-behavior'],
+            help='Caching behavior for the requests.',
+            enum=['BypassCache', 'Override', 'SetIfMissing']
+        )
+        args_schema.cache_duration = AAZIntArg(
+            options=['--cache-duration'],
+            help='The duration for which the content needs to be cached. '
+            'Allowed format is [d.]hh:mm:ss.',
+        )
+        args_schema.custom_fragment = AAZStrArg(
+            options=['--custom-fragment'],
+            help='Fragment to add to the redirect URL.',
+        )
+        args_schema.custom_hostname = AAZStrArg(
+            options=['--custom-hostname'],
+            help='Host to redirect. Leave empty to use the incoming host as the destination host.',
+        )
+        args_schema.custom_path = AAZStrArg(
+            options=['--custom-path'],
+            help='The full path to redirect. Path cannot be empty and must start with /. '
+            'Leave empty to use the incoming path as destination path.',
+        )
+        args_schema.custom_querystring = AAZStrArg(
+            options=['--custom-querystring'],
+            help='The set of query strings to be placed in the redirect URL. '
+            'leave empty to preserve the incoming query string.',
+        )
+        args_schema.destination = AAZStrArg(
+            options=['--destination'],
+            help='The destination path to be used in the rewrite.'
+        )
+        args_schema.header_action = AAZStrArg(
+            options=['--header-action'],
+            help='Header action for the requests.',
+            enum=['Append', 'Overwrite', 'Delete']
+        )
+        args_schema.header_name = AAZStrArg(
+            options=['--header-name'],
+            help='Name of the header to modify.',
+        )
+        args_schema.header_value = AAZStrArg(
+            options=['--header-value'],
+            help='Value of the header.',
+        )
+        args_schema.match_values = AAZListArg(
+            options=['--match-values'],
+            help='Match values of the match condition. e.g, space separated values "GET" "HTTP".',
+        )
+        args_schema.match_values.Element = AAZStrArg()
+        args.schema.match_variable = AAZStrArg(
+            options=['--match-variable'],
+            help='Name of the match condition: '
+            'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions.',
+            enum=['ClientPort', 'Cookies', 'HostName', 'HttpVersion', 'IsDevice', 'PostArgs', 'QueryString',
+                  'RemoteAddress', 'RequestBody', 'RequestHeader', 'RequestMethod', 'RequestScheme', 'RequestUri',
+                  'ServerPort', 'SocketAddr', 'SslProtocol', 'UrlFileExtension', 'UrlFileName', 'UrlPath']
+        )
+        args_schema.negate_condition = AAZBoolArg(
+            options=['--negate-condition'],
+            help='If true, negates the condition.',
+        )
+        args_schema.operator = AAZStrArg(
+            options=['--operator'],
+            help='Operator of the match condition.'
+        )
+        args_schema.preserve_unmatched_path = AAZBoolArg(
+            options=['--preserve-unmatched-path'],
+            help='If True, the remaining path after the source pattern will be appended to the new destination path.',
+        )
+        args_schema.query_parameters = AAZStrArg(
+            options=['--query-parameters'],
+            help='Query parameters to include or exclude (comma separated).',
+        )
+        args_schema.query_string_behavior = AAZStrArg(
+            options=['--query-string-behavior'],
+            help='Query string behavior for the requests.',
+            enum=['Include', 'IncludeAll', 'Exclude', 'ExcludeAll']
+        )
+        args_schema.redirect_protocol = AAZStrArg(
+            options=['--redirect-protocol'],
+            help='Protocol to use for the redirect.',
+            enum=['Http', 'Https', 'MatchRequest']
+        )
+        args_schema.redirect_type = AAZStrArg(
+            options=['--redirect-type'],
+            help='The redirect type the rule will use when redirecting traffic.',
+            enum=['Moved', 'Found', 'TemporaryRedirect', 'PermanentRedirect']
+        )
+        args_schema.rule_name = AAZStrArg(
+            options=['--rule-name'],
+            help='Name of the rule, only required for Microsoft SKU.',
+            required=True,
+        )
+        args_schema.selector = AAZStrArg(
+            options=['--selector'],
+            help='Selector of the match condition.',
+        )
+        args_schema.source_pattern = AAZStrArg(
+            options=['--source-pattern'],
+            help='A request URI pattern that identifies the type of requests that may be rewritten.',
+        )
+        args_schema.transform = AAZStrArg(
+            options=['--transform'],
+            help='Transform to apply before matching.',
+            enum=['Lowercase', 'Uppercase']
+        )
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        partner_skus = [SkuName.PREMIUM_VERIZON, SkuName.CUSTOM_VERIZON, SkuName.STANDARD_AKAMAI, SkuName.STANDARD_VERIZON]
+        profile = CDNProfileShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group_name,
+            'profile_name': args.profile_name
+        })
+        if args.rule_name is None and profile['sku']['name'] in partner_skus:
+            raise CLIError("--rule-name is required for Microsoft SKU")
+        endpoint = _CDNEndpointShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group_name,
+            'profile_name': args.profile_name,
+            'endpoint_name': args.endpoint_name
+        })
+
+        delivery_policy = endpoint['delivery_policy']
+        if delivery_policy is None:
+            delivery_policy = {
+                'description': 'default_policy',
+                'rules': []
+            }
+        _convert_to_unified_delivery_rules(delivery_policy)
+        conditions = []
+        condition = create_condition(args.match_variable, args.operator, args.match_values,
+                                     args.selector, args.negate_condition, args.transform)
+        if condition is not None:
+            conditions.append(condition)
+        actions = []
+        action = create_action(args.action_name, args.cache_behavior, args.cache_duration, args.header_action,
+                               args.header_name, args.header_value, args.query_string_behavior, args.query_parameters,
+                               args.redirect_type, args.redirect_protocol, args.custom_hostname, args.custom_path,
+                               args.custom_querystring, args.custom_fragment, args.source_pattern, args.destination,
+                               args.preserve_unmatched_path, self.ctx.subscription_id,
+                               args.resource_group_name, args.profile_name, args.endpoint_name, args.origin_group)
+        if action is not None:
+            actions.append(action)
+        rule = {
+            'name': args.rule_name,
+            'order': args.order,
+            'conditions': conditions,
+            'actions': actions
+        }
+        delivery_policy['rules'].append(rule)
+        args.delivery_policy = delivery_policy
+
+
+class CDNEndpointRuleRemove(_CDNEndpointUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.Rule = AAZStrArg(
+            options=['--rule-name'],
+            help='Name of the rule.',
+        )
+        args_schema.Order = AAZIntArg(
+            options=['--order'],
+            help='The order in which the rules are applied for the endpoint. Possible values {0,1,2,3,………}. '
+            'A rule with a lower order will be applied before one with a higher order. '
+            'Rule with order 0 is a special rule. It does not require any condition and '
+            'actions listed in it will always be applied.',
+        )
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if not has_value(args.rule_name) and not has_value(args.order):
+            raise CLIError("Either --rule-name or --order must be specified")
+
+        if has_value(args.order) and args.order < 0:
+            raise CLIError("Order should be non-negative.")
+        endpoint = _CDNEndpointShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group_name,
+            'profile_name': args.profile_name,
+            'endpoint_name': args.endpoint_name
+        })
+        policy = endpoint['delivery_policy']
+        if policy is not None:
+            _convert_to_unified_delivery_rules(policy)
+            pop_index = -1
+            for idx, rule in enumerate(policy.rules):
+                if has_value(args.rule_name) and rule.name == args.rule_name:
+                    pop_index = idx
+                    break
+                if args.order is not None and rule.order == args.order:
+                    pop_index = idx
+                    break
+
+            # To guarantee the consecutive rule order, we need to make sure the rule with order larger than the deleted one
+            # to decrease its order by one. Rule with order 0 is special and no rule order adjustment is required.
+            if pop_index != -1:
+                pop_order = policy['rules'][pop_index]['order']
+                policy['rules'].pop(pop_index)
+                for rule in policy['rules']:
+                    if rule.order > pop_order and pop_order != 0:
+                        rule.order -= 1
+
+        else:
+            logger.warning("rule cannot be found. This command will be skipped. Please check the rule name")
+        args.delivery_policy = policy
+
+
+class CDNEndpointActionsAdd(_CDNEndpointUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.action_name = AAZStrArg(
+            options=['--action-name'],
+            help='The name of the action for the delivery rule: '
+            'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-actions.',
+            required=True
+        )
+        args_schema.cache_behavior = AAZStrArg(
+            options=['--cache-behavior'],
+            help='Caching behavior for the requests.',
+            enum=['BypassCache', 'Override', 'SetIfMissing']
+        )
+        args_schema.cache_duration = AAZIntArg(
+            options=['--cache-duration'],
+            help='The duration for which the content needs to be cached. '
+            'Allowed format is [d.]hh:mm:ss.',
+        )
+        args_schema.custom_fragment = AAZStrArg(
+            options=['--custom-fragment'],
+            help='Fragment to add to the redirect URL.',
+        )
+        args_schema.custom_hostname = AAZStrArg(
+            options=['--custom-hostname'],
+            help='Host to redirect. Leave empty to use the incoming host as the destination host.',
+        )
+        args_schema.custom_path = AAZStrArg(
+            options=['--custom-path'],
+            help='The full path to redirect. Path cannot be empty and must start with /. '
+            'Leave empty to use the incoming path as destination path.',
+        )
+        args_schema.custom_querystring = AAZStrArg(
+            options=['--custom-querystring'],
+            help='The set of query strings to be placed in the redirect URL. '
+            'leave empty to preserve the incoming query string.',
+        )
+        args_schema.destination = AAZStrArg(
+            options=['--destination'],
+            help='The destination path to be used in the rewrite.'
+        )
+        args_schema.header_action = AAZStrArg(
+            options=['--header-action'],
+            help='Header action for the requests.',
+            enum=['Append', 'Overwrite', 'Delete']
+        )
+        args_schema.header_name = AAZStrArg(
+            options=['--header-name'],
+            help='Name of the header to modify.',
+        )
+        args_schema.header_value = AAZStrArg(
+            options=['--header-value'],
+            help='Value of the header.',
+        )
+        args_schema.preserve_unmatched_path = AAZBoolArg(
+            options=['--preserve-unmatched-path'],
+            help='If True, the remaining path after the source pattern will be appended to the new destination path.',
+        )
+        args_schema.query_parameters = AAZStrArg(
+            options=['--query-parameters'],
+            help='Query parameters to include or exclude (comma separated).',
+        )
+        args_schema.query_string_behavior = AAZStrArg(
+            options=['--query-string-behavior'],
+            help='Query string behavior for the requests.',
+            enum=['Include', 'IncludeAll', 'Exclude', 'ExcludeAll']
+        )
+        args_schema.redirect_protocol = AAZStrArg(
+            options=['--redirect-protocol'],
+            help='Protocol to use for the redirect.',
+            enum=['Http', 'Https', 'MatchRequest']
+        )
+        args_schema.redirect_type = AAZStrArg(
+            options=['--redirect-type'],
+            help='The redirect type the rule will use when redirecting traffic.',
+            enum=['Moved', 'Found', 'TemporaryRedirect', 'PermanentRedirect']
+        )
+        args_schema.rule_name = AAZStrArg(
+            options=['--rule-name'],
+            help='Name of the rule, only required for Microsoft SKU.',
+            required=True,
+        )
+        args_schema.source_pattern = AAZStrArg(
+            options=['--source-pattern'],
+            help='A request URI pattern that identifies the type of requests that may be rewritten.',
+        )
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        endpoint = _CDNEndpointShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group_name,
+            'profile_name': args.profile_name,
+            'endpoint_name': args.endpoint_name
+        })
+
+        delivery_policy = endpoint['delivery_policy']
+        action = create_action(args.action_name, args.cache_behavior, args.cache_duration, args.header_action,
+                               args.header_name, args.header_value, args.query_string_behavior, args.query_parameters,
+                               args.redirect_type, args.redirect_protocol, args.custom_hostname, args.custom_path,
+                               args.custom_querystring, args.custom_fragment, args.source_pattern, args.destination,
+                               args.preserve_unmatched_path, self.ctx.subscription_id,
+                               args.resource_group_name, args.profile_name, args.endpoint_name, args.origin_group)
+        for i in range(0, len(delivery_policy['rules'])):
+            if delivery_policy['rules'][i]['name'] == args.rule_name:
+                delivery_policy['rules'][i]['actions'].append(action)
+        args.delivery_policy = delivery_policy
+
+
+class CDNEndpointActionsRemove(_CDNEndpointUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.index = AAZIntArg(
+            options=['--index'],
+            help='The index of the condition/action.',
+            required=True
+        )
+        args_schema.rule_name = AAZStrArg(
+            options=['--rule-name'],
+            help='Name of the rule.',
+            required=True,
+        )
+
+    def pre_operations(self):
+        args = self.ctx.args
+        endpoint = _CDNEndpointShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group_name,
+            'profile_name': args.profile_name,
+            'endpoint_name': args.endpoint_name
+        })
+
+        delivery_policy = endpoint['delivery_policy']
+        if delivery_policy is not None:
+            for i in range(0, len(delivery_policy['rules'])):
+                if delivery_policy['rules'][i]['name'] == args.rule_name:
+                    delivery_policy['rules'][i]['actions'].pop(args.index)
+        else:
+            logger.warning("rule cannot be found. This command will be skipped. Please check the rule name")
+        args.delivery_policy = delivery_policy
+
+
+class CDNEndpointConditionsAdd(_CDNEndpointUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.match_values = AAZListArg(
+            options=['--match-values'],
+            help='Match values of the match condition. e.g, space separated values "GET" "HTTP".',
+        )
+        args_schema.match_values.Element = AAZStrArg()
+        args.schema.match_variable = AAZStrArg(
+            options=['--match-variable'],
+            help='Name of the match condition: '
+            'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions.',
+            enum=['ClientPort', 'Cookies', 'HostName', 'HttpVersion', 'IsDevice', 'PostArgs', 'QueryString',
+                  'RemoteAddress', 'RequestBody', 'RequestHeader', 'RequestMethod', 'RequestScheme', 'RequestUri',
+                  'ServerPort', 'SocketAddr', 'SslProtocol', 'UrlFileExtension', 'UrlFileName', 'UrlPath'],
+            required=True
+        )
+        args_schema.negate_condition = AAZBoolArg(
+            options=['--negate-condition'],
+            help='If true, negates the condition.',
+        )
+        args_schema.operator = AAZStrArg(
+            options=['--operator'],
+            help='Operator of the match condition.',
+            required=True
+        )
+        args_schema.rule_name = AAZStrArg(
+            options=['--rule-name'],
+            help='Name of the rule, only required for Microsoft SKU.',
+            required=True,
+        )
+        args_schema.selector = AAZStrArg(
+            options=['--selector'],
+            help='Selector of the match condition.',
+        )
+        args_schema.transform = AAZStrArg(
+            options=['--transform'],
+            help='Transform to apply before matching.',
+            enum=['Lowercase', 'Uppercase']
+        )
+
+    def pre_operations(self):
+        args = self.ctx.args
+        endpoint = _CDNEndpointShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group_name,
+            'profile_name': args.profile_name,
+            'endpoint_name': args.endpoint_name
+        })
+        delivery_policy = endpoint['delivery_policy']
+        condition = create_condition(args.match_variable, args.operator, args.match_values,
+                                     args.selector, args.negate_condition, args.transform)
+        for i in range(0, len(delivery_policy['rules'])):
+            if delivery_policy['rules'][i]['name'] == args.rule_name:
+                delivery_policy['rules'][i]['conditions'].append(condition)
+
+        args.delivery_policy = delivery_policy
+
+
+class CDNEndpointConditionsRemove(_CDNEndpointUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.index = AAZIntArg(
+            options=['--index'],
+            help='The index of the condition/action.',
+            required=True
+        )
+        args_schema.rule_name = AAZStrArg(
+            options=['--rule-name'],
+            help='Name of the rule.',
+            required=True,
+        )
+
+    def pre_operations(self):
+        args = self.ctx.args
+        endpoint = _CDNEndpointShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group_name,
+            'profile_name': args.profile_name,
+            'endpoint_name': args.endpoint_name
+        })
+
+        delivery_policy = endpoint['delivery_policy']
+        if delivery_policy is not None:
+            for i in range(0, len(delivery_policy['rules'])):
+                if delivery_policy['rules'][i]['name'] == args.rule_name:
+                    delivery_policy['rules'][i]['conditions'].pop(args.index)
+        else:
+            logger.warning("rule cannot be found. This command will be skipped. Please check the rule name")
+        args.delivery_policy = delivery_policy

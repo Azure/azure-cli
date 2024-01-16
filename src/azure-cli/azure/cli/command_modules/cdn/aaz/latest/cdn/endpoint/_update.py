@@ -66,6 +66,16 @@ class Update(AAZCommand):
             required=True,
         )
 
+        # define Arg Group "DefaultOriginGroup"
+
+        _args_schema = cls._args_schema
+        _args_schema.default_origin_group = AAZStrArg(
+            options=["--default-origin-group"],
+            arg_group="DefaultOriginGroup",
+            help="The origin group to use for origins not explicitly included in an origin group. Can be specified as a resource ID or the name of an origin group of this endpoint.",
+            nullable=True,
+        )
+
         # define Arg Group "Endpoint"
 
         _args_schema = cls._args_schema
@@ -97,13 +107,6 @@ class Update(AAZCommand):
             help="List of content types on which compression applies. The value should be a valid MIME type.",
             nullable=True,
         )
-        _args_schema.default_origin_group = AAZObjectArg(
-            options=["--default-origin-group"],
-            arg_group="Properties",
-            help="A reference to the origin group.",
-            nullable=True,
-        )
-        cls._build_args_resource_reference_update(_args_schema.default_origin_group)
         _args_schema.delivery_policy = AAZObjectArg(
             options=["--delivery-policy"],
             arg_group="Properties",
@@ -338,7 +341,6 @@ class Update(AAZCommand):
         parameters.origin_group = AAZObjectArg(
             options=["origin-group"],
             help="defines the OriginGroup that would override the DefaultOriginGroup.",
-            nullable=True,
         )
         cls._build_args_resource_reference_update(parameters.origin_group)
         parameters.type_name = AAZStrArg(
@@ -408,7 +410,6 @@ class Update(AAZCommand):
         origin_group_override.origin_group = AAZObjectArg(
             options=["origin-group"],
             help="defines the OriginGroup that would override the DefaultOriginGroup on route.",
-            nullable=True,
         )
         cls._build_args_resource_reference_update(origin_group_override.origin_group)
 
@@ -1507,9 +1508,7 @@ class Update(AAZCommand):
         )
 
         origins = cls._args_schema.origin_groups.Element.origins
-        origins.Element = AAZObjectArg(
-            nullable=True,
-        )
+        origins.Element = AAZObjectArg()
         cls._build_args_resource_reference_update(origins.Element)
 
         response_based_origin_error_detection_settings = cls._args_schema.origin_groups.Element.response_based_origin_error_detection_settings
@@ -1735,9 +1734,7 @@ class Update(AAZCommand):
             _schema.id = cls._args_resource_reference_update.id
             return
 
-        cls._args_resource_reference_update = AAZObjectArg(
-            nullable=True,
-        )
+        cls._args_resource_reference_update = AAZObjectArg()
 
         resource_reference_update = cls._args_resource_reference_update
         resource_reference_update.id = AAZStrArg(
@@ -1998,7 +1995,7 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("contentTypesToCompress", AAZListType, ".content_types_to_compress")
-                _UpdateHelper._build_schema_resource_reference_update(properties.set_prop("defaultOriginGroup", AAZObjectType, ".default_origin_group"))
+                properties.set_prop("defaultOriginGroup", AAZObjectType)
                 properties.set_prop("deliveryPolicy", AAZObjectType, ".delivery_policy")
                 properties.set_prop("geoFilters", AAZListType, ".geo_filters")
                 properties.set_prop("isCompressionEnabled", AAZBoolType, ".is_compression_enabled")
@@ -2017,6 +2014,10 @@ class Update(AAZCommand):
             content_types_to_compress = _builder.get(".properties.contentTypesToCompress")
             if content_types_to_compress is not None:
                 content_types_to_compress.set_elements(AAZStrType, ".")
+
+            default_origin_group = _builder.get(".properties.defaultOriginGroup")
+            if default_origin_group is not None:
+                default_origin_group.set_prop("id", AAZStrType, ".default_origin_group")
 
             delivery_policy = _builder.get(".properties.deliveryPolicy")
             if delivery_policy is not None:

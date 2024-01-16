@@ -150,7 +150,8 @@ def create_condition(match_variable,
                     "type_name": "DeliveryRuleHttpVersionConditionParameters",
                     "match_values": match_values,
                     "negate_condition": negate_condition,
-                    "operator": operator
+                    "operator": operator,
+                    "transforms": transforms
                 }
             }
         }

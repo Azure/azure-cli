@@ -71,6 +71,15 @@ class Create(AAZCommand):
             required=True,
         )
 
+        # define Arg Group "DefaultOriginGroup"
+
+        _args_schema = cls._args_schema
+        _args_schema.default_origin_group = AAZStrArg(
+            options=["--default-origin-group"],
+            arg_group="DefaultOriginGroup",
+            help="The origin group to use for origins not explicitly included in an origin group. Can be specified as a resource ID or the name of an origin group of this endpoint.",
+        )
+
         # define Arg Group "Endpoint"
 
         _args_schema = cls._args_schema
@@ -99,12 +108,6 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="List of content types on which compression applies. The value should be a valid MIME type.",
         )
-        _args_schema.default_origin_group = AAZObjectArg(
-            options=["--default-origin-group"],
-            arg_group="Properties",
-            help="A reference to the origin group.",
-        )
-        cls._build_args_resource_reference_create(_args_schema.default_origin_group)
         _args_schema.delivery_policy = AAZObjectArg(
             options=["--delivery-policy"],
             arg_group="Properties",
@@ -1791,7 +1794,7 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("contentTypesToCompress", AAZListType, ".content_types_to_compress")
-                _CreateHelper._build_schema_resource_reference_create(properties.set_prop("defaultOriginGroup", AAZObjectType, ".default_origin_group"))
+                properties.set_prop("defaultOriginGroup", AAZObjectType)
                 properties.set_prop("deliveryPolicy", AAZObjectType, ".delivery_policy")
                 properties.set_prop("geoFilters", AAZListType, ".geo_filters")
                 properties.set_prop("isCompressionEnabled", AAZBoolType, ".is_compression_enabled")
@@ -1810,6 +1813,10 @@ class Create(AAZCommand):
             content_types_to_compress = _builder.get(".properties.contentTypesToCompress")
             if content_types_to_compress is not None:
                 content_types_to_compress.set_elements(AAZStrType, ".")
+
+            default_origin_group = _builder.get(".properties.defaultOriginGroup")
+            if default_origin_group is not None:
+                default_origin_group.set_prop("id", AAZStrType, ".default_origin_group")
 
             delivery_policy = _builder.get(".properties.deliveryPolicy")
             if delivery_policy is not None:
