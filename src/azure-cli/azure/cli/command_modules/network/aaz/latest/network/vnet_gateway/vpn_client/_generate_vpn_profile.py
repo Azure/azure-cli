@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network vnet-gateway vpn-client generate-vpn-profile",
-)
 class GenerateVpnProfile(AAZCommand):
     """Generates VPN profile for P2S client of the virtual network gateway in the specified resource group. Used for IKEV2 and radius based authentication.
     """

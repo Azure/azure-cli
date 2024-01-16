@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network vnet-gateway vpn-client generate",
-)
 class Generate(AAZCommand):
     """Generate VPN client configuration.
 
