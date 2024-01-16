@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "network public-ip ddos-protection-statu show",
 )
 class Show(AAZCommand):
-    """Gets the Ddos Protection Status of a Public IP Address
+    """Get the Ddos Protection Status of a Public IP Address
 
     :example: Gets the Ddos Protection Status of a Public IP Address
         az network public-ip show-ddos-protection-statu -n MyPublicIp -g MyResourceGroup
