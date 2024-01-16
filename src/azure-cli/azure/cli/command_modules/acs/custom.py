@@ -828,11 +828,11 @@ def aks_upgrade(cmd,
 
     instance = _update_upgrade_settings(
         cmd,
-        instance, 
-        enable_force_upgrade=enable_force_upgrade, 
-        disable_force_upgrade=disable_force_upgrade, 
+        instance,
+        enable_force_upgrade=enable_force_upgrade,
+        disable_force_upgrade=disable_force_upgrade,
         upgrade_override_until=upgrade_override_until)
-    
+
     if instance.kubernetes_version == kubernetes_version or kubernetes_version == '':
         # don't prompt here because there is another prompt below?
         if instance.provisioning_state == "Succeeded":
@@ -877,7 +877,8 @@ def aks_upgrade(cmd,
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
-def _update_upgrade_settings(cmd, instance, 
+
+def _update_upgrade_settings(cmd, instance,
                              enable_force_upgrade=False,
                              disable_force_upgrade=False,
                              upgrade_override_until=None):
@@ -926,6 +927,7 @@ def _update_upgrade_settings(cmd, instance,
             if existing_until is None or existing_until.timestamp() < default_extended_until.timestamp():
                 instance.upgrade_settings.override_settings.until = default_extended_until
     return instance
+
 
 def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name,
                                            snapshot_id=None):

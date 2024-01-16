@@ -504,7 +504,7 @@ def load_arguments(self, _):
         c.argument('enable_force_upgrade', action='store_true')
         c.argument('disable_force_upgrade', action='store_true', validator=validate_force_upgrade_disable_and_enable_parameters)
         c.argument('upgrade_override_until')
-        
+
     with self.argument_context('aks scale', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('nodepool_name', validator=validate_nodepool_name, help='Node pool name, up to 12 alphanumeric characters.')
 
