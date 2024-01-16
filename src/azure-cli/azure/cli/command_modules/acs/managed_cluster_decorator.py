@@ -4261,8 +4261,8 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         if updated:
             return new_profile
-        else:
-            return self.mc.service_mesh_profile
+
+        return self.mc.service_mesh_profile
 
     def _sort_revisions(self, revisions):
         def _convert_revision_to_semver(rev):
