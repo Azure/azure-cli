@@ -135,7 +135,7 @@ DEPENDENCIES = [
     'colorama~=0.4.4',
     # On Linux, the distribution (Ubuntu, Debian, etc) and version are checked for `az feedback`
     'distro; sys_platform == "linux"',
-    'fabric~=2.4',
+    'fabric~=3.2.2',
     'javaproperties~=0.5.1',
     'jsondiff~=2.0.0',
     'packaging>=20.9',
