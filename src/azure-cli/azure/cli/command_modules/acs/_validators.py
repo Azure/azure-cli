@@ -18,8 +18,6 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OS_SKU_AZURELINUX,
     CONST_OS_SKU_CBLMARINER,
     CONST_OS_SKU_MARINER,
-    CONST_AZURE_SERVICE_MESH_INGRESS_MODE_EXTERNAL,
-    CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL,
 )
 from azure.cli.core import keys
 from azure.cli.core.azclierror import (

@@ -2760,8 +2760,8 @@ def aks_mesh_get_revisions(
 
     if revisions:
         return revisions[0].properties
-    else:
-        return None
+    
+    return None
 
 
 def aks_mesh_get_upgrades(
@@ -2780,8 +2780,8 @@ def aks_mesh_get_upgrades(
 
     if upgrades:
         return upgrades[0].properties
-    else:
-        return None
+
+    return None
 
 
 def aks_mesh_upgrade_start(
@@ -2847,7 +2847,6 @@ def _aks_mesh_update(
 ):
     raw_parameters = locals()
 
-    from azure.cli.command_modules.acs._consts import DecoratorEarlyExitException
     from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterUpdateDecorator
 
     aks_update_decorator = AKSManagedClusterUpdateDecorator(
