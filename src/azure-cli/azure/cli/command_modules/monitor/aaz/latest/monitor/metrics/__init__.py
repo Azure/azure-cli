@@ -10,5 +10,8 @@
 
 from .__cmd_group import *
 from ._list import *
+from ._list_by_subscription import *
+from ._list_by_subscription_post import *
+from ._list_definition_by_subscription import *
 from ._list_definitions import *
 from ._list_namespaces import *

@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage the Azure Monitor Service.
+    """Monitor.
     """
     pass
 
