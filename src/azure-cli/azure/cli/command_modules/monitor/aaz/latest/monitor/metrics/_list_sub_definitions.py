@@ -12,9 +12,9 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "monitor metrics list-definition-by-subscription",
+    "monitor metrics list-sub-definitions",
 )
-class ListDefinitionBySubscription(AAZCommand):
+class ListSubDefinitions(AAZCommand):
     """List the metric definitions for the subscription.
     """
 
@@ -173,7 +173,7 @@ class ListDefinitionBySubscription(AAZCommand):
                 serialized_name="metricClass",
             )
             _element.name = AAZObjectType()
-            _ListDefinitionBySubscriptionHelper._build_schema_localizable_string_read(_element.name)
+            _ListSubDefinitionsHelper._build_schema_localizable_string_read(_element.name)
             _element.namespace = AAZStrType()
             _element.primary_aggregation_type = AAZStrType(
                 serialized_name="primaryAggregationType",
@@ -188,7 +188,7 @@ class ListDefinitionBySubscription(AAZCommand):
 
             dimensions = cls._schema_on_200.value.Element.dimensions
             dimensions.Element = AAZObjectType()
-            _ListDefinitionBySubscriptionHelper._build_schema_localizable_string_read(dimensions.Element)
+            _ListSubDefinitionsHelper._build_schema_localizable_string_read(dimensions.Element)
 
             metric_availabilities = cls._schema_on_200.value.Element.metric_availabilities
             metric_availabilities.Element = AAZObjectType()
@@ -205,8 +205,8 @@ class ListDefinitionBySubscription(AAZCommand):
             return cls._schema_on_200
 
 
-class _ListDefinitionBySubscriptionHelper:
-    """Helper class for ListDefinitionBySubscription"""
+class _ListSubDefinitionsHelper:
+    """Helper class for ListSubDefinitions"""
 
     _schema_localizable_string_read = None
 
@@ -231,4 +231,4 @@ class _ListDefinitionBySubscriptionHelper:
         _schema.value = cls._schema_localizable_string_read.value
 
 
-__all__ = ["ListDefinitionBySubscription"]
+__all__ = ["ListSubDefinitions"]

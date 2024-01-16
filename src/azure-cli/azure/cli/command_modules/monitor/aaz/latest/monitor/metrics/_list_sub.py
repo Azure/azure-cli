@@ -12,9 +12,9 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "monitor metrics list-by-subscription-post",
+    "monitor metrics list-sub",
 )
-class ListBySubscriptionPost(AAZCommand):
+class ListSub(AAZCommand):
     """Lists the metric data for a subscription. Parameters can be specified on the body.
     """
 
@@ -262,7 +262,7 @@ class ListBySubscriptionPost(AAZCommand):
             _element.name = AAZObjectType(
                 flags={"required": True},
             )
-            _ListBySubscriptionPostHelper._build_schema_localizable_string_read(_element.name)
+            _ListSubHelper._build_schema_localizable_string_read(_element.name)
             _element.timeseries = AAZListType(
                 flags={"required": True},
             )
@@ -299,14 +299,14 @@ class ListBySubscriptionPost(AAZCommand):
 
             _element = cls._schema_on_200.value.Element.timeseries.Element.metadatavalues.Element
             _element.name = AAZObjectType()
-            _ListBySubscriptionPostHelper._build_schema_localizable_string_read(_element.name)
+            _ListSubHelper._build_schema_localizable_string_read(_element.name)
             _element.value = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _ListBySubscriptionPostHelper:
-    """Helper class for ListBySubscriptionPost"""
+class _ListSubHelper:
+    """Helper class for ListSub"""
 
     _schema_localizable_string_read = None
 
@@ -331,4 +331,4 @@ class _ListBySubscriptionPostHelper:
         _schema.value = cls._schema_localizable_string_read.value
 
 
-__all__ = ["ListBySubscriptionPost"]
+__all__ = ["ListSub"]
