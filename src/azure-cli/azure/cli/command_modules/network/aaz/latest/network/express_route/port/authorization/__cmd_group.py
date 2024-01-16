@@ -8,11 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
-from ._create import *
-from ._delete import *
-from ._list import *
-from ._list_auto_approved import *
-from ._show import *
-from ._update import *
-from ._wait import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "network express-route port authorization",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage ExpressRoute ports authorzation.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]
