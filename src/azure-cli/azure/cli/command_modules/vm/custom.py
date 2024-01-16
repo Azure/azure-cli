@@ -5093,7 +5093,8 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
     if workspace is None:
         raise CLIError('Cannot find the corresponding log analytics workspace. '
                        'Please check the status of log analytics workpsace.')
-    return client.query(workspace, QueryBody(query=analytics_query, timespan=timespan))
+    # return client.query(workspace, QueryBody(query=analytics_query, timespan=timespan))
+    return client.query_workspace(workspace, analytics_query, timespan=timespan)
 
 
 def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name, workspace_name):
