@@ -711,16 +711,8 @@ class AzCliCommandInvoker(CommandInvoker):
                 result = list(result)
 
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
-            sensitive_info = cmd_copy.sensitive_info if hasattr(cmd_copy, 'sensitive_info') else None
-            redact = sensitive_info and sensitive_info.redact
-            redact_keys = sensitive_info.redact_keys if sensitive_info and redact else []
-            for key in redact_keys:
-                result[key] = '_REDACTED_'
-            from ..credential_helper import is_containing_credential, distinguish_credential, redact_credential, senstive_data_warning_message
-            if not sensitive_info and is_containing_credential(result, max_level=99):
-                logger.warning(senstive_data_warning_message)
-            if (not sensitive_info) or redact:
-                result = redact_credential(result)
+            self._resolve_output_sensitive_data_warning(cmd_copy, result)
+
             event_data = {'result': result}
             cmd_copy.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
             return event_data['result']
@@ -757,10 +749,6 @@ class AzCliCommandInvoker(CommandInvoker):
         self._resolve_extension_override_warning(cmd)
 
     def _resolve_preview_and_deprecation_warnings(self, cmd, parsed_args):
-        sensitives = []
-        if hasattr(cmd, 'sensitive_info') and cmd.sensitive_info:
-            sensitives.append(cmd.sensitive_info)
-
         deprecations = [] + getattr(parsed_args, '_argument_deprecations', [])
         if cmd.deprecate_info:
             deprecations.append(cmd.deprecate_info)
@@ -816,8 +804,6 @@ class AzCliCommandInvoker(CommandInvoker):
                 experimentals.append(ImplicitExperimentalItem(cli_ctx=self.cli_ctx, **experimental_kwargs))
 
         if not self.cli_ctx.only_show_errors:
-            for s in sensitives:
-                print(s.message, file=sys.stderr)
             for d in deprecations:
                 print(d.message, file=sys.stderr)
             for p in previews:
@@ -828,6 +814,26 @@ class AzCliCommandInvoker(CommandInvoker):
     def _resolve_extension_override_warning(self, cmd):  # pylint: disable=no-self-use
         if isinstance(cmd.command_source, ExtensionCommandSource) and cmd.command_source.overrides_command:
             logger.warning(cmd.command_source.get_command_warn_msg())
+
+    def _resolve_output_sensitive_data_warning(self, cmd, result):
+        if not cmd.cli_ctx.config.getboolean('core', 'show_secrets_warning', True):
+            return
+
+        from ..credential_helper import sensitive_data_detailed_warning_message, sensitive_data_warning_message
+        sensitive_info = cmd.sensitive_info if hasattr(cmd, 'sensitive_info') else None
+        if sensitive_info:
+            message = sensitive_data_warning_message
+            if sensitive_info.sensitive_keys:
+                message = sensitive_data_detailed_warning_message.format(', '.join(sensitive_info.sensitive_keys))
+            logger.warning(message)
+            return
+
+        from ..credential_helper import distinguish_credential
+        containing_credential, secret_property_names = distinguish_credential(result, max_level=9)
+        if secret_property_names:
+            logger.warning(sensitive_data_detailed_warning_message.format(', '.join(secret_property_names)))
+        elif containing_credential:
+            logger.warning(sensitive_data_warning_message)
 
     def resolve_confirmation(self, cmd, parsed_args):
         confirm = cmd.confirmation and not parsed_args.__dict__.pop('yes', None) \

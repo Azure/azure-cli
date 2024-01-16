@@ -33,7 +33,7 @@ def resolve_sensitive_info(cli_ctx, name):
 # pylint: disable=too-many-instance-attributes
 class SensitiveItem(StatusTag):
 
-    def __init__(self, cli_ctx, object_type='', redact=True, redact_keys=[], target=None, tag_func=None, message_func=None, **kwargs):
+    def __init__(self, cli_ctx, object_type='', redact=True, sensitive_keys=[], target=None, tag_func=None, message_func=None, **kwargs):
         """ Create a collection of sensitive metadata.
 
         :param cli_ctx: The CLI context associated with the sensitive item.
@@ -53,9 +53,10 @@ class SensitiveItem(StatusTag):
         """
 
         def _default_get_message(self):
-            from ..credential_helper import senstive_data_warning_message
-            return senstive_data_warning_message
-            # return "{} may contain sensitive data, please take care.".format("This " + self.object_type)
+            from ..credential_helper import sensitive_data_detailed_warning_message, sensitive_data_warning_message
+            if self.sensitive_keys:
+                return sensitive_data_detailed_warning_message.format(', '.join(self.sensitive_keys))
+            return sensitive_data_warning_message
 
         super().__init__(
             cli_ctx=cli_ctx,
@@ -66,7 +67,7 @@ class SensitiveItem(StatusTag):
             message_func=message_func or _default_get_message
         )
         self.redact = redact
-        self.redact_keys = redact_keys
+        self.sensitive_keys = sensitive_keys
 
 
 class ImplicitSensitiveItem(SensitiveItem):
