@@ -189,7 +189,7 @@ class Profile:
         consolidated = self._normalize_properties(username, subscriptions,
                                                   is_service_principal, bool(use_cert_sn_issuer))
 
-        self._set_subscriptions(consolidated)
+        self._set_subscriptions(consolidated, interactive=interactive)
         return deepcopy(consolidated)
 
     def login_with_managed_identity(self, identity_id=None, allow_no_subscriptions=None):
@@ -451,7 +451,7 @@ class Profile:
         s.state = 'Enabled'
         return s
 
-    def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
+    def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None, interactive=False):
 
         def _get_key_name(account, secondary_key_name):
             return (account[_SUBSCRIPTION_ID] if secondary_key_name is None
@@ -486,9 +486,9 @@ class Profile:
                     s[_IS_DEFAULT_SUBSCRIPTION] = False
 
                 if not new_active_one:
-                    new_active_one = Profile._pick_working_subscription(new_subscriptions)
+                    new_active_one = Profile._pick_working_subscription(new_subscriptions, interactive=interactive)
             else:
-                new_active_one = Profile._pick_working_subscription(new_subscriptions)
+                new_active_one = Profile._pick_working_subscription(new_subscriptions, interactive=interactive)
 
             new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
             default_sub_id = new_active_one[_SUBSCRIPTION_ID]
@@ -497,7 +497,18 @@ class Profile:
         self._storage[_SUBSCRIPTIONS] = subscriptions
 
     @staticmethod
-    def _pick_working_subscription(subscriptions):
+    def _pick_working_subscription(subscriptions, interactive=False):
+        interactive = True
+        if interactive:
+            print('This account has access to below subscriptions: ')
+            index_to_subscription_map = {}
+            for index, sub in enumerate(subscriptions, start=1):
+                index_to_subscription_map[index] = sub
+                print('{:>3d}. {} {:50s} {}'.format(index, sub[_SUBSCRIPTION_ID], sub[_SUBSCRIPTION_NAME], sub[_TENANT_ID]))
+            from knack.prompting import prompt_int, NoTTYException
+            select_index = prompt_int('Please select the default subscription: ')
+            return index_to_subscription_map[select_index]
+
         s = next((x for x in subscriptions if x.get(_STATE) == 'Enabled'), None)
         return s or subscriptions[0]
 
