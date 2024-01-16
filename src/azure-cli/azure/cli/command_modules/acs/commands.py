@@ -189,8 +189,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'aks_trustedaccess_role_binding_create')
         g.custom_command('update', 'aks_trustedaccess_role_binding_update')
         g.custom_command('delete', 'aks_trustedaccess_role_binding_delete', confirmation=True)
-        
-     # AKS mesh commands
+
+    # AKS mesh commands
     with self.command_group('aks mesh', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
         g.custom_command(
             'enable',

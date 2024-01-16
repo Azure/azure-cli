@@ -4083,7 +4083,7 @@ class AKSManagedClusterContext(BaseAKSContext):
     def _get_k8s_support_plan(self) -> KubernetesSupportPlan:
         support_plan = self.raw_param.get("k8s_support_plan")
         return support_plan
-    
+
     def get_initial_service_mesh_profile(self) -> ServiceMeshProfile:
         """ Obtain the initial service mesh profile from parameters.
         This function is used only when setting up a new AKS cluster.

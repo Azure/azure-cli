@@ -197,6 +197,7 @@ CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START = "Start"
 CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE = "Complete"
 CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK = "Rollback"
 
+
 # consts for decorator pattern
 class DecoratorMode(Enum):
     """Enumerations used to distinguish whether to handle creation or update.
