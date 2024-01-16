@@ -7284,7 +7284,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         self.assertTrue(updated_mc.security_profile.workload_identity.enabled)
 
     def test_set_up_azure_service_mesh(self):
-        dec_1 = AKSPreviewManagedClusterCreateDecorator(
+        dec_1 = AKSManagedClusterCreateDecorator(
             self.cmd,
             self.client,
             {},
@@ -7296,7 +7296,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
-        dec_2 = AKSPreviewManagedClusterCreateDecorator(
+        dec_2 = AKSManagedClusterCreateDecorator(
             self.cmd,
             self.client,
             {
@@ -10788,7 +10788,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         dec_6.context.attach_mc(mc_6)
         with patch(
-                "azext_aks_preview.managed_cluster_decorator.prompt_y_n",
+                "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
                 return_value=True,
         ):
             dec_mc_6 = dec_6.update_azure_service_mesh_profile(mc_6)
@@ -10823,7 +10823,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         dec_7.context.attach_mc(mc_7)
         with patch(
-                "azext_aks_preview.managed_cluster_decorator.prompt_y_n",
+                "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
                 return_value=True,
         ):
             dec_mc_7 = dec_7.update_azure_service_mesh_profile(mc_7)
