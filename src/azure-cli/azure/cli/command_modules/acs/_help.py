@@ -518,13 +518,16 @@ parameters:
     short-summary: Enable vertical pod autoscaler for cluster.
   - name: --nodepool-allowed-host-ports
     type: string
-    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. 80/TCP,443/TCP,4000-5000/TCP.
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
   - name: --nodepool-asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
   - name: --node-public-ip-tags
     type: string
     short-summary: The ipTags of the node public IPs.
+  - name: --crg-id
+    type: string
+    short-summary: The crg id used to associate the new cluster with the existed Capacity Reservation Group resource.
   - name: --enable-asm --enable-azure-service-mesh
     type: bool
     short-summary: Enable Azure Service Mesh.
@@ -602,6 +605,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
   - name: Create a kubernetes cluster with vertical pod autoscaler enaled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-vpa
+  - name: create a kubernetes cluster with a Capacity Reservation Group(CRG) ID.
+    text: az aks create -g MyResourceGroup -n MyMC --kubernetes-version 1.20.9 --node-vm-size VMSize --assign-identity "subscriptions/SubID/resourceGroups/RGName/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID" --enable-managed-identity --crg-id "subscriptions/SubID/resourceGroups/RGName/providers/Microsoft.ContainerService/CapacityReservationGroups/MyCRGID"
   - name: Create a kubernetes cluster with Azure Service Mesh enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-service-mesh
 """
@@ -634,6 +639,10 @@ parameters:
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' changes a standard managed cluster to a free one.
+  - name: --network-plugin
+    type: string
+    short-summary: The Kubernetes network plugin to use.
+    long-summary: Specify "azure" along with --network-plugin-mode=overlay to update a cluster to use Azure CNI Overlay. For more information see https://aka.ms/aks/azure-cni-overlay
   - name: --network-plugin-mode
     type: string
     short-summary: Update the mode of a network plugin to migrate to a different pod networking setup.
@@ -1540,13 +1549,17 @@ parameters:
     short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
   - name: --allowed-host-ports
     type: string
-    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. 80/TCP,443/TCP,4000-5000/TCP.
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
   - name: --asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
   - name: --node-public-ip-tags
     type: string
     short-summary: The ipTags of the node public IPs.
+  - name: --crg-id
+    type: string
+    short-summary: The crg id used to associate the new nodepool with the existed Capacity Reservation Group resource.
+
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1562,6 +1575,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --kubernetes-version 1.20.9 --snapshot-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/snapshots/mysnapshot1"
   - name: create a nodepool in an existing AKS cluster with host group id
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --host-group-id /subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/hostGroups/myHostGroup --node-vm-size VMSize
+  - name: create a nodepool with a Capacity Reservation Group(CRG) ID.
+    text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --node-vm-size VMSize --crg-id "/subscriptions/SubID/resourceGroups/ResourceGroupName/providers/Microsoft.ContainerService/CapacityReservationGroups/MyCRGID"
 """
 
 helps['aks nodepool delete'] = """
@@ -1640,7 +1655,7 @@ parameters:
     short-summary: Comma-separated key-value pairs to specify custom headers.
   - name: --allowed-host-ports
     type: string
-    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. 80/TCP,443/TCP,4000-5000/TCP.
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
   - name: --asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
@@ -1751,6 +1766,16 @@ examples:
   - name: Show the details for a managed Kubernetes cluster
     text: az aks show --name MyManagedCluster --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['aks stop'] = """
+    type: command
+    short-summary: Stop a managed cluster.
+    long-summary: This can only be performed on Azure Virtual Machine Scale set backed clusters. Stopping a
+        cluster stops the control plane and agent nodes entirely, while maintaining all object and
+        cluster state. A cluster does not accrue charges while it is stopped. See `stopping a
+        cluster <https://docs.microsoft.com/azure/aks/start-stop-cluster>`_ for more details about
+        stopping a cluster.
 """
 
 helps['aks update-credentials'] = """
@@ -2006,6 +2031,80 @@ helps['aks oidc-issuer'] = """
 helps['aks oidc-issuer rotate-signing-keys'] = """
     type: command
     short-summary: Rotate oidc issuer service account signing keys
+"""
+
+helps['aks trustedaccess'] = """
+    type: group
+    short-summary: Commands to manage trusted access security features.
+"""
+
+helps['aks trustedaccess role'] = """
+    type: group
+    short-summary: Commands to manage trusted access roles.
+"""
+
+helps['aks trustedaccess role list'] = """
+    type: command
+    short-summary: List trusted access roles.
+"""
+
+helps['aks trustedaccess rolebinding'] = """
+    type: group
+    short-summary: Commands to manage trusted access role bindings.
+"""
+
+helps['aks trustedaccess rolebinding list'] = """
+    type: command
+    short-summary: List all the trusted access role bindings.
+"""
+
+helps['aks trustedaccess rolebinding show'] = """
+    type: command
+    short-summary: Get the specific trusted access role binding according to binding name.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Specify the role binding name.
+"""
+
+helps['aks trustedaccess rolebinding create'] = """
+    type: command
+    short-summary: Create a new trusted access role binding.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Specify the role binding name.
+        - name: --roles
+          type: string
+          short-summary: Specify the comma-separated roles.
+        - name: --source-resource-id -r
+          type: string
+          short-summary: Specify the source resource id of the binding.
+
+    examples:
+        - name: Create a new trusted access role binding
+          text: az aks trustedaccess rolebinding create -g myResourceGroup --cluster-name myCluster -n bindingName --source-resource-id /subscriptions/0000/resourceGroups/myResourceGroup/providers/Microsoft.Demo/samples --roles Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer
+"""
+
+helps['aks trustedaccess rolebinding update'] = """
+    type: command
+    short-summary: Update a trusted access role binding.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Specify the role binding name.
+        - name: --roles
+          type: string
+          short-summary: Specify the comma-separated roles.
+"""
+
+helps['aks trustedaccess rolebinding delete'] = """
+    type: command
+    short-summary: Delete a trusted access role binding according to name.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Specify the role binding name.
 """
 
 helps['aks mesh'] = """

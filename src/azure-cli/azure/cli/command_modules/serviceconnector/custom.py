@@ -306,6 +306,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       namespace=None,                                        # Resource.EventHub
                       webpubsub=None,                                        # Resource.WebPubSub
                       signalr=None,                                          # Resource.SignalR
+                      appinsights=None,                                      # Resource.AppInsights
                       ):
 
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
@@ -497,6 +498,7 @@ def local_connection_create(cmd, client,  # pylint: disable=too-many-locals,too-
                             namespace=None,                                        # Resource.EventHub
                             webpubsub=None,                                        # Resource.WebPubSub
                             signalr=None,                                          # Resource.SignalR
+                            appinsights=None,                                      # Resource.AppInsights
                             ):
     auth_info = get_local_conn_auth_info(secret_auth_info, secret_auth_info_auto,
                                          user_account_auth_info, service_principal_auth_info_secret)

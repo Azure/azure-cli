@@ -74,6 +74,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_force_upgrade_disable_and_enable_parameters,
     validate_allowed_host_ports, validate_application_security_groups,
     validate_node_public_ip_tags,
+    validate_crg_id,
     validate_azure_service_mesh_revision)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
@@ -342,6 +343,7 @@ def load_arguments(self, _):
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
+        c.argument('crg_id', validator=validate_crg_id)
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
         c.argument('nodepool_allowed_host_ports', nargs='+', validator=validate_allowed_host_ports, help="allowed host ports for agentpool")
         c.argument('nodepool_asg_ids', nargs='+', validator=validate_application_security_groups, help="application security groups for agentpool")
@@ -371,6 +373,7 @@ def load_arguments(self, _):
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('network_dataplane', arg_type=get_enum_type(network_dataplanes))
+        c.argument('network_plugin', arg_type=get_enum_type(network_plugins))
         c.argument('network_policy')
         c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
@@ -594,6 +597,7 @@ def load_arguments(self, _):
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
+        c.argument('crg_id', validator=validate_crg_id)
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
         c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
@@ -661,6 +665,22 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('snapshot_name', options_list=['--name', '-n'], required=True, validator=validate_snapshot_name, help='The nodepool snapshot name.')
             c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+
+    with self.argument_context('aks trustedaccess rolebinding') as c:
+        c.argument('cluster_name', help='The cluster name.')
+
+    for scope in ['aks trustedaccess rolebinding show', 'aks trustedaccess rolebinding create',
+                  'aks trustedaccess rolebinding update', 'aks trustedaccess rolebinding delete']:
+        with self.argument_context(scope) as c:
+            c.argument('role_binding_name', options_list=[
+                       '--name', '-n'], required=True, help='The role binding name.')
+
+    with self.argument_context('aks trustedaccess rolebinding create') as c:
+        c.argument('roles', help='comma-separated roles: Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer,...')
+        c.argument('source_resource_id', options_list=['--source-resource-id', '-r'], help='The source resource id of the binding')
+
+    with self.argument_context('aks trustedaccess rolebinding update') as c:
+        c.argument('roles', help='comma-separated roles: Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer,...')
 
     with self.argument_context('aks mesh enable-ingress-gateway') as c:
         c.argument('ingress_gateway_type',

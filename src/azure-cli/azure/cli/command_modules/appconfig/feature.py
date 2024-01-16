@@ -45,6 +45,7 @@ def set_feature(cmd,
                 name=None,
                 label=None,
                 description=None,
+                requirement_type=None,
                 yes=False,
                 connection_string=None,
                 auth_mode="key",
@@ -65,13 +66,16 @@ def set_feature(cmd,
 
     # when creating a new Feature flag, these defaults will be used
     tags = {}
-    default_conditions = {'client_filters': []}
+    default_conditions = {FeatureFlagConstants.CLIENT_FILTERS: []}
+
+    if requirement_type:
+        default_conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
 
     default_value = {
-        "id": feature,
-        "description": "" if description is None else description,
-        "enabled": False,
-        "conditions": default_conditions
+        FeatureFlagConstants.ID: feature,
+        FeatureFlagConstants.DESCRIPTION: "" if description is None else description,
+        FeatureFlagConstants.ENABLED: False,
+        FeatureFlagConstants.CONDITIONS: default_conditions
     }
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
@@ -113,6 +117,9 @@ def set_feature(cmd,
                 # User can only update description if the key already exists
                 if description is not None:
                     feature_flag_value.description = description
+
+                if requirement_type is not None:
+                    feature_flag_value.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
 
                 set_kv = KeyValue(key=key,
                                   label=label,
@@ -618,7 +625,7 @@ def add_filter(cmd,
             # if it's invalid, we catch appropriate exception that contains
             # detailed message
             feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-            feature_filters = feature_flag_value.conditions['client_filters']
+            feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
             entry = json.dumps(new_filter.__dict__, indent=2, ensure_ascii=False)
             confirmation_message = "Are you sure you want to add this filter?\n" + entry
@@ -713,7 +720,7 @@ def update_filter(cmd,
             # if it's invalid, we catch appropriate exception that contains
             # detailed message
             feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-            feature_filters = feature_flag_value.conditions['client_filters']
+            feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
             entry = json.dumps(new_filter.__dict__,
                                indent=2, ensure_ascii=False)
@@ -838,7 +845,7 @@ def delete_filter(cmd,
             # if it's invalid, we catch appropriate exception that contains
             # detailed message
             feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-            feature_filters = feature_flag_value.conditions['client_filters']
+            feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
             display_filter = {}
             match_index = []
@@ -947,7 +954,7 @@ def show_filter(cmd,
         # if it's invalid, we catch appropriate exception that contains
         # detailed message
         feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-        feature_filters = feature_flag_value.conditions['client_filters']
+        feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
         display_filters = []
 
@@ -1010,7 +1017,7 @@ def list_filter(cmd,
         # if it's invalid, we catch appropriate exception that contains
         # detailed message
         feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-        feature_filters = feature_flag_value.conditions['client_filters']
+        feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
         if all_:
             top = len(feature_filters)
@@ -1054,7 +1061,7 @@ def __clear_filter(azconfig_client,
 
             # These fields will never be missing because we validate that
             # in map_keyvalue_to_featureflagvalue
-            feature_filters = feature_flag_value.conditions['client_filters']
+            feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
             # create a deep copy of the filters to display to the user
             # after deletion

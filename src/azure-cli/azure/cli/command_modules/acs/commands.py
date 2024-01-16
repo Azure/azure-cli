@@ -8,6 +8,8 @@ from azure.cli.command_modules.acs._client_factory import (
     cf_managed_clusters,
     cf_maintenance_configurations,
     cf_snapshots,
+    cf_trustedaccess_role,
+    cf_trustedaccess_role_binding,
 )
 from azure.cli.command_modules.acs._format import (
     aks_agentpool_list_table_format,
@@ -62,6 +64,22 @@ def load_command_table(self, _):
         client_factory=cf_snapshots
     )
 
+    trustedaccess_role_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.containerservice.operations.'
+                        '_trusted_access_roles_operations#TrustedAccessRolesOperations.{}',
+        operation_group='trustedaccess_role',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        client_factory=cf_trustedaccess_role
+    )
+
+    trustedaccess_role_binding_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.containerservice.operations.'
+                        '_trusted_access_role_bindings_operations#TrustedAccessRoleBindingsOperations.{}',
+        operation_group='trustedaccess_role_binding',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        client_factory=cf_trustedaccess_role_binding
+    )
+
     # AKS commands
     with self.command_group('aks', managed_clusters_sdk,
                             client_factory=cf_managed_clusters) as g:
@@ -83,7 +101,7 @@ def load_command_table(self, _):
         g.custom_command('rotate-certs', 'aks_rotate_certs', supports_no_wait=True,
                          confirmation='Kubernetes will be unavailable during certificate rotation process.\n' +
                          'Are you sure you want to perform this operation?')
-        g.command('stop', 'begin_stop', supports_no_wait=True, min_api='2020-09-01')
+        g.custom_command('stop', 'aks_stop', supports_no_wait=True, min_api='2020-09-01')
         g.command('start', 'begin_start', supports_no_wait=True, min_api='2020-09-01')
         g.wait_command('wait')
         g.custom_command('use-dev-spaces', 'aks_use_dev_spaces', deprecate_info=g.deprecate())
@@ -159,6 +177,18 @@ def load_command_table(self, _):
                          confirmation='Be careful that rotate oidc issuer signing keys twice within short period' +
                          ' will invalidate service accounts token immediately. Please refer to doc for details.\n' +
                          'Are you sure you want to perform this operation?')
+
+    # AKS trusted access role commands
+    with self.command_group('aks trustedaccess role', trustedaccess_role_sdk, client_factory=cf_trustedaccess_role) as g:
+        g.custom_command('list', 'aks_trustedaccess_role_list')
+
+    # AKS trusted access rolebinding commands
+    with self.command_group('aks trustedaccess rolebinding', trustedaccess_role_binding_sdk, client_factory=cf_trustedaccess_role_binding) as g:
+        g.custom_command('list', 'aks_trustedaccess_role_binding_list')
+        g.custom_show_command('show', 'aks_trustedaccess_role_binding_get')
+        g.custom_command('create', 'aks_trustedaccess_role_binding_create')
+        g.custom_command('update', 'aks_trustedaccess_role_binding_update')
+        g.custom_command('delete', 'aks_trustedaccess_role_binding_delete', confirmation=True)
         
      # AKS mesh commands
     with self.command_group('aks mesh', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
