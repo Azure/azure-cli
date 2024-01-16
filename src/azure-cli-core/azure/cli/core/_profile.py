@@ -504,10 +504,21 @@ class Profile:
             index_to_subscription_map = {}
             for index, sub in enumerate(subscriptions, start=1):
                 index_to_subscription_map[index] = sub
-                print('{:>3d}. {} {:50s} {}'.format(index, sub[_SUBSCRIPTION_ID], sub[_SUBSCRIPTION_NAME], sub[_TENANT_ID]))
+                print('{}. {} {:50s} {}'.format(index, sub[_SUBSCRIPTION_ID], sub[_SUBSCRIPTION_NAME], sub[_TENANT_ID]))
             from knack.prompting import prompt_int, NoTTYException
-            select_index = prompt_int('Please select the default subscription: ')
-            return index_to_subscription_map[select_index]
+
+            # Keep prompting until the user inputs a valid index
+            while True:
+                try:
+                    select_index = prompt_int('Please select the default subscription: ')
+                    return index_to_subscription_map[select_index]
+                except KeyError:
+                    logger.warning("Invalid selection.")
+                    # Let retry
+                except NoTTYException:
+                    logger.warning("No TTY to select the default subscription. Picking the first enabled subscription"
+                                   "as the default one.")
+                    break
 
         s = next((x for x in subscriptions if x.get(_STATE) == 'Enabled'), None)
         return s or subscriptions[0]
