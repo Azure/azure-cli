@@ -299,7 +299,7 @@ jobs:
     inputs:
       filePath: build_scripts\windows\scripts\test_msi_installation.ps1
 
-- job: TestZipPackage
+- job: TestZipInstallation
   displayName: Test ZIP Package
   dependsOn: BuildWindowsZIP
   strategy:
@@ -1243,7 +1243,7 @@ jobs:
     - BuildWindowsMSI
     - TestMsiInstallation
     - BuildWindowsZIP
-    - TestZipPackage
+    - TestZipInstallation
     - BuildDockerImageAlpine
     - TestDockerImageAlpine
     - BuildDockerImageAzureLinux
