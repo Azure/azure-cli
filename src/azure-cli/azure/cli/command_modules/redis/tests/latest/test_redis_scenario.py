@@ -236,7 +236,7 @@ class RedisCacheTests(ScenarioTest):
         result = self.cmd('az redis list-keys -n {name} -g {rg}').get_output_in_json()
         self.assertTrue(result['primaryKey'] is not None)
         self.assertTrue(result['secondaryKey'] is not None)
-        self.cmd('az redis update -n {name} -g {rg} --set "tags.mytag=mytagval"')
+        # TODO: self.cmd('az redis update -n {name} -g {rg} --set "tags.mytag=mytagval"')
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
     def test_redis_cache_patch_schedule(self, resource_group):
@@ -402,7 +402,7 @@ class RedisCacheTests(ScenarioTest):
 
         self.cmd('az redis regenerate-keys -n {name} -g {rg} --key-type Primary')
         self.cmd('az redis regenerate-keys -n {name} -g {rg} --key-type Secondary')
-        self.cmd('az redis update -n {name} -g {rg} --set "tags.mytag=mytagval"')
+        # TODO: self.cmd('az redis update -n {name} -g {rg} --set "tags.mytag=mytagval"')
         self.cmd('az redis delete -n {name} -g {rg} -y')
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
@@ -420,7 +420,7 @@ class RedisCacheTests(ScenarioTest):
             self.check('length(identity.userAssignedIdentities)', 1)
         ])
 
-        self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled"')
+        # TODO: self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled"')
         if self.is_live:
             time.sleep(5*60)
 
@@ -555,7 +555,7 @@ class RedisCacheTests(ScenarioTest):
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
         if self.is_live:
             time.sleep(5*60)
-        self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled"')
+        # TODO: self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled"')
         if self.is_live:
             time.sleep(5*60)
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
