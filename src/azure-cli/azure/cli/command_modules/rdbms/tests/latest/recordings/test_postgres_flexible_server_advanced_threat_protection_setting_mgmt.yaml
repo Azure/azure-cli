@@ -1,0 +1,1267 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: HEAD
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 08 Jan 2024 11:32:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_postgres_flexible_server_advanced_threat_protection_setting_mgmt","date":"2024-01-08T11:31:57Z","module":"rdbms"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '406'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:32:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "azuredbclitest-000002", "type": "Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '86'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/checkNameAvailability?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers","nameAvailable":true,"message":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '117'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:32:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/capabilities?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"name":"FlexibleServerCapabilities","supportedServerEditions":[{"name":"Burstable","defaultSkuName":"Standard_B1ms","supportedStorageEditions":[{"name":"ManagedDisk","defaultStorageSizeMb":32768,"supportedStorageMb":[{"supportedIops":120,"storageSizeMb":32768,"defaultIopsTier":"P4","supportedIopsTiers":[{"name":"P4","iops":120},{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":240,"storageSizeMb":65536,"defaultIopsTier":"P6","supportedIopsTiers":[{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":500,"storageSizeMb":131072,"defaultIopsTier":"P10","supportedIopsTiers":[{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":1100,"storageSizeMb":262144,"defaultIopsTier":"P15","supportedIopsTiers":[{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":2300,"storageSizeMb":524288,"defaultIopsTier":"P20","supportedIopsTiers":[{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":5000,"storageSizeMb":1048576,"defaultIopsTier":"P30","supportedIopsTiers":[{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":2097152,"defaultIopsTier":"P40","supportedIopsTiers":[{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4193280,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4194304,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":16000,"storageSizeMb":8388608,"defaultIopsTier":"P60","supportedIopsTiers":[{"name":"P60","iops":16000},{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":18000,"storageSizeMb":16777216,"defaultIopsTier":"P70","supportedIopsTiers":[{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":20000,"storageSizeMb":33553408,"defaultIopsTier":"P80","supportedIopsTiers":[{"name":"P80","iops":20000}]}]},{"name":"ManagedDiskV2","defaultStorageSizeMb":32768,"supportedStorageMb":[{"supportedIops":3000,"supportedMaximumIops":80000,"storageSizeMb":32768,"maximumStorageSizeMb":67108864,"supportedThroughput":125,"supportedMaximumThroughput":1200,"defaultIopsTier":"None","supportedIopsTiers":[{"name":"None","iops":0}]}]}],"supportedServerSkus":[{"name":"Standard_B1ms","vCores":1,"supportedIops":640,"supportedMemoryPerVcoreMb":2048,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B2s","vCores":2,"supportedIops":1280,"supportedMemoryPerVcoreMb":2048,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B2ms","vCores":2,"supportedIops":1920,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B4ms","vCores":4,"supportedIops":2880,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B8ms","vCores":8,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B12ms","vCores":12,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B16ms","vCores":16,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B20ms","vCores":20,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]}]},{"name":"GeneralPurpose","defaultSkuName":"Standard_D4ds_v5","supportedStorageEditions":[{"name":"ManagedDisk","defaultStorageSizeMb":65536,"supportedStorageMb":[{"supportedIops":120,"storageSizeMb":32768,"defaultIopsTier":"P4","supportedIopsTiers":[{"name":"P4","iops":120},{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":240,"storageSizeMb":65536,"defaultIopsTier":"P6","supportedIopsTiers":[{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":500,"storageSizeMb":131072,"defaultIopsTier":"P10","supportedIopsTiers":[{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":1100,"storageSizeMb":262144,"defaultIopsTier":"P15","supportedIopsTiers":[{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":2300,"storageSizeMb":524288,"defaultIopsTier":"P20","supportedIopsTiers":[{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":5000,"storageSizeMb":1048576,"defaultIopsTier":"P30","supportedIopsTiers":[{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":2097152,"defaultIopsTier":"P40","supportedIopsTiers":[{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4193280,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4194304,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":16000,"storageSizeMb":8388608,"defaultIopsTier":"P60","supportedIopsTiers":[{"name":"P60","iops":16000},{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":18000,"storageSizeMb":16777216,"defaultIopsTier":"P70","supportedIopsTiers":[{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":20000,"storageSizeMb":33553408,"defaultIopsTier":"P80","supportedIopsTiers":[{"name":"P80","iops":20000}]}]},{"name":"ManagedDiskV2","defaultStorageSizeMb":65536,"supportedStorageMb":[{"supportedIops":3000,"supportedMaximumIops":80000,"storageSizeMb":32768,"maximumStorageSizeMb":67108864,"supportedThroughput":125,"supportedMaximumThroughput":1200,"defaultIopsTier":"None","supportedIopsTiers":[{"name":"None","iops":0}]}]}],"supportedServerSkus":[{"name":"Standard_D2s_v3","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D4s_v3","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D8s_v3","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D16s_v3","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D32s_v3","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D48s_v3","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D64s_v3","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D2ds_v4","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D4ds_v4","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D8ds_v4","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D16ds_v4","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D32ds_v4","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D48ds_v4","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D64ds_v4","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D2ads_v5","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D4ads_v5","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D8ads_v5","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D16ads_v5","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D32ads_v5","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D48ads_v5","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D64ads_v5","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D96ads_v5","vCores":96,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D2ds_v5","vCores":2,"supportedIops":3750,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D4ds_v5","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D8ds_v5","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D16ds_v5","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D32ds_v5","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D48ds_v5","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D64ds_v5","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D96ds_v5","vCores":96,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]}]},{"name":"MemoryOptimized","defaultSkuName":"Standard_E4ds_v5","supportedStorageEditions":[{"name":"ManagedDisk","defaultStorageSizeMb":131072,"supportedStorageMb":[{"supportedIops":120,"storageSizeMb":32768,"defaultIopsTier":"P4","supportedIopsTiers":[{"name":"P4","iops":120},{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":240,"storageSizeMb":65536,"defaultIopsTier":"P6","supportedIopsTiers":[{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":500,"storageSizeMb":131072,"defaultIopsTier":"P10","supportedIopsTiers":[{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":1100,"storageSizeMb":262144,"defaultIopsTier":"P15","supportedIopsTiers":[{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":2300,"storageSizeMb":524288,"defaultIopsTier":"P20","supportedIopsTiers":[{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":5000,"storageSizeMb":1048576,"defaultIopsTier":"P30","supportedIopsTiers":[{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":2097152,"defaultIopsTier":"P40","supportedIopsTiers":[{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4193280,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4194304,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":16000,"storageSizeMb":8388608,"defaultIopsTier":"P60","supportedIopsTiers":[{"name":"P60","iops":16000},{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":18000,"storageSizeMb":16777216,"defaultIopsTier":"P70","supportedIopsTiers":[{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":20000,"storageSizeMb":33553408,"defaultIopsTier":"P80","supportedIopsTiers":[{"name":"P80","iops":20000}]}]},{"name":"ManagedDiskV2","defaultStorageSizeMb":131072,"supportedStorageMb":[{"supportedIops":3000,"supportedMaximumIops":80000,"storageSizeMb":32768,"maximumStorageSizeMb":67108864,"supportedThroughput":125,"supportedMaximumThroughput":1200,"defaultIopsTier":"None","supportedIopsTiers":[{"name":"None","iops":0}]}]}],"supportedServerSkus":[{"name":"Standard_E2s_v3","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E4s_v3","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E8s_v3","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E16s_v3","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E32s_v3","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E48s_v3","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E64s_v3","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":6912,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E2ds_v4","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E4ds_v4","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E8ds_v4","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E16ds_v4","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E20ds_v4","vCores":20,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E32ds_v4","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E48ds_v4","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E64ds_v4","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":6912,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E2ads_v5","vCores":2,"supportedIops":3750,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E4ads_v5","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E8ads_v5","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E16ads_v5","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E20ads_v5","vCores":20,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E32ads_v5","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E48ads_v5","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E64ads_v5","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E96ads_v5","vCores":96,"supportedIops":20000,"supportedMemoryPerVcoreMb":7168,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E2ds_v5","vCores":2,"supportedIops":3750,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E4ds_v5","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E8ds_v5","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E16ds_v5","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E20ds_v5","vCores":20,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E32ds_v5","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E48ds_v5","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E64ds_v5","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E96ds_v5","vCores":96,"supportedIops":20000,"supportedMemoryPerVcoreMb":7168,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]}]}],"supportedServerVersions":[{"name":"11","supportedVersionsToUpgrade":["12","13","14","15"]},{"name":"12","supportedVersionsToUpgrade":["13","14","15"]},{"name":"13","supportedVersionsToUpgrade":["14","15"]},{"name":"14","supportedVersionsToUpgrade":["15"]},{"name":"15","supportedVersionsToUpgrade":[]},{"name":"16","supportedVersionsToUpgrade":[]}],"fastProvisioningSupported":"Enabled","supportedFastProvisioningEditions":[{"supportedTier":"Burstable","supportedSku":"standard_b1ms","supportedStorageGb":32,"supportedServerVersions":"12","serverCount":0},{"supportedTier":"Burstable","supportedSku":"standard_b2s","supportedStorageGb":32,"supportedServerVersions":"12","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2s_v3","supportedStorageGb":128,"supportedServerVersions":"12","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2ds_v4","supportedStorageGb":128,"supportedServerVersions":"12","serverCount":0},{"supportedTier":"MemoryOptimized","supportedSku":"standard_e2ds_v4","supportedStorageGb":512,"supportedServerVersions":"12","serverCount":0},{"supportedTier":"Burstable","supportedSku":"standard_b1ms","supportedStorageGb":32,"supportedServerVersions":"13","serverCount":0},{"supportedTier":"Burstable","supportedSku":"standard_b2s","supportedStorageGb":32,"supportedServerVersions":"13","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2s_v3","supportedStorageGb":128,"supportedServerVersions":"13","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2ds_v4","supportedStorageGb":128,"supportedServerVersions":"13","serverCount":0},{"supportedTier":"MemoryOptimized","supportedSku":"standard_e2ds_v4","supportedStorageGb":512,"supportedServerVersions":"13","serverCount":0},{"supportedTier":"Burstable","supportedSku":"standard_b1ms","supportedStorageGb":32,"supportedServerVersions":"14","serverCount":0},{"supportedTier":"Burstable","supportedSku":"standard_b2s","supportedStorageGb":32,"supportedServerVersions":"14","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2s_v3","supportedStorageGb":128,"supportedServerVersions":"14","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2ds_v4","supportedStorageGb":128,"supportedServerVersions":"14","serverCount":0},{"supportedTier":"MemoryOptimized","supportedSku":"standard_e2ds_v4","supportedStorageGb":512,"supportedServerVersions":"14","serverCount":0},{"supportedTier":"Burstable","supportedSku":"standard_b1ms","supportedStorageGb":32,"supportedServerVersions":"15","serverCount":0},{"supportedTier":"Burstable","supportedSku":"standard_b2s","supportedStorageGb":32,"supportedServerVersions":"15","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2s_v3","supportedStorageGb":128,"supportedServerVersions":"15","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2ds_v4","supportedStorageGb":128,"supportedServerVersions":"15","serverCount":0},{"supportedTier":"MemoryOptimized","supportedSku":"standard_e2ds_v4","supportedStorageGb":512,"supportedServerVersions":"15","serverCount":0}],"geoBackupSupported":"Enabled","zoneRedundantHaSupported":"Enabled","zoneRedundantHaAndGeoBackupSupported":"Enabled","storageAutoGrowthSupported":"Enabled","onlineResizeSupported":"Enabled","restricted":"Disabled"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '24060'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:32:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "sku": {"name": "Standard_D2s_v3", "tier": "GeneralPurpose"},
+      "properties": {"administratorLogin": "brokenthrushe2", "administratorLoginPassword":
+      "yZLbyI6Nj5jfEj3KyzPydQ", "version": "13", "storage": {"storageSizeGB": 128,
+      "autoGrow": "Disabled"}, "authConfig": {"activeDirectoryAuth": "Disabled", "passwordAuth":
+      "Enabled", "tenantId": ""}, "backup": {"backupRetentionDays": 7, "geoRedundantBackup":
+      "Disabled"}, "highAvailability": {"mode": "Disabled"}, "createMode": "Create"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '504'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"operation":"UpsertServerManagementOperationV2","startTime":"2024-01-08T11:32:13.11Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/70af2bb1-7539-46c3-8877-f7ff65a914e7?api-version=2023-06-01-preview&t=638403103332572475&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=odA7AT4iKMykC_mbetxcZ-xJbN24keSQcVKKBORVj06VhimC51nYmAtMN1boiXqPVfgBehUgO6GC75CdVSqFApnIYo7cLXsyzqD78zHheIkr9nK0QGjKmBu-1xnyH1kzH7JZE7eSAi9QoWH6zy1uUI32aCYgXcV1VeQCGseyCsoC4FcOFC6iLdywNWunEvyi4vm2Z3y_qRlBUpeDYdR-ax-jPWTeMmMpm5rcrzOAJtg2FlJw-Aovp-OXhIHVRJXnvC0yPULzQcnHccfm-OntLu4F8rwB8KIf2ormwTC0LCR8DU39yIa1UQrjyalqca8oVxWF9vdGSQjFCzTRifw5qg&h=YhLAeQGGlPFd-wP9Gif_o2-Wod4a7xaF0u98dr3twJ8
+      cache-control:
+      - no-cache
+      content-length:
+      - '87'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:32:13 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/operationResults/70af2bb1-7539-46c3-8877-f7ff65a914e7?api-version=2023-06-01-preview&t=638403103332572475&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=BEibg5ez5Rwy43T8ewKtC0OkVqC7fZxU94He363fYbyEfhUxiqaf6_oYA17D636gDJU909Pr61TElioSCVjz8XPHkYy7G8jlTHZjgq01hzP-GTUQdj8ETFpd6ZB3pSmttM4DZIc-EsdJo-d6-7497uzGSYUvh_-kz0rx4YA0j-fYcONdA4KVAwLZWb0SKZvss4e_7IRL-GG8nicYhOT_kxOHMlLcxRXYvL31B8LnwS0zdCr2cuebXkVgiDK4Z4EFkkJjdfZDHjOGgSqdLF1GAIsEKhM8rCyXIwWyci1ddoJ_3Vop6rHL16CTyetW06W3fYgWwJ3VLNF70zb3WrH9Bw&h=qIUkz7S_eCndShepCZ_LHzCBCp--nYMzF0bKXUwkY00
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/70af2bb1-7539-46c3-8877-f7ff65a914e7?api-version=2023-06-01-preview&t=638403103332572475&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=odA7AT4iKMykC_mbetxcZ-xJbN24keSQcVKKBORVj06VhimC51nYmAtMN1boiXqPVfgBehUgO6GC75CdVSqFApnIYo7cLXsyzqD78zHheIkr9nK0QGjKmBu-1xnyH1kzH7JZE7eSAi9QoWH6zy1uUI32aCYgXcV1VeQCGseyCsoC4FcOFC6iLdywNWunEvyi4vm2Z3y_qRlBUpeDYdR-ax-jPWTeMmMpm5rcrzOAJtg2FlJw-Aovp-OXhIHVRJXnvC0yPULzQcnHccfm-OntLu4F8rwB8KIf2ormwTC0LCR8DU39yIa1UQrjyalqca8oVxWF9vdGSQjFCzTRifw5qg&h=YhLAeQGGlPFd-wP9Gif_o2-Wod4a7xaF0u98dr3twJ8
+  response:
+    body:
+      string: '{"name":"70af2bb1-7539-46c3-8877-f7ff65a914e7","status":"InProgress","startTime":"2024-01-08T11:32:13.11Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:32:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/70af2bb1-7539-46c3-8877-f7ff65a914e7?api-version=2023-06-01-preview&t=638403103332572475&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=odA7AT4iKMykC_mbetxcZ-xJbN24keSQcVKKBORVj06VhimC51nYmAtMN1boiXqPVfgBehUgO6GC75CdVSqFApnIYo7cLXsyzqD78zHheIkr9nK0QGjKmBu-1xnyH1kzH7JZE7eSAi9QoWH6zy1uUI32aCYgXcV1VeQCGseyCsoC4FcOFC6iLdywNWunEvyi4vm2Z3y_qRlBUpeDYdR-ax-jPWTeMmMpm5rcrzOAJtg2FlJw-Aovp-OXhIHVRJXnvC0yPULzQcnHccfm-OntLu4F8rwB8KIf2ormwTC0LCR8DU39yIa1UQrjyalqca8oVxWF9vdGSQjFCzTRifw5qg&h=YhLAeQGGlPFd-wP9Gif_o2-Wod4a7xaF0u98dr3twJ8
+  response:
+    body:
+      string: '{"name":"70af2bb1-7539-46c3-8877-f7ff65a914e7","status":"InProgress","startTime":"2024-01-08T11:32:13.11Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:33:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/70af2bb1-7539-46c3-8877-f7ff65a914e7?api-version=2023-06-01-preview&t=638403103332572475&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=odA7AT4iKMykC_mbetxcZ-xJbN24keSQcVKKBORVj06VhimC51nYmAtMN1boiXqPVfgBehUgO6GC75CdVSqFApnIYo7cLXsyzqD78zHheIkr9nK0QGjKmBu-1xnyH1kzH7JZE7eSAi9QoWH6zy1uUI32aCYgXcV1VeQCGseyCsoC4FcOFC6iLdywNWunEvyi4vm2Z3y_qRlBUpeDYdR-ax-jPWTeMmMpm5rcrzOAJtg2FlJw-Aovp-OXhIHVRJXnvC0yPULzQcnHccfm-OntLu4F8rwB8KIf2ormwTC0LCR8DU39yIa1UQrjyalqca8oVxWF9vdGSQjFCzTRifw5qg&h=YhLAeQGGlPFd-wP9Gif_o2-Wod4a7xaF0u98dr3twJ8
+  response:
+    body:
+      string: '{"name":"70af2bb1-7539-46c3-8877-f7ff65a914e7","status":"InProgress","startTime":"2024-01-08T11:32:13.11Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:34:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/70af2bb1-7539-46c3-8877-f7ff65a914e7?api-version=2023-06-01-preview&t=638403103332572475&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=odA7AT4iKMykC_mbetxcZ-xJbN24keSQcVKKBORVj06VhimC51nYmAtMN1boiXqPVfgBehUgO6GC75CdVSqFApnIYo7cLXsyzqD78zHheIkr9nK0QGjKmBu-1xnyH1kzH7JZE7eSAi9QoWH6zy1uUI32aCYgXcV1VeQCGseyCsoC4FcOFC6iLdywNWunEvyi4vm2Z3y_qRlBUpeDYdR-ax-jPWTeMmMpm5rcrzOAJtg2FlJw-Aovp-OXhIHVRJXnvC0yPULzQcnHccfm-OntLu4F8rwB8KIf2ormwTC0LCR8DU39yIa1UQrjyalqca8oVxWF9vdGSQjFCzTRifw5qg&h=YhLAeQGGlPFd-wP9Gif_o2-Wod4a7xaF0u98dr3twJ8
+  response:
+    body:
+      string: '{"name":"70af2bb1-7539-46c3-8877-f7ff65a914e7","status":"InProgress","startTime":"2024-01-08T11:32:13.11Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:35:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/70af2bb1-7539-46c3-8877-f7ff65a914e7?api-version=2023-06-01-preview&t=638403103332572475&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=odA7AT4iKMykC_mbetxcZ-xJbN24keSQcVKKBORVj06VhimC51nYmAtMN1boiXqPVfgBehUgO6GC75CdVSqFApnIYo7cLXsyzqD78zHheIkr9nK0QGjKmBu-1xnyH1kzH7JZE7eSAi9QoWH6zy1uUI32aCYgXcV1VeQCGseyCsoC4FcOFC6iLdywNWunEvyi4vm2Z3y_qRlBUpeDYdR-ax-jPWTeMmMpm5rcrzOAJtg2FlJw-Aovp-OXhIHVRJXnvC0yPULzQcnHccfm-OntLu4F8rwB8KIf2ormwTC0LCR8DU39yIa1UQrjyalqca8oVxWF9vdGSQjFCzTRifw5qg&h=YhLAeQGGlPFd-wP9Gif_o2-Wod4a7xaF0u98dr3twJ8
+  response:
+    body:
+      string: '{"name":"70af2bb1-7539-46c3-8877-f7ff65a914e7","status":"InProgress","startTime":"2024-01-08T11:32:13.11Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:36:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/70af2bb1-7539-46c3-8877-f7ff65a914e7?api-version=2023-06-01-preview&t=638403103332572475&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=odA7AT4iKMykC_mbetxcZ-xJbN24keSQcVKKBORVj06VhimC51nYmAtMN1boiXqPVfgBehUgO6GC75CdVSqFApnIYo7cLXsyzqD78zHheIkr9nK0QGjKmBu-1xnyH1kzH7JZE7eSAi9QoWH6zy1uUI32aCYgXcV1VeQCGseyCsoC4FcOFC6iLdywNWunEvyi4vm2Z3y_qRlBUpeDYdR-ax-jPWTeMmMpm5rcrzOAJtg2FlJw-Aovp-OXhIHVRJXnvC0yPULzQcnHccfm-OntLu4F8rwB8KIf2ormwTC0LCR8DU39yIa1UQrjyalqca8oVxWF9vdGSQjFCzTRifw5qg&h=YhLAeQGGlPFd-wP9Gif_o2-Wod4a7xaF0u98dr3twJ8
+  response:
+    body:
+      string: '{"name":"70af2bb1-7539-46c3-8877-f7ff65a914e7","status":"Succeeded","startTime":"2024-01-08T11:32:13.11Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:37:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2024-01-08T11:32:19.6095356Z"},"properties":{"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":500,"tier":"P10","storageSizeGB":128,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Enabled"},"privateEndpointConnections":[],"dataEncryption":{"type":"SystemManaged"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"13","minorVersion":"12","administratorLogin":"brokenthrushe2","state":"Ready","availabilityZone":"1","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2024-01-08T11:32:19.6095356+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
+        US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1236'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:37:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"charset": "utf8", "collation": "en_US.utf8"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '62'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/databases/flexibleserverdb?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"operation":"UpsertServerDatabaseManagementOperation","startTime":"2024-01-08T11:37:21.287Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/2ab711a5-d88b-423d-8728-35b09a2e00fe?api-version=2023-06-01-preview&t=638403106414430144&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=l-KmAr5fo_mulE6X665MmwGxGB5AtrKzOBhoxKjKXlSSIpgcbrVHihNVR04KoiTbsObqvaYh6o3_-BOAnREi13zz-wdvspR6k4X2INVJhn5lIbY5NVdDggAsBWciyhql80J6eUKi6QLxga70SQl5A3nu1UNb_qkoOeelx3HjB2kebNz6QsaKhboN9vPvWugXdRwD99vf_KlTK-T4ki4bTWwkXeam6fSW7iINzsaOdE68VloxMgQwa5OSiTpY_zSVLZG5r38LhKOUyI98AAQbP1K8U3y1t0HVp8MbGjEiG6nC66uO53Lo7ev90pdkI0jJhEZz-t6AlU62kxNB8kqbVQ&h=way6xrx6M4BCJlbAd_6ZQy_GlWdRDyY5DsTSZ1T7lbc
+      cache-control:
+      - no-cache
+      content-length:
+      - '94'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:37:20 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/operationResults/2ab711a5-d88b-423d-8728-35b09a2e00fe?api-version=2023-06-01-preview&t=638403106414430144&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=mF_C5QYFNrSa5kgsLUVuxNGIKHtcZ45cvhZwTlSPZTfYvt0Qe7DWi_K-ixD_1DumxQqUAQMASOnE9g7piV-wYhicLZAYYXpgrGKHlsXFTQKsMtDTARECaENX-uS5984gnKO9e0GZp8qZdvWVqInTTyVKv6nSL_LHsBn3uaxZ83IJK0v6Jt0uHJdqhdZHUR7IO8la96cyrRnu1VOqvnrgUhASx8VgEaOjATIBhXm6P3JAFe2gakh2myZE4vYP254XhWbNfB9w0-2z_SvOeOTg-vfbELq-IfFc5BAL5QMJwzzunfuBEO_ksYHLmBIJ5f0mLXnyUstRWIF3nxUJL3963w&h=FdGU4pVIg1GQHodqa5d28FiizsGGC2RA4BcbkZmQsa0
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/2ab711a5-d88b-423d-8728-35b09a2e00fe?api-version=2023-06-01-preview&t=638403106414430144&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=l-KmAr5fo_mulE6X665MmwGxGB5AtrKzOBhoxKjKXlSSIpgcbrVHihNVR04KoiTbsObqvaYh6o3_-BOAnREi13zz-wdvspR6k4X2INVJhn5lIbY5NVdDggAsBWciyhql80J6eUKi6QLxga70SQl5A3nu1UNb_qkoOeelx3HjB2kebNz6QsaKhboN9vPvWugXdRwD99vf_KlTK-T4ki4bTWwkXeam6fSW7iINzsaOdE68VloxMgQwa5OSiTpY_zSVLZG5r38LhKOUyI98AAQbP1K8U3y1t0HVp8MbGjEiG6nC66uO53Lo7ev90pdkI0jJhEZz-t6AlU62kxNB8kqbVQ&h=way6xrx6M4BCJlbAd_6ZQy_GlWdRDyY5DsTSZ1T7lbc
+  response:
+    body:
+      string: '{"name":"2ab711a5-d88b-423d-8728-35b09a2e00fe","status":"InProgress","startTime":"2024-01-08T11:37:21.287Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:37:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/2ab711a5-d88b-423d-8728-35b09a2e00fe?api-version=2023-06-01-preview&t=638403106414430144&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=l-KmAr5fo_mulE6X665MmwGxGB5AtrKzOBhoxKjKXlSSIpgcbrVHihNVR04KoiTbsObqvaYh6o3_-BOAnREi13zz-wdvspR6k4X2INVJhn5lIbY5NVdDggAsBWciyhql80J6eUKi6QLxga70SQl5A3nu1UNb_qkoOeelx3HjB2kebNz6QsaKhboN9vPvWugXdRwD99vf_KlTK-T4ki4bTWwkXeam6fSW7iINzsaOdE68VloxMgQwa5OSiTpY_zSVLZG5r38LhKOUyI98AAQbP1K8U3y1t0HVp8MbGjEiG6nC66uO53Lo7ev90pdkI0jJhEZz-t6AlU62kxNB8kqbVQ&h=way6xrx6M4BCJlbAd_6ZQy_GlWdRDyY5DsTSZ1T7lbc
+  response:
+    body:
+      string: '{"name":"2ab711a5-d88b-423d-8728-35b09a2e00fe","status":"Succeeded","startTime":"2024-01-08T11:37:21.287Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:37:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name -l --storage-size --public-access --tier --sku-name --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/databases/flexibleserverdb?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"charset":"UTF8","collation":"en_US.utf8"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/databases/flexibleserverdb","name":"flexibleserverdb","type":"Microsoft.DBforPostgreSQL/flexibleServers/databases"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '337'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:37:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server advanced-threat-protection-setting show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --server-name
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/advancedThreatProtectionSettings/Default?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"state":"Disabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/advancedThreatProtectionSettings/Default","name":"threatProtectionName","type":"Microsoft.DBforPostgreSQL/flexibleServers/advancedThreatProtectionSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '355'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:37:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"state": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server advanced-threat-protection-setting update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '36'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --server-name --state
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/advancedThreatProtectionSettings/Default?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"operation":"UpsertThreatProtectionStateOperation","startTime":"2024-01-08T11:37:36.963Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/b30ca96a-98f0-4683-9981-ab6b4e96ebfb?api-version=2023-06-01-preview&t=638403106571018230&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=lLebfw2rqEwfl3ZirWdrgtdPCPo1NC4X6cgx9i4l-YMobWWZS-tfZENeN5fjnxbMFhQQtUmJcZv70QavSNU-0JFzJ0pZlSV0StRhm_6-hKYHZLTD5pWq74MtufoQ1IrXfSxn8_66w5wKXNk1qCohp71sDPcoaiLwndedw8vqPOCPms2ElmkmNWnqgB9F7pXJ2Zx_vOjsOfK-xjw5mYKmNoh0D9nX-HUkzp_r8BqEdIu4c5T_Z_bKcB7Gsdfa9e9WwuIAac3XTqyOZwSM45_5GYV-MQZ8uFoqXheyZUfxZPk3JY-l-TmXdZjXCl9NMdAMs2cvcY5bcExf0dPb_SOGUQ&h=QBhrqEaq-N2wTAeYVvv9U2Nralrvs0X-PO-Ih5O9chI
+      cache-control:
+      - no-cache
+      content-length:
+      - '91'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:37:36 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/operationResults/b30ca96a-98f0-4683-9981-ab6b4e96ebfb?api-version=2023-06-01-preview&t=638403106571018230&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=k7cLwDd4gylXX6ULutUzYwAyeu9z9ixJB7zZd-zIVq8LSXy6-yteP-miXV9lbuql81uHCl6iT3aJD0mITkHdUf_OpSlXj1DcpVlpehoE6GtXF4jaJkJEWFr0xLl1NfKaqMOF-qBz09h7wY88vVdSLFXLIqsX64BkVfn6q7GJeIFjkO4FRgELbgv1rmJbLq9w3ovRD6n3_8mGTNGJK_dhgaA_fZOnuAkS0jMgZWV3euPwhmVJvUMHu39gFlqzjW-MR2rID98ue2N0ZjtPg3pfYiz8TVasynLOqDgsdX10q_Tnt5tn8wylZvyXeLqXwzjanzM7F3FEdTrUH2IVwuBGBQ&h=pIvhRMnM2mH-mB5ayclP0AkLK6yYSayq4Xb7L8m43-c
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server advanced-threat-protection-setting show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --server-name
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/advancedThreatProtectionSettings/Default?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"state":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/advancedThreatProtectionSettings/Default","name":"threatProtectionName","type":"Microsoft.DBforPostgreSQL/flexibleServers/advancedThreatProtectionSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:39:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"state": "Disabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server advanced-threat-protection-setting update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '37'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --server-name --state
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/advancedThreatProtectionSettings/Default?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"operation":"UpsertThreatProtectionStateOperation","startTime":"2024-01-08T11:39:40.607Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/933f3f1f-675f-4d42-99c0-8087208bb245?api-version=2023-06-01-preview&t=638403107807384166&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=OM4KslvHIx_z8HMPM0yG8L9ef-3kUReL4xbPORpeTnQ7EJ1VtnlZNKwygeX8omo058Ee2jmSx2tOD377o-GGdRjEViXXcKEVCU-30R-0ZlEfeJ4nA6nYSYlSwvxrRfpxoUghfzr__krycH6FtNl0R66j00-_JwrKMSJhX_muBQr_r_ArpIohscFLro93pYCwJg80ZEVdhCGv35NjGxc0AlpZJZBI0dNWpsCeY1Hfw-tIDOTiERJh7UpE1NVbg-75BTqDZlQtwcpLH1ejZdGBNIpX2lf4AKcExtKznjrAacL41fiANQo6y4lIKIEHWWV7TNzdpt4Oj-ghliisNecEbw&h=3cg4A0cnZGFJpPCDJ2j9nn7RzU9qjYRd1jhipNbA2kA
+      cache-control:
+      - no-cache
+      content-length:
+      - '91'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:39:40 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/operationResults/933f3f1f-675f-4d42-99c0-8087208bb245?api-version=2023-06-01-preview&t=638403107807539634&c=MIIHADCCBeigAwIBAgITHgOOTF2IP7nZFyla6AAAA45MXTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDMzOTAzWhcNMjQxMDI2MDMzOTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKktUTh2v1SGL7dLk28cowQRt_0hicbpjq4Bo165pqYdhPZdZR58gWiSuY5k5s6B5gMa9D10Xjfynj9LGEik-W98DwEfgm4wXFu78jQJxAv50-XPkoizqK4lbk1wnLh7bItGww4tYgqKKEkO7K5O3rDRvFYOOf2xEYLB3APzCMnKyk0DGyXBYNmhtHajbi3NmP2Qa4wxTHPJpU3LfUuQieDVElhkWThcJRmHKYW0rw63bX9WmJJObX5cFUgKc84g6UBi6duzxAaz6X7E6BvUx9oIXP0_HLcJ9_1rjHbrcy6RUSgXExEtmdQNnKJJri2TccAeaY1Bw303JflacltM28kCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQERNOvwwG8gNC_q_Svo16a4QGpPTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIbmsySIop8ARfn3Uc4sq71s6OlH2KvNhPihjJeCSer2Z9iFHQtTPDG4uuJ6NWaFLOCZGGL_KENGz3J5wbD3b6QrzGDAMSYkyH_vDFv_av_MDo5FN5rlAL5O-ri2cFlO6_woZWUcpZt7fLs8YnJxk5kE8jmNbNapuomF9aKRFS-H2rHeDcsxyRpdmi-Q2OBhUjJ7Y9GDRKPgCNLqKg8Y7P-cE5DkkzRgmcJv1jx9CqIOPFWoHx0Uu7OCEOLyl5rkz-fGlMFCDbyLgSiy8qBFi_m5sg4FCDgMCrODS1dzOU1fuOmoGYbxLd-GoFFfCtcbfRJtQr8D2Bq306YSypf0nWY&s=YRyeeBUqulFigMs_eogmmeWER4-pSFD2fAKlL_GTNEBmelNmq6Nr1RXm-aohGwhGzOyxnGq8S-4vvhY75J7mSCpGqJ-VbEGxwARj1Dm7YKSnMvZL5ePzhR1nueNbek1zfOYgeoqSwaiLGVQ7nBTTc4SNuQ8jyIIMHTWTcFgg6MUm4zI0L_q-ChgY6eFhYEqhgx_uPJ0bclmylJ-KregaVLBrEvndwlucg23_TDw6saKwyrGtZWvi--BUpXnVeT7hwwfqHxyHtoIh5AIv_y74wJRb-KxEmJA4s--CfYkJGrETwMuaNvAq-Q69re0JulCG-WCeALCIIRmGKsAnAB8plw&h=ZjS2wl7ez3foJv9vcdgYkGsPf3BYpzINgOjSiyCQjso
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server advanced-threat-protection-setting show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --server-name
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/advancedThreatProtectionSettings/Default?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"state":"Disabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/advancedThreatProtectionSettings/Default","name":"threatProtectionName","type":"Microsoft.DBforPostgreSQL/flexibleServers/advancedThreatProtectionSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '355'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:41:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"operation":"DropServerManagementOperation","startTime":"2024-01-08T11:41:43.37Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East
+        US/azureAsyncOperation/c97d1443-2971-4f02-91f2-de9de503f1bc?api-version=2023-06-01-preview&t=638403109035122840&c=MIIHADCCBeigAwIBAgITHgOOZnSUesiIBulFwAAAA45mdDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDUxOTQ3WhcNMjQxMDI2MDUxOTQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOtwjRh-1G1a4yBlEy6M1AUa9Hq-Ri3r8iWBtdkLmcsejm48p6INIQx7aREhaizCEfvdoJpt69YKxHHg88zVFCZmcjwwXfyQKfZfKO2LZ0pWDws_OPuxD2zTIQHyZera5VZWwqn0El0Y7Vi7ROfDODi-_coovUwQhkUnnRqi1qHAWHn132H1R0LTlVpve9I6Osbib8lkRd6e4jrVrCT96iC8MJcdr5TVBH8shaJT_PXgda0rZwA_YIKVO8URdjWCaNuuRbkrrCIfoCj0O3tyRVkK4VNNAcWiEZUJVj2Dkzpn6fxA01bNli4-RvP0GQ4rk-cK28IIq9KBLyHA7QLdF80CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBTUZBUS9B61FL0tNpXxcrxMZE6PMzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKKa3hOZEgZXFsSf1I0yVgExP5QoFqwoL9gFup0ENl3D9BNUuSsJYpNcqCY-6HyZeDCMQWsgI663Hc9xPq-LX47BRWkNpWdV-DOD2BbSL42M7aGdyNxYilWFKeTy-P0vZBhfJQHTsmZCM7T_sGB0iaeJSp03JIWGCbn1iFU8_0PLBRf6Xp18C8Yo-xv1QFPEKvrSSHof-6k2YTbYTIaoJQJ8I-uoFWm0csgtiYn5jiF6Cq1qSsJ1SecSkZ_Be0jsEECNlA26v7Pi_NqL_lKOpi752KtXbvn2IuMAmCQjr28NZz2fcJ1q-3CsBflvJzW1aBnQxCxC19jDjfSiGbcE11A&s=XIpBE46tu4cU36zj904PGRfcnD5qlQt63YVYprs2_vV9wVWwIKkXia2UZchjlqlVljiBmPnETZEzmrc8X-bld7VPl82ZFKrD_61litnhyjTD4anddWJDAru4G8goCwDv9irl4lwIXX_37Sk1WsaYngK9lyl5zPju9h0EsV4-MH7QW9-76VvaRP760iPcqNpTthwfXGiz5v0EeJ1Zjlk87SF6kOIfLIBELHzjij-B37EAC8RNiLq69yMVRBTOzRilMpZbQaWLhNkW81MHhFior4rzrXH_BpRXpbzhO0vn7u1gIy3P5FtubIzqBwcl9Q1wcjNnCZFPBTkuq_nFSKbdnQ&h=kiwqLRw9PsJ5yRaQbtzbAddi8BNFxjOoWiw0N4dn8Nc
+      cache-control:
+      - no-cache
+      content-length:
+      - '83'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:41:42 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/operationResults/c97d1443-2971-4f02-91f2-de9de503f1bc?api-version=2023-06-01-preview&t=638403109035122840&c=MIIHADCCBeigAwIBAgITHgOOZnSUesiIBulFwAAAA45mdDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDUxOTQ3WhcNMjQxMDI2MDUxOTQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOtwjRh-1G1a4yBlEy6M1AUa9Hq-Ri3r8iWBtdkLmcsejm48p6INIQx7aREhaizCEfvdoJpt69YKxHHg88zVFCZmcjwwXfyQKfZfKO2LZ0pWDws_OPuxD2zTIQHyZera5VZWwqn0El0Y7Vi7ROfDODi-_coovUwQhkUnnRqi1qHAWHn132H1R0LTlVpve9I6Osbib8lkRd6e4jrVrCT96iC8MJcdr5TVBH8shaJT_PXgda0rZwA_YIKVO8URdjWCaNuuRbkrrCIfoCj0O3tyRVkK4VNNAcWiEZUJVj2Dkzpn6fxA01bNli4-RvP0GQ4rk-cK28IIq9KBLyHA7QLdF80CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBTUZBUS9B61FL0tNpXxcrxMZE6PMzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKKa3hOZEgZXFsSf1I0yVgExP5QoFqwoL9gFup0ENl3D9BNUuSsJYpNcqCY-6HyZeDCMQWsgI663Hc9xPq-LX47BRWkNpWdV-DOD2BbSL42M7aGdyNxYilWFKeTy-P0vZBhfJQHTsmZCM7T_sGB0iaeJSp03JIWGCbn1iFU8_0PLBRf6Xp18C8Yo-xv1QFPEKvrSSHof-6k2YTbYTIaoJQJ8I-uoFWm0csgtiYn5jiF6Cq1qSsJ1SecSkZ_Be0jsEECNlA26v7Pi_NqL_lKOpi752KtXbvn2IuMAmCQjr28NZz2fcJ1q-3CsBflvJzW1aBnQxCxC19jDjfSiGbcE11A&s=BsB2KvJyIs4AoRF-trH_2I-8eEw7ELoPGzM-961qac4ORTuQ-9NPCdk7hNOw7kfBEivFKh7SGz24LwB4FucTD0eLhdkZ894Fz9OxWb3gl8pkQBOQnNiGV9pzprk5JrByY9WI5_-_AzARFglZg06oquyjBScZ-lUp7SYZHdl6kDyT0z93NaEJ-_-56wMX6JR9Yk4QD_6LxuQJhgjk3s6G3lhoHqv4HOlBa4E5v4EDmzEArfUgwAJVeG2QXpkcznQDY98vjAdsFv8RN2V89ej_hYyfhOgTl_eOD6Jc1cHYh5NyxY4Neco6jJGlDWKAP2alUNvuyVHQnl9Glyhb2XP7Jg&h=NHa5CeBlkCkTzsm59pKpUJTnBlHK2o7z-Bd2zddRTkg
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/c97d1443-2971-4f02-91f2-de9de503f1bc?api-version=2023-06-01-preview&t=638403109035122840&c=MIIHADCCBeigAwIBAgITHgOOZnSUesiIBulFwAAAA45mdDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDUxOTQ3WhcNMjQxMDI2MDUxOTQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOtwjRh-1G1a4yBlEy6M1AUa9Hq-Ri3r8iWBtdkLmcsejm48p6INIQx7aREhaizCEfvdoJpt69YKxHHg88zVFCZmcjwwXfyQKfZfKO2LZ0pWDws_OPuxD2zTIQHyZera5VZWwqn0El0Y7Vi7ROfDODi-_coovUwQhkUnnRqi1qHAWHn132H1R0LTlVpve9I6Osbib8lkRd6e4jrVrCT96iC8MJcdr5TVBH8shaJT_PXgda0rZwA_YIKVO8URdjWCaNuuRbkrrCIfoCj0O3tyRVkK4VNNAcWiEZUJVj2Dkzpn6fxA01bNli4-RvP0GQ4rk-cK28IIq9KBLyHA7QLdF80CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBTUZBUS9B61FL0tNpXxcrxMZE6PMzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKKa3hOZEgZXFsSf1I0yVgExP5QoFqwoL9gFup0ENl3D9BNUuSsJYpNcqCY-6HyZeDCMQWsgI663Hc9xPq-LX47BRWkNpWdV-DOD2BbSL42M7aGdyNxYilWFKeTy-P0vZBhfJQHTsmZCM7T_sGB0iaeJSp03JIWGCbn1iFU8_0PLBRf6Xp18C8Yo-xv1QFPEKvrSSHof-6k2YTbYTIaoJQJ8I-uoFWm0csgtiYn5jiF6Cq1qSsJ1SecSkZ_Be0jsEECNlA26v7Pi_NqL_lKOpi752KtXbvn2IuMAmCQjr28NZz2fcJ1q-3CsBflvJzW1aBnQxCxC19jDjfSiGbcE11A&s=XIpBE46tu4cU36zj904PGRfcnD5qlQt63YVYprs2_vV9wVWwIKkXia2UZchjlqlVljiBmPnETZEzmrc8X-bld7VPl82ZFKrD_61litnhyjTD4anddWJDAru4G8goCwDv9irl4lwIXX_37Sk1WsaYngK9lyl5zPju9h0EsV4-MH7QW9-76VvaRP760iPcqNpTthwfXGiz5v0EeJ1Zjlk87SF6kOIfLIBELHzjij-B37EAC8RNiLq69yMVRBTOzRilMpZbQaWLhNkW81MHhFior4rzrXH_BpRXpbzhO0vn7u1gIy3P5FtubIzqBwcl9Q1wcjNnCZFPBTkuq_nFSKbdnQ&h=kiwqLRw9PsJ5yRaQbtzbAddi8BNFxjOoWiw0N4dn8Nc
+  response:
+    body:
+      string: '{"name":"c97d1443-2971-4f02-91f2-de9de503f1bc","status":"InProgress","startTime":"2024-01-08T11:41:43.37Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:41:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/c97d1443-2971-4f02-91f2-de9de503f1bc?api-version=2023-06-01-preview&t=638403109035122840&c=MIIHADCCBeigAwIBAgITHgOOZnSUesiIBulFwAAAA45mdDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDUxOTQ3WhcNMjQxMDI2MDUxOTQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOtwjRh-1G1a4yBlEy6M1AUa9Hq-Ri3r8iWBtdkLmcsejm48p6INIQx7aREhaizCEfvdoJpt69YKxHHg88zVFCZmcjwwXfyQKfZfKO2LZ0pWDws_OPuxD2zTIQHyZera5VZWwqn0El0Y7Vi7ROfDODi-_coovUwQhkUnnRqi1qHAWHn132H1R0LTlVpve9I6Osbib8lkRd6e4jrVrCT96iC8MJcdr5TVBH8shaJT_PXgda0rZwA_YIKVO8URdjWCaNuuRbkrrCIfoCj0O3tyRVkK4VNNAcWiEZUJVj2Dkzpn6fxA01bNli4-RvP0GQ4rk-cK28IIq9KBLyHA7QLdF80CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBTUZBUS9B61FL0tNpXxcrxMZE6PMzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKKa3hOZEgZXFsSf1I0yVgExP5QoFqwoL9gFup0ENl3D9BNUuSsJYpNcqCY-6HyZeDCMQWsgI663Hc9xPq-LX47BRWkNpWdV-DOD2BbSL42M7aGdyNxYilWFKeTy-P0vZBhfJQHTsmZCM7T_sGB0iaeJSp03JIWGCbn1iFU8_0PLBRf6Xp18C8Yo-xv1QFPEKvrSSHof-6k2YTbYTIaoJQJ8I-uoFWm0csgtiYn5jiF6Cq1qSsJ1SecSkZ_Be0jsEECNlA26v7Pi_NqL_lKOpi752KtXbvn2IuMAmCQjr28NZz2fcJ1q-3CsBflvJzW1aBnQxCxC19jDjfSiGbcE11A&s=XIpBE46tu4cU36zj904PGRfcnD5qlQt63YVYprs2_vV9wVWwIKkXia2UZchjlqlVljiBmPnETZEzmrc8X-bld7VPl82ZFKrD_61litnhyjTD4anddWJDAru4G8goCwDv9irl4lwIXX_37Sk1WsaYngK9lyl5zPju9h0EsV4-MH7QW9-76VvaRP760iPcqNpTthwfXGiz5v0EeJ1Zjlk87SF6kOIfLIBELHzjij-B37EAC8RNiLq69yMVRBTOzRilMpZbQaWLhNkW81MHhFior4rzrXH_BpRXpbzhO0vn7u1gIy3P5FtubIzqBwcl9Q1wcjNnCZFPBTkuq_nFSKbdnQ&h=kiwqLRw9PsJ5yRaQbtzbAddi8BNFxjOoWiw0N4dn8Nc
+  response:
+    body:
+      string: '{"name":"c97d1443-2971-4f02-91f2-de9de503f1bc","status":"InProgress","startTime":"2024-01-08T11:41:43.37Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:41:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/c97d1443-2971-4f02-91f2-de9de503f1bc?api-version=2023-06-01-preview&t=638403109035122840&c=MIIHADCCBeigAwIBAgITHgOOZnSUesiIBulFwAAAA45mdDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDUxOTQ3WhcNMjQxMDI2MDUxOTQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOtwjRh-1G1a4yBlEy6M1AUa9Hq-Ri3r8iWBtdkLmcsejm48p6INIQx7aREhaizCEfvdoJpt69YKxHHg88zVFCZmcjwwXfyQKfZfKO2LZ0pWDws_OPuxD2zTIQHyZera5VZWwqn0El0Y7Vi7ROfDODi-_coovUwQhkUnnRqi1qHAWHn132H1R0LTlVpve9I6Osbib8lkRd6e4jrVrCT96iC8MJcdr5TVBH8shaJT_PXgda0rZwA_YIKVO8URdjWCaNuuRbkrrCIfoCj0O3tyRVkK4VNNAcWiEZUJVj2Dkzpn6fxA01bNli4-RvP0GQ4rk-cK28IIq9KBLyHA7QLdF80CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBTUZBUS9B61FL0tNpXxcrxMZE6PMzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKKa3hOZEgZXFsSf1I0yVgExP5QoFqwoL9gFup0ENl3D9BNUuSsJYpNcqCY-6HyZeDCMQWsgI663Hc9xPq-LX47BRWkNpWdV-DOD2BbSL42M7aGdyNxYilWFKeTy-P0vZBhfJQHTsmZCM7T_sGB0iaeJSp03JIWGCbn1iFU8_0PLBRf6Xp18C8Yo-xv1QFPEKvrSSHof-6k2YTbYTIaoJQJ8I-uoFWm0csgtiYn5jiF6Cq1qSsJ1SecSkZ_Be0jsEECNlA26v7Pi_NqL_lKOpi752KtXbvn2IuMAmCQjr28NZz2fcJ1q-3CsBflvJzW1aBnQxCxC19jDjfSiGbcE11A&s=XIpBE46tu4cU36zj904PGRfcnD5qlQt63YVYprs2_vV9wVWwIKkXia2UZchjlqlVljiBmPnETZEzmrc8X-bld7VPl82ZFKrD_61litnhyjTD4anddWJDAru4G8goCwDv9irl4lwIXX_37Sk1WsaYngK9lyl5zPju9h0EsV4-MH7QW9-76VvaRP760iPcqNpTthwfXGiz5v0EeJ1Zjlk87SF6kOIfLIBELHzjij-B37EAC8RNiLq69yMVRBTOzRilMpZbQaWLhNkW81MHhFior4rzrXH_BpRXpbzhO0vn7u1gIy3P5FtubIzqBwcl9Q1wcjNnCZFPBTkuq_nFSKbdnQ&h=kiwqLRw9PsJ5yRaQbtzbAddi8BNFxjOoWiw0N4dn8Nc
+  response:
+    body:
+      string: '{"name":"c97d1443-2971-4f02-91f2-de9de503f1bc","status":"InProgress","startTime":"2024-01-08T11:41:43.37Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:42:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/c97d1443-2971-4f02-91f2-de9de503f1bc?api-version=2023-06-01-preview&t=638403109035122840&c=MIIHADCCBeigAwIBAgITHgOOZnSUesiIBulFwAAAA45mdDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDUxOTQ3WhcNMjQxMDI2MDUxOTQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOtwjRh-1G1a4yBlEy6M1AUa9Hq-Ri3r8iWBtdkLmcsejm48p6INIQx7aREhaizCEfvdoJpt69YKxHHg88zVFCZmcjwwXfyQKfZfKO2LZ0pWDws_OPuxD2zTIQHyZera5VZWwqn0El0Y7Vi7ROfDODi-_coovUwQhkUnnRqi1qHAWHn132H1R0LTlVpve9I6Osbib8lkRd6e4jrVrCT96iC8MJcdr5TVBH8shaJT_PXgda0rZwA_YIKVO8URdjWCaNuuRbkrrCIfoCj0O3tyRVkK4VNNAcWiEZUJVj2Dkzpn6fxA01bNli4-RvP0GQ4rk-cK28IIq9KBLyHA7QLdF80CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBTUZBUS9B61FL0tNpXxcrxMZE6PMzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKKa3hOZEgZXFsSf1I0yVgExP5QoFqwoL9gFup0ENl3D9BNUuSsJYpNcqCY-6HyZeDCMQWsgI663Hc9xPq-LX47BRWkNpWdV-DOD2BbSL42M7aGdyNxYilWFKeTy-P0vZBhfJQHTsmZCM7T_sGB0iaeJSp03JIWGCbn1iFU8_0PLBRf6Xp18C8Yo-xv1QFPEKvrSSHof-6k2YTbYTIaoJQJ8I-uoFWm0csgtiYn5jiF6Cq1qSsJ1SecSkZ_Be0jsEECNlA26v7Pi_NqL_lKOpi752KtXbvn2IuMAmCQjr28NZz2fcJ1q-3CsBflvJzW1aBnQxCxC19jDjfSiGbcE11A&s=XIpBE46tu4cU36zj904PGRfcnD5qlQt63YVYprs2_vV9wVWwIKkXia2UZchjlqlVljiBmPnETZEzmrc8X-bld7VPl82ZFKrD_61litnhyjTD4anddWJDAru4G8goCwDv9irl4lwIXX_37Sk1WsaYngK9lyl5zPju9h0EsV4-MH7QW9-76VvaRP760iPcqNpTthwfXGiz5v0EeJ1Zjlk87SF6kOIfLIBELHzjij-B37EAC8RNiLq69yMVRBTOzRilMpZbQaWLhNkW81MHhFior4rzrXH_BpRXpbzhO0vn7u1gIy3P5FtubIzqBwcl9Q1wcjNnCZFPBTkuq_nFSKbdnQ&h=kiwqLRw9PsJ5yRaQbtzbAddi8BNFxjOoWiw0N4dn8Nc
+  response:
+    body:
+      string: '{"name":"c97d1443-2971-4f02-91f2-de9de503f1bc","status":"Succeeded","startTime":"2024-01-08T11:41:43.37Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 08 Jan 2024 11:42:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/operationResults/c97d1443-2971-4f02-91f2-de9de503f1bc?api-version=2023-06-01-preview&t=638403109035122840&c=MIIHADCCBeigAwIBAgITHgOOZnSUesiIBulFwAAAA45mdDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMxMTAxMDUxOTQ3WhcNMjQxMDI2MDUxOTQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOtwjRh-1G1a4yBlEy6M1AUa9Hq-Ri3r8iWBtdkLmcsejm48p6INIQx7aREhaizCEfvdoJpt69YKxHHg88zVFCZmcjwwXfyQKfZfKO2LZ0pWDws_OPuxD2zTIQHyZera5VZWwqn0El0Y7Vi7ROfDODi-_coovUwQhkUnnRqi1qHAWHn132H1R0LTlVpve9I6Osbib8lkRd6e4jrVrCT96iC8MJcdr5TVBH8shaJT_PXgda0rZwA_YIKVO8URdjWCaNuuRbkrrCIfoCj0O3tyRVkK4VNNAcWiEZUJVj2Dkzpn6fxA01bNli4-RvP0GQ4rk-cK28IIq9KBLyHA7QLdF80CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBTUZBUS9B61FL0tNpXxcrxMZE6PMzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKKa3hOZEgZXFsSf1I0yVgExP5QoFqwoL9gFup0ENl3D9BNUuSsJYpNcqCY-6HyZeDCMQWsgI663Hc9xPq-LX47BRWkNpWdV-DOD2BbSL42M7aGdyNxYilWFKeTy-P0vZBhfJQHTsmZCM7T_sGB0iaeJSp03JIWGCbn1iFU8_0PLBRf6Xp18C8Yo-xv1QFPEKvrSSHof-6k2YTbYTIaoJQJ8I-uoFWm0csgtiYn5jiF6Cq1qSsJ1SecSkZ_Be0jsEECNlA26v7Pi_NqL_lKOpi752KtXbvn2IuMAmCQjr28NZz2fcJ1q-3CsBflvJzW1aBnQxCxC19jDjfSiGbcE11A&s=BsB2KvJyIs4AoRF-trH_2I-8eEw7ELoPGzM-961qac4ORTuQ-9NPCdk7hNOw7kfBEivFKh7SGz24LwB4FucTD0eLhdkZ894Fz9OxWb3gl8pkQBOQnNiGV9pzprk5JrByY9WI5_-_AzARFglZg06oquyjBScZ-lUp7SYZHdl6kDyT0z93NaEJ-_-56wMX6JR9Yk4QD_6LxuQJhgjk3s6G3lhoHqv4HOlBa4E5v4EDmzEArfUgwAJVeG2QXpkcznQDY98vjAdsFv8RN2V89ej_hYyfhOgTl_eOD6Jc1cHYh5NyxY4Neco6jJGlDWKAP2alUNvuyVHQnl9Glyhb2XP7Jg&h=NHa5CeBlkCkTzsm59pKpUJTnBlHK2o7z-Bd2zddRTkg
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 08 Jan 2024 11:42:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

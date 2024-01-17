@@ -30,7 +30,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"
 TEST_SSH_KEY_PUB_2 = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCof7rG2sYVyHSDPp4lbrq5zu8N8D7inS4Qb+ZZ5Kh410znTcoVJSNsLOhrM2COxg5LXca3DQMBi4S/V8UmMnwxwDVf38GvU+0QVDR6vSO6lPlj2OpPLk4OEdTv3qcj/gpEBvv1RCacpFuu5bL546r4BqG4f0dJXqBd5tT4kjpO9ytOZ1Wkg8tA35UvbucVAsDBfOZ5GtsnflPtKCY9h20LeXEjyDZ8eFzAGH/vNrfWPiWWznwN9EoPghIQHCiC0mnJgdsABraUzeTTMjxahi0DXBxb5dsKd6YbJxQw/V+AohVMPfPvs9y95Aj7IxM2zrtgBswC8bT0z678svTJSFX9 test@example.com"
-
+TEST_SSH_KEY_PUB_ED25519 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE+N4unGvv6pXPYebWiQ6Ak618DjYm5g6d2ECnq/1F0x generated-by-azure"
 
 def _write_config_file(user_name):
 
@@ -1328,6 +1328,46 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('sig show --gallery-name {gallery2} --resource-group {rg} --select Permissions', checks=[
             self.check('sharingProfile.permissions', 'Private')
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_disk_and_snapshot_with_elastic_san', location='westus2')
+    @AllowLargeResponse(size_kb=99999)
+    def test_disk_and_snapshot_with_elastic_san(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10),
+            'snapshot': self.create_random_name('snap', 10),
+            'elastic_san': self.create_random_name('elastic_san', 20),
+            'volume_group': self.create_random_name('volume_group', 20),
+            'volume_name': self.create_random_name('volume-name', 20),
+            'snapshot_name': self.create_random_name('snapshot_name', 20),
+        })
+        self.cmd('extension add -n elastic-san')
+        self.cmd('elastic-san create -n {elastic_san} -g {rg} -l westus2 --base-size-tib 23 --extended-size 14 --sku {{name:Premium_LRS,tier:Premium}}')
+        self.cmd('elastic-san volume-group create -e {elastic_san} -g {rg} -n {volume_group}')
+        volume = self.cmd('elastic-san volume create -e {elastic_san} -g {rg} -v {volume_group} -n {volume_name} --size-gib 2').get_output_in_json()
+        self.kwargs.update({"volume_id": volume['id']})
+        snapshot = self.cmd('elastic-san volume snapshot create -g {rg} -e {elastic_san} -v {volume_group} -n {snapshot_name} --creation-data {{source-id:{volume_id}}}').get_output_in_json()
+        self.kwargs.update({"snapshot_id": snapshot['id']})
+        # disk resource is currently blocked and is expected
+        # self.cmd('disk create -g {rg} -n {disk} --elastic-san-resource-id {snapshot_id}', checks=[
+        #     self.check('creationData.createOption', 'CopyFromSanSnapshot'),
+        #     self.check('creationData.sourceResourceId', "{snapshot_id}")
+        # ])
+        self.cmd('snapshot create -n {snapshot} -g {rg} --elastic-san-resource-id {snapshot_id}', checks=[
+            self.check('creationData.createOption', 'CopyFromSanSnapshot'),
+            self.check('creationData.elasticSanResourceId', '{snapshot_id}'),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_with_optimized_for_frequent_attach_')
+    def test_disk_with_optimized_for_frequent_attach(self, resource_group):
+        self.kwargs.update({
+            'disk1': self.create_random_name('testdisk1-', length=15),
+            'disk2': self.create_random_name('testdisk2-', length=15),
+        })
+
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 10 -l westus --optimized-for-frequent-attach true',
+                 self.check('optimizedForFrequentAttach', True))
+        self.cmd('disk create -g {rg} -n {disk2} --size-gb 10 -l westus --optimized-for-frequent-attach false',
+                 self.check('optimizedForFrequentAttach', False))
 
 
 class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
@@ -2862,7 +2902,7 @@ class VMCreateCustomIP(ScenarioTest):
             'dns': 'vrfmyvm00110011z',
             'public_ip_sku': 'Standard'
         })
-
+        # Basic option will be removed in the future. Now the default should be "Standard" sku with "Static" allocation method
         self.cmd('vm create -n {vm} -g {rg} --image OpenLogic:CentOS:7.5:latest --admin-username user11 --private-ip-address 10.0.0.5 --public-ip-sku {public_ip_sku} --public-ip-address-dns-name {dns} --generate-ssh-keys --nsg-rule NONE')
 
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', checks=[
@@ -2872,13 +2912,6 @@ class VMCreateCustomIP(ScenarioTest):
         ])
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
                  checks=self.check('ipConfigurations[0].privateIPAllocationMethod', 'Static'))
-
-        # verify the default should be "Basic" sku with "Dynamic" allocation method
-        self.cmd('vm create -n {vm2} -g {rg} --image OpenLogic:CentOS:7.5:latest --admin-username user11 --generate-ssh-keys --nsg-rule NONE')
-        self.cmd('network public-ip show -n {vm2}PublicIP -g {rg}', checks=[
-            self.check('publicIPAllocationMethod', 'Dynamic'),
-            self.check('sku.name', 'Basic')
-        ])
 
 
 class VMDiskAttachDetachTest(ScenarioTest):
@@ -3815,11 +3848,9 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'vmss2': self.create_random_name('vmss', 15),
             'vmss3': self.create_random_name('vmss', 15),
             'vmss4': self.create_random_name('vmss', 15),
-            'vmss5': self.create_random_name('vmss', 15),
             'vmss6': self.create_random_name('vmss', 15),
             'natrule': self.create_random_name('natrule', 15),
             'natrule1': self.create_random_name('natrule', 15),
-            'natrule2': self.create_random_name('natrule', 15),
             'natpool': self.create_random_name('natpool', 15),
         })
 
@@ -3832,7 +3863,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         ])
         self.cmd('vmss list-instance-connection-info -n {vmss1} -g {rg}')
 
-        self.cmd('vmss create -n {vmss2} -g {rg} --image OpenLogic:CentOS:7.5:latest --orchestration-mode Uniform')
+        self.cmd('vmss create -n {vmss2} -g {rg} --image OpenLogic:CentOS:7.5:latest --lb-sku Basic --orchestration-mode Uniform')
         self.cmd('vmss show -n {vmss2} -g {rg}', checks=[
             self.exists('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools[0].id')
         ])
@@ -3850,7 +3881,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         ])
         self.cmd('vmss list-instance-connection-info -n {vmss3} -g {rg}')
 
-        self.cmd('vmss create -n {vmss4} -g {rg} --image OpenLogic:CentOS:7.5:latest --nat-rule-name {natrule1} --orchestration-mode Uniform')
+        self.cmd('vmss create -n {vmss4} -g {rg} --image OpenLogic:CentOS:7.5:latest --nat-rule-name {natrule1} --lb-sku Basic --orchestration-mode Uniform')
         self.cmd('vmss show -n {vmss4} -g {rg}', checks=[
             self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
         ])
@@ -3860,16 +3891,6 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         message = 'There is no connection information. If you are using NAT rule V2, please confirm whether the load balancer SKU is Standard'
         with self.assertRaisesRegex(CLIError, message):
             self.cmd('vmss list-instance-connection-info -n {vmss4} -g {rg}')
-
-        self.cmd('vmss create -n {vmss5} -g {rg} --image OpenLogic:CentOS:7.5:latest --nat-rule-name {natrule2} --lb-sku Basic --orchestration-mode Uniform')
-        self.cmd('vmss show -n {vmss5} -g {rg}', checks=[
-            self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
-        ])
-        self.cmd('network lb show -n {vmss5}LB -g {rg}', checks=[
-            self.check('sku.name', 'Basic')
-        ])
-        with self.assertRaisesRegex(CLIError, message):
-            self.cmd('vmss list-instance-connection-info -n {vmss5} -g {rg}')
 
         self.cmd('vmss create -n {vmss6} -g {rg} --image OpenLogic:CentOS:7.5:latest --nat-pool-name {natpool} --lb-sku Standard --orchestration-mode Uniform')
         self.cmd('vmss show -n {vmss6} -g {rg}', checks=[
@@ -4022,7 +4043,7 @@ class VMSSUpdateTests(ScenarioTest):
             'vmss4': self.create_random_name('vmss', 10),
             'img4': 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest',
         })
-        self.cmd('vmss create -n {vmss2} -g {rg} --image {img2} --admin-username vmtest --admin-password Test123456789#')
+        self.cmd('vmss create -n {vmss2} -g {rg} --image {img2} --admin-username vmtest --admin-password Test123456789# --orchestration-mode Uniform')
         self.cmd('vmss update -g {rg} -n {vmss2} --set virtualMachineProfile.storageProfile.imageReference.sku={img2_sku_gen2} --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true', checks=[
             self.check('virtualMachineProfile.storageProfile.imageReference.offer', 'windowsserver'),
             self.check('virtualMachineProfile.storageProfile.imageReference.sku', '{img2_sku_gen2}'),
@@ -4031,7 +4052,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
         ])
 
-        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest --generate-ssh-keys', checks=[
+        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest --generate-ssh-keys --orchestration-mode Uniform', checks=[
             self.check('vmss.virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
         ])
         self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch', checks=[
@@ -4046,7 +4067,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', False),
         ])
 
-        self.cmd('vmss create -n {vmss4} -g {rg} --image {img4} --admin-username vmtest --admin-password Test123456789# --vm-sku Standard_DC2as_v5 --security-type ConfidentialVM --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type VMGuestStateOnly', checks=[
+        self.cmd('vmss create -n {vmss4} -g {rg} --image {img4} --admin-username vmtest --admin-password Test123456789# --vm-sku Standard_DC2as_v5 --security-type ConfidentialVM --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type VMGuestStateOnly --orchestration-mode Uniform', checks=[
             self.check('vmss.virtualMachineProfile.securityProfile.securityType', 'ConfidentialVM'),
         ])
         with self.assertRaisesRegex(InvalidArgumentValueError, r'vmss.* is already configured with ConfidentialVM\..*'):
@@ -4641,11 +4662,11 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
 
 class VMSSNicScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_nics')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_nics', location='eastus')
     def test_vmss_nics(self):
 
         self.kwargs.update({
-            'vmss': 'vmss1',
+            'vmss': self.create_random_name('vmss', 10)
         })
 
         self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter --orchestration-mode Uniform')
@@ -6968,7 +6989,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
 # region dedicated host tests
 class DedicatedHostScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_management_')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_management_', location='eastus')
     def test_vm_host_management(self, resource_group):
         self.kwargs.update({
             'host-group': 'my-host-group',
@@ -8206,6 +8227,33 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.diskControllerType', 'SCSI')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_vmss_non_persisted_tpm_', location='centralus')
+    def test_vm_vmss_non_persisted_tpm(self, resource_group):
+        self.kwargs.update({
+            'vm1': self.create_random_name('vm', 10),
+            'vmss1': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vm create -g {rg} -n {vm1} --image Canonical:0001-com-ubuntu-confidential-vm-jammy:22_04-lts-cvm:latest --size Standard_DC2es_v5 --enable-vtpm --enable-secure-boot --os-disk-security-encryption-type NonPersistedTPM --security-type ConfidentialVM --admin-password azuretest01!! --storage-sku StandardSSD_LRS')
+        self.cmd('vm show -g {rg} -n {vm1}', checks=[
+            self.check('securityProfile.securityType', 'ConfidentialVM'),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('storageProfile.osDisk.managedDisk.securityProfile.securityEncryptionType', 'NonPersistedTPM')
+        ])
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:0001-com-ubuntu-confidential-vm-jammy:22_04-lts-cvm:latest --vm-sku Standard_DC2es_v5 --enable-vtpm --enable-secure-boot --os-disk-security-encryption-type NonPersistedTPM --security-type ConfidentialVM --admin-password azuretest01!! --storage-sku StandardSSD_LRS', checks=[
+            self.check('vmss.virtualMachineProfile.securityProfile.securityType', 'ConfidentialVM'),
+            self.check('vmss.virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.managedDisk.securityProfile.securityEncryptionType','NonPersistedTPM')
+        ])
+        message = 'usage error: The "--os-disk-security-encryption-type NonPersistedTPM" can only be passed in when "--security-type" is "ConfidentialVM" and "--enable-vtpm" is True'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vm create -g {rg} -n {vm1} --image Canonical:0001-com-ubuntu-confidential-vm-jammy:22_04-lts-cvm:latest --size Standard_DC2es_v5 --os-disk-security-encryption-type NonPersistedTPM --security-type ConfidentialVM --admin-password azuretest01!! --storage-sku StandardSSD_LRS')
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vm create -g {rg} -n {vm1} --image Canonical:0001-com-ubuntu-confidential-vm-jammy:22_04-lts-cvm:latest --size Standard_DC2es_v5 --enable-vtpm --enable-secure-boot --os-disk-security-encryption-type NonPersistedTPM --admin-password azuretest01!! --storage-sku StandardSSD_LRS')
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:0001-com-ubuntu-confidential-vm-jammy:22_04-lts-cvm:latest --vm-sku Standard_DC2es_v5 --os-disk-security-encryption-type NonPersistedTPM --security-type ConfidentialVM --admin-password azuretest01!! --storage-sku StandardSSD_LRS')
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:0001-com-ubuntu-confidential-vm-jammy:22_04-lts-cvm:latest --vm-sku Standard_DC2es_v5 --enable-vtpm --enable-secure-boot --os-disk-security-encryption-type NonPersistedTPM --admin-password azuretest01!! --storage-sku StandardSSD_LRS')
+
 
 class DiskAccessTest(ScenarioTest):
 
@@ -8394,9 +8442,9 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_automatic_repairs_with_health_probe_')
     def test_vmss_update_automatic_repairs_with_health_probe(self, resource_group):
         self.kwargs.update({
-            'vmss': 'vmss1',
-            'probe': 'probe',
-            'lbrule': 'lbrule'
+            'vmss': self.create_random_name('vmss', 15),
+            'probe': self.create_random_name('probe', 15),
+            'lbrule': self.create_random_name('lbrule', 15)
         })
 
         # Prepare vmss
@@ -8415,7 +8463,7 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         ).get_output_in_json()['id']
         self.cmd(
             'network lb rule create -g {rg} --lb-name {vmss}LB -n {lbrule} --probe-name {probe} --protocol Tcp '
-            '--frontend-port 80 --backend-port 80'
+            '--frontend-port 81 --backend-port 81'
         )
         # Test enable automatic repairs with a health probe when update vmss
         self.cmd('vmss update -g {rg} -n {vmss} --set virtualMachineProfile.networkProfile.healthProbe.id={probe_id}',
@@ -9059,6 +9107,21 @@ class VMSSHKeyScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n vm3 --image OpenLogic:CentOS:7.5:latest --nsg-rule None --ssh-key-name k3 --generate-ssh-keys --admin-username vmtest')
         self.cmd('sshkey show -g {rg} -n k3')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_ssh_key_ed25519', location='eastus2euap')
+    def test_vm_ssh_key_ed25519(self, resource_group):
+        self.kwargs.update({
+            'key_name': 'key',
+            "ssh_key": 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE+N4unGvv6pXPYebWiQ6Ak618DjYm5g6d2ECnq/1F0x generated-by-azure',
+            'vm1': 'vm1',
+            'vm2': 'vm2',
+        })
+        self.cmd('sshkey create -g {rg} -n {key_name} --encryption-type ed25519')
+
+        # Create VM using ed25519 key
+        self.cmd('vm create -g {rg} -n {vm1} --image OpenLogic:CentOS:7.5:latest --nsg-rule None --ssh-key-name {key_name} --admin-username vmtest')
+
+        self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7.5:latest --nsg-rule None  --ssh-key-value \'{ssh_key}\' --admin-username vmtest2')
+
 
 class VMInstallPatchesScenarioTest(ScenarioTest):
     @unittest.skip('The selected VM image is not supported for VM Guest patch operations')
@@ -9398,6 +9461,45 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_', location='eastus2euap')
+    def test_vm_vmss_proxy_agent(self, resource_group):
+        self.kwargs.update({
+            'vm1': self.create_random_name('vm', 10),
+            'vm2': self.create_random_name('vm', 10),
+            'vmss1': self.create_random_name('vmss', 10),
+            'vmss2': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vm create -g {rg} -n {vm1} --image ubuntu2204 --enable-proxy-agent --proxy-agent-mode Audit --size Standard_D2s_v3')
+        self.cmd('vm show -g {rg} -n {vm1}', checks=[
+            self.check('securityProfile.proxyAgentSettings.enabled', True),
+            self.check('securityProfile.proxyAgentSettings.mode', 'Audit')
+        ])
+        self.cmd('vm update -g {rg} -n {vm1} --enable-proxy-agent False --proxy-agent-mode Enforce', checks=[
+            self.check('securityProfile.proxyAgentSettings.enabled', False),
+            self.check('securityProfile.proxyAgentSettings.mode', 'Enforce')
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm2} --image ubuntu2204 --size Standard_D2s_v3')
+        self.cmd('vm update -g {rg} -n {vm2} --enable-proxy-agent True --proxy-agent-mode Enforce')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('securityProfile.proxyAgentSettings.enabled', True),
+            self.check('securityProfile.proxyAgentSettings.mode', 'Enforce')
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss1} --image ubuntu2204 --enable-proxy-agent --proxy-agent-mode Audit --vm-sku Standard_D2s_v3', checks=[
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.mode', 'Audit')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss1} --enable-proxy-agent False --proxy-agent-mode Enforce', checks=[
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', False),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.mode', 'Enforce')
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss2} --image ubuntu2204 --vm-sku Standard_D2s_v3')
+        self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent True --proxy-agent-mode Audit', checks=[
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.mode', 'Audit')
+        ])
 
 class DiskHibernationScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_disk_hibernation_')

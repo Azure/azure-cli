@@ -208,6 +208,9 @@ def load_arguments(self, _):
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), min_api='2021-12-01', help='CPU architecture.')
         c.argument('data_access_auth_mode', arg_type=get_enum_type(['AzureActiveDirectory', 'None']), min_api='2021-12-01', help='Specify the auth mode when exporting or uploading to a disk or snapshot.')
+        c.argument('optimized_for_frequent_attach', arg_type=get_three_state_flag(), min_api='2023-04-02',
+                   help='Setting this property to true improves reliability and performance of data disks that are frequently (more than 5 times a day) by detached from one virtual machine and attached to another. '
+                        'This property should not be set for disks that are not detached and attached frequently as it causes the disks to not align with the fault domain of the virtual machine.')
     # endregion
 
     # region Disks
@@ -234,6 +237,9 @@ def load_arguments(self, _):
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='snapshots')), min_api='2021-12-01', help='CPU architecture.')
         c.argument('for_upload', arg_type=get_three_state_flag(), min_api='2018-09-30',
                    help='Create the snapshot for uploading blobs later on through storage commands. Run "az snapshot grant-access --access-level Write" to retrieve the snapshot\'s SAS token.')
+        c.argument('elastic_san_resource_id', min_api='2023-04-02',
+                   options_list=['--elastic-san-resource-id', '--elastic-san-id'],
+                   help='This is the ARM id of the source elastic san volume snapshot.')
     # endregion
 
     # region Images
@@ -379,6 +385,15 @@ def load_arguments(self, _):
     for scope in ['image builder optimizer add', 'image builder optimizer update']:
         with self.argument_context(scope, min_api='2022-07-01') as c:
             c.argument('enable_vm_boot', arg_type=get_three_state_flag(), help='If this parameter is set to true, VM boot time will be improved by optimizing the final customized image output.')
+
+    with self.argument_context('image builder error-handler add', min_api='2023-07-01') as c:
+        from azure.mgmt.imagebuilder.models import OnBuildError
+        c.argument('on_customizer_error', arg_type=get_enum_type(OnBuildError),
+                   help='If there is a customizer error and this field is set to "cleanup", the build VM and associated network resources will be cleaned up. This is the default behavior. '
+                        'If there is a customizer error and this field is set to "abort", the build VM will be preserved.')
+        c.argument('on_validation_error', arg_type=get_enum_type(OnBuildError),
+                   help='If there is a validation error and this field is set to "cleanup", the build VM and associated network resources will be cleaned up. This is the default behavior. '
+                        'If there is a validation error and this field is set to "abort", the build VM will be preserved.')
     # endregion
 
     # region AvailabilitySets
@@ -721,7 +736,9 @@ def load_arguments(self, _):
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
         c.argument('computer_name_prefix', help='Computer name prefix for all of the virtual machines in the scale set. Computer name prefixes must be 1 to 15 characters long')
         c.argument('orchestration_mode', help='Choose how virtual machines are managed by the scale set. In Uniform mode, you define a virtual machine model and Azure will generate identical instances based on that model. In Flexible mode, you manually create and add a virtual machine of any configuration to the scale set or generate identical instances based on virtual machine model defined for the scale set.',
-                   arg_type=get_enum_type(['Uniform', 'Flexible']), default='Flexible')
+                   arg_type=get_enum_type(['Uniform', 'Flexible']), default='Flexible', min_api='2020-12-01')
+        c.argument('orchestration_mode', help='Choose how virtual machines are managed by the scale set. In Uniform mode, you define a virtual machine model and Azure will generate identical instances based on that model.',
+                   arg_type=get_enum_type(['Uniform']), default='Uniform', max_api='2020-09-30')
         c.argument('scale_in_policy', scale_in_policy_type)
         c.argument('automatic_repairs_grace_period', min_api='2018-10-01',
                    help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.')
@@ -1023,7 +1040,7 @@ def load_arguments(self, _):
             c.argument('disable_integrity_monitoring_autoupgrade', action='store_true', min_api='2020-12-01', help='Disable auto upgrade of guest attestation extension for Trusted Launch enabled VMs and VMSS.')
 
         with self.argument_context(scope, arg_group='Authentication') as c:
-            c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
+            c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private RSA key files if missing. The keys will be stored in the ~/.ssh directory')
             c.argument('admin_username', help='Username for the VM. Default value is current username of OS. If the default value is system reserved, then default value will be set to azureuser. Please refer to https://docs.microsoft.com/rest/api/compute/virtualmachines/createorupdate#osprofile to get a full list of reserved values.')
             c.argument('admin_password', help="Password for the VM if authentication type is 'Password'.")
             c.argument('ssh_key_value', options_list=['--ssh-key-values'], completer=FilesCompleter(), type=file_type, nargs='+')
@@ -1178,6 +1195,8 @@ def load_arguments(self, _):
             c.argument('v_cpus_available', type=int, min_api='2021-11-01', help='Specify the number of vCPUs available')
             c.argument('v_cpus_per_core', type=int, min_api='2021-11-01', help='Specify the ratio of vCPU to physical core. Setting this property to 1 also means that hyper-threading is disabled.')
             c.argument('disk_controller_type', disk_controller_type)
+            c.argument('enable_proxy_agent', arg_type=get_three_state_flag(), min_api='2023-09-01', help='Specify whether proxy agent feature should be enabled on the virtual machine or virtual machine scale set.')
+            c.argument('proxy_agent_mode', arg_type=get_enum_type(self.get_models('Mode')), min_api='2023-09-01', help='Specify the mode that proxy agent will execute on if the feature is enabled.')
 
     with self.argument_context('vm update') as c:
         c.argument('license_type', license_type)

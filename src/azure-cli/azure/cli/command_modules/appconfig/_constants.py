@@ -13,6 +13,20 @@ class FeatureFlagConstants:
     FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
     FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
 
+    # Feature flag properties
+    ID = "id"
+    DESCRIPTION = "description"
+    ENABLED = "enabled"
+    CONDITIONS = "conditions"
+    CLIENT_FILTERS = "client_filters"
+    REQUIREMENT_TYPE = "requirement_type"
+    FILTER_NAME = "name"
+    FILTER_PARAMETERS = "parameters"
+
+    # Requirement type options
+    REQUIREMENT_TYPE_ALL = "all"
+    REQUIREMENT_TYPE_ANY = "any"
+
 
 class KeyVaultConstants:
     KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
