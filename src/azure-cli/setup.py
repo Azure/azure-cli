@@ -89,7 +89,7 @@ DEPENDENCIES = [
     'azure-mgmt-eventhub~=10.1.0',
     'azure-mgmt-extendedlocation==1.0.0b2',
     'azure-mgmt-hdinsight~=9.0.0',
-    'azure-mgmt-imagebuilder~=1.2.0',
+    'azure-mgmt-imagebuilder~=1.3.0',
     'azure-mgmt-iotcentral~=10.0.0b1',
     'azure-mgmt-iothub==3.0.0',
     'azure-mgmt-iothubprovisioningservices==1.1.0',
@@ -135,7 +135,7 @@ DEPENDENCIES = [
     'colorama~=0.4.4',
     # On Linux, the distribution (Ubuntu, Debian, etc) and version are checked for `az feedback`
     'distro; sys_platform == "linux"',
-    'fabric~=2.4',
+    'fabric~=3.2.2',
     'javaproperties~=0.5.1',
     'jsondiff~=2.0.0',
     'packaging>=20.9',

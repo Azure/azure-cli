@@ -95,6 +95,9 @@ from ._util import (
 
 logger = get_logger(__name__)
 
+BACKUP_STORAGE_ACCESS_TIERS = ["hot",
+                               "archive"]
+
 ###############################################
 #                Common funcs                 #
 ###############################################
@@ -3000,6 +3003,7 @@ def update_long_term_retention(
         monthly_retention=None,
         yearly_retention=None,
         week_of_year=None,
+        backup_storage_access_tier=None,
         **kwargs):
     '''
     Updates long term retention for managed database
@@ -3010,6 +3014,10 @@ def update_long_term_retention(
     if yearly_retention and not week_of_year:
         raise CLIError('Please specify week of year for yearly retention.')
 
+    if backup_storage_access_tier and backup_storage_access_tier.lower() not in BACKUP_STORAGE_ACCESS_TIERS:
+        raise CLIError('Please specify a valid backup storage access tier type for backup storage access tier.'
+                       'See \'--help\' for more details.')
+
     kwargs['weekly_retention'] = weekly_retention
 
     kwargs['monthly_retention'] = monthly_retention
@@ -3017,6 +3025,8 @@ def update_long_term_retention(
     kwargs['yearly_retention'] = yearly_retention
 
     kwargs['week_of_year'] = week_of_year
+
+    kwargs['backup_storage_access_tier'] = backup_storage_access_tier
 
     policy = client.begin_create_or_update(
         database_name=database_name,
@@ -3219,6 +3229,7 @@ def restore_long_term_retention_backup(
         target_database_name,
         target_server_name,
         target_resource_group_name,
+        sku,
         assign_identity=False,
         user_assigned_identity_id=None,
         keys=None,
@@ -3237,10 +3248,23 @@ def restore_long_term_retention_backup(
     if not long_term_retention_backup_resource_id:
         raise CLIError('Please specify a long term retention backup.')
 
+    backup_name = long_term_retention_backup_resource_id.split("/")[-1].split(";")
+    if len(backup_name) == 3 and backup_name[-1] != "Hot":
+        raise CLIError('Restore operation on "' + backup_name[-1] + '" backup is not allowed. '
+                       'Only "Hot" backups can be restored')
+
     kwargs['location'] = _get_server_location(
         cmd.cli_ctx,
         server_name=target_server_name,
         resource_group_name=target_resource_group_name)
+
+    # If sku.name is not specified, resolve the requested sku name
+    # using capabilities.
+    kwargs['sku'] = _find_db_sku_from_capabilities(
+        cmd.cli_ctx,
+        kwargs['location'],
+        sku,
+        compute_model=kwargs['compute_model'])
 
     kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
