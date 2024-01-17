@@ -472,7 +472,7 @@ def set_msal_telemetry(msal_telemetry):
 
 @decorators.suppress_all_exceptions()
 def set_user_agent(user_agent):
-    if not _session.user_agent:
+    if user_agent:
         _session.user_agent = user_agent
 
 
