@@ -70,13 +70,13 @@ class ListSub(AAZCommand):
             arg_group="Body",
             help="The interval (i.e. timegrain) of the query in ISO 8601 duration format. Defaults to PT1M. Special case for 'FULL' value that returns single datapoint for entire time span requested. *Examples: PT15M, PT1H, P1D, FULL*",
         )
-        _args_schema.metric_names = AAZStrArg(
-            options=["--metric-names"],
+        _args_schema.metricnames = AAZStrArg(
+            options=["--metricnames"],
             arg_group="Body",
             help="The names of the metrics (comma separated) to retrieve.",
         )
-        _args_schema.metric_namespace = AAZStrArg(
-            options=["--metric-namespace"],
+        _args_schema.metricnamespace = AAZStrArg(
+            options=["--metricnamespace"],
             arg_group="Body",
             help="Metric namespace where the metrics you want reside.",
         )
@@ -203,8 +203,8 @@ class ListSub(AAZCommand):
             _builder.set_prop("autoAdjustTimegrain", AAZBoolType, ".auto_adjust_timegrain")
             _builder.set_prop("filter", AAZStrType, ".filter")
             _builder.set_prop("interval", AAZStrType, ".interval")
-            _builder.set_prop("metricNames", AAZStrType, ".metric_names")
-            _builder.set_prop("metricNamespace", AAZStrType, ".metric_namespace")
+            _builder.set_prop("metricNames", AAZStrType, ".metricnames")
+            _builder.set_prop("metricNamespace", AAZStrType, ".metricnamespace")
             _builder.set_prop("orderBy", AAZStrType, ".order_by")
             _builder.set_prop("resultType", AAZStrType, ".result_type")
             _builder.set_prop("rollUpBy", AAZStrType, ".roll_up_by")
