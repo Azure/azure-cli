@@ -308,7 +308,6 @@ class RedisCacheTests(ScenarioTest):
             filesasURL = storage['primaryEndpoints']['blob'] + self.kwargs['containerName'] + "/"+ self.kwargs["prefix"] + "?" + containersasToken[1:-2]
             self.kwargs['containersasURL'] = containersasURL
             self.kwargs['filesasURL'] = filesasURL
-        
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
         
         '''
