@@ -132,14 +132,11 @@ def cf_log_analytics_data_sources(cli_ctx, subscription_id, *_):
 def cf_log_analytics_data_plane(cli_ctx, _):
     """Initialize Log Analytics data client for use with CLI."""
     from azure.monitor.query import LogsQueryClient
-    from azure.loganalytics import LogAnalyticsDataClient
     from azure.cli.core._profile import Profile
     profile = Profile(cli_ctx=cli_ctx)
     cred, _, _ = profile.get_login_credentials(
         resource=cli_ctx.cloud.endpoints.log_analytics_resource_id)
     api_version = 'v1'
-    # return LogAnalyticsDataClient(cred,
-    #                               base_url=cli_ctx.cloud.endpoints.log_analytics_resource_id + '/' + api_version)
     return LogsQueryClient(cred, endpoint=cli_ctx.cloud.endpoints.log_analytics_resource_id + '/' + api_version)
 
 

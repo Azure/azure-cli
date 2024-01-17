@@ -149,14 +149,10 @@ def transform_log_analytics_query_output(result):
     tables_output = []
 
     def _transform_query_output(table):
-        # columns = table.columns
         name = table.name
         rows = table.rows
-
         column_names = table.columns
         table_output = []
-        # for column in columns:
-        #     column_names.append(column.name)
         for row in rows:
             item = OrderedDict()
             item['TableName'] = name
