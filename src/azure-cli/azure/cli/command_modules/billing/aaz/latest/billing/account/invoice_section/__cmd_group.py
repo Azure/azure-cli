@@ -8,3 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "billing account invoice-section",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage account invoice section
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]
