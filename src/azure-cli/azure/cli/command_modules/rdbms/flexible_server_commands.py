@@ -212,7 +212,7 @@ def load_flexibleserver_command_table(self, _):
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_servers) as g:
         g.custom_command('create', 'flexible_replica_create', supports_no_wait=True)
-        g.custom_command('stop-replication', 'flexible_replica_stop', confirmation=True)
+        g.custom_command('stop-replication', 'flexible_replica_stop', confirmation=True, deprecate_info=g.deprecate(target='stop-replication', redirect='promote', hide=True))
         g.custom_command('promote', 'flexible_replica_promote', confirmation=True)
 
     with self.command_group('postgres flexible-server identity', postgres_flexible_servers_sdk,
