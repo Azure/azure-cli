@@ -664,7 +664,7 @@ def load_arguments(self, _):
 
     with self.argument_context('aks trustedaccess rolebinding create') as c:
         c.argument('roles', help='comma-separated roles: Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer,...')
-        c.argument('source_resource_id', options_list=['--source-resource-id', '-r'], help='The source resource id of the binding')
+        c.argument('source_resource_id', options_list=['--source-resource-id'], help='The source resource id of the binding')
 
     with self.argument_context('aks trustedaccess rolebinding update') as c:
         c.argument('roles', help='comma-separated roles: Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer,...')
