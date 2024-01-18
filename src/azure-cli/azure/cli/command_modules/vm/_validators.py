@@ -1340,23 +1340,36 @@ def _validate_trusted_launch(namespace):
         namespace.enable_secure_boot = True
 
 
-def trusted_launch_set_default(namespace, generation_version):
+def trusted_launch_set_default(namespace, generation_version, features):
     if not generation_version:
         return
 
+    trusted_launch = ["TrustedLaunchSupported", "TrustedLaunchAndConfidentialVmSupported"]
+
+    features_security_type = None
+    for item in features:
+        if hasattr(item, 'name') and hasattr(item, 'value') and item.name == 'SecurityType':
+            features_security_type = item.value
+            break
+
     from ._constants import UPGRADE_SECURITY_HINT
-    if generation_version == 'V1' or namespace.security_type == 'Standard':
-        logger.warning(UPGRADE_SECURITY_HINT)
+    if generation_version == 'V2':
+        if features_security_type in trusted_launch:
+            if namespace.security_type is None:
+                namespace.security_type = 'TrustedLaunch'
 
-    elif generation_version == 'V2':
-        if namespace.security_type is None:
-            namespace.security_type = 'TrustedLaunch'
+            if namespace.enable_vtpm is None:
+                namespace.enable_vtpm = True
 
-        if namespace.enable_vtpm is None:
-            namespace.enable_vtpm = True
-
-        if namespace.enable_secure_boot is None:
-            namespace.enable_secure_boot = True
+            if namespace.enable_secure_boot is None:
+                namespace.enable_secure_boot = True
+        else:
+            if namespace.security_type is None:
+                namespace.security_type = 'Standard'
+            logger.warning(UPGRADE_SECURITY_HINT)
+    else:
+        if namespace.security_type == 'Standard':
+            logger.warning(UPGRADE_SECURITY_HINT)
 
 
 def _validate_generation_version_and_trusted_launch(cmd, namespace):
@@ -1399,7 +1412,9 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
                                        namespace.os_sku, os_version)
             generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
                                                                              'hyper_v_generation') else None
-            trusted_launch_set_default(namespace, generation_version)
+            features = vm_image_info.features if hasattr(vm_image_info, 'features') else []
+
+            trusted_launch_set_default(namespace, generation_version, features)
             return
 
     # create vm with os disk
