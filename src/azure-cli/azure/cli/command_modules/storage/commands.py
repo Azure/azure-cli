@@ -515,7 +515,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('restore', 'undelete_container', min_api='2020-02-10')
 
     with self.command_group('storage container policy', resource_type=ResourceType.DATA_STORAGE_BLOB,
-                            custom_command_type=get_custom_sdk('access_policy', client_factory=cf_container_client,
+                            custom_command_type=get_custom_sdk('container_access_policy', client_factory=cf_container_client,
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
         from ._transformers import transform_acl_list_output, transform_acl_edit, transform_acl_datetime
         g.storage_custom_command_oauth('create', 'create_acl_policy', transform=transform_acl_edit)

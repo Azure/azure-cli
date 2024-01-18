@@ -10,22 +10,22 @@ def create_acl_policy(cmd, client, policy_name, start=None, expiry=None, permiss
     """Create a stored access policy on the containing object"""
     t_access_policy = cmd.get_models('_models#AccessPolicy', resource_type=ResourceType.DATA_STORAGE_BLOB)
     acl = _get_acl(cmd, client, **kwargs)
-    acl[policy_name] = t_access_policy(permission, expiry, start)
-    if hasattr(acl, 'public_access'):
-        kwargs['public_access'] = getattr(acl, 'public_access')
+    acl['signed_identifiers'][policy_name] = t_access_policy(permission, expiry, start)
+    if 'public_access' in acl:
+        kwargs['public_access'] = acl['public_access']
 
-    return _set_acl(cmd, client, acl, **kwargs)
+    return _set_acl(cmd, client, acl['signed_identifiers'], **kwargs)
 
 
 def get_acl_policy(cmd, client, policy_name, **kwargs):
     """Show a stored access policy on a containing object"""
     acl = _get_acl(cmd, client, **kwargs)
-    return acl.get(policy_name)
+    return acl['signed_identifiers'].get(policy_name)
 
 
 def list_acl_policies(cmd, client, **kwargs):
     """List stored access policies on a containing object"""
-    return _get_acl(cmd, client, **kwargs)
+    return _get_acl(cmd, client, **kwargs)['signed_identifiers']
 
 
 def set_acl_policy(cmd, client, policy_name, start=None, expiry=None, permission=None, **kwargs):
@@ -35,32 +35,38 @@ def set_acl_policy(cmd, client, policy_name, start=None, expiry=None, permission
         raise CLIError('Must specify at least one property when updating an access policy.')
 
     acl = _get_acl(cmd, client, **kwargs)
+
     try:
-        policy = acl[policy_name]
+        policy = acl['signed_identifiers'][policy_name]
         if policy is None:
             t_access_policy = cmd.get_models('_models#AccessPolicy', resource_type=ResourceType.DATA_STORAGE_BLOB)
-            acl[policy_name] = t_access_policy(permission, expiry, start)
+            acl['signed_identifiers'][policy_name] = t_access_policy(permission, expiry, start)
         else:
             policy.start = start if start else policy.start
             policy.expiry = expiry if expiry else policy.expiry
             policy.permission = permission or policy.permission
-        if hasattr(acl, 'public_access'):
-            kwargs['public_access'] = getattr(acl, 'public_access')
+        if 'public_access' in acl:
+            kwargs['public_access'] = acl['public_access']
 
     except KeyError:
         from knack.util import CLIError
         raise CLIError('ACL does not contain {}'.format(policy_name))
-    return _set_acl(cmd, client, acl, **kwargs)
+    return _set_acl(cmd, client, acl['signed_identifiers'], **kwargs)
 
 
 def delete_acl_policy(cmd, client, policy_name, **kwargs):
     """ Delete a stored access policy on a containing object """
     acl = _get_acl(cmd, client, **kwargs)
-    del acl[policy_name]
-    if hasattr(acl, 'public_access'):
-        kwargs['public_access'] = getattr(acl, 'public_access')
 
-    return _set_acl(cmd, client, acl, **kwargs)
+    try:
+        del acl['signed_identifiers'][policy_name]
+    except KeyError:
+        from knack.util import CLIError
+        raise CLIError('ACL does not contain {}'.format(policy_name))
+    if 'public_access' in acl:
+        kwargs['public_access'] = acl['public_access']
+
+    return _set_acl(cmd, client, acl['signed_identifiers'], **kwargs)
 
 
 def _get_service_container_type(cmd, client):
@@ -68,17 +74,6 @@ def _get_service_container_type(cmd, client):
     if isinstance(client, t_blob_svc):
         return "container"
 
-    t_file_svc = cmd.get_models('_share_client#ShareClient', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
-    if isinstance(client, t_file_svc):
-        return "share"
-
-    t_queue_svc = cmd.get_models('_queue_client#QueueClient', resource_type=ResourceType.DATA_STORAGE_QUEUE)
-    if isinstance(client, t_queue_svc):
-        return "queue"
-
-    from azure.data.tables._table_client import TableClient
-    if isinstance(client, TableClient):
-        return 'table'
     raise ValueError('Unsupported service {}'.format(type(client)))
 
 
@@ -97,13 +92,10 @@ def convert_acl_permissions(result):
     if 'signed_identifiers' in result:
         signed_identifiers = {}
         for identifier in result["signed_identifiers"]:
+            if getattr(identifier.access_policy, 'permission') is None:
+                setattr(identifier.access_policy, 'permission', '')
             signed_identifiers[identifier.id] = identifier.access_policy
-        result = signed_identifiers
-    for policy in sorted(result.keys()):
-        if result[policy] is None:
-            continue
-        if getattr(result[policy], 'permission') is None:
-            setattr(result[policy], 'permission', '')
+        result['signed_identifiers'] = signed_identifiers
     return result
 
 
