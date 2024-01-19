@@ -9785,7 +9785,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--resource-group={resource_group} ' \
             '--cluster-name={name} ' \
             '-n testbinding ' \
-            '-r {sid} ' \
+            '--source-resource-id {sid} ' \
             '--roles Microsoft.MachineLearningServices/workspaces/mlworkload'
         self.cmd(create_binding_cmd)
         self.cmd(list_binding_cmd, checks=[
