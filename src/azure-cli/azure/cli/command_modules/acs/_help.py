@@ -530,7 +530,7 @@ parameters:
     short-summary: The crg id used to associate the new cluster with the existed Capacity Reservation Group resource.
   - name: --enable-asm --enable-azure-service-mesh
     type: bool
-    short-summary: Enable Azure Service Mesh.
+    short-summary: Enable Azure Service Mesh addon.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -2140,7 +2140,7 @@ helps['aks mesh enable'] = """
       - name: Enable Azure Service Mesh with selfsigned CA.
         text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster
       - name: Enable Azure Service Mesh with plugin CA.
-        text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster --key-vault-id /subscriptions/8ecadfc9-d1a3-4ea4-b844-0d9f87e4d7c8/resourceGroups/foo/providers/Microsoft.KeyVault/vaults/foo --ca-cert-object-name my-ca-cert --ca-key-object-name my-ca-key --cert-chain-object-name my-cert-chain --root-cert-object-name my-root-cert
+        text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster --key-vault-id /subscriptions/00000/resourceGroups/foo/providers/Microsoft.KeyVault/vaults/foo --ca-cert-object-name my-ca-cert --ca-key-object-name my-ca-key --cert-chain-object-name my-cert-chain --root-cert-object-name my-root-cert
 """
 
 helps['aks mesh disable'] = """
@@ -2180,7 +2180,7 @@ helps['aks mesh disable-ingress-gateway'] = """
 helps['aks mesh get-revisions'] = """
     type: command
     short-summary: Discover available Azure Service Mesh revisions and their compatibility.
-    long-summary: This command discovers available Azure Service Mesh revisions and their compatibility information for the given location.
+    long-summary: This command lists available Azure Service Mesh revisions and their compatibility information for the given location.
     examples:
       - name: Discover Azure Service Mesh revisions.
         text: az aks mesh get-revisions --location westus2
@@ -2190,7 +2190,7 @@ helps['aks mesh get-revisions'] = """
 helps['aks mesh get-upgrades'] = """
     type: command
     short-summary: Discover available Azure Service Mesh upgrades.
-    long-summary: This command discovers available Azure Service Mesh upgrades for the mesh revision installed on the cluster.
+    long-summary: This command lists available Azure Service Mesh upgrades for the mesh revision installed on the cluster.
     examples:
       - name: Discover Azure Service Mesh upgrades.
         text: az aks mesh get-upgrades --resource-group MyResourceGroup --name MyManagedCluster
