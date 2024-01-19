@@ -40,8 +40,7 @@ class ServiceFabricApplicationTests(ScenarioTest):
         self.cmd('az sf application list -g {rg} -c {cluster_name}',
                  checks=[self.check('length(value)', 0)])
         app = self.cmd('az sf application create -g {rg} -c {cluster_name} --application-name {app_name} '
-                       '--application-type-name {app_type_name} --application-type-version {v1} --package-url {app_package_v1} '
-                       '--application-parameters Mode=binary',
+                       '--application-type-name {app_type_name} --application-type-version {v1} --package-url {app_package_v1} ',
                        checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
         self.cmd('az sf application show -g {rg} -c {cluster_name} --application-name {app_name}',
                  checks=[self.check('id', app['id'])])
@@ -58,12 +57,10 @@ class ServiceFabricApplicationTests(ScenarioTest):
                  checks=[self.check('provisioningState', 'Succeeded')])
 
         self.cmd('az sf application update -g {rg} -c {cluster_name} --application-name {app_name} --application-type-version {v2} '
-                 '--application-parameters Precision=3 --health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 '
+                 '--health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 '
                  '--upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --upgrade-replica-set-check-timeout 300 --force-restart',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('typeVersion', '{v2}'),
-                         self.check('parameters.Mode', 'binary'),
-                         self.check('parameters.Precision', '3'),
                          self.check('upgradePolicy.forceRestart', True),
                          self.check('upgradePolicy.upgradeReplicaSetCheckTimeout', '00:05:00'),
                          self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.healthCheckRetryTimeout', '00:00:00'),
@@ -96,13 +93,13 @@ class ServiceFabricApplicationTests(ScenarioTest):
             'cert_name': self.create_random_name('sfrp-cli-', 24),
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
-            'app_type_name': 'CalcServiceApp',
-            'v1': '1.0',
-            'app_package_v1': 'https://sfrpserviceclienttesting.blob.core.windows.net/test-apps/CalcApp_1.0.sfpkg',
-            'v2': '1.2',
-            'app_package_v2': 'https://sfrpserviceclienttesting.blob.core.windows.net/test-apps/CalcApp_1.2.sfpkg',
+            'app_type_name': 'VotingType',
+            'v1': '1.0.0',
+            'app_package_v1': 'https://sfrpazclistorage.blob.core.windows.net/sfrpazclicont/Voting.sfpkg?sp=racwdyti&st=2024-01-18T23:07:27Z&se=2024-02-08T07:07:27Z&sv=2022-11-02&sr=b&sig=XYlcb4sW%2B8zbzl0yxt2%2BZGwA5Q9RMLeJO7MU0OJCCb8%3D',
+            'v2': '2.0.0',
+            'app_package_v2': 'https://sfrpazclistorage.blob.core.windows.net/sfrpazclicont/Voting.2.0.0.sfpkg?sp=racwdyti&st=2024-01-18T23:10:57Z&se=2024-02-08T07:10:57Z&sv=2022-11-02&sr=b&sig=HNAFsFsodk9XFU%2FA5lfTRyk45uAAFeOinGL3kgkjrpg%3D',
             'app_name': self.create_random_name('testApp', 11),
-            'service_type': 'CalcServiceType'
+            'service_type': 'VotingWebType'
         })
 
         _create_cluster_with_separate_kv(self, self.kwargs)
