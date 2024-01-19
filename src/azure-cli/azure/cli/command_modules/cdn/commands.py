@@ -7,8 +7,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands import CliCommandType
 
-from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_profiles, cf_origins, cf_resource_usage,
-                              cf_edge_nodes, cf_waf_policy, cf_waf_rule_set, cf_origin_groups, cf_afd_rules)
+from ._client_factory import (cf_endpoints, cf_waf_policy, cf_waf_rule_set, cf_afd_rules)
 
 
 def _not_found(message):
@@ -35,57 +34,14 @@ _not_found_msg = "{}(s) not found. Please verify the resource(s), group or it's 
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
 def load_command_table(self, _):
-    profile_not_found_msg = _not_found_msg.format('Profile')
     endpoint_not_found_msg = _not_found_msg.format('Endpoint')
-    cd_not_found_msg = _not_found_msg.format('Custom Domain')
-    origin_not_found_msg = _not_found_msg.format('Origin')
-    origin_group_not_found_msg = _not_found_msg.format('Origin Group')
     waf_policy_not_found_msg = _not_found_msg.format('WAF Policy')
     rule_not_found_msg = _not_found_msg.format('Rule')
-
-    cdn_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn#CdnManagementClient.{}',
-        client_factory=cf_cdn
-    )
 
     cdn_endpoints_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cdn.operations#EndpointsOperations.{}',
         client_factory=cf_endpoints,
         exception_handler=_not_found(endpoint_not_found_msg)
-    )
-
-    cdn_profiles_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#ProfilesOperations.{}',
-        client_factory=cf_profiles,
-        exception_handler=_not_found(profile_not_found_msg)
-    )
-
-    cdn_domain_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#CustomDomainsOperations.{}',
-        client_factory=cf_custom_domain,
-        exception_handler=_not_found(cd_not_found_msg)
-    )
-
-    cdn_origin_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#OriginsOperations.{}',
-        client_factory=cf_origins,
-        exception_handler=_not_found(origin_not_found_msg)
-    )
-
-    cdn_origin_group_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#OriginGroupsOperations.{}',
-        client_factory=cf_origin_groups,
-        exception_handler=_not_found(origin_group_not_found_msg)
-    )
-
-    cdn_edge_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#EdgeNodesOperations.{}',
-        client_factory=cf_edge_nodes
-    )
-
-    cdn_usage_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#ResourceUsageOperations.{}',
-        client_factory=cf_resource_usage
     )
 
     cdn_waf_policy_sdk = CliCommandType(
@@ -100,88 +56,72 @@ def load_command_table(self, _):
         exception_handler=_not_found(rule_not_found_msg)
     )
 
-    with self.command_group('cdn', cdn_sdk) as g:
-        g.custom_command('name-exists', 'check_name_availability', client_factory=cf_cdn)
+    from .custom.custom_cdn import CDNProfileCreate
+    self.command_table['cdn profile create'] = CDNProfileCreate(loader=self)
 
-    with self.command_group('cdn', cdn_usage_sdk) as g:
-        g.command('usage', 'list')
+    from .custom.custom_cdn import CDNProfileUpdate
+    self.command_table['cdn profile update'] = CDNProfileUpdate(loader=self)
 
-    with self.command_group('cdn endpoint', cdn_endpoints_sdk) as g:
-        for name in ['start', 'stop', 'delete']:
-            g.command(name, f"begin_{name}", supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_profile')
-        g.custom_command('load', 'load_endpoint_content', client_factory=cf_cdn, supports_no_wait=True)
-        g.custom_command('purge', 'purge_endpoint_content', client_factory=cf_cdn, supports_no_wait=True)
-        g.custom_command('validate-custom-domain', 'validate_custom_domain', client_factory=cf_cdn)
-        g.custom_command('create', 'create_endpoint', client_factory=cf_cdn,
-                         doc_string_source='azure.mgmt.cdn.models#Endpoint',
-                         supports_no_wait=True)
-        g.generic_update_command('update', setter_name='begin_update', setter_arg_name='endpoint_update_properties',
-                                 custom_func_name='update_endpoint',
-                                 doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
-                                 supports_no_wait=True)
+    from .custom.custom_cdn import CDNProfileDelete
+    self.command_table['cdn profile delete'] = CDNProfileDelete(loader=self)
+
+    from .custom.custom_cdn import CDNProfileShow
+    self.command_table['cdn profile show'] = CDNProfileShow(loader=self)
+
+    from .custom.custom_cdn import CDNProfileList
+    self.command_table['cdn profile list'] = CDNProfileList(loader=self)
+
+    from azure.cli.command_modules.cdn.aaz.latest.cdn.endpoint import Show
+    self.command_table['cdn endpoint rule show'] = Show(loader=self)
+    self.command_table['cdn endpoint rule condition show'] = Show(loader=self)
+    self.command_table['cdn endpoint rule action show'] = Show(loader=self)
+
+    from .custom.custom_cdn import CDNEndpointCreate
+    self.command_table['cdn endpoint create'] = CDNEndpointCreate(loader=self)
+
+    from .custom.custom_cdn import CDNEndpointUpdate
+    self.command_table['cdn endpoint update'] = CDNEndpointUpdate(loader=self)
+
+    from .custom.custom_cdn import CDNEnableCustomHttp
+    self.command_table['cdn endpoint enable-custom-http'] = CDNEnableCustomHttp(loader=self)
+
+    from .custom.custom_cdn import NameExistsWithType
+    self.command_table['cdn endpoint name-exists'] = NameExistsWithType(loader=self)
+
+    from .custom.custom_cdn import CDNOriginCreate
+    self.command_table['cdn origin create'] = CDNOriginCreate(loader=self)
+
+    from .custom.custom_cdn import CDNOriginUpdate
+    self.command_table['cdn origin update'] = CDNOriginUpdate(loader=self)
+
+    from .custom.custom_cdn import CDNOriginGroupCreate
+    self.command_table['cdn origin-group create'] = CDNOriginGroupCreate(loader=self)
+
+    from .custom.custom_cdn import CDNOriginGroupUpdate
+    self.command_table['cdn origin-group update'] = CDNOriginGroupUpdate(loader=self)
+
+    from .custom.custom_cdn import CDNEndpointRuleAdd
+    self.command_table['cdn endpoint rule add'] = CDNEndpointRuleAdd(loader=self)
+
+    from .custom.custom_cdn import CDNEndpointRuleRemove
+    self.command_table['cdn endpoint rule remove'] = CDNEndpointRuleRemove(loader=self)
+
+    from .custom.custom_cdn import CDNEndpointRuleConditionAdd
+    self.command_table['cdn endpoint rule condition add'] = CDNEndpointRuleConditionAdd(loader=self)
+
+    from .custom.custom_cdn import CDNEndpointRuleConditionRemove
+    self.command_table['cdn endpoint rule condition remove'] = CDNEndpointRuleConditionRemove(loader=self)
+
+    from .custom.custom_cdn import CDNEndpointRuleActionAdd
+    self.command_table['cdn endpoint rule action add'] = CDNEndpointRuleActionAdd(loader=self)
+
+    from .custom.custom_cdn import CDNEndpointRuleActionRemove
+    self.command_table['cdn endpoint rule action remove'] = CDNEndpointRuleActionRemove(loader=self)
 
     with self.command_group('cdn endpoint waf policy', cdn_endpoints_sdk, is_preview=True) as g:
         g.custom_show_command('show', 'show_endpoint_waf_policy_link', client_factory=cf_endpoints)
         g.custom_command('set', 'set_endpoint_waf_policy_link', client_factory=cf_endpoints)
         g.custom_command('remove', 'remove_endpoint_waf_policy_link', client_factory=cf_endpoints, confirmation=True)
-
-    with self.command_group('cdn endpoint rule', cdn_endpoints_sdk, is_preview=True) as g:
-        g.show_command('show', 'get')
-        g.custom_command('add', 'add_rule', client_factory=cf_cdn,
-                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
-        g.custom_command('remove', 'remove_rule', client_factory=cf_cdn,
-                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
-
-    with self.command_group('cdn endpoint rule condition', cdn_endpoints_sdk, is_preview=True) as g:
-        g.show_command('show', 'get')
-        g.custom_command('add', 'add_condition', client_factory=cf_cdn,
-                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
-        g.custom_command('remove', 'remove_condition', client_factory=cf_cdn,
-                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
-
-    with self.command_group('cdn endpoint rule action', cdn_endpoints_sdk, is_preview=True) as g:
-        g.show_command('show', 'get')
-        g.custom_command('add', 'add_action', client_factory=cf_cdn,
-                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
-        g.custom_command('remove', 'remove_action', client_factory=cf_cdn,
-                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
-
-    with self.command_group('cdn profile', cdn_profiles_sdk) as g:
-        g.custom_show_command('show', 'get_profile', client_factory=cf_cdn)
-        g.command('usage', 'list_resource_usage')
-        g.custom_command('delete', 'delete_profile', client_factory=cf_cdn)
-        g.custom_command('list', 'list_profiles', client_factory=cf_cdn)
-        g.custom_command('create', 'create_profile', client_factory=cf_cdn)
-        g.generic_update_command('update', setter_name='begin_update', custom_func_name='update_profile',
-                                 setter_arg_name='profile_update_parameters',
-                                 doc_string_source='azure.mgmt.cdn.models#ProfileUpdateParameters')
-
-    with self.command_group('cdn custom-domain', cdn_domain_sdk) as g:
-        g.show_command('show', 'get')
-        g.command('delete', 'begin_delete')
-        g.command('list', 'list_by_endpoint')
-        g.custom_command('create', 'create_custom_domain', client_factory=cf_cdn)
-        g.custom_command('enable-https', 'enable_custom_https', client_factory=cf_cdn)
-        g.command('disable-https', 'disable_custom_https')
-
-    with self.command_group('cdn origin', cdn_origin_sdk) as g:
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_endpoint')
-        g.custom_command('create', 'create_origin', client_factory=cf_origins, is_preview=True)
-        g.custom_command('update', 'update_origin', client_factory=cf_origins)
-        g.command('delete', 'begin_delete', confirmation=True)
-
-    with self.command_group('cdn origin-group', cdn_origin_group_sdk, is_preview=True) as g:
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_endpoint')
-        g.custom_command('create', 'create_origin_group', client_factory=cf_origin_groups)
-        g.custom_command('update', 'update_origin_group', client_factory=cf_origin_groups)
-        g.command('delete', 'begin_delete', confirmation=True)
-
-    with self.command_group('cdn edge-node', cdn_edge_sdk) as g:
-        g.command('list', 'list')
 
     with self.command_group('cdn waf policy', cdn_waf_policy_sdk, is_preview=True,
                             deprecate_info=self.deprecate(hide=False)) as g:
@@ -230,19 +170,11 @@ def load_command_table(self, _):
     with self.command_group('afd rule condition',
                             cdn_afd_rule_sdk,
                             custom_command_type=get_custom_sdk(cf_afd_rules, _not_found(rule_not_found_msg))) as g:
-        g.custom_command('add', 'add_afd_rule_condition',
-                         doc_string_source='azure.mgmt.cdn.models#Rule')
-        g.custom_command('remove', 'remove_afd_rule_condition',
-                         doc_string_source='azure.mgmt.cdn.models#Rule')
         g.custom_command('list', 'list_afd_rule_condition')
 
     with self.command_group('afd rule action',
                             cdn_afd_rule_sdk,
                             custom_command_type=get_custom_sdk(cf_afd_rules, _not_found(rule_not_found_msg))) as g:
-        g.custom_command('add', 'add_afd_rule_action',
-                         doc_string_source='azure.mgmt.cdn.models#Rule')
-        g.custom_command('remove', 'remove_afd_rule_action',
-                         doc_string_source='azure.mgmt.cdn.models#Rule')
         g.custom_command('list', 'list_afd_rule_action')
 
     from .custom.custom_afdx import AFDCustomDomainCreate
@@ -280,6 +212,18 @@ def load_command_table(self, _):
 
     from .custom.custom_afdx import AFDRuleCreate
     self.command_table['afd rule create'] = AFDRuleCreate(loader=self)
+
+    from .custom.custom_afdx import AFDRuleconditionAdd
+    self.command_table['afd rule condition add'] = AFDRuleconditionAdd(loader=self)
+
+    from .custom.custom_afdx import AFDRuleconditionRemove
+    self.command_table['afd rule condition remove'] = AFDRuleconditionRemove(loader=self)
+
+    from .custom.custom_afdx import AFDRuleActionCreate
+    self.command_table['afd rule action add'] = AFDRuleActionCreate(loader=self)
+
+    from .custom.custom_afdx import AFDRuleActionRemove
+    self.command_table['afd rule action remove'] = AFDRuleActionRemove(loader=self)
 
     from .custom.custom_afdx import AFDSecretCreate
     self.command_table['afd secret create'] = AFDSecretCreate(loader=self)

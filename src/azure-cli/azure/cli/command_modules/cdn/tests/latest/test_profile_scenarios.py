@@ -16,7 +16,7 @@ class CdnProfileScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         profile_name = 'profile123'
         checks = [JMESPathCheck('name', profile_name),
-                  JMESPathCheck('sku.name', SkuName.STANDARD_AKAMAI)]
+                  JMESPathCheck('sku.name', SkuName.STANDARD_VERIZON)]
         self.profile_create_cmd(resource_group, profile_name, checks=checks)
         self.profile_show_cmd(resource_group, profile_name, checks=checks)
 

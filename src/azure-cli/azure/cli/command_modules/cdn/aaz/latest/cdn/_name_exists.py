@@ -57,6 +57,7 @@ class NameExists(AAZCommand):
             arg_group="CheckNameAvailabilityInput",
             help="The type of the resource whose name is to be validated.",
             required=True,
+            default="Microsoft.Cdn/Profiles/Endpoints",
             enum={"Microsoft.Cdn/Profiles/AfdEndpoints": "Microsoft.Cdn/Profiles/AfdEndpoints", "Microsoft.Cdn/Profiles/Endpoints": "Microsoft.Cdn/Profiles/Endpoints"},
         )
         return cls._args_schema

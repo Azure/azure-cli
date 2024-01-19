@@ -375,9 +375,6 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         self.endpoint_delete_cmd(resource_group, endpoint_name, profile_name)
 
-    @ResourceGroupPreparer()
-    def test_akamai_delivery_rule(self, resource_group):
-        self._test_delivery_rule_internal(resource_group, "akp", "Standard_Akamai")
 
     @ResourceGroupPreparer()
     def test_verizon_delivery_rule(self, resource_group):

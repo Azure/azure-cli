@@ -5,21 +5,23 @@
 # pylint: disable=too-many-locals, too-many-statements too-many-boolean-expressions too-many-branches protected-access
 
 from azure.mgmt.cdn.models import (MinimumTlsVersion, ProtocolType, SkuName, UpdateRule, DeleteRule, CertificateType,
-                                   UrlPathMatchConditionParameters, UrlFileExtensionMatchConditionParameters)
+                                   UrlPathMatchConditionParameters, UrlFileExtensionMatchConditionParameters, ResourceType)
 from azure.cli.core.aaz._base import has_value
-from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.command_modules.cdn.aaz.latest.cdn.custom_domain import EnableCustomHttp as _CDNEnableCustomHttp
 from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDProfileShow, \
-    Create as _AFDProfileCreate, Update as _AFDProfileUpdate, Delete as _AFDProfileDelete
-from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZIntArg, AAZListArg, AAZDateArg, register_command
+    Create as _AFDProfileCreate, Update as _AFDProfileUpdate, Delete as _AFDProfileDelete, \
+    List as _AFDProfileList
+from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZIntArg, AAZListArg
 from azure.cli.command_modules.cdn.aaz.latest.cdn.origin import Create as _CDNOriginCreate, \
     Update as _CDNOriginUpdate
 from azure.cli.command_modules.cdn.aaz.latest.cdn.origin_group import Create as _CDNOriginGroupCreate, \
     Update as _CDNOriginGroupUpdate, Show as _CDNOriginGroupShow
 from azure.cli.command_modules.cdn.aaz.latest.cdn.endpoint import Create as _CDNEndpointCreate, \
     Update as _CDNEndpointUpdate, Show as _CDNEndpointShow
+from azure.cli.command_modules.cdn.aaz.latest.cdn._name_exists import NameExists
 from .custom_rule_util import (create_condition, create_action,
                                create_conditions_from_existing, create_actions_from_existing)
+import argparse
 
 from knack.util import CLIError
 from knack.log import get_logger
@@ -51,34 +53,61 @@ def _convert_to_unified_delivery_rules(policy):
                         con.parameters.match_values = con.parameters.additional_properties["extensions"]
 
 
-@register_command('cdn profile show')
+def _parse_ranges(ranges: str):
+    if ranges is None:
+        return []
+
+    from azure.mgmt.cdn.models import HttpErrorRangeParameters
+
+    def parse_range(error_range: str):
+        split = error_range.split('-')
+        if not split or len(split) > 2:
+            raise CLIError(f'range "{error_range}" is invalid')
+
+        try:
+            begin = split[0]
+            end = split[1] if len(split) == 2 else begin
+        except ValueError:
+            raise CLIError(f'range "{error_range}" is invalid')
+
+        return HttpErrorRangeParameters(being=begin, end=end)
+
+    return [parse_range(error_range) for error_range in ranges.split(',')]
+
+
+class NameExistsWithType(NameExists):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.type = ResourceType.MICROSOFT_CDN_PROFILES_ENDPOINTS.value
+
+
+class CDNProfileList(_AFDProfileList):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
+
+
 class CDNProfileShow(_AFDProfileShow):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         return args_schema
 
-    def _output(self, *args, **kwargs):
-        existing = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        if existing['sku']['name'] not in (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door):
-            logger.warning('Unexpected SKU type, only Standard_AzureFrontDoor and Premium_AzureFrontDoor are supported')
-            raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
-        return existing
 
-
-@register_command('cdn profile create')
 class CDNProfileCreate(_AFDProfileCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location._registered = False
         return args_schema
-    # def pre_operations(self):
-    #     args = self.ctx.args
-    #     args.location = 'global'
 
 
-@register_command('cdn profile update')
 class CDNProfileUpdate(_AFDProfileUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -93,14 +122,10 @@ class CDNProfileUpdate(_AFDProfileUpdate):
             'resource_group': args.resource_group,
             'profile_name': args.profile_name
         })
-        if existing['sku']['name'] not in (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door):
-            logger.warning('Unexpected SKU type, only Standard_AzureFrontDoor and Premium_AzureFrontDoor are supported')
-            raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
         existing_location = None if 'location' not in existing else existing['location']
         args.location = existing_location
 
 
-@register_command('cdn profile delete', _AFDProfileDelete)
 class CDNProfileDelete(_AFDProfileDelete):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -268,28 +293,6 @@ class CDNOriginUpdate(_CDNOriginUpdate):
     def pre_operations(self):
         args = self.ctx.args
         args.enable = not args.disabled
-
-
-def _parse_ranges(ranges: str):
-    if ranges is None:
-        return []
-
-    from azure.mgmt.cdn.models import HttpErrorRangeParameters
-
-    def parse_range(error_range: str):
-        split = error_range.split('-')
-        if not split or len(split) > 2:
-            raise CLIError(f'range "{error_range}" is invalid')
-
-        try:
-            begin = split[0]
-            end = split[1] if len(split) == 2 else begin
-        except ValueError:
-            raise CLIError(f'range "{error_range}" is invalid')
-
-        return HttpErrorRangeParameters(being=begin, end=end)
-
-    return [parse_range(error_range) for error_range in ranges.split(',')]
 
 
 class CDNOriginGroupCreate(_CDNOriginGroupCreate):
@@ -482,10 +485,56 @@ class CDNEndpointCreate(_CDNEndpointCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.origin = AAZStrArg(
+            options=['--origin'],
+            help='Endpoint origin specified by the following space-delimited 6 tuple: '
+            'www.example.com http_port https_port private_link_resource_id '
+            'private_link_location private_link_approval_message. '
+            'The HTTP and HTTPS ports and the private link resource ID and location are optional. '
+            'The HTTP and HTTPS ports default to 80 and 443, respectively. '
+            'Private link fields are only valid for the sku Standard_Microsoft, '
+            'and private_link_location is required if private_link_resource_id is set.',
+            required=True,
+        )
+        args_schema.origins._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
+
+        origin_params = args.origin.to_serialized_data().split(' ')
+        if not 1 <= len(origin_params) <= 3 and not 5 <= len(origin_params) <= 6:
+            msg = '%s takes 1, 2, 3, 5, or 6 values, %d given'
+            raise argparse.ArgumentError(
+                self, msg % (len(origin_params)))
+
+        host_name = origin_params[0]
+        http_port = 80
+        https_port = 443
+        private_link_resource_id = None
+        private_link_location = None
+        private_link_approval_message = None
+
+        if len(origin_params) > 1:
+            http_port = int(origin_params[1])
+        if len(origin_params) > 2:
+            https_port = int(origin_params[2])
+        if len(origin_params) > 4:
+            private_link_resource_id = origin_params[3]
+            private_link_location = origin_params[4]
+        if len(origin_params) > 5:
+            private_link_approval_message = origin_params[5]
+
+        args.origins = [{
+            'name': 'origin',
+            'host_name': host_name,
+            'http_port': http_port,
+            'https_port': https_port,
+            'private_link_resource_id': private_link_resource_id,
+            'private_link_location': private_link_location,
+            'private_link_approval_message': private_link_approval_message
+        }]
+
         if not has_value(args.is_compression_enabled):
             args.is_compression_enabled = False
         if not has_value(args.is_http_allowed):
@@ -638,9 +687,11 @@ class CDNEndpointRuleAdd(_CDNEndpointUpdate):
             options=['--source-pattern'],
             help='A request URI pattern that identifies the type of requests that may be rewritten.',
         )
-        args_schema.transform = AAZStrArg(
+        args_schema.transform = AAZListArg(
             options=['--transform'],
             help='Transform to apply before matching.',
+        )
+        args_schema.transform.Element = AAZStrArg(
             enum=['Lowercase', 'Uppercase']
         )
         return args_schema
@@ -745,7 +796,7 @@ class CDNEndpointRuleRemove(_CDNEndpointUpdate):
         args.delivery_policy = policy
 
 
-class CDNEndpointActionsAdd(_CDNEndpointUpdate):
+class CDNEndpointRuleActionAdd(_CDNEndpointUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -855,7 +906,7 @@ class CDNEndpointActionsAdd(_CDNEndpointUpdate):
         args.delivery_policy = delivery_policy
 
 
-class CDNEndpointActionsRemove(_CDNEndpointUpdate):
+class CDNEndpointRuleActionRemove(_CDNEndpointUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -888,7 +939,7 @@ class CDNEndpointActionsRemove(_CDNEndpointUpdate):
         args.delivery_policy = delivery_policy
 
 
-class CDNEndpointConditionsAdd(_CDNEndpointUpdate):
+class CDNEndpointRuleConditionAdd(_CDNEndpointUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -924,9 +975,11 @@ class CDNEndpointConditionsAdd(_CDNEndpointUpdate):
             options=['--selector'],
             help='Selector of the match condition.',
         )
-        args_schema.transform = AAZStrArg(
+        args_schema.transform = AAZListArg(
             options=['--transform'],
             help='Transform to apply before matching.',
+        )
+        args_schema.transform.Element = AAZStrArg(
             enum=['Lowercase', 'Uppercase']
         )
 
@@ -947,7 +1000,7 @@ class CDNEndpointConditionsAdd(_CDNEndpointUpdate):
         args.delivery_policy = delivery_policy
 
 
-class CDNEndpointConditionsRemove(_CDNEndpointUpdate):
+class CDNEndpointRuleConditionRemove(_CDNEndpointUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)

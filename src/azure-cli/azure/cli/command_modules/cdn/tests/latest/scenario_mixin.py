@@ -10,7 +10,7 @@ def add_tags(command, tags):
 
 # pylint: disable=too-many-public-methods
 class CdnScenarioMixin:
-    def profile_create_cmd(self, group, name, tags=None, checks=None, options=None, sku=None):
+    def profile_create_cmd(self, group, name, tags=None, checks=None, options=None, sku='Standard_VERIZON'):
         command = 'cdn profile create -g {} -n {}'.format(group, name)
         if tags:
             command = command + ' --tags {}'.format(tags)
