@@ -242,7 +242,7 @@ type: command
 short-summary: Update long term retention settings for a database.
 examples:
   - name: Set long term retention for a database.
-    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26 --make-backups-immutable true
+    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26 --access-tier "Archive" --make-backups-immutable true
 """
 
 helps['sql db ltr-policy show'] = """
@@ -263,7 +263,7 @@ type: command
 short-summary: Get a long term retention backup for a database.
 examples:
   - name: Show long term retention backup for a database.
-    text: az sql db ltr-backup show -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: az sql db ltr-backup show -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000;Hot"
 """
 
 helps['sql db ltr-backup list'] = """

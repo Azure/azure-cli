@@ -104,7 +104,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
-                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, public_network_access=None):
+                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, public_network_access=None,
+                  acr_use_identity=False):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -187,6 +188,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     if using_webapp_up:
         https_only = using_webapp_up
+
+    if acr_use_identity:
+        site_config.acr_use_managed_identity_creds = acr_use_identity
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
@@ -3724,6 +3728,15 @@ def get_app_insights_key(cli_ctx, resource_group, name):
     return appinsights.instrumentation_key
 
 
+def get_app_insights_connection_string(cli_ctx, resource_group, name):
+    appinsights_client = get_mgmt_service_client(cli_ctx, ApplicationInsightsManagementClient)
+    appinsights = appinsights_client.components.get(resource_group, name)
+    if appinsights is None or appinsights.connection_string is None:
+        raise ResourceNotFoundError("App Insights {} under resource group {} was not found.".format(name,
+                                                                                                    resource_group))
+    return appinsights.connection_string
+
+
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
                                         max_burst=None, location=None, tags=None, zone_redundant=False):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
@@ -4133,9 +4146,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
                                                       value=app_insights_key))
     elif app_insights is not None:
-        instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
-        site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
-                                                      value=instrumentation_key))
+        app_insights_conn_string = get_app_insights_connection_string(cmd.cli_ctx, resource_group_name, app_insights)
+        site_config.app_settings.append(NameValuePair(name='APPLICATIONINSIGHTS_CONNECTION_STRING',
+                                                      value=app_insights_conn_string))
     elif disable_app_insights or not matched_runtime.app_insights:
         # set up dashboard if no app insights
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
@@ -4274,7 +4287,7 @@ def try_create_workspace_based_application_insights(cmd, functionapp, workspace_
     }
 
     appinsights = app_insights_client.components.create_or_update(ai_resource_group_name, ai_name, ai_properties)
-    if appinsights is None or appinsights.instrumentation_key is None:
+    if appinsights is None or appinsights.connection_string is None:
         logger.warning(creation_failed_warn)
         return
 
@@ -4283,12 +4296,8 @@ def try_create_workspace_based_application_insights(cmd, functionapp, workspace_
                    'You can visit https://portal.azure.com/#resource%s/overview to view your '
                    'Application Insights component', appinsights.name, appinsights.id)
 
-    if not is_centauri_functionapp(cmd, ai_resource_group_name, ai_name):
-        update_app_settings(cmd, functionapp.resource_group, functionapp.name,
-                            ['APPINSIGHTS_INSTRUMENTATIONKEY={}'.format(appinsights.instrumentation_key)])
-    else:
-        update_app_settings(cmd, functionapp.resource_group, functionapp.name,
-                            ['APPLICATIONINSIGHTS_CONNECTION_STRING={}'.format(appinsights.connection_string)])
+    update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                        ['APPLICATIONINSIGHTS_CONNECTION_STRING={}'.format(appinsights.connection_string)])
 
 
 def try_create_application_insights(cmd, functionapp):
