@@ -2072,7 +2072,7 @@ helps['aks trustedaccess rolebinding create'] = """
         - name: --roles
           type: string
           short-summary: Specify the comma-separated roles.
-        - name: --source-resource-id -r
+        - name: --source-resource-id
           type: string
           short-summary: Specify the source resource id of the binding.
 
