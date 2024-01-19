@@ -2760,7 +2760,7 @@ def aks_mesh_get_revisions(
 
     if revisions:
         return revisions[0].properties
-    
+
     return None
 
 

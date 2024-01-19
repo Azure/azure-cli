@@ -4100,6 +4100,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return None
 
+    # pylint: disable=too-many-branches
     def update_azure_service_mesh_profile(self) -> ServiceMeshProfile:
         """ Update azure service mesh profile.
         This function clone the existing service mesh profile, then apply user supplied changes
