@@ -38,6 +38,7 @@ from azure.cli.command_modules.batch._validators import (
     keyvault_id,
     metadata_item_format,
     resource_file_format,
+    resource_tag_format,
     storage_account_id,
     validate_cert_file,
     validate_cert_settings,
@@ -236,11 +237,42 @@ def load_arguments(self, _):
         c.argument('json_file', help='The file containing pool create properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Create Properties Parameter Arguments\' are ignored.  See https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add?tabs=HTTP#request-body')
         c.argument('os_family', arg_type=get_enum_type(['2', '3', '4', '5', '6']))
         c.argument('auto_scale_formula', help='A formula for the desired number of compute nodes in the pool. The formula is checked for validity before the pool is created. If the formula is not valid, the Batch service rejects the request with detailed error information. For more information about specifying this formula, see https://azure.microsoft.com/documentation/articles/batch-automatic-scaling/.')
+        c.extra('resource_tags', arg_group='Pool', type=resource_tag_format, help="User is able to specify resource tags for the pool. Any resource created for the pool will then also be tagged by the same resource tags")
+        c.extra('encryption_at_host',
+                arg_group='Pool: Security Profile',
+                help='This property can be used by user in the request to enable or disable the Host Encryption for the virtual machine or virtual machine scale set. This will enable the encryption for all the disks including Resource/Temp disk at host itself. The default behavior is: The Encryption at host will be disabled unless this property is set to true for the resource.')
+        c.extra('security_type',
+                arg_group='Pool: Security Profile',
+                help='Specifies the SecurityType of the virtual machine. It has to be set to any specified value to enable UefiSettings. The default behavior is: UefiSettings will not be enabled unless this property is set.')
+        c.extra('secure_boot_enabled', arg_type=get_three_state_flag(),
+                options_list=('--enable-secure-boot'),
+                arg_group='Pool: Security Profile',
+                help='Enable secure boot')
+        c.extra('v_tpm_enabled', arg_type=get_three_state_flag(),
+                options_list=('--enable-vtpm'),
+                arg_group='Pool: Security Profile',
+                help='Enable vTPM')
         c.extra('disk_encryption_targets',
                 arg_group="Pool: Virtual Machine Configuration",
                 help='A space separated list of DiskEncryptionTargets. current possible values include OsDisk and TemporaryDisk.', type=disk_encryption_configuration_format)
         c.extra('image', completer=load_supported_images, arg_group="Pool: Virtual Machine Configuration",
                 help="OS image reference. This can be either 'publisher:offer:sku[:version]' format, or a fully qualified ARM image id of the form '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/images/{imageName}'. If 'publisher:offer:sku[:version]' format, version is optional and if omitted latest will be used. Valid values can be retrieved via 'az batch pool supported-images list'. For example: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
+        c.extra('caching',
+                options_list=('--os-disk-caching'),
+                arg_group="Pool: OS Disk",
+                arg_type=get_enum_type(['None', 'ReadOnly', 'ReadWrite']),
+                help="Specifies the caching requirements. Possible values are: None, ReadOnly, ReadWrite. The default values are: None for Standard storage. ReadOnly for Premium storage.")
+        c.extra('storage_account_type',
+                arg_group="Pool: OS Disk",
+                help="The storage account type for managed disk")
+        c.extra('disk_size_gb',
+                options_list=('--os-disk-size'),
+                arg_group="Pool: OS Disk",
+                help="The initial disk size in GB when creating new OS disk.")
+        c.extra('write_accelerator_enabled', arg_type=get_three_state_flag(),
+                options_list=('--enable-write-accel'),
+                arg_group="Pool: OS Disk",
+                help="Specifies whether writeAccelerator should be enabled or disabled on the disk.")
         c.argument('target_node_communication_mode', options_list=['--target-communication'],
                    help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
                    arg_type=get_enum_type(NodeCommunicationMode))

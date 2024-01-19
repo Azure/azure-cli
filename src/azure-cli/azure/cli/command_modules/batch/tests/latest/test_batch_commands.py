@@ -49,6 +49,19 @@ class TestBatchValidators(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             _validators.metadata_item_format("name=value=other")
+    
+    def test_batch_resource_tag_format(self):
+        resource_tag = _validators.resource_tag_format("name=value")
+        self.assertEqual(resource_tag, {'name': 'value'})
+
+        with self.assertRaises(ValueError):
+            _validators.resource_tag_format("test")
+
+        with self.assertRaises(ValueError):
+            _validators.resource_tag_format("name=value=other")
+
+        with self.assertRaises(ValueError):
+            _validators.resource_tag_format("")
 
     def test_batch_environment_setting_format(self):
         env = _validators.environment_setting_format("name=value")
@@ -560,7 +573,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         # pylint: disable=too-many-statements
         handler = operations._pool_operations.PoolOperations.add
         args = list(self.command_pool._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 32)
+        self.assertEqual(len(args), 39)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
