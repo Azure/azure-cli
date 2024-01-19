@@ -14,7 +14,7 @@ from azure.cli.core.commands.parameters import (get_enum_type,
                                                 resource_group_name_type)
 from azure.cli.core.commands.validators import \
     get_default_location_from_resource_group
-from ._constants import ImportExportProfiles, ImportMode
+from ._constants import ImportExportProfiles, ImportMode, FeatureFlagConstants
 
 from ._validators import (validate_appservice_name_or_id, validate_snapshot_query_fields,
                           validate_connection_string, validate_datetime,
@@ -208,7 +208,7 @@ def load_arguments(self, _):
         c.argument('src_auth_mode', arg_type=get_enum_type(['login', 'key']),
                    help='Auth mode for connecting to source App Configuration. For details, refer to "--auth-mode" argument.')
         c.argument('src_snapshot', validator=validate_snapshot_import,
-                   help='Import all keys in a given snapshot of the source App Configuration store. If no snapshot is specified, the keys currently in the store are imported based on the specified key and label filters.', is_preview=True)
+                   help='Import all keys in a given snapshot of the source App Configuration store. If no snapshot is specified, the keys currently in the store are imported based on the specified key and label filters.')
 
     with self.argument_context('appconfig kv import', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
@@ -222,7 +222,7 @@ def load_arguments(self, _):
         c.argument('skip_features', help="Export items excluding all feature flags. By default, all features with the specified label will be exported to file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
         c.argument('skip_keyvault', help="Export items excluding all key vault references. By default, all key vault references with the specified label will be exported.", arg_type=get_three_state_flag())
         c.argument('snapshot', validator=validate_snapshot_export,
-                   help="Export all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are exported based on the specified key and label filters.", is_preview=True)
+                   help="Export all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are exported based on the specified key and label filters.")
 
     with self.argument_context('appconfig kv export', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
@@ -272,7 +272,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv list') as c:
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
-        c.argument('snapshot', help="List all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are listed.", is_preview=True)
+        c.argument('snapshot', help="List all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are listed.")
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), help="Resolve the content of key vault reference. This argument should NOT be specified along with --fields. Instead use --query for customized query.")
 
     with self.argument_context('appconfig kv restore') as c:
@@ -306,6 +306,8 @@ def load_arguments(self, _):
         c.argument('label', help="If no label specified, set the feature flag with null label by default")
         c.argument('description', help='Description of the feature flag to be set.')
         c.argument('key', validator=validate_feature_key, help='Key of the feature flag. Key must start with the ".appconfig.featureflag/" prefix. Key cannot contain the "%" character. Default key is the reserved prefix ".appconfig.featureflag/" + feature name.')
+        c.argument('requirement_type', arg_type=get_enum_type([FeatureFlagConstants.REQUIREMENT_TYPE_ALL, FeatureFlagConstants.REQUIREMENT_TYPE_ANY]),
+                   help='Requirement type determines if filters should use "Any" or "All" logic when evaluating the state of a feature.')
 
     with self.argument_context('appconfig feature delete') as c:
         c.argument('feature', help='Name of the feature to be deleted. If the feature flag key is different from the default key, provide the `--key` argument instead. Support star sign as filters, for instance * means all features and abc* means features with abc as prefix. Comma separated features are not supported. Please provide escaped string if your feature name contains comma.')

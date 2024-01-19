@@ -19,7 +19,6 @@ class AzureBillingServiceScenarioTest(ScenarioTest):
         else:
             self.assertIsNone(invoice['downloadUrl'])
 
-    @record_only()
     def test_list_billing_periods(self):
         # list
         periods_list = self.cmd('billing period list').get_output_in_json()
@@ -30,6 +29,9 @@ class AzureBillingServiceScenarioTest(ScenarioTest):
             'period_name': period_name
         })
         self.cmd('billing period show -n {period_name}', checks=self.check('name', period_name))
+        self.cmd('billing period list --top 3', checks=[
+            self.check('length(@)', 3)
+        ])
 
     @record_only()
     def test_list_enrollment_accounts(self):

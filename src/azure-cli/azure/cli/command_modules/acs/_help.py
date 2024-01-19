@@ -78,7 +78,7 @@ parameters:
     short-summary: Availability zones where agent nodes will be placed. Also, to install agent nodes to more than one zones you need to pass zone numbers (1,2 or 3) separated by blanks.  For example -  To have all 3 zones, you are expected to enter `--zones 1 2 3`
   - name: --node-osdisk-size
     type: int
-    short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
+    short-summary: Size in GiB of the OS disk for each node in the node pool. Minimum 30 GiB.
   - name: --node-osdisk-type
     type: string
     short-summary: "OS disk type to be used for machines in a given agent pool: Ephemeral or Managed. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation."
@@ -163,7 +163,7 @@ parameters:
   - name: --load-balancer-managed-outbound-ipv6-count
     type: int
     short-summary: Load balancer managed outbound IPv6 IP count.
-    long-summary: Desired number of managed outbound IPv6 IPs for load balancer outbound connection. Valid for dual-stack (--ip-families IPv4,IPv6) only. If updated, it will wipe off the existing setting on Load balancer managed outbound IPv6 count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
+    long-summary: Desired number of managed outbound IPv6 IPs for load balancer outbound connection. Valid for dual-stack (--ip-families IPv4,IPv6) only.
   - name: --load-balancer-outbound-ips
     type: string
     short-summary: Load balancer outbound IP resource IDs.
@@ -180,6 +180,10 @@ parameters:
     type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
+  - name: --load-balancer-backend-pool-type
+    type: string
+    short-summary: Load balancer backend pool type.
+    long-summary: Define the LoadBalancer backend pool type of managed inbound backend pool. The nodeIP means the VMs will be attached to the LoadBalancer by adding its private IP address to the backend pool. The nodeIPConfiguration means the VMs will be attached to the LoadBalancer by referencing the backend pool ID in the VM's NIC.
   - name: --nat-gateway-managed-outbound-ip-count
     type: int
     short-summary: NAT gateway managed outbound IP count.
@@ -253,7 +257,7 @@ parameters:
     short-summary: The Kubernetes network policy to use.
     long-summary: |
         Using together with "azure" network plugin.
-        Specify "azure" for Azure network policy manager and "calico" for calico network policy controller.
+        Specify "azure" for Azure network policy manager, "calico" for calico network policy controller, "cilium" for Azure CNI powered by Cilium.
         Defaults to "" (network policy disabled).
   - name: --network-dataplane
     type: string
@@ -512,6 +516,18 @@ parameters:
   - name: --enable-vpa
     type: bool
     short-summary: Enable vertical pod autoscaler for cluster.
+  - name: --nodepool-allowed-host-ports
+    type: string
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
+  - name: --nodepool-asg-ids
+    type: string
+    short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
+  - name: --node-public-ip-tags
+    type: string
+    short-summary: The ipTags of the node public IPs.
+  - name: --crg-id
+    type: string
+    short-summary: The crg id used to associate the new cluster with the existed Capacity Reservation Group resource.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -586,6 +602,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
   - name: Create a kubernetes cluster with vertical pod autoscaler enaled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-vpa
+  - name: create a kubernetes cluster with a Capacity Reservation Group(CRG) ID.
+    text: az aks create -g MyResourceGroup -n MyMC --kubernetes-version 1.20.9 --node-vm-size VMSize --assign-identity "subscriptions/SubID/resourceGroups/RGName/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID" --enable-managed-identity --crg-id "subscriptions/SubID/resourceGroups/RGName/providers/Microsoft.ContainerService/CapacityReservationGroups/MyCRGID"
 """
 
 helps['aks update'] = """
@@ -616,9 +634,19 @@ parameters:
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' changes a standard managed cluster to a free one.
+  - name: --network-plugin
+    type: string
+    short-summary: The Kubernetes network plugin to use.
+    long-summary: Specify "azure" along with --network-plugin-mode=overlay to update a cluster to use Azure CNI Overlay. For more information see https://aka.ms/aks/azure-cni-overlay
   - name: --network-plugin-mode
     type: string
     short-summary: Update the mode of a network plugin to migrate to a different pod networking setup.
+  - name: --network-policy
+    type: string
+    short-summary: Update the mode of a network policy.
+    long-summary: |
+        Specify "azure" for Azure network policy manager, "cilium" for Azure CNI powered by Cilium.
+        Defaults to "" (network policy disabled).
   - name: --pod-cidr
     type: string
     short-summary: Update the pod CIDR for a cluster. Used when updating a cluster from Azure CNI to Azure CNI Overlay.
@@ -631,19 +659,19 @@ parameters:
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
-    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. --load-balancer-managed-outbound-ip-count, --load-balancer-outbound-ips and --load-balancer-outbound-ip-prefixes are mutually exclusive. If updated, it will wipe off the existing setting on Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs. If the new value is greater than the original value, new additional outbound IPs will be created. If the value is less than the original value, existing outbound IPs will be deleted and outbound connections may fail due to configuration update.
+    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. If the new value is greater than the original value, new additional outbound IPs will be created. If the value is less than the original value, existing outbound IPs will be deleted and outbound connections may fail due to configuration update.
   - name: --load-balancer-managed-outbound-ipv6-count
     type: int
     short-summary: Load balancer managed outbound IPv6 IP count.
-    long-summary: Desired number of managed outbound IPv6 IPs for load balancer outbound connection. Valid for dual-stack (--ip-families IPv4,IPv6) only. If updated, it will wipe off the existing setting on Load balancer managed outbound IPv6 count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
+    long-summary: Desired number of managed outbound IPv6 IPs for load balancer outbound connection. Valid for dual-stack (--ip-families IPv4,IPv6) only.
   - name: --load-balancer-outbound-ips
     type: string
     short-summary: Load balancer outbound IP resource IDs.
-    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. --load-balancer-managed-outbound-ip-count, --load-balancer-outbound-ips and --load-balancer-outbound-ip-prefixes are mutually exclusive. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count and Load balancer outbound IP prefix resource IDs.
+    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
   - name: --load-balancer-outbound-ip-prefixes
     type: string
     short-summary: Load balancer outbound IP prefix resource IDs.
-    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. --load-balancer-managed-outbound-ip-count, --load-balancer-outbound-ips and --load-balancer-outbound-ip-prefixes are mutually exclusive. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count and Load balancer outbound IP resource IDs.
+    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
   - name: --load-balancer-outbound-ports
     type: int
     short-summary: Load balancer outbound allocated ports.
@@ -652,6 +680,10 @@ parameters:
     type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
+  - name: --load-balancer-backend-pool-type
+    type: string
+    short-summary: Load balancer backend pool type.
+    long-summary: Define the LoadBalancer backend pool type of managed inbound backend pool. The nodeIP means the VMs will be attached to the LoadBalancer by adding its private IP address to the backend pool. The nodeIPConfiguration means the VMs will be attached to the LoadBalancer by referencing the backend pool ID in the VM's NIC.
   - name: --nat-gateway-managed-outbound-ip-count
     type: int
     short-summary: NAT gateway managed outbound IP count.
@@ -729,6 +761,11 @@ parameters:
   - name: --disable-public-fqdn
     type: bool
     short-summary: Disable public fqdn feature for private cluster.
+  - name: --private-dns-zone
+    type: string
+    short-summary: The private dns zone mode for private cluster.
+    long-summary: |-
+        Only allow changing private dns zone from byo/system mode to none for private cluster. Others are denied.
   - name: --disable-local-accounts
     type: bool
     short-summary: If set to true, getting static credential will be disabled for this cluster.
@@ -774,6 +811,9 @@ parameters:
     long-summary: |-
         You do not need to set this if you have set DNS server in the VNET used by the cluster.
         You must set or not set --gmsa-dns-server and --gmsa-root-domain-name at the same time when setting --enable-windows-gmsa.
+  - name: --disable-windows-gmsa
+    type: bool
+    short-summary: Disable Windows gmsa on cluster.
   - name: --enable-defender
     type: bool
     short-summary: Enable Microsoft Defender security profile.
@@ -877,6 +917,15 @@ parameters:
   - name: --disable-vpa
     type: bool
     short-summary: Disable vertical pod autoscaler for cluster.
+  - name: --enable-force-upgrade
+    type: bool
+    short-summary: Enable forceUpgrade cluster upgrade settings override.
+  - name: --disable-force-upgrade
+    type: bool
+    short-summary: Disable forceUpgrade cluster upgrade settings override.
+  - name: --upgrade-override-until
+    type: string
+    short-summary: Until when the cluster upgradeSettings overrides are effective. It needs to be in a valid date-time format that's within the next 30 days. For example, 2023-04-01T13:00:00Z. Note that if --force-upgrade is set to true and --upgrade-override-until is not set, by default it will be set to 3 days from now.
 
 examples:
   - name: Reconcile the cluster back to its current state.
@@ -927,6 +976,8 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-windows-gmsa
   - name: Enable Windows gmsa for a kubernetes cluster without setting DNS server in the vnet used by the cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-windows-gmsa --gmsa-dns-server "10.240.0.4" --gmsa-root-domain-name "contoso.com"
+  - name: Disable Windows gmsa for a kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-windows-gmsa
   - name: Enable KEDA workload autoscaler for an existing kubernetes cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-keda
   - name: Disable KEDA workload autoscaler for an existing kubernetes cluster.
@@ -964,17 +1015,17 @@ type: command
 short-summary: Enable Kubernetes addons.
 long-summary: |-
     These addons are available:
-        - http_application_routing : configure ingress with automatic public DNS name creation.
-        - monitoring               : turn on Log Analytics monitoring. Requires "--workspace-resource-id".
-                                     Requires "--enable-msi-auth-for-monitoring" for managed identity auth.
-                                     Requires "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled
-                                     If monitoring addon is enabled --no-wait argument will have no effect
-        - virtual-node             : enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
-        - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
-                                     Learn more at aka.ms/aks/policy.
-        - ingress-appgw            : enable Application Gateway Ingress Controller addon.
-        - open-service-mesh        : enable Open Service Mesh addon.
-        - azure-keyvault-secrets-provider : enable Azure Keyvault Secrets Provider addon.
+    - http_application_routing : configure ingress with automatic public DNS name creation.
+    - monitoring               : turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+                                 Requires "--enable-msi-auth-for-monitoring" for managed identity auth.
+                                 Requires "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled
+                                 If monitoring addon is enabled --no-wait argument will have no effect
+    - virtual-node             : enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+    - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
+                                 Learn more at aka.ms/aks/policy.
+    - ingress-appgw            : enable Application Gateway Ingress Controller addon.
+    - open-service-mesh        : enable Open Service Mesh addon.
+    - azure-keyvault-secrets-provider : enable Azure Keyvault Secrets Provider addon.
 parameters:
   - name: --addons -a
     type: string
@@ -1396,7 +1447,7 @@ parameters:
       - "`az aks get-versions`"
   - name: --node-osdisk-size
     type: int
-    short-summary: Size in GB of the OS disk for each node in the agent pool. Minimum 30 GB.
+    short-summary: Size in GiB of the OS disk for each node in the agent pool. Minimum 30 GiB.
   - name: --node-osdisk-type
     type: string
     short-summary: OS disk type to be used for machines in a given agent pool. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation. ('Ephemeral' or 'Managed')
@@ -1461,6 +1512,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --drain-timeout
+    type: int
+    short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
   - name: --enable-encryption-at-host
     type: bool
     short-summary: Enable EncryptionAtHost, default value is false.
@@ -1488,6 +1542,19 @@ parameters:
   - name: --gpu-instance-profile
     type: string
     short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
+  - name: --allowed-host-ports
+    type: string
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
+  - name: --asg-ids
+    type: string
+    short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
+  - name: --node-public-ip-tags
+    type: string
+    short-summary: The ipTags of the node public IPs.
+  - name: --crg-id
+    type: string
+    short-summary: The crg id used to associate the new nodepool with the existed Capacity Reservation Group resource.
+
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1503,6 +1570,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --kubernetes-version 1.20.9 --snapshot-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/snapshots/mysnapshot1"
   - name: create a nodepool in an existing AKS cluster with host group id
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --host-group-id /subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/hostGroups/myHostGroup --node-vm-size VMSize
+  - name: create a nodepool with a Capacity Reservation Group(CRG) ID.
+    text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --node-vm-size VMSize --crg-id "/subscriptions/SubID/resourceGroups/ResourceGroupName/providers/Microsoft.ContainerService/CapacityReservationGroups/MyCRGID"
 """
 
 helps['aks nodepool delete'] = """
@@ -1567,6 +1636,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --drain-timeout
+    type: int
+    short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool. Pass the empty string `""` to remove all taints.
@@ -1576,6 +1648,12 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+  - name: --allowed-host-ports
+    type: string
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
+  - name: --asg-ids
+    type: string
+    short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -1600,6 +1678,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33% (mutually exclusive with "--node-image-only". See "az aks nodepool update --max-surge" to update max surge before upgrading with "--node-image-only")
+  - name: --drain-timeout
+    type: int
+    short-summary: When nodes are drain how long to wait for all pods to be evicted
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to upgrade this nodepool.
@@ -1680,6 +1761,16 @@ examples:
   - name: Show the details for a managed Kubernetes cluster
     text: az aks show --name MyManagedCluster --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['aks stop'] = """
+    type: command
+    short-summary: Stop a managed cluster.
+    long-summary: This can only be performed on Azure Virtual Machine Scale set backed clusters. Stopping a
+        cluster stops the control plane and agent nodes entirely, while maintaining all object and
+        cluster state. A cluster does not accrue charges while it is stopped. See `stopping a
+        cluster <https://docs.microsoft.com/azure/aks/start-stop-cluster>`_ for more details about
+        stopping a cluster.
 """
 
 helps['aks update-credentials'] = """
@@ -1935,4 +2026,78 @@ helps['aks oidc-issuer'] = """
 helps['aks oidc-issuer rotate-signing-keys'] = """
     type: command
     short-summary: Rotate oidc issuer service account signing keys
+"""
+
+helps['aks trustedaccess'] = """
+    type: group
+    short-summary: Commands to manage trusted access security features.
+"""
+
+helps['aks trustedaccess role'] = """
+    type: group
+    short-summary: Commands to manage trusted access roles.
+"""
+
+helps['aks trustedaccess role list'] = """
+    type: command
+    short-summary: List trusted access roles.
+"""
+
+helps['aks trustedaccess rolebinding'] = """
+    type: group
+    short-summary: Commands to manage trusted access role bindings.
+"""
+
+helps['aks trustedaccess rolebinding list'] = """
+    type: command
+    short-summary: List all the trusted access role bindings.
+"""
+
+helps['aks trustedaccess rolebinding show'] = """
+    type: command
+    short-summary: Get the specific trusted access role binding according to binding name.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Specify the role binding name.
+"""
+
+helps['aks trustedaccess rolebinding create'] = """
+    type: command
+    short-summary: Create a new trusted access role binding.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Specify the role binding name.
+        - name: --roles
+          type: string
+          short-summary: Specify the comma-separated roles.
+        - name: --source-resource-id
+          type: string
+          short-summary: Specify the source resource id of the binding.
+
+    examples:
+        - name: Create a new trusted access role binding
+          text: az aks trustedaccess rolebinding create -g myResourceGroup --cluster-name myCluster -n bindingName --source-resource-id /subscriptions/0000/resourceGroups/myResourceGroup/providers/Microsoft.Demo/samples --roles Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer
+"""
+
+helps['aks trustedaccess rolebinding update'] = """
+    type: command
+    short-summary: Update a trusted access role binding.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Specify the role binding name.
+        - name: --roles
+          type: string
+          short-summary: Specify the comma-separated roles.
+"""
+
+helps['aks trustedaccess rolebinding delete'] = """
+    type: command
+    short-summary: Delete a trusted access role binding according to name.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Specify the role binding name.
 """

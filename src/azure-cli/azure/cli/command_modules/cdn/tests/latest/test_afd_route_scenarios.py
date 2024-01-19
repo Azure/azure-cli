@@ -68,8 +68,8 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                           profile_name,
                                           custom_domain_name,
                                           host_name,
-                                          AfdCertificateType.managed_certificate,
-                                          AfdMinimumTlsVersion.tls12,
+                                          AfdCertificateType.managed_certificate.value,
+                                          AfdMinimumTlsVersion.tls12.value,
                                           None,
                                           None)
 
@@ -198,7 +198,7 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('originGroup.id', origin_group_id),
                          JMESPathCheck('length(ruleSets)', 0),
                          JMESPathCheck('cacheConfiguration.queryStringCachingBehavior', "UseQueryString")]
-        options = '--rule-sets --https-redirect Disabled'
+        options = '--rule-sets null --https-redirect Disabled'
         self.afd_route_update_cmd(resource_group,
                                   profile_name,
                                   endpoint_name,

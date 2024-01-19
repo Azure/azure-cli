@@ -129,6 +129,8 @@ examples:
     text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose --backup-storage-redundancy Local
   - name: Create a database with VBS enclave enabled.
     text: az sql db create -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
+  - name: Create a database with free limit applied
+    text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen5 -c 2 --compute-model Serverless --use-free-limit --free-limit-exhaustion-behavior AutoPause
 """
 
 helps['sql db delete'] = """
@@ -240,7 +242,7 @@ type: command
 short-summary: Update long term retention settings for a database.
 examples:
   - name: Set long term retention for a database.
-    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26
+    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26 --access-tier "Archive" --make-backups-immutable true
 """
 
 helps['sql db ltr-policy show'] = """
@@ -261,7 +263,7 @@ type: command
 short-summary: Get a long term retention backup for a database.
 examples:
   - name: Show long term retention backup for a database.
-    text: az sql db ltr-backup show -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: az sql db ltr-backup show -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000;Hot"
 """
 
 helps['sql db ltr-backup list'] = """
@@ -535,6 +537,8 @@ examples:
     text: az sql db update -g mygroup -s myserver -n mydb --backup-storage-redundancy Local
   - name: Update database with VBS enclave enabled.
     text: az sql db update -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
+  - name: Update exhaustion behavior of free limit database to BillOverUsage
+    text: az sql db update -g mygroup -s myserver -n mydb --free-limit-exhaustion-behavior BillOverUsage
 
 """
 
@@ -711,7 +715,7 @@ type: command
 short-summary: Create an instance pool.
 examples:
   - name: Example to create an instance pool (include --no-wait in the end to get an asynchronous experience)
-    text: az sql instance-pool create -g resource_group_name -n instance_pool_name -l location --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --license-type LicenseIncluded --capacity 8 -e GeneralPurpose -f Gen5 --no-wait
+    text: az sql instance-pool create -g resource_group_name -n instance_pool_name -l location --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --license-type LicenseIncluded --capacity 8 -e GeneralPurpose -f Gen5 -m SQL_{Region}_{MaintenanceConfigName} --no-wait
   - name: Example to create an instance pool with subnet name and vnet-name
     text: az sql instance-pool create --license-type LicenseIncluded -l northcentralus -n myinstancepool -c 8 -e GeneralPurpose -f Gen5 -g billingPools --subnet mysubnetname --vnet-name myvnetname
 """
@@ -747,7 +751,7 @@ type: command
 short-summary: Update an instance pool.
 examples:
   - name: Update an instance pool with new tags (make sure they are space separated if there are multiple tags)
-    text: az sql instance-pool update -n myinstancepool -g mygroup --tags mykey1=myvalue1 mykey2=myvalue2
+    text: az sql instance-pool update -n myinstancepool -g mygroup --tags mykey1=myvalue1 mykey2=myvalue2 --license-type LicenseIncluded --capacity 8 -e GeneralPurpose -f Gen5 -m SQL_{Region}_{MaintenanceConfigName}
   - name: Clear the tags assigned to an instance pool
     text: az sql instance-pool update -n myinstancepool -g mygroup --tags ""
 """
@@ -892,6 +896,8 @@ examples:
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -z
   - name: Create managed instance with zone redundancy explicitly disabled
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -z false
+  - name: Create managed instance with instance pool name
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --instance-pool-name myinstancepool
 """
 
 helps['sql mi delete'] = """
@@ -1021,6 +1027,10 @@ examples:
     text: az sql mi update -g mygroup -n myinstance --bsr Local
   - name: Enable zone redundancy on a managed instance
     text: az sql mi update -g mygroup -n myinstance -z
+  - name: Move managed instance to instance pool
+    text: az sql mi update -g mygroup -n myinstance --instance-pool-name myinstancepool
+  - name: Move managed instance out of instance pool
+    text: az sql mi update -g mygroup -n myinstance --remove instancePoolId --capacity vcorecapacity
 """
 
 helps['sql midb'] = """

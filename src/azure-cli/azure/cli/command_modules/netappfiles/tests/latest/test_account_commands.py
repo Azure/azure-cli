@@ -7,7 +7,8 @@ import unittest
 from knack.util import CLIError
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-LOCATION = "southcentralusstage"
+import time
+LOCATION = "eastus2"
 ADLOCATION = "northeurope"
 
 # No tidy up of tests required. The resource group is automatically removed
@@ -122,11 +123,13 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             self.check('name', '{acc_name}')
         ])
 
+        if self.is_live or self.in_recording:
+            time.sleep(60)
         # add an active directory
         self.cmd(
             "netappfiles account ad add -g {rg} -n {acc_name} --username {ad_user} --password {ad_user} "
             "--smb-server-name SMBSERVER --dns '1.2.3.4' --domain {loc} --ad-name {ad_name} --kdc-ip {kdc_ip} "
-            "--ldap-signing {ldap} --allow-local-ldap-users {ldap_users}", checks=[
+            "--ldap-signing {ldap} --allow-local-ldap-users {ldap_users}", checks=[ 
                 self.check('name', '{acc_name}'),
                 self.check('activeDirectories[0].username', '{ad_user}'),
                 self.check('activeDirectories[0].status', 'Created'),

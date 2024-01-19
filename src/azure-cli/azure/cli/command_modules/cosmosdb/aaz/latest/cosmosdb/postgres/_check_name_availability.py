@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres check-name-availability",
-    is_preview=True,
 )
 class CheckNameAvailability(AAZCommand):
     """Checks availability of a cluster name. Cluster names should be globally unique; at least 3 characters and at most 40 characters long; they must only contain lowercase letters, numbers, and hyphens; and must not start or end with a hyphen.

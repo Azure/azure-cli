@@ -282,6 +282,23 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_host_group_id(), "test_host_group_id")
 
+    def common_get_crg_id(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"crg_id": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_crg_id(), None)
+        # custom
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            capacity_reservation_group_id="test_crg_id"
+        )
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(ctx_1.get_crg_id(), "test_crg_id")
+
     def common_get_kubernetes_version(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -898,15 +915,27 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
+            AKSAgentPoolParamDict({"node_osdisk_size": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_node_osdisk_size(), None)
+        agentpool = self.create_initialized_agentpool_instance(os_disk_size_gb=30)
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_node_osdisk_size(), 30)
+
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
             AKSAgentPoolParamDict({"node_osdisk_size": 0}),
             self.models,
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_1.get_node_osdisk_size(), 0)
-        agentpool = self.create_initialized_agentpool_instance(os_disk_size_gb=10)
-        ctx_1.attach_agentpool(agentpool)
-        self.assertEqual(ctx_1.get_node_osdisk_size(), 10)
+        self.assertEqual(ctx_2.get_node_osdisk_size(), 0)
+        agentpool = self.create_initialized_agentpool_instance(os_disk_size_gb=100)
+        ctx_2.attach_agentpool(agentpool)
+        self.assertEqual(ctx_2.get_node_osdisk_size(), 100)
 
     def common_get_node_osdisk_type(self):
         # default
@@ -1060,7 +1089,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
-            AKSAgentPoolParamDict({"max_pods": 0}),
+            AKSAgentPoolParamDict({"max_pods": None}),
             self.models,
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
@@ -1069,6 +1098,18 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         agentpool = self.create_initialized_agentpool_instance(max_pods=110)
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_max_pods(), 110)
+
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"max_pods": 0}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_max_pods(), None)
+        agentpool = self.create_initialized_agentpool_instance(max_pods=250)
+        ctx_2.attach_agentpool(agentpool)
+        self.assertEqual(ctx_2.get_max_pods(), 250)
 
     def common_get_mode(self):
         # default
@@ -1284,6 +1325,20 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_gpu_instance_profile(), "test_gpu_instance_profile")
 
+    def common_get_drain_timeout(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"drain_timeout": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_drain_timeout(), None)
+        agentpool_1 = self.create_initialized_agentpool_instance(upgrade_settings=self.models.AgentPoolUpgradeSettings(drain_timeout_in_minutes=123))
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(ctx_1.get_drain_timeout(), 123)
+
 class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -1464,6 +1519,12 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_gpu_instance_profile(self):
         self.common_get_gpu_instance_profile()
 
+    def test_get_drain_timeout(self):
+        self.common_get_drain_timeout()
+
+    def test_get_crg_id(self):
+        self.common_get_crg_id()
+
 class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -1617,6 +1678,12 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
 
     def test_get_gpu_instance_profile(self):
         self.common_get_gpu_instance_profile()
+
+    def test_get_drain_timeout(self):
+        self.common_get_drain_timeout()
+
+    def test_get_crg_id(self):
+        self.common_get_crg_id()
 
 class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
     def _remove_defaults_in_agentpool(self, agentpool):
@@ -2132,7 +2199,6 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             enable_auto_scaling=False,
             count=3,
             node_taints=[],
-            os_disk_size_gb=0,
             upgrade_settings=ground_truth_upgrade_settings_1,
             type_properties_type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
             enable_encryption_at_host=False,
@@ -2141,6 +2207,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             mode=CONST_NODEPOOL_MODE_USER,
             scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
             host_group_id=None,
+            capacity_reservation_group_id=None,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
@@ -2277,7 +2344,6 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             enable_auto_scaling=False,
             count=3,
             node_taints=[],
-            os_disk_size_gb=0,
             upgrade_settings=upgrade_settings_1,
             type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
             enable_encryption_at_host=False,
@@ -2285,6 +2351,7 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             enable_fips=False,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
             host_group_id=None,
+            capacity_reservation_group_id=None,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 

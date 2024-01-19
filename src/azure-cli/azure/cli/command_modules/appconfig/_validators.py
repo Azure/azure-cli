@@ -227,7 +227,7 @@ def validate_identity(namespace):
 
 def validate_secret_identifier(namespace):
     """ Validate the format of keyvault reference secret identifier """
-    from azure.keyvault.key_vault_id import KeyVaultIdentifier
+    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
 
     identifier = getattr(namespace, 'secret_identifier', None)
     try:
@@ -311,6 +311,9 @@ def validate_export_as_reference(namespace):
     if namespace.export_as_reference:
         if namespace.destination != 'appservice':
             raise InvalidArgumentValueError("The option '--export-as-reference' can only be used when exporting to app service.")
+
+        if namespace.snapshot:
+            raise MutuallyExclusiveArgumentError("Cannot export snapshot key-values as references to App Service.")
 
 
 def __construct_kvset_invalid_argument_error(is_exporting, argument):
