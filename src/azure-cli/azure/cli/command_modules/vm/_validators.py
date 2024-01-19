@@ -1353,6 +1353,11 @@ def trusted_launch_set_default(namespace, generation_version, features):
             break
 
     from ._constants import UPGRADE_SECURITY_HINT
+    print_warning_message = False
+    if generation_version == 'V1' or namespace.security_type == 'Standard':
+        print_warning_message = True
+        logger.warning(UPGRADE_SECURITY_HINT)
+
     if generation_version == 'V2':
         if features_security_type in trusted_launch:
             if namespace.security_type is None:
@@ -1366,10 +1371,8 @@ def trusted_launch_set_default(namespace, generation_version, features):
         else:
             if namespace.security_type is None:
                 namespace.security_type = 'Standard'
-            logger.warning(UPGRADE_SECURITY_HINT)
-    else:
-        if namespace.security_type == 'Standard':
-            logger.warning(UPGRADE_SECURITY_HINT)
+            if not print_warning_message:
+                logger.warning(UPGRADE_SECURITY_HINT)
 
 
 def _validate_generation_version_and_trusted_launch(cmd, namespace):
@@ -1412,7 +1415,7 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
                                        namespace.os_sku, os_version)
             generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
                                                                              'hyper_v_generation') else None
-            features = vm_image_info.features if hasattr(vm_image_info, 'features') else []
+            features = vm_image_info.features if hasattr(vm_image_info, 'features') and vm_image_info.features else []
 
             trusted_launch_set_default(namespace, generation_version, features)
             return
