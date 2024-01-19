@@ -820,7 +820,7 @@ class AcrCommandsTests(ScenarioTest):
             'sku': 'Premium'
         })
 
-        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --metadata-search Enabled',
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --allow-metadata-search',
                  checks=[self.check('name', '{registry_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('adminUserEnabled', False),
@@ -829,12 +829,12 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('metadataSearch', 'Enabled')])
 
-        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --metadata-search Disabled',
+        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --allow-metadata-search false',
             checks=[self.check('name', '{registry_name}'),
                     self.check('provisioningState', 'Succeeded'),
                     self.check('metadataSearch', 'Disabled')])
 
-        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --metadata-search Enabled',
+        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --allow-metadata-search',
             checks=[self.check('name', '{registry_name}'),
                     self.check('provisioningState', 'Succeeded'),
                     self.check('metadataSearch', 'Enabled')])
@@ -860,7 +860,7 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('metadataSearch', 'Disabled')])
 
-        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --metadata-search Enabled',
+        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --allow-metadata-search',
             checks=[self.check('name', '{registry_name}'),
                     self.check('provisioningState', 'Succeeded'),
                     self.check('metadataSearch', 'Enabled')])
