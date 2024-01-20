@@ -11,7 +11,7 @@ from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPrepa
 class ServiceFabricApplicationTests(ScenarioTest):
     def _app_type_test(self):
         self.cmd('az sf application-type list -g {rg} -c {cluster_name}',
-                 checks=[self.check('length(value)', 0)])
+                 checks=[self.is_empty()])
         app_type = self.cmd('az sf application-type create -g {rg} -c {cluster_name} --application-type-name {app_type_name}',
                             checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
         self.cmd('az sf application-type show -g {rg} -c {cluster_name} --application-type-name {app_type_name}',
@@ -24,7 +24,7 @@ class ServiceFabricApplicationTests(ScenarioTest):
 
     def _app_type_version_test(self):
         self.cmd('az sf application-type version list -g {rg} -c {cluster_name} --application-type-name {app_type_name}',
-                 checks=[self.check('length(value)', 0)])
+                 checks=[self.is_empty()])
         app_type_version = self.cmd('az sf application-type version create -g {rg} -c {cluster_name} '
                                     '--application-type-name {app_type_name} --version {v1} --package-url {app_package_v1}',
                                     checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
@@ -38,7 +38,7 @@ class ServiceFabricApplicationTests(ScenarioTest):
 
     def _app_service_test(self):
         self.cmd('az sf application list -g {rg} -c {cluster_name}',
-                 checks=[self.check('length(value)', 0)])
+                 checks=[self.is_empty()])
         app = self.cmd('az sf application create -g {rg} -c {cluster_name} --application-name {app_name} '
                        '--application-type-name {app_type_name} --application-type-version {v1} --package-url {app_package_v1} ',
                        checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
