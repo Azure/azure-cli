@@ -867,8 +867,8 @@ def _get_env_and_group_from_log_analytics(
                 resource_group.name = env_details["resource_group"]
 
 
-def _get_acr_from_image(cmd, app, is_registry_server_params_set=None):
-    if app.image is not None and "azurecr.io" in app.image and not is_registry_server_params_set:
+def _get_acr_from_image(cmd, app):
+    if app.image is not None and "azurecr.io" in app.image:
         app.registry_server = app.image.split("/")[
             0
         ]  # TODO what if this conflicts with registry_server param?
@@ -1009,7 +1009,8 @@ def _set_up_defaults(
                 f"There are multiple environments with name {env.name} on the subscription. "
                 "Please specify which resource group your Containerapp environment is in."
             )  # get ACR details from --image, if possible
-    _get_acr_from_image(cmd, app, is_registry_server_params_set)
+    if not is_registry_server_params_set:
+        _get_acr_from_image(cmd, app)
 
 
 def _create_github_action(
