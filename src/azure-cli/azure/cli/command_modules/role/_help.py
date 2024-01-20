@@ -350,7 +350,7 @@ examples:
     ("credential.json" contains the following content)
     {
         "name": "Testing",
-        "issuer": "https://token.actions.githubusercontent.com/",
+        "issuer": "https://token.actions.githubusercontent.com",
         "subject": "repo:octo-org/octo-repo:environment:Production",
         "description": "Testing",
         "audiences": [
