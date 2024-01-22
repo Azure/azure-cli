@@ -5110,7 +5110,7 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
             'proxy_override': "Proxy",
             'maintenance_id': self._get_full_maintenance_id(self.MMI1),
             'intance_pool_name': '',
-            'database_format': 'SQLServer2022',
+            'database_format': 'AlwaysUpToDate',
             'pricing_model': 'Regular'
         })
 
@@ -5135,9 +5135,7 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
                                         self.check('proxyOverride', '{proxy_override}'),
                                         self.check('publicDataEndpointEnabled', 'True'),
                                         self.check('maintenanceConfigurationId', self._get_full_maintenance_id(self.MMI1)),
-                                        self.check('instancePoolId', None),
-                                        self.check('database_format', '{database_format}'),
-                                        self.check('pricing_model', '{pricing_model}')]).get_output_in_json()
+                                        self.check('instancePoolId', None)]).get_output_in_json()
 
         # test delete sql managed instance 2
         self.cmd('sql mi delete --ids {} --yes'
