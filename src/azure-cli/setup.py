@@ -112,7 +112,7 @@ DEPENDENCIES = [
     'azure-mgmt-redis~=14.2.0',
     'azure-mgmt-resource==23.1.0b2',
     'azure-mgmt-search~=9.0',
-    'azure-mgmt-security==5.0.0',
+    'azure-mgmt-security==6.0.0',
     'azure-mgmt-servicebus~=8.2.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
     'azure-mgmt-servicelinker==1.2.0b1',
