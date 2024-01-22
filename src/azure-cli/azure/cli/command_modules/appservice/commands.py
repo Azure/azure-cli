@@ -86,10 +86,6 @@ def _polish_bad_errors(ex, creating_plan):
                                   "If creating an App Service Plan with --zone-redundant/-z, "
                                   "please see supported regions here: "
                                   "https://docs.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
-                    elif 'Not enough available reserved instance servers to satisfy' in detail:
-                        detail = ("Plan with Linux worker can only be created in a group " +
-                                  "which has never contained a Windows worker, and vice versa. " +
-                                  "Please use a new resource group. Original error:" + detail)
         else:
             detail = json.loads(ex.error_msg.response.text())['Message']
         ex = CLIError(detail)
