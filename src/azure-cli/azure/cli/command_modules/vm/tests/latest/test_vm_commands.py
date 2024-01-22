@@ -194,7 +194,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
 
         # Expecting the one we just added
         self.kwargs['rg_caps'] = resource_group.upper()  # test the command handles name with casing diff.
-        self.cmd('vm list-ip-addresses --resource-group {rg_caps}', checks=[
+        self.cmd('vm list-ip-addresses --resource-group {rg_caps} -n {vm}', checks=[
             self.check('length(@)', 1),
             self.check('[0].virtualMachine.name', '{vm}'),
             self.check('[0].virtualMachine.resourceGroup', '{rg}'),
