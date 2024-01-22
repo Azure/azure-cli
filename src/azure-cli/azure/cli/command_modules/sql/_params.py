@@ -1262,6 +1262,7 @@ def load_arguments(self, _):
                 'monthly_retention',
                 'yearly_retention',
                 'week_of_year',
+                'make_backups_immutable',
                 'backup_storage_access_tier'])
 
         c.argument('weekly_retention',
@@ -1281,6 +1282,10 @@ def load_arguments(self, _):
 
         c.argument('week_of_year',
                    help='The Week of Year, 1 to 52, in which to take the yearly LTR backup.')
+
+        c.argument('make_backups_immutable',
+                   help='Whether to make the LTR backups immutable.',
+                   arg_type=get_three_state_flag())
 
         c.argument('backup_storage_access_tier',
                    options_list=['--access-tier', '--backup-storage-access-tier'],
