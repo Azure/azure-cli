@@ -161,7 +161,7 @@ class RedisCacheTests(ScenarioTest):
         self.assertTrue(result['permissions'] == "+get allkeys")
 
         # Create access policy assignment
-        result = self.cmd('az redis access-policy-assignment create -n {name} -g {rg} --assignment-name {access-policy-assignment-name} --access-policy-name {access-policy-name} --object-id {object-id} --object-id-alias {object-id-alias1}').get_output_in_json()
+        result = self.cmd('az redis access-policy-assignment create -n {name} -g {rg} --policy-assignment-name {access-policy-assignment-name} --access-policy-name {access-policy-name} --object-id {object-id} --object-id-alias {object-id-alias1}').get_output_in_json()
         self.assertTrue(result['name'] == self.kwargs['access-policy-assignment-name'])
         self.assertTrue(result['accessPolicyName'] == self.kwargs['access-policy-name'])
         self.assertTrue(result['objectId'] == self.kwargs['object-id'])
@@ -172,21 +172,21 @@ class RedisCacheTests(ScenarioTest):
         self.assertTrue(len(result) == 1)
 
         # Update access policy assignment
-        result = self.cmd('az redis access-policy-assignment update -n {name} -g {rg} --assignment-name {access-policy-assignment-name} --access-policy-name {access-policy-name} --object-id {object-id} --object-id-alias {object-id-alias2}').get_output_in_json()
+        result = self.cmd('az redis access-policy-assignment update -n {name} -g {rg} --policy-assignment-name {access-policy-assignment-name} --access-policy-name {access-policy-name} --object-id {object-id} --object-id-alias {object-id-alias2}').get_output_in_json()
         self.assertTrue(result['name'] == self.kwargs['access-policy-assignment-name'])
         self.assertTrue(result['accessPolicyName'] == self.kwargs['access-policy-name'])
         self.assertTrue(result['objectId'] == self.kwargs['object-id'])
         self.assertTrue(result['objectIdAlias'] == self.kwargs['object-id-alias2'])
 
         # Get access policy assignment
-        result = self.cmd('az redis access-policy-assignment show -n {name} -g {rg} --assignment-name {access-policy-assignment-name}').get_output_in_json()
+        result = self.cmd('az redis access-policy-assignment show -n {name} -g {rg} --policy-assignment-name {access-policy-assignment-name}').get_output_in_json()
         self.assertTrue(result['name'] == self.kwargs['access-policy-assignment-name'])
         self.assertTrue(result['accessPolicyName'] == self.kwargs['access-policy-name'])
         self.assertTrue(result['objectId'] == self.kwargs['object-id'])
         self.assertTrue(result['objectIdAlias'] == self.kwargs['object-id-alias2'])
 
         # Delete access policy assignment
-        self.cmd('az redis access-policy-assignment delete -n {name} -g {rg} --assignment-name {access-policy-assignment-name}')
+        self.cmd('az redis access-policy-assignment delete -n {name} -g {rg} --policy-assignment-name {access-policy-assignment-name}')
 
         # List access policy assignments
         result = self.cmd('az redis access-policy-assignment list -n {name} -g {rg}').get_output_in_json()
