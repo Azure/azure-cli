@@ -1300,7 +1300,7 @@ class WebAppUpE2ETests(ScenarioTest):
         up_working_dir = os.path.join(temp_dir, 'myExpressApp')
         os.chdir(up_working_dir)
 
-        self.cmd('webapp up -g {} -n {} --os-type linux -r "NODE|20-LTS" --track-status'.format(resource_group, webapp_name)).assert_with_checks([
+        self.cmd('webapp up -g {} -n {} --os-type linux --track-status'.format(resource_group, webapp_name)).assert_with_checks([
             JMESPathCheck('resourcegroup', resource_group),
             JMESPathCheck('name', webapp_name),
         ])
