@@ -48,7 +48,6 @@ set ARTIFACTS_DIR=%~dp0..\artifacts
 mkdir %ARTIFACTS_DIR%
 set TEMP_SCRATCH_FOLDER=%ARTIFACTS_DIR%\cli_scratch
 set BUILDING_DIR=%ARTIFACTS_DIR%\cli
-set ZIP_ROOT_FOLDER="AzureCLI"
 set WIX_DIR=%ARTIFACTS_DIR%\wix
 set PYTHON_DIR=%ARTIFACTS_DIR%\Python
 
@@ -154,14 +153,15 @@ popd
 REM Remove pywin32 help file to reduce size.
 del %BUILDING_DIR%\Lib\site-packages\PyWin32.chm
 
-echo Creating the wbin (Windows binaries) folder that will be added to the path...
-mkdir %BUILDING_DIR%\wbin
 if "%TARGET%"=="msi" (
+    echo Creating the wbin (Windows binaries) folder that will be added to the path...
+    mkdir %BUILDING_DIR%\wbin
     copy %REPO_ROOT%\build_scripts\windows\scripts\az_msi.cmd %BUILDING_DIR%\wbin\az.cmd
     copy %REPO_ROOT%\build_scripts\windows\scripts\azps.ps1 %BUILDING_DIR%\wbin\
     copy %REPO_ROOT%\build_scripts\windows\scripts\az %BUILDING_DIR%\wbin\
 ) else (
-    copy %REPO_ROOT%\build_scripts\windows\scripts\az_zip.cmd %BUILDING_DIR%\wbin\az.cmd
+    mkdir %BUILDING_DIR%\bin
+    copy %REPO_ROOT%\build_scripts\windows\scripts\az_zip.cmd %BUILDING_DIR%\bin\az.cmd
 )
 if %errorlevel% neq 0 goto ERROR
 copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
@@ -214,9 +214,7 @@ if "%TARGET%"=="msi" (
     msbuild /t:rebuild /p:Configuration=Release /p:Platform=%ARCH% %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
 ) else (
     echo Building ZIP...
-    REM Rename to zip root folder
-    ren %BUILDING_DIR% %ZIP_ROOT_FOLDER%
-    "%ProgramFiles%\7-Zip\7z.exe" a -tzip "%OUTPUT_DIR%\Microsoft Azure CLI.zip" "%ARTIFACTS_DIR%\%ZIP_ROOT_FOLDER%"
+    "%ProgramFiles%\7-Zip\7z.exe" a -tzip "%OUTPUT_DIR%\Microsoft Azure CLI.zip" "%BUILDING_DIR%\*"
 )
 
 if %errorlevel% neq 0 goto ERROR
