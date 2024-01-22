@@ -1353,12 +1353,10 @@ def trusted_launch_set_default(namespace, generation_version, features):
             break
 
     from ._constants import UPGRADE_SECURITY_HINT
-    print_warning_message = False
-    if generation_version == 'V1' or namespace.security_type == 'Standard':
-        print_warning_message = True
+    if generation_version == 'V1':
         logger.warning(UPGRADE_SECURITY_HINT)
 
-    if generation_version == 'V2':
+    elif generation_version == 'V2':
         if features_security_type in trusted_launch:
             if namespace.security_type is None:
                 namespace.security_type = 'TrustedLaunch'
@@ -1371,8 +1369,7 @@ def trusted_launch_set_default(namespace, generation_version, features):
         else:
             if namespace.security_type is None:
                 namespace.security_type = 'Standard'
-            if not print_warning_message:
-                logger.warning(UPGRADE_SECURITY_HINT)
+            logger.warning(UPGRADE_SECURITY_HINT)
 
 
 def _validate_generation_version_and_trusted_launch(cmd, namespace):
