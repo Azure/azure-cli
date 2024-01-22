@@ -2289,13 +2289,13 @@ def load_arguments(self, _):
                    arg_type=zone_redundant_param_type)
 
         c.argument('database_format', 
-                   options_list=['--database-format', '-df'],
+                   options_list=['--database-format', '-dbf'],
                    arg_type=get_enum_type(ManagedInstanceDatabaseFormat),
                    help='Managed Instance database format specific to the SQL. Allowed values include: '
                    'AlwaysUpToDate, SQLServer2022.')
 
         c.argument('pricing_model', 
-                   options_list=['--pricing-model', '-pm'],
+                   options_list=['--pricing-model', '-prm'],
                    arg_type=get_enum_type(FreemiumType),
                    help='Managed Instance pricing model. Allowed values include: '
                    'Regular, Freemium.')
