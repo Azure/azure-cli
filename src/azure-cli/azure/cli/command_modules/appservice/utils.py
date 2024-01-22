@@ -304,3 +304,9 @@ def is_webapp(app):
     if app is None or app.kind is None:
         return False
     return not is_logicapp(app) and not is_functionapp(app) and "app" in app.kind
+
+
+def is_linux_webapp(app):
+    if not is_webapp(app):
+        return False
+    return (app.reserved or not app.is_xenon) and bool(app.site_config.linux_fx_version)
