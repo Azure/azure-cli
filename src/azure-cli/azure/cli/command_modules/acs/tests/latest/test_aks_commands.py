@@ -9837,3 +9837,56 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty(),
         ])
+
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_upgrade_upgrade_settings(self, resource_group, resource_group_location):
+        """ This test case exercises enabling and disabling forceUpgrade override in cluster upgradeSettings.
+        """
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--enable-managed-identity ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.not_exists('upgradeSettings')
+        ])
+
+        # upgrade upgrade settings
+        self.cmd('aks upgrade --resource-group={resource_group} --name={name} --upgrade-override-until 2020-01-01T22:30:17+00:00 --yes', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.not_exists('upgradeSettings.overrideSettings.forceUpgrade'),
+            self.exists('upgradeSettings.overrideSettings.until')
+        ])
+        self.cmd('aks upgrade --resource-group={resource_group} --name={name} --enable-force-upgrade --yes', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('upgradeSettings.overrideSettings.forceUpgrade', True),
+            self.exists('upgradeSettings.overrideSettings.until')
+        ])
+        self.cmd('aks upgrade --resource-group={resource_group} --name={name} --enable-force-upgrade --upgrade-override-until 2020-02-22T22:30:17+00:00 --yes', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('upgradeSettings.overrideSettings.forceUpgrade', True),
+            self.check('upgradeSettings.overrideSettings.until', '2020-02-22T22:30:17+00:00')
+        ])
+        self.cmd('aks upgrade --resource-group={resource_group} --name={name} --disable-force-upgrade --yes', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('upgradeSettings.overrideSettings.forceUpgrade', False),
+            self.check('upgradeSettings.overrideSettings.until', '2020-02-22T22:30:17+00:00')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
