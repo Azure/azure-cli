@@ -160,6 +160,7 @@ if "%TARGET%"=="msi" (
     copy %REPO_ROOT%\build_scripts\windows\scripts\azps.ps1 %BUILDING_DIR%\wbin\
     copy %REPO_ROOT%\build_scripts\windows\scripts\az %BUILDING_DIR%\wbin\
 ) else (
+    REM Creating the bin folder that will be added to the path...
     mkdir %BUILDING_DIR%\bin
     copy %REPO_ROOT%\build_scripts\windows\scripts\az_zip.cmd %BUILDING_DIR%\bin\az.cmd
 )
