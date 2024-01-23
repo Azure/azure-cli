@@ -968,3 +968,81 @@ examples:
   - name: List log files for 'testsvr' containing name 'serverlogs'.
     text: az postgres flexible-server server-logs list -g testgroup -s testsvr --subscription testSubscription --filename-contains serverlogs
 """
+
+helps['postgres flexible-server private-endpoint-connection'] = """
+type: group
+short-summary: Manage PostgreSQL flexible server private endpoint connections.
+"""
+
+helps['postgres flexible-server private-endpoint-connection list'] = """
+type: command
+short-summary: List all private endpoint connections associated with a PostgreSQL flexible server.
+examples:
+  - name: List all private endpoint connections associated with a PostgreSQL flexible server.
+    text: az postgres flexible-server private-endpoint-connection list -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server private-endpoint-connection show'] = """
+type: command
+short-summary: Show details of a private endpoint connection associated with a PostgreSQL flexible server.
+examples:
+  - name: Show details of a private endpoint connection associated with a PostgreSQL flexible server.
+    text: az postgres flexible-server private-endpoint-connection show -g testgroup -s testsvr -n pec-connection.40e3d3a8-7d8f-41eb-8462-1cd05bc3e33b
+"""
+
+helps['postgres flexible-server private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve the specified private endpoint connection associated with a PostgreSQL flexible server.
+examples:
+  - name: Approve a private endpoint connection associated with a PostgreSQL flexible server.
+    text: >
+      az postgres flexible-server private-endpoint-connection approve -g testgroup -s testsvr \
+        -n pec-connection.40e3d3a8-7d8f-41eb-8462-1cd05bc3e33b \
+        --description "Approve connection"
+"""
+
+helps['postgres flexible-server private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject the specified private endpoint connection associated with a PostgreSQL flexible server.
+examples:
+  - name: Reject a private endpoint connection associated with a PostgreSQL flexible server.
+    text: >
+      az postgres flexible-server private-endpoint-connection reject -g testgroup -s testsvr \
+        -n pec-connection.40e3d3a8-7d8f-41eb-8462-1cd05bc3e33b \
+        --description "Reject connection"
+"""
+
+helps['postgres flexible-server private-endpoint-connection delete'] = """
+type: command
+short-summary: Delete the specified private endpoint connection associated with a PostgreSQL flexible server.
+examples:
+  - name: Delete a private endpoint connection associated with a PostgreSQL flexible server.
+    text: >
+      az postgres flexible-server private-endpoint-connection delete -g testgroup -s testsvr \
+        --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testgroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testsvr/privateEndpointConnections/pec-connection.40e3d3a8-7d8f-41eb-8462-1cd05bc3e33b
+"""
+
+helps['postgres flexible-server private-link-resource'] = """
+type: group
+short-summary: Get Private link resource for a PostgreSQL flexible server.
+"""
+
+helps['postgres flexible-server private-link-resource list'] = """
+type: command
+short-summary: List private link resources associated with a PostgreSQL flexible server.
+examples:
+  - name: List private link resources associated with a PostgreSQL flexible server.
+    text: az postgres flexible-server private-link-resource list -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server private-link-resource show'] = """
+type: command
+short-summary: Get private link  resource for a PostgreSQL flexible server.
+examples:
+  - name: Get the private link  resource for a flexible server.
+    text: az postgres flexible-server private-link-resource show --resource-group testGroup --server-name testserver
+  - name: Get the private link  resource for a flexible server in a different subscription.
+    text: az postgres flexible-server private-link-resource show --subscription testSubscription --resource-group testGroup --server-name testserver
+  - name: Get the private link resource for a flexible server using --ids parameter.
+    text: az postgres flexible-server private-link-resource show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testServer
+"""

@@ -159,6 +159,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
         c.argument('public_network_access', help="Enable or disable public access to the web app", arg_type=get_enum_type(PUBLIC_NETWORK_ACCESS_MODES))
+        c.argument('acr_use_identity', action='store_true', help="Enable or disable pull image from acr use managed identity")
         c.argument('basic_auth', options_list=['--basic-auth'], help='Enable or disable basic auth.')
         c.ignore('language')
         c.ignore('using_webapp_up')

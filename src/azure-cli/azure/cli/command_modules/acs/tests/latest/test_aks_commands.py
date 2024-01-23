@@ -9730,17 +9730,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
         ])
 
-        nodeRG = self.cmd('az aks show -g {resource_group} -n {name}'). \
-            get_output_in_json().get("nodeResourceGroup")
-        self.kwargs.update({
-            'nodeRG': nodeRG
-        })
-
-        vmss_id = self.cmd('az vmss list -g {nodeRG}').get_output_in_json()[0]['id']
-        self.kwargs.update({
-            'vmss_id': vmss_id
-        })
-
         list_binding_cmd = 'aks trustedaccess rolebinding list ' \
             '--cluster-name={name} ' \
             '--resource-group={resource_group}'
@@ -9748,12 +9737,17 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty(),
         ])
 
+        subscription_id = self.get_subscription_id()
+        sid = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.MachineLearningServices/workspaces/fake_workspace'.format(subscription_id, resource_group)
+        self.kwargs.update({
+            'sid': sid
+        })
         create_binding_cmd = 'aks trustedaccess rolebinding create ' \
             '--resource-group={resource_group} ' \
             '--cluster-name={name} ' \
             '-n testbinding ' \
-            '-r {vmss_id} ' \
-            '--roles Microsoft.Compute/virtualMachineScaleSets/test-node-reader '
+            '--source-resource-id {sid} ' \
+            '--roles Microsoft.MachineLearningServices/workspaces/mlworkload'
         self.cmd(create_binding_cmd)
         self.cmd(list_binding_cmd, checks=[
             self.check('[0].type', 'Microsoft.ContainerService/managedClusters/trustedAccessRoleBindings'),
@@ -9774,9 +9768,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--cluster-name={name} ' \
             '-n testbinding ' \
             '--resource-group={resource_group} ' \
-            '--roles Microsoft.Compute/virtualMachineScaleSets/test-pod-reader '
+            '--roles Microsoft.MachineLearningServices/workspaces/mlworkload'
         self.cmd(update_binding_cmd, checks=[
-            self.check('roles[0]', 'Microsoft.Compute/virtualMachineScaleSets/test-pod-reader'),
+            self.check('roles[0]', 'Microsoft.MachineLearningServices/workspaces/mlworkload'),
         ])
 
         delete_binding_cmd = 'aks trustedaccess rolebinding delete ' \
@@ -9843,3 +9837,56 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty(),
         ])
+
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_upgrade_upgrade_settings(self, resource_group, resource_group_location):
+        """ This test case exercises enabling and disabling forceUpgrade override in cluster upgradeSettings.
+        """
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--enable-managed-identity ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.not_exists('upgradeSettings')
+        ])
+
+        # upgrade upgrade settings
+        self.cmd('aks upgrade --resource-group={resource_group} --name={name} --upgrade-override-until 2020-01-01T22:30:17+00:00 --yes', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.not_exists('upgradeSettings.overrideSettings.forceUpgrade'),
+            self.exists('upgradeSettings.overrideSettings.until')
+        ])
+        self.cmd('aks upgrade --resource-group={resource_group} --name={name} --enable-force-upgrade --yes', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('upgradeSettings.overrideSettings.forceUpgrade', True),
+            self.exists('upgradeSettings.overrideSettings.until')
+        ])
+        self.cmd('aks upgrade --resource-group={resource_group} --name={name} --enable-force-upgrade --upgrade-override-until 2020-02-22T22:30:17+00:00 --yes', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('upgradeSettings.overrideSettings.forceUpgrade', True),
+            self.check('upgradeSettings.overrideSettings.until', '2020-02-22T22:30:17+00:00')
+        ])
+        self.cmd('aks upgrade --resource-group={resource_group} --name={name} --disable-force-upgrade --yes', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('upgradeSettings.overrideSettings.forceUpgrade', False),
+            self.check('upgradeSettings.overrideSettings.until', '2020-02-22T22:30:17+00:00')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
