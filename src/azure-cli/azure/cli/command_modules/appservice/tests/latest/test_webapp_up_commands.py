@@ -1282,6 +1282,7 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_up_runtimestatus', location='eastus')
     def test_webapp_up_track_runtimestatus_runtimesuccessful(self, resource_group):
         plan_name = self.create_random_name('plan-linux', 24)
@@ -1312,6 +1313,7 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_up_runtimestatus', location='eastus')
     def test_webapp_up_track_runtimestatus_buildfailed(self, resource_group):
         plan_name = self.create_random_name('plan-linux', 24)
@@ -1339,7 +1341,7 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
-
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_up_runtimestatus', location='eastus')
     def test_webapp_up_track_runtimestatus_runtimefailed(self, resource_group):
         plan_name = self.create_random_name('plan-linux', 24)
