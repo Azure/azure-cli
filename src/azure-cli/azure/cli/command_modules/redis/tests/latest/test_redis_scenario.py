@@ -206,12 +206,10 @@ class RedisCacheTests(ScenarioTest):
         result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
 
         # Verify cache is aad disabled
-        print(result)
         if self.is_live:
             while result['provisioningState'] == 'ConfiguringAAD':
                 result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
                 time.sleep(1)
-        print(result)
         self.assertTrue(result['provisioningState'] == 'Succeeded')
         self.assertTrue(result['redisConfiguration']['aadEnabled'] == "False")
         """
