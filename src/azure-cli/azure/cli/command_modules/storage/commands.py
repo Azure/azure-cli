@@ -127,7 +127,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('keys renew', 'regenerate_key',
                          transform=lambda x: getattr(x, 'keys', x))
         g.command('keys list', 'list_keys',
-                  transform=lambda x: getattr(x, 'keys', x), sensitive_info=g.sensitive(redact=False, sensitive_keys=['value']))
+                  transform=lambda x: getattr(x, 'keys', x))
         g.command('revoke-delegation-keys', 'revoke_user_delegation_keys', min_api='2019-04-01')
 
     account_blob_service_custom_sdk = get_custom_sdk('account', client_factory=cf_blob_service,

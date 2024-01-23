@@ -829,11 +829,21 @@ class AzCliCommandInvoker(CommandInvoker):
             return
 
         from ..credential_helper import distinguish_credential
-        containing_credential, secret_property_names = distinguish_credential(result, max_level=9)
-        if secret_property_names:
-            logger.warning(sensitive_data_detailed_warning_message.format(', '.join(secret_property_names)))
-        elif containing_credential:
-            logger.warning(sensitive_data_warning_message)
+        from ..telemetry import set_secrets_detected
+        try:
+            containing_credential, secret_property_names = distinguish_credential(result, max_level=9)
+            if not containing_credential:
+                set_secrets_detected(False)
+                return
+
+            message = sensitive_data_warning_message
+            if secret_property_names:
+                message = sensitive_data_detailed_warning_message.format(', '.join(secret_property_names))
+            logger.warning(message)
+            set_secrets_detected(True)
+        except Exception:  # pylint: disable=broad-except
+            # ignore all exceptions, as this is just a warning
+            pass
 
     def resolve_confirmation(self, cmd, parsed_args):
         confirm = cmd.confirmation and not parsed_args.__dict__.pop('yes', None) \

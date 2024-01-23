@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import StatusTag, status_tag_messages, color_map
+from knack.util import StatusTag
 
 _SENSITIVE_TAG = '[Sensitive]'
 _sensitive_kwarg = 'sensitive_info'
@@ -33,7 +33,8 @@ def resolve_sensitive_info(cli_ctx, name):
 # pylint: disable=too-many-instance-attributes
 class SensitiveItem(StatusTag):
 
-    def __init__(self, cli_ctx, object_type='', redact=True, sensitive_keys=[], target=None, tag_func=None, message_func=None, **kwargs):
+    def __init__(self, cli_ctx, object_type='', redact=True, sensitive_keys=None,
+                 target=None, tag_func=None, message_func=None, **kwargs):
         """ Create a collection of sensitive metadata.
 
         :param cli_ctx: The CLI context associated with the sensitive item.
@@ -67,7 +68,7 @@ class SensitiveItem(StatusTag):
             message_func=message_func or _default_get_message
         )
         self.redact = redact
-        self.sensitive_keys = sensitive_keys
+        self.sensitive_keys = sensitive_keys if sensitive_keys else []
 
 
 class ImplicitSensitiveItem(SensitiveItem):
