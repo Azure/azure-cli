@@ -104,7 +104,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
-                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, public_network_access=None):
+                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
+                  public_network_access=None, basic_auth=""):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -112,6 +113,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
+
+    basic_auth = basic_auth.lower()
+    _check_basic_auth_param(basic_auth)
 
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
 
@@ -286,7 +290,25 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,
                                    role, None, scope)
         webapp.identity = identity
+
+    _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth)
     return webapp
+
+
+def _enable_basic_auth(cmd, app_name, slot_name, resource_group, enabled):
+    if enabled == "":
+        return
+    CsmPublishingCredentialsPoliciesEntity = cmd.get_models("CsmPublishingCredentialsPoliciesEntity")
+    csmPublishingCredentialsPoliciesEntity = CsmPublishingCredentialsPoliciesEntity(allow=enabled == "enabled")
+    _generic_site_operation(cmd.cli_ctx, resource_group, app_name,
+                            'update_ftp_allowed', slot_name, csmPublishingCredentialsPoliciesEntity)
+    _generic_site_operation(cmd.cli_ctx, resource_group, app_name,
+                            'update_scm_allowed', slot_name, csmPublishingCredentialsPoliciesEntity)
+
+
+def _check_basic_auth_param(basic_auth):
+    if basic_auth != "enabled" and basic_auth != "disabled" and basic_auth != "":
+        raise ValidationError("--basic_auth parameter only accept Enabled or Disabled as input")
 
 
 def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, webapp_location, vnet_sub_id=None):
@@ -807,7 +829,7 @@ def get_webapp(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
 
-def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=None,  # pylint: disable=unused-argument
+def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=None, basic_auth="",  # pylint: disable=unused-argument
                skip_custom_domain_verification=None, force_dns_registration=None, ttl_in_seconds=None, **kwargs):  # pylint: disable=unused-argument
     instance = kwargs['parameters']
     client = web_client_factory(cmd.cli_ctx)
@@ -815,6 +837,10 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
     kwargs = dict(resource_group_name=resource_group_name, name=name, site_envelope=instance)
     if slot:
         kwargs['slot'] = slot
+
+    basic_auth = basic_auth.lower()
+    _check_basic_auth_param(basic_auth)
+    _enable_basic_auth(cmd, name, slot, resource_group_name, basic_auth)
 
     return updater(**kwargs)
 
@@ -5052,9 +5078,12 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
-              app_service_environment=None):
+              app_service_environment=None, basic_auth=None):
     if not name:
         name = generate_default_app_name(cmd)
+
+    basic_auth = basic_auth.lower()
+    _check_basic_auth_param(basic_auth)
 
     import os
 
@@ -5222,6 +5251,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
             if match:
                 _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_config, runtime_version)
         create_json['runtime_version'] = runtime_version
+
+    _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth)
+
     # Zip contents & Deploy
     logger.warning("Creating zip with contents of dir %s ...", src_dir)
     # zip contents & deploy
