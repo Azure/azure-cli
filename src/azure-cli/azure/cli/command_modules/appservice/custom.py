@@ -311,7 +311,7 @@ def _enable_basic_auth(cmd, app_name, slot_name, resource_group, enabled):
 
 def _check_basic_auth_param(basic_auth):
     if basic_auth != "enabled" and basic_auth != "disabled" and basic_auth != "":
-        raise ValidationError("--basic_auth parameter only accept Enabled or Disabled as input")
+        raise ValidationError("--basic-auth parameter only accept Enabled or Disabled as input")
 
 
 def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, webapp_location, vnet_sub_id=None):

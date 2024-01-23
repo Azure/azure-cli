@@ -160,7 +160,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
         c.argument('public_network_access', help="Enable or disable public access to the web app", arg_type=get_enum_type(PUBLIC_NETWORK_ACCESS_MODES))
         c.argument('acr_use_identity', action='store_true', help="Enable or disable pull image from acr use managed identity")
-        c.argument('basic_auth', options_list=['--basic-auth'], help='Enable or disable basic auth.')
+        c.argument('basic_auth', type=str, help='Enable or disable basic auth.')
         c.ignore('language')
         c.ignore('using_webapp_up')
 
@@ -210,7 +210,7 @@ subscription than the app service environment, please use the resource ID for --
                    arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
         c.argument('minimum_elastic_instance_count', options_list=["--minimum-elastic-instance-count", "-i"], type=int, is_preview=True, help="Minimum number of instances. App must be in an elastic scale App Service Plan.")
         c.argument('prewarmed_instance_count', options_list=["--prewarmed-instance-count", "-w"], type=int, is_preview=True, help="Number of preWarmed instances. App must be in an elastic scale App Service Plan.")
-        c.argument('basic_auth', options_list=['--basic-auth'], help='Enable or disable basic auth.')
+        c.argument('basic_auth', type=str, help='Enable or disable basic auth.')
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
@@ -691,7 +691,7 @@ subscription than the app service environment, please use the resource ID for --
                    default=False, action='store_true')
         c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
         c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku [I1v2, I2v2, I3v2]')
-        c.argument('basic_auth', options_list=['--basic-auth'], help='Enable or disable basic auth.')
+        c.argument('basic_auth', type=str, help='Enable or disable basic auth.')
 
     with self.argument_context('webapp ssh') as c:
         c.argument('port', options_list=['--port', '-p'],
