@@ -29,7 +29,7 @@ class CredentialType(Enum):
     BEARER_TOKEN = (r'(bearer |bearer%20)[\w\-.~+/]{100,}', r'\1_REDACTED_BEARER_TOKEN_', 0, 'Bearer token')
     # (ssh-rsa ) - match the literal string 'ssh-rsa ' as group 1, which is the prefix of ssh key
     # AAAA[\w\-.~+/]{100,} - match 'AAAA' followed by any word character, '-', '.', '~', '+', or '/' one hundred or more times.
-    SSH_KEY = ('r(ssh-rsa )AAAA[\w\-.~+/]{100,}', r'\1_REDACTED_SSH_KEY_', 1, 'SSH key')
+    SSH_KEY = (r'(ssh-rsa )AAAA[\w\-.~+/]{100,}', r'\1_REDACTED_SSH_KEY_', 1, 'SSH key')
     # [\w.%#+-] - match any word character, '.', '%', '#', '+', or '-' one or more times.
     # (%40|@) - match character '@' or '%40' as group 1
     # ([a-z0-9.-]*\.[a-z]{2,}) - match any word character, '.', or '-' zero or more times, followed by a '.' and two or more word characters.
