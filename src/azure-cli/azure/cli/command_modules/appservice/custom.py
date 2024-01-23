@@ -310,7 +310,7 @@ def _enable_basic_auth(cmd, app_name, slot_name, resource_group, enabled):
 
 
 def _check_basic_auth_param(basic_auth):
-    if basic_auth != "enabled" and basic_auth != "disabled" and basic_auth != "":
+    if basic_auth not in ["enabled", "disabled", ""]:
         raise ValidationError("--basic-auth parameter only accept Enabled or Disabled as input")
 
 
