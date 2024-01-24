@@ -70,8 +70,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('cache_name', arg_type=cache_name, id_part=None)
 
     with self.argument_context('redis access-policy-assignment') as c:
-        c.argument('access_policy_assignment_name', options_list=['--policy-assignment-name'], help='The name of the access '
-                                                                                             'policy assignment')
+        c.argument('access_policy_assignment_name', options_list=['--policy-assignment-name'],
+                   help='The name of the access policy assignment')
         c.argument('object_id', help='Object Id to assign access policy to')
         c.argument('object_id_alias', help='User friendly name for object id. Also represents username for token '
                                            'based authentication')
