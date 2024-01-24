@@ -600,7 +600,7 @@ class ImportFromStorageProgressHook:
             try:
                 jsonresp = json.loads(operation_progress_response.text())
                 self._update_import_from_storage_progress_status(jsonresp)
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 pass
 
     def get_progress_message(self):
@@ -672,7 +672,7 @@ class OperationProgressBar(IndeterminateProgressBar):
                 self._operation_progress_hook.update_progress(operation_progress_resp)
                 self.message = self._operation_progress_hook.get_progress_message()
                 self._progress_message_last_updated = get_current_utc_time()
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             pass
 
     def _should_update_progress_message(self):
