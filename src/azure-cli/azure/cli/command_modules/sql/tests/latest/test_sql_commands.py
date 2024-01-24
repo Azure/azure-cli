@@ -5117,14 +5117,17 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
             'collation': ManagedInstancePreparer.collation,
             'proxy_override': "Proxy",
             'maintenance_id': self._get_full_maintenance_id(self.MMI1),
-            'intance_pool_name': ''
+            'intance_pool_name': '',
+            'database_format': 'AlwaysUpToDate',
+            'pricing_model': 'Regular'
         })
 
         # test create sql managed_instance with FMW
         managed_instance = self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
                                     '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
-                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}" --instance-pool-name "{intance_pool_name}"',
+                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}" '
+                                    '--instance-pool-name "{intance_pool_name}" --database-format "{database_format}" --pricing-model "{pricing_model}"',
                                     checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),

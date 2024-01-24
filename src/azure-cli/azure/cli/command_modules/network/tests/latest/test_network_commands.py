@@ -5835,6 +5835,34 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_sku_', location='westus3')
+    def test_network_vpn_gateway_sku(self, resource_group):
+        self.kwargs.update({
+            'vnet1': 'myvnet1',
+            'gw1': 'gateway1',
+            'ip1': 'pubip1',
+            'custom_routes1': "101.168.0.6/32",
+            'custom_routes2': "102.168.0.6/32"
+        })
+
+        self.cmd('network public-ip create -n {ip1} -g {rg}')
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')
+
+        self.cmd(
+            "network vnet-gateway create -n {gw1} -g {rg} --public-ip-address {ip1} --vnet {vnet1} --gateway-type ExpressRoute --sku ErGwScale --min-scale-unit 3 --max-scale-unit 5",
+            checks=[
+                self.check("vnetGateway.autoScaleConfiguration.bounds.max", 5),
+                self.check("vnetGateway.autoScaleConfiguration.bounds.min", 3),
+            ]
+        )
+        self.cmd(
+            "network vnet-gateway update -n {gw1} -g {rg} --min-scale-unit 4 --max-scale-unit 8",
+            checks=[
+                self.check("autoScaleConfiguration.bounds.max", 8),
+                self.check("autoScaleConfiguration.bounds.min", 4),
+            ]
+        )
+
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_aad_')
     def test_network_vpn_gateway_aad(self, resource_group):
         self.kwargs.update({

@@ -5065,7 +5065,9 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         yes=None,
         service_principal_type=None,
         zone_redundant=None,
-        instance_pool_name=None):
+        instance_pool_name=None,
+        database_format=None,
+        pricing_model=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -5137,6 +5139,12 @@ def managed_instance_update(  # pylint: disable=too-many-locals
 
     if instance_pool_name is not None:
         instance.instance_pool_id = _get_managed_instance_pool_resource_id(cmd.cli_ctx, resource_group_name, instance_pool_name)
+
+    if database_format is not None:
+        instance.database_format = database_format
+
+    if pricing_model is not None:
+        instance.pricing_model = pricing_model
 
     return instance
 
