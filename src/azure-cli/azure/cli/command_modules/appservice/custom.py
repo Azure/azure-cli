@@ -595,7 +595,7 @@ def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, 
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot, track_status)
 
 
-def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=False,):
+def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=False):
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
