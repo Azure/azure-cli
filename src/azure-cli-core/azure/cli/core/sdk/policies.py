@@ -7,7 +7,7 @@ import logging
 import re
 import types
 
-from azure.core.pipeline.policies import SansIOHTTPPolicy
+from azure.core.pipeline.policies import SansIOHTTPPolicy, UserAgentPolicy
 from knack.log import get_logger
 
 _LOGGER = get_logger(__name__)
@@ -45,9 +45,6 @@ class SafeNetworkTraceLoggingPolicy(SansIOHTTPPolicy):
                     if header.lower() in self.headers_to_redact:
                         value = '*****'
                     _LOGGER.debug("    %r: %r", header, value)
-                    if header.lower() == 'user-agent':
-                        from azure.cli.core.telemetry import set_user_agent
-                        set_user_agent(value)
                 _LOGGER.debug("Request body:")
 
                 # We don't want to log the binary data of a file upload.
@@ -99,3 +96,13 @@ class SafeNetworkTraceLoggingPolicy(SansIOHTTPPolicy):
                         _LOGGER.debug(response.http_response.text())
         except Exception as err:  # pylint: disable=broad-except
             _LOGGER.debug("Failed to log response: %s", repr(err))
+
+
+class RecordTelemetryUserAgentPolicy(UserAgentPolicy):
+    def __init__(self, base_user_agent=None, **kwargs):
+        super().__init__(base_user_agent=base_user_agent, **kwargs)
+
+    def on_request(self, request):
+        super().on_request(request)
+        from azure.cli.core.telemetry import set_user_agent
+        set_user_agent(request.http_request.headers[self._USERAGENT])
