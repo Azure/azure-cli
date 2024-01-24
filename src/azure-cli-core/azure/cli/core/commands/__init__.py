@@ -816,7 +816,7 @@ class AzCliCommandInvoker(CommandInvoker):
             logger.warning(cmd.command_source.get_command_warn_msg())
 
     def _resolve_output_sensitive_data_warning(self, cmd, result):
-        if not cmd.cli_ctx.config.getboolean('core', 'show_secrets_warning', True):
+        if not cmd.cli_ctx.config.getboolean('core', 'show_secrets_warning', False):
             return
 
         from ..credential_helper import sensitive_data_detailed_warning_message, sensitive_data_warning_message
