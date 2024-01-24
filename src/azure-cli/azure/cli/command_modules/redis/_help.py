@@ -231,90 +231,90 @@ short-summary: Show the identity assigned for Azure cache for Redis.
 
 helps['redis access-policy'] = """
 type: group
-short-summary: Manage access policies for Redis Cache
+short-summary: Manage Access Policies for Redis Cache
 """
 
 helps['redis access-policy create'] = """
 type: command
-short-summary: Add an access policy to the Redis Cache
+short-summary: Add an Access Policy to the Redis Cache
 examples:
-    - name: Usage example
+    - name: Create a custom Access Policy with the given permissions
       text: az redis access-policy create -g testResourceGroup -n testCacheName --access-policy-name testAccessPolicy --permissions "+get +hget"
 """
 
 helps['redis access-policy update'] = """
 type: command
-short-summary: Update an access policy of the Redis Cache
+short-summary: Update an Access Policy of the Redis Cache
 examples:
-    - name: Usage example
-      text: az redis access-policy update -g testResourceGroup -n testCacheName --access-policy-name testAccessPolicy --permissions "+get +hget"
+    - name: Update the permissions of the custom Access Policy
+      text: az redis access-policy update -g testResourceGroup -n testCacheName --access-policy-name testAccessPolicy --permissions "+get"
 """
 
 helps['redis access-policy delete'] = """
 type: command
-short-summary: Delete an access policy from the Redis Cache
+short-summary: Delete the Access Policy
 examples:
-    - name: Usage example
+    - name: Delete the custom Access Policy
       text: az redis access-policy delete -g testResourceGroup -n testCacheName --access-policy-name testAccessPolicy
 """
 
 helps['redis access-policy show'] = """
 type: command
-short-summary: Get the detailed information about an access policy of the Redis Cache
+short-summary: Get the detailed information about an Access Policy of the Redis Cache
 examples:
-    - name: Usage example
+    - name: Show the permissions of the custom Access Policy
       text: az redis access-policy show -g testResourceGroup -n testCacheName --access-policy-name testAccessPolicy
 """
 
 helps['redis access-policy list'] = """
 type: command
-short-summary: Get the list of access policies associated with the Redis Cache
+short-summary: Get the list of Access Policies associated with the Redis Cache
 examples:
-    - name: Usage example
+    - name: List the Access Policies of the Redis Cache
       text: az redis access-policy list -g testResourceGroup -n testCacheName
 """
 
 helps['redis access-policy-assignment'] = """
 type: group
-short-summary: Manage access policy assignments (redis users) for Redis Cache
+short-summary: Manage Access Policy Assignments (Redis Users) for Redis Cache
 """
 
 helps['redis access-policy-assignment create'] = """
 type: command
-short-summary: Add an access policy assignment (redis user) to the Redis Cache
+short-summary: Add an Access Policy Assignment (Redis User) to the Redis Cache
 examples:
-    - name: Usage example
+    - name: Configure Redis User for role based access control
       text: az redis access-policy-assignment create -g testResourceGroup -n testCacheName --object-id 932b5c60-66e4-4fbf-b8b0-xxxxxxxxxxxx --object-id-alias testAlias --access-policy-name testAccessPolicy --policy-assignment-name testAccessPolicyAssignment
 """
 
 helps['redis access-policy-assignment update'] = """
 type: command
-short-summary: Update an access policy assignment (redis user) of the Redis Cache
+short-summary: Update an Access Policy Assignment (Redis User) of the Redis Cache
 examples:
-    - name: Usage example
+    - name: Update Redis User for role based access control
       text: az redis access-policy-assignment update -g testResourceGroup -n testCacheName --object-id 932b5c60-66e4-4fbf-b8b0-xxxxxxxxxxxx --object-id-alias testAlias --access-policy-name testAccessPolicy --policy-assignment-name testAccessPolicyAssignment
 """
 
 helps['redis access-policy-assignment delete'] = """
 type: command
-short-summary: Delete an access policy assignment (redis user) from the Redis Cache
+short-summary: Delete the Access Policy Assignment (Redis User)
 examples:
-    - name: Usage example
+    - name: Delete the Redis User
       text: az redis access-policy-assignment delete -g testResourceGroup -n testCacheName --policy-assignment-name testAccessPolicyAssignment
 """
 
 helps['redis access-policy-assignment show'] = """
 type: command
-short-summary: Get the detailed information about an access policy assignment (redis user) of the Redis Cache
+short-summary: Get the detailed information about an Access Policy Assignment (Redis User) of the Redis Cache
 examples:
-    - name: Usage example
+    - name: Get the Object Id, Object Id Alias and Access Policy assigned to the Redis User
       text: az redis access-policy-assignment show -g testResourceGroup -n testCacheName --policy-assignment-name testAccessPolicyAssignment
 """
 
 helps['redis access-policy-assignment list'] = """
 type: command
-short-summary: Get the list of access policy assignments (redis users) associated with the Redis Cache
+short-summary: Get the list of Access Policy Assignments (Redis Users) associated with the Redis Cache
 examples:
-    - name: Usage example
+    - name: List the Redis Users of the Redis Cache
       text: az redis access-policy-assignment list -g testResourceGroup -n testCacheName
 """
