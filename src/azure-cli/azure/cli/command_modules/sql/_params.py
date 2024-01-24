@@ -31,7 +31,9 @@ from azure.mgmt.sql.models import (
     ServerConnectionType,
     ServerKeyType,
     StorageKeyType,
-    TransparentDataEncryptionState
+    TransparentDataEncryptionState,
+    FreemiumType,
+    ManagedInstanceDatabaseFormat
 )
 
 from azure.cli.core.commands.parameters import (
@@ -2323,7 +2325,9 @@ def load_arguments(self, _):
                 'primary_user_assigned_identity_id',
                 'key_id',
                 'zone_redundant',
-                'instance_pool_name'
+                'instance_pool_name',
+                'database_format',
+                'pricing_model'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -2402,6 +2406,20 @@ def load_arguments(self, _):
                    options_list=['--instance-pool-name'],
                    help='Name of the Instance Pool where managed instance will be placed.')
 
+        c.argument('database_format',
+                   required=False,
+                   options_list=['--database-format'],
+                   arg_type=get_enum_type(ManagedInstanceDatabaseFormat),
+                   help='Managed Instance database format specific to the SQL. Allowed values include: '
+                   'AlwaysUpToDate, SQLServer2022.')
+
+        c.argument('pricing_model',
+                   required=False,
+                   options_list=['--pricing-model'],
+                   arg_type=get_enum_type(FreemiumType),
+                   help='Managed Instance pricing model. Allowed values include: '
+                   'Regular, Freemium.')
+
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -2467,6 +2485,20 @@ def load_arguments(self, _):
                    required=False,
                    options_list=['--instance-pool-name'],
                    help='Name of the Instance Pool where managed instance will be placed.')
+
+        c.argument('database_format',
+                   required=False,
+                   options_list=['--database-format'],
+                   arg_type=get_enum_type(ManagedInstanceDatabaseFormat),
+                   help='Managed Instance database format specific to the SQL. Allowed values include: '
+                   'AlwaysUpToDate, SQLServer2022.')
+
+        c.argument('pricing_model',
+                   required=False,
+                   options_list=['--pricing-model'],
+                   arg_type=get_enum_type(FreemiumType),
+                   help='Managed Instance pricing model. Allowed values include: '
+                   'Regular, Freemium.')
 
     with self.argument_context('sql mi show') as c:
         c.argument('expand_ad_admin',
