@@ -627,7 +627,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     # check the status of async deployment
     if res.status_code == 202:
         response_body = None
-        if (track_status is not None and track_status):
+        if track_status:
             response_body = _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name, slot,
                                                                           deployment_status_url, is_async=True,
                                                                           timeout=timeout)

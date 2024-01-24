@@ -309,4 +309,4 @@ def is_webapp(app):
 def is_linux_webapp(app):
     if not is_webapp(app):
         return False
-    return (app.reserved or not app.is_xenon) and bool(app.site_config.linux_fx_version)
+    return "linux" in app.kind
