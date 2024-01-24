@@ -600,36 +600,31 @@ class ImportFromStorageProgressHook:
             try:
                 jsonresp = json.loads(operation_progress_response.text())
                 self._update_import_from_storage_progress_status(jsonresp)
-            except:
+            except Exception:
                 pass
 
     def get_progress_message(self):
         msg = self._import_state.value
         if self._import_estimated_completion_time is not None:
             msg = msg + " " + self._get_eta_time_duration_in_user_readable_string()
-        elif self._import_state == ImportFromStorageState.IMPORTING :
+        elif self._import_state == ImportFromStorageState.IMPORTING:
             msg = msg + " " + "Preparing (This might take few minutes)"
-
         return msg
-    
+
     def _get_eta_time_duration_in_user_readable_string(self):
         time_remaining = datetime.fromisoformat(self._import_estimated_completion_time) - get_current_utc_time()
         msg = " ETA : "
-
         if time_remaining.total_seconds() < 60:
-            return  msg + "Few seconds remaining"
-        
+            return msg + "Few seconds remaining"
         days = time_remaining.days
         hours, remainder = divmod(time_remaining.seconds, 3600)
-        minutes = math.ceil(remainder/60.0)
-        
+        minutes = math.ceil(remainder / 60.0)
         if days > 0:
             msg = msg + str(days) + " days "
         if hours > 0:
             msg = msg + str(hours) + " hours "
         if minutes > 0:
             msg = msg + str(minutes) + " minutes "
-        
         return msg + " remaining"
 
     def _update_import_from_storage_progress_status(self, progress_resp_json):
@@ -641,23 +636,23 @@ class ImportFromStorageProgressHook:
             if progress_status == "Importing":
                 self._import_started = True
                 self._import_state = ImportFromStorageState.IMPORTING
-            elif progress_status == "InProgress" and self._import_started == False:
+            elif progress_status == "InProgress" and self._import_started is False:
                 self._import_state = ImportFromStorageState.PROVISIONING
             else:
                 self._import_state = ImportFromStorageState.DEFAULT
-            
+
             # Updating the estimated completion time
             is_state_same = self._import_state == previous_import_state
-            if is_state_same == False:
+            if is_state_same is False:
                 self._import_estimated_completion_time = None
             if "properties" in progress_resp_json and "estimatedCompletionTime" in progress_resp_json["properties"]:
                 self._import_estimated_completion_time = str(progress_resp_json["properties"]["estimatedCompletionTime"])
-            
+
 
 class OperationProgressBar(IndeterminateProgressBar):
 
     """ Define progress bar update view for operation progress """
-    def __init__(self, cli_ctx, poller, operation_progress_hook, progress_message_update_interval_in_sec = 60.0):
+    def __init__(self, cli_ctx, poller, operation_progress_hook, progress_message_update_interval_in_sec=60.0):
         self._poller = poller
         self._operation_progress_hook = operation_progress_hook
         self._operation_progress_request = self._get_operation_progress_request()
@@ -677,7 +672,7 @@ class OperationProgressBar(IndeterminateProgressBar):
                 self._operation_progress_hook.update_progress(operation_progress_resp)
                 self.message = self._operation_progress_hook.get_progress_message()
                 self._progress_message_last_updated = get_current_utc_time()
-        except:
+        except Exception:
             pass
 
     def _should_update_progress_message(self):
@@ -690,4 +685,4 @@ class OperationProgressBar(IndeterminateProgressBar):
         query_params = dict(parse_qsl(operation_progress_url_parsed.query))
         query_params['api-version'] = "2023-12-01-preview"
         updated_operation_progress_url = operation_progress_url_parsed._replace(query=urlencode(query_params)).geturl()
-        return HttpRequest('GET', updated_operation_progress_url)        
+        return HttpRequest('GET', updated_operation_progress_url)

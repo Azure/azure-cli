@@ -15,7 +15,6 @@ from importlib import import_module
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 from azure.core.exceptions import ResourceNotFoundError
-from azure.core.rest import HttpRequest
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.command_modules.mysql.random.generate import generate_username
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
@@ -629,7 +628,7 @@ def flexible_server_import_create(cmd, client,
                                           data_encryption=data_encryption,
                                           source_server_id=source_server_id,
                                           import_source_properties=import_source_properties,
-                                          data_source_type = data_source_type)
+                                          data_source_type=data_source_type)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
@@ -1403,16 +1402,13 @@ def _import_create_server(db_context, cmd, resource_group_name, server_name, cre
         source_server_resource_id=source_server_id,
         create_mode=create_mode,
         import_source_properties=import_source_properties)
-    
     import_poller = server_client.begin_create(resource_group_name, server_name, parameters)
-
     import_progress_bar = None
-
     if data_source_type.lower() == "azure_blob":
         import_progress_bar = OperationProgressBar(cmd.cli_ctx, import_poller, ImportFromStorageProgressHook())
 
     return resolve_poller(
-        import_poller, cmd.cli_ctx, 
+        import_poller, cmd.cli_ctx,
         '{} Server Import Create'.format(logging_name),
         progress_bar=import_progress_bar)
 
