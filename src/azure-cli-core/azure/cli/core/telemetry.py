@@ -529,7 +529,7 @@ def _get_config():
 
 @decorators.suppress_all_exceptions()
 def _get_secrets_warning_config():
-    show_secrets_warning = _get_config().getboolean('core', 'show_secrets_warning', fallback=None)
+    show_secrets_warning = _get_config().getboolean('clients', 'show_secrets_warning', fallback=None)
     if show_secrets_warning is None:
         return None
     return 'on' if show_secrets_warning else 'off'

@@ -816,7 +816,7 @@ class AzCliCommandInvoker(CommandInvoker):
             logger.warning(cmd.command_source.get_command_warn_msg())
 
     def _resolve_output_sensitive_data_warning(self, cmd, result):
-        if not cmd.cli_ctx.config.getboolean('core', 'show_secrets_warning', False):
+        if not cmd.cli_ctx.config.getboolean('clients', 'show_secrets_warning', False):
             return
 
         from ..credential_helper import sensitive_data_detailed_warning_message, sensitive_data_warning_message
@@ -831,7 +831,7 @@ class AzCliCommandInvoker(CommandInvoker):
         from ..credential_helper import distinguish_credential
         from ..telemetry import set_secrets_detected
         try:
-            containing_credential, secret_property_names = distinguish_credential(result, max_level=9)
+            containing_credential, secret_property_names = distinguish_credential(result)
             if not containing_credential:
                 set_secrets_detected(False)
                 return
