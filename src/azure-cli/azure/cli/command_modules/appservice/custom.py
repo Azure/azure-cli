@@ -5135,7 +5135,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
-              app_service_environment=None, track_status=False, basic_auth=None):
+              app_service_environment=None, track_status=False, basic_auth=""):
     if not name:
         name = generate_default_app_name(cmd)
 
