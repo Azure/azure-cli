@@ -32,9 +32,8 @@ logger = get_logger(__name__)
 
 def _resource_not_exists(cli_ctx, resource_type):
     def _handle_resource_not_exists(namespace):
-        # TODO: hook up namespace._subscription_id once we support it
         ns, t = resource_type.split('/')
-        if resource_exists(cli_ctx, namespace.resource_group_name, namespace.name, ns, t):
+        if resource_exists(cli_ctx, namespace._subscription_id, namespace.resource_group_name, namespace.name, ns, t):
             raise CLIError('Resource {} of type {} in group {} already exists.'.format(
                 namespace.name,
                 resource_type,
