@@ -183,7 +183,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result,
                               'ClientRequestId',
                               lambda: self.application.data['headers'].get('x-ms-client-request-id', ''))
-        set_custom_properties(result, 'UserAgent', self.user_agent or (os.environ.get('AZURE_HTTP_USER_AGENT') if 'AZURE_HTTP_USER_AGENT' in os.environ else None))
+        set_custom_properties(result, 'UserAgent', _get_user_agent())
         set_custom_properties(result, 'CoreVersion', _get_core_version)
         set_custom_properties(result, 'TelemetryVersion', "2.0")
         set_custom_properties(result, 'InstallationId', _get_installation_id)
@@ -671,6 +671,16 @@ def _get_shell_type():
         return 'cloud-shell'
     return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
 
+
+@decorators.suppress_all_exceptions(fallback_return='')
+def _get_user_agent():
+    if _session.user_agent:
+        return _session.user_agent
+    from azure.cli.core.util import get_az_user_agent
+    agents = [get_az_user_agent()]
+    if 'AZURE_HTTP_USER_AGENT' in os.environ:
+        agents.append(os.environ['AZURE_HTTP_USER_AGENT'])
+    return ' '.join(agents)
 
 @decorators.suppress_all_exceptions(fallback_return='')
 @decorators.hash256_result
