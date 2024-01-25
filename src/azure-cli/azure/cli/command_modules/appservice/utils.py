@@ -19,7 +19,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._client_factory import web_client_factory
-from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND
+from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND, LINUXAPP_KIND
 
 logger = get_logger(__name__)
 
@@ -309,4 +309,4 @@ def is_webapp(app):
 def is_linux_webapp(app):
     if not is_webapp(app):
         return False
-    return "linux" in app.kind
+    return LINUXAPP_KIND in app.kind
