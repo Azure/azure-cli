@@ -175,14 +175,14 @@ class ResourceId(str):
         return str.__new__(cls, val)
 
 
-def resource_exists(cli_ctx, subscription, resource_group, name, namespace, type, **_):  # pylint: disable=redefined-builtin
+def resource_exists(cli_ctx, subscription, resource_group, name, namespace, type,
+                    **_):  # pylint: disable=redefined-builtin
     ''' Checks if the given resource exists. '''
     odata_filter = "resourceGroup eq '{}' and name eq '{}'" \
         " and resourceType eq '{}/{}'".format(resource_group, name, namespace, type)
-    if subscription:
-        client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, subscription_id=subscription).resources
-    else:
-        client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources
+    # Support cross subscription resource existence check
+    client = get_mgmt_service_client(
+        cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, subscription_id=subscription).resources
     existing = len(list(client.list(filter=odata_filter))) == 1
     return existing
 
