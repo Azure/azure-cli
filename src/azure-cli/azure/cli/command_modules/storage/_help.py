@@ -302,7 +302,7 @@ examples:
     text: >
         az storage account file-service-properties update --versions SMB2.1;SMB3.0;SMB3.1.1
         --auth-methods NTLMv2;Kerberos --kerb-ticket-encryption RC4-HMAC;AES-256
-        --channel-encryption AES-CCM-128;AES-GCM-128;AES-GCM-256 -n mystorageaccount -g MyResourceGroup
+        --channel-encryption AES-128-CCM;AES-128-GCM;AES-256-GCM -n mystorageaccount -g MyResourceGroup
 """
 
 helps['storage account keys'] = """

@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}", "2023-09-01"],
         ]
     }
 
@@ -116,7 +116,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -201,6 +201,9 @@ class Wait(AAZWaitCommand):
             properties.bandwidth_in_gbps = AAZIntType(
                 serialized_name="bandwidthInGbps",
             )
+            properties.billing_type = AAZStrType(
+                serialized_name="billingType",
+            )
             properties.circuits = AAZListType(
                 flags={"read_only": True},
             )
@@ -251,6 +254,10 @@ class Wait(AAZWaitCommand):
             properties = cls._schema_on_200.properties.links.Element.properties
             properties.admin_state = AAZStrType(
                 serialized_name="adminState",
+            )
+            properties.colo_location = AAZStrType(
+                serialized_name="coloLocation",
+                flags={"read_only": True},
             )
             properties.connector_type = AAZStrType(
                 serialized_name="connectorType",

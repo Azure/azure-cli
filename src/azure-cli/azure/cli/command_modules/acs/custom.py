@@ -29,6 +29,8 @@ from distutils.version import StrictVersion  # pylint: disable=deprecated-module
 from urllib.error import URLError
 from urllib.request import urlopen
 from azure.cli.command_modules.acs.maintenanceconfiguration import aks_maintenanceconfiguration_update_internal
+import datetime
+from dateutil.parser import parse
 
 import colorama
 import requests
@@ -60,6 +62,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
     DecoratorEarlyExitException,
+    CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START,
+    CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE,
+    CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
 )
 
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster
@@ -603,6 +608,8 @@ def aks_create(
     host_group_id=None,
     crg_id=None,
     gpu_instance_profile=None,
+    # azure service mesh
+    enable_azure_service_mesh=None,
     # azure monitor profile
     enable_azure_monitor_metrics=False,
     azure_monitor_workspace_resource_id=None,
@@ -786,6 +793,9 @@ def aks_upgrade(cmd,
                 control_plane_only=False,
                 node_image_only=False,
                 no_wait=False,
+                enable_force_upgrade=False,
+                disable_force_upgrade=False,
+                upgrade_override_until=None,
                 yes=False):
     msg = 'Kubernetes may be unavailable during cluster upgrades.\n Are you sure you want to perform this operation?'
     if not yes and not prompt_y_n(msg, default="n"):
@@ -820,6 +830,13 @@ def aks_upgrade(cmd,
                                                    resource_group_name, name, agent_pool_profile.name)
         mc = client.get(resource_group_name, name)
         return _remove_nulls([mc])[0]
+
+    instance = _update_upgrade_settings(
+        cmd,
+        instance,
+        enable_force_upgrade=enable_force_upgrade,
+        disable_force_upgrade=disable_force_upgrade,
+        upgrade_override_until=upgrade_override_until)
 
     if instance.kubernetes_version == kubernetes_version or kubernetes_version == '':
         # don't prompt here because there is another prompt below?
@@ -864,6 +881,57 @@ def aks_upgrade(cmd,
     instance.service_principal_profile = None
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
+
+
+def _update_upgrade_settings(cmd, instance,
+                             enable_force_upgrade=False,
+                             disable_force_upgrade=False,
+                             upgrade_override_until=None):
+    existing_until = None
+    if instance.upgrade_settings is not None and instance.upgrade_settings.override_settings is not None and instance.upgrade_settings.override_settings.until is not None:
+        existing_until = instance.upgrade_settings.override_settings.until
+
+    force_upgrade = None
+    if enable_force_upgrade is False and disable_force_upgrade is False:
+        force_upgrade = None
+    elif enable_force_upgrade is not None:
+        force_upgrade = enable_force_upgrade
+    elif disable_force_upgrade is not None:
+        force_upgrade = not disable_force_upgrade
+
+    ClusterUpgradeSettings = cmd.get_models(
+        "ClusterUpgradeSettings",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
+
+    UpgradeOverrideSettings = cmd.get_models(
+        "UpgradeOverrideSettings",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
+
+    if force_upgrade is not None or upgrade_override_until is not None:
+        if instance.upgrade_settings is None:
+            instance.upgrade_settings = ClusterUpgradeSettings()
+        if instance.upgrade_settings.override_settings is None:
+            instance.upgrade_settings.override_settings = UpgradeOverrideSettings()
+        # sets force_upgrade
+        if force_upgrade is not None:
+            instance.upgrade_settings.override_settings.force_upgrade = force_upgrade
+        # sets until
+        if upgrade_override_until is not None:
+            try:
+                instance.upgrade_settings.override_settings.until = parse(upgrade_override_until)
+            except Exception:  # pylint: disable=broad-except
+                raise InvalidArgumentValueError(
+                    f"{upgrade_override_until} is not a valid datatime format."
+                )
+        elif force_upgrade:
+            default_extended_until = datetime.datetime.utcnow() + datetime.timedelta(days=3)
+            if existing_until is None or existing_until.timestamp() < default_extended_until.timestamp():
+                instance.upgrade_settings.override_settings.until = default_extended_until
+    return instance
 
 
 def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name,
@@ -2666,3 +2734,195 @@ def aks_trustedaccess_role_binding_update(cmd, client, resource_group_name, clus
 
 def aks_trustedaccess_role_binding_delete(cmd, client, resource_group_name, cluster_name, role_binding_name):
     return client.begin_delete(resource_group_name, cluster_name, role_binding_name)
+
+
+def aks_mesh_enable(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        revision=None,
+        key_vault_id=None,
+        ca_cert_object_name=None,
+        ca_key_object_name=None,
+        root_cert_object_name=None,
+        cert_chain_object_name=None
+):
+    instance = client.get(resource_group_name, name)
+    addon_profiles = instance.addon_profiles
+    if key_vault_id is not None and ca_cert_object_name is not None and ca_key_object_name is not None and root_cert_object_name is not None and cert_chain_object_name is not None:
+        if not addon_profiles or not addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME] or not addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME].enabled:
+            raise CLIError('AzureKeyvaultSecretsProvider addon is required for Azure Service Mesh plugin certificate authority feature.')
+
+    return _aks_mesh_update(cmd,
+                            client,
+                            resource_group_name,
+                            name,
+                            key_vault_id,
+                            ca_cert_object_name,
+                            ca_key_object_name,
+                            root_cert_object_name,
+                            cert_chain_object_name,
+                            revision=revision,
+                            enable_azure_service_mesh=True)
+
+
+def aks_mesh_disable(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+):
+    return _aks_mesh_update(cmd, client, resource_group_name, name, disable_azure_service_mesh=True)
+
+
+def aks_mesh_enable_ingress_gateway(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        ingress_gateway_type,
+):
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        enable_ingress_gateway=True,
+        ingress_gateway_type=ingress_gateway_type)
+
+
+def aks_mesh_disable_ingress_gateway(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        ingress_gateway_type,
+):
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        disable_ingress_gateway=True,
+        ingress_gateway_type=ingress_gateway_type)
+
+
+def aks_mesh_get_revisions(
+        cmd,
+        client,
+        location
+):
+    revisonProfiles = client.list_mesh_revision_profiles(location)
+    # 'revisonProfiles' is an ItemPaged object
+    revisions = []
+    # Iterate over items within pages
+    for page in revisonProfiles.by_page():
+        for item in page:
+            revisions.append(item)
+
+    if revisions:
+        return revisions[0].properties
+
+    return None
+
+
+def aks_mesh_get_upgrades(
+        cmd,
+        client,
+        resource_group_name,
+        name
+):
+    upgradeProfiles = client.list_mesh_upgrade_profiles(resource_group_name, name)
+    # 'upgradeProfiles' is an ItemPaged object
+    upgrades = []
+    # Iterate over items within pages
+    for page in upgradeProfiles.by_page():
+        for item in page:
+            upgrades.append(item)
+
+    if upgrades:
+        return upgrades[0].properties
+
+    return None
+
+
+def aks_mesh_upgrade_start(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        revision
+):
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        revision=revision,
+        mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START)
+
+
+def aks_mesh_upgrade_complete(
+        cmd,
+        client,
+        resource_group_name,
+        name):
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE)
+
+
+def aks_mesh_upgrade_rollback(
+        cmd,
+        client,
+        resource_group_name,
+        name
+):
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK)
+
+
+def _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        key_vault_id=None,
+        ca_cert_object_name=None,
+        ca_key_object_name=None,
+        root_cert_object_name=None,
+        cert_chain_object_name=None,
+        enable_azure_service_mesh=None,
+        disable_azure_service_mesh=None,
+        enable_ingress_gateway=None,
+        disable_ingress_gateway=None,
+        ingress_gateway_type=None,
+        revision=None,
+        mesh_upgrade_command=None,
+):
+    raw_parameters = locals()
+
+    from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterUpdateDecorator
+
+    aks_update_decorator = AKSManagedClusterUpdateDecorator(
+        cmd=cmd,
+        client=client,
+        raw_parameters=raw_parameters,
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+    )
+
+    try:
+        mc = aks_update_decorator.update_mc_profile_default()
+        mc = aks_update_decorator.update_azure_service_mesh_profile(mc)
+    except DecoratorEarlyExitException:
+        return None
+
+    return aks_update_decorator.update_mc(mc)

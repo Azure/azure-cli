@@ -389,9 +389,9 @@ def register_global_subscription_argument(cli_ctx):
     cli_ctx.register_event(EVENT_INVOKER_PRE_LOAD_ARGUMENTS, add_subscription_parameter)
 
 
-add_usage = '--add property.listProperty <key=value, string or JSON string>'
-set_usage = '--set property1.property2=<value>'
-remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
+add_usage = '`--add property.listProperty <key=value, string or JSON string>`'
+set_usage = '`--set property1.property2=<value>`'
+remove_usage = '`--remove property.list <indexToRemove>` OR `--remove propertyToRemove`'
 
 
 def _get_operations_tmpl(cmd, custom_command=False):
