@@ -441,6 +441,7 @@ AD_HOC_API_VERSIONS = {
         'VERSION_2020_11_01_PREVIEW': "2020-11-01-preview",
         'VERSION_2021_08_01_PREVIEW': "2021-08-01-preview",
         'VERSION_2022_02_01_PREVIEW': "2022-02-01-preview",
+        'VERSION_2023_01_01_PREVIEW': "2023-01-01-preview",
     },
     ResourceType.MGMT_CONTAINERSERVICE: {
         # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50
