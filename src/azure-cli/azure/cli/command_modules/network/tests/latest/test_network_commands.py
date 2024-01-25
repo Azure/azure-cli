@@ -3721,8 +3721,8 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 3))
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_with_cross_subscription_id_', location='westus2')
-    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_with_cross_subscription_id_', location='westus2',
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_with_cross_subscription_id_', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_with_cross_subscription_id_', location='eastus2euap',
                            parameter_name='aux_resource_group', subscription=AUX_SUBSCRIPTION)
     def test_network_lb_with_cross_subscription_id(self, resource_group, aux_resource_group):
 
@@ -3745,7 +3745,7 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
         self.kwargs['subnet_id'] = vnet['newVNet']['subnets'][0]['id']
 
         self.cmd('network lb create -g {rg} -n {lb} --subnet {subnet_id} --sku Standard', checks=[
-            self.check('loadBalancer.name', '{lb}')
+            self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
         ])
 
         public_ip_address_id = self.cmd('network public-ip create -g {rg2} -n {publicip} --subscription {aux_sub}', checks=[
@@ -3754,8 +3754,9 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
 
         self.kwargs['publicip_id'] = public_ip_address_id
 
-        self.cmd('network lb create -g {rg} -n {lb} --public-ip-address {publicip_id} --sku Standard --debug', checks=[
-            self.check('loadBalancer.name', '{lb}')
+        self.cmd('network lb create -g {rg} -n {lb2} --public-ip-address {publicip_id} --sku Standard', checks=[
+            self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
+            self.check('loadBalancer.frontendIPConfigurations[0].properties.publicIPAddress.id', '{publicip_id}'),
         ])
 
 
