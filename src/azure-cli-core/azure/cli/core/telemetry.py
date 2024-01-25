@@ -183,7 +183,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result,
                               'ClientRequestId',
                               lambda: self.application.data['headers'].get('x-ms-client-request-id', ''))
-        set_custom_properties(result, 'UserAgent', self.user_agent)
+        set_custom_properties(result, 'UserAgent', self.user_agent or (os.environ.get('AZURE_HTTP_USER_AGENT') if 'AZURE_HTTP_USER_AGENT' in os.environ else None))
         set_custom_properties(result, 'CoreVersion', _get_core_version)
         set_custom_properties(result, 'TelemetryVersion', "2.0")
         set_custom_properties(result, 'InstallationId', _get_installation_id)
