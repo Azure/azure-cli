@@ -8,3 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "billing enrollment-account",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage enrollment account
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]
