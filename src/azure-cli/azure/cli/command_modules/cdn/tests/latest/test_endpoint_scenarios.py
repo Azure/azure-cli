@@ -25,7 +25,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
                              JMESPathCheck('nameAvailable', True)]
         self.cmd(f"cdn name-exists --name {endpoint_name}", checks=name_exist_checks)
 
-        origin = 'www.example.com'
+        origin = 'www.contoso.com'
         checks = [JMESPathCheck('name', endpoint_name),
                   JMESPathCheck('origins[0].hostName', origin),
                   JMESPathCheck('isHttpAllowed', True),
@@ -155,7 +155,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.profile_create_cmd(resource_group, profile_name, sku='Standard_Microsoft')
 
         endpoint_name = self.create_random_name(prefix='endpoint', length=24)
-        origin = 'www.example.com'
+        origin = 'www.contoso.com'
         pls_subscription_id = '27cafca8-b9a4-4264-b399-45d0c9cca1ab'
         # Workaround for overly heavy-handed subscription id replacement in playback mode.
         if self.is_playback_mode():
@@ -191,7 +191,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.profile_create_cmd(resource_group, profile_name)
 
         endpoint_name = self.create_random_name(prefix='endpoint', length=24)
-        origin = 'www.example.com'
+        origin = 'www.contoso.com'
         self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin)
 
         checks = [JMESPathCheck('resourceState', 'Stopped')]
@@ -258,7 +258,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.endpoint_list_cmd(resource_group, profile_name, checks=list_checks)
 
         endpoint_name = self.create_random_name(prefix='endpoint', length=24)
-        origin = 'www.example.com'
+        origin = 'www.contoso.com'
         checks = [JMESPathCheck('name', endpoint_name),
                   JMESPathCheck('origins[0].hostName', origin),
                   JMESPathCheck('isHttpAllowed', True),

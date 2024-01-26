@@ -45,7 +45,7 @@ class ValidateCustomDomain(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.endpoint_name = AAZStrArg(
-            options=["--endpoint-name"],
+            options=["-n", "--name", "--endpoint-name"],
             help="Name of the endpoint under the profile which is unique globally.",
             required=True,
             id_part="child_name_1",

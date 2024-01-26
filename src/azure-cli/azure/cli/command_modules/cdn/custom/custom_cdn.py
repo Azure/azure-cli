@@ -432,19 +432,19 @@ class CDNOriginGroupUpdate(_CDNOriginGroupUpdate):
         # Allow removing properties explicitly by specifying as empty string, or
         # update without modifying by not specifying (value is None).
         if not has_value(args.probe_path):
-            args.probe_path = existing['health_probe_settings']['probe_path']
+            args.probe_path = existing['healthProbeSettings']['probePath']
         elif args.probe_path.to_serialized_data() == '':
             args.probe_path = None
         if not has_value(args.probe_method):
-            args.probe_method = existing['health_probe_settings']['probe_method']
+            args.probe_method = existing['healthProbeSettings']['probeMethod']
         elif args.probe_method.to_serialized_data() == '':
             args.probe_method = None
         if not has_value(args.probe_protocol):
-            args.probe_protocol = existing['health_probe_settings']['probe_protocol']
+            args.probe_protocol = existing['healthProbeSettings']['probeProtocol']
         elif args.probe_protocol.to_serialized_data() == '':
             args.probe_protocol = None
         if not has_value(args.probe_interval):
-            args.probe_interval = existing['health_probe_settings']['probe_interval_in_seconds']
+            args.probe_interval = existing['healthProbeSettings']['probeIntervalInSeconds']
         elif args.probe_interval.to_serialized_data() == '':
             args.probe_interval = None
         health_probe_settings = {
@@ -485,7 +485,7 @@ class CDNEndpointCreate(_CDNEndpointCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.origin = AAZStrArg(
+        args_schema.origin = AAZListArg(
             options=['--origin'],
             help='Endpoint origin specified by the following space-delimited 6 tuple: '
             'www.example.com http_port https_port private_link_resource_id '
@@ -496,34 +496,55 @@ class CDNEndpointCreate(_CDNEndpointCreate):
             'and private_link_location is required if private_link_resource_id is set.',
             required=True,
         )
+        args_schema.origin.Element = AAZStrArg()
+        args_schema.no_http = AAZBoolArg(
+            options=['--no-http'],
+            help='Disable HTTP traffic.Indicates whether HTTP traffic is not allowed on the endpoint. '
+            'Default is to allow HTTP traffic.',
+            blank=True
+        )
+        args_schema.no_https = AAZBoolArg(
+            options=['--no-https'],
+            help='Indicates whether HTTPS traffic is not allowed on the endpoint. '
+            'Default is to allow HTTPS traffic.',
+            blank=True
+        )
+        args_schema.enable_compression = AAZBoolArg(
+            options=['--enable-compression'],
+            help='If compression is enabled, content will be served as compressed if user requests for a compressed version. '
+            'Content won\'t be compressed on CDN when requested content is smaller than 1 byte or larger than 1 MB.',
+            blank=True
+        )
         args_schema.origins._registered = False
+        args_schema.is_http_allowed._registered = False
+        args_schema.is_https_allowed._registered = False
+        args_schema.is_compression_enabled._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
 
-        origin_params = args.origin.to_serialized_data().split(' ')
-        if not 1 <= len(origin_params) <= 3 and not 5 <= len(origin_params) <= 6:
+        if not 1 <= len(args.origin) <= 3 and not 5 <= len(args.origin) <= 6:
             msg = '%s takes 1, 2, 3, 5, or 6 values, %d given'
             raise argparse.ArgumentError(
-                self, msg % (len(origin_params)))
+                self, msg % (len(args.origin)))
 
-        host_name = origin_params[0]
+        host_name = args.origin[0]
         http_port = 80
         https_port = 443
         private_link_resource_id = None
         private_link_location = None
         private_link_approval_message = None
 
-        if len(origin_params) > 1:
-            http_port = int(origin_params[1])
-        if len(origin_params) > 2:
-            https_port = int(origin_params[2])
-        if len(origin_params) > 4:
-            private_link_resource_id = origin_params[3]
-            private_link_location = origin_params[4]
-        if len(origin_params) > 5:
-            private_link_approval_message = origin_params[5]
+        if len(args.origin) > 1:
+            http_port = int(args.origin[1].to_serialized_data())
+        if len(args.origin) > 2:
+            https_port = int(args.origin[2].to_serialized_data())
+        if len(args.origin) > 4:
+            private_link_resource_id = args.origin[3]
+            private_link_location = args.origin[4]
+        if len(args.origin) > 5:
+            private_link_approval_message = args.origin[5]
 
         args.origins = [{
             'name': 'origin',
@@ -535,13 +556,13 @@ class CDNEndpointCreate(_CDNEndpointCreate):
             'private_link_approval_message': private_link_approval_message
         }]
 
-        if not has_value(args.is_compression_enabled):
-            args.is_compression_enabled = False
-        if not has_value(args.is_http_allowed):
-            args.is_http_allowed = True
-        if not has_value(args.is_https_allowed):
-            args.is_https_allowed = True
-        if args.is_http_allowed.to_serialized_data() and not has_value(args.content_types_to_compress):
+        if has_value(args.enable_compression):
+            args.is_compression_enabled = args.enable_compression
+        if has_value(args.no_http):
+            args.is_http_allowed = not args.no_http
+        if has_value(args.no_https):
+            args.is_https_allowed = not args.no_https
+        if args.enable_compression.to_serialized_data() and not has_value(args.content_types_to_compress):
             args.content_types_to_compress = default_content_types()
 
 
@@ -549,6 +570,28 @@ class CDNEndpointUpdate(_CDNEndpointUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.no_http = AAZBoolArg(
+            options=['--no-http'],
+            help='Disable HTTP traffic.Indicates whether HTTP traffic is not allowed on the endpoint. '
+            'Default is to allow HTTP traffic.',
+            blank=True
+        )
+        args_schema.no_https = AAZBoolArg(
+            options=['--no-https'],
+            help='Indicates whether HTTPS traffic is not allowed on the endpoint. '
+            'Default is to allow HTTPS traffic.',
+            blank=True
+        )
+        args_schema.enable_compression = AAZBoolArg(
+            options=['--enable-compression'],
+            help='If compression is enabled, content will be served as compressed if user requests for a compressed version. '
+            'Content won\'t be compressed on CDN when requested content is smaller than 1 byte or larger than 1 MB.',
+            blank=True
+        )
+        args_schema.origins._registered = False
+        args_schema.is_http_allowed._registered = False
+        args_schema.is_https_allowed._registered = False
+        args_schema.is_compression_enabled._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -558,13 +601,19 @@ class CDNEndpointUpdate(_CDNEndpointUpdate):
             'profile_name': args.profile_name,
             'endpoint_name': args.endpoint_name
         })
-        if not has_value(args.default_content_types):
+        if has_value(args.default_origin_group):
             if '/' not in args.default_origin_group.to_serialized_data():
                 args.default_origin_group = f'{args.id}/originGroups/{args.default_origin_group}'
         if not has_value(args.is_compression_enabled):
-            args.is_compression_enabled = existing['is_compression_enabled']
+            args.is_compression_enabled = existing['isCompressionEnabled']
         if args.is_compression_enabled.to_serialized_data() and not has_value(args.content_types_to_compress):
-            args.content_types_to_compress = existing['content_types_to_compress']
+            args.content_types_to_compress = existing['contentTypesToCompress']
+        if has_value(args.enable_compression):
+            args.is_compression_enabled = args.enable_compression
+        if has_value(args.no_http):
+            args.is_http_allowed = not args.no_http
+        if has_value(args.no_https):
+            args.is_https_allowed = not args.no_https
 
 
 class CDNEndpointRuleAdd(_CDNEndpointUpdate):
@@ -635,7 +684,7 @@ class CDNEndpointRuleAdd(_CDNEndpointUpdate):
             help='Match values of the match condition. e.g, space separated values "GET" "HTTP".',
         )
         args_schema.match_values.Element = AAZStrArg()
-        args.schema.match_variable = AAZStrArg(
+        args_schema.match_variable = AAZStrArg(
             options=['--match-variable'],
             help='Name of the match condition: '
             'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions.',
@@ -902,7 +951,8 @@ class CDNEndpointRuleActionAdd(_CDNEndpointUpdate):
                                args.resource_group_name, args.profile_name, args.endpoint_name, args.origin_group)
         for i in range(0, len(delivery_policy['rules'])):
             if delivery_policy['rules'][i]['name'] == args.rule_name:
-                delivery_policy['rules'][i]['actions'].append(action)
+                actions = create_actions_from_existing(delivery_policy['rules'][i]['actions'])
+                actions.append(action)
         args.delivery_policy = delivery_policy
 
 
@@ -948,7 +998,7 @@ class CDNEndpointRuleConditionAdd(_CDNEndpointUpdate):
             help='Match values of the match condition. e.g, space separated values "GET" "HTTP".',
         )
         args_schema.match_values.Element = AAZStrArg()
-        args.schema.match_variable = AAZStrArg(
+        args_schema.match_variable = AAZStrArg(
             options=['--match-variable'],
             help='Name of the match condition: '
             'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions.',

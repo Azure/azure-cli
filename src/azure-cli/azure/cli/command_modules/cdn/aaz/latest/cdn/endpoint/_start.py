@@ -45,8 +45,8 @@ class Start(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.endpoint_name = AAZStrArg(
-            options=["--endpoint-name"],
+        _args_schema.endpoint_nameendpoint_name = AAZStrArg(
+            options=["-n", "--name", "--endpoint-nameendpoint-name"],
             help="Name of the endpoint under the profile which is unique globally.",
             required=True,
             id_part="child_name_1",
@@ -125,7 +125,7 @@ class Start(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "endpointName", self.ctx.args.endpoint_name,
+                    "endpointName", self.ctx.args.endpoint_nameendpoint_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
