@@ -186,10 +186,9 @@ def _is_v2_sku(sku):
     return 'v2' in sku
 
 
-def _add_aux_subscription(aux_subscriptions, resource_id):
-    from msrestazure.tools import is_valid_resource_id, parse_resource_id
-    if resource_id and is_valid_resource_id(resource_id):
-        res_parts = parse_resource_id(resource_id)
+def _add_aux_subscription(aux_subscriptions, added_resource_id):
+    if added_resource_id and is_valid_resource_id(added_resource_id):
+        res_parts = parse_resource_id(added_resource_id)
         aux_sub = res_parts['subscription']
         if aux_sub and aux_sub not in aux_subscriptions:
             aux_subscriptions.append(aux_sub)

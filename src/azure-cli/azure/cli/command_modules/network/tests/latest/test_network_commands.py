@@ -3725,6 +3725,7 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
         self.cmd('network lb list --resource-group {rg}',
                  checks=self.check('length(@)', 3))
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_network_lb_with_cross_subscription_id_', location='eastus2euap')
     @ResourceGroupPreparer(name_prefix='cli_test_network_lb_with_cross_subscription_id_', location='eastus2euap',

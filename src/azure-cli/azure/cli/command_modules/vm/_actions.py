@@ -33,6 +33,7 @@ logger = get_logger(__name__)
 def _resource_not_exists(cli_ctx, resource_type):
     def _handle_resource_not_exists(namespace):
         ns, t = resource_type.split('/')
+        # pylint: disable=protected-access
         if resource_exists(cli_ctx, namespace._subscription_id, namespace.resource_group_name, namespace.name, ns, t):
             raise CLIError('Resource {} of type {} in group {} already exists.'.format(
                 namespace.name,
