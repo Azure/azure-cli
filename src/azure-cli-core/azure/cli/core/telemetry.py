@@ -682,6 +682,7 @@ def _get_user_agent():
         agents.append(os.environ['AZURE_HTTP_USER_AGENT'])
     return ' '.join(agents)
 
+
 @decorators.suppress_all_exceptions(fallback_return='')
 @decorators.hash256_result
 def _get_error_hash():
