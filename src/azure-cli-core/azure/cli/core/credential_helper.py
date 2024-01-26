@@ -9,8 +9,8 @@ import re
 import json
 from enum import Enum
 
-sensitive_data_warning_message = '[Warning] This output may compromise security by showing secrets. Learn more at: http://aka.ms/clisecrets'
-sensitive_data_detailed_warning_message = '[Warning] This output may compromise security by showing the following secrets: {}. Learn more at: http://aka.ms/clisecrets'
+sensitive_data_warning_message = '[Warning] This output may compromise security by showing secrets. Learn more at: https://go.microsoft.com/fwlink/?linkid=2258669'
+sensitive_data_detailed_warning_message = '[Warning] This output may compromise security by showing the following secrets: {}. Learn more at: https://go.microsoft.com/fwlink/?linkid=2258669'
 
 
 class CredentialType(Enum):
