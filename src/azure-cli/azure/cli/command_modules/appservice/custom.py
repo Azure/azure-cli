@@ -3840,6 +3840,10 @@ def update_dapr_and_workload_config(cmd, resource_group_name, name, enabled=None
                                     http_max_request_size=None, http_read_buffer_size=None, log_level=None,
                                     enable_api_logging=None, workload_profile_name=None, cpu=None, memory=None):
     site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    DaprConfig = cmd.get_models('DaprConfig')
+    if site.dapr_config is None:
+        site.dapr_config = DaprConfig()
+
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['enabled', 'enable_api_logging']
