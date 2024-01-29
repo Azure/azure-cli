@@ -1233,6 +1233,8 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
             'week_of_year': 12,
+            'make_backups_immutable': 'False',
+            'backup_storage_access_tier': 'Archive',
             'encryption_protector' : 'https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1',
             'keys' : '"https://test123343strehan.vault.azure.net/keys/k2/66f51a6e70f04067af8eaf77805e88b1" "https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1" "https://test123343strehan.vault.azure.net/keys/testk1/96151496df864e32aa62a3c1857b2931"',
             'umi' : '/subscriptions/e1775f9f-a286-474d-b6f0-29c42ac74554/resourcegroups/ArmTemplate/providers/Microsoft.ManagedIdentity/userAssignedIdentities/shobhittest'
@@ -1242,12 +1244,16 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
             ' --weekly-retention {weekly_retention} --monthly-retention {monthly_retention}'
-            ' --yearly-retention {yearly_retention} --week-of-year {week_of_year}',
+            ' --yearly-retention {yearly_retention} --week-of-year {week_of_year}'
+            ' --make-backups-immutable {make_backups_immutable}',
+            ' --access-tier {backup_storage_access_tier}',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('monthlyRetention', '{monthly_retention}'),
-                self.check('yearlyRetention', '{yearly_retention}')])
+                self.check('yearlyRetention', '{yearly_retention}'),
+                self.check('makeBackupsImmutable', '{make_backups_immutable}'),
+                self.check('backupStorageAccessTier', '{backup_storage_access_tier}')])
 
         # test get long term retention policy on live database
         self.cmd(
@@ -1256,7 +1262,9 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
                 self.check('resourceGroup', '{rg}'),
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('monthlyRetention', '{monthly_retention}'),
-                self.check('yearlyRetention', '{yearly_retention}')])
+                self.check('yearlyRetention', '{yearly_retention}'),
+                self.check('makeBackupsImmutable', '{make_backups_immutable}'),
+                self.check('backupStorageAccessTier', '{backup_storage_access_tier}')])
 
         # test list long term retention backups for location
         # with resource group
@@ -5109,14 +5117,17 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
             'collation': ManagedInstancePreparer.collation,
             'proxy_override': "Proxy",
             'maintenance_id': self._get_full_maintenance_id(self.MMI1),
-            'intance_pool_name': ''
+            'intance_pool_name': '',
+            'database_format': 'AlwaysUpToDate',
+            'pricing_model': 'Regular'
         })
 
         # test create sql managed_instance with FMW
         managed_instance = self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
                                     '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
-                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}" --instance-pool-name "{intance_pool_name}"',
+                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}" '
+                                    '--instance-pool-name "{intance_pool_name}" --database-format "{database_format}" --pricing-model "{pricing_model}"',
                                     checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),

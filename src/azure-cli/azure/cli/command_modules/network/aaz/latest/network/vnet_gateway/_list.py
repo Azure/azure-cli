@@ -22,11 +22,13 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways", "2023-09-01"],
         ]
     }
+
+    AZ_SUPPORT_PAGINATION = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -110,7 +112,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -180,6 +182,18 @@ class List(AAZCommand):
             properties.active_active = AAZBoolType(
                 serialized_name="activeActive",
             )
+            properties.admin_state = AAZStrType(
+                serialized_name="adminState",
+            )
+            properties.allow_remote_vnet_traffic = AAZBoolType(
+                serialized_name="allowRemoteVnetTraffic",
+            )
+            properties.allow_virtual_wan_traffic = AAZBoolType(
+                serialized_name="allowVirtualWanTraffic",
+            )
+            properties.auto_scale_configuration = AAZObjectType(
+                serialized_name="autoScaleConfiguration",
+            )
             properties.bgp_settings = AAZObjectType(
                 serialized_name="bgpSettings",
             )
@@ -231,6 +245,9 @@ class List(AAZCommand):
             properties.v_net_extended_location_resource_id = AAZStrType(
                 serialized_name="vNetExtendedLocationResourceId",
             )
+            properties.virtual_network_gateway_policy_groups = AAZListType(
+                serialized_name="virtualNetworkGatewayPolicyGroups",
+            )
             properties.vpn_client_configuration = AAZObjectType(
                 serialized_name="vpnClientConfiguration",
             )
@@ -240,6 +257,13 @@ class List(AAZCommand):
             properties.vpn_type = AAZStrType(
                 serialized_name="vpnType",
             )
+
+            auto_scale_configuration = cls._schema_on_200.value.Element.properties.auto_scale_configuration
+            auto_scale_configuration.bounds = AAZObjectType()
+
+            bounds = cls._schema_on_200.value.Element.properties.auto_scale_configuration.bounds
+            bounds.max = AAZIntType()
+            bounds.min = AAZIntType()
 
             bgp_settings = cls._schema_on_200.value.Element.properties.bgp_settings
             bgp_settings.asn = AAZIntType()
@@ -361,6 +385,56 @@ class List(AAZCommand):
             sku.name = AAZStrType()
             sku.tier = AAZStrType()
 
+            virtual_network_gateway_policy_groups = cls._schema_on_200.value.Element.properties.virtual_network_gateway_policy_groups
+            virtual_network_gateway_policy_groups.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.virtual_network_gateway_policy_groups.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties.virtual_network_gateway_policy_groups.Element.properties
+            properties.is_default = AAZBoolType(
+                serialized_name="isDefault",
+                flags={"required": True},
+            )
+            properties.policy_members = AAZListType(
+                serialized_name="policyMembers",
+                flags={"required": True},
+            )
+            properties.priority = AAZIntType(
+                flags={"required": True},
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.vng_client_connection_configurations = AAZListType(
+                serialized_name="vngClientConnectionConfigurations",
+                flags={"read_only": True},
+            )
+
+            policy_members = cls._schema_on_200.value.Element.properties.virtual_network_gateway_policy_groups.Element.properties.policy_members
+            policy_members.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.virtual_network_gateway_policy_groups.Element.properties.policy_members.Element
+            _element.attribute_type = AAZStrType(
+                serialized_name="attributeType",
+            )
+            _element.attribute_value = AAZStrType(
+                serialized_name="attributeValue",
+            )
+            _element.name = AAZStrType()
+
+            vng_client_connection_configurations = cls._schema_on_200.value.Element.properties.virtual_network_gateway_policy_groups.Element.properties.vng_client_connection_configurations
+            vng_client_connection_configurations.Element = AAZObjectType()
+            _ListHelper._build_schema_sub_resource_read(vng_client_connection_configurations.Element)
+
             vpn_client_configuration = cls._schema_on_200.value.Element.properties.vpn_client_configuration
             vpn_client_configuration.aad_audience = AAZStrType(
                 serialized_name="aadAudience",
@@ -379,6 +453,9 @@ class List(AAZCommand):
             )
             vpn_client_configuration.radius_servers = AAZListType(
                 serialized_name="radiusServers",
+            )
+            vpn_client_configuration.vng_client_connection_configurations = AAZListType(
+                serialized_name="vngClientConnectionConfigurations",
             )
             vpn_client_configuration.vpn_authentication_types = AAZListType(
                 serialized_name="vpnAuthenticationTypes",
@@ -414,6 +491,38 @@ class List(AAZCommand):
             _element.radius_server_secret = AAZStrType(
                 serialized_name="radiusServerSecret",
             )
+
+            vng_client_connection_configurations = cls._schema_on_200.value.Element.properties.vpn_client_configuration.vng_client_connection_configurations
+            vng_client_connection_configurations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.vpn_client_configuration.vng_client_connection_configurations.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties.vpn_client_configuration.vng_client_connection_configurations.Element.properties
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.virtual_network_gateway_policy_groups = AAZListType(
+                serialized_name="virtualNetworkGatewayPolicyGroups",
+                flags={"required": True},
+            )
+            properties.vpn_client_address_pool = AAZObjectType(
+                serialized_name="vpnClientAddressPool",
+                flags={"required": True},
+            )
+            _ListHelper._build_schema_address_space_read(properties.vpn_client_address_pool)
+
+            virtual_network_gateway_policy_groups = cls._schema_on_200.value.Element.properties.vpn_client_configuration.vng_client_connection_configurations.Element.properties.virtual_network_gateway_policy_groups
+            virtual_network_gateway_policy_groups.Element = AAZObjectType()
+            _ListHelper._build_schema_sub_resource_read(virtual_network_gateway_policy_groups.Element)
 
             vpn_authentication_types = cls._schema_on_200.value.Element.properties.vpn_client_configuration.vpn_authentication_types
             vpn_authentication_types.Element = AAZStrType()

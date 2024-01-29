@@ -61,6 +61,7 @@ from .utils import (_normalize_sku,
                     _get_location_from_resource_group,
                     _list_app,
                     is_functionapp,
+                    is_linux_webapp,
                     _rename_server_farm_props,
                     _get_location_from_webapp,
                     _normalize_location,
@@ -80,7 +81,7 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
                          VERSION_2022_09_01,
-                         RUNTIME_STATUS_TEXT_MAP)
+                         RUNTIME_STATUS_TEXT_MAP, LANGUAGE_EOL_DEPRECATION_NOTICES)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -104,7 +105,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
-                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, public_network_access=None):
+                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, public_network_access=None,
+                  acr_use_identity=False):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -187,6 +189,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     if using_webapp_up:
         https_only = using_webapp_up
+
+    if acr_use_identity:
+        site_config.acr_use_managed_identity_creds = acr_use_identity
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
@@ -401,6 +406,27 @@ def parse_docker_image_name(deployment_container_image_name, environment=None):
     return "https://{}".format(hostname)
 
 
+def check_language_runtime(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    app = client.web_apps.get(resource_group_name, name)
+    is_linux = app.reserved
+    if is_functionapp(app):
+        runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, is_linux)
+        runtime = runtime_info['app_runtime']
+        runtime_version = runtime_info['app_runtime_version']
+        functions_version = runtime_info['functionapp_version']
+        runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=is_linux, windows=(not is_linux))
+        try:
+            runtime_helper.resolve(runtime, runtime_version, functions_version, is_linux)
+        except ValidationError as e:
+            logger.warning(e.error_msg)
+
+
+def update_app_settings_functionapp(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
+    check_language_runtime(cmd, resource_group_name, name)
+    return update_app_settings(cmd, resource_group_name, name, settings, slot, slot_settings)
+
+
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
     if not settings and not slot_settings:
         raise MutuallyExclusiveArgumentError('Usage Error: --settings |--slot-settings')
@@ -550,6 +576,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
 
 
 def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
+    check_language_runtime(cmd, resource_group_name, name)
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     if app is None:
@@ -586,11 +613,11 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
 
 
-def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None):
-    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout=timeout, slot=slot)
+def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=False):
+    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot, track_status)
 
 
-def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
+def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=False):
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
@@ -621,9 +648,15 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
     # check the status of async deployment
     if res.status_code == 202:
-        response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                slot, timeout)
-        return response
+        response_body = None
+        if track_status:
+            response_body = _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name, slot,
+                                                                          deployment_status_url, is_async=True,
+                                                                          timeout=timeout)
+        else:
+            response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+                                                         slot, timeout)
+        return response_body
 
     # check if there's an ongoing process
     if res.status_code == 409:
@@ -1779,6 +1812,28 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
                                                                           slot=slot))
 
 
+def update_site_configs_functionapp(cmd, resource_group_name, name, slot=None, number_of_workers=None,
+                                    linux_fx_version=None, windows_fx_version=None, pre_warmed_instance_count=None,
+                                    php_version=None, python_version=None, net_framework_version=None,
+                                    power_shell_version=None, java_version=None, java_container=None,
+                                    java_container_version=None, remote_debugging_enabled=None,
+                                    web_sockets_enabled=None, always_on=None, auto_heal_enabled=None,
+                                    use32_bit_worker_process=None, min_tls_version=None,
+                                    http20_enabled=None, app_command_line=None, ftps_state=None,
+                                    vnet_route_all_enabled=None, generic_configurations=None, min_replicas=None,
+                                    max_replicas=None):
+    check_language_runtime(cmd, resource_group_name, name)
+    return update_site_configs(cmd, resource_group_name, name, slot, number_of_workers, linux_fx_version,
+                               windows_fx_version, pre_warmed_instance_count, php_version,
+                               python_version, net_framework_version, power_shell_version,
+                               java_version, java_container, java_container_version,
+                               remote_debugging_enabled, web_sockets_enabled,
+                               always_on, auto_heal_enabled,
+                               use32_bit_worker_process, min_tls_version, http20_enabled, app_command_line,
+                               ftps_state, vnet_route_all_enabled, generic_configurations, min_replicas,
+                               max_replicas)
+
+
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
                                           image=None, registry_username=None,
                                           registry_password=None, slot=None, min_replicas=None, max_replicas=None,
@@ -1786,6 +1841,7 @@ def update_container_settings_functionapp(cmd, resource_group_name, name, regist
                                           dapr_http_max_request_size=None, dapr_http_read_buffer_size=None,
                                           dapr_log_level=None, dapr_enable_api_logging=None,
                                           workload_profile_name=None, cpu=None, memory=None):
+    check_language_runtime(cmd, resource_group_name, name)
     if is_centauri_functionapp(cmd, resource_group_name, name):
         _validate_cpu_momory_functionapp(cpu, memory)
         if any([enable_dapr, dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
@@ -3560,10 +3616,36 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 d["linux_fx_version"] = self.site_config_dict.linux_fx_version
             return d
 
+    class RuntimeEOL:
+        def __init__(self, name=None, version=None, eol=None):
+            self.name = name
+            self.version = version
+            self.eol = eol
+            self.display_name = "{}|{}".format(name, version)
+            self.deprecation_link = LANGUAGE_EOL_DEPRECATION_NOTICES.get(self.display_name)
+
     def __init__(self, cmd, linux=False, windows=False):
         self.disallowed_functions_versions = {"~1", "~2", "~3"}
         self.KEYS = FUNCTIONS_STACKS_API_KEYS()
+        self.end_of_life_dates = []
         super().__init__(cmd, linux=linux, windows=windows)
+
+    def validate_end_of_life_date(self, runtime, version):
+        from dateutil.relativedelta import relativedelta
+        today = datetime.datetime.now(datetime.timezone.utc)
+        six_months = today + relativedelta(months=+6)
+        runtimes_eol = [r for r in self.end_of_life_dates if runtime == r.name]
+        matched_runtime_eol = next((r for r in runtimes_eol if r.version == version), None)
+        if matched_runtime_eol:
+            eol = matched_runtime_eol.eol
+            runtime_deprecation_link = matched_runtime_eol.deprecation_link or ''
+
+            if eol < today:
+                raise ValidationError('{} has reached EOL on {} and is no longer supported. {}'
+                                      .format(runtime, eol.date(), runtime_deprecation_link))
+            if eol < six_months:
+                logger.warning('%s will reach EOL on %s and will no longer be supported. %s',
+                               runtime, eol.date(), runtime_deprecation_link)
 
     def resolve(self, runtime, version=None, functions_version=None, linux=False, disable_version_error=False):
         stacks = self.stacks
@@ -3575,7 +3657,12 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                                   "Run 'az functionapp list-runtimes' for more details on supported runtimes. "
                                   .format(runtime, os, supported_runtimes))
         if version is None:
-            return self.get_default_version(runtime, functions_version, linux)
+            matched_runtime_version = self.get_default_version(runtime, functions_version, linux)
+            self.validate_end_of_life_date(
+                matched_runtime_version.name,
+                matched_runtime_version.version
+            )
+            return matched_runtime_version
         matched_runtime_version = next((r for r in runtimes if r.version == version), None)
         if not matched_runtime_version:
             # help convert previously acceptable versions into correct ones if match not found
@@ -3589,6 +3676,14 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             }
             new_version = old_to_new_version.get(version)
             matched_runtime_version = next((r for r in runtimes if r.version == new_version), None)
+            if matched_runtime_version is not None:
+                version = new_version
+
+        self.validate_end_of_life_date(
+            runtime,
+            version
+        )
+
         if not matched_runtime_version:
             versions = [r.version for r in runtimes]
             if disable_version_error:
@@ -3646,7 +3741,10 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 valid_versions.append(self._format_version_name(v))
         return valid_versions
 
-    def _parse_minor_version(self, runtime_settings, major_version_name, minor_version_name, runtime_to_version):
+    def _parse_minor_version(self, runtime_settings, major_version_name, minor_version_name, runtime_to_version,
+                             runtime_to_version_eol):
+        runtime_name = (runtime_settings.app_settings_dictionary.get(self.KEYS.FUNCTIONS_WORKER_RUNTIME) or
+                        major_version_name)
         if not runtime_settings.is_deprecated:
             functions_versions = self._get_valid_function_versions(runtime_settings)
             if functions_versions:
@@ -3660,10 +3758,13 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                     self.KEYS.GIT_HUB_ACTION_SETTINGS: runtime_settings.git_hub_action_settings
                 }
 
-                runtime_name = (runtime_settings.app_settings_dictionary.get(self.KEYS.FUNCTIONS_WORKER_RUNTIME) or
-                                major_version_name)
                 runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
                 runtime_to_version[runtime_name][minor_version_name] = runtime_version_properties
+
+        # obtain end of life date for all runtime versions
+        if runtime_settings.end_of_life_date is not None:
+            runtime_to_version_eol[runtime_name] = runtime_to_version_eol.get(runtime_name, dict())
+            runtime_to_version_eol[runtime_name][minor_version_name] = runtime_settings.end_of_life_date
 
     def _create_runtime_from_properties(self, runtime_name, version_name, version_properties, linux):
         supported_func_versions = version_properties[self.KEYS.SUPPORTED_EXTENSION_VERSIONS]
@@ -3683,6 +3784,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
         # build a map of runtime -> runtime version -> runtime version properties
         runtime_to_version_linux = {}
         runtime_to_version_windows = {}
+        runtime_to_version_end_of_life = {}
         for runtime in stacks:
             for major_version in runtime.major_versions:
                 for minor_version in major_version.minor_versions:
@@ -3694,16 +3796,19 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                         self._parse_minor_version(runtime_settings=linux_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
-                                                  runtime_to_version=runtime_to_version_linux)
+                                                  runtime_to_version=runtime_to_version_linux,
+                                                  runtime_to_version_eol=runtime_to_version_end_of_life)
 
                     if windows_settings is not None and not windows_settings.is_hidden:
                         self._parse_minor_version(runtime_settings=windows_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
-                                                  runtime_to_version=runtime_to_version_windows)
+                                                  runtime_to_version=runtime_to_version_windows,
+                                                  runtime_to_version_eol=runtime_to_version_end_of_life)
 
         runtime_to_version_linux = self._format_version_names(runtime_to_version_linux)
         runtime_to_version_windows = self._format_version_names(runtime_to_version_windows)
+        runtime_to_version_end_of_life = self._format_version_names(runtime_to_version_end_of_life)
 
         for runtime_name, versions in runtime_to_version_windows.items():
             for version_name, version_properties in versions.items():
@@ -3715,6 +3820,11 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 r = self._create_runtime_from_properties(runtime_name, version_name, version_properties, linux=True)
                 self._stacks.append(r)
 
+        for runtime_name, versions in runtime_to_version_end_of_life.items():
+            for version_name, version_eol in versions.items():
+                r = self.RuntimeEOL(name=runtime_name, version=version_name, eol=version_eol)
+                self.end_of_life_dates.append(r)
+
 
 def get_app_insights_key(cli_ctx, resource_group, name):
     appinsights_client = get_mgmt_service_client(cli_ctx, ApplicationInsightsManagementClient)
@@ -3723,6 +3833,15 @@ def get_app_insights_key(cli_ctx, resource_group, name):
         raise ResourceNotFoundError("App Insights {} under resource group {} was not found.".format(name,
                                                                                                     resource_group))
     return appinsights.instrumentation_key
+
+
+def get_app_insights_connection_string(cli_ctx, resource_group, name):
+    appinsights_client = get_mgmt_service_client(cli_ctx, ApplicationInsightsManagementClient)
+    appinsights = appinsights_client.components.get(resource_group, name)
+    if appinsights is None or appinsights.connection_string is None:
+        raise ResourceNotFoundError("App Insights {} under resource group {} was not found.".format(name,
+                                                                                                    resource_group))
+    return appinsights.connection_string
 
 
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
@@ -3821,6 +3940,10 @@ def update_dapr_and_workload_config(cmd, resource_group_name, name, enabled=None
                                     http_max_request_size=None, http_read_buffer_size=None, log_level=None,
                                     enable_api_logging=None, workload_profile_name=None, cpu=None, memory=None):
     site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    DaprConfig = cmd.get_models('DaprConfig')
+    if site.dapr_config is None:
+        site.dapr_config = DaprConfig()
+
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['enabled', 'enable_api_logging']
@@ -4129,9 +4252,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
                                                       value=app_insights_key))
     elif app_insights is not None:
-        instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
-        site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
-                                                      value=instrumentation_key))
+        app_insights_conn_string = get_app_insights_connection_string(cmd.cli_ctx, resource_group_name, app_insights)
+        site_config.app_settings.append(NameValuePair(name='APPLICATIONINSIGHTS_CONNECTION_STRING',
+                                                      value=app_insights_conn_string))
     elif disable_app_insights or not matched_runtime.app_insights:
         # set up dashboard if no app insights
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
@@ -4270,7 +4393,7 @@ def try_create_workspace_based_application_insights(cmd, functionapp, workspace_
     }
 
     appinsights = app_insights_client.components.create_or_update(ai_resource_group_name, ai_name, ai_properties)
-    if appinsights is None or appinsights.instrumentation_key is None:
+    if appinsights is None or appinsights.connection_string is None:
         logger.warning(creation_failed_warn)
         return
 
@@ -4279,12 +4402,8 @@ def try_create_workspace_based_application_insights(cmd, functionapp, workspace_
                    'You can visit https://portal.azure.com/#resource%s/overview to view your '
                    'Application Insights component', appinsights.name, appinsights.id)
 
-    if not is_centauri_functionapp(cmd, ai_resource_group_name, ai_name):
-        update_app_settings(cmd, functionapp.resource_group, functionapp.name,
-                            ['APPINSIGHTS_INSTRUMENTATIONKEY={}'.format(appinsights.instrumentation_key)])
-    else:
-        update_app_settings(cmd, functionapp.resource_group, functionapp.name,
-                            ['APPLICATIONINSIGHTS_CONNECTION_STRING={}'.format(appinsights.connection_string)])
+    update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                        ['APPLICATIONINSIGHTS_CONNECTION_STRING={}'.format(appinsights.connection_string)])
 
 
 def try_create_application_insights(cmd, functionapp):
@@ -4467,8 +4586,49 @@ def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
     return None
 
 
+def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name, slot,
+                                                  deployment_status_url, is_async, timeout):
+    response_body = None
+    logger.warning('Polling the status of %s deployment. Start Time: %s UTC',
+                   "async" if is_async else "sync",
+                   datetime.datetime.now(datetime.timezone.utc))
+    # verify if the app is a linux web app
+    client = web_client_factory(cmd.cli_ctx)
+    app = client.web_apps.get(resource_group_name, name)
+    app_is_linux_webapp = is_linux_webapp(app)
+    if not app_is_linux_webapp:
+        logger.warning("Deployment status tracking is currently only supported for linux webapps."
+                       " Resuming without tracking status.")
+        response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+                                                     slot, timeout)
+    else:
+        # get the deployment id
+        # once deploymentstatus/latest is available, we can use it to track the deployment
+        deployment_id = _get_latest_deployment_id(cmd, resource_group_name,
+                                                  name, deployment_status_url, slot)
+        if deployment_id is None:
+            logger.warning("Failed to enable tracking runtime status for this deployment. "
+                           "Resuming without tracking status.")
+            response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+                                                         slot, timeout)
+        else:
+            deploymentstatisapi_url = _build_deploymentstatus_url(cmd, resource_group_name,
+                                                                  name, slot, deployment_id)
+            response_body = _poll_deployment_runtime_status(cmd, resource_group_name, name, slot,
+                                                            deploymentstatisapi_url, deployment_id, timeout)
+            # incase we are unable to fetch response from deploymentstatus API
+            # fallback to polling kudu for deployment status
+            if response_body is None:
+                logger.warning("Failed to track the runtime status for this deployment. "
+                               "Resuming without tracking status.")
+                response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+                                                             slot, timeout)
+    return response_body
+
+
 # pylint: disable=too-many-branches
-def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment_id, timeout=None):
+def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot, deploymentstatusapi_url,
+                                    deployment_id, timeout=None):
     max_time_sec = int(timeout) if timeout else 1000
     start_time = time.time()
     time_elapsed = 0
@@ -4476,8 +4636,9 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
     response_body = None
     while time_elapsed < max_time_sec:
         try:
-            response_body = send_raw_request(params.cmd.cli_ctx, "GET", deploymentstatusapi_url).json()
+            response_body = send_raw_request(cmd.cli_ctx, "GET", deploymentstatusapi_url).json()
         except Exception as ex:  # pylint: disable=broad-except
+            # we might get a 404 if a new deployment has started and this deployment_id is no longer latest
             logger.warning("Deployment status endpoint %s returned error: %s.", deploymentstatusapi_url, ex)
             break
         deployment_properties = response_body.get('properties')
@@ -4537,7 +4698,7 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
                     error_text += "Extended ErrorCode: {}\n".format(error_extended_code)
             deployment_logs = deployment_properties.get('failedInstancesLogs')
             if deployment_logs is None or len(deployment_logs) == 0:
-                scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+                scm_url = _get_scm_url(cmd, resource_group_name, webapp_name, slot)
                 deployment_logs = scm_url + f"/api/deployments/{deployment_id}/log"
             else:
                 deployment_logs = deployment_logs[0]
@@ -4546,7 +4707,7 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
         time.sleep(15)
 
     if time_elapsed >= max_time_sec and deployment_status != "RuntimeSuccessful":
-        scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+        scm_url = _get_scm_url(cmd, resource_group_name, webapp_name, slot)
         if deployment_status == "BuildInProgress":
             deployments_log_url = scm_url + f"/api/deployments/{deployment_id}/log"
             raise CLIError("Timeout reached while build was still in progress. "
@@ -5048,7 +5209,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
-              app_service_environment=None):
+              app_service_environment=None, track_status=False):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -5222,7 +5383,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     logger.warning("Creating zip with contents of dir %s ...", src_dir)
     # zip contents & deploy
     zip_file_path = zip_contents_from_dir(src_dir, language)
-    enable_zip_deploy(cmd, rg_name, name, zip_file_path)
+    enable_zip_deploy(cmd, rg_name, name, zip_file_path, track_status=track_status)
 
     if launch_browser:
         logger.warning("Launching app using default browser")
@@ -5546,18 +5707,18 @@ def _build_onedeploy_arm_url(params):
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
 
-def _build_deploymentstatus_url(params, deployment_id):
+def _build_deploymentstatus_url(cmd, resource_group_name, webapp_name, slot, deployment_id):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    client = web_client_factory(params.cmd.cli_ctx)
-    sub_id = get_subscription_id(params.cmd.cli_ctx)
+    client = web_client_factory(cmd.cli_ctx)
+    sub_id = get_subscription_id(cmd.cli_ctx)
 
-    slot_info = "/slots/" + params.slot if params.slot else ""
+    slot_info = "/slots/" + slot if slot else ""
     base_url = (
-        f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-        f"{params.webapp_name}{slot_info}/deploymentStatus/{deployment_id}"
+        f"subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/"
+        f"{webapp_name}{slot_info}/deploymentStatus/{deployment_id}"
         f"?api-version={client.DEFAULT_API_VERSION}"
     )
-    return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
+    return cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
 
 def _get_ondeploy_headers(params):
@@ -5654,41 +5815,12 @@ def _make_onedeploy_request(params):
     if response.status_code == 202 or response.status_code == 200:
         response_body = None
         if poll_async_deployment_for_debugging:
-            logger.warning('Polling the status of %s deployment. Start Time: %s UTC',
-                           "async" if params.is_async_deployment else "sync",
-                           datetime.datetime.now(datetime.timezone.utc))
             if params.track_status is not None and params.track_status:
-                # verify if the app is a linux app
-                webapp = _generic_site_operation(params.cmd.cli_ctx, params.resource_group_name,
-                                                 params.webapp_name, 'get', params.slot)
-                is_linux = bool(webapp.site_config.linux_fx_version)
-                if not is_linux:
-                    logger.warning("Deployment status tracking is currently only supported for linux webapps."
-                                   " Resuming without tracking status.")
-                    response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name,
-                                                                 params.webapp_name, deployment_status_url,
-                                                                 params.slot, params.timeout)
-                else:
-                    # get the deployment id
-                    # once deploymentstatus/latest is available, we can use it to track the deployment
-                    deployment_id = _get_latest_deployment_id(params.cmd, params.resource_group_name,
-                                                              params.webapp_name, deployment_status_url, params.slot)
-                    if deployment_id is None:
-                        logger.warning("Failed to enable tracking runtime status for this deployment. "
-                                       "Resuming without tracking status.")
-                        response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name,
-                                                                     params.webapp_name, deployment_status_url,
-                                                                     params.slot, params.timeout)
-                    else:
-                        deploymentstatusapi_url = _build_deploymentstatus_url(params, deployment_id)
-                        response_body = _track_deployment_runtime_status(params, deploymentstatusapi_url,
-                                                                         deployment_id, params.timeout)
-                        if response_body is None:
-                            logger.warning("Failed to track the runtime status for this deployment. "
-                                           "Resuming without tracking status.")
-                            response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name,
-                                                                         params.webapp_name, deployment_status_url,
-                                                                         params.slot, params.timeout)
+                response_body = _check_runtimestatus_with_deploymentstatusapi(params.cmd, params.resource_group_name,
+                                                                              params.webapp_name, params.slot,
+                                                                              deployment_status_url,
+                                                                              params.is_async_deployment,
+                                                                              params.timeout)
             else:
                 response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
                                                              deployment_status_url, params.slot, params.timeout)
