@@ -147,7 +147,7 @@ subnet_disable_ple_msg = ("`--disable-private-endpoint-network-policies` will be
 
 subnet_disable_pls_msg = ("`--disable-private-link-service-network-policies` will be deprecated in the future, if you "
                           "wanna disable network policy for private link service, please use "
-                          "`----private-link-service-network-policies Disabled` instead.")
+                          "`--private-link-service-network-policies Disabled` instead.")
 
 
 # region Utility methods
@@ -5555,7 +5555,7 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         # add ple/pls arguments
         args_schema.disable_private_endpoint_network_policies = AAZStrArg(
             options=["--disable-private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet.",
+            help="Disable private endpoint network policies on the subnet. Please note that it will be replaced by `--private-endpoint-network-policies` soon.",
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
                 "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
@@ -5564,7 +5564,7 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         )
         args_schema.disable_private_link_service_network_policies = AAZStrArg(
             options=["--disable-private-link-service-network-policies"],
-            help="Disable private link service network policies on the subnet.",
+            help="Disable private link service network policies on the subnet. Please note that it will be replaced by `--private-link-service-network-policies` soon.",
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
                 "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
@@ -5667,7 +5667,7 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         # add ple/pls arguments
         args_schema.disable_private_endpoint_network_policies = AAZStrArg(
             options=["--disable-private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet.",
+            help="Disable private endpoint network policies on the subnet. Please note that it will be replaced by `--private-endpoint-network-policies` soon.",
             nullable=True,
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
@@ -5677,7 +5677,7 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         )
         args_schema.disable_private_link_service_network_policies = AAZStrArg(
             options=["--disable-private-link-service-network-policies"],
-            help="Disable private link service network policies on the subnet.",
+            help="Disable private link service network policies on the subnet. Please note that it will be replaced by `--private-link-service-network-policies` soon.",
             nullable=True,
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",

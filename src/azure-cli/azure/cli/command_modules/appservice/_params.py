@@ -462,6 +462,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('runtime', options_list=['--runtime', '-r'], help='Canonicalized web runtime in the format of Framework|Version, e.g. "PHP|5.6". Use "az webapp list-runtimes" for available list.')
         c.argument('force', options_list=['--force', '-f'], help='When true, the command will overwrite any workflow file with a conflicting name.', action='store_true')
 
+    with self.argument_context('webapp deployment source config-zip')as c:
+        c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
+                   arg_type=get_three_state_flag())
+
     with self.argument_context('webapp log config') as c:
         c.argument('application_logging', help='configure application logging',
                    arg_type=get_enum_type(['filesystem', 'azureblobstorage', 'off']))
@@ -689,6 +693,8 @@ subscription than the app service environment, please use the resource ID for --
                    default=False, action='store_true')
         c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
         c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku [I1v2, I2v2, I3v2]')
+        c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('webapp ssh') as c:
         c.argument('port', options_list=['--port', '-p'],

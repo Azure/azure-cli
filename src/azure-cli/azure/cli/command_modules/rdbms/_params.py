@@ -829,9 +829,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
                            help='Determines the public access. ')
 
-        with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
-            c.argument('server_name', arg_type=server_name_arg_type)
-
         with self.argument_context('{} flexible-server replica promote'.format(command_group)) as c:
             c.argument('server_name', arg_type=server_name_arg_type)
             c.argument('promote_mode', options_list=['--promote-mode'], required=False, arg_type=promote_mode_arg_type)

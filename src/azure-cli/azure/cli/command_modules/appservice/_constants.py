@@ -33,6 +33,7 @@ GITHUB_OAUTH_SCOPES = [
 ]
 LOGICAPP_KIND = "workflowapp"
 FUNCTIONAPP_KIND = "functionapp"
+LINUXAPP_KIND = "linux"
 DOTNET_REFERENCES_DIR_IN_ZIP = ".az-references"
 
 
