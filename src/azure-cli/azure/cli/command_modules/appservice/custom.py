@@ -2807,7 +2807,13 @@ def enable_credentials(cmd, resource_group_name, name, enable, slot=None):
     if not configs.cors:
         configs.cors = CorsSettings()
     configs.cors.support_credentials = enable
-    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+
+    result = None
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        result = update_configuration_polling(cmd, resource_group_name, name, slot, configs)
+    else:
+        result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+
     return result.cors
 
 
@@ -2817,7 +2823,13 @@ def add_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
     if not configs.cors:
         configs.cors = CorsSettings()
     configs.cors.allowed_origins = (configs.cors.allowed_origins or []) + allowed_origins
-    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+
+    result = None
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        result = update_configuration_polling(cmd, resource_group_name, name, slot, configs)
+    else:
+        result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+
     return result.cors
 
 
@@ -2828,8 +2840,14 @@ def remove_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
             configs.cors.allowed_origins = [x for x in (configs.cors.allowed_origins or []) if x not in allowed_origins]
         else:
             configs.cors.allowed_origins = []
-        configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
-    return configs.cors
+
+    result = None
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        result = update_configuration_polling(cmd, resource_group_name, name, slot, configs)
+    else:
+        result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+
+    return result.cors
 
 
 def show_cors(cmd, resource_group_name, name, slot=None):
