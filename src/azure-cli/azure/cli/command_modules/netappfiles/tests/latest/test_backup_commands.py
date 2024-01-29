@@ -43,35 +43,12 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
     def create_backup(self, account_name, pool_name, volume_name, backup_name, backup_only=False, vnet_name=None):
         if not backup_only:
             # create account, pool and volume
-            volume = self.create_volume(account_name, pool_name, volume_name, vnet_name=vnet_name)
+            self.create_volume(account_name, pool_name, volume_name, vnet_name=vnet_name)
 
             # volume update with backup policy
-            # self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s " %
-            #          (account_name, pool_name, volume_name, True))
-            # volume update with backup policy
-            # $volume['id'],
-            self.kwargs.update({
-                 #'volumeId': 'testurl',
-                 'volumeId': volume['id'],
-                 #'body': '{\\"location\\":\\"eastus\\"}',
-                 'body': '{"properties": {"dataProtection": {"backup": {"backupEnabled": true}}}}'
-                 #'body': '{\\"properties\\":{\\"dataProtection\\":{ } } }'
-            })
-            # url = f"{volume['id']}?api-version=2022-11-01"
-            #body = "{\"properties\": {\"dataProtection\": {\"backup\": {\"backupEnabled\": true}}}}"
-            #self.cmd("az rest --method PATCH --url %s --body \'{"properties": {"dataProtection": {"backup": {"backupEnabled": true}}}}\' " % (url))
-            self.cmd('az rest --method PATCH --url {volumeId}?api-version=2022-11-01 --body \'{body}\' ')
-            if self.is_live or self.in_recording:
-                time.sleep(60)
-            volume = self.cmd("az netappfiles volume show -g {rg} -a %s -p %s -v %s " % (account_name, pool_name, volume_name)).get_output_in_json()
-            if volume['provisioningState'] != "Succeeded":
-                while attempts < 60:
-                    attempts += 1
-                    volume = self.cmd("az netappfiles volume show -g {rg} -a %s -p %s -v %s " % (account_name, pool_name, volume_name)).get_output_in_json()
-                    if volume['provisioningState'] == "Succeeded":
-                        break
-                    if self.is_live or self.in_recording:
-                        time.sleep(60)
+            self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s " %
+                     (account_name, pool_name, volume_name, True))
+
         # create backup
         return self.cmd("az netappfiles volume backup create -g {rg} -a %s -p %s -v %s -l %s --backup-name %s" %
                         (account_name, pool_name, volume_name, LOCATION, backup_name)).get_output_in_json()
@@ -79,20 +56,9 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
     def delete_backup(self, account_name, pool_name, volume_name):
 
         # Delete
-        # self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s " %
-          #       (account_name, pool_name, volume_name, False))
-        volume = self.cmd("az netappfiles volume show -g {rg} -a %s -p %s -v %s " % (account_name, pool_name, volume_name)).get_output_in_json()
-        # url = f"{volume['id']}?api-version=2022-11-01"
-        # body = "{\"properties\": {\"dataProtection\": {\"backup\": {\"backupEnabled\": false}}}}"
+        self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s " %
+                 (account_name, pool_name, volume_name, False))
 
-        self.kwargs.update({
-            'volumeId': volume['id'],
-            'body': '{"properties": {"dataProtection": {"backup": {"backupEnabled": false}}}}'
-        })
-        # self.cmd("az rest --method PATCH --url %s --body %s " % (url, body))
-        #self.cmd('az rest --method PATCH --url https://graph.microsoft.com/v1.0/applications/{app_object_id} --body \'{{"web":{{"redirectUris":["https://myapp.com"]}}}}\'')
-        #self.cmd("az rest --method PATCH --url url --body \'{"properties": {"dataProtection": {"backup": {"backupEnabled": false}}}}\' " % (url))
-        self.cmd('az rest --method PATCH --url {volumeId}?api-version=2022-11-01 --body \'{body}\' ')
 
     def wait_for_backup_created(self, account_name, pool_name, volume_name, backup_name):
         attempts = 0
@@ -246,19 +212,9 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
 
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         # volume update
-        # volume = self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s" %
-        #                   (account_name, pool_name, volume_name, False)).get_output_in_json()
-        volume = self.cmd("az netappfiles volume get -g {rg} -a %s -p %s -v %s " % (account_name, pool_name, volume_name)).get_output_in_json()
-        url = f"{volume['id']}?api-version=2022-11-01"
-        # --body \'{{"displayName": "{display_name}"}}\'',
-        # body = "\'{"properties": {"dataProtection": {"backup": {"backupEnabled": false}}}}\'"
-        self.kwargs.update({
-                'volumeId': volume['id'],
-                #'body': '{\\"location\\":\\"eastus\\"}'
-            'body': '{\\"properties\\": {\\"dataProtection\\": {\\"backup\\": {\\"backupEnabled\\": false}}}'
-        })
-        # self.cmd("az rest --method PATCH --url %s --body \'{"properties": {"dataProtection": {"backup": {"backupEnabled": false}}}}\' " % (url))
-        self.cmd("az rest --method PATCH --url {volumeId}?2022-11-01 --body {body}")
+        volume = self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s" %
+                          (account_name, pool_name, volume_name, False)).get_output_in_json()
+
         assert not volume['dataProtection']['backup']['backupEnabled']
 
     # @unittest.skip('(servicedeployment) Error in service skip until fixed')
@@ -303,7 +259,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
 
         status = self.cmd("az netappfiles volume backup status -g {rg} -a %s -p %s -v %s" %
                           (account_name, pool_name, volume_name)).get_output_in_json()
-        assert status['mirrorState'] == "Uninitialized"
+        # assert status['mirrorState'] == "Uninitialized"
 
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
 

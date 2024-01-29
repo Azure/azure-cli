@@ -18,6 +18,7 @@ from .aaz.latest.netappfiles.volume_group import Create as _VolumeGroupCreate
 from .aaz.latest.netappfiles.volume.export_policy import List as _ExportPolicyList, Add as _ExportPolicyAdd, Remove as _ExportPolicyRemove
 from .aaz.latest.netappfiles.volume.replication import Resume as _ReplicationResume
 from .aaz.latest.netappfiles.pool import Create as _PoolCreate, Update as _PoolUpdate
+from azure.mgmt.netapp.models import  VolumePatch, VolumePatchPropertiesDataProtection, VolumeBackupProperties
 
 logger = get_logger(__name__)
 
@@ -301,6 +302,7 @@ class VolumeCreate(_VolumeCreate):
             maximum=500,
             minimum=100
         )
+
         return args_schema
 
     def pre_operations(self):
@@ -387,7 +389,22 @@ class VolumeCreate(_VolumeCreate):
             logger.debug("Don't create export policy")
 
 # todo create export policy note no longer flatteneded
-
+    # def post_operations(self):
+    #     args = self.ctx.args
+    #     backupPolicyId = None
+    #     backupEnabled = None
+    #     backupVaultId = None
+    #     if has_value(args.backup_policy_id):
+    #         backupPolicyId = args.backup_policy_id.to_serialized_data()
+    #     if has_value(args.backup_enabled):
+    #         backupEnabled = args.backup_enabled.to_serialized_data()
+    #     if has_value(args.backup_vault_id):
+    #         backupVaultId = args.backup_vault_id.to_serialized_data()
+    #     if has_value(args.policy_enforced):
+    #         policyEnforced = args.policy_enforced.to_serialized_data()
+    #     if any(x is not None for x in [backupPolicyId, backupEnabled, backupVaultId]):
+    #         backup = VolumeBackupProperties(backup_enabled=backup_enabled,
+    #                                         backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)
 
 # check if flattening dataprotection works
 class VolumeUpdate(_VolumeUpdate):

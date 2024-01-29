@@ -30,9 +30,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2023-05-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2023-05-01-preview"],
         ]
     }
 
@@ -83,6 +83,25 @@ class Create(AAZCommand):
                 max_length=64,
                 min_length=1,
             ),
+        )
+
+        # define Arg Group "Backup"
+
+        _args_schema = cls._args_schema
+        _args_schema.backup_enabled = AAZBoolArg(
+            options=["--backup-enabled"],
+            arg_group="Backup",
+            help="Backup Enabled",
+        )
+        _args_schema.backup_policy_id = AAZStrArg(
+            options=["--backup-policy-id"],
+            arg_group="Backup",
+            help="Backup Policy Resource ID",
+        )
+        _args_schema.policy_enforced = AAZBoolArg(
+            options=["--policy-enforced"],
+            arg_group="Backup",
+            help="Policy Enforced",
         )
 
         # define Arg Group "Body"
@@ -469,6 +488,11 @@ class Create(AAZCommand):
             help="Indicates whether the local volume is the source or destination for the Volume Replication",
             enum={"dst": "dst", "src": "src"},
         )
+        _args_schema.remote_path = AAZObjectArg(
+            options=["--remote-path"],
+            arg_group="Replication",
+            help="The full path to a volume that is to be migrated into ANF. Required for Migration volumes",
+        )
         _args_schema.remote_volume_region = AAZStrArg(
             options=["--remote-volume-region"],
             arg_group="Replication",
@@ -484,6 +508,23 @@ class Create(AAZCommand):
             arg_group="Replication",
             help="Schedule",
             enum={"_10minutely": "_10minutely", "daily": "daily", "hourly": "hourly"},
+        )
+
+        remote_path = cls._args_schema.remote_path
+        remote_path.external_host_name = AAZStrArg(
+            options=["external-host-name"],
+            help="The Path to a Ontap Host",
+            required=True,
+        )
+        remote_path.server_name = AAZStrArg(
+            options=["server-name"],
+            help="The name of a server on the Ontap Host",
+            required=True,
+        )
+        remote_path.volume_name = AAZStrArg(
+            options=["volume-name"],
+            help="The name of a volume on the server",
+            required=True,
         )
 
         # define Arg Group "Snapshot"
@@ -594,7 +635,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2023-05-01-preview",
                     required=True,
                 ),
             }
@@ -667,16 +708,30 @@ class Create(AAZCommand):
 
             data_protection = _builder.get(".properties.dataProtection")
             if data_protection is not None:
+                data_protection.set_prop("backup", AAZObjectType)
                 data_protection.set_prop("replication", AAZObjectType)
                 data_protection.set_prop("snapshot", AAZObjectType)
                 data_protection.set_prop("volumeRelocation", AAZObjectType)
 
+            backup = _builder.get(".properties.dataProtection.backup")
+            if backup is not None:
+                backup.set_prop("backupEnabled", AAZBoolType, ".backup_enabled")
+                backup.set_prop("backupPolicyId", AAZStrType, ".backup_policy_id")
+                backup.set_prop("policyEnforced", AAZBoolType, ".policy_enforced")
+
             replication = _builder.get(".properties.dataProtection.replication")
             if replication is not None:
                 replication.set_prop("endpointType", AAZStrType, ".endpoint_type")
+                replication.set_prop("remotePath", AAZObjectType, ".remote_path")
                 replication.set_prop("remoteVolumeRegion", AAZStrType, ".remote_volume_region")
                 replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id", typ_kwargs={"flags": {"required": True}})
                 replication.set_prop("replicationSchedule", AAZStrType, ".replication_schedule")
+
+            remote_path = _builder.get(".properties.dataProtection.replication.remotePath")
+            if remote_path is not None:
+                remote_path.set_prop("externalHostName", AAZStrType, ".external_host_name", typ_kwargs={"flags": {"required": True}})
+                remote_path.set_prop("serverName", AAZStrType, ".server_name", typ_kwargs={"flags": {"required": True}})
+                remote_path.set_prop("volumeName", AAZStrType, ".volume_name", typ_kwargs={"flags": {"required": True}})
 
             snapshot = _builder.get(".properties.dataProtection.snapshot")
             if snapshot is not None:
@@ -851,6 +906,11 @@ class Create(AAZCommand):
                 serialized_name="fileSystemId",
                 flags={"read_only": True},
             )
+            properties.inherited_size_in_bytes = AAZIntType(
+                serialized_name="inheritedSizeInBytes",
+                nullable=True,
+                flags={"read_only": True},
+            )
             properties.is_default_quota_enabled = AAZBoolType(
                 serialized_name="isDefaultQuotaEnabled",
             )
@@ -969,15 +1029,33 @@ class Create(AAZCommand):
             )
 
             data_protection = cls._schema_on_200_201.properties.data_protection
+            data_protection.backup = AAZObjectType()
             data_protection.replication = AAZObjectType()
             data_protection.snapshot = AAZObjectType()
             data_protection.volume_relocation = AAZObjectType(
                 serialized_name="volumeRelocation",
             )
 
+            backup = cls._schema_on_200_201.properties.data_protection.backup
+            backup.backup_enabled = AAZBoolType(
+                serialized_name="backupEnabled",
+            )
+            backup.backup_policy_id = AAZStrType(
+                serialized_name="backupPolicyId",
+            )
+            backup.backup_vault_id = AAZStrType(
+                serialized_name="backupVaultId",
+            )
+            backup.policy_enforced = AAZBoolType(
+                serialized_name="policyEnforced",
+            )
+
             replication = cls._schema_on_200_201.properties.data_protection.replication
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
+            )
+            replication.remote_path = AAZObjectType(
+                serialized_name="remotePath",
             )
             replication.remote_volume_region = AAZStrType(
                 serialized_name="remoteVolumeRegion",
@@ -992,6 +1070,20 @@ class Create(AAZCommand):
             )
             replication.replication_schedule = AAZStrType(
                 serialized_name="replicationSchedule",
+            )
+
+            remote_path = cls._schema_on_200_201.properties.data_protection.replication.remote_path
+            remote_path.external_host_name = AAZStrType(
+                serialized_name="externalHostName",
+                flags={"required": True},
+            )
+            remote_path.server_name = AAZStrType(
+                serialized_name="serverName",
+                flags={"required": True},
+            )
+            remote_path.volume_name = AAZStrType(
+                serialized_name="volumeName",
+                flags={"required": True},
             )
 
             snapshot = cls._schema_on_200_201.properties.data_protection.snapshot

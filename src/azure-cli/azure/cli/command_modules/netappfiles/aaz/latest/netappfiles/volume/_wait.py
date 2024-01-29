@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2023-05-01-preview"],
         ]
     }
 
@@ -149,7 +149,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2023-05-01-preview",
                     required=True,
                 ),
             }
@@ -280,6 +280,11 @@ class Wait(AAZWaitCommand):
                 serialized_name="fileSystemId",
                 flags={"read_only": True},
             )
+            properties.inherited_size_in_bytes = AAZIntType(
+                serialized_name="inheritedSizeInBytes",
+                nullable=True,
+                flags={"read_only": True},
+            )
             properties.is_default_quota_enabled = AAZBoolType(
                 serialized_name="isDefaultQuotaEnabled",
             )
@@ -398,15 +403,33 @@ class Wait(AAZWaitCommand):
             )
 
             data_protection = cls._schema_on_200.properties.data_protection
+            data_protection.backup = AAZObjectType()
             data_protection.replication = AAZObjectType()
             data_protection.snapshot = AAZObjectType()
             data_protection.volume_relocation = AAZObjectType(
                 serialized_name="volumeRelocation",
             )
 
+            backup = cls._schema_on_200.properties.data_protection.backup
+            backup.backup_enabled = AAZBoolType(
+                serialized_name="backupEnabled",
+            )
+            backup.backup_policy_id = AAZStrType(
+                serialized_name="backupPolicyId",
+            )
+            backup.backup_vault_id = AAZStrType(
+                serialized_name="backupVaultId",
+            )
+            backup.policy_enforced = AAZBoolType(
+                serialized_name="policyEnforced",
+            )
+
             replication = cls._schema_on_200.properties.data_protection.replication
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
+            )
+            replication.remote_path = AAZObjectType(
+                serialized_name="remotePath",
             )
             replication.remote_volume_region = AAZStrType(
                 serialized_name="remoteVolumeRegion",
@@ -421,6 +444,20 @@ class Wait(AAZWaitCommand):
             )
             replication.replication_schedule = AAZStrType(
                 serialized_name="replicationSchedule",
+            )
+
+            remote_path = cls._schema_on_200.properties.data_protection.replication.remote_path
+            remote_path.external_host_name = AAZStrType(
+                serialized_name="externalHostName",
+                flags={"required": True},
+            )
+            remote_path.server_name = AAZStrType(
+                serialized_name="serverName",
+                flags={"required": True},
+            )
+            remote_path.volume_name = AAZStrType(
+                serialized_name="volumeName",
+                flags={"required": True},
             )
 
             snapshot = cls._schema_on_200.properties.data_protection.snapshot
