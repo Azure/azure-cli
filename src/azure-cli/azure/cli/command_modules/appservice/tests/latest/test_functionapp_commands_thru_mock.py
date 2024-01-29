@@ -92,6 +92,7 @@ class TestFunctionappMocked(unittest.TestCase):
         enable_zip_deploy_mock.assert_called_once()
         remove_remote_build_app_settings_mock.assert_called_once()
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.check_language_runtime')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
     @mock.patch('azure.cli.command_modules.appservice.custom.validate_zip_deploy_app_setting_exists')
@@ -102,7 +103,8 @@ class TestFunctionappMocked(unittest.TestCase):
                                                             upload_zip_to_storage_mock,
                                                             validate_zip_deploy_app_setting_exists_mock,
                                                             parse_resource_id_mock,
-                                                            web_client_factory_mock):
+                                                            web_client_factory_mock,
+                                                            check_language_runtime_mock):
         # prepare
         cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
@@ -124,6 +126,7 @@ class TestFunctionappMocked(unittest.TestCase):
         web_client_mock.web_apps.get.assert_called_with('rg', 'name')
         upload_zip_to_storage_mock.assert_called_with(cmd_mock, 'rg', 'name', 'src', None)
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.check_language_runtime')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
     @mock.patch('azure.cli.command_modules.appservice.custom.validate_zip_deploy_app_setting_exists')
@@ -134,7 +137,8 @@ class TestFunctionappMocked(unittest.TestCase):
                                                             upload_zip_to_storage_mock,
                                                             validate_zip_deploy_app_setting_exists_mock,
                                                             parse_resource_id_mock,
-                                                            web_client_factory_mock):
+                                                            web_client_factory_mock,
+                                                            check_language_runtime_mock):
         # prepare
         cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
@@ -156,6 +160,7 @@ class TestFunctionappMocked(unittest.TestCase):
         web_client_mock.web_apps.get.assert_called_with('rg', 'name')
         upload_zip_to_storage_mock.assert_called_with(cmd_mock, 'rg', 'name', 'src', 'slot')
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.check_language_runtime')
     @mock.patch('azure.cli.command_modules.appservice.custom.add_remote_build_app_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
@@ -164,7 +169,8 @@ class TestFunctionappMocked(unittest.TestCase):
                                                      enable_zip_deploy_mock,
                                                      parse_resource_id_mock,
                                                      web_client_factory_mock,
-                                                     add_remote_build_app_settings_mock):
+                                                     add_remote_build_app_settings_mock,
+                                                     check_language_runtime_mock):
         # prepare
         cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
