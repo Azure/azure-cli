@@ -86,10 +86,6 @@ def _polish_bad_errors(ex, creating_plan):
                                   "If creating an App Service Plan with --zone-redundant/-z, "
                                   "please see supported regions here: "
                                   "https://docs.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
-                    elif 'Not enough available reserved instance servers to satisfy' in detail:
-                        detail = ("Plan with Linux worker can only be created in a group " +
-                                  "which has never contained a Windows worker, and vice versa. " +
-                                  "Please use a new resource group. Original error:" + detail)
         else:
             detail = json.loads(ex.error_msg.response.text())['Message']
         ex = CLIError(detail)
@@ -338,12 +334,12 @@ def load_command_table(self, _):
                                  validator=validate_functionapp_on_containerapp_update)
 
     with self.command_group('functionapp config') as g:
-        g.custom_command('set', 'update_site_configs', validator=validate_functionapp_on_containerapp_site_config_set, exception_handler=ex_handler_factory())
+        g.custom_command('set', 'update_site_configs_functionapp', validator=validate_functionapp_on_containerapp_site_config_set, exception_handler=ex_handler_factory())
         g.custom_show_command('show', 'get_site_configs', validator=validate_functionapp_on_containerapp_site_config_show, exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)
-        g.custom_command('set', 'update_app_settings', exception_handler=ex_handler_factory())
+        g.custom_command('set', 'update_app_settings_functionapp', exception_handler=ex_handler_factory())
         g.custom_command('delete', 'delete_app_settings', exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp config hostname') as g:

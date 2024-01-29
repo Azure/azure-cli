@@ -33,6 +33,7 @@ GITHUB_OAUTH_SCOPES = [
 ]
 LOGICAPP_KIND = "workflowapp"
 FUNCTIONAPP_KIND = "functionapp"
+LINUXAPP_KIND = "linux"
 DOTNET_REFERENCES_DIR_IN_ZIP = ".az-references"
 
 
@@ -108,4 +109,30 @@ RUNTIME_STATUS_TEXT_MAP = {
     "RuntimeStarting": "Starting the site...",
     "RuntimeSuccessful": "Site started successfully.",
     "RuntimeFailed": "Site failed to start."
+}
+
+LANGUAGE_EOL_DEPRECATION_NOTICES = {
+    "dotnet|3.1": "https://azure.microsoft.com/en-us/updates/extended-support-for-"
+                  "microsoft-net-core-31-will-end-on-3-december-2022/",
+    "dotnet|6": "https://azure.microsoft.com/en-us/updates/dotnet6support/",
+    "dotnet-isolated|6": "https://azure.microsoft.com/en-us/updates/dotnet6support/",
+    "dotnet-isolated|7": "https://azure.microsoft.com/en-us/updates/dotnet7support/",
+    "python|3.6": "https://azure.microsoft.com/en-us/updates/azure-functions-support-"
+                  "for-python-36-is-ending-on-30-september-2022/",
+    "python|3.7": "https://azure.microsoft.com/en-us/updates/community-support-for-"
+                  "python-37-is-ending-on-27-june-2023/",
+    "python|3.8": "https://azure.microsoft.com/en-us/updates/azure-functions-support-"
+                  "for-python-38-is-ending-on-14-october-2023-6/",
+    "powershell|6.2": "https://azure.microsoft.com/en-us/updates/azure-functions-support-"
+                      "for-powershell-6-is-ending-on-30-september-2022/",
+    "node|6": "https://azure.microsoft.com/en-us/updates/azure-functions-support-for-"
+              "node-6-is-ending-on-28-february-2022/",
+    "node|8": "https://azure.microsoft.com/en-us/updates/azure-functions-support-for-"
+              "node-8-is-ending-on-28-february-2022/",
+    "node|10": "https://azure.microsoft.com/en-us/updates/azure-functions-support-"
+               "for-node-10-is-ending-on-30-september-2022/",
+    "node|12": "https://azure.microsoft.com/en-us/updates/node12/",
+    "node|14": "https://azure.microsoft.com/en-us/updates/community-support-for-node-"
+               "14-lts-is-ending-on-30-april-2023/",
+    "node|16": "https://azure.microsoft.com/en-us/updates/node16support/"
 }

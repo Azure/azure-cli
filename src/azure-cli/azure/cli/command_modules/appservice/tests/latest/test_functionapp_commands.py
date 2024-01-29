@@ -44,7 +44,7 @@ class FunctionappACRScenarioTest(ScenarioTest):
             resource_group, acr_registry_name))
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
-        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 3 --runtime {}'.format(
+        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 4 --runtime {}'.format(
             resource_group, functionapp, storage_account, plan, runtime))
         creds = self.cmd('acr credential show -n {} -g {}'.format(
             acr_registry_name, resource_group)).get_output_in_json()
@@ -97,7 +97,7 @@ class FunctionAppCreateUsingACR(ScenarioTest):
         password = acr_creds['passwords'][0]['value']
         self.cmd(
             'functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan))
-        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 3 --runtime {}'
+        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 4 --runtime {}'
                  ' --deployment-container-image-name {}.azurecr.io/image-name:latest --docker-registry-server-user {}'
                  ' --docker-registry-server-password {}'.format(resource_group, functionapp, storage_account, plan, runtime,
                                                                 acr_registry_name, username, password))
@@ -143,7 +143,7 @@ class FunctionappACRDeploymentScenarioTest(ScenarioTest):
             resource_group, acr_registry_name))
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
-        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 3 --runtime {}'.format(
+        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 4 --runtime {}'.format(
             resource_group, functionapp, storage_account, plan, runtime))
         creds = self.cmd('acr credential show -g {} -n {}'.format(
             resource_group, acr_registry_name)).get_output_in_json()
@@ -381,7 +381,7 @@ class FunctionUpdatePlan(ScenarioTest):
         self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'.format(resource_group, functionapp, plan,
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node'.format(resource_group, functionapp, plan,
                                                                                         storage_account), checks=[
             JMESPathCheck('name', functionapp)
         ])
@@ -526,7 +526,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionapplinuxconsumption', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --functions-version 3 --runtime node'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --functions-version 4 --runtime node'
                  .format(resource_group, functionapp_name, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -1034,7 +1034,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 3 --runtime node'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime node'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -1088,7 +1088,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 3 --runtime node --runtime-version 14'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime node --runtime-version 18'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -1098,7 +1098,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
                      "[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~14')])
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~18')])
 
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
@@ -1119,7 +1119,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
     def test_functionapp_windows_runtime_functions_version(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 3 --os-type Windows --runtime node'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4 --os-type Windows --runtime node'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -1128,8 +1128,8 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
 
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
-                     "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~14')])
+                     "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4'),
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~18')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1189,6 +1189,26 @@ class FunctionAppWithAppInsightsKey(ScenarioTest):
 
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+
+class FunctionAppWithAppInsightsConnString(ScenarioTest):
+    def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None, random_config_dir=False):
+        super().__init__(method_name, config_file, recording_name, recording_processors, replay_processors, recording_patches, replay_patches, random_config_dir)
+        self.cmd('extension add -n application-insights')
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_with_app_insights_conn_string(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(prefix='functionappwithappinsights', length=40)
+        workspace_name = self.create_random_name(prefix='existingworkspace', length=40)
+        app_insights_name = self.create_random_name(prefix='existingappinsights', length=40)
+        workspace = self.cmd('monitor log-analytics workspace create -g {} -n {} -l {}'.format(resource_group, workspace_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        app_insights = self.cmd('monitor app-insights component create --app {} --location {} --kind web -g {} --application-type web'.format(app_insights_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, resource_group)).get_output_in_json()
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --app-insights {} --functions-version 4'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account, app_insights_name))
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck(
+                "[?name=='APPLICATIONINSIGHTS_CONNECTION_STRING'].value|[0]", app_insights['connectionString'])
+        ])
 
 
 class FunctionAppASPZoneRedundant(ScenarioTest):
@@ -1264,7 +1284,7 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
 
         app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
                                                                                     functionapp_name)).get_output_in_json()
-        self.assertTrue('APPINSIGHTS_INSTRUMENTATIONKEY' in [
+        self.assertTrue('APPLICATIONINSIGHTS_CONNECTION_STRING' in [
                         kp['name'] for kp in app_set])
         self.assertTrue('AzureWebJobsDashboard' not in [
                         kp['name'] for kp in app_set])
@@ -1284,7 +1304,7 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
 
         app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
                                                                                     functionapp_name)).get_output_in_json()
-        self.assertTrue('APPINSIGHTS_INSTRUMENTATIONKEY' not in [
+        self.assertTrue('APPLICATIONINSIGHTS_CONNECTION_STRING' not in [
                         kp['name'] for kp in app_set])
         self.assertTrue('AzureWebJobsDashboard' in [
                         kp['name'] for kp in app_set])
@@ -1354,7 +1374,7 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'.format(resource_group, functionapp, plan, storage_account), checks=[
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node'.format(resource_group, functionapp, plan, storage_account), checks=[
             JMESPathCheck('name', functionapp)
         ])
         result = self.cmd('functionapp list -g {}'.format(resource_group), checks=[
@@ -1364,7 +1384,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|14')])
+            JMESPathCheck('linuxFxVersion', 'Node|18')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
@@ -1379,7 +1399,7 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node --runtime-version 14'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node --runtime-version 18'
                  .format(resource_group, functionapp, plan, storage_account),
                  checks=[
                      JMESPathCheck('name', functionapp)
@@ -1391,20 +1411,20 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|14')])
+            JMESPathCheck('linuxFxVersion', 'Node|18')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_on_linux_version_consumption(self, resource_group, storage_account):
         functionapp = self.create_random_name(
             prefix='functionapp-linux', length=24)
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.7'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.10 --functions-version 4'
                  .format(resource_group, functionapp, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account), checks=[
                      JMESPathCheck('name', functionapp)
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Python|3.7')])
+            JMESPathCheck('linuxFxVersion', 'Python|3.10')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1444,17 +1464,17 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1')
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node'
                  .format(resource_group, functionapp, plan, storage_account), checks=[
                      JMESPathCheck('name', functionapp)
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|14')
+            JMESPathCheck('linuxFxVersion', 'Node|18')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
-                "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3')
+                "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4')
         ])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
@@ -1481,17 +1501,17 @@ class FunctionAppOnLinux(ScenarioTest):
     def test_functionapp_on_linux_functions_version_consumption(self, resource_group, storage_account):
         functionapp = self.create_random_name(
             prefix='functionapp-linux', length=24)
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 3 --runtime node --os-type linux'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4 --runtime node --os-type linux'
                  .format(resource_group, functionapp, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account), checks=[
                      JMESPathCheck('name', functionapp)
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|14')
+            JMESPathCheck('linuxFxVersion', 'Node|18')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
-                "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3')
+                "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4')
         ])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
@@ -1595,7 +1615,7 @@ class FunctionAppSlotTests(ScenarioTest):
         self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'.format(resource_group, functionapp, plan,
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node'.format(resource_group, functionapp, plan,
                                                                                         storage_account), checks=[
             JMESPathCheck('name', functionapp)
         ])
@@ -1623,7 +1643,7 @@ class FunctionAppSlotTests(ScenarioTest):
         self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'.format(resource_group, functionapp,
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node'.format(resource_group, functionapp,
                                                                                         plan,
                                                                                         storage_account), checks=[
             JMESPathCheck('name', functionapp)
@@ -2267,7 +2287,7 @@ class FunctionappCorsTest(ScenarioTest):
         functionapp_name = self.create_random_name(prefix='functionapp', length=24)
         plan_name = self.create_random_name(prefix='funcappplan', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'.format(resource_group, functionapp_name, plan_name, storage_account))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node'.format(resource_group, functionapp_name, plan_name, storage_account))
         self.cmd('functionapp cors credentials -g {} -n {} --enable true'.format(resource_group, functionapp_name))
         result = self.cmd('functionapp cors show -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()['supportCredentials']
         self.assertEqual(result, True)
@@ -2627,6 +2647,17 @@ class FunctionAppConfigTest(ScenarioTest):
                      JMESPathCheck('powerShellVersion', '7.0')])
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+class FunctionAppLanguageEOLTest(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_language_runtime_version_deprecated(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 32)
+        
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime node --runtime-version 10'
+                    .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
 
 
 if __name__ == '__main__':
