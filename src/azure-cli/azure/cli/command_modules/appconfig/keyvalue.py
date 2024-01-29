@@ -695,6 +695,7 @@ def show_key(cmd,
              key,
              name=None,
              label=None,
+             parse_json=False,
              datetime=None,
              connection_string=None,
              auth_mode="key",
@@ -704,7 +705,7 @@ def show_key(cmd,
         key_value = azconfig_client.get_configuration_setting(key=key, label=label, accept_datetime=datetime)
         if key_value is None:
             raise CLIErrors.ResourceNotFoundError("The key-value does not exist.")
-        return convert_configurationsetting_to_keyvalue(key_value)
+        return convert_configurationsetting_to_keyvalue(key_value, parse_json)
     except ResourceNotFoundError:
         raise CLIErrors.ResourceNotFoundError("Key '{}' with label '{}' does not exist.".format(key, label))
     except HttpResponseError as exception:
@@ -718,6 +719,7 @@ def list_key(cmd,
              fields=None,
              name=None,
              label=None,
+             parse_json=False,
              datetime=None,
              snapshot=None,
              connection_string=None,
@@ -737,6 +739,7 @@ def list_key(cmd,
     keyvalues = __read_kv_from_config_store(azconfig_client,
                                             key=key if key else SearchFilterOptions.ANY_KEY,
                                             label=label if label else SearchFilterOptions.ANY_LABEL,
+                                            parse_json=parse_json,
                                             datetime=datetime,
                                             snapshot=snapshot,
                                             fields=fields,
@@ -830,6 +833,7 @@ def list_revision(cmd,
                   fields=None,
                   name=None,
                   label=None,
+                  parse_json=False,
                   datetime=None,
                   connection_string=None,
                   top=None,
@@ -862,7 +866,7 @@ def list_revision(cmd,
             top = 100
 
         for revision in revisions_iterable:
-            kv_revision = convert_configurationsetting_to_keyvalue(revision)
+            kv_revision = convert_configurationsetting_to_keyvalue(revision, parse_json)
             if fields:
                 partial_revision = {}
                 for field in fields:
