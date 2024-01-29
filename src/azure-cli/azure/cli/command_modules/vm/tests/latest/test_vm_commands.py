@@ -7017,6 +7017,22 @@ class DedicatedHostScenarioTest(ScenarioTest):
         self.cmd('vm host delete -n {host} --host-group {host-group} -g {rg} --yes')
         self.cmd('vm host group delete -n {host-group} -g {rg} --yes')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_redeploy_', location='eastus2euapaz')
+    def test_vm_host_redeploy(self, resource_group):
+        self.kwargs.update({
+            'host-group': 'my-host-group',
+            'host': 'my-host',
+        })
+
+        self.cmd('vm host group create -n {host-group} -c 3 -g {rg}')
+        self.cmd('vm host group list -g {rg}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{host-group}')
+        ])
+        self.cmd('vm host create -n {host} --host-group {host-group} -d 2 -g {rg} --sku DSv3-Type1')
+
+        self.cmd('vm host redeploy -n {host} --host-group {host-group}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_host_resize_', location='centraluseuap')
     def test_vm_host_resize(self, resource_group):
         self.kwargs.update({
