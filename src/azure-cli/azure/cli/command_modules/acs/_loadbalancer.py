@@ -110,7 +110,7 @@ def configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_
                 profile.managed_outbound_i_ps.count_ipv6 = managed_outbound_ipv6_count
         elif profile.managed_outbound_i_ps is not None:
             profile.managed_outbound_i_ps = None
-    if outbound_ports != None:
+    if outbound_ports is not None:
         profile.allocated_outbound_ports = outbound_ports
     if idle_timeout:
         profile.idle_timeout_in_minutes = idle_timeout
