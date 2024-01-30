@@ -9,7 +9,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 class AcrArtifactStreamingCommandsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
-    def test_acr_artifact_streaming(self, resource_group):
+    def test_acr_artifactstreaming(self, resource_group):
         repo = 'microsoft'
         tag = 'azure-cli'
         self.kwargs.update({

@@ -370,8 +370,8 @@ class AcrCommandsTests(ScenarioTest):
         token = self.cmd('account get-access-token').get_output_in_json()['accessToken']
 
         # service principal creds to support import from resource_imageV1
-        service_principal_username = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPusername').get_output_in_json()['value']
-        service_principal_password = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPpassword').get_output_in_json()['value']
+        #service_principal_username = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPusername').get_output_in_json()['value']
+        #service_principal_password = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPpassword').get_output_in_json()['value']
 
         self.kwargs.update({
             'resource_id': '/subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourcegroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
@@ -392,8 +392,8 @@ class AcrCommandsTests(ScenarioTest):
             'tag_same_registry': 'repository_same_registry:tag_same_registry',
             'tag_by_digest': 'repository_by_digest:tag_by_digest',
             'source_image_public_registry_dockerhub': 'registry.hub.docker.com/library/hello-world',
-            'application_ID': service_principal_username,
-            'service_principal_password': service_principal_password,
+           # 'application_ID': service_principal_username,
+            #'service_principal_password': service_principal_password,
             'token': token
         })
 
@@ -440,7 +440,7 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr import -n {registry_name} --source {source_image_public_registry_dockerhub}')
 
         # Case 8: Import image from an Azure Container Registry with Service Principal's credentials
-        self.cmd('acr import -n {registry_name} --source {resource_imageV1} -u {application_ID} -p {service_principal_password}')
+        #self.cmd('acr import -n {registry_name} --source {resource_imageV1} -u {application_ID} -p {service_principal_password}')
 
         # Case 9: Import image from an Azure Container Registry with personal access token
         self.cmd('acr import -n {registry_name} --source {resource_imageV2} -p {token}')
