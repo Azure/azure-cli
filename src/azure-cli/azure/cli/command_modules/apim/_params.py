@@ -30,6 +30,12 @@ class ImportFormat(Enum):
     Wsdl = "Wsdl"
     GraphQL = "GraphQL"
 
+class ExportFormat(Enum):
+    Wadl = "Wadl"
+    Swagger = "Swagger"
+    OpenApi = "OpenApiYaml"
+    OpenApiJson = "OpenApiJson"
+    Wsdl = "Wsdl"
 
 def load_arguments(self, _):
 
@@ -288,6 +294,21 @@ def load_arguments(self, _):
         c.argument('soap_api_type', help='The type of API when file format is WSDL.')
         c.argument('wsdl_service_name', help='Local name of WSDL Service to be imported.')
         c.argument('wsdl_endpoint_name', help='Local name of WSDL Endpoint (port) to be imported.')
+
+    with self.argument_context('apim api export') as c:
+        c.argument('subscription_id', options_list=['--subscription-id', '-s'],
+                   help="The ID of the target subscription")
+        c.argument('resource_group_name', arg_type=resource_group_name_type,
+                   help="The name of the resource group. The name is case insensitive.")
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help="The name of the api management service instance", id_part=None)
+        c.argument('api_id', arg_type=api_id,
+                   help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number. Regex pattern: ^[^*#&+:<>?]+$')
+        c.argument('api_version', arg_group='API',
+                   help='Describes the Version of the Api to use for this operation')
+        c.argument('format', arg_type=get_enum_type(ExportFormat), help='Specify the format of the exporting API.')
+        c.argument('file_path', options_list=['--file-path', '-f'], 
+                   help='File path specified to export the API.')
 
     with self.argument_context('apim product api list') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],

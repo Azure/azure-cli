@@ -25,6 +25,7 @@ from urllib.parse import urlparse
 
 from azure.cli.command_modules.apim._params import ImportFormat
 from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.util import get_logger
 from azure.cli.core.azclierror import (RequiredArgumentMissingError, MutuallyExclusiveArgumentError,
                                        InvalidArgumentValueError)
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
@@ -37,12 +38,13 @@ from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiMa
                                              OpenIdAuthenticationSettingsContract, ProductContract, ProductState,
                                              NamedValueCreateContract, VersioningScheme, ApiVersionSetContract,
                                              OperationContract, ApiManagementServiceCheckNameAvailabilityParameters,
-                                             ApiReleaseContract, SchemaContract, ResolverContract, PolicyContract)
+                                             ApiReleaseContract, SchemaContract, ResolverContract, PolicyContract, ApiExportResult, ApiExportResultValue)
 
+logger = get_logger(__name__)
 
 # Helpers
 
-API_VS_ARM_ID_Reg = "(.*?)/providers/microsoft.apimanagement/service/([^/]+)/apiVersionSets/([^/]+)"
+API_VS_ARM_ID_Reg = "(.*?)/providers/microsoft.apimanagement/service/([^/]+)`/apiVersionSets/([^/]+)"
 API_VS_PREFIX = "/apiVersionSets/"
 
 
@@ -513,6 +515,108 @@ def apim_api_import(
         api_id=api_id,
         parameters=parameters)
 
+def apim_api_export(client, resource_group_name, service_name, subscription_id, api_id, api_version, format, file_path):
+    """Gets the details of the API specified by its identifier in the format specified """
+
+    import json
+    import yaml
+    import xml.etree.ElementTree as ET
+    import os
+    import requests
+
+    # Define the mapping from old format values to new ones
+    format_mapping = {
+        "Wadl": "wadl-link",
+        "Swagger": "swagger-link",
+        "OpenApiYaml": "openapi-link",
+        "OpenApiJson": "openapi+json-link",
+        "Wsdl": "wsdl-link"
+    }
+    mappedFormat = format_mapping.get(format)
+
+        # Determine the file extension based on the mappedFormat
+    if mappedFormat in ['swagger-link', 'openapi+json-link']:
+        file_extension = '.json'
+    elif mappedFormat in ['wsdl-link', 'wadl-link']:
+        file_extension = '.xml'
+    elif mappedFormat in ['openapi-link']:
+        file_extension = '.yaml'
+    else:
+        file_extension = '.txt'
+        
+    # Remove '-link' from the mappedFormat
+    exportType = mappedFormat.replace('-link', '')
+
+    # Create the file name
+    file_name = f"{api_id}_{exportType}{file_extension}"
+    
+    # Combine the file path and the file name
+    full_path = os.path.join(file_path, file_name)
+    
+    # Export the API from APIManagement
+    response = client.api_export.get(resource_group_name, service_name, api_id, mappedFormat, True)
+    response_dict = api_export_result_to_dict(response)
+    response_json = json.dumps(response_dict)
+    try:
+        # Extract the link from the response where results are stored
+        link = response_dict['additional_properties']['properties']['value']['link']
+    except KeyError:
+        logger.warning("Error exporting api from APIManagement. The expected link is not present in the response.")
+
+    # Get the results from the link where the API Export Results are stored  
+    try:
+        exportedResults = requests.get(link, timeout=30)
+        if not exportedResults.ok:
+            logger.warning(f"Got bad status from APIManagement during API Export: {exportedResults.status_code}")
+    except requests.exceptions.ReadTimeout:
+        logger.warning("Timed out while exporting api from APIManagement.")
+
+    try:
+        # Try to parse as JSON
+        exportedResultContent = json.loads(exportedResults.text)
+    except json.JSONDecodeError:
+        try:
+            # Try to parse as YAML
+            exportedResultContent = yaml.safe_load(exportedResults.text)
+        except yaml.YAMLError:
+            try:
+                # Try to parse as XML
+                exportedResultContent = ET.fromstring(exportedResults.text)
+            except ET.ParseError:
+                logger.warning("Content is not in JSON, YAML, or XML format.")
+
+    # Write results to a file
+    logger.warning(f"Writing results to file: {full_path}")
+    try:
+        with open(full_path, 'w') as f:
+            if file_extension == '.json':
+                json.dump(exportedResultContent, f, indent=4)
+            elif file_extension  =='.yaml':
+                yaml.dump(exportedResultContent, f)
+            elif file_extension == '.xml':
+                from xml.etree.ElementTree import tostring
+                ET.register_namespace('', 'http://wadl.dev.java.net/2009/02')
+                xml_string = ET.tostring(exportedResultContent, encoding='unicode')
+                f.write(xml_string)
+            else:
+                f.write(str(exportedResultContent))
+    except IOError as e:
+        logger.warning(f"Error writing to file.: {e}")
+    except Exception as e:
+        logger.warning(f"An error occurred: {e}")
+    
+    # Write the response to a file
+    return logger.warning(f"APIMExport results written to file: {full_path}")
+
+def api_export_result_to_dict(api_export_result):
+    # This function should return a dictionary representation of the ApiExportResult object
+    # The implementation of this function depends on the structure of the ApiExportResult object
+    return {
+        'additional_properties': api_export_result.additional_properties,
+        'id': api_export_result.id,
+        'export_result_format': api_export_result.export_result_format,
+        'value': api_export_result.value
+    }
 
 # Product API Operations
 

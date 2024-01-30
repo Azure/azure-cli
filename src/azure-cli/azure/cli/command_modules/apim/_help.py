@@ -243,6 +243,15 @@ examples:
         az apim api import -g MyResourceGroup --service-name MyApim --path MyApi --specification-url https://MySpecificationURL --specification-format OpenApiJson
 """
 
+helps['apim api export'] = """
+type: command
+short-summary: Export an API Management API.
+examples:
+  - name: Export an API Management API to a file
+    text: |-
+        az apim api export --subscription-id MySubId -g MyResourceGroup --service-name MyApim --api_id MyApi --api-version default --format OpenApiJson --file-path path
+"""
+
 helps['apim product api list'] = """
 type: command
 short-summary: Lists a collection of the APIs associated with a product.

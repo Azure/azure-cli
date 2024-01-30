@@ -23,6 +23,7 @@ def load_command_table(self, _):
     api_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.apimanagement.operations#ApiOperations.{}',
         client_factory=cf_api
+        
     )
 
     api_schema = CliCommandType(
@@ -96,6 +97,7 @@ def load_command_table(self, _):
 
     with self.command_group('apim api', api_sdk) as g:
         g.custom_command('import', 'apim_api_import', supports_no_wait=True)
+        g.custom_command('export', 'apim_api_export')
         g.custom_command('create', 'apim_api_create', supports_no_wait=True)
         g.custom_show_command('show', 'apim_api_get')
         g.custom_command('list', 'apim_api_list')
@@ -104,7 +106,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='apim_api_update',
                                  setter_name='begin_create_or_update', getter_name='get', supports_no_wait=True)
         g.wait_command('wait')
-
+        
     with self.command_group('apim product api', api_sdk) as g:
         g.custom_command('list', 'apim_product_api_list')
         g.custom_command('check', 'apim_product_api_check_association')
