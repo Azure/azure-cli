@@ -205,7 +205,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     def test_endpoint_load_and_purge(self, resource_group):
         profile_name = 'profile123'
-        self.profile_create_cmd(resource_group, profile_name, options='--sku Standard_Verizon')
+        self.profile_create_cmd(resource_group, profile_name, sku='Standard_Verizon')
 
         endpoint_name = self.create_random_name(prefix='endpoint', length=24)
         origin = 'www.contoso.com'
@@ -253,7 +253,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         profile_name = 'profile123'
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
 
-        self.profile_create_cmd(resource_group, profile_name, options='--sku Standard_Microsoft')
+        self.profile_create_cmd(resource_group, profile_name, sku='Standard_Microsoft')
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.endpoint_list_cmd(resource_group, profile_name, checks=list_checks)
 
@@ -382,7 +382,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
 
     def _test_delivery_rule_internal(self, resource_group, profile_prefix, sku):
         profile_name = self.create_random_name(prefix=profile_prefix, length=24)
-        self.profile_create_cmd(resource_group, profile_name, options=f'--sku {sku}')
+        self.profile_create_cmd(resource_group, profile_name, sku=sku)
         endpoint_name = self.create_random_name(prefix='endpoint', length=24)
         origin = 'huaiyiztesthost1.blob.core.chinacloudapi.cn'
         checks = [JMESPathCheck('name', endpoint_name),
@@ -409,7 +409,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
                            JMESPathCheck('deliveryPolicy.rules[1].conditions[0].parameters.path', "/test2/*")]
         rule_add_command = f'az cdn endpoint rule add -g {resource_group} -n {endpoint_name} --profile-name {profile_name} --order 1 '\
             '--action-name CacheExpiration --match-variable UrlPath --operator Wildcard --match-values /test2/* '\
-            '--cache-behavior Override --cache-duration 00:05:00'
+            '--cache-behavior Override --cache-duration 00:05:00 --debug'
         self.cmd(rule_add_command, rule_add_checks)
 
         # Add file extension rule

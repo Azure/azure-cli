@@ -23,7 +23,7 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDPro
     Create as _AFDProfileCreate, Update as _AFDProfileUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.endpoint import Show as _AFDEndpointShow, \
     Create as _AFDEndpointCreate, Update as _AFDEndpointUpdate
-from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZDateArg, AAZIntArg
+from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZTimeArg, AAZIntArg
 from knack.log import get_logger
 from .custom_rule_util import (create_condition, create_action,
                                create_conditions_from_existing, create_actions_from_existing)
@@ -570,7 +570,7 @@ class AFDRuleCreate(_AFDRuleCreate):
             options=['--cache-behavior'],
             help='Caching behavior for the requests.',
         )
-        args_schema.cache_duration = AAZDateArg(
+        args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
             help='The duration for which the content needs to be cached. Allowed format is [d.]hh:mm:ss.',
         )
@@ -847,7 +847,7 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
             options=['--cache-behavior'],
             help='Caching behavior for the requests.',
         )
-        args_schema.cache_duration = AAZDateArg(
+        args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
             help='The duration for which the content needs to be cached. Allowed format is [d.]hh:mm:ss.',
         )
@@ -981,7 +981,7 @@ class AFDRuleActionRemove(_AFDRuleUpdate):
             options=['--cache-behavior'],
             help='Caching behavior for the requests.',
         )
-        args_schema.cache_duration = AAZDateArg(
+        args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
             help='The duration for which the content needs to be cached. Allowed format is [d.]hh:mm:ss.',
         )

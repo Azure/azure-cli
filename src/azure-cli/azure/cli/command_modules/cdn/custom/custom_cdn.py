@@ -5,13 +5,13 @@
 # pylint: disable=too-many-locals, too-many-statements too-many-boolean-expressions too-many-branches protected-access
 
 from azure.mgmt.cdn.models import (MinimumTlsVersion, ProtocolType, SkuName, UpdateRule, DeleteRule, CertificateType,
-                                   UrlPathMatchConditionParameters, UrlFileExtensionMatchConditionParameters, ResourceType)
+                                   ResourceType)
 from azure.cli.core.aaz._base import has_value
 from azure.cli.command_modules.cdn.aaz.latest.cdn.custom_domain import EnableCustomHttp as _CDNEnableCustomHttp
 from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDProfileShow, \
     Create as _AFDProfileCreate, Update as _AFDProfileUpdate, Delete as _AFDProfileDelete, \
     List as _AFDProfileList
-from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZIntArg, AAZListArg
+from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZIntArg, AAZListArg, AAZTimeArg
 from azure.cli.command_modules.cdn.aaz.latest.cdn.origin import Create as _CDNOriginCreate, \
     Update as _CDNOriginUpdate
 from azure.cli.command_modules.cdn.aaz.latest.cdn.origin_group import Create as _CDNOriginGroupCreate, \
@@ -19,8 +19,7 @@ from azure.cli.command_modules.cdn.aaz.latest.cdn.origin_group import Create as 
 from azure.cli.command_modules.cdn.aaz.latest.cdn.endpoint import Create as _CDNEndpointCreate, \
     Update as _CDNEndpointUpdate, Show as _CDNEndpointShow
 from azure.cli.command_modules.cdn.aaz.latest.cdn._name_exists import NameExists
-from .custom_rule_util import (create_condition, create_action,
-                               create_conditions_from_existing, create_actions_from_existing)
+from .custom_rule_util import (create_condition, create_action, create_delivery_policy_from_existing)
 import argparse
 
 from knack.util import CLIError
@@ -38,19 +37,6 @@ def default_content_types():
             "application/javascript",
             "application/json",
             "application/xml"]
-
-
-def _convert_to_unified_delivery_rules(policy):
-    for existing_rule in policy.rules:
-        if existing_rule.conditions:
-            for con in existing_rule.conditions:
-                if con.parameters.operator is None and con.parameters.match_values is None:
-                    if con.parameters.type_name == UrlPathMatchConditionParameters.type_name:
-                        con.parameters.operator = con.parameters.additional_properties["matchType"]
-                        con.parameters.match_values = con.parameters.additional_properties["path"].split(',')
-                    if con.parameters.type_name == UrlFileExtensionMatchConditionParameters.type_name:
-                        con.parameters.operator = "Any"
-                        con.parameters.match_values = con.parameters.additional_properties["extensions"]
 
 
 def _parse_ranges(ranges: str):
@@ -209,7 +195,7 @@ class CDNEnableCustomHttp(_CDNEnableCustomHttp):
             azure_key_vault = {
                 'certificate_source_parameters': {
                     'delete_rule': DeleteRule.NO_ACTION,
-                    'resource_group_name': args.user_cert_group_name,
+                    'resource_group': args.user_cert_group_name,
                     'secret_name': args.user_cert_secret_name,
                     'subscription_id': args.user_cert_subscription_id,
                     'type_name': 'KeyVaultCertificateSourceParameters',
@@ -639,7 +625,7 @@ class CDNEndpointRuleAdd(_CDNEndpointUpdate):
             help='Caching behavior for the requests.',
             enum=['BypassCache', 'Override', 'SetIfMissing']
         )
-        args_schema.cache_duration = AAZIntArg(
+        args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
             help='The duration for which the content needs to be cached. '
             'Allowed format is [d.]hh:mm:ss.',
@@ -726,7 +712,6 @@ class CDNEndpointRuleAdd(_CDNEndpointUpdate):
         args_schema.rule_name = AAZStrArg(
             options=['--rule-name'],
             help='Name of the rule, only required for Microsoft SKU.',
-            required=True,
         )
         args_schema.selector = AAZStrArg(
             options=['--selector'],
@@ -743,30 +728,37 @@ class CDNEndpointRuleAdd(_CDNEndpointUpdate):
         args_schema.transform.Element = AAZStrArg(
             enum=['Lowercase', 'Uppercase']
         )
+        args_schema.origin_group = AAZStrArg(
+            options=['--origin-group'],
+            help='Name of the origin group to which this rule will be added.Name or ID of the OriginGroup '
+            'that would override the default OriginGroup.',
+        )
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        partner_skus = [SkuName.PREMIUM_VERIZON, SkuName.CUSTOM_VERIZON, SkuName.STANDARD_AKAMAI, SkuName.STANDARD_VERIZON]
+        partner_skus = [SkuName.PREMIUM_VERIZON, SkuName.CUSTOM_VERIZON, SkuName.STANDARD_VERIZON]
         profile = CDNProfileShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group_name,
+            'resource_group': args.resource_group,
             'profile_name': args.profile_name
         })
-        if args.rule_name is None and profile['sku']['name'] in partner_skus:
+        if not has_value(args.rule_name) and profile['sku']['name'] not in partner_skus:
             raise CLIError("--rule-name is required for Microsoft SKU")
         endpoint = _CDNEndpointShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group_name,
+            'resource_group': args.resource_group,
             'profile_name': args.profile_name,
             'endpoint_name': args.endpoint_name
         })
 
-        delivery_policy = endpoint['delivery_policy']
-        if delivery_policy is None:
+        delivery_policy = None
+        if 'deliveryPolicy' in endpoint:
+            delivery_policy = create_delivery_policy_from_existing(endpoint['deliveryPolicy'])
+        else:
             delivery_policy = {
                 'description': 'default_policy',
                 'rules': []
             }
-        _convert_to_unified_delivery_rules(delivery_policy)
+
         conditions = []
         condition = create_condition(args.match_variable, args.operator, args.match_values,
                                      args.selector, args.negate_condition, args.transform)
@@ -778,7 +770,7 @@ class CDNEndpointRuleAdd(_CDNEndpointUpdate):
                                args.redirect_type, args.redirect_protocol, args.custom_hostname, args.custom_path,
                                args.custom_querystring, args.custom_fragment, args.source_pattern, args.destination,
                                args.preserve_unmatched_path, self.ctx.subscription_id,
-                               args.resource_group_name, args.profile_name, args.endpoint_name, args.origin_group)
+                               args.resource_group, args.profile_name, args.endpoint_name, args.origin_group)
         if action is not None:
             actions.append(action)
         rule = {
@@ -795,17 +787,18 @@ class CDNEndpointRuleRemove(_CDNEndpointUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.Rule = AAZStrArg(
+        args_schema.rule_name = AAZStrArg(
             options=['--rule-name'],
             help='Name of the rule.',
         )
-        args_schema.Order = AAZIntArg(
+        args_schema.order = AAZIntArg(
             options=['--order'],
             help='The order in which the rules are applied for the endpoint. Possible values {0,1,2,3,………}. '
             'A rule with a lower order will be applied before one with a higher order. '
             'Rule with order 0 is a special rule. It does not require any condition and '
             'actions listed in it will always be applied.',
         )
+        return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
@@ -815,34 +808,33 @@ class CDNEndpointRuleRemove(_CDNEndpointUpdate):
         if has_value(args.order) and args.order < 0:
             raise CLIError("Order should be non-negative.")
         endpoint = _CDNEndpointShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group_name,
+            'resource_group': args.resource_group,
             'profile_name': args.profile_name,
             'endpoint_name': args.endpoint_name
         })
-        policy = endpoint['delivery_policy']
-        if policy is not None:
-            _convert_to_unified_delivery_rules(policy)
+        delivery_policy = create_delivery_policy_from_existing(endpoint['deliveryPolicy'])
+        if delivery_policy is not None:
             pop_index = -1
-            for idx, rule in enumerate(policy.rules):
-                if has_value(args.rule_name) and rule.name == args.rule_name:
+            for idx, rule in enumerate(delivery_policy['rules']):
+                if has_value(args.rule_name) and rule['name'] == args.rule_name:
                     pop_index = idx
                     break
-                if args.order is not None and rule.order == args.order:
+                if args.order is not None and rule['order'] == args.order:
                     pop_index = idx
                     break
 
             # To guarantee the consecutive rule order, we need to make sure the rule with order larger than the deleted one
             # to decrease its order by one. Rule with order 0 is special and no rule order adjustment is required.
             if pop_index != -1:
-                pop_order = policy['rules'][pop_index]['order']
-                policy['rules'].pop(pop_index)
-                for rule in policy['rules']:
-                    if rule.order > pop_order and pop_order != 0:
-                        rule.order -= 1
+                pop_order = delivery_policy['rules'][pop_index]['order']
+                delivery_policy['rules'].pop(pop_index)
+                for rule in delivery_policy['rules']:
+                    if rule['order'] > pop_order and pop_order != 0:
+                        rule['order'] -= 1
 
         else:
             logger.warning("rule cannot be found. This command will be skipped. Please check the rule name")
-        args.delivery_policy = policy
+        args.delivery_policy = delivery_policy
 
 
 class CDNEndpointRuleActionAdd(_CDNEndpointUpdate):
@@ -860,7 +852,7 @@ class CDNEndpointRuleActionAdd(_CDNEndpointUpdate):
             help='Caching behavior for the requests.',
             enum=['BypassCache', 'Override', 'SetIfMissing']
         )
-        args_schema.cache_duration = AAZIntArg(
+        args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
             help='The duration for which the content needs to be cached. '
             'Allowed format is [d.]hh:mm:ss.',
@@ -932,27 +924,31 @@ class CDNEndpointRuleActionAdd(_CDNEndpointUpdate):
             options=['--source-pattern'],
             help='A request URI pattern that identifies the type of requests that may be rewritten.',
         )
+        args_schema.origin_group = AAZStrArg(
+            options=['--origin-group'],
+            help='Name of the origin group to which this rule will be added.Name or ID of the OriginGroup '
+            'that would override the default OriginGroup.',
+        )
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
         endpoint = _CDNEndpointShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group_name,
+            'resource_group': args.resource_group,
             'profile_name': args.profile_name,
             'endpoint_name': args.endpoint_name
         })
 
-        delivery_policy = endpoint['delivery_policy']
+        delivery_policy = create_delivery_policy_from_existing(endpoint['deliveryPolicy'])
         action = create_action(args.action_name, args.cache_behavior, args.cache_duration, args.header_action,
                                args.header_name, args.header_value, args.query_string_behavior, args.query_parameters,
                                args.redirect_type, args.redirect_protocol, args.custom_hostname, args.custom_path,
                                args.custom_querystring, args.custom_fragment, args.source_pattern, args.destination,
                                args.preserve_unmatched_path, self.ctx.subscription_id,
-                               args.resource_group_name, args.profile_name, args.endpoint_name, args.origin_group)
+                               args.resource_group, args.profile_name, args.endpoint_name, args.origin_group)
         for i in range(0, len(delivery_policy['rules'])):
             if delivery_policy['rules'][i]['name'] == args.rule_name:
-                actions = create_actions_from_existing(delivery_policy['rules'][i]['actions'])
-                actions.append(action)
+                delivery_policy['rules'][i]['actions'].append(action)
         args.delivery_policy = delivery_policy
 
 
@@ -970,20 +966,21 @@ class CDNEndpointRuleActionRemove(_CDNEndpointUpdate):
             help='Name of the rule.',
             required=True,
         )
+        return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
         endpoint = _CDNEndpointShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group_name,
+            'resource_group': args.resource_group,
             'profile_name': args.profile_name,
             'endpoint_name': args.endpoint_name
         })
 
-        delivery_policy = endpoint['delivery_policy']
+        delivery_policy = create_delivery_policy_from_existing(endpoint['deliveryPolicy'])
         if delivery_policy is not None:
             for i in range(0, len(delivery_policy['rules'])):
                 if delivery_policy['rules'][i]['name'] == args.rule_name:
-                    delivery_policy['rules'][i]['actions'].pop(args.index)
+                    delivery_policy['rules'][i]['actions'].pop(args.index.to_serialized_data())
         else:
             logger.warning("rule cannot be found. This command will be skipped. Please check the rule name")
         args.delivery_policy = delivery_policy
@@ -1032,15 +1029,17 @@ class CDNEndpointRuleConditionAdd(_CDNEndpointUpdate):
         args_schema.transform.Element = AAZStrArg(
             enum=['Lowercase', 'Uppercase']
         )
+        return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
         endpoint = _CDNEndpointShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group_name,
+            'resource_group': args.resource_group,
             'profile_name': args.profile_name,
             'endpoint_name': args.endpoint_name
         })
-        delivery_policy = endpoint['delivery_policy']
+
+        delivery_policy = create_delivery_policy_from_existing(endpoint['deliveryPolicy'])
         condition = create_condition(args.match_variable, args.operator, args.match_values,
                                      args.selector, args.negate_condition, args.transform)
         for i in range(0, len(delivery_policy['rules'])):
@@ -1064,20 +1063,21 @@ class CDNEndpointRuleConditionRemove(_CDNEndpointUpdate):
             help='Name of the rule.',
             required=True,
         )
+        return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
         endpoint = _CDNEndpointShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group_name,
+            'resource_group': args.resource_group,
             'profile_name': args.profile_name,
             'endpoint_name': args.endpoint_name
         })
 
-        delivery_policy = endpoint['delivery_policy']
+        delivery_policy = create_delivery_policy_from_existing(endpoint['deliveryPolicy'])
         if delivery_policy is not None:
             for i in range(0, len(delivery_policy['rules'])):
                 if delivery_policy['rules'][i]['name'] == args.rule_name:
-                    delivery_policy['rules'][i]['conditions'].pop(args.index)
+                    delivery_policy['rules'][i]['conditions'].pop(args.index.to_serialized_data())
         else:
             logger.warning("rule cannot be found. This command will be skipped. Please check the rule name")
         args.delivery_policy = delivery_policy

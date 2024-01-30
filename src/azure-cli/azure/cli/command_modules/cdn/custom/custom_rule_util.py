@@ -11,6 +11,7 @@ from msrestazure.tools import is_valid_resource_id
 
 def create_condition(match_variable,
                      operator, match_values=None, selector=None, negate_condition=None, transforms=None):
+    condition = None
     if match_variable == 'RemoteAddress':
         condition = {
             "remote_address": {
@@ -250,6 +251,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                   preserve_unmatched_path=None, sub_id=None, resource_group_name=None, profile_name=None,
                   endpoint_name=None, origin_group=None, query_string_caching_behavior=None,
                   enable_compression=None, enable_caching=None, forwarding_protocol=None):
+    action = None
     if action_name == "CacheExpiration":
         action = {
             "cache_expiration": {
@@ -509,3 +511,22 @@ def create_conditions_from_existing(existing_conditions):
     if len(parsed_conditions) == 0:
         return []
     return parsed_conditions
+
+
+def create_delivery_policy_from_existing(existing_policy):
+    parsed_policy = {
+        'description': 'default_policy',
+        'rules': []
+    }
+
+    if 'rules' in existing_policy:
+        for rule in existing_policy['rules']:
+            parsed_rule = {
+                'name': rule['name'] if 'name' in rule else None,
+                'order': rule['order'],
+                'conditions': create_conditions_from_existing(rule['conditions']),
+                'actions': create_actions_from_existing(rule['actions'])
+            }
+            parsed_policy['rules'].append(parsed_rule)
+
+    return parsed_policy
