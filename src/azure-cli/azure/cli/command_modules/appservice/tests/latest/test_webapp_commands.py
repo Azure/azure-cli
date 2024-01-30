@@ -1940,7 +1940,7 @@ class WebappUpdateTest(ScenarioTest):
         ])
 
 
-class BasicAuthScenarioTest(ScenarioTest):
+class BasicAuthScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_update(self, resource_group):
         webapp_name = self.create_random_name('webapp-basicAuth-test', 40)
