@@ -121,6 +121,7 @@ def configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_
 
 def is_load_balancer_profile_provided(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips, ip_prefixes,
                                       outbound_ports, backend_pool_type, idle_timeout):
+    """allow outbound_port to be set to 0"""
     if isinstance(outbound_ports, int):
         return True
     return any([managed_outbound_ip_count,
