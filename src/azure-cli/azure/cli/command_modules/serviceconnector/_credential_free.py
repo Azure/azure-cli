@@ -32,7 +32,6 @@ def is_passwordless_command(cmd, auth_info):
                                       AUTHTYPES[AUTH_TYPE.ServicePrincipalSecret],
                                       AUTHTYPES[AUTH_TYPE.UserIdentity]]:
         return False
-    source_type = get_source_resource_name(cmd)
     target_type = get_target_resource_name(cmd)
     if target_type not in {RESOURCE.Sql, RESOURCE.Postgres, RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible}:
         return False
