@@ -38,13 +38,13 @@ from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiMa
                                              OpenIdAuthenticationSettingsContract, ProductContract, ProductState,
                                              NamedValueCreateContract, VersioningScheme, ApiVersionSetContract,
                                              OperationContract, ApiManagementServiceCheckNameAvailabilityParameters,
-                                             ApiReleaseContract, SchemaContract, ResolverContract, PolicyContract, ApiExportResult, ApiExportResultValue)
+                                             ApiReleaseContract, SchemaContract, ResolverContract, PolicyContract)
 
 logger = get_logger(__name__)
 
 # Helpers
 
-API_VS_ARM_ID_Reg = "(.*?)/providers/microsoft.apimanagement/service/([^/]+)`/apiVersionSets/([^/]+)"
+API_VS_ARM_ID_Reg = "(.*?)/providers/microsoft.apimanagement/service/([^/]+)/apiVersionSets/([^/]+)"
 API_VS_PREFIX = "/apiVersionSets/"
 
 
@@ -534,7 +534,7 @@ def apim_api_export(client, resource_group_name, service_name, subscription_id, 
     }
     mappedFormat = format_mapping.get(format)
 
-        # Determine the file extension based on the mappedFormat
+    # Determine the file extension based on the mappedFormat
     if mappedFormat in ['swagger-link', 'openapi+json-link']:
         file_extension = '.json'
     elif mappedFormat in ['wsdl-link', 'wadl-link']:
@@ -549,10 +549,10 @@ def apim_api_export(client, resource_group_name, service_name, subscription_id, 
 
     # Create the file name
     file_name = f"{api_id}_{exportType}{file_extension}"
-    
+
     # Combine the file path and the file name
     full_path = os.path.join(file_path, file_name)
-    
+
     # Export the API from APIManagement
     response = client.api_export.get(resource_group_name, service_name, api_id, mappedFormat, True)
     response_dict = api_export_result_to_dict(response)
