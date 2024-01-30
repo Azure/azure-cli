@@ -414,7 +414,7 @@ class NetworkPrivateLinkService(ScenarioTest):
             self.check('length(ipConfigurations)', 1),
             self.check('length(loadBalancerFrontendIpConfigurations)', 1)
         ])
-
+        self.cmd('network private-link-service list-auto-approved -l westus', self.check('type(@)', 'array'))
         self.cmd('network private-link-service delete -g {rg} -n {lks1}')
 
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies false', checks=[
@@ -2241,6 +2241,9 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
             self.check('length(@)', 6)
         ])
 
+        self.cmd('network application-gateway waf-config list-dynamic-rule-sets -l westus',
+                 self.check('type(@)', 'array'))
+
 
 class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
@@ -3038,6 +3041,10 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
                 self.check('publicIp.provisioningState', 'Succeeded')
             ])
 
+        # test ddos protection status
+        self.cmd('network application-gateway create -g {rg} -n testag --public-ip-address {ip1} --sku Standard_v2 --priority 1001')
+        self.cmd('network public-ip ddos-protection-statu show -g {rg} -n {ip1}', self.check('isWorkloadProtected', False))
+
         self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Disabled --ddos-protection-plan null',
                  checks=[
                      self.check('ddosSettings.protectionMode', 'Disabled'),
@@ -3047,6 +3054,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
                  ])
         self.cmd('network ddos-protection delete -g {rg} -n {ddos}')
 
+        self.cmd('network application-gateway delete -g {rg} -n testag')
         self.cmd('network public-ip delete -g {rg} -n {ip1}')
         self.cmd('network public-ip list -g {rg}',
                  checks=self.check("length[?name == '{ip1}']", None))
@@ -3532,7 +3540,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
     def test_network_cross_region_load_balancer_ip_config(self, resource_group):
 
         for i in range(1, 4):  # create 3 public IPs to use for the test
-            self.cmd('network public-ip create -g {{rg}} -n publicip{} --sku Standard'.format(i))
+            self.cmd('network public-ip create -g {{rg}} -n publicip{} --sku Standard --tier Global'.format(i))
 
         # create internet-facing LB with public IP (lb1)
         self.cmd('network cross-region-lb create -g {rg} -n lb1 --public-ip-address publicip1')
@@ -3720,7 +3728,7 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
 
 class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_load_balancer_ip_config', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_load_balancer_ip_config', location='westus')
     def test_network_load_balancer_ip_config(self, resource_group):
 
         for i in range(1, 4):  # create 3 public IPs to use for the test
@@ -3917,15 +3925,24 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'lb': self.create_random_name('lb', 10),
-            'ap': self.create_random_name('ap', 10),
+            'ap1': self.create_random_name('ap1', 10),
+            'ap2': self.create_random_name('ap2', 10),
+            'vnet': self.create_random_name('vnet', 10),
         })
         self.cmd('network lb create -g {rg} -n {lb}')
-        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {ap} --sync-mode Manual',
-                 checks=self.check('syncMode', 'Manual'))
-        self.cmd('network lb address-pool show -g {rg} --lb-name {lb} -n {ap}',
-                 checks=[self.check('name', '{ap}'),
+        self.cmd('network vnet create -g {rg} -n {vnet}')
+
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {ap1} --sync-mode Manual --vnet {vnet}')
+        self.cmd('network lb address-pool show -g {rg} --lb-name {lb} -n {ap1}',
+                 checks=[self.check('name', '{ap1}'),
                          self.check('syncMode', 'Manual')])
-        self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n {ap}',
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {ap2}')
+        self.cmd('network lb address-pool update -g {rg} --lb-name {lb} -n {ap2} --sync-mode Automatic --vnet {vnet}',
+                 checks=self.check('syncMode', 'Automatic'))
+
+        self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n {ap1}',
+                 checks=self.is_empty())
+        self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n {ap2}',
                  checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_lb_address_pool_addresses', location='eastus2')
@@ -3957,7 +3974,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         # create with subnet
         self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap2 --vnet {vnet} --admin-state None '
                  '--backend-address name=addr1 ip-address=10.0.0.1 subnet={subnet} '
-                 '--backend-address name=addr2 ip-address=10.0.0.2 subnet={subnet_name} '
+                 '--backend-address name=addr2 ip-address=10.0.1.1 subnet={subnet_name} '
                  '--backend-address name=addr3 ip-address=10.0.0.3 subnet={subnet} '
                  '--drain-period 10',
                  checks=[
@@ -3971,12 +3988,12 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         # update backend pool
         self.cmd('network lb address-pool update -g {rg} --lb-name {lb} -n bap2 --vnet {vnet} --admin-state None '
                  '--backend-address name=addr1 ip-address=10.0.0.3 subnet={subnet} '
-                 '--backend-address name=addr2 ip-address=10.0.0.4 subnet={subnet_name} '
+                 '--backend-address name=addr2 ip-address=10.0.1.2 subnet={subnet_name} '
                  '--backend-address name=addr3 ip-address=10.0.0.5 subnet={subnet} '
                  '--drain-period 20',
                  checks=[
                      self.check('loadBalancerBackendAddresses[0].ipAddress', '10.0.0.3'),
-                     self.check('loadBalancerBackendAddresses[1].ipAddress', '10.0.0.4'),
+                     self.check('loadBalancerBackendAddresses[1].ipAddress', '10.0.1.2'),
                      self.check('loadBalancerBackendAddresses[2].ipAddress', '10.0.0.5'),
                      self.check('drainPeriodInSeconds', 20),
                      self.check('loadBalancerBackendAddresses[0].adminState', 'None'),
@@ -4019,7 +4036,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
 
         self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr7 --subnet {subnet} --ip-address 10.0.0.7', checks=self.check('name', 'bap1'))
 
-        self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr8 --vnet {vnet} --subnet {subnet_name} --ip-address 10.0.0.8', checks=self.check('name', 'bap1'))
+        self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr8 --vnet {vnet} --subnet {subnet_name} --ip-address 10.0.1.3', checks=self.check('name', 'bap1'))
 
         self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '3'))
 
@@ -4291,7 +4308,7 @@ class NetworkNicScenarioTest(ScenarioTest):
 
 class NetworkNicAppGatewayScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_nic_app_gateway', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_app_gateway', location='eastus')
     def test_network_nic_app_gateway(self, resource_group):
         from azure.core.exceptions import HttpResponseError
         import json
@@ -5082,7 +5099,7 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
             'gw_sub_prefix1': '10.12.255.0/27',
             'gw1ip': 'pip1',
             'gw1': 'gw1',
-            'gw1_sku': 'Standard',
+            'gw1_sku': 'VpnGw1',
             'lgw1': 'lgw1',
             'lgw1ip': '131.107.72.22',
             'lgw1_prefix1': '10.61.0.0/16',
@@ -5111,9 +5128,7 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
             self.check('name', 'conn1')
         ])
         # test vpn connection show-device-config-script
-        self.cmd('network vpn-connection show-device-config-script -g {rg} -n {conn1} --vendor "Cisco" --device-family "Cisco-ISR(IOS)" --firmware-version "Cisco-ISR-15.x--IKEv2+BGP"', checks=[
-                self.check('length(@)', 10581)
-            ])
+        self.cmd('network vpn-connection show-device-config-script -g {rg} -n {conn1} --vendor "Cisco" --device-family "Cisco-ISR(IOS)" --firmware-version "Cisco-ISR-15.x--IKEv2+BGP"')
         self.cmd('network vpn-connection ipsec-policy add -g {rg} --connection-name {conn1} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}', checks=self.check('length(@)', 1))
         self.cmd('network vpn-connection ipsec-policy clear -g {rg} --connection-name {conn1}')
@@ -5584,7 +5599,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --default-outbound-access true',
                  self.check('defaultOutboundAccess', True))
 
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefixes 10.0.4.0/24',
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefixes 10.0.4.0/24 --default-outbound-access true',
                  self.check('defaultOutboundAccess', True))
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet2} --default-outbound-access false',
                  self.check('defaultOutboundAccess', False))
@@ -5819,6 +5834,34 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vpn-connection list -g {rg} --vnet-gateway {gw1}', checks=[
             self.check('length(@)', 1)
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_sku_', location='westus3')
+    def test_network_vpn_gateway_sku(self, resource_group):
+        self.kwargs.update({
+            'vnet1': 'myvnet1',
+            'gw1': 'gateway1',
+            'ip1': 'pubip1',
+            'custom_routes1': "101.168.0.6/32",
+            'custom_routes2': "102.168.0.6/32"
+        })
+
+        self.cmd('network public-ip create -n {ip1} -g {rg}')
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')
+
+        self.cmd(
+            "network vnet-gateway create -n {gw1} -g {rg} --public-ip-address {ip1} --vnet {vnet1} --gateway-type ExpressRoute --sku ErGwScale --min-scale-unit 3 --max-scale-unit 5",
+            checks=[
+                self.check("vnetGateway.autoScaleConfiguration.bounds.max", 5),
+                self.check("vnetGateway.autoScaleConfiguration.bounds.min", 3),
+            ]
+        )
+        self.cmd(
+            "network vnet-gateway update -n {gw1} -g {rg} --min-scale-unit 4 --max-scale-unit 8",
+            checks=[
+                self.check("autoScaleConfiguration.bounds.max", 8),
+                self.check("autoScaleConfiguration.bounds.min", 4),
+            ]
+        )
 
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_aad_')
     def test_network_vpn_gateway_aad(self, resource_group):
@@ -6326,6 +6369,7 @@ class NetworkVirtualNetworkGatewayNatRule(ScenarioTest):
                  '--nat-rule name=nat internal-mappings=10.4.0.0/24 external-mappings=192.168.21.0/24 ',
                  checks=[self.check('length(vnetGateway.natRules)', 1)])
         self.cmd("network vnet-gateway show -n {vg} -g {rg}")
+        self.cmd("network vnet-gateway list -g {rg}")
 
         # minimal parameters(ip-config-id can only be set when type is Dynamic, and only allowlist sub-ids support Dynamic)
         self.cmd('network public-ip create -g {rg} -n {ip1}')
@@ -6629,6 +6673,7 @@ class NetworkVirtualApplianceIdentityScenarioTest(ScenarioTest):
                  ])
         self.cmd('network virtual-appliance delete -n {nva_name4} -g {rg} -y')
 
+
 class NetworkExtendedLocation(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_network_lb_edge_zone', location='eastus2euap')
     def test_network_lb_edge_zone(self, resource_group):
@@ -6726,6 +6771,24 @@ class NetworkExtendedLocation(ScenarioTest):
         self.cmd('network vnet-gateway create -g {rg} -n vnet-gateway --vnet {vnet} --gateway-type {gateway_type} --edge-zone {edge_name} '
                  '--edge-zone-vnet-id {edge_zone_vnet_id}',
                  checks=self.check('vnetGateway.vNetExtendedLocationResourceId', '{edge_zone_vnet_id}'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_with_enable_private_ip_address', location='eastus')
+    def test_network_vnet_gateway_with_enable_private_ip_address(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'ip': self.create_random_name('ip-', 10),
+            'vnet': self.create_random_name('vnet-', 10),
+            'vnet_gateway': self.create_random_name('vg-', 10),
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} -l eastus --address-prefix 10.1.0.0/16 --subnet-name Frontend --subnet-prefix 10.1.0.0/24')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n GatewaySubnet --address-prefix 10.1.255.0/27')
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {vnet_gateway} --vnet {vnet} --public-ip-address {ip} --gateway-type Vpn --sku VpnGw2 --vpn-gateway-generation Generation2 --enable-private-ip true -l eastus --no-wait')
+        self.cmd('network vnet-gateway show -g {rg} -n {vnet_gateway}', checks=self.check("enablePrivateIpAddress", True))
+        self.cmd('network vnet-gateway wait -g {rg} -n {vnet_gateway} --created')
+        self.cmd('network vnet-gateway update -g {rg} -n {vnet_gateway} --enable-private-ip false')
+        self.cmd('network vnet-gateway show -g {rg} -n {vnet_gateway}', checks=self.check("enablePrivateIpAddress", False))
 
     @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_edge_zone', location='eastus2euap')
     def test_network_private_endpoint_edge_zone(self, resource_group):

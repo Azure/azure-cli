@@ -167,9 +167,9 @@ def load_arguments(self, _):
         c.argument('retention_days', validator=validate_retention_days_on_creation,
                    help='Soft delete data retention days. It accepts >=7 and <=90. '
                         'Defaults to 90 for keyvault creation. Required for MHSM creation')
-        c.argument('user_identities', options_list=['--mi-user-assigned'], nargs='*', is_preview=True,
+        c.argument('user_identities', options_list=['--mi-user-assigned'], nargs='*',
                    min_api='2023-07-01', resource_type=ResourceType.MGMT_KEYVAULT, operation_group="managed_hsms",
-                   help="[HSM Only]Enable user-assigned managed identities for managed HSM. "
+                   help="[HSM Only] Enable user-assigned managed identities for managed HSM. "
                         "Accept space-separated list of identity resource IDs.")
 
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
@@ -191,7 +191,7 @@ def load_arguments(self, _):
                    help='--secondary-locations extends/contracts an HSM pool to listed regions. The primary location '
                         'where the resource was originally created CANNOT be removed.')
         c.argument('user_identities', options_list=['--mi-user-assigned'],
-                   nargs='*', min_api='2023-07-01', is_preview=True,
+                   nargs='*', min_api='2023-07-01',
                    help="Enable user-assigned managed identities for managed HSM. "
                         "Accept space-separated list of identity resource IDs.")
 
@@ -635,7 +635,7 @@ def load_arguments(self, _):
         with self.argument_context('keyvault {} start'.format(command_group)) as c:
             c.argument('token', options_list=['--storage-container-SAS-token', '-t'],
                        help='The SAS token pointing to an Azure Blob storage container')
-            c.argument('use_managed_identity', arg_type=get_three_state_flag(), is_preview=True,
+            c.argument('use_managed_identity', arg_type=get_three_state_flag(),
                        help='If True, Managed HSM will use the configured user-assigned managed identity to '
                             'authenticate with Azure Storage. Otherwise, a `sas_token` has to be specified.')
 

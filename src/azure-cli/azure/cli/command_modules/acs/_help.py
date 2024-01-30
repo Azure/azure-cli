@@ -180,6 +180,10 @@ parameters:
     type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
+  - name: --load-balancer-backend-pool-type
+    type: string
+    short-summary: Load balancer backend pool type.
+    long-summary: Define the LoadBalancer backend pool type of managed inbound backend pool. The nodeIP means the VMs will be attached to the LoadBalancer by adding its private IP address to the backend pool. The nodeIPConfiguration means the VMs will be attached to the LoadBalancer by referencing the backend pool ID in the VM's NIC.
   - name: --nat-gateway-managed-outbound-ip-count
     type: int
     short-summary: NAT gateway managed outbound IP count.
@@ -514,10 +518,19 @@ parameters:
     short-summary: Enable vertical pod autoscaler for cluster.
   - name: --nodepool-allowed-host-ports
     type: string
-    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. 80/TCP,443/TCP,4000-5000/TCP.
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
   - name: --nodepool-asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
+  - name: --node-public-ip-tags
+    type: string
+    short-summary: The ipTags of the node public IPs.
+  - name: --crg-id
+    type: string
+    short-summary: The crg id used to associate the new cluster with the existed Capacity Reservation Group resource.
+  - name: --enable-asm --enable-azure-service-mesh
+    type: bool
+    short-summary: Enable Azure Service Mesh addon.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -592,6 +605,10 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
   - name: Create a kubernetes cluster with vertical pod autoscaler enaled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-vpa
+  - name: create a kubernetes cluster with a Capacity Reservation Group(CRG) ID.
+    text: az aks create -g MyResourceGroup -n MyMC --kubernetes-version 1.20.9 --node-vm-size VMSize --assign-identity "subscriptions/SubID/resourceGroups/RGName/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID" --enable-managed-identity --crg-id "subscriptions/SubID/resourceGroups/RGName/providers/Microsoft.ContainerService/CapacityReservationGroups/MyCRGID"
+  - name: Create a kubernetes cluster with Azure Service Mesh enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-service-mesh
 """
 
 helps['aks update'] = """
@@ -622,6 +639,10 @@ parameters:
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' changes a standard managed cluster to a free one.
+  - name: --network-plugin
+    type: string
+    short-summary: The Kubernetes network plugin to use.
+    long-summary: Specify "azure" along with --network-plugin-mode=overlay to update a cluster to use Azure CNI Overlay. For more information see https://aka.ms/aks/azure-cni-overlay
   - name: --network-plugin-mode
     type: string
     short-summary: Update the mode of a network plugin to migrate to a different pod networking setup.
@@ -664,6 +685,10 @@ parameters:
     type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
+  - name: --load-balancer-backend-pool-type
+    type: string
+    short-summary: Load balancer backend pool type.
+    long-summary: Define the LoadBalancer backend pool type of managed inbound backend pool. The nodeIP means the VMs will be attached to the LoadBalancer by adding its private IP address to the backend pool. The nodeIPConfiguration means the VMs will be attached to the LoadBalancer by referencing the backend pool ID in the VM's NIC.
   - name: --nat-gateway-managed-outbound-ip-count
     type: int
     short-summary: NAT gateway managed outbound IP count.
@@ -1495,6 +1520,9 @@ parameters:
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
+  - name: --node-soak-duration
+    type: int
+    short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
   - name: --enable-encryption-at-host
     type: bool
     short-summary: Enable EncryptionAtHost, default value is false.
@@ -1524,10 +1552,17 @@ parameters:
     short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
   - name: --allowed-host-ports
     type: string
-    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. 80/TCP,443/TCP,4000-5000/TCP.
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
   - name: --asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
+  - name: --node-public-ip-tags
+    type: string
+    short-summary: The ipTags of the node public IPs.
+  - name: --crg-id
+    type: string
+    short-summary: The crg id used to associate the new nodepool with the existed Capacity Reservation Group resource.
+
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1543,6 +1578,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --kubernetes-version 1.20.9 --snapshot-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/snapshots/mysnapshot1"
   - name: create a nodepool in an existing AKS cluster with host group id
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --host-group-id /subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/hostGroups/myHostGroup --node-vm-size VMSize
+  - name: create a nodepool with a Capacity Reservation Group(CRG) ID.
+    text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --node-vm-size VMSize --crg-id "/subscriptions/SubID/resourceGroups/ResourceGroupName/providers/Microsoft.ContainerService/CapacityReservationGroups/MyCRGID"
 """
 
 helps['aks nodepool delete'] = """
@@ -1610,6 +1647,9 @@ parameters:
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
+  - name: --node-soak-duration
+    type: int
+    short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool. Pass the empty string `""` to remove all taints.
@@ -1621,7 +1661,7 @@ parameters:
     short-summary: Comma-separated key-value pairs to specify custom headers.
   - name: --allowed-host-ports
     type: string
-    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. 80/TCP,443/TCP,4000-5000/TCP.
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. `80/TCP 443/TCP 4000-5000/TCP`.
   - name: --asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
@@ -1652,6 +1692,9 @@ parameters:
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how long to wait for all pods to be evicted
+  - name: --node-soak-duration
+    type: int
+    short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to upgrade this nodepool.
@@ -1734,6 +1777,16 @@ examples:
     crafted: true
 """
 
+helps['aks stop'] = """
+    type: command
+    short-summary: Stop a managed cluster.
+    long-summary: This can only be performed on Azure Virtual Machine Scale set backed clusters. Stopping a
+        cluster stops the control plane and agent nodes entirely, while maintaining all object and
+        cluster state. A cluster does not accrue charges while it is stopped. See `stopping a
+        cluster <https://docs.microsoft.com/azure/aks/start-stop-cluster>`_ for more details about
+        stopping a cluster.
+"""
+
 helps['aks update-credentials'] = """
 type: command
 short-summary: Update credentials for a managed Kubernetes cluster, like service principal.
@@ -1788,6 +1841,17 @@ parameters:
   - name: --node-image-only
     type: bool
     short-summary: Only upgrade node image for agent pools.
+  - name: --enable-force-upgrade
+    type: bool
+    short-summary: Enable forceUpgrade cluster upgrade settings override.
+  - name: --disable-force-upgrade
+    type: bool
+    short-summary: Disable forceUpgrade cluster upgrade settings override.
+  - name: --upgrade-override-until
+    type: string
+    short-summary: Until when the cluster upgradeSettings overrides are effective.
+    long-summary: It needs to be in a valid date-time format that's within the next 30 days. For example, 2023-04-01T13:00:00Z. Note that if --force-upgrade is set to true and --upgrade-override-until is not set, by default it will be set to 3 days from now.
+
 examples:
   - name: Upgrade a managed Kubernetes cluster to a newer version. (autogenerated)
     text: az aks upgrade --kubernetes-version 1.12.6 --name MyManagedCluster --resource-group MyResourceGroup
@@ -1987,4 +2051,204 @@ helps['aks oidc-issuer'] = """
 helps['aks oidc-issuer rotate-signing-keys'] = """
     type: command
     short-summary: Rotate oidc issuer service account signing keys
+"""
+
+helps['aks trustedaccess'] = """
+    type: group
+    short-summary: Commands to manage trusted access security features.
+"""
+
+helps['aks trustedaccess role'] = """
+    type: group
+    short-summary: Commands to manage trusted access roles.
+"""
+
+helps['aks trustedaccess role list'] = """
+    type: command
+    short-summary: List trusted access roles.
+"""
+
+helps['aks trustedaccess rolebinding'] = """
+    type: group
+    short-summary: Commands to manage trusted access role bindings.
+"""
+
+helps['aks trustedaccess rolebinding list'] = """
+    type: command
+    short-summary: List all the trusted access role bindings.
+"""
+
+helps['aks trustedaccess rolebinding show'] = """
+    type: command
+    short-summary: Get the specific trusted access role binding according to binding name.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Specify the role binding name.
+"""
+
+helps['aks trustedaccess rolebinding create'] = """
+    type: command
+    short-summary: Create a new trusted access role binding.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Specify the role binding name.
+        - name: --roles
+          type: string
+          short-summary: Specify the comma-separated roles.
+        - name: --source-resource-id
+          type: string
+          short-summary: Specify the source resource id of the binding.
+
+    examples:
+        - name: Create a new trusted access role binding
+          text: az aks trustedaccess rolebinding create -g myResourceGroup --cluster-name myCluster -n bindingName --source-resource-id /subscriptions/0000/resourceGroups/myResourceGroup/providers/Microsoft.Demo/samples --roles Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer
+"""
+
+helps['aks trustedaccess rolebinding update'] = """
+    type: command
+    short-summary: Update a trusted access role binding.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Specify the role binding name.
+        - name: --roles
+          type: string
+          short-summary: Specify the comma-separated roles.
+"""
+
+helps['aks trustedaccess rolebinding delete'] = """
+    type: command
+    short-summary: Delete a trusted access role binding according to name.
+    parameters:
+        - name: --name -n
+          type: string
+          short-summary: Specify the role binding name.
+"""
+
+helps['aks mesh'] = """
+    type: group
+    short-summary: Commands to manage Azure Service Mesh.
+    long-summary: A group of commands to manage Azure Service Mesh in given cluster.
+"""
+
+helps['aks mesh enable'] = """
+    type: command
+    short-summary: Enable Azure Service Mesh.
+    long-summary: This command enables Azure Service Mesh in given cluster.
+    parameters:
+      - name: --revision
+        type: string
+        short-summary: Azure Service Mesh revision to install.
+      - name: --key-vault-id
+        type: string
+        short-summary: The Azure Keyvault id with plugin CA info.
+      - name: --ca-cert-object-name
+        type: string
+        short-summary: Intermediate cert object name in the Azure Keyvault.
+      - name: --ca-key-object-name
+        type: string
+        short-summary: Intermediate key object name in the Azure Keyvault.
+      - name: --cert-chain-object-name
+        type: string
+        short-summary: Cert chain object name in the Azure Keyvault.
+      - name: --root-cert-object-name
+        type: string
+        short-summary: Root cert object name in the Azure Keyvault.
+    examples:
+      - name: Enable Azure Service Mesh with selfsigned CA.
+        text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster
+      - name: Enable Azure Service Mesh with plugin CA.
+        text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster --key-vault-id /subscriptions/00000/resourceGroups/foo/providers/Microsoft.KeyVault/vaults/foo --ca-cert-object-name my-ca-cert --ca-key-object-name my-ca-key --cert-chain-object-name my-cert-chain --root-cert-object-name my-root-cert
+"""
+
+helps['aks mesh disable'] = """
+    type: command
+    short-summary: Disable Azure Service Mesh.
+    long-summary: This command disables Azure Service Mesh in given cluster.
+"""
+
+helps['aks mesh enable-ingress-gateway'] = """
+    type: command
+    short-summary: Enable an Azure Service Mesh ingress gateway.
+    long-summary: This command enables an Azure Service Mesh ingress gateway in given cluster.
+    parameters:
+      - name: --ingress-gateway-type
+        type: string
+        short-summary: Specify the type of ingress gateway.
+        long-summary: Allowed values are "External" which is backed by a load balancer with an external IP address; "Internal" which is backed by a load balancer with an internal IP address.
+    examples:
+      - name: Enable an internal ingress gateway.
+        text: az aks mesh enable-ingress-gateway --resource-group MyResourceGroup --name MyManagedCluster --ingress-gateway-type Internal
+"""
+
+helps['aks mesh disable-ingress-gateway'] = """
+    type: command
+    short-summary: Disable an Azure Service Mesh ingress gateway.
+    long-summary: This command disables an Azure Service Mesh ingress gateway in given cluster.
+    parameters:
+      - name: --ingress-gateway-type
+        type: string
+        short-summary: Specify the type of ingress gateway.
+        long-summary: Allowed values are "External" which is backed by a load balancer with an external IP address, "Internal" which is backed by a load balancer with an internal IP address.
+    examples:
+      - name: Disable an internal ingress gateway.
+        text: az aks mesh disable-ingress-gateway --resource-group MyResourceGroup --name MyManagedCluster --ingress-gateway-type Internal
+"""
+
+helps['aks mesh get-revisions'] = """
+    type: command
+    short-summary: Discover available Azure Service Mesh revisions and their compatibility.
+    long-summary: This command lists available Azure Service Mesh revisions and their compatibility information for the given location.
+    examples:
+      - name: Discover Azure Service Mesh revisions.
+        text: az aks mesh get-revisions --location westus2
+        crafted: true
+"""
+
+helps['aks mesh get-upgrades'] = """
+    type: command
+    short-summary: Discover available Azure Service Mesh upgrades.
+    long-summary: This command lists available Azure Service Mesh upgrades for the mesh revision installed on the cluster.
+    examples:
+      - name: Discover Azure Service Mesh upgrades.
+        text: az aks mesh get-upgrades --resource-group MyResourceGroup --name MyManagedCluster
+"""
+
+helps['aks mesh upgrade start'] = """
+    type: command
+    short-summary: Initiate Azure Service Mesh upgrade.
+    long-summary: This command initiates upgrade of Azure Service Mesh to the specified revision.
+    parameters:
+      - name: --revision
+        type: string
+        short-summary: Azure Service Mesh revision to upgrade to.
+    examples:
+      - name: Initiate Azure Service Mesh upgrade.
+        text: az aks mesh upgrade start --resource-group MyResourceGroup --name MyManagedCluster --revision asm-1-18
+"""
+
+helps['aks mesh upgrade'] = """
+    type: group
+    short-summary: Commands to manage the upgrades for Azure Service Mesh.
+    long-summary: A group of commands to manage the upgrades for Azure Service Mesh in given cluster.
+"""
+
+helps['aks mesh upgrade complete'] = """
+    type: command
+    short-summary: Complete Azure Service Mesh upgrade.
+    long-summary: This command completes Azure Service Mesh canary upgrade by removing the previous revision.
+    examples:
+      - name: Complete Azure Service Mesh upgrade.
+        text: az aks mesh upgrade complete --resource-group MyResourceGroup --name MyManagedCluster
+"""
+
+helps['aks mesh upgrade rollback'] = """
+    type: command
+    short-summary: Rollback Azure Service Mesh upgrade.
+    long-summary: This command rolls back Azure Service Mesh upgrade to the previous stable revision.
+    examples:
+      - name: Rollback Azure Service Mesh upgrade.
+        text: az aks mesh upgrade rollback --resource-group MyResourceGroup --name MyManagedCluster
 """

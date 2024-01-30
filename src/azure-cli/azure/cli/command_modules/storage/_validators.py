@@ -400,6 +400,8 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
         prefix = cmd.command_kwargs['resource_type'].value[0]
         if valid_file_source and (ns.get('container_name', None) or not same_account):
             dir_name, file_name = os.path.split(path) if path else (None, '')
+            if dir_name == '':
+                dir_name = None
             if is_storagev2(prefix):
                 source_sas = create_short_lived_file_sas_v2(cmd, source_account_name, source_account_key, share,
                                                             dir_name, file_name)
@@ -2167,12 +2169,6 @@ def validate_policy(namespace):
     if namespace.id is not None:
         logger.warning("\nPlease do not specify --expiry and --permissions if they are already specified in your "
                        "policy.")
-
-
-def validate_allow_blob_public_access():
-    logger.warning("The public access to all blobs or containers in the storage account will be "
-                   "disallowed by default in the future, which means default value for --allow-blob-public-access "
-                   "is still null but will be equivalent to false.")
 
 
 def validate_immutability_arguments(namespace):

@@ -6,7 +6,7 @@
 import argparse
 import base64
 import binascii
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 import sys
 from ipaddress import ip_network
@@ -482,7 +482,7 @@ def datetime_type(string):
                              '%Y-%m-%dT%HZ', '%Y-%m-%d']
     for form in accepted_date_formats:
         try:
-            return datetime.strptime(string, form)
+            return datetime.strptime(string, form).replace(tzinfo=timezone.utc)
         except ValueError:  # checks next format
             pass
     raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))

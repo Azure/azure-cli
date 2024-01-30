@@ -27,6 +27,7 @@ from azure.cli.command_modules.resource.custom import (
     deploy_arm_template_at_management_group,
     deploy_arm_template_at_tenant_scope,
     format_bicep_file,
+    publish_bicep_file,
 )
 
 from azure.cli.command_modules.resource._bicep import (run_bicep_command)
@@ -674,6 +675,39 @@ class TestFormatBicepFile(unittest.TestCase):
         mock_bicep_version_greater_than_or_equal_to.assert_called_once_with("0.12.1")
         mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ["format", file_path, "--stdout"])
 
+class TestPublishWithSource(unittest.TestCase):
+    @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to", return_value=True)
+    @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command", return_value="formatted content")
+    def test_publish_withsource(self, mock_run_bicep_command, mock_bicep_version_greater_than_or_equal_to):
+        # Arrange.
+        file_path = "path/to/file.bicep"
+        target = "br:contoso.azurecr.io/bicep/mymodule:v1"
+
+        # Act.
+        publish_bicep_file(cmd, file_path, target, documentationUri=None, with_source=None)
+
+        # Assert.
+        mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
+            mock.call("0.4.1008"), # Min version for 'bicep publish'
+        ])
+        mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ['publish', file_path, '--target', 'br:contoso.azurecr.io/bicep/mymodule:v1'])
+
+    @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to", return_value=True)
+    @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command", return_value="formatted content")
+    def test_publish_without_source(self, mock_run_bicep_command, mock_bicep_version_greater_than_or_equal_to):
+        # Arrange.
+        file_path = "path/to/file.bicep"
+        target = "br:contoso.azurecr.io/bicep/mymodule:v1"
+
+        # Act.
+        publish_bicep_file(cmd, file_path, target, documentationUri=None, with_source=True)
+
+        # Assert.
+        mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
+            mock.call("0.4.1008"), # Min version for 'bicep publish'
+            mock.call("0.23.1") # Min version for 'bicep publish --with-source'
+        ])
+        mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ['publish', file_path, '--target', 'br:contoso.azurecr.io/bicep/mymodule:v1', '--with-source'])
 
 if __name__ == '__main__':
     unittest.main()

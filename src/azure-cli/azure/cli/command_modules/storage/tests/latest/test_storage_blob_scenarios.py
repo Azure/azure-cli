@@ -274,6 +274,20 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage container show-permission -n {}', account_info, c) \
             .assert_with_checks(JMESPathCheck('publicAccess', 'off'))
 
+        # test case with access policy set
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        policy = self.create_random_name('policy', 16)
+        self.storage_cmd('storage container policy create -c {} -n {} --expiry {} --permissions racwdxyltfmei',
+                         account_info, c, policy, expiry)
+        self.storage_cmd('storage container set-permission -n {} --public-access blob',
+                         account_info, c)
+        self.storage_cmd('storage container show-permission -n {}', account_info, c) \
+            .assert_with_checks(JMESPathCheck('publicAccess', 'blob'))
+        self.storage_cmd('storage container policy list -c {} ', account_info, c) \
+            .assert_with_checks(JMESPathCheckExists('{}.expiry'.format(policy)),
+                                JMESPathCheck('{}.permission'.format(policy), 'racwdxyltfmei'))
+
         self.storage_cmd('storage container show -n {}', account_info, c) \
             .assert_with_checks(JMESPathCheck('name', c))
 
