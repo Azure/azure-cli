@@ -95,6 +95,12 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         self.assertTrue(output_budget['timePeriod'])
         self.assertTrue(output_budget['name'])
 
+    def _validate_event_or_lot(self, output_event):
+        self.assertIsNotNone(output_event)
+        self.assertTrue(output_event['name'])
+        self.assertTrue(output_event['type'])
+        self.assertTrue(output_event['properties'])
+
     @AllowLargeResponse()
     def test_consumption_pricesheet_billing_period(self):
         pricesheet = self.cmd('consumption pricesheet show --billing-period-name 20171001').get_output_in_json()
@@ -218,3 +224,18 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         output_budget = self.cmd('consumption budget show --budget-name "havTest01"').get_output_in_json()
         self.assertTrue(output_budget)
         self._validate_budget(output_budget)
+
+    def test_consumption_event_list(self):
+        output_event = self.cmd('consumption event list --billing-account-id {} --billing-profile-id {} -s "2019-09-01" -e "2019-10-31"').get_output_in_json()
+        self.assertTrue(output_event)
+        self._validate_event_or_lot(output_event[0])
+
+    def test_consumption_lot_list(self):
+        output_lot = self.cmd('consumption lot list --billing-account-id {} --billing-profile-id {}').get_output_in_json()
+        self.assertTrue(output_lot)
+        self._validate_event_or_lot(output_lot[0])
+
+    def test_consumption_lot_list_with_customer_id(self):
+        output_lot = self.cmd('consumption lot list --billing-account-id {} --customer-id {}').get_output_in_json()
+        self.assertTrue(output_lot)
+        self._validate_event_or_lot(output_lot[0])

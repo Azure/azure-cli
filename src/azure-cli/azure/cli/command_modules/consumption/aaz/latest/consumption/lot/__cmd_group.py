@@ -8,3 +8,13 @@
 # pylint: skip-file
 # flake8: noqa
 
+from azure.cli.core.aaz import *
+
+
+class __CMDGroup(AAZCommandGroup):
+    """Manage lot of Azure resources.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]

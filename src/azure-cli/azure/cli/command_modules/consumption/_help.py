@@ -99,3 +99,8 @@ helps['consumption usage list'] = """
 type: command
 short-summary: List the details of Azure resource consumption, either as an invoice or within a billing period.
 """
+
+helps['consumption lot list'] = """
+type: command
+short-summary: List all Microsoft Azure consumption commitments for a billing account. Or List all Azure credits for a customer.
+"""
