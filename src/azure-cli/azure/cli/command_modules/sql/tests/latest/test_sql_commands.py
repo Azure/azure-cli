@@ -7470,3 +7470,26 @@ class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
         # list 0 config options
         self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
                     checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+
+
+class SqlManagedInstanceExternalGovernanceTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ManagedInstancePreparer(parameter_name='mi')
+    def test_sql_mi_refresh_external_governance_status(self, mi, rg):
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi
+        })
+        # check if test MI got created
+        self.cmd('sql mi show -g {rg} -n {mi}',
+                 checks=[
+                     JMESPathCheck('name', mi),
+                     JMESPathCheck('resourceGroup', rg)])
+
+        self.cmd('sql mi refresh-external-governance-status --mi {mi} -g {rg}',
+                 checks=[
+                     self.check('type', 'Microsoft.Sql/locations/refreshExternalGovernanceStatusOperationResults'),
+                     self.check('managedInstanceName', '{mi}'),
+                     self.check('status', 'Succeeded'),
+                     self.check('requestType', 'UpdatePurviewMetadata')
+                 ])
