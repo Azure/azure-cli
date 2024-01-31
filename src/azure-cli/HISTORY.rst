@@ -22,8 +22,8 @@ Release History
 
 **Backup**
 
-* Add support for disk restore in edge-zone backups (#28150)
-* Support for Taiwan North and Taiwan North-West Cross region restore (#28150)
+* `az backup restore restore-disks`: Add support for disk restore in edge-zone backups (#28150)
+* `az backup restore restore-disks`: Support for Taiwan North and Taiwan North-West Cross region restore (#28150)
 
 **Billing**
 
@@ -39,7 +39,7 @@ Release History
 * `az image builder error-handler`: Add group to manage error handling options upon a build failure (#28106)
 * `az sshkey create`: Add parameter `--encryption-type` to specify the encryption type of SSH keys to be generated (#28143)
 * `az vm monitor log show`: Deprecate `azure-loganalytics` and apply `azure-monitor-query` (#28199)
-* `az vm create` and `az vmss create`: Support Trusted Launch as default deployment option (#28222)
+* `az vm/vmss create`: Support Trusted Launch as default deployment option (#28222)
 
 **Consumption**
 
@@ -58,7 +58,7 @@ Release History
 **Monitor**
 
 * `az monitor metrics`: Add `list-sub` and `list-sub-definition` (#28201)
-
+* `az monitor metrics list`: Fix `--top` help message (#28114)
 **MySQL**
 
 * `az mysql flexible-server import create`: Add support for operation progress estimated completion time for import from physical backup from azure blob to flexible server (#28243)
@@ -85,9 +85,9 @@ Release History
 
 **Redis**
 
-* Add support for flush operation (#27599)
-* Add support for Microsoft Entra Authentication (#27599)
-* Add support for update channels (#27599)
+* `az redis flush`: Add support for flush operation (#27599)
+* `az redis create`: Add support for Microsoft Entra Authentication (#27599)
+* `az redis access-policy/access-policy-assignment`: New command groups to manage access policy (#27599)
 
 **Service Connector**
 
