@@ -30,6 +30,7 @@ class ImportFormat(Enum):
     Wsdl = "Wsdl"
     GraphQL = "GraphQL"
 
+
 class ExportFormat(Enum):
     WadlFile = "WadlFile"
     SwaggerFile = "SwaggerFile"
@@ -41,6 +42,7 @@ class ExportFormat(Enum):
     OpenApiUrl = "OpenApiYamlUrl"
     OpenApiJsonUrl = "OpenApiJsonUrl"
     WsdlUrl = "WsdlUrl"
+
 
 def load_arguments(self, _):
 
@@ -312,7 +314,7 @@ def load_arguments(self, _):
         c.argument('api_version', arg_group='API',
                    help='Describes the Version of the Api to use for this operation')
         c.argument('format', arg_type=get_enum_type(ExportFormat), help='Specify the format of the exporting API.')
-        c.argument('file_path', options_list=['--file-path', '-f'], 
+        c.argument('file_path', options_list=['--file-path', '-f'],
                    help='File path specified to export the API.')
 
     with self.argument_context('apim product api list') as c:

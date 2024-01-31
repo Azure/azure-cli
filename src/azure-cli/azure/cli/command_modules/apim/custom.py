@@ -515,6 +515,7 @@ def apim_api_import(
         api_id=api_id,
         parameters=parameters)
 
+
 def apim_api_export(client, resource_group_name, service_name, subscription_id, api_id, api_version, format, file_path):
     """Gets the details of the API specified by its identifier in the format specified """
 
@@ -541,15 +542,14 @@ def apim_api_export(client, resource_group_name, service_name, subscription_id, 
 
     # Export the API from APIManagement
     response = client.api_export.get(resource_group_name, service_name, api_id, mappedFormat, True)
-    
+
     # If url is requested
     if format in ['WadlUrl', 'SwaggerUrl', 'OpenApiYamlUrl', 'OpenApiJsonUrl', 'WsdlUrl']:
         return response
-    
+
     # If file is requested
     # Obtain link from the response
     response_dict = api_export_result_to_dict(response)
-    response_json = json.dumps(response_dict)
     try:
         # Extract the link from the response where results are stored
         link = response_dict['additional_properties']['properties']['value']['link']
@@ -565,13 +565,13 @@ def apim_api_export(client, resource_group_name, service_name, subscription_id, 
         file_extension = '.yaml'
     else:
         file_extension = '.txt'
-        
+
     # Remove '-link' from the mappedFormat and create the file name with full path
     exportType = mappedFormat.replace('-link', '')
     file_name = f"{api_id}_{exportType}{file_extension}"
     full_path = os.path.join(file_path, file_name)
-    
-    # Get the results from the link where the API Export Results are stored  
+
+    # Get the results from the link where the API Export Results are stored
     try:
         exportedResults = requests.get(link, timeout=30)
         if not exportedResults.ok:
@@ -599,7 +599,7 @@ def apim_api_export(client, resource_group_name, service_name, subscription_id, 
         with open(full_path, 'w') as f:
             if file_extension == '.json':
                 json.dump(exportedResultContent, f, indent=4)
-            elif file_extension  =='.yaml':
+            elif file_extension == '.yaml':
                 yaml.dump(exportedResultContent, f)
             elif file_extension == '.xml':
                 from xml.etree.ElementTree import tostring
@@ -609,12 +609,11 @@ def apim_api_export(client, resource_group_name, service_name, subscription_id, 
             else:
                 f.write(str(exportedResultContent))
     except IOError as e:
-        logger.warning(f"Error writing to file.: {e}")
-    except Exception as e:
-        logger.warning(f"An error occurred: {e}")
-    
+        logger.warning(f"Error writing exported API to file.: {e}")
+
     # Write the response to a file
     return logger.warning(f"APIMExport results written to file: {full_path}")
+
 
 def api_export_result_to_dict(api_export_result):
     # This function returns a dictionary representation of the ApiExportResult object
@@ -625,8 +624,8 @@ def api_export_result_to_dict(api_export_result):
         'value': api_export_result.value
     }
 
-# Product API Operations
 
+# Product API Operations
 def apim_product_api_list(client, resource_group_name, service_name, product_id):
 
     return client.product_api.list_by_product(resource_group_name, service_name, product_id)
