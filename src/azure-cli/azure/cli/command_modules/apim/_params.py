@@ -311,8 +311,6 @@ def load_arguments(self, _):
                    help="The name of the api management service instance", id_part=None)
         c.argument('api_id', arg_type=api_id,
                    help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number. Regex pattern: ^[^*#&+:<>?]+$')
-        c.argument('api_version', arg_group='API',
-                   help='Describes the Version of the Api to use for this operation')
         c.argument('format', arg_type=get_enum_type(ExportFormat), help='Specify the format of the exporting API.')
         c.argument('file_path', options_list=['--file-path', '-f'],
                    help='File path specified to export the API.')

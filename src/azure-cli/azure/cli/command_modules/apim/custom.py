@@ -516,7 +516,7 @@ def apim_api_import(
         parameters=parameters)
 
 
-def apim_api_export(client, resource_group_name, service_name, subscription_id, api_id, api_version, format, file_path):
+def apim_api_export(client, resource_group_name, service_name, subscription_id, api_id, format, file_path):
     """Gets the details of the API specified by its identifier in the format specified """
 
     import json
