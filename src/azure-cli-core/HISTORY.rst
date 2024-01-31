@@ -6,7 +6,7 @@ Release History
 2.57.0
 ++++++
 * `aaz`: Handle null value when deserialize output (#28253)
-* Warn customers when there're credentials in cli output if this feature has been turned on through `az config set clients.show_secrets_warning=True` (#27929)
+* Add warning for customers when there're credentials in cli output if this feature has been turned on through `az config set clients.show_secrets_warning=True` (#27929)
 
 2.56.0
 ++++++
