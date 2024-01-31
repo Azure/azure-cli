@@ -59,6 +59,7 @@ Release History
 
 * `az monitor metrics`: Add `list-sub` and `list-sub-definition` (#28201)
 * `az monitor metrics list`: Fix `--top` help message (#28114)
+
 **MySQL**
 
 * `az mysql flexible-server import create`: Add support for operation progress estimated completion time for import from physical backup from azure blob to flexible server (#28243)
