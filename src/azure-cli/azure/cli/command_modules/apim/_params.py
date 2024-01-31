@@ -31,11 +31,16 @@ class ImportFormat(Enum):
     GraphQL = "GraphQL"
 
 class ExportFormat(Enum):
-    Wadl = "Wadl"
-    Swagger = "Swagger"
-    OpenApi = "OpenApiYaml"
-    OpenApiJson = "OpenApiJson"
-    Wsdl = "Wsdl"
+    WadlFile = "WadlFile"
+    SwaggerFile = "SwaggerFile"
+    OpenApiFile = "OpenApiYamlFile"
+    OpenApiJsonFile = "OpenApiJsonFile"
+    WsdlFile = "WsdlFile"
+    WadlUrl = "WadlUrl"
+    SwaggerUrl = "SwaggerUrl"
+    OpenApiUrl = "OpenApiYamlUrl"
+    OpenApiJsonUrl = "OpenApiJsonUrl"
+    WsdlUrl = "WsdlUrl"
 
 def load_arguments(self, _):
 

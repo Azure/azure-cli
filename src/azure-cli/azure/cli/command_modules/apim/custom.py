@@ -526,13 +526,35 @@ def apim_api_export(client, resource_group_name, service_name, subscription_id, 
 
     # Define the mapping from old format values to new ones
     format_mapping = {
-        "Wadl": "wadl-link",
-        "Swagger": "swagger-link",
-        "OpenApiYaml": "openapi-link",
-        "OpenApiJson": "openapi+json-link",
-        "Wsdl": "wsdl-link"
+        "WadlFile": "wadl-link",
+        "SwaggerFile": "swagger-link",
+        "OpenApiYamlFile": "openapi-link",
+        "OpenApiJsonFile": "openapi+json-link",
+        "WsdlFile": "wsdl-link",
+        "WadlUrl": "wadl-link",
+        "SwaggerUrl": "swagger-link",
+        "OpenApiYamlUrl": "openapi-link",
+        "OpenApiJsonUrl": "openapi+json-link",
+        "WsdlUrl": "wsdl-link"
     }
     mappedFormat = format_mapping.get(format)
+
+    # Export the API from APIManagement
+    response = client.api_export.get(resource_group_name, service_name, api_id, mappedFormat, True)
+    
+    # If url is requested
+    if format in ['WadlUrl', 'SwaggerUrl', 'OpenApiYamlUrl', 'OpenApiJsonUrl', 'WsdlUrl']:
+        return response
+    
+    # If file is requested
+    # Obtain link from the response
+    response_dict = api_export_result_to_dict(response)
+    response_json = json.dumps(response_dict)
+    try:
+        # Extract the link from the response where results are stored
+        link = response_dict['additional_properties']['properties']['value']['link']
+    except KeyError:
+        logger.warning("Error exporting api from APIManagement. The expected link is not present in the response.")
 
     # Determine the file extension based on the mappedFormat
     if mappedFormat in ['swagger-link', 'openapi+json-link']:
@@ -544,25 +566,11 @@ def apim_api_export(client, resource_group_name, service_name, subscription_id, 
     else:
         file_extension = '.txt'
         
-    # Remove '-link' from the mappedFormat
+    # Remove '-link' from the mappedFormat and create the file name with full path
     exportType = mappedFormat.replace('-link', '')
-
-    # Create the file name
     file_name = f"{api_id}_{exportType}{file_extension}"
-
-    # Combine the file path and the file name
     full_path = os.path.join(file_path, file_name)
-
-    # Export the API from APIManagement
-    response = client.api_export.get(resource_group_name, service_name, api_id, mappedFormat, True)
-    response_dict = api_export_result_to_dict(response)
-    response_json = json.dumps(response_dict)
-    try:
-        # Extract the link from the response where results are stored
-        link = response_dict['additional_properties']['properties']['value']['link']
-    except KeyError:
-        logger.warning("Error exporting api from APIManagement. The expected link is not present in the response.")
-
+    
     # Get the results from the link where the API Export Results are stored  
     try:
         exportedResults = requests.get(link, timeout=30)
@@ -609,8 +617,7 @@ def apim_api_export(client, resource_group_name, service_name, subscription_id, 
     return logger.warning(f"APIMExport results written to file: {full_path}")
 
 def api_export_result_to_dict(api_export_result):
-    # This function should return a dictionary representation of the ApiExportResult object
-    # The implementation of this function depends on the structure of the ApiExportResult object
+    # This function returns a dictionary representation of the ApiExportResult object
     return {
         'additional_properties': api_export_result.additional_properties,
         'id': api_export_result.id,

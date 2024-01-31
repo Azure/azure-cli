@@ -247,7 +247,7 @@ helps['apim api export'] = """
 type: command
 short-summary: Export an API Management API.
 examples:
-  - name: Export an API Management API to a file
+  - name: Export an API Management API to a file or returns a response containing a link of the export.
     text: |-
         az apim api export --subscription-id MySubId -g MyResourceGroup --service-name MyApim --api_id MyApi --api-version default --format OpenApiJson --file-path path
 """
