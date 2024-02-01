@@ -18,7 +18,6 @@ from .aaz.latest.netappfiles.volume_group import Create as _VolumeGroupCreate
 from .aaz.latest.netappfiles.volume.export_policy import List as _ExportPolicyList, Add as _ExportPolicyAdd, Remove as _ExportPolicyRemove
 from .aaz.latest.netappfiles.volume.replication import Resume as _ReplicationResume
 from .aaz.latest.netappfiles.pool import Create as _PoolCreate, Update as _PoolUpdate
-from azure.mgmt.netapp.models import  VolumePatch, VolumePatchPropertiesDataProtection, VolumeBackupProperties
 
 logger = get_logger(__name__)
 
@@ -405,6 +404,7 @@ class VolumeCreate(_VolumeCreate):
     #     if any(x is not None for x in [backupPolicyId, backupEnabled, backupVaultId]):
     #         backup = VolumeBackupProperties(backup_enabled=backup_enabled,
     #                                         backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)
+
 
 # check if flattening dataprotection works
 class VolumeUpdate(_VolumeUpdate):
