@@ -71,6 +71,9 @@ def load_command_table(self, _):
     from .custom.custom_cdn import CDNProfileList
     self.command_table['cdn profile list'] = CDNProfileList(loader=self)
 
+    from .custom.custom_cdn import CDNEnableHttps
+    self.command_table['cdn custom-domain enable-https'] = CDNEnableHttps(loader=self)
+
     from azure.cli.command_modules.cdn.aaz.latest.cdn.endpoint import Show
     self.command_table['cdn endpoint rule show'] = Show(loader=self)
     self.command_table['cdn endpoint rule condition show'] = Show(loader=self)
@@ -81,9 +84,6 @@ def load_command_table(self, _):
 
     from .custom.custom_cdn import CDNEndpointUpdate
     self.command_table['cdn endpoint update'] = CDNEndpointUpdate(loader=self)
-
-    from .custom.custom_cdn import CDNEnableCustomHttp
-    self.command_table['cdn endpoint enable-custom-http'] = CDNEnableCustomHttp(loader=self)
 
     from .custom.custom_cdn import NameExistsWithType
     self.command_table['cdn endpoint name-exists'] = NameExistsWithType(loader=self)

@@ -7,7 +7,7 @@
 from azure.mgmt.cdn.models import (MinimumTlsVersion, ProtocolType, SkuName, UpdateRule, DeleteRule, CertificateType,
                                    ResourceType)
 from azure.cli.core.aaz._base import has_value
-from azure.cli.command_modules.cdn.aaz.latest.cdn.custom_domain import EnableCustomHttp as _CDNEnableCustomHttp
+from azure.cli.command_modules.cdn.aaz.latest.cdn.custom_domain import EnableHttps as _CDNEnableHttps
 from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDProfileShow, \
     Create as _AFDProfileCreate, Update as _AFDProfileUpdate, Delete as _AFDProfileDelete, \
     List as _AFDProfileList
@@ -119,7 +119,7 @@ class CDNProfileDelete(_AFDProfileDelete):
         return args_schema
 
 
-class CDNEnableCustomHttp(_CDNEnableCustomHttp):
+class CDNEnableHttps(_CDNEnableHttps):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -146,11 +146,11 @@ class CDNEnableCustomHttp(_CDNEnableCustomHttp):
             'the deployed certificate will be automatically rotated to the latest version '
             'when a newer version of the certificate is available.',
         )
-        args_schema.user_cert_secret_name = AAZStrArg(
+        args_schema.user_cert_subscription_id = AAZStrArg(
             options=['--user-cert-subscription-id'],
             help='The subscription id of the KeyVault certificate.',
         )
-        args_schema.user_cert_secret_name = AAZStrArg(
+        args_schema.user_cert_vault_name = AAZStrArg(
             options=['--user-cert-vault-name'],
             help='The vault name of the KeyVault certificate.',
         )
@@ -301,14 +301,13 @@ class CDNOriginGroupCreate(_CDNOriginGroupCreate):
             options=['--probe-protocol'],
             help='The protocol to use for health probes.',
         )
-        args_schema.origin = AAZListArg(
-            options=['--origin-name'],
+        args_schema.origins = AAZStrArg(
+            options=['--origins'],
             help='The origins load balanced by this origin group, '
             'as a comma-separated list of origin names or origin resource IDs.',
         )
-        args_schema.origin.Element = AAZStrArg()
-        args_schema.response_error_detection_error_types = AAZStrArg(
-            options=['--response-error-detection-error-types'],
+        args_schema.response_error_detection_status_code_ranges = AAZStrArg(
+            options=['--response-error-detection-status-code-ranges'],
             help='Type of response errors for real user requests for which origin will be deemed unhealthy',
         )
         args_schema.response_error_detection_failover_threshold = AAZIntArg(
@@ -327,7 +326,7 @@ class CDNOriginGroupCreate(_CDNOriginGroupCreate):
         if not has_value(args.probe_method):
             args.probe_method = 'HEAD'
         if not has_value(args.probe_protocol):
-            args.probe_protocol = 'HTTP'
+            args.probe_protocol = 'Http'
         if not has_value(args.probe_interval):
             args.probe_interval = 240
         health_probe_settings = {
@@ -339,7 +338,7 @@ class CDNOriginGroupCreate(_CDNOriginGroupCreate):
         args.health_probe_settings = health_probe_settings
 
         formatted_origins = []
-        if has_value(args.origin):
+        if has_value(args.origins):
             for origin in args.origins.to_serialized_data().split(','):
                 # If the origin is not an ID, assume it's a name and format it as an ID.
                 if '/' not in origin:
@@ -358,7 +357,7 @@ class CDNOriginGroupCreate(_CDNOriginGroupCreate):
                 'response_based_detected_error_types': args.response_error_detection_error_types,
                 'response_based_failover_threshold_percentage': args.response_error_detection_failover_threshold
             }
-        args.response_based_error_detection_settings = response_based_error_detection_settings
+        args.response_based_origin_error_detection_settings = response_based_error_detection_settings
 
 
 class CDNOriginGroupUpdate(_CDNOriginGroupUpdate):
@@ -590,12 +589,14 @@ class CDNEndpointUpdate(_CDNEndpointUpdate):
         if has_value(args.default_origin_group):
             if '/' not in args.default_origin_group.to_serialized_data():
                 args.default_origin_group = f'{args.id}/originGroups/{args.default_origin_group}'
-        if not has_value(args.is_compression_enabled):
+        if has_value(args.enable_compression):
+            args.is_compression_enabled = args.enable_compression
+        if not has_value(args.enable_compression):
             args.is_compression_enabled = existing['isCompressionEnabled']
         if args.is_compression_enabled.to_serialized_data() and not has_value(args.content_types_to_compress):
             args.content_types_to_compress = existing['contentTypesToCompress']
-        if has_value(args.enable_compression):
-            args.is_compression_enabled = args.enable_compression
+            if not has_value(args.content_types_to_compress) is None:
+                args.content_types_to_compress = default_content_types()
         if has_value(args.no_http):
             args.is_http_allowed = not args.no_http
         if has_value(args.no_https):

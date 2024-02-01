@@ -12,9 +12,9 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "cdn custom-domain disable-custom-http",
+    "cdn custom-domain disable-https",
 )
-class DisableCustomHttp(AAZCommand):
+class DisableHttps(AAZCommand):
     """Disable https delivery of the custom domain.
     """
 
@@ -43,7 +43,7 @@ class DisableCustomHttp(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.custom_domain_name = AAZStrArg(
-            options=["--custom-domain-name"],
+            options=["-n", "--name", "--custom-domain-name"],
             help="Name of the custom domain within an endpoint.",
             required=True,
             id_part="child_name_2",
@@ -185,13 +185,13 @@ class DisableCustomHttp(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _DisableCustomHttpHelper._build_schema_custom_domain_read(cls._schema_on_200)
+            _DisableHttpsHelper._build_schema_custom_domain_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
 
-class _DisableCustomHttpHelper:
-    """Helper class for DisableCustomHttp"""
+class _DisableHttpsHelper:
+    """Helper class for DisableHttps"""
 
     _schema_custom_domain_read = None
 
@@ -348,4 +348,4 @@ class _DisableCustomHttpHelper:
         _schema.type = cls._schema_custom_domain_read.type
 
 
-__all__ = ["DisableCustomHttp"]
+__all__ = ["DisableHttps"]

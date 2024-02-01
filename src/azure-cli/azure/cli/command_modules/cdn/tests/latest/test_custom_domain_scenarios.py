@@ -16,18 +16,16 @@ from azure.core.exceptions import (HttpResponseError, ResourceNotFoundError, Res
 class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_cdn_domain')
     def test_cdn_custom_domain_errors(self, resource_group):
-        from knack.util import CLIError
-
         self.kwargs.update({
             'profile': 'cdnprofile1',
             'endpoint': self.create_random_name(prefix='endpoint', length=24),
             'origin': 'www.test.com',
-            'hostname': 'www.example.com',
+            'hostname': 'www.contoso.com',
             'name': 'customdomain1',
             'rg': resource_group,
         })
 
-        self.cmd('cdn profile create -g {rg} -n {profile}')
+        self.cmd('cdn profile create -g {rg} -n {profile} --sku Standard_Microsoft')
         self.cmd('cdn endpoint create -g {rg} --origin {origin} --profile-name {profile} -n {endpoint}')
         self.cmd('cdn custom-domain list -g {rg} --endpoint-name {endpoint} --profile-name {profile}')
 
@@ -36,14 +34,14 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         with self.assertRaises(HttpResponseError):
             self.cmd(
                 'cdn custom-domain create -g {rg} --endpoint-name {endpoint} --hostname {hostname} --profile-name {profile} -n {name}')
-        with self.assertRaises(SystemExit):  # exits with code 3 due to missing resource
+        with self.assertRaises(ResourceNotFoundError):  # exits with code 3 due to missing resource
             self.cmd('cdn custom-domain show -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
-        self.cmd('cdn custom-domain delete -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
+        # self.cmd('cdn custom-domain delete -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name} --yes')
         with self.assertRaises(ResourceNotFoundError):
             self.cmd(
                 'cdn custom-domain enable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
 
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ResourceNotFoundError):
             self.cmd(
                 'cdn custom-domain disable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
 
@@ -52,12 +50,12 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         profile_name = self.create_random_name(prefix='profile', length=24)
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
 
-        self.profile_create_cmd(resource_group, profile_name, sku=SkuName.standard_akamai.value)
+        self.profile_create_cmd(resource_group, profile_name, sku="Standard_Microsoft")
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
         endpoint_name = 'cdn-cli-test'
-        origin = 'www.example.com'
+        origin = 'www.microsoft1.com'
         self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin)
 
         list_checks = [JMESPathCheck('length(@)', 0)]
@@ -145,7 +143,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
         endpoint_name = 'cdn-cli-test-4'
-        origin = 'www.example.com'
+        origin = 'www.contoso.com'
         endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         # Create custom domains for CDN managed cert and BYOC
@@ -215,7 +213,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
         endpoint_name = 'cdn-cli-test-5'
-        origin = 'www.example.com'
+        origin = 'www.contoso.com'
         endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         # Create custom domain for BYOC

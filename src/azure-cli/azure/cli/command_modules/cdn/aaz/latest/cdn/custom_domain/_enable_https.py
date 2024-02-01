@@ -12,9 +12,9 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "cdn custom-domain enable-custom-http",
+    "cdn custom-domain enable-https",
 )
-class EnableCustomHttp(AAZCommand):
+class EnableHttps(AAZCommand):
     """Enable https delivery of the custom domain.
 
     :example: Enable HTTPS for custom domain with resource name customdomain1 using a CDN-managed certificate
@@ -49,7 +49,7 @@ class EnableCustomHttp(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.custom_domain_name = AAZStrArg(
-            options=["--custom-domain-name"],
+            options=["-n", "--name", "--custom-domain-name"],
             help="Name of the custom domain within an endpoint.",
             required=True,
             id_part="child_name_2",
@@ -328,13 +328,13 @@ class EnableCustomHttp(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _EnableCustomHttpHelper._build_schema_custom_domain_read(cls._schema_on_200)
+            _EnableHttpsHelper._build_schema_custom_domain_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
 
-class _EnableCustomHttpHelper:
-    """Helper class for EnableCustomHttp"""
+class _EnableHttpsHelper:
+    """Helper class for EnableHttps"""
 
     _schema_custom_domain_read = None
 
@@ -491,4 +491,4 @@ class _EnableCustomHttpHelper:
         _schema.type = cls._schema_custom_domain_read.type
 
 
-__all__ = ["EnableCustomHttp"]
+__all__ = ["EnableHttps"]

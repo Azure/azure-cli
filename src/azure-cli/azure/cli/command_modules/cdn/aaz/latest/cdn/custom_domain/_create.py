@@ -67,8 +67,8 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.host_name = AAZStrArg(
-            options=["--host-name"],
+        _args_schema.hostname = AAZStrArg(
+            options=["--hostname"],
             arg_group="Properties",
             help="The host name of the custom domain. Must be a domain name.",
         )
@@ -192,7 +192,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("hostName", AAZStrType, ".host_name", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("hostName", AAZStrType, ".hostname", typ_kwargs={"flags": {"required": True}})
 
             return self.serialize_content(_content_value)
 
