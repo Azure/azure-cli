@@ -5,8 +5,8 @@
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
 import unittest
-LOCATION = "westus"
-VNET_LOCATION = "westus"
+LOCATION = "westus2"
+VNET_LOCATION = "westus2"
 
 
 class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
@@ -244,6 +244,8 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         assert volume2['dataProtection']['backup']['backupEnabled']
 
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
+        if self.is_live or self.in_recording:
+            time.sleep(60)
         self.delete_backup(account_name, pool_name, volume_name)
 
     # @unittest.skip('(servicedeployment) Backups has been deprecated, new backup API is in 2023-05-01-preview -> netappfiles-preview extension')

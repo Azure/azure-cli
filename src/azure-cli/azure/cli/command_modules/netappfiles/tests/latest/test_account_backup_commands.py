@@ -6,8 +6,8 @@
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
 import unittest
-LOCATION = "eastus"
-VNET_LOCATION = "eastus"
+LOCATION = "westus2"
+VNET_LOCATION = "westus2"
 
 # No tidy up of tests required. The resource group is automatically removed
 
