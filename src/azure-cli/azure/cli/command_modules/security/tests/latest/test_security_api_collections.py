@@ -17,21 +17,21 @@ class ApiCollectionsTests(ScenarioTest):
 
         nexttoken = base64.b64encode('{"next_link": null, "offset": 0}'.encode()).decode()
 
-        self.cmd("az security api-collections create -g {} --api-id {} --service-name {}".format(resource_group, api_id, service_name), checks=[
+        self.cmd("az security api-collection create -g {} --api-id {} --service-name {}".format(resource_group, api_id, service_name), checks=[
             JMESPathCheck('name', api_id)
         ])
 
-        self.cmd("az security api-collections wait --created -g {} --api-id {} --service-name {}".format(resource_group, api_id, service_name))
+        self.cmd("az security api-collection wait --created -g {} --api-id {} --service-name {}".format(resource_group, api_id, service_name))
 
-        collections = self.cmd("az security api-collections list -g {} --max-items 1 --next-token {}".format(resource_group, nexttoken)).get_output_in_json()
+        collections = self.cmd("az security api-collection list -g {} --max-items 1 --next-token {}".format(resource_group, nexttoken)).get_output_in_json()
         assert len(collections) > 0
 
-        collections = self.cmd("az security api-collections list -g {} --service-name {}".format(resource_group, service_name)).get_output_in_json()
+        collections = self.cmd("az security api-collection list -g {} --service-name {}".format(resource_group, service_name)).get_output_in_json()
         assert len(collections) > 0
 
-        self.cmd("az security api-collections show -g {} --api-id {} --service-name {}".format(resource_group, api_id, service_name), checks=[
+        self.cmd("az security api-collection show -g {} --api-id {} --service-name {}".format(resource_group, api_id, service_name), checks=[
             JMESPathCheck('name', api_id),
             JMESPathCheck('provisioningState', 'Succeeded')
         ])
 
-        self.cmd("az security api-collections delete --yes -g {} --name {} --service-name {}".format(resource_group, api_id, service_name))
+        self.cmd("az security api-collection delete --yes -g {} --name {} --service-name {}".format(resource_group, api_id, service_name))
