@@ -1,0 +1,342 @@
+interactions:
+- request:
+    body: '{"location": "centralus", "properties": {"environmentData": {"environmentType":
+      "AzureDevOpsScope"}, "environmentName": "AzureDevOps", "hierarchyIdentifier":
+      "530aee27-8996-4a9e-a980-336a04985747", "offerings": [{"offeringType": "CspmMonitorAzureDevOps"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security security-connectors create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '257'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --location --resource-group --security-connector-name --hierarchy-identifier
+        --environment-name --environment-data --offerings
+      User-Agent:
+      - AZURECLI/2.56.0 (AAZ) azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Security/securityConnectors/cli000002?api-version=2023-10-01-preview
+  response:
+    body:
+      string: '{"properties":{"offerings":[{"offeringType":"CspmMonitorAzureDevOps"}],"environmentName":"AzureDevOps","hierarchyIdentifier":"530aee27-8996-4a9e-a980-336a04985747","environmentData":{"environmentType":"AzureDevOpsScope"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Security/securityConnectors/cli000002","name":"cli000002","type":"Microsoft.Security/securityconnectors","location":"centralus","tags":{},"systemData":{"createdBy":"c3d82ccb-fee1-430c-949e-6c0a217c00a8","createdByType":"Application","createdAt":"2024-01-31T23:45:59.5812275Z","lastModifiedBy":"c3d82ccb-fee1-430c-949e-6c0a217c00a8","lastModifiedByType":"Application","lastModifiedAt":"2024-01-31T23:45:59.5812275Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '748'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 31 Jan 2024 23:45:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 12C25C796EDD4E3C9DBBE41D18D0761E Ref B: CO6AA3150219035 Ref C: 2024-01-31T23:45:59Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security security-connectors show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.56.0 (AAZ) azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Security/securityConnectors/cli000002?api-version=2023-10-01-preview
+  response:
+    body:
+      string: '{"properties":{"offerings":[{"offeringType":"CspmMonitorAzureDevOps"}],"environmentName":"AzureDevOps","hierarchyIdentifier":"530aee27-8996-4a9e-a980-336a04985747","environmentData":{"environmentType":"AzureDevOpsScope"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Security/securityConnectors/cli000002","name":"cli000002","type":"Microsoft.Security/securityconnectors","location":"centralus","tags":{},"systemData":{"createdBy":"c3d82ccb-fee1-430c-949e-6c0a217c00a8","createdByType":"Application","createdAt":"2024-01-31T23:45:59.5812275Z","lastModifiedBy":"c3d82ccb-fee1-430c-949e-6c0a217c00a8","lastModifiedByType":"Application","lastModifiedAt":"2024-01-31T23:45:59.5812275Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '748'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 31 Jan 2024 23:46:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+      x-msedge-ref:
+      - 'Ref A: 67808E3DB4B548299FED6A72FAA87F82 Ref B: CO6AA3150218033 Ref C: 2024-01-31T23:46:00Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security security-connectors update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --environment-name --environment-data --offerings
+      User-Agent:
+      - AZURECLI/2.56.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"centralus","tags":{"product":"azurecli","cause":"automation","test":"test_security_securityconnectors","date":"2024-01-31T23:45:55Z","module":"security"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '375'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 31 Jan 2024 23:46:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 33C0F4F4BD074D6E8A75D7E745DAD318 Ref B: CO6AA3150217027 Ref C: 2024-01-31T23:46:01Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security security-connectors update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --environment-name --environment-data --offerings
+      User-Agent:
+      - AZURECLI/2.56.0 (AAZ) azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Security/securityConnectors/cli000002?api-version=2023-10-01-preview
+  response:
+    body:
+      string: '{"properties":{"offerings":[{"offeringType":"CspmMonitorAzureDevOps"}],"environmentName":"AzureDevOps","hierarchyIdentifier":"530aee27-8996-4a9e-a980-336a04985747","environmentData":{"environmentType":"AzureDevOpsScope"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Security/securityConnectors/cli000002","name":"cli000002","type":"Microsoft.Security/securityconnectors","location":"centralus","tags":{},"systemData":{"createdBy":"c3d82ccb-fee1-430c-949e-6c0a217c00a8","createdByType":"Application","createdAt":"2024-01-31T23:45:59.5812275Z","lastModifiedBy":"c3d82ccb-fee1-430c-949e-6c0a217c00a8","lastModifiedByType":"Application","lastModifiedAt":"2024-01-31T23:45:59.5812275Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '748'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 31 Jan 2024 23:46:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+      x-msedge-ref:
+      - 'Ref A: 48F91F3B3AF84013BCD132392ACD2B44 Ref B: CO6AA3150219053 Ref C: 2024-01-31T23:46:01Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "centralus", "properties": {"environmentData": {"environmentType":
+      "AzureDevOpsScope"}, "environmentName": "AzureDevOps", "hierarchyIdentifier":
+      "530aee27-8996-4a9e-a980-336a04985747", "offerings": [{"offeringType": "CspmMonitorAzureDevOps"}]},
+      "tags": {}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security security-connectors update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '269'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --environment-name --environment-data --offerings
+      User-Agent:
+      - AZURECLI/2.56.0 (AAZ) azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Security/securityConnectors/cli000002?api-version=2023-10-01-preview
+  response:
+    body:
+      string: '{"properties":{"offerings":[{"offeringType":"CspmMonitorAzureDevOps"}],"environmentName":"AzureDevOps","hierarchyIdentifier":"530aee27-8996-4a9e-a980-336a04985747","environmentData":{"environmentType":"AzureDevOpsScope"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Security/securityConnectors/cli000002","name":"cli000002","type":"Microsoft.Security/securityconnectors","location":"centralus","tags":{},"systemData":{"createdBy":"c3d82ccb-fee1-430c-949e-6c0a217c00a8","createdByType":"Application","createdAt":"2024-01-31T23:45:59.5812275Z","lastModifiedBy":"c3d82ccb-fee1-430c-949e-6c0a217c00a8","lastModifiedByType":"Application","lastModifiedAt":"2024-01-31T23:46:02.1653134Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '748'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 31 Jan 2024 23:46:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 2D79CA7944204283A7462456C6674126 Ref B: CO6AA3150219053 Ref C: 2024-01-31T23:46:01Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security security-connectors list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --max-items --next-token
+      User-Agent:
+      - AZURECLI/2.56.0 (AAZ) azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Security/securityConnectors?api-version=2023-10-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"offerings":[{"offeringType":"CspmMonitorAzureDevOps"}],"environmentName":"AzureDevOps","hierarchyIdentifier":"530aee27-8996-4a9e-a980-336a04985747","environmentData":{"environmentType":"AzureDevOpsScope"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Security/securityConnectors/cli000002","name":"cli000002","type":"Microsoft.Security/securityconnectors","location":"centralus","tags":{},"systemData":{"createdBy":"c3d82ccb-fee1-430c-949e-6c0a217c00a8","createdByType":"Application","createdAt":"2024-01-31T23:45:59.5812275Z","lastModifiedBy":"c3d82ccb-fee1-430c-949e-6c0a217c00a8","lastModifiedByType":"Application","lastModifiedAt":"2024-01-31T23:46:02.1653134Z"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '760'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 31 Jan 2024 23:46:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+      x-msedge-ref:
+      - 'Ref A: AA9C0B70783F49EABC1F3EB5CE7BA953 Ref B: CO6AA3150217017 Ref C: 2024-01-31T23:46:03Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security security-connectors delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --yes --resource-group --name
+      User-Agent:
+      - AZURECLI/2.56.0 (AAZ) azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Security/securityConnectors/cli000002?api-version=2023-10-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Wed, 31 Jan 2024 23:46:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 6DC95C31B16A45BD998624C70F050BC3 Ref B: CO6AA3150217035 Ref C: 2024-01-31T23:46:04Z'
+    status:
+      code: 204
+      message: No Content
+version: 1
