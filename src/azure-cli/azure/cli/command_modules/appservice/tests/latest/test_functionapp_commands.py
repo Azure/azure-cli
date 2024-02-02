@@ -578,23 +578,6 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
 
 
 class FunctionappDaprConfig(ScenarioTest):
-    @ResourceGroupPreparer(location="northeurope")
-    @StorageAccountPreparer()
-    def test_functionapp_dapr_config_not_enabled_error(self, resource_group, storage_account):
-        functionapp_name = self.create_random_name(
-            'functionappdapr', 24)
-        managed_environment_name = self.create_random_name(
-            'managedenvironment', 40
-        )
-
-        with self.assertRaises(ArgumentUsageError):
-            self.cmd('functionapp create -g {} -n {} -s {} --environment {} --enable-dapr false --dapr-app-id daprappid --functions-version 4'.format(
-                resource_group,
-                functionapp_name,
-                storage_account,
-                managed_environment_name
-            ))
-
     @ResourceGroupPreparer(location='northeurope')
     @StorageAccountPreparer()
     def test_functionapp_enable_dapr(self, resource_group, storage_account):
@@ -676,7 +659,13 @@ class FunctionappDapr(LiveScenarioTest):
         time.sleep(1200)
 
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
-            JMESPathCheck('daprConfig', None)
+            JMESPathCheck('daprConfig.enabled', False),
+            JMESPathCheck('daprConfig.appId', None),
+            JMESPathCheck('daprConfig.appPort', None),
+            JMESPathCheck('daprConfig.httpReadBufferSize', None),
+            JMESPathCheck('daprConfig.httpMaxRequestSize', None),
+            JMESPathCheck('daprConfig.logLevel', 'info'),
+            JMESPathCheck('daprConfig.enableApiLogging', False)
         ])
 
     @ResourceGroupPreparer(location='northeurope')

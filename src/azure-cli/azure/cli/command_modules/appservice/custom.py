@@ -3903,7 +3903,7 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
     updated_functionapp = json.dumps(
         {
             "properties": {
-                "daprConfig": None if functionapp.dapr_config is None else {
+                "daprConfig": {"enabled": False} if functionapp.dapr_config is None else {
                     "enabled": functionapp.dapr_config.enabled,
                     "appId": functionapp.dapr_config.app_id,
                     "appPort": functionapp.dapr_config.app_port,
