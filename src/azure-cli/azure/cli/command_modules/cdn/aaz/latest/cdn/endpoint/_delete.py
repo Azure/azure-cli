@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cdn endpoint delete",
-    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile.

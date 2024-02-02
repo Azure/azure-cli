@@ -164,9 +164,9 @@ class CdnScenarioMixin:
         return self.cmd(command, checks, expect_failure=expect_failure)
 
     def endpoint_delete_cmd(self, group, name, profile_name, checks=None):
-        command = 'cdn endpoint delete -g {} -n {} --profile-name {} --yes'.format(group,
-                                                                                   name,
-                                                                                   profile_name)
+        command = 'cdn endpoint delete -g {} -n {} --profile-name {}'.format(group,
+                                                                             name,
+                                                                             profile_name)
         return self.cmd(command, checks)
 
     def origin_create_cmd(self, group, origin_name, endpoint_name, profile_name, host_name, http_port=None,

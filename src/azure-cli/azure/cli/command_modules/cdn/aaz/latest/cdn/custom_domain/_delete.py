@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cdn custom-domain delete",
-    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete an existing custom domain within an endpoint.

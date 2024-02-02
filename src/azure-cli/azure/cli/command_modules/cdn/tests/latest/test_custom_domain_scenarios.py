@@ -54,7 +54,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'cdn-cli-test'
+        endpoint_name = 'cdn-cli-test-aaz'
         origin = 'www.microsoft1.com'
         self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin)
 
@@ -62,7 +62,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.custom_domain_list_cmd(resource_group, profile_name, endpoint_name, checks=list_checks)
 
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.cdn-cli-test.azfdtest.xyz'
+        hostname = custom_domain_name + '.aaz.clitest.azfdtest.xyz'
         checks = [JMESPathCheck('name', custom_domain_name),
                   JMESPathCheck('hostName', hostname),
                   JMESPathCheck('customHttpsParameters', None)]
@@ -76,7 +76,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         except HttpResponseError as err:
             if err.status_code != 400:
                 raise err
-            hostname = custom_domain_name + '.cdn-cli-test-dogfood.azfdtest.xyz'
+            hostname = custom_domain_name + '.aaz-df.clitest.azfdtest.xyz'
             self.custom_domain_create_cmd(group=resource_group,
                                           profile_name=profile_name,
                                           endpoint_name=endpoint_name,
