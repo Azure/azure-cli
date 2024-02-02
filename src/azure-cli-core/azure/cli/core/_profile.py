@@ -451,7 +451,7 @@ class Profile:
         s.state = 'Enabled'
         return s
 
-    def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None, interactive=False):
+    def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None, interactive=None):
 
         def _get_key_name(account, secondary_key_name):
             return (account[_SUBSCRIPTION_ID] if secondary_key_name is None
@@ -497,31 +497,59 @@ class Profile:
         self._storage[_SUBSCRIPTIONS] = subscriptions
 
     @staticmethod
-    def _pick_working_subscription(subscriptions, interactive=False):
-        interactive = True
+    def _pick_working_subscription(subscriptions, interactive=None):
         if interactive:
-            print('This account has access to below subscriptions: ')
-            index_to_subscription_map = {}
-            for index, sub in enumerate(subscriptions, start=1):
-                index_to_subscription_map[index] = sub
-                print('{}. {} {:50s} {}'.format(index, sub[_SUBSCRIPTION_ID], sub[_SUBSCRIPTION_NAME], sub[_TENANT_ID]))
-            from knack.prompting import prompt_int, NoTTYException
-
-            # Keep prompting until the user inputs a valid index
-            while True:
-                try:
-                    select_index = prompt_int('Please select the default subscription: ')
-                    return index_to_subscription_map[select_index]
-                except KeyError:
-                    logger.warning("Invalid selection.")
-                    # Let retry
-                except NoTTYException:
-                    logger.warning("No TTY to select the default subscription. Picking the first enabled subscription"
-                                   "as the default one.")
-                    break
-
+            picked = Profile._interactively_pick_subscription(subscriptions)
+            if picked:
+                return picked
         s = next((x for x in subscriptions if x.get(_STATE) == 'Enabled'), None)
         return s or subscriptions[0]
+
+    @staticmethod
+    def _interactively_pick_subscription(subscriptions):
+        index_to_subscription_map = {}
+        table_data = []
+        for index, sub in enumerate(subscriptions, start=1):
+            # There is no need to use int, as int requires parsing. str match is sufficient.
+            index_str = str(index)  # '1', '2', ...
+            index_to_subscription_map[index_str] = sub
+
+            # TODO: make index_str blue
+            table_data.append({
+                'No': f'[{index_str}]',
+                'Subscription name': sub[_SUBSCRIPTION_NAME],
+                'Subscription ID': sub[_SUBSCRIPTION_ID],
+                # TODO: Retrieve tenant domain name
+                'Tenant Domain Name': sub[_TENANT_ID]
+            })
+
+        from tabulate import tabulate
+        table_str = tabulate(table_data, headers="keys", tablefmt="simple", disable_numparse=True)
+
+        print()
+        print('Select a subscription and tenant:')
+        print()
+        print(table_str)
+        print()
+
+        from knack.prompting import prompt, NoTTYException
+
+        # Keep prompting until the user inputs a valid index
+        while True:
+            try:
+                # TODO: Make text in parentheses grey
+                select_index = prompt(
+                    'Which subscription and tenant would you like to choose '
+                    '(Type a number or Enter for no changes): ')
+                return index_to_subscription_map[select_index]
+            except KeyError:
+                logger.warning("Invalid selection.")
+                # Let retry
+            except NoTTYException:
+                # This is a good example showing interactive and non-TTY are not contradictory
+                logger.warning("No TTY to select the default subscription. Picking the first enabled subscription "
+                               "as the default one.")
+                break
 
     def is_tenant_level_account(self):
         return self.get_subscription()[_SUBSCRIPTION_NAME] == _TENANT_LEVEL_ACCOUNT_NAME
