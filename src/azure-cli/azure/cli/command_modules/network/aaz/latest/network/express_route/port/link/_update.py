@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}", "2022-01-01", "properties.links[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}", "2023-09-01", "properties.links[]"],
         ]
     }
 
@@ -213,7 +213,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -312,7 +312,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -470,6 +470,9 @@ class _UpdateHelper:
         properties.bandwidth_in_gbps = AAZIntType(
             serialized_name="bandwidthInGbps",
         )
+        properties.billing_type = AAZStrType(
+            serialized_name="billingType",
+        )
         properties.circuits = AAZListType(
             flags={"read_only": True},
         )
@@ -520,6 +523,10 @@ class _UpdateHelper:
         properties = _schema_express_route_port_read.properties.links.Element.properties
         properties.admin_state = AAZStrType(
             serialized_name="adminState",
+        )
+        properties.colo_location = AAZStrType(
+            serialized_name="coloLocation",
+            flags={"read_only": True},
         )
         properties.connector_type = AAZStrType(
             serialized_name="connectorType",

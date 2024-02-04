@@ -985,6 +985,7 @@ def _set_up_defaults(
         resource_group: "ResourceGroup",
         env: "ContainerAppEnvironment",
         app: "ContainerApp",
+        is_registry_server_params_set=None,
 ):
     # If no RG passed in and a singular app exists with the same name, get its env and rg
     _get_app_env_and_group(cmd, name, resource_group, env, location)
@@ -1008,7 +1009,8 @@ def _set_up_defaults(
                 f"There are multiple environments with name {env.name} on the subscription. "
                 "Please specify which resource group your Containerapp environment is in."
             )  # get ACR details from --image, if possible
-    _get_acr_from_image(cmd, app)
+    if not is_registry_server_params_set:
+        _get_acr_from_image(cmd, app)
 
 
 def _create_github_action(

@@ -22,9 +22,9 @@ class ListMapping(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
+        "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools/{}/queryinboundnatruleportmapping", "2022-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools/{}/queryinboundnatruleportmapping", "2023-09-01"],
         ]
     }
 
@@ -49,15 +49,15 @@ class ListMapping(AAZCommand):
             options=["--backend-pool-name"],
             help="The name of the backend address pool.",
             required=True,
-        )
-        _args_schema.resource_group = AAZStrArg(
-            options=["-g", "--resource-group"],
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
-            required=True,
+            id_part="child_name_1",
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
             help="The load balancer name.",
+            required=True,
+            id_part="name",
+        )
+        _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
 
@@ -167,7 +167,7 @@ class ListMapping(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }

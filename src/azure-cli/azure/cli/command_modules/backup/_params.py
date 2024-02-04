@@ -392,6 +392,7 @@ def load_arguments(self, _):
         c.argument('target_subnet_name', help='Name of the subnet in which the target VM should be created, in the case of Alternate Location restore a new VM')
         c.argument('target_subscription_id', help='ID of the subscription to which the resource should be restored')
         c.argument('storage_account_resource_group', help='Name of the resource group which contains the storage account. Default value will be same as --resource-group if not specified.')
+        c.argument('restore_to_edge_zone', arg_type=get_three_state_flag(), help='Switch parameter to indicate edge zone VM restore. This parameter can\'t be used in cross region and cross subscription restore scenarios.')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)

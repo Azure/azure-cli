@@ -219,7 +219,7 @@ parameters:
 examples:
   - name: Update a function app's settings.
     text: |
-        az functionapp config appsettings set --name MyFunctionApp --resource-group MyResourceGroup --settings "AzureWebJobsStorage=$storageConnectionString"
+        az functionapp config appsettings set --name MyFunctionApp --resource-group MyResourceGroup --settings foo=bar AzureWebJobsStorage=$storageConnectionString
   - name: Set using both key-value pair and a json file with more settings.
     text: >
         az functionapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings mySetting=value @moreSettings.json

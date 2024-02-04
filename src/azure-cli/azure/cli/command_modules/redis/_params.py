@@ -8,7 +8,7 @@ from knack.arguments import CLIArgumentType
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
-    from azure.mgmt.redis.models import RebootType, RedisKeyType, SkuName, TlsVersion, ReplicationRole
+    from azure.mgmt.redis.models import RebootType, RedisKeyType, SkuName, TlsVersion, ReplicationRole, UpdateChannel
     from azure.cli.command_modules.redis._validators import JsonString, ScheduleEntryList
     from azure.cli.command_modules.redis.custom import allowed_c_family_sizes, allowed_p_family_sizes, allowed_auth_methods
     from azure.cli.core.commands.parameters import get_enum_type, tags_type, zones_type
@@ -49,6 +49,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('redis_version', help='Redis version. This should be in the form \'major[.minor]\' (only \'major\' is required) or the value \'latest\' which refers to the latest stable Redis version that is available. Supported versions: 4.0, 6.0 (latest). Default value is \'latest\'.')
         c.argument('mi_system_assigned', arg_type=system_identity_type)
         c.argument('mi_user_assigned', arg_type=user_identity_type)
+        c.argument('update_channel', arg_type=get_enum_type(UpdateChannel), help='Specifies the update channel for the monthly Redis updates your Redis Cache will receive. Caches using "Preview" update channel get latest Redis updates at least 4 weeks ahead of "Stable" channel caches. Default value is "Stable".')
         c.argument('storage_subscription_id', options_list=['--storage-subscription-id', '--storage-sub-id'], help='SubscriptionId of the storage account')
 
     with self.argument_context('redis firewall-rules list') as c:
@@ -59,6 +60,25 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('end_ip', help='Highest IP address included in the range.')
         c.argument('rule_name', help='The name of the firewall rule.')
         c.argument('start_ip', help='Lowest IP address included in the range.')
+
+    with self.argument_context('redis access-policy') as c:
+        c.argument('access_policy_name', help='The name of the access policy that is being assigned')
+        c.argument('permissions', help='Permissions for the access policy. Learn how to configure permissions at '
+                                       'https://aka.ms/redis/AADPreRequisites')
+
+    with self.argument_context('redis access-policy list') as c:
+        c.argument('cache_name', arg_type=cache_name, id_part=None)
+
+    with self.argument_context('redis access-policy-assignment') as c:
+        c.argument('access_policy_assignment_name', options_list=['--policy-assignment-name'],
+                   help='The name of the access policy assignment')
+        c.argument('object_id', help='Object Id to assign access policy to')
+        c.argument('object_id_alias', help='User friendly name for object id. Also represents username for token '
+                                           'based authentication')
+        c.argument('access_policy_name', help='The name of the access policy that is being assigned')
+
+    with self.argument_context('redis access-policy-assignment list') as c:
+        c.argument('cache_name', arg_type=cache_name, id_part=None)
 
     with self.argument_context('redis force-reboot') as c:
         c.argument('shard_id', help='If clustering is enabled, the ID of the shard to be rebooted.')

@@ -12,8 +12,9 @@ from azure.cli.testsdk.scenario_tests import record_only, AllowLargeResponse
 
 class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(location='EastUS2')
-    def test_storage_file_copy_scenario(self, resource_group, storage_account):
+    @StorageAccountPreparer(location='EastUS2', parameter_name='storage_account')
+    @StorageAccountPreparer(location='EastUS2', parameter_name='storage_account_2')
+    def test_storage_file_copy_scenario(self, resource_group, storage_account, storage_account_2):
         account_info = self.get_account_info(resource_group, storage_account)
         s1 = self.create_share(account_info)
         s2 = self.create_share(account_info)
@@ -63,6 +64,17 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage file copy start -s {} -p "{}" --source-share {} --source-path "{}"',
                          account_info, s2, dst_file, s1, src_file) \
             .assert_with_checks(JMESPathCheck('status', 'success'))
+
+        # test copy between two different storage accounts
+        account_2_info = self.get_account_info(resource_group, storage_account_2)
+        s3 = self.create_share(account_2_info)
+        src_file = 'source_file.txt'
+        dst_file = 'dst_file.txt'
+        self.storage_cmd('storage file upload -p "{}" --share-name {} --source "{}"', account_2_info,
+                         src_file, s3, local_file)
+        self.storage_cmd('storage file copy start -s {} -p "{}" --source-share {} --source-path "{}" '
+                         '--source-account-name {} --source-account-key {}',
+                         account_info, s2, dst_file, s3, src_file, account_2_info[0], account_2_info[1])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(location='EastUS2')

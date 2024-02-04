@@ -202,7 +202,7 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('length(properties.configuration.secrets)', 1),
         ])
 
-        # Update Container App with ACR
+        # Update Container App with ACR, set --min-replicas 1
         update_string = 'containerapp update -g {} -n {} --min-replicas 1 --max-replicas 1 --set-env-vars testenv=testing'.format(
             resource_group, containerapp_name)
         self.cmd(update_string, checks=[
@@ -233,7 +233,7 @@ class ContainerappScenarioTest(ScenarioTest):
             # Removing ACR password should fail since it is needed for ACR
             self.cmd('containerapp secret remove -g {} -n {} --secret-names {}'.format(resource_group, containerapp_name, secret_name))
 
-        # Update Container App with ACR
+        # Update Container App with ACR, --min-replicas 0
         update_string = 'containerapp update -g {} -n {} --min-replicas 0 --max-replicas 1 --replace-env-vars testenv=testing2'.format(
             resource_group, containerapp_name)
         self.cmd(update_string, checks=[

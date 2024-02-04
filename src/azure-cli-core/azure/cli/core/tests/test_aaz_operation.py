@@ -451,7 +451,7 @@ class TestAAZGenericUpdateOperation(unittest.TestCase):
                 }
             )
 
-        with self.assertRaisesRegex(InvalidArgumentValueError, "--set property1.property2=<value>"):
+        with self.assertRaisesRegex(InvalidArgumentValueError, "`--set property1.property2=<value>`"):
             AAZGenericInstanceUpdateOperation(ctx)._update_instance_by_generic(
                 instance,
                 {
@@ -514,7 +514,7 @@ class TestAAZGenericUpdateOperation(unittest.TestCase):
                 }
             )
 
-        with self.assertRaisesRegex(InvalidArgumentValueError, "--remove property.list <indexToRemove> OR --remove propertyToRemove"):
+        with self.assertRaisesRegex(InvalidArgumentValueError, "`--remove property.list <indexToRemove>` OR `--remove propertyToRemove`"):
             AAZGenericInstanceUpdateOperation(ctx)._update_instance_by_generic(
                 instance,
                 {

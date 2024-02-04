@@ -9,5 +9,6 @@
 # flake8: noqa
 
 from .__cmd_group import *
+from ._refresh_external_governance_status import *
 from ._start import *
 from ._stop import *

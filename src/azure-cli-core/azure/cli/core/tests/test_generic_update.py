@@ -272,7 +272,7 @@ class GenericUpdateTest(unittest.TestCase):
                             'index out of range in path')
 
         _execute_with_error('genupdate --remove myList[0]',
-                            'invalid syntax: --remove property.list <indexToRemove> OR --remove propertyToRemove',
+                            'invalid syntax: `--remove property.list <indexToRemove>` OR `--remove propertyToRemove`',
                             'remove requires index to be space-separated')
 
         cli.invoke("genupdate --set myDict={'foo':'bar'}".split())
@@ -285,7 +285,7 @@ class GenericUpdateTest(unittest.TestCase):
                             'Cannot list index from a scalar value')
 
         _execute_with_error('genupdate --add myDict la=da',
-                            "invalid syntax: --add property.listProperty <key=value, string or JSON string>",
+                            "invalid syntax: `--add property.listProperty <key=value, string or JSON string>`",
                             'Add only works with lists')
 
         # add an entry which makes 'myKey' no longer unique

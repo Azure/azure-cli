@@ -381,6 +381,57 @@ class ImageTemplateTest(ScenarioTest):
             self.check('optimize.vmBoot.state', 'Enabled')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_image_builder_template_error_handler_', location='westus')
+    def test_image_builder_template_error_handler(self, resource_group):
+        self._identity_role(resource_group)
+
+        self.kwargs.update({
+            'loc': 'westus',
+            'tmpl': 'template',
+            'img_src': LINUX_IMAGE_SOURCE,
+            'script': TEST_SHELL_SCRIPT_URL,
+            'image_def': 'def',
+        })
+
+        # create image template in local cache
+        self.cmd('image builder create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} '
+                 '--managed-image-destinations {image_def}={loc} --identity {ide} --defer')
+
+        # add error-handler to template
+        self.cmd('image builder error-handler add -n {tmpl} -g {rg} '
+                 '--on-customizer-error cleanup --on-validation-error abort --defer',
+                 checks=[
+                     self.check('properties.errorHandling.onCustomizerError', 'cleanup'),
+                     self.check('properties.errorHandling.onValidationError', 'abort')
+                 ])
+
+        # remove error-handler from template
+        self.cmd('image builder error-handler remove -n {tmpl} -g {rg} --defer',
+                 checks=[
+                     self.check('properties.errorHandling', 'None')
+                 ])
+
+        # add error-handler to template
+        self.cmd('image builder error-handler add -n {tmpl} -g {rg} '
+                 '--on-customizer-error abort --on-validation-error cleanup --defer',
+                 checks=[
+                     self.check('properties.errorHandling.onCustomizerError', 'abort'),
+                     self.check('properties.errorHandling.onValidationError', 'cleanup')
+                 ])
+
+        # show error-handler of template
+        self.cmd('image builder error-handler show -n {tmpl} -g {rg} --defer',
+                 checks=[
+                     self.check('onCustomizerError', 'abort'),
+                     self.check('onValidationError', 'cleanup'),
+                 ])
+
+        # create image template from cache
+        self.cmd('image builder update -n {tmpl} -g {rg}', checks=[
+            self.check('errorHandling.onCustomizerError', 'abort'),
+            self.check('errorHandling.onValidationError', 'cleanup'),
+        ])
+
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic_2', location="westus2")
     def test_image_builder_basic_sig(self, resource_group):
         self._identity_role(resource_group)

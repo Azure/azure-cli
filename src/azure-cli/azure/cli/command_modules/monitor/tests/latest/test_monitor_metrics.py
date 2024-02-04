@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck
 
 
 class TestMonitorMetrics(ScenarioTest):
@@ -28,3 +28,20 @@ class TestMonitorMetrics(ScenarioTest):
                  checks=self.check('length(@.value)', 2))
         self.cmd('az monitor metrics list --resource {sa_id} --metrics Ingress Egress --end-time 2025-01-01 00:00:00 +00:00 --offset 5000d',
                  checks=self.check('length(@.value)', 2))
+
+    @ResourceGroupPreparer(location='westus')
+    def test_monitor_metrics_list_by_sub(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'vm': "vm1",
+            "location": "westus",
+        })
+        vm_json = self.cmd('vm create -g {rg} -n {vm} --image Ubuntu2204 --admin-password TestPassword11!! --admin-username testadmin --authentication-type password').get_output_in_json()
+        self.kwargs['vm_id'] = vm_json['id']
+        self.kwargs['namespace'] = self.cmd('az monitor metrics list-namespaces --resource {vm_id}').get_output_in_json()[0]['properties']['metricNamespaceName']
+        self.cmd('az monitor metrics list-sub-definitions --region {location} --metricnamespace {namespace}')
+        self.cmd('az monitor metrics list-sub --region {location} --metricnamespace {namespace} --metricnames "Data Disk Max Burst IOPS" ',
+                 checks=[
+                     JMESPathCheck('resourceregion', self.kwargs["location"]),
+                     JMESPathCheck('namespace', self.kwargs["namespace"]),
+                 ])

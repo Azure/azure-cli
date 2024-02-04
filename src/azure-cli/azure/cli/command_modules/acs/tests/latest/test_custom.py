@@ -8,6 +8,8 @@ import shutil
 import tempfile
 import unittest
 from unittest import mock
+import datetime
+from dateutil.parser import parse
 
 import yaml
 from azure.cli.command_modules.acs._consts import (
@@ -23,6 +25,7 @@ from azure.cli.command_modules.acs.custom import (
     k8s_install_kubectl,
     k8s_install_kubelogin,
     merge_kubernetes_configurations,
+    _update_upgrade_settings,
 )
 from azure.cli.command_modules.acs.managed_cluster_decorator import (
     AKSManagedClusterModels,
@@ -42,11 +45,15 @@ from azure.cli.core.profiles import ResourceType
 from azure.mgmt.containerservice.v2020_03_01.models import (
     ManagedClusterAddonProfile,
 )
+from azure.cli.core.azclierror import (
+    InvalidArgumentValueError,
+)
 
 
 class AcsCustomCommandTest(unittest.TestCase):
     def setUp(self):
         self.cli = MockCLI()
+        self.models = AKSManagedClusterModels(MockCmd(self.cli), ResourceType.MGMT_CONTAINERSERVICE)
 
     def test_merge_credentials_non_existent(self):
         self.assertRaises(CLIError, merge_kubernetes_configurations, 'non', 'existent', False)
@@ -682,6 +689,105 @@ class AcsCustomCommandTest(unittest.TestCase):
             mock_url_retrieve.assert_called_with(MockUrlretrieveUrlValidator(test_source_url, test_ver), mock.ANY)
         finally:
             shutil.rmtree(temp_dir)
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client', autospec=True)
+    def test_update_upgrade_settings(self, rg_def, get_resource_groups_client, get_resources_client):
+        instance = mock.MagicMock()
+
+        # Should not update mc if unset
+        instance.upgrade_settings = None
+        instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=False, disable_force_upgrade=False, upgrade_override_until=None)
+        self.assertIsNone(instance.upgrade_settings)
+
+        instance.upgrade_settings = self.models.ClusterUpgradeSettings(
+            override_settings = self.models.UpgradeOverrideSettings(
+                force_upgrade = True,
+                until=parse("2023-04-01T13:00:00Z")
+            )
+        )
+        instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=False, disable_force_upgrade=False, upgrade_override_until=None)
+        self.assertTrue(instance.upgrade_settings.override_settings.force_upgrade)
+        self.assertEqual(instance.upgrade_settings.override_settings.until, parse("2023-04-01T13:00:00Z"))
+
+        # force_upgrade True
+        instance.upgrade_settings = None
+        instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=True, disable_force_upgrade=False, upgrade_override_until=None)
+        self.assertTrue(instance.upgrade_settings.override_settings.force_upgrade)
+        self.assertGreater(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.utcnow() + datetime.timedelta(days=2)).timestamp())
+        self.assertLess(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.utcnow() + datetime.timedelta(days=4)).timestamp())
+
+        instance.upgrade_settings = self.models.ClusterUpgradeSettings(
+            override_settings = self.models.UpgradeOverrideSettings(
+                force_upgrade = False
+            )
+        )
+        instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=True, disable_force_upgrade=False, upgrade_override_until=None)
+        self.assertTrue(instance.upgrade_settings.override_settings.force_upgrade)
+        self.assertGreater(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.utcnow() + datetime.timedelta(days=2)).timestamp())
+        self.assertLess(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.utcnow() + datetime.timedelta(days=4)).timestamp())
+
+        # force_upgrade False
+        instance.upgrade_settings = None
+        instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=False, disable_force_upgrade=True, upgrade_override_until=None)
+        self.assertFalse(instance.upgrade_settings.override_settings.force_upgrade)
+        self.assertIsNone(instance.upgrade_settings.override_settings.until)
+
+        instance.upgrade_settings = None
+        instance.upgrade_settings = self.models.ClusterUpgradeSettings(
+            override_settings = self.models.UpgradeOverrideSettings(
+                force_upgrade = True
+            )
+        )
+        instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=False, disable_force_upgrade=True, upgrade_override_until=None)
+        self.assertFalse(instance.upgrade_settings.override_settings.force_upgrade)
+        self.assertIsNone(instance.upgrade_settings.override_settings.until)
+
+        # Update util
+        instance.upgrade_settings = None
+        instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=False, disable_force_upgrade=False, upgrade_override_until="2024-01-01T13:00:00Z")
+        self.assertIsNone(instance.upgrade_settings.override_settings.force_upgrade)
+        self.assertEqual(instance.upgrade_settings.override_settings.until, parse("2024-01-01T13:00:00Z"))
+        
+        instance.upgrade_settings = None
+        instance.upgrade_settings = self.models.ClusterUpgradeSettings(
+            override_settings = self.models.UpgradeOverrideSettings(
+                until=parse("2023-04-01T13:00:00Z")
+            )
+        )
+        instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=False, disable_force_upgrade=False, upgrade_override_until="2024-01-01T13:00:00Z")
+        self.assertIsNone(instance.upgrade_settings.override_settings.force_upgrade)
+        self.assertEqual(instance.upgrade_settings.override_settings.until, parse("2024-01-01T13:00:00Z"))
+
+        with self.assertRaises(InvalidArgumentValueError):
+            _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=False, disable_force_upgrade=False, upgrade_override_until="abc")
+
+         # Set both force_upgrade and until 
+        instance.upgrade_settings = None
+        instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=True, disable_force_upgrade=False, upgrade_override_until="2024-01-01T13:00:00Z")
+        self.assertTrue(instance.upgrade_settings.override_settings.force_upgrade)
+        self.assertEqual(instance.upgrade_settings.override_settings.until, parse("2024-01-01T13:00:00Z"))
+        
+        instance.upgrade_settings = self.models.ClusterUpgradeSettings(
+            override_settings = self.models.UpgradeOverrideSettings(
+                force_upgrade = True,
+                until=parse("2023-04-01T13:00:00Z")
+            )
+        )
+        instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=False, disable_force_upgrade=True, upgrade_override_until="2024-01-01T13:00:00Z")
+        self.assertFalse(instance.upgrade_settings.override_settings.force_upgrade)
+        self.assertEqual(instance.upgrade_settings.override_settings.until, parse("2024-01-01T13:00:00Z"))
+
+        instance.upgrade_settings = self.models.ClusterUpgradeSettings(
+            override_settings = self.models.UpgradeOverrideSettings(
+                force_upgrade = False,
+                until=parse("2023-04-01T13:00:00Z")
+            )
+        )
+        instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=True, disable_force_upgrade=False, upgrade_override_until="2024-01-01T13:00:00Z")
+        self.assertTrue(instance.upgrade_settings.override_settings.force_upgrade)
+        self.assertEqual(instance.upgrade_settings.override_settings.until, parse("2024-01-01T13:00:00Z"))
 
 class TestAKSCommand(unittest.TestCase):
     def setUp(self):

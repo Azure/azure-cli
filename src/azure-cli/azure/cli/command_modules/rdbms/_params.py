@@ -829,9 +829,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
                            help='Determines the public access. ')
 
-        with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
-            c.argument('server_name', arg_type=server_name_arg_type)
-
         with self.argument_context('{} flexible-server replica promote'.format(command_group)) as c:
             c.argument('server_name', arg_type=server_name_arg_type)
             c.argument('promote_mode', options_list=['--promote-mode'], required=False, arg_type=promote_mode_arg_type)
@@ -931,6 +928,28 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('filename_contains', help='The pattern that file name should match.')
             c.argument('file_last_written', type=int, help='Integer in hours to indicate file last modify time.', default=72)
             c.argument('max_file_size', type=int, help='The file size limitation to filter files.')
+
+        for scope in ['list', 'show', 'delete', 'approve', 'reject']:
+            with self.argument_context('{} flexible-server private-endpoint-connection {}'.format(command_group, scope)) as c:
+                c.argument('resource_group_name', arg_type=resource_group_name_type)
+                if scope == "list":
+                    c.argument('server_name', options_list=['--server-name', '-s'], id_part='name', arg_type=server_name_arg_type, required=False)
+                else:
+                    c.argument('server_name', options_list=['--server-name', '-s'], id_part='name', arg_type=server_name_arg_type, required=False,
+                               help='Name of the Server. Required if --id is not specified')
+                    c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                               help='The name of the private endpoint connection associated with the Server. '
+                               'Required if --id is not specified')
+                    c.extra('connection_id', options_list=['--id'], required=False,
+                            help='The ID of the private endpoint connection associated with the Server. '
+                            'If specified --server-name/-s and --name/-n, this should be omitted.')
+                if scope == "approve" or scope == "reject":
+                    c.argument('description', help='Comments for {} operation.'.format(scope), required=True)
+
+        for scope in ['list', 'show']:
+            with self.argument_context('{} flexible-server private-link-resource {}'.format(command_group, scope)) as c:
+                c.argument('resource_group_name', arg_type=resource_group_name_type)
+                c.argument('server_name', options_list=['--server-name', '-s'], id_part='name', arg_type=server_name_arg_type, required=False)
 
         # GTID
         if command_group == 'mysql':

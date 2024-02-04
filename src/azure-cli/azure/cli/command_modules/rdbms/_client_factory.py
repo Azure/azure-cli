@@ -394,6 +394,18 @@ def cf_postgres_flexible_private_dns_zone_suffix_operations(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).get_private_dns_zone_suffix
 
 
+def cf_postgres_flexible_private_endpoint_connections(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).private_endpoint_connections
+
+
+def cf_postgres_flexible_private_endpoint_connection(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).private_endpoint_connection
+
+
+def cf_postgres_flexible_private_link_resources(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).private_link_resources
+
+
 def resource_client_factory(cli_ctx, subscription_id=None):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, subscription_id=subscription_id)
 
