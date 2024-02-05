@@ -8,17 +8,9 @@
 # pylint: skip-file
 # flake8: noqa
 
-from azure.cli.core.aaz import *
-
-
-@register_command_group(
-    "security api-collection",
-    is_preview=True,
-)
-class __CMDGroup(AAZCommandGroup):
-    """Discover, manage, and view security insights for API collections.
-    """
-    pass
-
-
-__all__ = ["__CMDGroup"]
+from .__cmd_group import *
+from ._list import *
+from ._offboard import *
+from ._onboard import *
+from ._show import *
+from ._wait import *

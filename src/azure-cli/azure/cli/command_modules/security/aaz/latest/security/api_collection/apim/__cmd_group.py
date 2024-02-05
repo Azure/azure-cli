@@ -12,11 +12,11 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "security api-collection",
+    "security api-collection apim",
     is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
-    """Discover, manage, and view security insights for API collections.
+    """Discover, manage, and view security insights for API collections from Azure API Management
     """
     pass
 

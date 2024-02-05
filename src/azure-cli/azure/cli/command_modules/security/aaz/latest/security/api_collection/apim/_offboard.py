@@ -12,11 +12,11 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "security api-collection delete",
+    "security api-collection apim offboard",
     is_preview=True,
     confirmation="Are you sure you want to perform this operation?",
 )
-class Delete(AAZCommand):
+class Offboard(AAZCommand):
     """Offboard an Azure API Management API from Microsoft Defender for APIs. The system will stop monitoring the operations within the Azure API Management API for intrusive behaviors.
     """
 
@@ -150,8 +150,8 @@ class Delete(AAZCommand):
             pass
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
+class _OffboardHelper:
+    """Helper class for Offboard"""
 
 
-__all__ = ["Delete"]
+__all__ = ["Offboard"]

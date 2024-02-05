@@ -12,11 +12,11 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "security api-collection list",
+    "security api-collection apim list",
     is_preview=True,
 )
 class List(AAZCommand):
-    """Gets a list of API collections within a subscription that have been onboarded to Microsoft Defender for APIs.
+    """Gets a list of API collections that have been onboarded to Microsoft Defender for APIs.
     """
 
     _aaz_info = {
