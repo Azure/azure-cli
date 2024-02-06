@@ -75,7 +75,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            get_or_create_default_workspace, get_or_create_default_resource_group,
                            get_workspace)
 from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX,
-                         FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
+                         FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
@@ -3625,7 +3625,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             self.deprecation_link = LANGUAGE_EOL_DEPRECATION_NOTICES.get(self.display_name)
 
     def __init__(self, cmd, linux=False, windows=False):
-        self.disallowed_functions_versions = {"~1", "~2"}
+        self.disallowed_functions_versions = {"~1", "~2", "~3"}
         self.KEYS = FUNCTIONS_STACKS_API_KEYS()
         self.end_of_life_dates = []
         super().__init__(cmd, linux=linux, windows=windows)
@@ -3671,7 +3671,8 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 "8": "8.0",
                 "7": "7.0",
                 "6.0": "6",
-                "1.8": "8.0"
+                "1.8": "8.0",
+                "17": "17.0"
             }
             new_version = old_to_new_version.get(version)
             matched_runtime_version = next((r for r in runtimes if r.version == new_version), None)
@@ -3978,9 +3979,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        workload_profile_name=None, cpu=None, memory=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
-        logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
-                       "be required. To create a 3.x function you would pass in the flag `--functions-version 3`")
-        functions_version = '3'
+        logger.warning("No functions version specified so defaulting to 4.")
+        functions_version = '4'
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if any([cpu, memory, workload_profile_name]) and environment is None:
@@ -4097,10 +4097,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         docker_registry_server_url = registry_server
     else:
         docker_registry_server_url = parse_docker_image_name(image, environment)
-
-    if functions_version == '2' and functionapp_def.location in FUNCTIONS_NO_V2_REGIONS:
-        raise ValidationError("2.x functions are not supported in this region. To create a 3.x function, "
-                              "pass in the flag '--functions-version 3'")
 
     if is_linux and not runtime and (consumption_plan_location or not image):
         raise ArgumentUsageError(
@@ -4331,7 +4327,7 @@ def _validate_cpu_momory_functionapp(cpu=None, memory=None):
 def _get_extension_version_functionapp(functions_version):
     if functions_version is not None:
         return '~{}'.format(functions_version)
-    return '~2'
+    return '~4'
 
 
 def _get_app_setting_set_functionapp(site_config, app_setting):
