@@ -516,7 +516,7 @@ def apim_api_import(
         parameters=parameters)
 
 
-def apim_api_export(client, resource_group_name, service_name, subscription_id, api_id, format, file_path):
+def apim_api_export(client, resource_group_name, service_name, api_id, format, file_path=None):
     """Gets the details of the API specified by its identifier in the format specified """
 
     import json
@@ -548,6 +548,10 @@ def apim_api_export(client, resource_group_name, service_name, subscription_id, 
         return response
 
     # If file is requested
+    if file_path is None:
+        raise RequiredArgumentMissingError(
+            "Please specify file path using '--file-path' argument.")
+
     # Obtain link from the response
     response_dict = api_export_result_to_dict(response)
     try:

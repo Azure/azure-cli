@@ -303,8 +303,6 @@ def load_arguments(self, _):
         c.argument('wsdl_endpoint_name', help='Local name of WSDL Endpoint (port) to be imported.')
 
     with self.argument_context('apim api export') as c:
-        c.argument('subscription_id', options_list=['--subscription-id', '-s'],
-                   help="The ID of the target subscription")
         c.argument('resource_group_name', arg_type=resource_group_name_type,
                    help="The name of the resource group. The name is case insensitive.")
         c.argument('service_name', options_list=['--service-name', '-n'],
