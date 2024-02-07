@@ -105,7 +105,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             resource_group, identity_name)).get_output_in_json()
         return identity.get("id")
 
-    def test_aks_get_version_table(self, location):
+    def test_aks_get_version_table(self, location="westus2"):
+        self.kwargs.update({
+            'location': location
+        })
+
         # show k8s versions in table format
         self.cmd('aks get-versions -l {location} -o table', checks=[
             StringContainCheck("SupportPlan"), # column name is printed
