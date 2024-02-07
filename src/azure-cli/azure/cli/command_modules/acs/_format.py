@@ -105,9 +105,10 @@ def aks_versions_table_format(result):
     parsed = compile_jmes("""[].{
         kubernetesVersion: version,
         isPreview: isPreview,
-        upgrades: upgrades || [`None available`] | sort_versions(@) | join(`, `, @),
-        supportPlan: supportPlan
+        upgrades: upgrades || [`None available`] | join(`, `, @),
+        supportPlan: supportPlan | join(`, `, @)
     }""")
+
     # use ordered dicts so headers are predictable
     results = parsed.search(version_table, Options(
         dict_cls=OrderedDict, custom_functions=_custom_functions({})))
