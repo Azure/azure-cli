@@ -357,7 +357,7 @@ def prepare_private_dns_zone(db_context, resource_group, server_name, private_dn
 
     if cluster is not None:
         private_dns_zone_suffix = cluster["privateDnsZoneDomain"]
-    else:        
+    else:
         dns_suffix_client = db_context.cf_private_dns_zone_suffix(cmd.cli_ctx, '_')
         private_dns_zone_suffix = dns_suffix_client.execute()
         if db_context.command_group == 'mysql':
