@@ -72,6 +72,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.poll_end_time = None
         self.allow_broker = None
         self.msal_telemetry = None
+        self.secrets_detected = None
 
     def add_event(self, name, properties):
         for key in self.instrumentation_key:
@@ -219,6 +220,8 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'RegionIdentified', self.region_identified)
         set_custom_properties(result, 'AllowBroker', str(self.allow_broker))
         set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
+        set_custom_properties(result, 'SecretsWarning', _get_secrets_warning_config())
+        set_custom_properties(result, 'SecretsDetected', self.secrets_detected)
 
         return result
 
@@ -468,6 +471,11 @@ def set_msal_telemetry(msal_telemetry):
 
 
 @decorators.suppress_all_exceptions()
+def set_secrets_detected(secrets_detected):
+    _session.secrets_detected = secrets_detected
+
+
+@decorators.suppress_all_exceptions()
 def add_dedicated_instrumentation_key(dedicated_instrumentation_key):
     if not dedicated_instrumentation_key:
         return
@@ -517,6 +525,14 @@ def is_telemetry_enabled():
 @decorators.suppress_all_exceptions(fallback_return={})
 def _get_config():
     return _session.application.config
+
+
+@decorators.suppress_all_exceptions()
+def _get_secrets_warning_config():
+    show_secrets_warning = _get_config().getboolean('clients', 'show_secrets_warning', fallback=None)
+    if show_secrets_warning is None:
+        return None
+    return 'on' if show_secrets_warning else 'off'
 
 
 # internal utility functions

@@ -9,7 +9,12 @@ import unittest
 
 class AzureSearchAdminKeysTests(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    # https://vcrpy.readthedocs.io/en/latest/configuration.html#request-matching
+    def setUp(self):
+        self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
+        super(AzureSearchAdminKeysTests, self).setUp()
+
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_admin_key_show_renew(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',

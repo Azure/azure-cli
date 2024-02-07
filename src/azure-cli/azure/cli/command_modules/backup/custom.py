@@ -47,73 +47,77 @@ import azure.cli.command_modules.backup.custom_help as cust_help
 logger = get_logger(__name__)
 
 # Mapping of workload type
-secondary_region_map = {"ussecwest": "usseceast",
-                        "usseceast": "ussecwest",
-                        "usnateast": "usnatwest",
-                        "usnatwest": "usnateast",
-                        "swedencentral": "swedensouth",
-                        "swedensouth": "swedencentral",
-                        "norwaywest": "norwayeast",
-                        "norwayeast": "norwaywest",
-                        "germanynorth": "germanywestcentral",
-                        "germanywestcentral": "germanynorth",
-                        "westus3": "eastus",
-                        "eastasia": "southeastasia",
-                        "southeastasia": "eastasia",
-                        "australiaeast": "australiasoutheast",
-                        "australiasoutheast": "australiaeast",
-                        "australiacentral": "australiacentral2",
-                        "australiacentral2": "australiacentral",
-                        "brazilsouth": "southcentralus",
-                        "brazilsoutheast": "brazilsouth",
-                        "canadacentral": "canadaeast",
-                        "canadaeast": "canadacentral",
-                        "chinanorth": "chinaeast",
-                        "chinaeast": "chinanorth",
-                        "chinanorth2": "chinaeast2",
-                        "chinaeast2": "chinanorth2",
-                        "chinanorth3": "chinaeast3",
-                        "chinaeast3": "chinanorth3",
-                        "northeurope": "westeurope",
-                        "westeurope": "northeurope",
-                        "francecentral": "francesouth",
-                        "francesouth": "francecentral",
-                        "germanycentral": "germanynortheast",
-                        "germanynortheast": "germanycentral",
-                        "centralindia": "southindia",
-                        "southindia": "centralindia",
-                        "westindia": "southindia",
-                        "japaneast": "japanwest",
-                        "japanwest": "japaneast",
-                        "koreacentral": "koreasouth",
-                        "koreasouth": "koreacentral",
-                        "eastus": "westus",
-                        "westus": "eastus",
-                        "eastus2": "centralus",
-                        "centralus": "eastus2",
-                        "northcentralus": "southcentralus",
-                        "southcentralus": "northcentralus",
-                        "westus2": "westcentralus",
-                        "westcentralus": "westus2",
-                        "centraluseuap": "eastus2euap",
-                        "eastus2euap": "centraluseuap",
-                        "southafricanorth": "southafricawest",
-                        "southafricawest": "southafricanorth",
-                        "switzerlandnorth": "switzerlandwest",
-                        "switzerlandwest": "switzerlandnorth",
-                        "ukwest": "uksouth",
-                        "uksouth": "ukwest",
-                        "uaenorth": "uaecentral",
-                        "uaecentral": "uaenorth",
-                        "usdodeast": "usdodcentral",
-                        "usdodcentral": "usdodeast",
-                        "usgovarizona": "usgovtexas",
-                        "usgovtexas": "usgovarizona",
-                        "usgoviowa": "usgovvirginia",
-                        "usgovvirginia": "usgovtexas",
-                        "malaysiasouth": "japanwest",
-                        "jioindiacentral": "jioindiawest",
-                        "jioindiawest": "jioindiacentral"}
+secondary_region_map = {
+    "australiacentral": "australiacentral2",
+    "australiacentral2": "australiacentral",
+    "australiaeast": "australiasoutheast",
+    "australiasoutheast": "australiaeast",
+    "brazilsouth": "southcentralus",
+    "brazilsoutheast": "brazilsouth",
+    "canadacentral": "canadaeast",
+    "canadaeast": "canadacentral",
+    "centralindia": "southindia",
+    "centralus": "eastus2",
+    "centraluseuap": "eastus2euap",
+    "chinaeast": "chinanorth",
+    "chinaeast2": "chinanorth2",
+    "chinaeast3": "chinanorth3",
+    "chinanorth": "chinaeast",
+    "chinanorth2": "chinaeast2",
+    "chinanorth3": "chinaeast3",
+    "eastasia": "southeastasia",
+    "eastus": "westus",
+    "eastus2": "centralus",
+    "eastus2euap": "centraluseuap",
+    "francecentral": "francesouth",
+    "francesouth": "francecentral",
+    "germanycentral": "germanynortheast",
+    "germanynorth": "germanywestcentral",
+    "germanynortheast": "germanycentral",
+    "germanywestcentral": "germanynorth",
+    "japaneast": "japanwest",
+    "japanwest": "japaneast",
+    "jioindiacentral": "jioindiawest",
+    "jioindiawest": "jioindiacentral",
+    "koreacentral": "koreasouth",
+    "koreasouth": "koreacentral",
+    "malaysiasouth": "japanwest",
+    "northcentralus": "southcentralus",
+    "northeurope": "westeurope",
+    "norwayeast": "norwaywest",
+    "norwaywest": "norwayeast",
+    "southafricanorth": "southafricawest",
+    "southafricawest": "southafricanorth",
+    "southcentralus": "northcentralus",
+    "southeastasia": "eastasia",
+    "southindia": "centralindia",
+    "swedencentral": "swedensouth",
+    "swedensouth": "swedencentral",
+    "switzerlandnorth": "switzerlandwest",
+    "switzerlandwest": "switzerlandnorth",
+    "taiwannorth": "taiwannorthwest",
+    "taiwannorthwest": "taiwannorth",
+    "uaecentral": "uaenorth",
+    "uaenorth": "uaecentral",
+    "uksouth": "ukwest",
+    "ukwest": "uksouth",
+    "usdodcentral": "usdodeast",
+    "usdodeast": "usdodcentral",
+    "usgovarizona": "usgovtexas",
+    "usgoviowa": "usgovvirginia",
+    "usgovtexas": "usgovarizona",
+    "usgovvirginia": "usgovtexas",
+    "usnateast": "usnatwest",
+    "usnatwest": "usnateast",
+    "usseceast": "ussecwest",
+    "ussecwest": "usseceast",
+    "westcentralus": "westus2",
+    "westeurope": "northeurope",
+    "westindia": "southindia",
+    "westus": "eastus",
+    "westus2": "westcentralus",
+    "westus3": "eastus"
+}
 
 fabric_name = "Azure"
 default_policy_name = "DefaultPolicy"
@@ -125,47 +129,121 @@ password_length = 15
 # pylint: disable=too-many-function-args
 
 
+# pylint: disable=line-too-long
+def update_vault(client, vault_name, resource_group_name, tags=None,
+                 public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
+                 classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
+    try:
+        existing_vault = client.get(resource_group_name, vault_name)
+    except CoreResourceNotFoundError:
+        raise CLIError("The vault you are trying to update does not exist. Please create it with "
+                       "az backup vault create")
+
+    patchvault = PatchVault()
+    patchvault.properties = VaultProperties()
+
+    if public_network_access is not None:
+        patchvault.properties.public_network_access = _get_vault_public_network_access(public_network_access)
+
+    if immutability_state is not None:
+        patchvault.properties.security_settings = _get_vault_security_settings(immutability_state, existing_vault)
+
+    if cross_subscription_restore_state is not None:
+        patchvault.properties.restore_settings = _get_vault_restore_settings(cross_subscription_restore_state)
+
+    if classic_alerts is not None or azure_monitor_alerts_for_job_failures is not None:
+        patchvault.properties.monitoring_settings = _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures,
+                                                                                   classic_alerts, existing_vault)
+
+    if tags is not None:
+        patchvault.tags = tags
+
+    return client.begin_update(resource_group_name, vault_name, patchvault)
+
+
 # TODO: Re-add references to SoftDeleteSettings once SDK version is upgraded:
 # Import SoftDeleteSettings, args in create_vault and _get_vault_security_settings
 def create_vault(client, vault_name, resource_group_name, location, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
-                 classic_alerts='Enable', azure_monitor_alerts_for_job_failures='Enable'):
+                 classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
+    try:
+        client.get(resource_group_name, vault_name)
+        logger.warning("You are using the az backup vault create command to update vault properties. Please "
+                       "note that this is not officially supported, and can also reset some vault properties "
+                       "to their default values. It is recommended to use az backup vault update instead.")
+
+        # If the vault exists, we move to the update flow instead
+        update_vault(client, vault_name, resource_group_name, tags, public_network_access,
+                     immutability_state, cross_subscription_restore_state, classic_alerts,
+                     azure_monitor_alerts_for_job_failures)
+    except CoreResourceNotFoundError:
+        vault_properties = VaultProperties()
+
+        # Setting defaults. If we set it in the function signature, the update functionality of the command will break
+        classic_alerts = 'Enable' if classic_alerts is None else classic_alerts
+        azure_monitor_alerts_for_job_failures = 'Enable' if azure_monitor_alerts_for_job_failures is None \
+            else azure_monitor_alerts_for_job_failures
+        public_network_access = 'Enable' if public_network_access is None else public_network_access
+
     vault_sku = Sku(name=SkuName.standard)
 
-    vault_properties = VaultProperties(
-        monitoring_settings=_get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts),
-        public_network_access=_get_vault_public_network_access(client, resource_group_name, vault_name,
-                                                               public_network_access),
-        security_settings=_get_vault_security_settings(client, resource_group_name, vault_name, immutability_state),
-        restore_settings=_get_vault_restore_settings(cross_subscription_restore_state)
-    )
+    vault_properties.public_network_access = _get_vault_public_network_access(public_network_access)
+    vault_properties.monitoring_settings = _get_vault_monitoring_settings(
+        azure_monitor_alerts_for_job_failures, classic_alerts)
+
+    if immutability_state is not None:
+        vault_properties.security_settings = _get_vault_security_settings(immutability_state)
+
+    if cross_subscription_restore_state is not None:
+        vault_properties.restore_settings = _get_vault_restore_settings(cross_subscription_restore_state)
+
     vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
+
     return client.begin_create_or_update(resource_group_name, vault_name, vault)
 
 
-def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts):
-    monitoring_settings = MonitoringSettings(
-        azure_monitor_alert_settings=AzureMonitorAlertSettings(
-            alerts_for_all_job_failures=cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures)
-        ),
-        classic_alert_settings=ClassicAlertSettings(
-            alerts_for_critical_operations=cust_help.transform_enable_parameters(classic_alerts)
-        )
-    )
+def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts, existing_vault=None):
+    monitoring_settings = MonitoringSettings()
+    if existing_vault is not None:
+        monitoring_settings = existing_vault.properties.monitoring_settings
+
+    if azure_monitor_alerts_for_job_failures is not None:
+        monitoring_settings.azure_monitor_alert_settings = AzureMonitorAlertSettings(
+            alerts_for_all_job_failures=cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures))
+    if classic_alerts is not None:
+        monitoring_settings.classic_alert_settings = ClassicAlertSettings(
+            alerts_for_critical_operations=cust_help.transform_enable_parameters(classic_alerts))
+
     return monitoring_settings
 
 
 # TODO Remove pylint supress once the new SDK is in place
 # pylint: disable=unused-argument
-def _get_vault_security_settings(client, resource_group_name, vault_name, immutability_state):
+def _get_vault_security_settings(immutability_state, existing_vault=None):
     security_settings = None
-    immutability_settings = None
     if immutability_state is not None:
-        immutability_settings = ImmutabilitySettings(state=immutability_state)
-    security_settings = SecuritySettings(
-        immutability_settings=None if immutability_settings is None else immutability_settings)
+        security_settings = SecuritySettings()
+        security_settings.immutability_settings = ImmutabilitySettings(state=immutability_state)
 
     # TODO Re-add once the new SDK is in place
+    # Using updated process (defaults for soft delete need to be set in create function):
+    # security_settings = SecuritySettings()
+    # if existing_vault is not None:
+    #     security_settings = existing_vault.properties.security_settings
+
+    # if immutability_state is not None:
+    #     security_settings.immutability_settings = ImmutabilitySettings(state=immutability_state)
+
+    # if soft_delete_state is not None or soft_delete_retention_period_in_days is not None:
+    #     soft_delete_settings = security_settings.soft_delete_settings
+
+    #     if soft_delete_state is not None:
+    #         soft_delete_settings.soft_delete_state = help.transform_softdelete_parameters(soft_delete_state)
+    #     if soft_delete_retention_period_in_days is not None:
+    #         soft_delete_settings.soft_delete_retention_period_in_days = soft_delete_retention_period_in_days
+
+    #     security_settings.soft_delete_settings = soft_delete_settings
+    # Old process
     # security_settings = None
     # if immutability_state is not None or soft_delete_state is not None or \
     #         soft_delete_retention_period_in_days is not None:
@@ -211,24 +289,13 @@ def _get_vault_security_settings(client, resource_group_name, vault_name, immuta
 def _get_vault_restore_settings(cross_subscription_restore_state):
     restore_settings = None
     if cross_subscription_restore_state is not None:
-        restore_settings = RestoreSettings(
-            cross_subscription_restore_settings=CrossSubscriptionRestoreSettings(
-                cross_subscription_restore_state=cust_help.transform_enable_parameters(cross_subscription_restore_state)
-            )
-        )
+        restore_settings = RestoreSettings()
+        restore_settings.cross_subscription_restore_settings = CrossSubscriptionRestoreSettings(
+            cross_subscription_restore_state=cust_help.transform_enable_parameters(cross_subscription_restore_state))
     return restore_settings
 
 
-def _get_vault_public_network_access(client, resource_group_name, vault_name, public_network_access):
-    if public_network_access is None:
-        # get the existing value of public_network_access so the request is made correctly
-        try:
-            existing_vault_if_any = client.get(resource_group_name, vault_name)
-            existing_vault_public_network_access = existing_vault_if_any.properties.public_network_access
-            public_network_access = cust_help.transform_enable_parameters(existing_vault_public_network_access)
-        except CoreResourceNotFoundError:
-            # This runs for a create - if there is no vault, default value is Enable
-            public_network_access = 'Enable'
+def _get_vault_public_network_access(public_network_access):
     return cust_help.transform_enable_parameters(public_network_access)
 
 
@@ -1211,6 +1278,32 @@ def _get_alr_restore_mode(target_vm_name, target_vnet_name, target_vnet_resource
         """)
 
 
+def _set_edge_zones_trigger_restore_properties(cmd, trigger_restore_properties, restore_to_edge_zone, recovery_point,
+                                               target_subscription, use_secondary_region, restore_mode):
+    # TODO: As the subscription we currently use does not have access to Edge Zones, no tests have been written for
+    # this. We have manually validated it, but tests should be added to validate all (successful + exceptional)
+    # cases as soon as is viable.
+    if restore_to_edge_zone is not None and restore_to_edge_zone:
+        # If CSR or CRR, error
+        if target_subscription != get_subscription_id(cmd.cli_ctx) or use_secondary_region:
+            raise InvalidArgumentValueError("The restore-to-edge-zone parameter can't be used for cross region "
+                                            "or cross subscription restore")
+        if recovery_point.properties.extended_location is None \
+                or recovery_point.properties.extended_location.name is None \
+                or recovery_point.properties.extended_location.name == "":
+            raise InvalidArgumentValueError("Please make sure that the recovery point belongs to an edge zone VM "
+                                            "and contains extended location")
+        trigger_restore_properties.extended_location = recovery_point.properties.extended_location
+
+    if restore_mode == "OriginalLocation":
+        if recovery_point.properties.extended_location is not None \
+                and recovery_point.properties.extended_location.name is not None \
+                and recovery_point.properties.extended_location.name != "":
+            trigger_restore_properties.extended_location = recovery_point.properties.extended_location
+
+    return trigger_restore_properties
+
+
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
@@ -1219,7 +1312,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
                   mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
                   target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None,
-                  target_subscription_id=None, storage_account_resource_group=None):
+                  target_subscription_id=None, storage_account_resource_group=None, restore_to_edge_zone=None):
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     vault_location = vault.location
     vault_identity = vault.identity
@@ -1318,6 +1411,12 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                     target_vnet_resource_group, target_subnet_name, vault_name, resource_group_name,
                                     recovery_point, target_zone, target_rg_id, _source_resource_id, restore_mode,
                                     target_subscription, use_secondary_region)
+
+    # Edge zones-specific code. Not using existing set/get properties code as it is messy and prone to errors
+    trigger_restore_properties = _set_edge_zones_trigger_restore_properties(cmd, trigger_restore_properties,
+                                                                            restore_to_edge_zone,
+                                                                            recovery_point, target_subscription,
+                                                                            use_secondary_region, restore_mode)
 
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 

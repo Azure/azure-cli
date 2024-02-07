@@ -197,6 +197,7 @@ def load_command_table(self, _):
         g.command('list', 'list_sql_databases')
         g.show_command('show', 'get_sql_database')
         g.command('delete', 'begin_delete_sql_database', confirmation=True)
+        g.custom_command('restore', 'cli_cosmosdb_sql_database_restore')
 
     with self.command_group('cosmosdb sql container', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_sql_container_create')
@@ -205,6 +206,7 @@ def load_command_table(self, _):
         g.command('list', 'list_sql_containers')
         g.show_command('show', 'get_sql_container')
         g.command('delete', 'begin_delete_sql_container', confirmation=True)
+        g.custom_command('restore', 'cli_cosmosdb_sql_container_restore')
 
     with self.command_group('cosmosdb sql stored-procedure', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_sql_stored_procedure_create_update')
@@ -236,6 +238,7 @@ def load_command_table(self, _):
         g.command('list', 'list_mongo_db_databases')
         g.show_command('show', 'get_mongo_db_database')
         g.command('delete', 'begin_delete_mongo_db_database', confirmation=True)
+        g.custom_command('restore', 'cli_cosmosdb_mongodb_database_restore')
 
     with self.command_group('cosmosdb mongodb collection', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_mongodb_collection_create')
@@ -244,6 +247,7 @@ def load_command_table(self, _):
         g.command('list', 'list_mongo_db_collections')
         g.show_command('show', 'get_mongo_db_collection')
         g.command('delete', 'begin_delete_mongo_db_collection', confirmation=True)
+        g.custom_command('restore', 'cli_cosmosdb_mongodb_collection_restore')
 
     # Cassandra api
     with self.command_group('cosmosdb cassandra'):
@@ -272,6 +276,7 @@ def load_command_table(self, _):
         g.command('list', 'list_gremlin_databases')
         g.show_command('show', 'get_gremlin_database')
         g.command('delete', 'begin_delete_gremlin_database', confirmation=True)
+        g.custom_command('restore', 'cli_cosmosdb_gremlin_database_restore')
 
     with self.command_group('cosmosdb gremlin graph', cosmosdb_gremlin_sdk, client_factory=cf_gremlin_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_gremlin_graph_create')
@@ -280,6 +285,7 @@ def load_command_table(self, _):
         g.command('list', 'list_gremlin_graphs')
         g.show_command('show', 'get_gremlin_graph')
         g.command('delete', 'begin_delete_gremlin_graph', confirmation=True)
+        g.custom_command('restore', 'cli_cosmosdb_gremlin_graph_restore')
 
     # Table api
     with self.command_group('cosmosdb table', cosmosdb_table_sdk, client_factory=cf_table_resources) as g:
@@ -288,6 +294,7 @@ def load_command_table(self, _):
         g.command('list', 'list_tables')
         g.show_command('show', 'get_table')
         g.command('delete', 'begin_delete_table', confirmation=True)
+        g.custom_command('restore', 'cli_cosmosdb_table_restore')
 
     # Offer throughput
     with self.command_group('cosmosdb sql database throughput', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:

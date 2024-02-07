@@ -6,7 +6,7 @@
 import argparse
 import base64
 import binascii
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 import sys
 from ipaddress import ip_network
@@ -180,11 +180,6 @@ def process_secret_set_namespace(namespace):
     tags.update({'file-encoding': encoding})
     namespace.tags = tags
     namespace.value = content
-
-
-def process_sas_token_parameter(cmd, ns):
-    SASTokenParameter = cmd.get_models('SASTokenParameter', resource_type=ResourceType.DATA_KEYVAULT)
-    return SASTokenParameter(storage_resource_uri=ns.storage_resource_uri, token=ns.token)
 
 
 def process_hsm_name(ns):
@@ -487,7 +482,7 @@ def datetime_type(string):
                              '%Y-%m-%dT%HZ', '%Y-%m-%d']
     for form in accepted_date_formats:
         try:
-            return datetime.strptime(string, form)
+            return datetime.strptime(string, form).replace(tzinfo=timezone.utc)
         except ValueError:  # checks next format
             pass
     raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))
@@ -631,7 +626,7 @@ def set_vault_base_url(ns):
 
 def validate_key_id(entity_type):
     def _validate(ns):
-        from .vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
+        from azure.keyvault.keys._shared import parse_key_vault_id
 
         pure_entity_type = entity_type.replace('deleted', '')
         name = getattr(ns, pure_entity_type + '_name', None)
@@ -648,9 +643,9 @@ def validate_key_id(entity_type):
             if hsm_name:
                 raise CLIError('--hsm-name and --id are mutually exclusive.')
 
-            ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
+            ident = parse_key_vault_id(identifier)
             setattr(ns, pure_entity_type + '_name', ident.name)
-            setattr(ns, 'vault_base_url', ident.vault)
+            setattr(ns, 'vault_base_url', ident.vault_url)
             if ident.version and hasattr(ns, pure_entity_type + '_version'):
                 setattr(ns, pure_entity_type + '_version', ident.version)
         elif not (name and vault):
@@ -662,7 +657,7 @@ def validate_key_id(entity_type):
 
 def validate_keyvault_resource_id(entity_type):
     def _validate(ns):
-        from .vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
+        from azure.keyvault.keys._shared import parse_key_vault_id
 
         pure_entity_type = entity_type.replace('deleted', '')
         name = getattr(ns, pure_entity_type + '_name', None) or getattr(ns, 'name', None)
@@ -679,58 +674,20 @@ def validate_keyvault_resource_id(entity_type):
             if hsm_name:
                 raise CLIError('--hsm-name and --id are mutually exclusive.')
 
-            ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
+            kv_resource_id = parse_key_vault_id(identifier)
             if getattr(ns, 'command', None) and 'key rotation-policy' in ns.command:
-                setattr(ns, 'key_name', ident.name)
+                setattr(ns, 'key_name', kv_resource_id.name)
             elif getattr(ns, 'command', None) and 'certificate' in ns.command:
-                setattr(ns, 'certificate_name', ident.name)
+                setattr(ns, 'certificate_name', kv_resource_id.name)
             else:
-                setattr(ns, 'name', ident.name)
-            setattr(ns, 'vault_base_url', ident.vault)
-            if ident.version and (hasattr(ns, pure_entity_type + '_version') or hasattr(ns, 'version')):
-                setattr(ns, 'version', ident.version)
+                setattr(ns, 'name', kv_resource_id.name)
+            setattr(ns, 'vault_base_url', kv_resource_id.vault_url)
+            if kv_resource_id.version and (hasattr(ns, pure_entity_type + '_version') or hasattr(ns, 'version')):
+                setattr(ns, 'version', kv_resource_id.version)
         elif not (name and vault):
             raise CLIError('incorrect usage: --id ID | --vault-name/--hsm-name VAULT/HSM '
                            '--name/-n NAME [--version VERSION]')
 
-    return _validate
-
-
-def validate_sas_definition_id(ns):
-    from .vendored_sdks.azure_keyvault_t1 import StorageSasDefinitionId
-    acct_name = getattr(ns, 'storage_account_name', None)
-    sas_name = getattr(ns, 'sas_definition_name', None)
-    vault = getattr(ns, 'vault_base_url', None)
-    identifier = getattr(ns, 'identifier', None)
-
-    if identifier:
-        ident = StorageSasDefinitionId(uri=identifier)
-        setattr(ns, 'sas_definition_name', getattr(ident, 'sas_definition'))
-        setattr(ns, 'storage_account_name', getattr(ident, 'account_name'))
-        setattr(ns, 'vault_base_url', ident.vault)
-    elif not (acct_name and sas_name and vault):
-        raise CLIError('incorrect usage: --id ID | --vault-name VAULT --account-name --name NAME')
-
-
-def validate_storage_account_id(ns):
-    from .vendored_sdks.azure_keyvault_t1 import StorageAccountId
-    acct_name = getattr(ns, 'storage_account_name', None)
-    vault = getattr(ns, 'vault_base_url', None)
-    identifier = getattr(ns, 'identifier', None)
-
-    if identifier:
-        ident = StorageAccountId(uri=identifier)
-        setattr(ns, 'storage_account_name', ident.name)
-        setattr(ns, 'vault_base_url', ident.vault)
-    elif not (acct_name and vault):
-        raise CLIError('incorrect usage: --id ID | --vault-name VAULT --name NAME')
-
-
-def validate_storage_disabled_attribute(attr_arg_name, attr_type):
-    def _validate(ns):
-        disabled = getattr(ns, 'disabled', None)
-        attr_arg = attr_type(enabled=(not disabled))
-        setattr(ns, attr_arg_name, attr_arg)
     return _validate
 
 
@@ -751,15 +708,40 @@ def process_certificate_policy(cmd, ns):
     policy = getattr(ns, 'policy', None)
     if policy is None:
         return
-    CertificatePolicy = cmd.loader.get_sdk('CertificatePolicy', mod='_models',
-                                           resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
-    CertificateAttributes = cmd.loader.get_sdk('CertificateAttributes', mod='_generated_models',
-                                               resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
-    LifetimeAction = cmd.loader.get_sdk('LifetimeAction', mod='_models',
-                                        resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
     if not isinstance(policy, dict):
         raise CLIError('incorrect usage: policy should be an JSON encoded string '
                        'or can use @{file} to load from a file(e.g.@my_policy.json).')
+
+    secret_properties = policy.get('secret_properties')
+    if secret_properties and not secret_properties.get('content_type') \
+            and hasattr(ns, 'certificate_bytes') and ns.certificate_bytes:
+        from OpenSSL import crypto
+        try:
+            crypto.load_certificate(crypto.FILETYPE_PEM, ns.certificate_bytes)
+            # if we get here, we know it was a PEM file
+            secret_properties['content_type'] = 'application/x-pem-file'
+        except (ValueError, crypto.Error):
+            # else it should be a pfx file
+            secret_properties['content_type'] = 'application/x-pkcs12'
+
+    if hasattr(ns, 'validity'):
+        x509_certificate_properties = policy.get('x509_certificate_properties')
+        if x509_certificate_properties and ns.validity:
+            x509_certificate_properties['validity_in_months'] = ns.validity
+        del ns.validity
+
+    policyObj = build_certificate_policy(cmd.cli_ctx, policy)
+    ns.policy = policyObj
+
+
+def build_certificate_policy(cli_ctx, policy: dict):
+    from azure.cli.core.profiles import get_sdk
+    CertificatePolicy = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES,
+                                'CertificatePolicy', mod='_models')
+    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES,
+                                    'CertificateAttributes', mod='_generated_models')
+    LifetimeAction = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES,
+                             'LifetimeAction', mod='_models')
 
     issuer_name = subject = exportable = key_type = key_size = reuse_key = key_curve_name = enhanced_key_usage \
         = key_usage = content_type = validity_in_months = issuer_certificate_type = certificate_transparency = san_emails \
@@ -801,16 +783,6 @@ def process_certificate_policy(cmd, ns):
     if secret_properties:
         content_type = secret_properties.get('content_type')
 
-    if not content_type and hasattr(ns, 'certificate_bytes') and ns.certificate_bytes:
-        from OpenSSL import crypto
-        try:
-            crypto.load_certificate(crypto.FILETYPE_PEM, ns.certificate_bytes)
-            # if we get here, we know it was a PEM file
-            content_type = 'application/x-pem-file'
-        except (ValueError, crypto.Error):
-            # else it should be a pfx file
-            content_type = 'application/x-pkcs12'
-
     x509_certificate_properties = policy.get('x509_certificate_properties')
     if x509_certificate_properties:
         subject = x509_certificate_properties.get('subject')
@@ -823,10 +795,6 @@ def process_certificate_policy(cmd, ns):
         key_usage = x509_certificate_properties.get('key_usage')
         validity_in_months = x509_certificate_properties.get('validity_in_months')
 
-    if hasattr(ns, 'validity'):
-        validity_in_months = ns.validity if ns.validity else validity_in_months
-        del ns.validity
-
     policyObj = CertificatePolicy(issuer_name=issuer_name, subject=subject, attributes=attributes,
                                   exportable=exportable, key_type=key_type, key_size=key_size, reuse_key=reuse_key,
                                   key_curve_name=key_curve_name, enhanced_key_usage=enhanced_key_usage,
@@ -834,7 +802,7 @@ def process_certificate_policy(cmd, ns):
                                   lifetime_actions=lifetime_actions, certificate_type=issuer_certificate_type,
                                   certificate_transparency=certificate_transparency, san_emails=san_emails,
                                   san_dns_names=san_dns_names, san_user_principal_names=san_user_principal_names)
-    ns.policy = policyObj
+    return policyObj
 
 
 def process_certificate_import(ns):

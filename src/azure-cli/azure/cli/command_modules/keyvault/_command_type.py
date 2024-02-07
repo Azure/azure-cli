@@ -29,11 +29,9 @@ def _encode_hex(item):
     return item
 
 
-def keyvault_exception_handler(cmd, ex):
+def keyvault_exception_handler(ex):
     from msrest.exceptions import ValidationError, ClientRequestError
-    from azure.cli.core.profiles import ResourceType
-    KeyVaultErrorException = cmd.get_models('KeyVaultErrorException', resource_type=ResourceType.DATA_KEYVAULT)
-    if isinstance(ex, (ValidationError, KeyVaultErrorException)):
+    if isinstance(ex, ValidationError):
         try:
             raise CLIError(ex.inner_exception.error.message)
         except AttributeError:
@@ -54,10 +52,9 @@ def keyvault_exception_handler(cmd, ex):
 class KeyVaultCommandGroup(AzCommandGroup):
 
     def __init__(self, command_loader, group_name, **kwargs):
-        from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-        # all regular and custom commands should use the keyvault data plane client
+        from azure.cli.command_modules.keyvault._client_factory import keyvault_mgmt_client_factory
         merged_kwargs = self._merge_kwargs(kwargs, base_kwargs=command_loader.module_kwargs)
-        merged_kwargs['custom_command_type'].settings['client_factory'] = keyvault_data_plane_factory
+        merged_kwargs['custom_command_type'].settings['client_factory'] = keyvault_mgmt_client_factory
         super(KeyVaultCommandGroup, self).__init__(command_loader, group_name, **kwargs)
 
     def _create_keyvault_command(self, name, method_name=None, command_type_name=None, **kwargs):
@@ -135,7 +132,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
                         show_exception_handler(ex)
                     except Exception:  # pylint: disable=broad-except
                         pass
-                return keyvault_exception_handler(self.command_loader, ex)
+                return keyvault_exception_handler(ex)
 
         self.command_loader._cli_command(command_name, handler=keyvault_command_handler,  # pylint: disable=protected-access
                                          argument_loader=keyvault_arguments_loader,

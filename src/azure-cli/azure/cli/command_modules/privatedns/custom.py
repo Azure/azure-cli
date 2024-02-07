@@ -15,7 +15,7 @@ from azure.cli.core.aaz import register_command
 from azure.core.exceptions import HttpResponseError
 
 from .aaz.latest.network.private_dns.link.vnet import Create as _PrivateDNSLinkVNetCreate
-from .aaz.latest.network.private_dns.zone import Create as _PrivateDNSZoneCreate
+from .aaz.latest.network.private_dns.zone import Create as _PrivateDNSZoneCreate, Show as PrivateDNSZoneShow
 from .aaz.latest.network.private_dns.record_set import Create as _RecordSetCreate, Delete as _RecordSetDelete, \
     ListByType as _RecordSetList, Show as _RecordSetShow, Update as _RecordSetUpdate
 
@@ -95,13 +95,21 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
 
     print('== BEGINNING ZONE IMPORT: {} ==\n'.format(private_zone_name), file=sys.stderr)
 
-    poller = PrivateDNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": private_zone_name,
-        "resource_group": resource_group_name
-    })
-    result = LongRunningOperation(cmd.cli_ctx)(poller)
-    if result["provisioningState"] != 'Succeeded':
-        raise CLIError('Error occured while creating or updating private dns zone.')
+    try:
+        PrivateDNSZoneShow(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": private_zone_name,
+            "resource_group": resource_group_name
+        })
+
+        logger.warning("Zone %s already exists in resource group %s.", private_zone_name, resource_group_name)
+    except HttpResponseError:
+        poller = PrivateDNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": private_zone_name,
+            "resource_group": resource_group_name
+        })
+        result = LongRunningOperation(cmd.cli_ctx)(poller)
+        if result["provisioningState"] != 'Succeeded':
+            raise CLIError('Error occured while creating or updating private dns zone.')
 
     for key, rs in record_sets.items():
 

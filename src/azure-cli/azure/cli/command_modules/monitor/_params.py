@@ -15,8 +15,10 @@ from azure.cli.command_modules.monitor.actions import (
     timezone_offset_type, timezone_name_type, MetricAlertConditionAction, MetricAlertAddAction)
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
+    validate_loganalytics_workspace_search_table_name, validate_loganalytics_workspace_restore_table_name,
     validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
     get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id)
+from azure.cli.command_modules.monitor.actions import get_date_midnight_type
 
 from knack.arguments import CLIArgumentType
 
@@ -98,7 +100,7 @@ def load_arguments(self, _):
         c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*')
         c.argument('metrics', nargs='+')
         c.argument('orderby', help='Aggregation to use for sorting results and the direction of the sort. Only one order can be specificed. Examples: sum asc')
-        c.argument('top', type=int, help='Max number of records to retrieve. Valid only if --filter used.')
+        c.argument('top', type=int, help='Max number of records to retrieve.')
         c.argument('filters', options_list='--filter')
         c.argument('metric_namespace', options_list='--namespace')
 
@@ -117,8 +119,8 @@ def load_arguments(self, _):
     with self.argument_context('monitor metrics alert') as c:
         c.argument('rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
         c.argument('severity', type=int, help='Severity of the alert from 0 (critical) to 4 (verbose).')
-        c.argument('window_size', type=get_period_type(), help='Time over which to aggregate metrics in "##h##m##s" format.')
-        c.argument('evaluation_frequency', type=get_period_type(), help='Frequency with which to evaluate the rule in "##h##m##s" format.')
+        c.argument('window_size', help='Time over which to aggregate metrics in "##h##m##s" format.')
+        c.argument('evaluation_frequency', help='Frequency with which to evaluate the rule in "##h##m##s" format.')
         c.argument('auto_mitigate', arg_type=get_three_state_flag(), help='Automatically resolve the alert.')
         c.argument('condition', options_list=['--condition'], action=MetricAlertConditionAction, nargs='+')
         c.argument('description', help='Free-text description of the rule.')
@@ -330,8 +332,8 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace table') as c:
         c.argument('table_name', name_arg_type, help='Name of the table.')
         c.argument('workspace_name', options_list='--workspace-name')
-        c.argument('retention_in_days', type=int, options_list='--retention-time', help='The data table data retention in days, between 4 and 730. Setting this property to null will default to the workspace')
-        c.argument('total_retention_in_days', type=int, options_list='--total-retention-time', help='The table data total retention in days, between 4 and 2555. Setting this property to null will default to table retention.')
+        c.argument('retention_in_days', type=int, options_list='--retention-time', help='The table retention in days, between 4 and 730. Setting this property to -1 will default to the workspace retention.')
+        c.argument('total_retention_in_days', type=int, options_list='--total-retention-time', help='The table total retention in days, between 4 and 2556. Setting this property to -1 will default to table retention.')
 
     with self.argument_context('monitor log-analytics workspace table create') as c:
         c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated columns in column_name=column_type format')
@@ -339,14 +341,18 @@ def load_arguments(self, _):
         c.argument('description', help='Schema description.')
 
     with self.argument_context('monitor log-analytics workspace table search-job create') as c:
+        c.argument('table_name', name_arg_type, help='Name of the table. The table name needs to end with _SRCH',
+                   validator=validate_loganalytics_workspace_search_table_name)
         c.argument('search_query', options_list=['--search-query'], help='Search job query.')
         c.argument('limit', type=int, help='Limit the search job to return up to specified number of rows.')
         c.argument('start_search_time', arg_type=get_datetime_type(help='Datetime format.'))
         c.argument('end_search_time', arg_type=get_datetime_type(help='Datetime format.'))
 
     with self.argument_context('monitor log-analytics workspace table restore create') as c:
-        c.argument('start_restore_time', arg_type=get_datetime_type(help='Datetime format.'))
-        c.argument('end_restore_time', arg_type=get_datetime_type(help='Datetime format.'))
+        c.argument('table_name', name_arg_type, help='Name of the table. The table name needs to end with _RST',
+                   validator=validate_loganalytics_workspace_restore_table_name)
+        c.argument('start_restore_time', arg_type=get_date_midnight_type(help='Datetime format.'))
+        c.argument('end_restore_time', arg_type=get_date_midnight_type(help='Datetime format.'))
         c.argument('restore_source_table', help='The table to restore data from.')
 
     with self.argument_context('monitor log-analytics workspace table update') as c:
