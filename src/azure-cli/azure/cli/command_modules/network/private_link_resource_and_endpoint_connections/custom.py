@@ -25,7 +25,7 @@ def register_providers():
     _register_one_provider("Microsoft.Cache/Redis", "2021-06-01", True)
     # "Microsoft.Cache/redisEnterprise", "2021-03-01", True
     _register_one_provider('Microsoft.CognitiveServices/accounts', '2022-03-01', True)
-    _register_one_provider('Microsoft.Compute/diskAccesses', '2020-09-30', True)
+    _register_one_provider('Microsoft.Compute/diskAccesses', '2023-04-02', True)
     _register_one_provider('Microsoft.ContainerRegistry/registries', '2019-12-01-preview', True)
     _register_one_provider('Microsoft.Dashboard/grafana', '2022-05-01-preview', True)
     _register_one_provider('Microsoft.DBforMySQL/servers', '2018-06-01', False, '2017-12-01-preview')
@@ -57,7 +57,7 @@ def register_providers():
     # "Microsoft.Migrate/assessmentProjects", "2020-05-01-preview", False
     # "Microsoft.Migrate/migrateProjects", "2020-06-01-preview", False
     _register_one_provider("Microsoft.Monitor/accounts", "2021-06-03-preview", True)
-    _register_one_provider('Microsoft.Network/applicationGateways', '2020-05-01', True)
+    _register_one_provider('Microsoft.Network/applicationGateways', '2023-09-01', True)
     _register_one_provider('Microsoft.Network/privateLinkServices', '2021-05-01', True)
     # "Microsoft.OffAzure/masterSites", "2020-07-07", False
     _register_one_provider("Microsoft.Purview/accounts", "2021-07-01", True)

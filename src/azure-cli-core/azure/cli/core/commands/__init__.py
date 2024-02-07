@@ -266,13 +266,14 @@ class AzCliCommand(CLICommand):
 
     def __init__(self, loader, name, handler, description=None, table_transformer=None,
                  arguments_loader=None, description_loader=None,
-                 formatter_class=None, deprecate_info=None, validator=None, **kwargs):
+                 formatter_class=None, sensitive_info=None, deprecate_info=None, validator=None, **kwargs):
         super(AzCliCommand, self).__init__(loader.cli_ctx, name, handler, description=description,
                                            table_transformer=table_transformer, arguments_loader=arguments_loader,
                                            description_loader=description_loader, formatter_class=formatter_class,
                                            deprecate_info=deprecate_info, validator=validator, **kwargs)
         self.loader = loader
         self.command_source = None
+        self.sensitive_info = sensitive_info
         self.no_wait_param = kwargs.get('no_wait_param', None)
         self.supports_no_wait = kwargs.get('supports_no_wait', False)
         self.exception_handler = kwargs.get('exception_handler', None)
@@ -710,6 +711,8 @@ class AzCliCommandInvoker(CommandInvoker):
                 result = list(result)
 
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
+            self._resolve_output_sensitive_data_warning(cmd_copy, result)
+
             event_data = {'result': result}
             cmd_copy.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
             return event_data['result']
@@ -811,6 +814,36 @@ class AzCliCommandInvoker(CommandInvoker):
     def _resolve_extension_override_warning(self, cmd):  # pylint: disable=no-self-use
         if isinstance(cmd.command_source, ExtensionCommandSource) and cmd.command_source.overrides_command:
             logger.warning(cmd.command_source.get_command_warn_msg())
+
+    def _resolve_output_sensitive_data_warning(self, cmd, result):
+        if not cmd.cli_ctx.config.getboolean('clients', 'show_secrets_warning', False):
+            return
+
+        from ..credential_helper import sensitive_data_detailed_warning_message, sensitive_data_warning_message
+        sensitive_info = cmd.sensitive_info if hasattr(cmd, 'sensitive_info') else None
+        if sensitive_info:
+            message = sensitive_data_warning_message
+            if sensitive_info.sensitive_keys:
+                message = sensitive_data_detailed_warning_message.format(', '.join(sensitive_info.sensitive_keys))
+            logger.warning(message)
+            return
+
+        from ..credential_helper import distinguish_credential
+        from ..telemetry import set_secrets_detected
+        try:
+            containing_credential, secret_property_names = distinguish_credential(result)
+            if not containing_credential:
+                set_secrets_detected(False)
+                return
+
+            message = sensitive_data_warning_message
+            if secret_property_names:
+                message = sensitive_data_detailed_warning_message.format(', '.join(secret_property_names))
+            logger.warning(message)
+            set_secrets_detected(True)
+        except Exception:  # pylint: disable=broad-except
+            # ignore all exceptions, as this is just a warning
+            pass
 
     def resolve_confirmation(self, cmd, parsed_args):
         confirm = cmd.confirmation and not parsed_args.__dict__.pop('yes', None) \
@@ -1423,6 +1456,11 @@ class AzCommandGroup(CommandGroup):
             merged_kwargs['preview_info'] = PreviewItem(self.command_loader.cli_ctx, object_type='command')
         if is_experimental:
             merged_kwargs['experimental_info'] = ExperimentalItem(self.command_loader.cli_ctx, object_type='command')
+
+    def sensitive(self, **kwargs):
+        from .sensitive import SensitiveItem
+        kwargs['object_type'] = 'command'
+        return SensitiveItem(self.command_loader.cli_ctx, **kwargs)
 
 
 def register_cache_arguments(cli_ctx):

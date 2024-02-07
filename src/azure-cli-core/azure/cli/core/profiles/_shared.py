@@ -156,7 +156,7 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2023-01-01',
         ResourceType.MGMT_NETWORK: '2022-01-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2022-11-01', {
+        ResourceType.MGMT_COMPUTE: SDKProfile('2023-09-01', {
             'resource_skus': '2019-04-01',
             'disks': '2023-04-02',
             'disk_encryption_sets': '2022-03-02',
@@ -168,7 +168,7 @@ AZURE_API_PROFILES = {
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
-            'virtual_machine_scale_sets': '2023-07-01',
+            'virtual_machine_scale_sets': '2023-09-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -254,14 +254,14 @@ AZURE_API_PROFILES = {
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
         ResourceType.MGMT_MSI: '2023-01-31',
-        ResourceType.MGMT_APPSERVICE: '2022-03-01',
+        ResourceType.MGMT_APPSERVICE: '2023-01-01',
         ResourceType.MGMT_IOTHUB: '2023-06-30-preview',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
         ResourceType.MGMT_IOTCENTRAL: '2021-11-01-preview',
         ResourceType.MGMT_ARO: '2023-09-04',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-10-01'),
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-11-01'),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     },
     '2020-09-01-hybrid': {
@@ -430,6 +430,10 @@ AZURE_API_PROFILES = {
 # We should avoid using ad hoc API versions,
 # use the version in a profile as much as possible.
 AD_HOC_API_VERSIONS = {
+    ResourceType.MGMT_APPSERVICE: {
+        # src/azure-cli/azure/cli/command_modules/appservice/_constants.py:68
+        'app_service_certificate_orders': '2022-09-01'
+    },
     ResourceType.MGMT_CONTAINERREGISTRY: {
         # src/azure-cli/azure/cli/command_modules/acr/_client_factory.py:8
         'VERSION_2019_05_01_PREVIEW': "2019-05-01-preview",

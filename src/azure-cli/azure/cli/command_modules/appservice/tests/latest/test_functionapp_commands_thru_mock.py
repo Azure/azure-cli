@@ -15,7 +15,8 @@ from azure.cli.command_modules.appservice.custom import (
     add_remote_build_app_settings,
     remove_remote_build_app_settings,
     config_source_control,
-    validate_app_settings_in_scm)
+    validate_app_settings_in_scm,
+    update_container_settings_functionapp)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault)
 
@@ -96,6 +97,7 @@ class TestFunctionappMocked(unittest.TestCase):
         enable_zip_deploy_mock.assert_called_once()
         remove_remote_build_app_settings_mock.assert_called_once()
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.check_language_runtime')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
     @mock.patch('azure.cli.command_modules.appservice.custom.validate_zip_deploy_app_setting_exists')
@@ -108,7 +110,8 @@ class TestFunctionappMocked(unittest.TestCase):
                                                             upload_zip_to_storage_mock,
                                                             validate_zip_deploy_app_setting_exists_mock,
                                                             parse_resource_id_mock,
-                                                            web_client_factory_mock):
+                                                            web_client_factory_mock,
+                                                            check_language_runtime_mock):
         # prepare
         cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
@@ -130,6 +133,7 @@ class TestFunctionappMocked(unittest.TestCase):
         web_client_mock.web_apps.get.assert_called_with('rg', 'name')
         upload_zip_to_storage_mock.assert_called_with(cmd_mock, 'rg', 'name', 'src', None)
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.check_language_runtime')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
     @mock.patch('azure.cli.command_modules.appservice.custom.validate_zip_deploy_app_setting_exists')
@@ -142,7 +146,8 @@ class TestFunctionappMocked(unittest.TestCase):
                                                             upload_zip_to_storage_mock,
                                                             validate_zip_deploy_app_setting_exists_mock,
                                                             parse_resource_id_mock,
-                                                            web_client_factory_mock):
+                                                            web_client_factory_mock,
+                                                            check_language_runtime_mock):
         # prepare
         cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
@@ -164,6 +169,7 @@ class TestFunctionappMocked(unittest.TestCase):
         web_client_mock.web_apps.get.assert_called_with('rg', 'name')
         upload_zip_to_storage_mock.assert_called_with(cmd_mock, 'rg', 'name', 'src', 'slot')
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.check_language_runtime')
     @mock.patch('azure.cli.command_modules.appservice.custom.add_remote_build_app_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
@@ -174,7 +180,8 @@ class TestFunctionappMocked(unittest.TestCase):
                                                      is_flex_functionapp_mock,
                                                      parse_resource_id_mock,
                                                      web_client_factory_mock,
-                                                     add_remote_build_app_settings_mock):
+                                                     add_remote_build_app_settings_mock,
+                                                     check_language_runtime_mock):
         # prepare
         cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
@@ -448,6 +455,39 @@ class TestFunctionappMocked(unittest.TestCase):
 
         # assert
         self.assertFalse(result)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.check_language_runtime')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.update_functionapp_polling', return_value=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.update_container_settings', autospec=True)
+    def test_update_container_settings_functionapp(self,
+                                                   update_container_settings_mock,
+                                                   update_functionapp_polling_mock,
+                                                   site_op_mock,
+                                                   is_centauri_functionapp_mock,
+                                                   check_language_runtime_mock):
+        # prepare
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        Site, DaprConfig, ResourceConfig = cmd_mock.get_models('Site', 'DaprConfig', 'ResourceConfig')
+        site = Site(dapr_config=None, location='westus', name='name', resource_config=ResourceConfig())
+        site_op_mock.return_value = site
+        
+        is_centauri_functionapp_mock.return_value = True
+
+        check_language_runtime_mock.return_value = True
+
+        # action
+        update_container_settings_functionapp(cmd_mock, 'rg', 'name', workload_profile_name='d4', cpu=0.5, memory='1Gi')
+
+        # assert
+        updated_site = site
+        updated_site.dapr_config = DaprConfig()
+        update_functionapp_polling_mock.assert_called_with(cmd_mock, 'rg', 'name', updated_site)
+
 
     @mock.patch('azure.cli.command_modules.appservice.custom.validate_app_settings_in_scm', return_value=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')

@@ -37,6 +37,7 @@ ASE_LOADBALANCER_MODES = ['Internal', 'External']
 ASE_KINDS = ['ASEv2', 'ASEv3']
 ASE_OS_PREFERENCE_TYPES = ['Windows', 'Linux']
 PUBLIC_NETWORK_ACCESS_MODES = ['Enabled', 'Disabled']
+DAPR_LOG_LEVELS = ['debug', 'error', 'info', 'warn']
 
 
 # pylint: disable=too-many-statements, too-many-lines
@@ -158,6 +159,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
         c.argument('public_network_access', help="Enable or disable public access to the web app", arg_type=get_enum_type(PUBLIC_NETWORK_ACCESS_MODES))
+        c.argument('acr_use_identity', action='store_true', help="Enable or disable pull image from acr use managed identity")
         c.ignore('language')
         c.ignore('using_webapp_up')
 
@@ -403,8 +405,18 @@ subscription than the app service environment, please use the resource ID for --
                    help='the container registry server username')
         c.argument('registry_password', options_list=['--registry-password', '-p', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
                    help='the container registry server password')
-        c.argument('min_replicas', type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
-        c.argument('max_replicas', type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('min_replicas', type=int, help="The minimum number of replicas when create function app on container app", is_preview=True)
+        c.argument('max_replicas', type=int, help="The maximum number of replicas when create function app on container app", is_preview=True)
+        c.argument('enable_dapr', help="Enable/Disable Dapr for a function app on an Azure Container App environment", arg_type=get_three_state_flag(return_label=True))
+        c.argument('dapr_app_id', help="The Dapr application identifier.")
+        c.argument('dapr_app_port', type=int, help="The port Dapr uses to communicate to the application.")
+        c.argument('dapr_http_max_request_size', type=int, options_list=['--dapr-http-max-request-size', '--dhmrs'], help="Max size of request body http and grpc servers in MB to handle uploading of large files.")
+        c.argument('dapr_http_read_buffer_size', type=int, options_list=['--dapr-http-read-buffer-size', '--dhrbs'], help="Max size of http header read buffer in KB to handle when sending multi-KB headers.")
+        c.argument('dapr_log_level', help="The log level for the Dapr sidecar", arg_type=get_enum_type(DAPR_LOG_LEVELS))
+        c.argument('dapr_enable_api_logging', options_list=['--dapr-enable-api-logging', '--dal'], help="Enable/Disable API logging for the Dapr sidecar.", arg_type=get_three_state_flag(return_label=True))
+        c.argument('workload_profile_name', help="The name of the workload profile to run the app on.", is_preview=True)
+        c.argument('cpu', type=float, help="Required CPU in cores from 0.5 to 2.0.", is_preview=True)
+        c.argument('memory', help="Required momory from 1.0 to 4.0 ending with ""Gi"" e.g. 1.0Gi, ", is_preview=True)
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -455,6 +467,10 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp deployment github-actions add')as c:
         c.argument('runtime', options_list=['--runtime', '-r'], help='Canonicalized web runtime in the format of Framework|Version, e.g. "PHP|5.6". Use "az webapp list-runtimes" for available list.')
         c.argument('force', options_list=['--force', '-f'], help='When true, the command will overwrite any workflow file with a conflicting name.', action='store_true')
+
+    with self.argument_context('webapp deployment source config-zip')as c:
+        c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('webapp log config') as c:
         c.argument('application_logging', help='configure application logging',
@@ -683,6 +699,8 @@ subscription than the app service environment, please use the resource ID for --
                    default=False, action='store_true')
         c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
         c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku [I1v2, I2v2, I3v2]')
+        c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('webapp ssh') as c:
         c.argument('port', options_list=['--port', '-p'],
@@ -719,6 +737,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('reset', help='Reset Java apps to the default parking page if set to true with no type specified.', arg_type=get_three_state_flag())
         c.argument('timeout', type=int, help='Timeout for the deployment operation in milliseconds. Ignored when using "--src-url" since synchronous deployments are not yet supported when using "--src-url"')
         c.argument('slot', help="The name of the slot. Default to the productions slot if not specified.")
+        c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('functionapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the function app to deploy to.')
@@ -748,9 +768,19 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('instance_size', type=int, options_list=['--instance-size'], help="The size of instances.", is_preview=True)
         c.argument('flexconsumption_location', options_list=['--flexconsumption-location', '-f'],
                    help="Geographic location where function app will be hosted. Use `az functionapp list-flexconsumption-locations` to view available locations.", is_preview=True)
-        c.argument('min_replicas', type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
-        c.argument('max_replicas', type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('min_replicas', type=int, help="The minimum number of replicas when create function app on container app", is_preview=True)
+        c.argument('max_replicas', type=int, help="The maximum number of replicas when create function app on container app", is_preview=True)
+        c.argument('enable_dapr', help="Enable/Disable Dapr for a function app on an Azure Container App environment", arg_type=get_three_state_flag(return_label=True))
+        c.argument('dapr_app_id', help="The Dapr application identifier.")
+        c.argument('dapr_app_port', type=int, help="The port Dapr uses to communicate to the application.")
+        c.argument('dapr_http_max_request_size', type=int, options_list=['--dapr-http-max-request-size', '--dhmrs'], help="Max size of request body http and grpc servers in MB to handle uploading of large files.")
+        c.argument('dapr_http_read_buffer_size', type=int, options_list=['--dapr-http-read-buffer-size', '--dhrbs'], help="Max size of http header read buffer in KB to handle when sending multi-KB headers.")
+        c.argument('dapr_log_level', help="The log level for the Dapr sidecar", arg_type=get_enum_type(DAPR_LOG_LEVELS))
+        c.argument('dapr_enable_api_logging', options_list=['--dapr-enable-api-logging', '--dal'], help="Enable/Disable API logging for the Dapr sidecar.", arg_type=get_three_state_flag(return_label=True))
         c.argument('workspace', help="Name of an existing log analytics workspace to be used for the application insights component")
+        c.argument('workload_profile_name', help="The workload profile name to run the container app on.", is_preview=True)
+        c.argument('cpu', type=float, help="The CPU in cores of the container app. e.g 0.75", is_preview=True)
+        c.argument('memory', help="The memory size of the container app. e.g. 1.0Gi, ", is_preview=True)
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
