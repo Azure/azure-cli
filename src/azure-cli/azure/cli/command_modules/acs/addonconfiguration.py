@@ -192,7 +192,7 @@ def ensure_default_log_analytics_workspace_for_monitoring(
 ):
     rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
     cloud_name = cmd.cli_ctx.cloud.name
-    workspace_region_code = "EUS"
+    workspace_region_code = "EUS" # default to EUS
 
     if cloud_name.lower() == "azurecloud":
         workspace_region = AzureCloudRegionToOmsRegionMap.get(
