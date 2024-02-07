@@ -28,8 +28,12 @@ def get_cloud(cmd):
 
 def get_cloud_cluster(cmd, location, subscription_id):
     cloud = get_cloud(cmd)
-    if cloud[location] is not None:
-        for cluster in cloud[location]:
+    try:
+        clusters = cloud[location]
+    except:
+        clusters = None
+    if clusters is not None:
+        for cluster in clusters:
             if cloud[cluster] is not None:
                 if subscription_id in cloud[cluster]["subscriptions"]:
                     return cloud[cluster]
