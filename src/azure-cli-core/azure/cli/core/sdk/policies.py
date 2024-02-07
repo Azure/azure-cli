@@ -99,9 +99,6 @@ class SafeNetworkTraceLoggingPolicy(SansIOHTTPPolicy):
 
 
 class RecordTelemetryUserAgentPolicy(UserAgentPolicy):
-    def __init__(self, base_user_agent=None, **kwargs):
-        super().__init__(base_user_agent=base_user_agent, **kwargs)
-
     def on_request(self, request):
         super().on_request(request)
         from azure.cli.core.telemetry import set_user_agent
