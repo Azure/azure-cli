@@ -105,7 +105,7 @@ def aks_versions_table_format(result):
     parsed = compile_jmes("""[].{
         kubernetesVersion: version,
         isPreview: isPreview,
-        upgrades: upgrades || [`None available`] | join(`, `, @),
+        upgrades: upgrades || [`None available`] | sort_versions(@) | join(`, `, @),
         supportPlan: supportPlan | join(`, `, @)
     }""")
 
