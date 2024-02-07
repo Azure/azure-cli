@@ -1332,12 +1332,12 @@ def _process_certificate(cli_ctx, years, app_start_date, app_end_date, cert, cre
             _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, cert)
     elif keyvault:
         # 6 - Use existing cert from KeyVault
-        kv_client = _get_keyvault_client(cli_ctx)
         vault_base = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
-        cert_obj = kv_client.get_certificate(vault_base, cert, '')
+        kv_client = _get_keyvault_cert_client(cli_ctx, vault_base)
+        cert_obj = kv_client.get_certificate(cert)
         public_cert_string = base64.b64encode(cert_obj.cer).decode('utf-8')  # pylint: disable=no-member
-        cert_start_date = cert_obj.attributes.not_before  # pylint: disable=no-member
-        cert_end_date = cert_obj.attributes.expires  # pylint: disable=no-member
+        cert_start_date = cert_obj.properties.not_before  # pylint: disable=no-member
+        cert_end_date = cert_obj.properties.expires_on  # pylint: disable=no-member
 
     return public_cert_string, cert_file, cert_start_date, cert_end_date
 
@@ -1364,9 +1364,10 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
     return app_start_date, app_end_date, cert_start_date, cert_end_date
 
 
-def _get_keyvault_client(cli_ctx):
-    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-    return keyvault_data_plane_factory(cli_ctx)
+def _get_keyvault_cert_client(cli_ctx, vault_base_url):
+    from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_certificate_client
+    command_args = {'vault_base_url': vault_base_url}
+    return data_plane_azure_keyvault_certificate_client(cli_ctx, command_args=command_args)
 
 
 def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-locals
@@ -1423,9 +1424,9 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
 
 
 def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_cert_name):  # pylint: disable=too-many-locals
-    import time
-
-    kv_client = _get_keyvault_client(cli_ctx)
+    from azure.cli.command_modules.keyvault._validators import build_certificate_policy
+    vault_base_url = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
+    kv_client = _get_keyvault_cert_client(cli_ctx, vault_base_url)
     cert_policy = {
         'issuer_parameters': {
             'name': 'Self'
@@ -1460,15 +1461,13 @@ def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_ce
             'validity_in_months': int(years * 12)
         }
     }
-    vault_base_url = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
-    kv_client.create_certificate(vault_base_url, keyvault_cert_name, cert_policy)
-    while kv_client.get_certificate_operation(vault_base_url, keyvault_cert_name).status != 'completed':  # pylint: disable=no-member, line-too-long
-        time.sleep(5)
+    policyObj = build_certificate_policy(cli_ctx, cert_policy)
+    kv_client.begin_create_certificate(keyvault_cert_name, policyObj).result()
 
-    cert = kv_client.get_certificate(vault_base_url, keyvault_cert_name, '')
+    cert = kv_client.get_certificate(keyvault_cert_name)
     cert_string = base64.b64encode(cert.cer).decode('utf-8')  # pylint: disable=no-member
-    cert_start_date = cert.attributes.not_before  # pylint: disable=no-member
-    cert_end_date = cert.attributes.expires  # pylint: disable=no-member
+    cert_start_date = cert.properties.not_before  # pylint: disable=no-member
+    cert_end_date = cert.properties.expires_on  # pylint: disable=no-member
     creds_file = None
     return (cert_string, creds_file, cert_start_date, cert_end_date)
 

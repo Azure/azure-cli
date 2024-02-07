@@ -2828,7 +2828,7 @@ def _get_vault_id_from_name(cli_ctx, client, vault_name):
 
 
 def get_vm_format_secret(cmd, secrets, certificate_store=None, keyvault=None, resource_group_name=None):
-    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1 import KeyVaultId
+    from azure.keyvault.secrets._shared import parse_key_vault_id
     import re
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     grouped_secrets = {}
@@ -2839,8 +2839,8 @@ def get_vm_format_secret(cmd, secrets, certificate_store=None, keyvault=None, re
 
     # group secrets by source vault
     for secret in merged_secrets:
-        parsed = KeyVaultId.parse_secret_id(secret)
-        match = re.search('://(.+?)\\.', parsed.vault)
+        parsed = parse_key_vault_id(secret)
+        match = re.search('://(.+?)\\.', parsed.vault_url)
         vault_name = match.group(1)
         if vault_name not in grouped_secrets:
             grouped_secrets[vault_name] = {
