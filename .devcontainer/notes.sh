@@ -3,6 +3,7 @@ echo "azdev (venv: /workspaces/azdev) and azcli (/workspaces/azure-cli) have bee
 echo "Extra manual config steps:"
 echo "  - config vscode python interpreter to '/workspaces/azdev/bin/python'"
 echo "  - run 'source /workspaces/azdev/bin/activate' (if its not loaded by default), so you have azdev/az fully setup."
+echo "  - run 'export VIRTUAL_ENV=/workspaces/azdev/' if you hit this error on azdev: TypeError: expected str, bytes or os.PathLike object, not NoneType"
 echo "==============="
 echo "Debug:"
 echo "  - modify .vscode/launch.json 'args' in 'Azure CLI Debug (Integrated Console)' with your own command in string array (not include az itself) "
