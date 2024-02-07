@@ -25,7 +25,7 @@ jobs:
     - task: AzureCLI@1
       displayName: 'update version'
       inputs:
-        azureSubscription: 'Azure CLI release'
+        azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
         scriptLocation: inlineScript
         inlineScript: |
           set -ev
@@ -93,7 +93,7 @@ jobs:
     - task: AzureCLI@1
       displayName: 'Checkout Target Branch'
       inputs:
-        azureSubscription: 'Azure CLI release'
+        azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
         scriptLocation: inlineScript
         inlineScript: |
           set -ev
@@ -117,7 +117,7 @@ jobs:
     - task: AzureCLI@1
       displayName: 'Rerun tests'
       inputs:
-        azureSubscription: 'azure-cli-sdk-test-2024'
+        azureSubscription: $(AZURE_SDK_TEST_SUB_CONNECTED_SERVICE)
         scriptLocation: inlineScript
         inlineScript: |
           set -ev
@@ -147,7 +147,7 @@ jobs:
     - task: AzureCLI@1
       displayName: 'Create PR'
       inputs:
-        azureSubscription: 'Azure CLI release'
+        azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
         scriptLocation: inlineScript
         inlineScript: |
           set -ev
