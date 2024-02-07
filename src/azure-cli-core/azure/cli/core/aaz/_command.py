@@ -194,7 +194,7 @@ class AAZCommand(CLICommand):
 
         def processor(schema, result):
             """A processor used in AAZBaseValue to serialized data"""
-            if result == AAZUndefined:
+            if result == AAZUndefined or result is None:
                 return result
 
             if isinstance(schema, AAZObjectType):
@@ -216,7 +216,7 @@ class AAZCommand(CLICommand):
                         continue
 
                     if client_flatten and k_schema._flags.get('client_flatten', False):
-                        # flatten k when there are client_flatten flag in it's schema
+                        # flatten k when there are client_flatten flag in its schema
                         assert isinstance(k_schema, AAZObjectType) and isinstance(v, dict)
                         for sub_k, sub_v in v.items():
                             if sub_k in new_result:
@@ -394,7 +394,7 @@ def load_aaz_command_table(loader, aaz_pkg_name, args):
         arg_str = ''
         fully_load = True
     else:
-        arg_str = ' '.join(args)
+        arg_str = ' '.join(args).lower()  # Sometimes args may contain capital letters.
         fully_load = os.environ.get(AAZ_PACKAGE_FULL_LOAD_ENV_NAME, 'False').lower() == 'true'  # disable cut logic
     if profile_pkg is not None:
         _load_aaz_pkg(loader, profile_pkg, command_table, command_group_table, arg_str, fully_load)
@@ -449,7 +449,7 @@ def _load_aaz_pkg(loader, pkg, parent_command_table, command_group_table, arg_st
             if issubclass(value, AAZCommandGroup):
                 if value.AZ_NAME:
                     # AAZCommandGroup already be registered by register_command_command
-                    if not arg_str.startswith(f'{value.AZ_NAME} '):
+                    if not arg_str.startswith(f'{value.AZ_NAME.lower()} '):
                         # when args not contain command group prefix, then cut more loading.
                         cut = True
                     # add command group into command group table

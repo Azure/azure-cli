@@ -12,6 +12,9 @@ from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer, K
 from azure.cli.testsdk.base import execute
 # pylint: disable=line-too-long
 
+from knack.log import get_logger
+logger = get_logger(__name__)
+
 
 class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=too-many-instance-attributes
     def __init__(self, name_prefix='clitest-vault', parameter_name='vault_name',
@@ -34,6 +37,9 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
             cmd = 'az backup vault create -n {} -g {} --location {}'.format(name, self.resource_group, self.location)
+            # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
+            # if not self.soft_delete:
+            #     cmd += ' --soft-delete-state Disable'
             execute(self.cli_ctx, cmd)
             if not self.soft_delete:
                 cmd = 'az backup vault backup-properties set -n {} -g {} --soft-delete-feature-state Disable'.format(name, self.resource_group)
@@ -98,10 +104,12 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
         if not self.dev_setting_value:
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
-            param_format = '-n {} -g {} --image {} --admin-username {} --admin-password {} --tags {} --nsg-rule None'
+            param_format = '-n {} -g {} --image {} --admin-username {} --admin-password {} '
+            param_format += '--tags {} --nsg-rule None'
+            # param_format += '--tags {} --size {} --nsg-rule None'
             param_tags = 'MabUsed=Yes Owner=sisi Purpose=CLITest DeleteBy=12-2099 AutoShutdown=No'
             param_string = param_format.format(name, self.resource_group, 'Win2012R2Datacenter', name,
-                                               '%j^VYw9Q3Z@Cu$*h', param_tags)
+                                               '%j^VYw9Q3Z@Cu$*h', param_tags)  #, 'Standard_D2a_v4')
             cmd = 'az vm create {}'.format(param_string)
             execute(self.cli_ctx, cmd)
             return {self.parameter_name: name}
@@ -588,17 +596,27 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
                        'decorator @AFSPolicyPreparer in front of this Item preparer.'
             raise CliTestError(template)
 
+    def _delete_lock(self, lock):
+        lock_id = lock["id"]
+        try:
+            command_string = 'az lock delete --ids {}'.format(lock_id)
+            execute(self.cli_ctx, command_string)
+        except Exception:
+            raise CliTestError('Unable to delete the lock with ID {}, please delete it manually'.format(lock_id))
+
     def _cleanup(self, resource_group, storage_account, vault, afs):
         # Need to remove any resource locks on the Storage Account, and also manually delete the item
         command_string = 'az lock list -g {}'.format(resource_group)
         list_of_locks = execute(self.cli_ctx, command_string).get_output_in_json()
         for lock in list_of_locks:
-            lock_id = lock["id"]
-            try:
-                command_string = 'az lock delete --ids {}'.format(lock_id)
-                execute(self.cli_ctx, command_string)
-            except Exception:
-                raise CliTestError('Unable to delete the lock with ID {}, please delete it manually'.format(lock_id))
+            self._delete_lock(lock)
+        
+        # Cleaning up Storage account locks
+        command_string = 'az lock list -g {} --resource-name {} --resource-type {}'.format(
+            resource_group, storage_account, 'Microsoft.Storage/storageAccounts')
+        list_of_locks = execute(self.cli_ctx, command_string).get_output_in_json()
+        for lock in list_of_locks:
+            self._delete_lock(lock)
 
         command_string = 'az backup protection disable'
         command_string += ' -g {} -v {} --container-name {} --item-name {}'
@@ -607,7 +625,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             execute(self.cli_ctx, command_string)
         except Exception:
-            print('Warning: Unable to unregister AFS item during AFS Item test cleanup.')
+            logger.warning('Warning: Unable to unregister AFS item during AFS Item test cleanup.')
 
         command_string = 'az backup container unregister'
         command_string += ' --vault-name {} --resource-group {} --container-name {} --backup-management-type AzureStorage --yes'
@@ -615,7 +633,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             execute(self.cli_ctx, command_string)
         except Exception:
-            print('Warning: Unable to unregister storage container during AFS Item test cleanup.')
+            logger.warning('Warning: Unable to unregister storage container during AFS Item test cleanup.')
 
 
 class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):

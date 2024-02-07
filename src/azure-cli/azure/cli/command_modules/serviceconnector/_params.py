@@ -22,13 +22,15 @@ from ._resource_config import (
     SOURCE_RESOURCES_PARAMS,
     SOURCE_RESOURCES_CREATE_PARAMS,
     TARGET_RESOURCES_PARAMS,
+    SOURCE_RESOURCES_OPTIONAL_PARAMS,
     TARGET_RESOURCES_CONNECTION_STRING,
     AUTH_TYPE_PARAMS,
     SUPPORTED_AUTH_TYPE,
     SUPPORTED_CLIENT_TYPE,
     TARGET_SUPPORT_SERVICE_ENDPOINT,
     TARGET_SUPPORT_PRIVATE_ENDPOINT,
-    LOCAL_CONNECTION_PARAMS
+    LOCAL_CONNECTION_PARAMS,
+    OPT_OUT_OPTION
 )
 from ._addon_factory import AddonFactory
 from knack.arguments import CLIArgumentType
@@ -46,9 +48,12 @@ def add_source_resource_block(context, source, enable_id=True, validate_source_i
     required_args = []
     for arg, content in SOURCE_RESOURCES_PARAMS.get(source).items():
         id_arg = '\'--id\'' if enable_id else '\'--source-id\''
+        deprecate_info = content.get('deprecate_info')
         context.argument(arg, configured_default=content.get('configured_default'),
                          options_list=content.get('options'), type=str,
-                         help='{}. Required if {} is not specified.'.format(content.get('help'), id_arg))
+                         deprecate_info=context.deprecate() if deprecate_info else None,
+                         help='{}. Required if {} is not specified.{}'.format(
+                             content.get('help'), id_arg, deprecate_info))
         required_args.append(content.get('options')[0])
 
     validator_kwargs = {
@@ -82,6 +87,18 @@ def add_source_resource_block(context, source, enable_id=True, validate_source_i
     else:
         context.ignore('scope')
         context.ignore('enable_csi')
+
+    # slot parameter
+    for resource, args in SOURCE_RESOURCES_OPTIONAL_PARAMS.items():
+        for arg in args:
+            if resource == source:
+                deprecate_info = args.get(arg).get('deprecate_info')
+                context.argument(arg, options_list=args.get(arg).get(
+                    'options'), type=str,
+                    deprecate_info=context.deprecate() if deprecate_info else None,
+                    help=args.get(arg).get('help'))
+            else:
+                context.ignore(arg)
 
 
 def add_auth_block(context, source, target):
@@ -220,6 +237,16 @@ def add_confluent_kafka_argument(context):
                      help='Name of the connection', validator=validate_kafka_params)
 
 
+def add_opt_out_argument(context):
+    context.argument('opt_out_list', options_list=['--opt-out'],
+                     default=None, nargs='+',
+                     arg_type=get_enum_type(OPT_OUT_OPTION),
+                     help='Whether to disable some configuration steps. '
+                     'Use configinfo to disbale configuration information changes on source. '
+                     'Use publicnetwork to disable public network access configuration.'
+                     )
+
+
 def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     for source in SOURCE_RESOURCES_PARAMS:
@@ -262,6 +289,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_vnet_block(c, target)
                 add_connection_string_argument(c, source, target)
                 add_customized_keys_argument(c)
+                add_opt_out_argument(c)
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)
@@ -271,6 +299,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_vnet_block(c, target)
                 add_connection_string_argument(c, source, target)
                 add_customized_keys_argument(c)
+                add_opt_out_argument(c)
 
         # special target resource: independent implementation
         target = RESOURCE.ConfluentKafka
@@ -280,12 +309,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             add_confluent_kafka_argument(c)
             add_secret_store_argument(c)
             add_customized_keys_argument(c)
+            add_opt_out_argument(c)
         with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
             add_client_type_argument(c, source, target)
             add_source_resource_block(c, source, enable_id=False)
             add_confluent_kafka_argument(c)
             add_secret_store_argument(c)
             add_customized_keys_argument(c)
+            add_opt_out_argument(c)
 
     # local connection
     with self.argument_context('connection list') as c:

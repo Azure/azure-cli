@@ -13,36 +13,38 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_private_endpoint_connection_eventhub000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001","name":"test_private_endpoint_connection_eventhub000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-08T09:49:43Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001","name":"test_private_endpoint_connection_eventhub000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_private_endpoint_connection_eventhub","date":"2023-12-14T09:29:19Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '372'
+      - '442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:49:43 GMT
+      - Thu, 14 Dec 2023 09:29:25 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "sku": {"name": "Standard", "tier": "Standard"},
-      "properties": {"publicNetworkAccess": "Enabled"}}'
+    body: '{"identity": {"type": "None"}, "location": "westus", "sku": {"name": "Standard",
+      "tier": "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -53,29 +55,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '121'
+      - '101'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006?api-version=2023-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006","name":"cli-test-resource-000006","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:cli-test-resource-000006","createdAt":"2023-02-08T09:49:47.24Z","updatedAt":"2023-02-08T09:49:47.24Z","serviceBusEndpoint":"https://cli-test-resource-000006.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:cli-test-resource-000006","createdAt":"2023-12-14T09:29:28.527Z","updatedAt":"2023-12-14T09:29:28.527Z","serviceBusEndpoint":"https://cli-test-resource-000006.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '832'
+      - '834'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:49:47 GMT
+      - Thu, 14 Dec 2023 09:29:28 GMT
       expires:
       - '-1'
       pragma:
@@ -112,32 +113,31 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006?api-version=2023-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006","name":"cli-test-resource-000006","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:cli-test-resource-000006","createdAt":"2023-02-08T09:49:47.24Z","updatedAt":"2023-02-08T09:49:47.24Z","serviceBusEndpoint":"https://cli-test-resource-000006.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:cli-test-resource-000006","createdAt":"2023-12-14T09:29:28.527Z","updatedAt":"2023-12-14T09:29:28.527Z","serviceBusEndpoint":"https://cli-test-resource-000006.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '832'
+      - '834'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:50:17 GMT
+      - Thu, 14 Dec 2023 09:29:29 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -163,32 +163,31 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006?api-version=2023-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006","name":"cli-test-resource-000006","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:cli-test-resource-000006","createdAt":"2023-02-08T09:49:47.24Z","updatedAt":"2023-02-08T09:50:34.503Z","serviceBusEndpoint":"https://cli-test-resource-000006.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:cli-test-resource-000006","createdAt":"2023-12-14T09:29:28.527Z","updatedAt":"2023-12-14T09:29:28.527Z","serviceBusEndpoint":"https://cli-test-resource-000006.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '831'
+      - '834'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:50:48 GMT
+      - Thu, 14 Dec 2023 09:30:00 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -204,7 +203,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -214,32 +213,31 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006?api-version=2023-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006","name":"cli-test-resource-000006","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:cli-test-resource-000006","createdAt":"2023-02-08T09:49:47.24Z","updatedAt":"2023-02-08T09:50:34.503Z","serviceBusEndpoint":"https://cli-test-resource-000006.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:cli-test-resource-000006","createdAt":"2023-12-14T09:29:28.527Z","updatedAt":"2023-12-14T09:30:16.913Z","serviceBusEndpoint":"https://cli-test-resource-000006.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '831'
+      - '832'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:50:48 GMT
+      - Thu, 14 Dec 2023 09:30:32 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -265,23 +263,22 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006?api-version=2023-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006","name":"cli-test-resource-000006","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:cli-test-resource-000006","createdAt":"2023-02-08T09:49:47.24Z","updatedAt":"2023-02-08T09:50:34.503Z","serviceBusEndpoint":"https://cli-test-resource-000006.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:cli-test-resource-000006","createdAt":"2023-12-14T09:29:28.527Z","updatedAt":"2023-12-14T09:30:16.913Z","serviceBusEndpoint":"https://cli-test-resource-000006.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '831'
+      - '832'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:50:49 GMT
+      - Thu, 14 Dec 2023 09:30:34 GMT
       expires:
       - '-1'
       pragma:
@@ -316,8 +313,7 @@ interactions:
       ParameterSetName:
       - --name -g --type
       User-Agent:
-      - python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) AZURECLI/2.45.0
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - python/3.8.10 (Windows-10-10.0.19045-SP0) AZURECLI/2.55.0 (PIP)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateLinkResources?api-version=2021-06-01-preview
   response:
@@ -331,16 +327,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:50:50 GMT
+      - Thu, 14 Dec 2023 09:30:36 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -366,22 +362,22 @@ interactions:
       ParameterSetName:
       - -n -g --subnet-name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_private_endpoint_connection_eventhub000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001","name":"test_private_endpoint_connection_eventhub000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-08T09:49:43Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001","name":"test_private_endpoint_connection_eventhub000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_private_endpoint_connection_eventhub","date":"2023-12-14T09:29:19Z","module":"network","DateCreated":"2023-12-14T09:30:26Z","Creator":"ethanyang@microsoft.com"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '372'
+      - '515'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:50:50 GMT
+      - Thu, 14 Dec 2023 09:30:37 GMT
       expires:
       - '-1'
       pragma:
@@ -415,20 +411,19 @@ interactions:
       ParameterSetName:
       - -n -g --subnet-name
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-vnet-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002\",\r\n
-        \ \"etag\": \"W/\\\"9abb7fd6-dfa5-493a-86ab-740c70de2df5\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"1e868263-7927-4d94-9974-063f644029ff\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"b88515f7-6dec-4509-81f0-ced9280f09b1\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        \"91fabf11-c309-471f-a74f-cc5dcdb07f15\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
         [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
         \     {\r\n        \"name\": \"cli-subnet-000003\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003\",\r\n
-        \       \"etag\": \"W/\\\"9abb7fd6-dfa5-493a-86ab-740c70de2df5\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1e868263-7927-4d94-9974-063f644029ff\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -439,7 +434,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ff3d675a-377d-4b9b-95ac-826acc0c5c51?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/217d071a-afda-412b-ba62-ca874cc45207?api-version=2022-01-01&t=638381430405048165&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=f7YdAqxbtnfP1VoQ7dECai_raM53ziH265nMBBQPQ2ly7fuLaM1ZIQJWXpJED8MbcUsBTG0BA72SQwSF9S9VNs9CVwwtG9FtCmhnk5sW9_Y2TqJY95frryQ8tyFYvamIY-76P4rr06Q9jOqejdBrLaGTazapC9Oky-gFXEEknvhPKrNJAperj2_gEZNNIVKfTDjXS1Jen66w0rFQdRaC6KJp_rAkd5Hm1YaPqZpYsHI9J0KiYPeyQYI6wERzv9V8fUTL6GbJ0omRqmx2rnPTSBh4O52tkyHGbrcImSHPf1NAYD7wAOcUeS577mJenpHPcf8CniCie54FjoURlMtZ-Q&h=gRDleqQc1V3-2CbCwXeBFhx5VMx8-0VPXRrx_xFxrpM
       cache-control:
       - no-cache
       content-length:
@@ -447,7 +442,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:50:52 GMT
+      - Thu, 14 Dec 2023 09:30:40 GMT
       expires:
       - '-1'
       pragma:
@@ -460,9 +455,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1d34a5f3-303f-4e03-9fcc-f6d4ef9f2db5
+      - 570d6449-e8be-4f1c-8e31-fd0e7eddff80
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -480,22 +475,21 @@ interactions:
       ParameterSetName:
       - -n -g --subnet-name
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ff3d675a-377d-4b9b-95ac-826acc0c5c51?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/217d071a-afda-412b-ba62-ca874cc45207?api-version=2022-01-01&t=638381430405048165&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=f7YdAqxbtnfP1VoQ7dECai_raM53ziH265nMBBQPQ2ly7fuLaM1ZIQJWXpJED8MbcUsBTG0BA72SQwSF9S9VNs9CVwwtG9FtCmhnk5sW9_Y2TqJY95frryQ8tyFYvamIY-76P4rr06Q9jOqejdBrLaGTazapC9Oky-gFXEEknvhPKrNJAperj2_gEZNNIVKfTDjXS1Jen66w0rFQdRaC6KJp_rAkd5Hm1YaPqZpYsHI9J0KiYPeyQYI6wERzv9V8fUTL6GbJ0omRqmx2rnPTSBh4O52tkyHGbrcImSHPf1NAYD7wAOcUeS577mJenpHPcf8CniCie54FjoURlMtZ-Q&h=gRDleqQc1V3-2CbCwXeBFhx5VMx8-0VPXRrx_xFxrpM
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '30'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:50:55 GMT
+      - Thu, 14 Dec 2023 09:30:40 GMT
       expires:
       - '-1'
       pragma:
@@ -512,7 +506,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a417eced-de77-4d8f-9832-fa94b832265b
+      - 1978178e-3b8a-456a-bb01-076903e5193d
     status:
       code: 200
       message: OK
@@ -530,37 +524,21 @@ interactions:
       ParameterSetName:
       - -n -g --subnet-name
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/217d071a-afda-412b-ba62-ca874cc45207?api-version=2022-01-01&t=638381430405048165&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=f7YdAqxbtnfP1VoQ7dECai_raM53ziH265nMBBQPQ2ly7fuLaM1ZIQJWXpJED8MbcUsBTG0BA72SQwSF9S9VNs9CVwwtG9FtCmhnk5sW9_Y2TqJY95frryQ8tyFYvamIY-76P4rr06Q9jOqejdBrLaGTazapC9Oky-gFXEEknvhPKrNJAperj2_gEZNNIVKfTDjXS1Jen66w0rFQdRaC6KJp_rAkd5Hm1YaPqZpYsHI9J0KiYPeyQYI6wERzv9V8fUTL6GbJ0omRqmx2rnPTSBh4O52tkyHGbrcImSHPf1NAYD7wAOcUeS577mJenpHPcf8CniCie54FjoURlMtZ-Q&h=gRDleqQc1V3-2CbCwXeBFhx5VMx8-0VPXRrx_xFxrpM
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-vnet-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002\",\r\n
-        \ \"etag\": \"W/\\\"3e1fad78-be4b-4e88-a5be-21debc256faa\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"b88515f7-6dec-4509-81f0-ced9280f09b1\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
-        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
-        \     {\r\n        \"name\": \"cli-subnet-000003\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003\",\r\n
-        \       \"etag\": \"W/\\\"3e1fad78-be4b-4e88-a5be-21debc256faa\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1331'
+      - '29'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:50:55 GMT
-      etag:
-      - W/"3e1fad78-be4b-4e88-a5be-21debc256faa"
+      - Thu, 14 Dec 2023 09:30:50 GMT
       expires:
       - '-1'
       pragma:
@@ -577,7 +555,71 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ed8aff30-3df6-4010-8530-ea1186b1e53e
+      - 3bcbaded-2e43-4ddf-92bd-1454140734da
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet-name
+      User-Agent:
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-vnet-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002\",\r\n
+        \ \"etag\": \"W/\\\"c3914352-4a61-4bee-9272-15d9a34aa8b4\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"91fabf11-c309-471f-a74f-cc5dcdb07f15\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
+        \     {\r\n        \"name\": \"cli-subnet-000003\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003\",\r\n
+        \       \"etag\": \"W/\\\"c3914352-4a61-4bee-9272-15d9a34aa8b4\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1331'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 14 Dec 2023 09:30:51 GMT
+      etag:
+      - W/"c3914352-4a61-4bee-9272-15d9a34aa8b4"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - acbabad1-acfb-4984-adc0-9669d17abd09
     status:
       code: 200
       message: OK
@@ -595,29 +637,23 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003?api-version=2023-09-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-subnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003\",\r\n
-        \ \"etag\": \"W/\\\"3e1fad78-be4b-4e88-a5be-21debc256faa\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
-        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
-        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+      string: '{"name":"cli-subnet-000003","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003","etag":"W/\"c3914352-4a61-4bee-9272-15d9a34aa8b4\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '589'
+      - '523'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:50:57 GMT
+      - Thu, 14 Dec 2023 09:30:54 GMT
       etag:
-      - W/"3e1fad78-be4b-4e88-a5be-21debc256faa"
+      - W/"c3914352-4a61-4bee-9272-15d9a34aa8b4"
       expires:
       - '-1'
       pragma:
@@ -634,7 +670,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d93a5b4e-73c2-490a-a986-552816c90cdf
+      - d998673b-6d42-4c37-b5bd-57238c6f5c92
     status:
       code: 200
       message: OK
@@ -659,31 +695,25 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003?api-version=2023-09-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-subnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003\",\r\n
-        \ \"etag\": \"W/\\\"d6d24bc5-26f0-4ae7-a5b6-1681997d97c7\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
-        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
-        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+      string: '{"name":"cli-subnet-000003","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003","etag":"W/\"962d4881-cc55-4638-87f4-1577840dc10c\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8bc8d1b1-2f5e-4cd3-8850-3b8813f001af?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e03bb68e-669d-470f-99c2-fc1976a1f678?api-version=2023-09-01&t=638381430551791926&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=sHIc_htcKmrSeS5-aNoBfnDQGImt-hMNlBTg1k2sVcFg6qTz8chJeOJG3fa1CIVrwFt_I4MJzPP_X56xCgzXS9KWgsRXyCCcIUfR_3AnuBoS5edqdSmdqEN0kF1Pg6a3pXa4Eg3fk-6aDh3qH9ybMFKE59R0g6wM81Y-OZ2XyA0fhdyFECsF7GGt2A1YxlmsMpfF0VuEHO3smu8M04DjDnOrOLnlSt9Ub5mnDZioHyLYz1xMakgOQMISk16TeMY139KYx4aJHn1quUNVmv4u1Jpk7bq3WWgffsR4mlVEctRVUpNlIr6uYtTo_Me7b16GJ5seqmPh-encPKkb_rekDw&h=nUpmCkVZGF1DnOEnnHOg9-mQxVLFKYWFfOolPgtaQWw
       cache-control:
       - no-cache
       content-length:
-      - '589'
+      - '523'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:50:57 GMT
+      - Thu, 14 Dec 2023 09:30:54 GMT
       expires:
       - '-1'
       pragma:
@@ -700,9 +730,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e0a9ea04-5bad-4aa6-9add-997b98d70858
+      - 87bf44ca-5283-4ae9-b313-6cf3236dba10
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -720,22 +750,21 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8bc8d1b1-2f5e-4cd3-8850-3b8813f001af?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e03bb68e-669d-470f-99c2-fc1976a1f678?api-version=2023-09-01&t=638381430551791926&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=sHIc_htcKmrSeS5-aNoBfnDQGImt-hMNlBTg1k2sVcFg6qTz8chJeOJG3fa1CIVrwFt_I4MJzPP_X56xCgzXS9KWgsRXyCCcIUfR_3AnuBoS5edqdSmdqEN0kF1Pg6a3pXa4Eg3fk-6aDh3qH9ybMFKE59R0g6wM81Y-OZ2XyA0fhdyFECsF7GGt2A1YxlmsMpfF0VuEHO3smu8M04DjDnOrOLnlSt9Ub5mnDZioHyLYz1xMakgOQMISk16TeMY139KYx4aJHn1quUNVmv4u1Jpk7bq3WWgffsR4mlVEctRVUpNlIr6uYtTo_Me7b16GJ5seqmPh-encPKkb_rekDw&h=nUpmCkVZGF1DnOEnnHOg9-mQxVLFKYWFfOolPgtaQWw
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: '{"status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:51:27 GMT
+      - Thu, 14 Dec 2023 09:30:55 GMT
       expires:
       - '-1'
       pragma:
@@ -752,7 +781,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f04438d9-6440-4a56-bdd5-a7cd9469d6eb
+      - f7933fd7-b9ff-4505-be20-a3e58fb939e3
     status:
       code: 200
       message: OK
@@ -770,29 +799,23 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003?api-version=2023-09-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-subnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003\",\r\n
-        \ \"etag\": \"W/\\\"d6d24bc5-26f0-4ae7-a5b6-1681997d97c7\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
-        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
-        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+      string: '{"name":"cli-subnet-000003","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003","etag":"W/\"962d4881-cc55-4638-87f4-1577840dc10c\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '589'
+      - '523'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:51:27 GMT
+      - Thu, 14 Dec 2023 09:30:55 GMT
       etag:
-      - W/"d6d24bc5-26f0-4ae7-a5b6-1681997d97c7"
+      - W/"962d4881-cc55-4638-87f4-1577840dc10c"
       expires:
       - '-1'
       pragma:
@@ -809,7 +832,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0f1aa5cd-024a-4bae-873e-fc3684dc8a69
+      - de2d7ee7-e655-44b4-86bb-b5b65fcb77a0
     status:
       code: 200
       message: OK
@@ -828,28 +851,30 @@ interactions:
       - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_private_endpoint_connection_eventhub000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001","name":"test_private_endpoint_connection_eventhub000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-08T09:49:43Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001","name":"test_private_endpoint_connection_eventhub000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_private_endpoint_connection_eventhub","date":"2023-12-14T09:29:19Z","module":"network","DateCreated":"2023-12-14T09:30:26Z","Creator":"ethanyang@microsoft.com"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '372'
+      - '515'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:51:27 GMT
+      - Thu, 14 Dec 2023 09:30:56 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -877,19 +902,18 @@ interactions:
       - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-pe-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004\",\r\n
-        \ \"etag\": \"W/\\\"6a41a2e4-bd17-40ea-905c-e8d4327d8e71\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"6c2ab8ea-bf92-477c-a24a-a8d433f1947b\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"05ec531d-901c-42ab-8124-2b6f32b788df\",\r\n    \"privateLinkServiceConnections\":
+        \"09a44d66-d1e6-425b-9118-804d3a107416\",\r\n    \"privateLinkServiceConnections\":
         [\r\n      {\r\n        \"name\": \"cli-pec-000005\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004/privateLinkServiceConnections/cli-pec-000005\",\r\n
-        \       \"etag\": \"W/\\\"6a41a2e4-bd17-40ea-905c-e8d4327d8e71\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6c2ab8ea-bf92-477c-a24a-a8d433f1947b\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006\",\r\n
         \         \"groupIds\": [\r\n            \"namespace\"\r\n          ],\r\n
@@ -900,13 +924,13 @@ interactions:
         \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003\"\r\n
         \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
-        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000004.nic.b0ed1a80-f5c9-47d0-b6b1-bba2d8a4b2a4\"\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000004.nic.264c458a-2eeb-4075-88c0-4be0c99f1792\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ca6cf409-a4fa-47a6-b5ff-921b1815381f?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/137be9b0-2731-45e5-b6d0-8fbc8197b0a2?api-version=2022-01-01&t=638381430602357168&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=Q9-tBLbxDkVI9YaklJ7haS6qOV7TJg1cCrhI0HLhnOX8wod4SXtpYH9y2StQjdYbc6xBT3S9JzpardmTyrjhykJRkwec84mQPM6EcwFJxkNyeqF53hIcoMXSyENkn6OEYHieiFizsqXWb5HnJ4Q8mVlBQm3HyxzzCDD1Q6MqLn10VyJR_B9IBRRr0-O8ZLVC6zwhRT0kXrQ0oQ4k3zQyUDEf-bKjCiW3xEOPVLBmkEyhhDQEqu0xHugCspdGHUFI0ffGILW4UZN9j6AZAmMIdrfSr-saSar5yY38-tJ3lOOGAXW9LNS5efo-B7OFGXJCBgKeW6lrS8x3-FC6hkKXMA&h=a-PReDLq4f9KN6-vcppl5F2UMYZBl-8EX-CjFeKiIlc
       cache-control:
       - no-cache
       content-length:
@@ -914,7 +938,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:51:31 GMT
+      - Thu, 14 Dec 2023 09:30:59 GMT
       expires:
       - '-1'
       pragma:
@@ -927,7 +951,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 666228b9-fa06-455b-af3b-ab58700445e2
+      - ab7657fd-fbda-47ab-b806-47caff84126b
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -948,10 +972,9 @@ interactions:
       - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ca6cf409-a4fa-47a6-b5ff-921b1815381f?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/137be9b0-2731-45e5-b6d0-8fbc8197b0a2?api-version=2022-01-01&t=638381430602357168&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=Q9-tBLbxDkVI9YaklJ7haS6qOV7TJg1cCrhI0HLhnOX8wod4SXtpYH9y2StQjdYbc6xBT3S9JzpardmTyrjhykJRkwec84mQPM6EcwFJxkNyeqF53hIcoMXSyENkn6OEYHieiFizsqXWb5HnJ4Q8mVlBQm3HyxzzCDD1Q6MqLn10VyJR_B9IBRRr0-O8ZLVC6zwhRT0kXrQ0oQ4k3zQyUDEf-bKjCiW3xEOPVLBmkEyhhDQEqu0xHugCspdGHUFI0ffGILW4UZN9j6AZAmMIdrfSr-saSar5yY38-tJ3lOOGAXW9LNS5efo-B7OFGXJCBgKeW6lrS8x3-FC6hkKXMA&h=a-PReDLq4f9KN6-vcppl5F2UMYZBl-8EX-CjFeKiIlc
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -963,7 +986,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:51:41 GMT
+      - Thu, 14 Dec 2023 09:31:00 GMT
       expires:
       - '-1'
       pragma:
@@ -980,7 +1003,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 40f3a4d6-734b-40b3-b97a-862312f04002
+      - 1d605408-49ab-4a0d-bd54-9268c551143e
     status:
       code: 200
       message: OK
@@ -999,10 +1022,9 @@ interactions:
       - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ca6cf409-a4fa-47a6-b5ff-921b1815381f?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/137be9b0-2731-45e5-b6d0-8fbc8197b0a2?api-version=2022-01-01&t=638381430602357168&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=Q9-tBLbxDkVI9YaklJ7haS6qOV7TJg1cCrhI0HLhnOX8wod4SXtpYH9y2StQjdYbc6xBT3S9JzpardmTyrjhykJRkwec84mQPM6EcwFJxkNyeqF53hIcoMXSyENkn6OEYHieiFizsqXWb5HnJ4Q8mVlBQm3HyxzzCDD1Q6MqLn10VyJR_B9IBRRr0-O8ZLVC6zwhRT0kXrQ0oQ4k3zQyUDEf-bKjCiW3xEOPVLBmkEyhhDQEqu0xHugCspdGHUFI0ffGILW4UZN9j6AZAmMIdrfSr-saSar5yY38-tJ3lOOGAXW9LNS5efo-B7OFGXJCBgKeW6lrS8x3-FC6hkKXMA&h=a-PReDLq4f9KN6-vcppl5F2UMYZBl-8EX-CjFeKiIlc
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1014,7 +1036,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:51:51 GMT
+      - Thu, 14 Dec 2023 09:31:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1031,7 +1053,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a54a95e0-bbd5-4944-a416-254ab5e49e1f
+      - a2dd0ede-d9eb-4265-be5c-1d61b34c6bad
     status:
       code: 200
       message: OK
@@ -1050,10 +1072,9 @@ interactions:
       - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ca6cf409-a4fa-47a6-b5ff-921b1815381f?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/137be9b0-2731-45e5-b6d0-8fbc8197b0a2?api-version=2022-01-01&t=638381430602357168&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=Q9-tBLbxDkVI9YaklJ7haS6qOV7TJg1cCrhI0HLhnOX8wod4SXtpYH9y2StQjdYbc6xBT3S9JzpardmTyrjhykJRkwec84mQPM6EcwFJxkNyeqF53hIcoMXSyENkn6OEYHieiFizsqXWb5HnJ4Q8mVlBQm3HyxzzCDD1Q6MqLn10VyJR_B9IBRRr0-O8ZLVC6zwhRT0kXrQ0oQ4k3zQyUDEf-bKjCiW3xEOPVLBmkEyhhDQEqu0xHugCspdGHUFI0ffGILW4UZN9j6AZAmMIdrfSr-saSar5yY38-tJ3lOOGAXW9LNS5efo-B7OFGXJCBgKeW6lrS8x3-FC6hkKXMA&h=a-PReDLq4f9KN6-vcppl5F2UMYZBl-8EX-CjFeKiIlc
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1065,7 +1086,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:52:11 GMT
+      - Thu, 14 Dec 2023 09:31:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1082,7 +1103,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9829db71-902a-481a-9d65-9123a1105a7f
+      - 3f6469ee-ff18-4f6b-bea6-d851fc08f5cb
     status:
       code: 200
       message: OK
@@ -1101,10 +1122,9 @@ interactions:
       - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ca6cf409-a4fa-47a6-b5ff-921b1815381f?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/137be9b0-2731-45e5-b6d0-8fbc8197b0a2?api-version=2022-01-01&t=638381430602357168&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=Q9-tBLbxDkVI9YaklJ7haS6qOV7TJg1cCrhI0HLhnOX8wod4SXtpYH9y2StQjdYbc6xBT3S9JzpardmTyrjhykJRkwec84mQPM6EcwFJxkNyeqF53hIcoMXSyENkn6OEYHieiFizsqXWb5HnJ4Q8mVlBQm3HyxzzCDD1Q6MqLn10VyJR_B9IBRRr0-O8ZLVC6zwhRT0kXrQ0oQ4k3zQyUDEf-bKjCiW3xEOPVLBmkEyhhDQEqu0xHugCspdGHUFI0ffGILW4UZN9j6AZAmMIdrfSr-saSar5yY38-tJ3lOOGAXW9LNS5efo-B7OFGXJCBgKeW6lrS8x3-FC6hkKXMA&h=a-PReDLq4f9KN6-vcppl5F2UMYZBl-8EX-CjFeKiIlc
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1116,7 +1136,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:52:31 GMT
+      - Thu, 14 Dec 2023 09:32:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1133,7 +1153,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ee0bcb63-fbe8-4d1f-bc50-0c35e8dc8cf4
+      - c4bc7978-e398-413d-800a-ef2ff483856d
     status:
       code: 200
       message: OK
@@ -1152,19 +1172,18 @@ interactions:
       - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.55.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-pe-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004\",\r\n
-        \ \"etag\": \"W/\\\"3ad337f6-59c8-4096-a57a-c91518278bab\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"d77f4434-6dfb-40c5-b0f9-bbe79abb340e\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"05ec531d-901c-42ab-8124-2b6f32b788df\",\r\n    \"privateLinkServiceConnections\":
+        \"09a44d66-d1e6-425b-9118-804d3a107416\",\r\n    \"privateLinkServiceConnections\":
         [\r\n      {\r\n        \"name\": \"cli-pec-000005\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004/privateLinkServiceConnections/cli-pec-000005\",\r\n
-        \       \"etag\": \"W/\\\"3ad337f6-59c8-4096-a57a-c91518278bab\\\"\",\r\n
+        \       \"etag\": \"W/\\\"d77f4434-6dfb-40c5-b0f9-bbe79abb340e\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006\",\r\n
         \         \"groupIds\": [\r\n            \"namespace\"\r\n          ],\r\n
@@ -1175,7 +1194,7 @@ interactions:
         \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000002/subnets/cli-subnet-000003\"\r\n
         \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
-        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000004.nic.b0ed1a80-f5c9-47d0-b6b1-bba2d8a4b2a4\"\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000004.nic.264c458a-2eeb-4075-88c0-4be0c99f1792\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
         \"cli-test-resource-000006.servicebus.windows.net\",\r\n        \"ipAddresses\":
         [\r\n          \"10.0.0.4\"\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
@@ -1187,9 +1206,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:52:31 GMT
+      - Thu, 14 Dec 2023 09:32:13 GMT
       etag:
-      - W/"3ad337f6-59c8-4096-a57a-c91518278bab"
+      - W/"d77f4434-6dfb-40c5-b0f9-bbe79abb340e"
       expires:
       - '-1'
       pragma:
@@ -1206,7 +1225,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 05acabb3-8633-4bd5-8ddb-d70bd33eadce
+      - 31709885-d83a-406d-b321-07052f7027fb
     status:
       code: 200
       message: OK
@@ -1224,36 +1243,39 @@ interactions:
       ParameterSetName:
       - --name -g --type
       User-Agent:
-      - python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) AZURECLI/2.45.0
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - python/3.8.10 (Windows-10-10.0.19045-SP0) AZURECLI/2.55.0 (PIP)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055","name":"eeeedb43-ee84-47d3-9010-33895950c055","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"West
-        US","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-Approved"},"groupIds":["namespace"]}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775","name":"de08f04f-39c3-4813-8fd3-265649529775","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"westus","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-Approved"},"groupIds":["namespace"]}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '758'
+      - '757'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:52:32 GMT
+      - Thu, 14 Dec 2023 09:32:15 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - f06e2027-433e-4515-baae-8568ef9977bd
+      x-ms-messaging-routing-id:
+      - WESTUS|WESTUS|G2|2023-12-14T09:32:15
     status:
       code: 200
       message: OK
@@ -1271,32 +1293,27 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type
       User-Agent:
-      - python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) AZURECLI/2.45.0
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - python/3.8.10 (Windows-10-10.0.19045-SP0) AZURECLI/2.55.0 (PIP)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055","name":"eeeedb43-ee84-47d3-9010-33895950c055","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"West
-        US","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-Approved"},"groupIds":["namespace"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775","name":"de08f04f-39c3-4813-8fd3-265649529775","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"westus","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-Approved"},"groupIds":["namespace"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '746'
+      - '745'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:52:32 GMT
+      - Thu, 14 Dec 2023 09:32:17 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1305,6 +1322,10 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 401ff647-6e89-4818-9fc5-7681ee60a3c4
+      x-ms-messaging-routing-id:
+      - WESTUS|WESTUS|G3|2023-12-14T09:32:17
     status:
       code: 200
       message: OK
@@ -1322,32 +1343,27 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type
       User-Agent:
-      - python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) AZURECLI/2.45.0
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - python/3.8.10 (Windows-10-10.0.19045-SP0) AZURECLI/2.55.0 (PIP)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055","name":"eeeedb43-ee84-47d3-9010-33895950c055","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"West
-        US","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-Approved"},"groupIds":["namespace"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775","name":"de08f04f-39c3-4813-8fd3-265649529775","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"westus","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-Approved"},"groupIds":["namespace"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '746'
+      - '745'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:52:32 GMT
+      - Thu, 14 Dec 2023 09:32:19 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1356,13 +1372,17 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 6d440ab7-2f99-4014-882e-a3e2b8632da4
+      x-ms-messaging-routing-id:
+      - WESTUS|WESTUS|G0|2023-12-14T09:32:20
     status:
       code: 200
       message: OK
 - request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055",
-      "name": "eeeedb43-ee84-47d3-9010-33895950c055", "type": "Microsoft.EventHub/Namespaces/PrivateEndpointConnections",
-      "location": "West US", "properties": {"provisioningState": "Succeeded", "privateEndpoint":
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775",
+      "name": "de08f04f-39c3-4813-8fd3-265649529775", "type": "Microsoft.EventHub/Namespaces/PrivateEndpointConnections",
+      "location": "westus", "properties": {"provisioningState": "Succeeded", "privateEndpoint":
       {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},
       "privateLinkServiceConnectionState": {"status": "Rejected", "description": null},
       "groupIds": ["namespace"]}}'
@@ -1376,44 +1396,43 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '755'
+      - '754'
       Content-Type:
       - application/json
       ParameterSetName:
       - --name -g --resource-name --type
       User-Agent:
-      - python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) AZURECLI/2.45.0
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - python/3.8.10 (Windows-10-10.0.19045-SP0) AZURECLI/2.55.0 (PIP)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055","name":"eeeedb43-ee84-47d3-9010-33895950c055","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"West
-        US","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Rejected","description":""},"groupIds":["namespace"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775","name":"de08f04f-39c3-4813-8fd3-265649529775","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"westus","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Rejected"},"groupIds":["namespace"]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055/operationStatus/eeeedb43-ee84-47d3-9010-33895950c055?api-version=2021-06-01-preview&operationType=Update
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775/operationStatus/de08f04f-39c3-4813-8fd3-265649529775?api-version=2021-06-01-preview&operationType=Update
       cache-control:
       - no-cache
       content-length:
-      - '732'
+      - '714'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:52:33 GMT
+      - Thu, 14 Dec 2023 09:32:22 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 046c29b5-c8c8-496a-9e80-ddd3c8c8cf21
+      x-ms-messaging-routing-id:
+      - WESTUS|WESTUS|G4|2023-12-14T09:32:22
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -1433,32 +1452,27 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type
       User-Agent:
-      - python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) AZURECLI/2.45.0
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - python/3.8.10 (Windows-10-10.0.19045-SP0) AZURECLI/2.55.0 (PIP)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055","name":"eeeedb43-ee84-47d3-9010-33895950c055","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"West
-        US","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Rejected","description":""},"groupIds":["namespace"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775","name":"de08f04f-39c3-4813-8fd3-265649529775","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"westus","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Rejected"},"groupIds":["namespace"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '732'
+      - '714'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:52:43 GMT
+      - Thu, 14 Dec 2023 09:32:33 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1467,6 +1481,10 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - a1936b80-f28a-4655-9346-81af7ffaa811
+      x-ms-messaging-routing-id:
+      - WESTUS|WESTUS|G2|2023-12-14T09:32:34
     status:
       code: 200
       message: OK
@@ -1484,32 +1502,27 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type
       User-Agent:
-      - python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) AZURECLI/2.45.0
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - python/3.8.10 (Windows-10-10.0.19045-SP0) AZURECLI/2.55.0 (PIP)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055","name":"eeeedb43-ee84-47d3-9010-33895950c055","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"West
-        US","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Rejected","description":""},"groupIds":["namespace"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775","name":"de08f04f-39c3-4813-8fd3-265649529775","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"westus","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Rejected"},"groupIds":["namespace"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '732'
+      - '714'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:52:53 GMT
+      - Thu, 14 Dec 2023 09:32:46 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1518,6 +1531,10 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 7a5212d1-04f9-4769-9f8b-55d752c7cec0
+      x-ms-messaging-routing-id:
+      - WESTUS|WESTUS|G1|2023-12-14T09:32:46
     status:
       code: 200
       message: OK
@@ -1535,32 +1552,27 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type
       User-Agent:
-      - python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) AZURECLI/2.45.0
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - python/3.8.10 (Windows-10-10.0.19045-SP0) AZURECLI/2.55.0 (PIP)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055","name":"eeeedb43-ee84-47d3-9010-33895950c055","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"West
-        US","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Rejected","description":""},"groupIds":["namespace"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775","name":"de08f04f-39c3-4813-8fd3-265649529775","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"westus","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Rejected"},"groupIds":["namespace"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '732'
+      - '715'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 09:53:04 GMT
+      - Thu, 14 Dec 2023 09:32:58 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1569,57 +1581,10 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint-connection reject
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name -g --resource-name --type
-      User-Agent:
-      - python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) AZURECLI/2.45.0
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055?api-version=2021-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055","name":"eeeedb43-ee84-47d3-9010-33895950c055","type":"Microsoft.EventHub/Namespaces/PrivateEndpointConnections","location":"West
-        US","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000004"},"privateLinkServiceConnectionState":{"status":"Rejected","description":""},"groupIds":["namespace"]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '733'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 09:53:15 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
+      x-ms-messaging-activity-id:
+      - d400c223-7acf-4b5b-acc1-43f2416119fd
+      x-ms-messaging-routing-id:
+      - WESTUS|WESTUS|G3|2023-12-14T09:32:58
     status:
       code: 200
       message: OK
@@ -1639,37 +1604,37 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --type -y
       User-Agent:
-      - python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) AZURECLI/2.45.0
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - python/3.8.10 (Windows-10-10.0.19045-SP0) AZURECLI/2.55.0 (PIP)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775?api-version=2021-06-01-preview
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/eeeedb43-ee84-47d3-9010-33895950c055/operationStatus/eeeedb43-ee84-47d3-9010-33895950c055?api-version=2021-06-01-preview&operationType=Delete
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_private_endpoint_connection_eventhub000001/providers/Microsoft.EventHub/namespaces/cli-test-resource-000006/privateEndpointConnections/de08f04f-39c3-4813-8fd3-265649529775/operationStatus/de08f04f-39c3-4813-8fd3-265649529775?api-version=2021-06-01-preview&operationType=Delete
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 08 Feb 2023 09:53:15 GMT
+      - Thu, 14 Dec 2023 09:33:00 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 00000001-0000-0000-0002-000000007892
+      x-ms-messaging-routing-id:
+      - WESTUS|WESTUS|G2|2023-12-14T09:33:00
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
     status:
       code: 202
       message: Accepted

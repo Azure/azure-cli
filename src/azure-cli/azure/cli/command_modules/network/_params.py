@@ -60,7 +60,6 @@ def load_arguments(self, _):
         options_list=['--zone', '-z'],
         nargs='+',
         help='Space-separated list of availability zones into which to provision the resource.',
-        choices=['1', '2', '3']
     )
     edge_zone = CLIArgumentType(help='The name of edge zone.')
 
@@ -464,7 +463,7 @@ def load_arguments(self, _):
     with self.argument_context('network lb create') as c:
         c.argument('frontend_ip_zone', zone_type, options_list=['--frontend-ip-zone'], help='used to create internal facing Load balancer')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
-        c.argument('sku', help='Load balancer SKU', arg_type=get_enum_type(['Basic', 'Gateway', 'Standard'], default='basic'))
+        c.argument('sku', help='Load balancer SKU', arg_type=get_enum_type(['Basic', 'Gateway', 'Standard'], default='Standard'))
         c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network lb create', arg_group='Public IP') as c:
@@ -624,7 +623,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network public-ip create') as c:
         c.argument('name', completer=None)
-        c.argument('sku', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard"]))
+        c.argument('sku', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard"]), default="Standard")
         c.argument('tier', help='Tier of a public IP address SKU and Global tier is only supported for standard SKU public IP addresses', arg_type=get_enum_type(["Regional", "Global"]))
         c.ignore('dns_name_type')
         c.argument('edge_zone', edge_zone)

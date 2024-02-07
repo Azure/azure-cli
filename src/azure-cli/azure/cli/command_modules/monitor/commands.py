@@ -9,11 +9,11 @@ from azure.cli.core.commands import CliCommandType
 def load_command_table(self, _):
     from ._client_factory import (
         cf_alert_rules, cf_autoscale,
-        cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
+        cf_action_groups, cf_event_categories,
         cf_metric_alerts, cf_log_analytics_workspace, cf_log_analytics_linked_storage)
     from .transformers import (action_group_list_table)
-    from .validators import (process_autoscale_create_namespace,
-                             process_action_group_detail_for_creation)
+    from .validators import (process_autoscale_create_namespace)
+
     from ._exception_handler import exception_handler
 
     monitor_custom = CliCommandType(
@@ -36,18 +36,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.monitor.operations#EventCategoriesOperations.{}',
         client_factory=cf_event_categories,
         operation_group='event_categories',
-        exception_handler=exception_handler)
-
-    activity_log_alerts_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#ActivityLogAlertsOperations.{}',
-        client_factory=cf_activity_log_alerts,
-        operation_group='activity_log_alerts',
-        exception_handler=exception_handler)
-
-    activity_log_alerts_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.monitor.operations.activity_log_alerts#{}',
-        client_factory=cf_activity_log_alerts,
-        operation_group='activity_log_alerts',
         exception_handler=exception_handler)
 
     autoscale_sdk = CliCommandType(
@@ -90,40 +78,45 @@ def load_command_table(self, _):
         exception_handler=exception_handler)
 
     with self.command_group('monitor action-group', action_group_sdk, custom_command_type=action_group_custom) as g:
-        g.show_command('show', 'get', table_transformer=action_group_list_table)
-        g.command('create', 'create_or_update', table_transformer=action_group_list_table,
-                  validator=process_action_group_detail_for_creation)
-        g.command('delete', 'delete')
-        g.custom_command('enable-receiver', 'enable_receiver', table_transformer=action_group_list_table)
-        g.custom_command('list', 'list_action_groups', table_transformer=action_group_list_table)
-        g.generic_update_command('update', custom_func_name='update_action_groups', setter_arg_name='action_group',
-                                 table_transformer=action_group_list_table)
-        g.custom_command('test-notifications create', 'post_notifications', table_transformer=action_group_list_table,
-                         supports_no_wait=True)
         g.wait_command('wait')
 
-    with self.command_group('monitor activity-log', activity_log_sdk) as g:
-        g.custom_command('list', 'list_activity_log', client_factory=cf_activity_log)
-        g.command('list-categories', 'list')
+    from .operations.action_groups import ActionGroupCreate, ActionGroupUpdate, ActionGroupTestNotificationCreate
+    from .aaz.latest.monitor.action_group import Show, List, EnableReceiver
+    self.command_table['monitor action-group create'] = ActionGroupCreate(loader=self,
+                                                                          table_transformer=action_group_list_table)
+    self.command_table['monitor action-group show'] = Show(loader=self,
+                                                           table_transformer=action_group_list_table)
+    self.command_table['monitor action-group list'] = List(loader=self,
+                                                           table_transformer=action_group_list_table)
+    self.command_table['monitor action-group update'] = ActionGroupUpdate(loader=self,
+                                                                          table_transformer=action_group_list_table)
+    self.command_table['monitor action-group enable-receiver'] = \
+        EnableReceiver(loader=self, table_transformer=action_group_list_table)
 
-    with self.command_group('monitor activity-log alert', activity_log_alerts_sdk,
-                            custom_command_type=activity_log_alerts_custom) as g:
-        g.custom_command('list', 'list_activity_logs_alert')
-        g.custom_command('create', 'create')
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='update', setter_arg_name='activity_log_alert')
-        g.custom_command('action-group add', 'add_action_group')
-        g.custom_command('action-group remove', 'remove_action_group')
-        g.custom_command('scope add', 'add_scope')
-        g.custom_command('scope remove', 'remove_scope')
+    self.command_table['monitor action-group test-notifications create'] = \
+        ActionGroupTestNotificationCreate(loader=self, table_transformer=action_group_list_table)
+
+    with self.command_group('monitor activity-log', activity_log_sdk) as g:
+        g.custom_command('list', 'list_activity_log')
+
+    from .operations.activity_log_alerts import ActivityLogAlertCreate, ActivityLogAlertUpdate, \
+        ActivityLogAlertActionGroupAdd, ActivityLogAlertActionGroupRemove, \
+        ActivityLogAlertScopeAdd, ActivityLogAlertScopeRemove
+    self.command_table['monitor activity-log alert create'] = ActivityLogAlertCreate(loader=self)
+    self.command_table['monitor activity-log alert update'] = ActivityLogAlertUpdate(loader=self)
+    self.command_table['monitor activity-log alert action-group add'] = ActivityLogAlertActionGroupAdd(loader=self)
+    self.command_table['monitor activity-log alert action-group remove'] = \
+        ActivityLogAlertActionGroupRemove(loader=self)
+    self.command_table['monitor activity-log alert scope add'] = ActivityLogAlertScopeAdd(loader=self)
+    self.command_table['monitor activity-log alert scope remove'] = ActivityLogAlertScopeRemove(loader=self)
 
     with self.command_group('monitor autoscale', autoscale_sdk, custom_command_type=autoscale_custom) as g:
         g.custom_command('create', 'autoscale_create', validator=process_autoscale_create_namespace)
-        g.generic_update_command('update', custom_func_name='autoscale_update', custom_func_type=autoscale_custom)
-        g.command('delete', 'delete')
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_resource_group')
+        # g.generic_update_command('update', custom_func_name='autoscale_update', custom_func_type=autoscale_custom)
+        from .operations.autoscale_settings import AutoScaleShow, AutoScaleList, AutoScaleUpdate
+        self.command_table['monitor autoscale show'] = AutoScaleShow(loader=self)
+        self.command_table['monitor autoscale list'] = AutoScaleList(loader=self)
+        self.command_table['monitor autoscale update'] = AutoScaleUpdate(loader=self)
 
     with self.command_group('monitor autoscale profile', autoscale_sdk, custom_command_type=autoscale_custom) as g:
         g.custom_command('create', 'autoscale_profile_create')
@@ -156,20 +149,17 @@ def load_command_table(self, _):
         g.custom_command('list-definitions', 'list_definations', command_type=monitor_custom, table_transformer=metrics_definitions_table)
         g.command('list-namespaces', 'list_namespaces', is_preview=True, command_type=monitor_custom, table_transformer=metrics_namespaces_table)
 
-    with self.command_group('monitor metrics alert', metric_alert_sdk, custom_command_type=alert_custom,
-                            client_factory=cf_metric_alerts) as g:
-        g.custom_command('create', 'create_metric_alert')
-        g.command('delete', 'delete')
-        g.custom_command('list', 'list_metric_alerts', custom_command_type=alert_custom)
-        g.show_command('show', 'get')
-        g.generic_update_command('update', custom_func_name='update_metric_alert', custom_func_type=alert_custom)
+    with self.command_group("monitor metrics alert") as g:
+        from .operations.metric_alert import MetricsAlertUpdate
+        self.command_table["monitor metrics alert update"] = MetricsAlertUpdate(loader=self)
+        g.custom_command("create", "create_metric_alert", custom_command_type=alert_custom)
 
-    with self.command_group('monitor metrics alert dimension', metric_alert_sdk, custom_command_type=alert_custom) as g:
+    with self.command_group('monitor metrics alert dimension') as g:
         from .validators import validate_metrics_alert_dimension
         g.custom_command('create', 'create_metric_alert_dimension', custom_command_type=alert_custom,
                          validator=validate_metrics_alert_dimension, is_preview=True)
 
-    with self.command_group('monitor metrics alert condition', metric_alert_sdk, custom_command_type=alert_custom) as g:
+    with self.command_group('monitor metrics alert condition') as g:
         from .validators import validate_metrics_alert_condition
         g.custom_command('create', 'create_metric_alert_condition', custom_command_type=alert_custom,
                          validator=validate_metrics_alert_condition, is_preview=True)
@@ -177,17 +167,19 @@ def load_command_table(self, _):
     with self.command_group('monitor log-analytics workspace', custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('recover', 'recover_log_analytics_workspace', supports_no_wait=True)
 
-    with self.command_group('monitor log-analytics workspace table', custom_command_type=log_analytics_workspace_custom,
-                            is_preview=True) as g:
+    with self.command_group('monitor log-analytics workspace table', custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_table', supports_no_wait=True)
         g.custom_command('update', 'update_log_analytics_workspace_table', supports_no_wait=True)
 
     with self.command_group('monitor log-analytics workspace table search-job',
-                            custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
+                            custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_table_search_job', supports_no_wait=True)
+        from .operations.log_analytics_workspace import WorkspaceTableSearchJobCancel
+        self.command_table['monitor log-analytics workspace table search-job cancel'] = \
+            WorkspaceTableSearchJobCancel(loader=self)
 
     with self.command_group('monitor log-analytics workspace table restore',
-                            custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
+                            custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_table_restore', supports_no_wait=True)
 
     from .operations.log_analytics_workspace import WorkspaceDataExportCreate, WorkspaceDataExportUpdate
