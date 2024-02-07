@@ -35,7 +35,9 @@ def _get_extension_command_tree(cli_ctx):
             logger.info("Request failed for extension command tree: %s", str(ex))
             return None
         if response.status_code == 200:
-            EXT_CMD_TREE.data = response.json()
+            # Manually decode the response content to remove BOM if present
+            content = response.content.decode('utf-8-sig')
+            EXT_CMD_TREE.data = json.loads(content)
             EXT_CMD_TREE.save_with_retry()
         else:
             logger.info("Error when retrieving extension command tree. Response code: %s", response.status_code)
