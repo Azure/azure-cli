@@ -126,6 +126,8 @@ os_windows = 'Windows'
 os_linux = 'Linux'
 password_offset = 33
 password_length = 15
+enhanced_policy_type = "v2"
+standard_policy_type = "v1"
 # pylint: disable=too-many-function-args
 
 
@@ -1004,9 +1006,9 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     vm_item_properties.policy_id = policy.id
     vm_item_properties.source_resource_id = item.properties.source_resource_id
     vm_item = ProtectedItemResource(properties=vm_item_properties)
+    existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
+                                            item.properties.policy_name)
     if is_critical_operation:
-        existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
-                                             item.properties.policy_name)
         if cust_help.is_retention_duration_decreased(existing_policy, policy, "AzureIaasVM"):
             # update the payload with critical operation and add auxiliary header for cross tenant case
             if tenant_id is not None:
@@ -1014,6 +1016,14 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
                                                  aux_tenants=[tenant_id]).protected_items
             vm_item.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
                 cmd.cli_ctx, resource_group_name, vault_name, "updateProtection")]
+
+    # Raise warning for standard->enhanced policy
+    existing_policy_type = enhanced_policy_type if existing_policy.properties.policy_type.lower() == "v2" else standard_policy_type
+    new_policy_type = enhanced_policy_type if policy.properties.policy_type.lower() == "v2" else standard_policy_type
+    if (new_policy_type == enhanced_policy_type and existing_policy_type == existing_policy_type):
+        logger.warning('Upgrading to enhanced policy can incur additional charges. Once upgraded to the enhanced '
+                       'policy, it is not possible to revert back to the standard policy.')
+
     # Update policy
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, vm_item, cls=cust_help.get_pipeline_response)
