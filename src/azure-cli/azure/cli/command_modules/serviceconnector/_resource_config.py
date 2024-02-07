@@ -750,7 +750,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.StorageBlob: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageQueue: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageFile: [AUTH_TYPE.SecretAuto],
-        RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto],
+        RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
 
         RESOURCE.KeyVault: [AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.AppConfig: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
@@ -779,7 +779,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.StorageBlob: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageQueue: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageFile: [AUTH_TYPE.SecretAuto],
-        RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto],
+        RESOURCE.StorageTable: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
 
         RESOURCE.KeyVault: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -808,7 +808,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.StorageBlob: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageQueue: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageFile: [AUTH_TYPE.SecretAuto],
-        RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto],
+        RESOURCE.StorageTable: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
 
         RESOURCE.KeyVault: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -837,7 +837,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.StorageBlob: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageQueue: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageFile: [AUTH_TYPE.SecretAuto],
-        RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto],
+        RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
 
         RESOURCE.KeyVault: [AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.AppConfig: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
@@ -866,7 +866,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.StorageBlob: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageQueue: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageFile: [AUTH_TYPE.SecretAuto],
-        RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto],
+        RESOURCE.StorageTable: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
 
         RESOURCE.KeyVault: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -1132,3 +1132,10 @@ SUPPORTED_CLIENT_TYPE[RESOURCE.KubernetesCluster] = SUPPORTED_CLIENT_TYPE[RESOUR
 SUPPORTED_CLIENT_TYPE[RESOURCE.ContainerApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.Local] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.FunctionApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
+
+
+# The dict defines the options for opt-out
+class OPT_OUT_OPTION(Enum):
+    PUBLIC_NETWORK = 'publicnetwork'
+    CONFIGURATION_INFO = 'configinfo'
+    # AUTHENTICATION = 'auth'

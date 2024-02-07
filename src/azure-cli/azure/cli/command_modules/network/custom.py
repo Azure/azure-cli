@@ -147,7 +147,7 @@ subnet_disable_ple_msg = ("`--disable-private-endpoint-network-policies` will be
 
 subnet_disable_pls_msg = ("`--disable-private-link-service-network-policies` will be deprecated in the future, if you "
                           "wanna disable network policy for private link service, please use "
-                          "`----private-link-service-network-policies Disabled` instead.")
+                          "`--private-link-service-network-policies Disabled` instead.")
 
 
 # region Utility methods
@@ -184,6 +184,14 @@ def _get_default_value(balancer, property_name, option_name, return_name):
 # pylint: disable=too-many-statements
 def _is_v2_sku(sku):
     return 'v2' in sku
+
+
+def _add_aux_subscription(aux_subscriptions, added_resource_id):
+    if added_resource_id and is_valid_resource_id(added_resource_id):
+        res_parts = parse_resource_id(added_resource_id)
+        aux_sub = res_parts['subscription']
+        if aux_sub and aux_sub not in aux_subscriptions:
+            aux_subscriptions.append(aux_sub)
 
 
 def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
@@ -3945,6 +3953,13 @@ class PrivateEndpointConnectionUpdate(_PrivateEndpointConnectionUpdate):
 
 
 # region LoadBalancers
+def _get_lb_create_aux_subscriptions(public_ip_address, subnet):
+    aux_subscriptions = []
+    _add_aux_subscription(aux_subscriptions, public_ip_address)
+    _add_aux_subscription(aux_subscriptions, subnet)
+    return aux_subscriptions
+
+
 def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=None, tags=None,
                          backend_pool_name=None, frontend_ip_name='LoadBalancerFrontEnd',
                          private_ip_address=None, public_ip_address=None,
@@ -3960,6 +3975,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         build_load_balancer_resource, build_public_ip_resource, build_vnet_resource)
 
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    aux_subscriptions = _get_lb_create_aux_subscriptions(public_ip_address, subnet)
 
     if public_ip_address is None:
         logger.warning(
@@ -4024,7 +4040,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
 
     # deploy ARM template
     deployment_name = 'lb_deploy_' + random_string(32)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     deployment = Deployment(properties=properties)
@@ -5555,7 +5571,7 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         # add ple/pls arguments
         args_schema.disable_private_endpoint_network_policies = AAZStrArg(
             options=["--disable-private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet.",
+            help="Disable private endpoint network policies on the subnet. Please note that it will be replaced by `--private-endpoint-network-policies` soon.",
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
                 "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
@@ -5564,7 +5580,7 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         )
         args_schema.disable_private_link_service_network_policies = AAZStrArg(
             options=["--disable-private-link-service-network-policies"],
-            help="Disable private link service network policies on the subnet.",
+            help="Disable private link service network policies on the subnet. Please note that it will be replaced by `--private-link-service-network-policies` soon.",
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
                 "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
@@ -5667,7 +5683,7 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         # add ple/pls arguments
         args_schema.disable_private_endpoint_network_policies = AAZStrArg(
             options=["--disable-private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet.",
+            help="Disable private endpoint network policies on the subnet. Please note that it will be replaced by `--private-endpoint-network-policies` soon.",
             nullable=True,
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
@@ -5677,7 +5693,7 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         )
         args_schema.disable_private_link_service_network_policies = AAZStrArg(
             options=["--disable-private-link-service-network-policies"],
-            help="Disable private link service network policies on the subnet.",
+            help="Disable private link service network policies on the subnet. Please note that it will be replaced by `--private-link-service-network-policies` soon.",
             nullable=True,
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
