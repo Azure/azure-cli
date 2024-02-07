@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import json
+import os
 from azure.cli.core.azclierror import BadRequestError
 
 _config = None
@@ -13,11 +14,12 @@ def get_config_json():
     global _config  # pylint:disable=global-statement
     if _config is not None:
         return _config
-    with open("src\\azure-cli\\azure\\cli\\command_modules\\rdbms\\config.json", "r") as f:
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(script_dir, "config.json"), "r") as f:
         try:
             _config = json.load(f)
             return _config
-        except ValueError as _:
+        except ValueError:
             raise BadRequestError("Invalid json file. Make sure that the json file content is properly formatted.")
 
 
@@ -30,7 +32,7 @@ def get_cloud_cluster(cmd, location, subscription_id):
     cloud = get_cloud(cmd)
     try:
         clusters = cloud[location]
-    except:
+    except Exception:
         clusters = None
     if clusters is not None:
         for cluster in clusters:
