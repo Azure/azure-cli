@@ -470,6 +470,7 @@ stages:
         displayName: 'Run live test'
         inputs:
           azureSubscription: $(AZURE_CLI_LIVE_TEST_CONNECTED_SERVICE)
+          scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
             cd ..
@@ -1045,6 +1046,7 @@ stages:
         displayName: 'Run live test on Macos'
         inputs:
           azureSubscription: $(AZURE_CLI_LIVE_TEST_CONNECTED_SERVICE)
+          scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
             cd ..
@@ -1620,6 +1622,7 @@ stages:
         displayName: 'Run live test on Windows'
         inputs:
           azureSubscription: $(AZURE_CLI_LIVE_TEST_CONNECTED_SERVICE)
+          scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
             cd ..
@@ -1773,6 +1776,7 @@ stages:
         displayName: 'Send live test email'
         inputs:
           azureSubscription: $(AZURE_CLI_LIVE_TEST_CONNECTED_SERVICE)
+          scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
             set -o errexit
@@ -1831,6 +1835,7 @@ stages:
         displayName: 'Clean resource'
         inputs:
           azureSubscription: $(AZURE_CLI_LIVE_TEST_CONNECTED_SERVICE)
+          scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
             set -o errexit
