@@ -216,17 +216,17 @@ def ensure_default_log_analytics_workspace_for_monitoring(
             workspace_region, "USGV"
         )
     elif cloud_name.lower() == "usnat":
-        workspace_region = AzureUSNatLocationToOmsRegionCodeMap.get(
+        workspace_region = AzureUSNatRegionToOmsRegionMap.get(
             rg_location, "usnatwest"
         )
-        workspace_region_code = AzureUSNatRegionToOmsRegionMap.get(
+        workspace_region_code = AzureUSNatLocationToOmsRegionCodeMap.get(
             workspace_region, "USNW"
         )
     elif cloud_name.lower() == "ussec":
-        workspace_region = AzureUSSecLocationToOmsRegionCodeMap.get(
+        workspace_region = AzureUSSecRegionToOmsRegionMap.get(
             rg_location, "ussecwest"
         )
-        workspace_region_code = AzureUSSecRegionToOmsRegionMap.get(
+        workspace_region_code = AzureUSSecLocationToOmsRegionCodeMap.get(
             workspace_region, "USSW"
         )
 
