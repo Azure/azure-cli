@@ -106,17 +106,20 @@ jobs:
   - template: ../../.azure-pipelines/templates/azdev_setup.yml
     parameters:
       CLIExtensionRepoPath: ./azure-cli-extensions
-  - bash: |
-      set -ev
-
-      source env/bin/activate
-      cd azure-cli-extensions
-
-      az login -u $(CLI_LIVE_TEST_ACCOUNT) -p "$(CLI_LIVE_TEST_PASSWORD)"
-      az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
-
-      python ../scripts/ci/automation_full_test.py "12" "$(Instance_idx)" "latest" "" "True" "extension"
-    displayName: "Rerun tests"
+  - task: AzureCLI@1
+    displayName: 'Rerun tests'
+    inputs:
+      azureSubscription: 'azure-cli-sdk-test-2024'
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -ev
+  
+        source env/bin/activate
+        cd azure-cli-extensions
+  
+        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+  
+        python ../scripts/ci/automation_full_test.py "12" "$(Instance_idx)" "latest" "" "True" "extension"
   - bash: |
       publishErrorModules='false'
       if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules_$(Instance_idx).txt' ]]; then
