@@ -17,7 +17,7 @@ from ._validators import (validate_onedeploy_params, validate_staticsite_link_fu
                           validate_functionapp_on_containerapp_site_config_show,
                           validate_functionapp_on_containerapp_container_settings_delete,
                           validate_functionapp_on_containerapp_update, validate_functionapp_on_flex_plan,
-                          validate_functionapp)
+                          validate_functionapp, validate_is_flex_functionapp)
 
 
 def output_slots_in_table(slots):
@@ -344,12 +344,12 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_app_settings', exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp scale config') as g:
-        g.custom_command('show', 'get_scale_config', exception_handler=ex_handler_factory())
-        g.custom_command('set', 'update_scale_config', exception_handler=ex_handler_factory())
+        g.custom_command('show', 'get_scale_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_command('set', 'update_scale_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
 
     with self.command_group('functionapp scale config always-ready') as g:
-        g.custom_command('delete', 'delete_always_ready_settings', exception_handler=ex_handler_factory())
-        g.custom_command('set', 'update_always_ready_settings', exception_handler=ex_handler_factory())
+        g.custom_command('delete', 'delete_always_ready_settings', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_command('set', 'update_always_ready_settings', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
 
     with self.command_group('functionapp config hostname') as g:
         g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())

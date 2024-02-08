@@ -13,7 +13,7 @@ from knack.log import get_logger
 
 from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError, ResourceNotFoundError)
 from azure.cli.core.commands.parameters import get_subscription_locations
-from azure.cli.core.util import should_disable_connection_verify
+from azure.cli.core.util import should_disable_connection_verify, send_raw_request
 from azure.cli.core.commands.client_factory import get_subscription_id
 
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
@@ -191,6 +191,16 @@ def _rename_server_farm_props(webapp):
     setattr(webapp, 'app_service_plan_id', webapp.server_farm_id)
     del webapp.server_farm_id
     return webapp
+
+
+def get_raw_functionapp(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    site_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
+    response = send_raw_request(cmd.cli_ctx, "GET", request_url)
+    return response.json()
 
 
 def _get_location_from_webapp(client, resource_group_name, webapp):
