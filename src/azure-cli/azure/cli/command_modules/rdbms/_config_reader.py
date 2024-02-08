@@ -32,7 +32,7 @@ def get_cloud_cluster(cmd, location, subscription_id):
     cloud = get_cloud(cmd)
     try:
         clusters = cloud[location]
-    except Exception:
+    except KeyError:
         clusters = None
     if clusters is not None:
         for cluster in clusters:
