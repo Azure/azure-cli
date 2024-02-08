@@ -1549,82 +1549,101 @@ def update_deployment_configs(cmd, resource_group_name, name,
                               deployment_storage_container_name=None, deployment_storage_auth_type=None,
                               deployment_storage_auth_value=None, slot=None):
     
-
-    # NameValuePair = cmd.get_models('NameValuePair')
-    NameValuePair = cmd.get_models('NameValuePair')
-    
-    logger.warning("checking the flex app. Params: deployment_storage_container_name: %s", deployment_storage_container_name)
-    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
-
-    if not is_flex:
-        raise ValidationError("This command is only valid for Azure Functions on the FlexConsumption plan.")
-
-    functionapp_config = get_flex_functionapp_deployment_config(cmd, resource_group_name, name, slot)
-
-    if (functionapp_config is None):
-        functionapp_config = {} #TODO: replace with the model if needed.
-
     logger.warning("deployment_storage_name: %s deployment_storage_container_name: %s", deployment_storage_name, deployment_storage_container_name)
     logger.warning("deployment_storage_auth_type: %s deployment_storage_auth_value: %s", deployment_storage_auth_type, deployment_storage_auth_value)
-
+    
     if (deployment_storage_name == None) != (deployment_storage_container_name == None):
-        raise ValidationError("Please provide both --deployment-storage-name and --deployment-storage-container-name or neither.")
-    
-    client = web_client_factory(cmd.cli_ctx)
-    functionapp = client.web_apps.get(resource_group_name, name)
-    
-    if functionapp is not None:
-        logger.warning("functionapp %s in %s found", functionapp.name, functionapp.location)
-
-    deployment_config_storage_value = None
-    if (deployment_storage_name is not None):
-        logger.warning("Setting deployment_storage_name to %s", deployment_storage_name)
-        deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx, resource_group_name, deployment_storage_name)
-        deployment_storage_container = _get_deployment_storage_container(cmd, resource_group_name, deployment_storage_name, deployment_storage_container_name)
-        deployment_storage_container_name = deployment_storage_container.name
-        deployment_config_storage_value = getattr(deployment_storage.primary_endpoints, 'blob') + deployment_storage_container_name
-    else:
-        deployment_config_storage_value = functionapp_config['storage']['value'] #todo replace with actual model when api version is relesed
+        raise ArgumentUsageError("Please provide both --deployment-storage-name and --deployment-storage-container-name or neither.")
     
     if deployment_storage_auth_type == 'userAssignedIdentity' and not deployment_storage_auth_value:
-        raise ArgumentUsageError(
-            '--deployment-storage-auth-value is required when --deployment-storage-auth-type is set to userAssignedIdentity.'
-        )
+        raise ArgumentUsageError('--deployment-storage-auth-value is required when --deployment-storage-auth-type is set to userAssignedIdentity.')
     
-    # if deployment_storage_auth_type is not provided then use the existing value
-    deployment_storage_auth_type = deployment_storage_auth_type or functionapp_config['storage']['authentication']['type'] #todo replace with actual model when api version is relesed
-
     if deployment_storage_auth_value and deployment_storage_auth_type != 'userAssignedIdentity':
         raise ArgumentUsageError(
             '--deployment-storage-auth-value is only a valid input for --deployment-storage-auth-type set to userAssignedIdentity. '
             'Please try again with --deployment-storage-auth-type set to userAssignedIdentity.'
         )
+
+    # NameValuePair = cmd.get_models('NameValuePair')
+    NameValuePair = cmd.get_models('NameValuePair')
+    Site, FunctionAppConfig, FunctionsDeployment = cmd.get_models('Site', 'FunctionAppConfig', 'FunctionsDeployment')
+    FunctionsDeploymentStorage, StorageType = cmd.get_models('FunctionsDeploymentStorage', 'StorageType')
+    FunctionsDeploymentStorageAuthentication, AuthenticatonType = cmd.get_models('FunctionsDeploymentStorageAuthentication', 'AuthenticatonType')
+    
+    logger.warning("checking the flex app. Params: deployment_storage_container_name: %s", deployment_storage_container_name)
+    is_flex = True # is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)  #TODO: replace with actual fetch when api version is released.
+
+    if not is_flex:
+        raise ValidationError("This command is only valid for Azure Functions on the FlexConsumption plan.")
+    
+    # client = web_client_factory(cmd.cli_ctx) #TODO: replace with actual fetch when api version is released.
+    # functionapp = client.web_apps.get(resource_group_name, name)
+    
+    functionapp = Site(location="", function_app_config=FunctionAppConfig(deployment=FunctionsDeployment())) #TODO: repalce with actual fetch when api version is released.
+    
+    if functionapp is not None:
+        logger.warning("functionapp %s in %s found", functionapp.name, functionapp.location)
         
+    function_app_config = functionapp.function_app_config
+
+    if (function_app_config is None):
+        function_app_config = FunctionAppConfig(deployment=FunctionsDeployment())
+        
+    if (function_app_config.deployment is None):
+        logger.warning("function_app_config.deployment is None")
+        function_app_config.deployment = FunctionsDeployment()
+        logger.warning("Empty deployment object" + type(function_app_config.deployment).__name__)
+    else:
+        logger.warning("function_app_config.deployment is not None")
+        logger.warning("Test test %s", function_app_config.deployment)
+        
+    if (function_app_config.deployment.storage is None):
+        function_app_config.deployment.storage = FunctionsDeploymentStorage()
+        
+    if (function_app_config.deployment.storage.authentication is None):
+        function_app_config.deployment.storage.authentication = FunctionsDeploymentStorageAuthentication()
+
+    # Storage
+    deployment_config_storage_value = None
+    deployment_storage = None
+    if (deployment_storage_name is not None):
+        logger.warning("Setting deployment_storage_name to %s", deployment_storage_name)
+        deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx, resource_group_name, deployment_storage_name)
+        deployment_storage_container = _get_deployment_storage_container(cmd, resource_group_name, deployment_storage_name, deployment_storage_container_name)
+        
+        if deployment_storage_container is None:
+            raise ValidationError("The specified container does not exist in the specified storage account.")
+        
+        deployment_storage_container_name = deployment_storage_container.name
+        deployment_config_storage_value = getattr(deployment_storage.primary_endpoints, 'blob') + deployment_storage_container_name
+        function_app_config.deployment.storage.value = deployment_config_storage_value
+        function_app_config.deployment.storage.type = StorageType.BLOB_CONTAINER
+        
+    # Authentication
+    assign_identities = None
     if deployment_storage_auth_type == 'storageAccountConnectionString':
         logger.warning("deployment_storage_auth_type is %s", deployment_storage_auth_type)
-        deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
+        deployment_storage_conn_string = "test_connectiong_string" #todo: _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
         configs = get_site_configs(cmd, resource_group_name, name, slot)
+        
         if configs.app_settings is None:
             configs.app_settings = []
         configs.app_settings.append(NameValuePair(name='DEPLOYMENT_STORAGE_CONNECTION_STRING',
                                                         value=deployment_storage_conn_string))
         update_flex_functionapp_configuration(cmd, resource_group_name, name, configs)
-        deployment_storage_auth_value = 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
-        logger.warning("deployment_storage_auth_type is %s", deployment_storage_auth_type)
-
-    if (functionapp_config.get('storage') is None):
-        functionapp_config['storage'] = {} #TODO: replace with the model if needed.
-    
-    if (deployment_config_storage_value is None):
-        functionapp_config['storage']['type'] = 'blobContainer'
-        functionapp_config['storage']['value'] = deployment_config_storage_value
         
-    functionapp_config['storage']['authentication'] = {}
-    functionapp_config['storage']['authentication']['type'] = deployment_storage_auth_type
-    functionapp_config['storage']['authentication']['value'] = deployment_storage_auth_value
-
-    if deployment_storage_auth_type == 'systemAssignedIdentity':
+        function_app_config.deployment.storage.authentication.type = AuthenticatonType.STORAGE_ACCOUNT_CONNECTION_STRING
+        logger.warning("deployment_storage_auth_type is %s", deployment_storage_auth_type)
+    elif deployment_storage_auth_type == 'systemAssignedIdentity':
         assign_identities = ['[system]']
+        function_app_config.deployment.storage.authentication.type = AuthenticatonType.SYSTEM_ASSIGNED_IDENTITY
+        function_app_config.deployment.storage.authentication.value = None
+    elif deployment_storage_auth_type == 'userAssignedIdentity':
+        function_app_config.deployment.storage.authentication.type = AuthenticatonType.USER_ASSIGNED_IDENTITY
+        function_app_config.deployment.storage.authentication.value = deployment_storage_auth_value
+    else:
+        raise ValidationError("Invalid value for --deployment-storage-auth-type. Please try again with a valid value.")
+        
 
     if deployment_storage_auth_type != 'storageAccountConnectionString' and assign_identities is not None:
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,
@@ -1634,7 +1653,7 @@ def update_deployment_configs(cmd, resource_group_name, name,
     if deployment_storage_auth_type == 'systemAssignedIdentity':
         _assign_deployment_storage_managed_identity_role(cmd.cli_ctx, deployment_storage, functionapp.identity.principal_id)
         
-    update_flex_functionapp_functions_configuration(cmd, resource_group_name, name, functionapp_config)
+    functionapp.function_app_config.deployment = function_app_config.deployment
 
     return functionapp
 
@@ -4088,7 +4107,7 @@ def update_flex_functionapp_functions_configuration(cmd, resource_group_name, na
     # implementation will be added after the SDK. 
     return
 
-def get_flex_functionapp_deployment_config(cmd, resource_group_name, name, configs):
+def get_flex_function_app_config(cmd, resource_group_name, name, configs):
     # implementation will be added after the SDK. 
     return
 
