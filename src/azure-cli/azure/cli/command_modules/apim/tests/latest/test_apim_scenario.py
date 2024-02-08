@@ -193,6 +193,11 @@ class ApimScenarioTest(ScenarioTest):
             self.check('serviceUrl', '{service_url}')
         ])
 
+        # export api
+        self.cmd(
+            'apim api export -g "{rg}" --service-name "{service_name}" --api-id "{api_id2}" --format "OpenApiJsonUrl"',
+            checks=[self.check('name', "{api_id2}")])
+
         # update api
         self.cmd(
             'apim api update -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --description "{description}" --protocols {protocol} --subscription-key-header-name "{subscription_key_header_name}" --subscription-key-query-param-name "{subscription_key_query_param_name}"',
