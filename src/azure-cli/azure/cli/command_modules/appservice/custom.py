@@ -5071,7 +5071,38 @@ def list_flexconsumption_locations(cmd):
         },
         {
             "name": "northeurope"
-        }
+        },
+        {
+            "name": "eastasia"
+        },
+        {
+            "name": "centralus"
+        },
+        {
+            "name": "uksouth"
+        },
+        {
+            "name": "eastus2"
+        },
+        {
+            "name": "australiaeast"
+        },
+        {
+            "name": "westus3"
+        },
+        {
+            "name": "southcentralus"
+        },
+        {
+            "name": "swedencentral"
+        },
+        {
+            "name": "southeastasia"
+        },
+        {
+            "name": "northcentralus(stage)"
+        },
+
     ]
 
 
