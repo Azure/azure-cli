@@ -579,7 +579,7 @@ def apim_api_export(client, resource_group_name, service_name, api_id, format, f
     try:
         exportedResults = requests.get(link, timeout=30)
         if not exportedResults.ok:
-            logger.warning(f"Got bad status from APIManagement during API Export: {exportedResults.status_code}")
+            logger.warning("Got bad status from APIManagement during API Export:%s, {exportedResults.status_code}")
     except requests.exceptions.ReadTimeout:
         logger.warning("Timed out while exporting api from APIManagement.")
 
@@ -598,7 +598,7 @@ def apim_api_export(client, resource_group_name, service_name, api_id, format, f
                 logger.warning("Content is not in JSON, YAML, or XML format.")
 
     # Write results to a file
-    logger.warning(f"Writing results to file: {full_path}")
+    logger.warning("Writing results to file: %s", full_path)
     try:
         with open(full_path, 'w') as f:
             if file_extension == '.json':
@@ -613,10 +613,10 @@ def apim_api_export(client, resource_group_name, service_name, api_id, format, f
             else:
                 f.write(str(exportedResultContent))
     except IOError as e:
-        logger.warning(f"Error writing exported API to file.: {e}")
+        logger.warning("Error writing exported API to file.: %s", e)
 
     # Write the response to a file
-    return logger.warning(f"APIMExport results written to file: {full_path}")
+    return logger.warning("APIMExport results written to file: %s", full_path)
 
 
 def api_export_result_to_dict(api_export_result):
