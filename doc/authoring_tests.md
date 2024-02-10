@@ -84,7 +84,7 @@ Here are some issues that may occur when authoring tests that you should be awar
   2. check your parameter aliasing (particularly if it complains that a required parameter is missing that you know is there)
  If your command makes use of concurrency, consider using unit tests, LiveScenarioTest, or, if practical, forcing the test to operate on a single thread for recording and playback.
 * **Paths**: When including paths in your tests as parameter values, always wrap them in double quotes. While this isn't necessary when running from the command line (depending on your shell environment), it will likely cause issues with the test framework.
-* **Defaults**: Ensure you don't have any defaults configured with `az configure` prior to running tests. Defaults can interfere with the expected test flow.
+* **Defaults**: Ensure you don't have any defaults configured with `az config` prior to running tests. Defaults can interfere with the expected test flow.
 
 ## Sample Scenario Tests
 
