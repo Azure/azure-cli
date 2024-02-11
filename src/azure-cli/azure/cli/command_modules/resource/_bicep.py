@@ -180,7 +180,7 @@ def is_bicepparam_file(file_path):
 def get_bicep_available_release_tags():
     try:
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
-        response = requests.get("https://aka.ms/BicepReleases", verify=_requests_verify)
+        response = requests.get("https://downloads.bicep-df.azure.com/releases", verify=_requests_verify)
         return [release["tag_name"] for release in response.json()]
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to retrieve available Bicep versions: {err}.")
@@ -189,7 +189,7 @@ def get_bicep_available_release_tags():
 def get_bicep_latest_release_tag():
     try:
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
-        response = requests.get("https://aka.ms/BicepLatestRelease", verify=_requests_verify)
+        response = requests.get("https://downloads.bicep-df.azure.com/releases/latest", verify=_requests_verify)
         response.raise_for_status()
         return response.json()["tag_name"]
     except requests.RequestException as err:
@@ -269,7 +269,7 @@ def _get_bicep_installed_version(bicep_executable_path):
 
 
 def _get_bicep_download_url(system, release_tag, target_platform=None):
-    download_url = f"https://downloads.bicep.azure.com/{release_tag}/{{}}"
+    download_url = f"https://downloads.bicep-df.azure.com/{release_tag}/{{}}"
 
     if target_platform:
         executable_name = "bicep-win-x64.exe" if target_platform == "win-x64" else f"bicep-{target_platform}"
