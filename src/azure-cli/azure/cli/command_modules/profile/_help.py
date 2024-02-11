@@ -88,6 +88,9 @@ examples:
     - name: Get an access token to use with MS Graph API
       text: >
         az account get-access-token --resource-type ms-graph
+    - name: Show the decoded claims of the token
+      text: >
+        az account get-access-token --show-claims
 """
 
 helps['self-test'] = """

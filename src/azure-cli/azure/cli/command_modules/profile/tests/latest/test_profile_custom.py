@@ -87,6 +87,22 @@ class ProfileCommandTest(unittest.TestCase):
         self.assertEqual(result, expected_result)
         get_raw_token_mock.assert_called_with(mock.ANY, None, None, None, tenant_id)
 
+        # test get token with decoded claims
+        test_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20vIiwibmFtZSI6IlRlc3QgVG9rZW4ifQ.redacted"
+        get_raw_token_mock.return_value = (('bearer', test_token, token_entry), None, 'tenant123')
+        result = get_access_token(cmd, show_claims=True)
+        expected_result = {
+            'tokenType': 'bearer',
+            'accessToken': test_token,
+            'expires_on': timestamp,
+            'expiresOn': datetime_local,
+            'tenant': 'tenant123',
+            'claims': {'aud': 'https://graph.microsoft.com/', 'name': 'Test Token'}
+        }
+
+        self.assertEqual(result, expected_result)
+        get_raw_token_mock.assert_called_with(mock.ANY, None, None, None, None)
+
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
     def test_get_login(self, profile_mock):
         invoked = []
