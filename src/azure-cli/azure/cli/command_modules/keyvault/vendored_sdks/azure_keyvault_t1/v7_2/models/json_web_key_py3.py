@@ -8,8 +8,7 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
-# pylint: skip-file
-# flake8: noqa
+
 from msrest.serialization import Model
 
 
@@ -18,9 +17,10 @@ class JsonWebKey(Model):
 
     :param kid: Key identifier.
     :type kid: str
-    :param kty: JsonWebKey key type (kty). Possible values include: 'EC',
-     'EC-HSM', 'RSA', 'RSA-HSM', 'oct'
-    :type kty: str or ~azure.keyvault.v2016_10_01.models.JsonWebKeyType
+    :param kty: JsonWebKey Key Type (kty), as defined in
+     https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40.
+     Possible values include: 'EC', 'EC-HSM', 'RSA', 'RSA-HSM', 'oct'
+    :type kty: str or ~azure.keyvault.v7_0.models.JsonWebKeyType
     :param key_ops:
     :type key_ops: list[str]
     :param n: RSA modulus.
@@ -45,8 +45,8 @@ class JsonWebKey(Model):
     :type t: bytes
     :param crv: Elliptic curve name. For valid values, see
      JsonWebKeyCurveName. Possible values include: 'P-256', 'P-384', 'P-521',
-     'SECP256K1'
-    :type crv: str or ~azure.keyvault.v2016_10_01.models.JsonWebKeyCurveName
+     'P-256K'
+    :type crv: str or ~azure.keyvault.v7_0.models.JsonWebKeyCurveName
     :param x: X component of an EC public key.
     :type x: bytes
     :param y: Y component of an EC public key.
