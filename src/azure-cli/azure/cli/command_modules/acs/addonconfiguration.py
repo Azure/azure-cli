@@ -166,7 +166,7 @@ AzureFairfaxRegionToOmsRegionMap = {
 # mapping for azure us nat cloud
 AzureUSNatLocationToOmsRegionCodeMap = {
     "usnatwest": "USNW",
-    "usnateast":  "USNE",
+    "usnateast": "USNE",
 }
 
 AzureUSNatRegionToOmsRegionMap = {
@@ -176,8 +176,8 @@ AzureUSNatRegionToOmsRegionMap = {
 
 # mapping for azure us sec cloud
 AzureUSSecLocationToOmsRegionCodeMap = {
-    "usseceast":  "USSE",
-    "ussecwest":  "USSW",
+    "usseceast": "USSE",
+    "ussecwest": "USSW",
 }
 
 AzureUSSecRegionToOmsRegionMap = {
@@ -192,7 +192,7 @@ def ensure_default_log_analytics_workspace_for_monitoring(
 ):
     rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
     cloud_name = cmd.cli_ctx.cloud.name
-    workspace_region_code = "EUS" # default to EUS
+    workspace_region_code = "EUS"
 
     if cloud_name.lower() == "azurecloud":
         workspace_region = AzureCloudRegionToOmsRegionMap.get(
