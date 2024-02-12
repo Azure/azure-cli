@@ -1696,6 +1696,13 @@ def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
     return update_flex_functionapp(cmd, resource_group_name, name, functionapp)
 
 
+def get_runtime_config(cmd, resource_group_name, name):
+    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+
+    return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
+        "runtime", {})
+
+
 def update_always_ready_settings(cmd, resource_group_name, name, settings):
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
 
@@ -4526,8 +4533,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
                                              runtime_version, functions_version, is_linux)
 
-    site_config_dict = matched_runtime.site_config_dict
-    app_settings_dict = matched_runtime.app_settings_dict
+    SiteConfigPropertiesDictionary = cmd.get_models('SiteConfigPropertiesDictionary')
+
+    site_config_dict = matched_runtime.site_config_dict if not flexconsumption_location \
+        else SiteConfigPropertiesDictionary()
+    app_settings_dict = matched_runtime.app_settings_dict if not flexconsumption_location else dict()
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
@@ -4680,6 +4690,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         create_app_insights = True
 
     if flexconsumption_location is not None:
+        site_config.net_framework_version = None
+        functionapp_def.reserved = None
+        functionapp_def.is_xenon = None
         functionapp_def.enable_additional_properties_sending()
         existing_properties = functionapp_def.serialize()["properties"]
         functionapp_def.additional_properties["properties"] = existing_properties
@@ -7586,6 +7599,12 @@ def _get_functionapp_runtime_info(cmd, resource_group, name, slot, is_linux):  #
         if 'name' in app_setting and app_setting['name'] == 'FUNCTIONS_EXTENSION_VERSION':
             functionapp_version = app_setting["value"]
             break
+
+    if is_flex_functionapp(cmd.cli_ctx, resource_group, name):
+        app_runtime_config = get_runtime_config(cmd, resource_group, name)
+        app_runtime = app_runtime_config.get("name", "")
+        app_runtime_version = app_runtime_config.get("version", "")
+        return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, None)
 
     if is_linux:
         app_metadata = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)

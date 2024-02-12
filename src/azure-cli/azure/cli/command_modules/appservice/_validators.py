@@ -140,6 +140,7 @@ def validate_functionapp_on_containerapp_container_settings_delete(cmd, namespac
         raise ValidationError(
             "Invalid command. This is currently not supported for Azure Functions on Azure Container app environments.",
             "Please use the following command instead: az functionapp config appsettings set")
+    validate_functionapp_on_flex_plan(cmd, namespace)
 
 
 def validate_functionapp_on_containerapp_update(cmd, namespace):
