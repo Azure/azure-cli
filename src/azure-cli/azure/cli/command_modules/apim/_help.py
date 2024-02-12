@@ -249,7 +249,7 @@ short-summary: Export an API Management API.
 examples:
   - name: Export an API Management API to a file or returns a response containing a link of the export.
     text: |-
-        az apim api export -g MyResourceGroup --service-name MyApim --api-id MyApi--format OpenApiJson --file-path path
+        az apim api export -g MyResourceGroup --service-name MyApim --api-id MyApi --export-format OpenApiJson --file-path path
 """
 
 helps['apim product api list'] = """

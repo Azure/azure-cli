@@ -516,7 +516,7 @@ def apim_api_import(
         parameters=parameters)
 
 
-def apim_api_export(client, resource_group_name, service_name, api_id, format, file_path=None):
+def apim_api_export(client, resource_group_name, service_name, api_id, export_format, file_path=None):
     """Gets the details of the API specified by its identifier in the format specified """
 
     import json
@@ -538,13 +538,13 @@ def apim_api_export(client, resource_group_name, service_name, api_id, format, f
         "OpenApiJsonUrl": "openapi+json-link",
         "WsdlUrl": "wsdl-link"
     }
-    mappedFormat = format_mapping.get(format)
+    mappedFormat = format_mapping.get(export_format)
 
     # Export the API from APIManagement
     response = client.api_export.get(resource_group_name, service_name, api_id, mappedFormat, True)
 
     # If url is requested
-    if format in ['WadlUrl', 'SwaggerUrl', 'OpenApiYamlUrl', 'OpenApiJsonUrl', 'WsdlUrl']:
+    if export_format in ['WadlUrl', 'SwaggerUrl', 'OpenApiYamlUrl', 'OpenApiJsonUrl', 'WsdlUrl']:
         return response
 
     # If file is requested
@@ -606,7 +606,6 @@ def apim_api_export(client, resource_group_name, service_name, api_id, format, f
             elif file_extension == '.yaml':
                 yaml.dump(exportedResultContent, f)
             elif file_extension == '.xml':
-                from xml.etree.ElementTree import tostring
                 ET.register_namespace('', 'http://wadl.dev.java.net/2009/02')
                 xml_string = ET.tostring(exportedResultContent, encoding='unicode')
                 f.write(xml_string)
