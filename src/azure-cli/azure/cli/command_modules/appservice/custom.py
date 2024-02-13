@@ -670,7 +670,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
     except ValueError:
         raise ResourceNotFoundError('Failed to fetch scm url for function app')
 
-    zip_url = scm_url + '/api/Deploy/Zip?RemoteBuild={}&Deployer=az_cli'.format(build_remote)
+    zip_url = scm_url + '/api/publish?RemoteBuild={}&Deployer=az_cli'.format(build_remote)
     deployment_status_url = scm_url + '/api/deployments/latest'
 
     additional_headers = {"Content-Type": "application/zip", "Cache-Control": "no-cache"}
@@ -5081,7 +5081,44 @@ def list_flexconsumption_locations(cmd):
         },
         {
             "name": "northeurope"
-        }
+        },
+        {
+            "name": "eastasia"
+        },
+        {
+            "name": "centralus"
+        },
+        {
+            "name": "uksouth"
+        },
+        {
+            "name": "eastus2"
+        },
+        {
+            "name": "eastus2euap"
+        },
+        {
+            "name": "australiaeast"
+        },
+        {
+            "name": "westus2"
+        },
+        {
+            "name": "westus3"
+        },
+        {
+            "name": "southcentralus"
+        },
+        {
+            "name": "swedencentral"
+        },
+        {
+            "name": "southeastasia"
+        },
+        {
+            "name": "northcentralus(stage)"
+        },
+
     ]
 
 
