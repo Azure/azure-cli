@@ -164,6 +164,8 @@ FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
 
 DEFAULT_INSTANCE_SIZE = 2048
 
+DEFAULT_MAXIMUM_INSTANCE_COUNT = 100
+
 DEPLOYMENT_STORAGE_AUTH_TYPES = ['systemAssignedIdentity', 'userAssignedIdentity', 'storageAccountConnectionString']
 
 STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'

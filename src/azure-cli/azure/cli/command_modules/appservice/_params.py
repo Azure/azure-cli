@@ -779,7 +779,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('dapr_enable_api_logging', options_list=['--dapr-enable-api-logging', '--dal'], help="Enable/Disable API logging for the Dapr sidecar.", arg_type=get_three_state_flag(return_label=True))
         c.argument('always_ready_instances', nargs='+', help="space-separated configuration for the number of pre-allocated instances in the format `<name>=<value>`", is_preview=True)
         c.argument('maximum_instance_count', type=int, help="The maximum number of instances.", is_preview=True)
-        c.argument('instance_memory', type=int, help="The instance memory size in MB.", is_preview=True)
+        c.argument('instance_memory', type=int, help="The instance memory size in MB. See https://aka.ms/flex-instance-sizes for more information on the supported values.", is_preview=True)
         c.argument('flexconsumption_location', options_list=['--flexconsumption-location', '-f'],
                    help="Geographic location where function app will be hosted. Use `az functionapp list-flexconsumption-locations` to view available locations.", is_preview=True)
         c.argument('workspace', help="Name of an existing log analytics workspace to be used for the application insights component")

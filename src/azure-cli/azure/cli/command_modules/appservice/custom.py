@@ -85,7 +85,7 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
                          VERSION_2022_09_01, FLEX_RUNTIMES, FLEX_SUBNET_DELEGATION, DEFAULT_INSTANCE_SIZE,
                          RUNTIME_STATUS_TEXT_MAP, LANGUAGE_EOL_DEPRECATION_NOTICES,
-                         STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID)
+                         STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID, DEFAULT_MAXIMUM_INSTANCE_COUNT)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -1718,7 +1718,12 @@ def update_always_ready_settings(cmd, resource_group_name, name, settings):
     updated_always_ready_config = []
 
     for key, value in updated_always_ready_dict.items():
-        updated_always_ready_config.append({"name": key, "instanceCount": validate_and_convert_to_int(key, value)})
+        updated_always_ready_config.append(
+            {
+                "name": key,
+                "instanceCount": max(0, validate_and_convert_to_int(key, value))
+            }
+        )
 
     for always_ready_setting in always_ready_config:
         if always_ready_setting["name"] not in updated_always_ready_dict:
@@ -4303,19 +4308,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 'Please try again without the --os-type parameter or set --os-type to be linux.'
             )
 
-        if functions_version != '4':
-            raise ArgumentUsageError(
-                '--functions-version must be set to 4 for Azure Functions on the Flex Consumption plan. '
-                'Please try again with the --functions-version parameter set to 4.'
-            )
-
-        # TODO: Might need to remove this validation if it will be done in the backend
-        if maximum_instance_count and maximum_instance_count > 1000:
-            raise ValidationError(
-                '--maximum-instances exceeds the maximum allowed for Azure Functions on the Flex Consumption plan. '
-                'Please try again with a valid --maximum-instances value.'
-            )
-
         flexconsumption_location = _normalize_flex_location(flexconsumption_location)
 
     if (any([always_ready_instances, maximum_instance_count, instance_memory, deployment_storage_name,
@@ -4468,10 +4460,15 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         always_ready_config = []
 
         for key, value in always_ready_dict.items():
-            always_ready_config.append({"name": key, "instanceCount": validate_and_convert_to_int(key, value)})
+            always_ready_config.append(
+                {
+                    "name": key,
+                    "instanceCount": max(0, validate_and_convert_to_int(key, value))
+                }
+            )
 
         function_app_config["scaleAndConcurrency"] = {
-            "maximumInstanceCount": maximum_instance_count,
+            "maximumInstanceCount": maximum_instance_count or DEFAULT_MAXIMUM_INSTANCE_COUNT,
             "instanceMemoryMB": instance_memory or DEFAULT_INSTANCE_SIZE,
             "alwaysReady": always_ready_config
         }
