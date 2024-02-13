@@ -3022,6 +3022,55 @@ def cli_cosmosdb_mongodb_database_restore(cmd,
                                                         database_name,
                                                         mongodb_database_resource)
 
+def process_restorable_databases(restorable_databases, database_name):
+    latest_database_delete_time = datetime.datetime.utcfromtimestamp(0)
+    latest_database_create_or_recreate_time = datetime.datetime.utcfromtimestamp(0)
+    database_alive = False
+
+    for restorable_database in restorable_databases:
+        resource = restorable_database.resource
+        if resource.owner_id == database_name:
+            database_rid = resource.owner_resource_id
+            event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+            if resource.operation_type == "Delete" and latest_database_delete_time < event_timestamp:
+                latest_database_delete_time = event_timestamp
+
+            if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_database_create_or_recreate_time < event_timestamp:
+                latest_database_create_or_recreate_time = event_timestamp
+
+    # Database never deleted then reset it to max time
+    latest_database_delete_time = datetime.datetime.max if latest_database_delete_time == datetime.datetime.utcfromtimestamp(0) else latest_database_delete_time
+
+    # Database is alive if create or recreate timestamp is later than latest delete timestamp
+    if  latest_database_create_or_recreate_time > latest_database_delete_time:
+        database_alive = True
+
+    return latest_database_delete_time, latest_database_create_or_recreate_time, database_alive
+
+def process_restorable_collections(restorable_collections, collection_name, latest_database_create_or_recreate_time):
+    latest_collection_delete_time = datetime.datetime.utcfromtimestamp(0)
+    latest_collection_create_or_recreate_time = datetime.datetime.utcfromtimestamp(0)
+    collection_alive = False
+
+    for restorable_collection in restorable_collections:
+        resource = restorable_collection.resource
+        if resource.owner_id == collection_name:
+            event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+            if resource.operation_type == "Delete" and latest_collection_delete_time < event_timestamp:
+                latest_collection_delete_time = event_timestamp
+
+            if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_collection_create_or_recreate_time < event_timestamp:
+                latest_collection_create_or_recreate_time = event_timestamp
+
+    # Collection never deleted then reset it to max time
+    latest_collection_delete_time = datetime.datetime.max if latest_collection_delete_time == datetime.datetime.utcfromtimestamp(0) else latest_collection_delete_time
+
+    # Collection is alive if create or recreate timestamp is later than latest delete timestamp
+    if latest_collection_create_or_recreate_time > latest_collection_delete_time:
+        collection_alive = True
+
+    return latest_collection_delete_time, latest_collection_create_or_recreate_time, collection_alive
+
 
 def cli_cosmosdb_mongodb_collection_restore(cmd,
                                             client,
@@ -3065,10 +3114,6 @@ def cli_cosmosdb_mongodb_collection_restore(cmd,
         if restorable_database_account is None:
             raise CLIError("Cannot find a database account with name {} that is online".format(account_name))
 
-        latest_database_delete_time = datetime.datetime.utcfromtimestamp(0)
-        latest_database_create_or_recreate_time = datetime.datetime.utcfromtimestamp(0)
-        latest_collection_delete_time = datetime.datetime.utcfromtimestamp(0)
-        latest_collection_create_or_recreate_time = datetime.datetime.utcfromtimestamp(0)
         database_rid = None
         try:
             from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_mongodb_databases
@@ -3076,47 +3121,25 @@ def cli_cosmosdb_mongodb_collection_restore(cmd,
             restorable_databases = restorable_databases_client.list(
                 restorable_database_account.location,
                 restorable_database_account.name)
-            for restorable_database in restorable_databases:
-                resource = restorable_database.resource
-                if resource.owner_id == database_name:
-                    database_rid = resource.owner_resource_id
-                    event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
-                    if resource.operation_type == "Delete" and latest_database_delete_time < event_timestamp:
-                        latest_database_delete_time = event_timestamp
+            latest_database_delete_time, latest_database_create_or_recreate_time, database_alive = process_restorable_databases(restorable_databases, database_name)
 
-                    if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_database_create_or_recreate_time < event_timestamp:
-                        latest_database_create_or_recreate_time = event_timestamp
-
-            latest_database_delete_time = datetime.datetime.max if latest_database_delete_time == datetime.datetime.utcfromtimestamp(0) else latest_database_delete_time
-            query_start_time = latest_database_create_or_recreate_time.strftime("%Y-%m-%dT%H:%M:%SZ")
-            query_end_time = latest_database_delete_time if latest_database_create_or_recreate_time < latest_database_delete_time else datetime.datetime.max.strftime("%Y-%m-%dT%H:%M:%SZ")
+            if not database_alive:
+                raise CLIError("Cannot find a database account with name {} that is online when latest collection instance was deleted".format(account_name))
 
             from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_mongodb_collections
             restorable_collections_client = cf_restorable_mongodb_collections(cmd.cli_ctx, [])
             restorable_collections = restorable_collections_client.list(
                 restorable_database_account.location,
                 restorable_database_account.name,
-                database_rid,
-                query_start_time,
-                query_end_time)
+                database_rid)
 
-            for restorable_collection in restorable_collections:
-                resource = restorable_collection.resource
-                if resource.owner_id == collection_name:
-                    event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
-                    if resource.operation_type == "Delete" and latest_collection_delete_time < event_timestamp:
-                        latest_collection_delete_time = event_timestamp
+            latest_collection_delete_time, latest_collection_create_or_recreate_time, collection_alive = process_restorable_collections(restorable_collections, collection_name, latest_database_create_or_recreate_time)
 
-                    if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_collection_delete_time < event_timestamp and latest_database_create_or_recreate_time < event_timestamp:
-                        latest_collection_create_or_recreate_time = event_timestamp
+            if collection_alive:
+                raise CLIError("The collection {} is currently online. Please delete the collection and provide a restore timestamp for restoring different instance of the collection.".format(collection_name))
 
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
-            if latest_collection_delete_time < latest_collection_create_or_recreate_time <= latest_database_delete_time:
-                restore_time = latest_database_delete_time + datetime.timedelta(seconds=-1)
-            elif (latest_collection_create_or_recreate_time < latest_collection_delete_time < latest_database_delete_time):
-                restore_time = latest_collection_delete_time + datetime.timedelta(seconds=-1)
-            else:
-                raise CLIError("No collection with name {} existed in the current version of database. Please provide a restore timestamp for restoring the collection from different instance of the database".format(collection_name))
+            restore_time = latest_collection_delete_time + datetime.timedelta(seconds=-1)
 
             restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%Z")
         except ResourceNotFoundError:
