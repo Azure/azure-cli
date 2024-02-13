@@ -143,6 +143,10 @@ FLEX_RUNTIMES = [
         'version': '6'
     },
     {
+        'runtime': 'dotnet-isolated',
+        'version': '8'
+    },
+    {
         'runtime': 'java',
         'version': '17.0'
     },
@@ -153,6 +157,10 @@ FLEX_RUNTIMES = [
     {
         'runtime': 'python',
         'version': '3.10'
+    },
+    {
+        'runtime': 'python',
+        'version': '3.11'
     },
     {
         'runtime': 'powershell',

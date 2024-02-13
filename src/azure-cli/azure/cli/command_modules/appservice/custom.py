@@ -1703,6 +1703,33 @@ def get_runtime_config(cmd, resource_group_name, name):
         "runtime", {})
 
 
+def update_runtime_config(cmd, resource_group_name, name, runtime_version):
+    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+
+    # TODO: remove it later
+    if 'functionAppConfig' not in functionapp["properties"]:
+        functionapp["properties"]["functionAppConfig"] = {}
+        if 'runtime' not in functionapp["properties"]["functionAppConfig"]:
+            functionapp["properties"]["functionAppConfig"]["runtime"] = {}
+
+    runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, True)
+    runtime = runtime_info['app_runtime']
+    functionapp_version = runtime_info['functionapp_version']
+
+    runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=True, windows=False)
+    matched_runtime = runtime_helper.resolve(runtime, runtime_version, functionapp_version, True)
+    version = matched_runtime.version
+
+    lang = next((r for r in FLEX_RUNTIMES if r['runtime'] == runtime and r['version'] == version), None)
+    if lang is None:
+        raise ValidationError("Invalid version {0} for runtime {1} for function apps on the "
+                              "Flex Consumption plan.".format(version, runtime))
+
+    functionapp["properties"]["functionAppConfig"]["runtime"]["version"] = version
+
+    return update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+
+
 def update_always_ready_settings(cmd, resource_group_name, name, settings):
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
 
@@ -4321,7 +4348,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                            "provide the name of the flex plan location using "
                                            "--flexconsumption-location.")
 
-    deployment_source_branch = deployment_source_branch or 'master'
+    if flexconsumption_location is None:
+        deployment_source_branch = deployment_source_branch or 'master'
 
     disable_app_insights = (disable_app_insights == "true")
 
@@ -4513,22 +4541,22 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if runtime is None and runtime_version is not None:
         raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
 
-    if flexconsumption_location:
-        runtime = runtime or 'dotnet'
-        lang = next((r for r in FLEX_RUNTIMES if r['runtime'] == runtime), None)
-        if lang is None:
-            raise ValidationError("Invalid runtime. Supported runtimes for function apps on Flex App "
-                                  "Service plans are 'dotnet-isolated', 'java', 'node', 'python' and 'powershell'.")
-        if runtime_version is None:
-            runtime_version = lang['version']
-        elif runtime_version != lang['version']:
-            raise ValidationError("Invalid version {0} for runtime {1} for function apps on the Flex Consumption plan. "
-                                  "Supported version for runtime {1} is {2}."
-                                  .format(runtime_version, runtime, lang['version']))
-
     runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
     matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
                                              runtime_version, functions_version, is_linux)
+
+    if flexconsumption_location:
+        runtime = matched_runtime.name
+        version = matched_runtime.version
+        lang = next((r for r in FLEX_RUNTIMES if r['runtime'] == runtime and r['version'] == version), None)
+        if lang is None:
+            raise ValidationError("Invalid version {0} for runtime {1} for function apps on the "
+                                  "Flex Consumption plan.".format(version, runtime))
+        runtime_config = {
+            "name": runtime,
+            "version": version
+        }
+        function_app_config["runtime"] = runtime_config
 
     SiteConfigPropertiesDictionary = cmd.get_models('SiteConfigPropertiesDictionary')
 
@@ -4695,7 +4723,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.additional_properties["properties"] = existing_properties
         functionapp_def.additional_properties["properties"]["functionAppConfig"] = function_app_config
         # TODO: use following poller if new API version is released
-        # poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def, api_version='2023-12-01')
+        # poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
+        #                                                 api_version='2023-12-01')
 
     poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -5364,7 +5393,7 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
         try:
             if (response.status_code == 404 or response.json().get('status') is None) and has_response:
                 raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.")
-            elif (response.status_code != 404 and response.json().get('status') is not None) and not has_response:
+            if (response.status_code != 404 and response.json().get('status') is not None) and not has_response:
                 has_response = True
 
             res_dict = response.json()
@@ -5378,14 +5407,14 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
 
         if status == -1:
             raise CLIError("Deployment was cancelled.")
-        elif status == 3:
+        if status == 3:
             raise CLIError("Zip deployment failed. {}. These are the deployment logs: \n{}".format(
                            res_dict, json.dumps(show_deployment_log(cmd, rg_name, name))))
-        elif status == 4:
+        if status == 4:
             break
-        elif status == 5:
+        if status == 5:
             raise CLIError("Deployment was cancelled and another deployment is in progress.")
-        elif status == 6:
+        if status == 6:
             raise CLIError("Deployment was partially successful. These are the deployment logs:\n{}".format(
                            json.dumps(show_deployment_log(cmd, rg_name, name))))
         if 'progress' in res_dict:

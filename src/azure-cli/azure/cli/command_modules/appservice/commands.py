@@ -345,6 +345,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp runtime config') as g:
         g.custom_command('show', 'get_runtime_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_command('set', 'update_runtime_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
 
     with self.command_group('functionapp scale config') as g:
         g.custom_command('show', 'get_scale_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
