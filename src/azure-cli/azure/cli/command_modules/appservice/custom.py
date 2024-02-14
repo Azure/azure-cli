@@ -1580,7 +1580,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 def update_deployment_configs(cmd, resource_group_name, name,
                               deployment_storage_name=None,
                               deployment_storage_container_name=None, deployment_storage_auth_type=None,
-                              deployment_storage_auth_value=None, slot=None):
+                              deployment_storage_auth_value=None):
     
     # logger.warning("deployment_storage_name: %s deployment_storage_container_name: %s", deployment_storage_name, deployment_storage_container_name)
     logger.warning("deployment_storage_auth_type: %s deployment_storage_auth_value: %s", deployment_storage_auth_type, deployment_storage_auth_value)
