@@ -174,6 +174,7 @@ def is_flex_functionapp(cli_ctx, resource_group, name):
     plan_info = client.app_service_plans.get(parse_plan_id['resource_group'], parse_plan_id['name'])
     return plan_info.sku.tier.lower() == 'flexconsumption'
 
+
 def _list_app(cli_ctx, resource_group_name=None):
     client = web_client_factory(cli_ctx)
     if resource_group_name:
