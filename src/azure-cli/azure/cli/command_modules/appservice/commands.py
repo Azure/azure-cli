@@ -335,7 +335,8 @@ def load_command_table(self, _):
                                  validator=validate_functionapp_on_containerapp_update)
     
     with self.command_group('functionapp deployment config') as g:
-        g.custom_command('set', 'update_deployment_configs')
+        g.custom_command('set', 'update_deployment_configs', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_command('show', 'get_deployment_configs', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
 
     with self.command_group('functionapp config') as g:
         g.custom_command('set', 'update_site_configs_functionapp', validator=validate_functionapp_on_containerapp_site_config_set, exception_handler=ex_handler_factory())

@@ -804,7 +804,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('deployment_storage_auth_type', arg_type=get_enum_type(DEPLOYMENT_STORAGE_AUTH_TYPES), help="The deployment storage account authentication type.", is_preview=True)
         c.argument('deployment_storage_auth_value', help="The deployment storage account authentication value. This is only applicable for the user-assigned managed identity authentication type.", is_preview=True)
         
-    with self.argument_context('az functionapp deployment config set') as c: #  functionapp config container
+    with self.argument_context('az functionapp deployment config set') as c:
         c.argument('deployment_storage_name', help="The deployment storage account name.", is_preview=True)
         c.argument('deployment_storage_container_name', help="The deployment storage account container name.", is_preview=True)
         c.argument('deployment_storage_auth_type', arg_type=get_enum_type(DEPLOYMENT_STORAGE_AUTH_TYPES), help="The deployment storage account authentication type.", is_preview=True)

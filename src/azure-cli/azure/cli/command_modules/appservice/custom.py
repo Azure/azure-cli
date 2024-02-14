@@ -1577,14 +1577,16 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
     # Decode base64 encoded byte array into string
     return b64encode(config_file_bytes).decode('utf-8')
 
+def get_deployment_configs(cmd, resource_group_name, name):
+    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
+        "deployment", {})
+
 def update_deployment_configs(cmd, resource_group_name, name,
                               deployment_storage_name=None,
                               deployment_storage_container_name=None, deployment_storage_auth_type=None,
                               deployment_storage_auth_value=None):
-    
-    # logger.warning("deployment_storage_name: %s deployment_storage_container_name: %s", deployment_storage_name, deployment_storage_container_name)
-    logger.warning("deployment_storage_auth_type: %s deployment_storage_auth_value: %s", deployment_storage_auth_type, deployment_storage_auth_value)
-    
+
     if (deployment_storage_name == None or deployment_storage_container_name == None):
         raise ArgumentUsageError("Please provide both --deployment-storage-name and --deployment-storage-container-name.")
     
@@ -1597,23 +1599,10 @@ def update_deployment_configs(cmd, resource_group_name, name,
             'Please try again with --deployment-storage-auth-type set to userAssignedIdentity.'
         )
 
-    # NameValuePair = cmd.get_models('NameValuePair')
     NameValuePair = cmd.get_models('NameValuePair')
-    
-    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name) 
 
-    if not is_flex:
-        raise ValidationError("This command is only valid for Azure Functions on the FlexConsumption plan.")
-    
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
-    
-    if functionapp is None:
-        raise ValidationError("The specified function app does not exist.")
-    
     functionapp_location = functionapp["location"]
-    # functionapp.enable_additional_properties_sending()
-    # existing_properties = functionapp["properties"]
-    # functionapp.additional_properties["properties"] = existing_properties
 
     if ("functionAppConfig" in functionapp["properties"]):
         function_app_config = functionapp["properties"]["functionAppConfig"]
@@ -1639,10 +1628,6 @@ def update_deployment_configs(cmd, resource_group_name, name,
     if (deployment_storage_name is not None):
         deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx, resource_group_name, deployment_storage_name)
         deployment_storage_container = _get_deployment_storage_container(cmd, resource_group_name, deployment_storage_name, deployment_storage_container_name)
-        
-        if deployment_storage_container is None:
-            raise ValidationError("The specified container does not exist in the specified storage account.")
-        
         deployment_storage_container_name = deployment_storage_container.name
         deployment_config_storage_value = getattr(deployment_storage.primary_endpoints, 'blob') + deployment_storage_container_name
         functionapp_deployment_storage["value"] = deployment_config_storage_value
@@ -1661,17 +1646,17 @@ def update_deployment_configs(cmd, resource_group_name, name,
                                                             value=deployment_storage_conn_string))
             update_flex_functionapp_configuration(cmd, resource_group_name, name, configs)
             
-            functionapp_deployment_storage["authentication"]["type"] = "StorageAccountConnectionString"
+            functionapp_deployment_storage["authentication"]["type"] = 'StorageAccountConnectionString'
             functionapp_deployment_storage["authentication"]["userAssignedIdentityResourceId"] = None
             functionapp_deployment_storage["authentication"]["storageAccountConnectionStringName"] = "DEPLOYMENT_STORAGE_CONNECTION_STRING"
         elif deployment_storage_auth_type == 'systemAssignedIdentity':
             assign_identities = ['[system]']
-            functionapp_deployment_storage["authentication"]["type"] = "SystemAssignedIdentity"
+            functionapp_deployment_storage["authentication"]["type"] = 'SystemAssignedIdentity'
             functionapp_deployment_storage["authentication"]["userAssignedIdentityResourceId"] = None
             functionapp_deployment_storage["authentication"]["storageAccountConnectionStringName"] = None
         elif deployment_storage_auth_type == 'userAssignedIdentity':
             assign_identities = [deployment_storage_auth_value]
-            functionapp_deployment_storage["authentication"]["type"] = "UserAssignedIdentity"
+            functionapp_deployment_storage["authentication"]["type"] = 'UserAssignedIdentity'
             deployment_storage_user_assigned_identity = _get_or_create_user_assigned_identity(cmd, resource_group_name, name, deployment_storage_auth_value, functionapp_location)
             functionapp_deployment_storage["authentication"]["userAssignedIdentityResourceId"] = deployment_storage_user_assigned_identity.id
             functionapp_deployment_storage["authentication"]["storageAccountConnectionStringName"] = None
