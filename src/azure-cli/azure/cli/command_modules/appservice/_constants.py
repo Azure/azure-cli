@@ -151,6 +151,10 @@ FLEX_RUNTIMES = [
         'version': '17.0'
     },
     {
+        'runtime': 'java',
+        'version': '11.0'
+    },
+    {
         'runtime': 'node',
         'version': '18'
     },

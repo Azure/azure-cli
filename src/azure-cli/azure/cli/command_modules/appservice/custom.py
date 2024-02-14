@@ -1716,14 +1716,17 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
     runtime = runtime_info['app_runtime']
     functionapp_version = runtime_info['functionapp_version']
 
+    runtimes = [r for r in FLEX_RUNTIMES if r['runtime'] == runtime]
+    lang = next((r for r in runtimes if r['version'] == runtime_version), None)
+    if lang is None:
+        supported_versions = list(map(lambda x: x['version'], runtimes))
+        raise ValidationError("Invalid version {0} for runtime {1} for function apps on the "
+                              "Flex Consumption plan. Supported version for runtime {1} is {2}."
+                              .format(runtime_version, runtime, supported_versions))
+
     runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=True, windows=False)
     matched_runtime = runtime_helper.resolve(runtime, runtime_version, functionapp_version, True)
     version = matched_runtime.version
-
-    lang = next((r for r in FLEX_RUNTIMES if r['runtime'] == runtime and r['version'] == version), None)
-    if lang is None:
-        raise ValidationError("Invalid version {0} for runtime {1} for function apps on the "
-                              "Flex Consumption plan.".format(version, runtime))
 
     functionapp["properties"]["functionAppConfig"]["runtime"]["version"] = version
 
@@ -4541,6 +4544,20 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if runtime is None and runtime_version is not None:
         raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
 
+    if flexconsumption_location:
+        runtimes = [r for r in FLEX_RUNTIMES if r['runtime'] == runtime]
+        if not runtimes:
+            supported_runtimes = set(map(lambda x: x['runtime'], FLEX_RUNTIMES))
+            raise ValidationError("Invalid runtime. Supported runtimes for function apps on Flex App Service "
+                                  "plans are {0}".format(list(supported_runtimes)))
+        if runtime_version is not None:
+            lang = next((r for r in runtimes if r['version'] == runtime_version), None)
+            if lang is None:
+                supported_versions = list(map(lambda x: x['version'], runtimes))
+                raise ValidationError("Invalid version {0} for runtime {1} for function apps on the Flex "
+                                      "Consumption plan. Supported version for runtime {1} is {2}."
+                                      .format(runtime_version, runtime, supported_versions))
+
     runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
     matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
                                              runtime_version, functions_version, is_linux)
@@ -4548,10 +4565,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if flexconsumption_location:
         runtime = matched_runtime.name
         version = matched_runtime.version
-        lang = next((r for r in FLEX_RUNTIMES if r['runtime'] == runtime and r['version'] == version), None)
-        if lang is None:
-            raise ValidationError("Invalid version {0} for runtime {1} for function apps on the "
-                                  "Flex Consumption plan.".format(version, runtime))
         runtime_config = {
             "name": runtime,
             "version": version
