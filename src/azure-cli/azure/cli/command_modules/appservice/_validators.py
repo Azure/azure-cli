@@ -140,6 +140,7 @@ def validate_functionapp_on_containerapp_container_settings_delete(cmd, namespac
         raise ValidationError(
             "Invalid command. This is currently not supported for Azure Functions on Azure Container app environments.",
             "Please use the following command instead: az functionapp config appsettings set")
+    validate_functionapp_on_flex_plan(cmd, namespace)
 
 
 def validate_functionapp_on_containerapp_update(cmd, namespace):
@@ -172,6 +173,19 @@ def validate_functionapp_on_flex_plan(cmd, namespace):
     if plan_info.sku.tier == 'FlexConsumption':
         raise ValidationError('Invalid command. This is not currently supported for Azure Functions '
                               'on the Flex Consumption plan.')
+
+
+def validate_is_flex_functionapp(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    client = web_client_factory(cmd.cli_ctx)
+    plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+    if plan_info is None:
+        raise ResourceNotFoundError('Could not determine the current plan of the functionapp')
+    if plan_info.sku.tier.lower() != 'flexconsumption':
+        raise ValidationError('This command is only valid for Azure Functions on the FlexConsumption plan.')
 
 
 def validate_app_exists(cmd, namespace):

@@ -592,7 +592,7 @@ def update_containerapp_logic(cmd,
         scale_def["maxReplicas"] = max_replicas
     # so we don't overwrite rules
     if safe_get(new_containerapp, "properties", "template", "scale", "rules"):
-        new_containerapp["properties"]["template"]["scale"].pop(["rules"])
+        new_containerapp["properties"]["template"]["scale"].pop("rules")
     if scale_rule_name:
         if not scale_rule_type:
             scale_rule_type = "http"
@@ -1564,6 +1564,9 @@ def start_containerappjob_execution_yaml(cmd, name, resource_group_name, file_na
         raise InvalidArgumentValueError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapp job execution YAML.') from ex
 
     containerappjobexec_def = _convert_object_from_snake_to_camel_case(_object_to_dict(containerappjobexec_def))
+
+    # Remove "additionalProperties" attributes that are introduced in the deserialization.
+    _remove_additional_attributes(containerappjobexec_def)
 
     # Clean null values since this is an update
     containerappjobexec_def = clean_null_values(containerappjobexec_def)
@@ -3590,7 +3593,9 @@ def containerapp_up(cmd,
     env = ContainerAppEnvironment(cmd, managed_env, resource_group, location=location, logs_key=logs_key, logs_customer_id=logs_customer_id)
     app = ContainerApp(cmd, name, resource_group, None, image, env, target_port, registry_server, registry_user, registry_pass, env_vars, workload_profile_name, ingress)
 
-    _set_up_defaults(cmd, name, resource_group_name, logs_customer_id, location, resource_group, env, app)
+    # Check and see if registry username and passwords are specified. If so, set is_registry_server_params_set to True to use those creds.
+    is_registry_server_params_set = bool(registry_server and registry_user and registry_pass)
+    _set_up_defaults(cmd, name, resource_group_name, logs_customer_id, location, resource_group, env, app, is_registry_server_params_set)
 
     if app.check_exists():
         if app.get()["properties"]["provisioningState"] == "InProgress":

@@ -160,6 +160,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
         c.argument('public_network_access', help="Enable or disable public access to the web app", arg_type=get_enum_type(PUBLIC_NETWORK_ACCESS_MODES))
+        c.argument('acr_use_identity', action='store_true', help="Enable or disable pull image from acr use managed identity")
         c.ignore('language')
         c.ignore('using_webapp_up')
 
@@ -413,6 +414,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('cpu', type=float, help="Required CPU in cores from 0.5 to 2.0.", is_preview=True)
         c.argument('memory', help="Required momory from 1.0 to 4.0 ending with ""Gi"" e.g. 1.0Gi, ", is_preview=True)
 
+    with self.argument_context('functionapp runtime config') as c:
+        c.argument('runtime_version', help='The version of the functions runtime stack. Use "az functionapp list-runtimes" to check supported runtimes and versions', is_preview=True)
+
     with self.argument_context('functionapp scale config') as c:
         c.argument('maximum_instance_count', type=int, help="The maximum number of instances.", is_preview=True)
         c.argument('instance_memory', type=int, help="The instance memory size in MB.", is_preview=True)
@@ -472,6 +476,10 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp deployment github-actions add')as c:
         c.argument('runtime', options_list=['--runtime', '-r'], help='Canonicalized web runtime in the format of Framework|Version, e.g. "PHP|5.6". Use "az webapp list-runtimes" for available list.')
         c.argument('force', options_list=['--force', '-f'], help='When true, the command will overwrite any workflow file with a conflicting name.', action='store_true')
+
+    with self.argument_context('webapp deployment source config-zip')as c:
+        c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('webapp log config') as c:
         c.argument('application_logging', help='configure application logging',
@@ -700,6 +708,8 @@ subscription than the app service environment, please use the resource ID for --
                    default=False, action='store_true')
         c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
         c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku [I1v2, I2v2, I3v2]')
+        c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('webapp ssh') as c:
         c.argument('port', options_list=['--port', '-p'],
@@ -780,10 +790,19 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('dapr_http_read_buffer_size', type=int, options_list=['--dapr-http-read-buffer-size', '--dhrbs'], help="Max size of http header read buffer in KB to handle when sending multi-KB headers.")
         c.argument('dapr_log_level', help="The log level for the Dapr sidecar", arg_type=get_enum_type(DAPR_LOG_LEVELS))
         c.argument('dapr_enable_api_logging', options_list=['--dapr-enable-api-logging', '--dal'], help="Enable/Disable API logging for the Dapr sidecar.", arg_type=get_three_state_flag(return_label=True))
+        c.argument('always_ready_instances', nargs='+', help="space-separated configuration for the number of pre-allocated instances in the format `<name>=<value>`", is_preview=True)
+        c.argument('maximum_instance_count', type=int, help="The maximum number of instances.", is_preview=True)
+        c.argument('instance_memory', type=int, help="The instance memory size in MB. See https://aka.ms/flex-instance-sizes for more information on the supported values.", is_preview=True)
+        c.argument('flexconsumption_location', options_list=['--flexconsumption-location', '-f'],
+                   help="Geographic location where function app will be hosted. Use `az functionapp list-flexconsumption-locations` to view available locations.", is_preview=True)
         c.argument('workspace', help="Name of an existing log analytics workspace to be used for the application insights component")
         c.argument('workload_profile_name', help="The workload profile name to run the container app on.", is_preview=True)
         c.argument('cpu', type=float, help="The CPU in cores of the container app. e.g 0.75", is_preview=True)
         c.argument('memory', help="The memory size of the container app. e.g. 1.0Gi, ", is_preview=True)
+        c.argument('deployment_storage_name', help="The deployment storage account name.", is_preview=True)
+        c.argument('deployment_storage_container_name', help="The deployment storage account container name.", is_preview=True)
+        c.argument('deployment_storage_auth_type', arg_type=get_enum_type(DEPLOYMENT_STORAGE_AUTH_TYPES), help="The deployment storage account authentication type.", is_preview=True)
+        c.argument('deployment_storage_auth_value', help="The deployment storage account authentication value. This is only applicable for the user-assigned managed identity authentication type.", is_preview=True)
         
     with self.argument_context('az functionapp deployment config set') as c: #  functionapp config container
         c.argument('deployment_storage_name', help="The deployment storage account name.", is_preview=True)

@@ -17,7 +17,7 @@ from ._validators import (validate_onedeploy_params, validate_staticsite_link_fu
                           validate_functionapp_on_containerapp_site_config_show,
                           validate_functionapp_on_containerapp_container_settings_delete,
                           validate_functionapp_on_containerapp_update, validate_functionapp_on_flex_plan,
-                          validate_functionapp)
+                          validate_functionapp, validate_is_flex_functionapp)
 
 
 def output_slots_in_table(slots):
@@ -86,10 +86,6 @@ def _polish_bad_errors(ex, creating_plan):
                                   "If creating an App Service Plan with --zone-redundant/-z, "
                                   "please see supported regions here: "
                                   "https://docs.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
-                    elif 'Not enough available reserved instance servers to satisfy' in detail:
-                        detail = ("Plan with Linux worker can only be created in a group " +
-                                  "which has never contained a Windows worker, and vice versa. " +
-                                  "Please use a new resource group. Original error:" + detail)
         else:
             detail = json.loads(ex.error_msg.response.text())['Message']
         ex = CLIError(detail)
@@ -342,21 +338,25 @@ def load_command_table(self, _):
         g.custom_command('set', 'update_deployment_configs')
 
     with self.command_group('functionapp config') as g:
-        g.custom_command('set', 'update_site_configs', validator=validate_functionapp_on_containerapp_site_config_set, exception_handler=ex_handler_factory())
+        g.custom_command('set', 'update_site_configs_functionapp', validator=validate_functionapp_on_containerapp_site_config_set, exception_handler=ex_handler_factory())
         g.custom_show_command('show', 'get_site_configs', validator=validate_functionapp_on_containerapp_site_config_show, exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)
-        g.custom_command('set', 'update_app_settings', exception_handler=ex_handler_factory())
+        g.custom_command('set', 'update_app_settings_functionapp', exception_handler=ex_handler_factory())
         g.custom_command('delete', 'delete_app_settings', exception_handler=ex_handler_factory())
 
+    with self.command_group('functionapp runtime config') as g:
+        g.custom_command('show', 'get_runtime_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_command('set', 'update_runtime_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+
     with self.command_group('functionapp scale config') as g:
-        g.custom_command('show', 'get_scale_config', exception_handler=ex_handler_factory())
-        g.custom_command('set', 'update_scale_config', exception_handler=ex_handler_factory())
+        g.custom_command('show', 'get_scale_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_command('set', 'update_scale_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
 
     with self.command_group('functionapp scale config always-ready') as g:
-        g.custom_command('delete', 'delete_always_ready_settings', exception_handler=ex_handler_factory())
-        g.custom_command('set', 'update_always_ready_settings', exception_handler=ex_handler_factory())
+        g.custom_command('delete', 'delete_always_ready_settings', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_command('set', 'update_always_ready_settings', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
 
     with self.command_group('functionapp config hostname') as g:
         g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())
@@ -413,9 +413,9 @@ def load_command_table(self, _):
         g.custom_command('show-cd-url', 'show_container_cd_url')
 
     with self.command_group('functionapp config container') as g:
-        g.custom_command('set', 'update_container_settings_functionapp')
+        g.custom_command('set', 'update_container_settings_functionapp', validator=validate_functionapp_on_flex_plan)
         g.custom_command('delete', 'delete_container_settings', validator=validate_functionapp_on_containerapp_container_settings_delete)
-        g.custom_show_command('show', 'show_container_settings_functionapp')
+        g.custom_show_command('show', 'show_container_settings_functionapp', validator=validate_functionapp_on_flex_plan)
 
     with self.command_group('functionapp deployment slot') as g:
         g.custom_command('list', 'list_slots', table_transformer=output_slots_in_table, validator=validate_functionapp_on_flex_plan)
