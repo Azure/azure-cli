@@ -639,7 +639,7 @@ class ApimScenarioTest(ScenarioTest):
         
         # export api
         self.cmd(
-            'apim api export -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --format "OpenApiJsonUrl"',
+            'apim api export -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --export-format "OpenApiJsonUrl"',
             checks=[self.check('name', "{api_id}")])
 
         # service delete command
