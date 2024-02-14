@@ -580,7 +580,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
     return _redact_storage_accounts(result.properties)
 
 
-def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
+def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=None, timeout=None, slot=None):
     check_language_runtime(cmd, resource_group_name, name)
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
@@ -612,6 +612,7 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
         enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout, slot, build_remote)
         response = check_flex_app_after_deployment(cmd, resource_group_name, name)
         return response
+    build_remote = build_remote == 'true' or False
     if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
     if build_remote and app.reserved:
@@ -662,13 +663,17 @@ def check_flex_app_after_deployment(cmd, resource_group_name, name):
     return "Deployment was successful."
 
 
-def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, slot=None, build_remote=False):
+def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, slot=None, build_remote=None):
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
         scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     except ValueError:
         raise ResourceNotFoundError('Failed to fetch scm url for function app')
+
+    runtime_config = get_runtime_config(cmd, resource_group_name, name)
+    runtime = runtime_config.get("name", "")
+    build_remote = build_remote or (True if runtime == 'python' else False)
 
     zip_url = scm_url + '/api/publish?RemoteBuild={}&Deployer=az_cli'.format(build_remote)
     deployment_status_url = scm_url + '/api/deployments/latest'
