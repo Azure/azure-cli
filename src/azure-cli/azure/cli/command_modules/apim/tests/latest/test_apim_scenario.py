@@ -577,10 +577,10 @@ class ApimScenarioTest(ScenarioTest):
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
     @AllowLargeResponse()
     def test_apim_export_api(self, resource_group, resource_group_location):
-        service_name = self.create_random_name('cli-test-apim-', 50)
+        service_name = self.create_random_name('cli-test-apim-export-api-', 50)
 
-        service_name = self.create_random_name('cli-test-apim-deletedservice-', 35)
-        resource_group = self.create_random_name('cli-test-apim-deletedservice-rg', 35)
+        service_name = self.create_random_name('cli-test-apim-service-', 35)
+        resource_group = self.create_random_name('cli-test-apim-service-rg', 35)
 
         # try to use the injected location, but if the location is not known
         # fall back to west us, otherwise we can't validate since the sdk returns displayName
@@ -624,19 +624,11 @@ class ApimScenarioTest(ScenarioTest):
                          self.check('publisherEmail', '{publisher_email}')])
 
         # import api
-        # --api-version {api_version} --subscription-key-header-name "{subscription_key_header_name}" --subscription-key-query-param-name "{subscription_key_query_param_name}"
         self.cmd(
             'apim api import -g "{rg}" --service-name "{service_name}" --path "{path}" --api-id "{api_id}" --specification-url "{specification_url}" --specification-format "{specification_format}" --display-name "Swagger Petstore"',
             checks=[self.check('displayName', 'Swagger Petstore'),
                     self.check('path', '{path}')])
-        
-                # import api
-        # self.cmd(
-        #     'apim api import -g "{rg}" --service-name "{service_name}" --path "{path3}" --api-id "{graphql_im_api_id}" --specification-url "{graphql_service_url}" --specification-format "{graphql}" --display-name "{graphql_im_api_id}"',
-        #     checks=[self.check('displayName', '{graphql_im_api_id}'),
-        #             self.check('path', '{path3}'),
-        #             self.check('apiType','{graphql_api_type}')])
-        
+
         # export api
         self.cmd(
             'apim api export -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --export-format "OpenApiJsonUrl"',
