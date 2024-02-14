@@ -1605,19 +1605,18 @@ def update_deployment_configs(cmd, resource_group_name, name,
     if not is_flex:
         raise ValidationError("This command is only valid for Azure Functions on the FlexConsumption plan.")
     
-    client = web_client_factory(cmd.cli_ctx) 
-    functionapp = client.web_apps.get(resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
     
     if functionapp is None:
         raise ValidationError("The specified function app does not exist.")
     
-    functionapp_location = functionapp.location
-    functionapp.enable_additional_properties_sending()
-    existing_properties = functionapp.serialize()["properties"]
-    functionapp.additional_properties["properties"] = existing_properties
+    functionapp_location = functionapp["location"]
+    # functionapp.enable_additional_properties_sending()
+    # existing_properties = functionapp["properties"]
+    # functionapp.additional_properties["properties"] = existing_properties
 
-    if ("functionAppConfig" in functionapp.additional_properties["properties"]):
-        function_app_config = functionapp.additional_properties["properties"]["functionAppConfig"]
+    if ("functionAppConfig" in functionapp["properties"]):
+        function_app_config = functionapp["properties"]["functionAppConfig"]
     else:
         function_app_config = {"deployment": None, "runtime": None, "scaleAndConcurrency": None}     
         
@@ -1687,9 +1686,9 @@ def update_deployment_configs(cmd, resource_group_name, name,
         if deployment_storage_auth_type == 'systemAssignedIdentity':
             _assign_deployment_storage_managed_identity_role(cmd.cli_ctx, deployment_storage, functionapp.identity.principal_id)
         
-    functionapp.additional_properties["properties"]["functionAppConfig"] = function_app_config
+    functionapp["properties"]["functionAppConfig"] = function_app_config
 
-    return functionapp
+    return update_flex_functionapp(cmd, resource_group_name, name, functionapp)
 
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
@@ -1792,6 +1791,7 @@ def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
             raise CLIError(ex)
 
 def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
+    return None
     # check if the customer has a flex app
     # is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
  
@@ -4416,10 +4416,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                        environment=None, min_replicas=None, max_replicas=None, workspace=None,
-                       always_ready_instances=None, maximum_instance_count=None, instance_memory=None,
-                       flexconsumption_location=None, deployment_storage_name=None,
-                       deployment_storage_container_name=None, deployment_storage_auth_type=None,
-                       deployment_storage_auth_value=None,
                        enable_dapr=False, dapr_app_id=None, dapr_app_port=None, dapr_http_max_request_size=None,
                        dapr_http_read_buffer_size=None, dapr_log_level=None, dapr_enable_api_logging=False,
                        workload_profile_name=None, cpu=None, memory=None,
@@ -5195,6 +5191,13 @@ def _get_or_create_deployment_storage_container(cmd, resource_group_name, functi
 
     logger.warning(storage_container)
     return storage_container
+
+def _get_deployment_storage_container(cmd, resource_group_name, deployment_storage_name, 
+                                      deployment_storage_container_name):
+    storage_client = get_mgmt_service_client(cmd.cli_ctx, StorageManagementClient)
+    return storage_client.blob_containers.get(resource_group_name, deployment_storage_name,
+                                                               deployment_storage_container_name)
+        
 
 
 def _get_or_create_user_assigned_identity(cmd, resource_group_name, functionapp_name, user_assigned_identity, location):
