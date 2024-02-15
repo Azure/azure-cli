@@ -1587,8 +1587,8 @@ def update_deployment_configs(cmd, resource_group_name, name,
                               deployment_storage_container_name=None, deployment_storage_auth_type=None,
                               deployment_storage_auth_value=None):
 
-    if (deployment_storage_name == None or deployment_storage_container_name == None):
-        raise ArgumentUsageError("Please provide both --deployment-storage-name and --deployment-storage-container-name.")
+    if (deployment_storage_name is not None) != (deployment_storage_container_name  is not None):
+        raise ArgumentUsageError("Please provide both --deployment-storage-name and --deployment-storage-container-name nor neither.")
     
     if deployment_storage_auth_type == 'userAssignedIdentity' and not deployment_storage_auth_value:
         raise ArgumentUsageError('--deployment-storage-auth-value is required when --deployment-storage-auth-type is set to userAssignedIdentity.')
@@ -1617,10 +1617,13 @@ def update_deployment_configs(cmd, resource_group_name, name,
     if ("storage" not in function_app_config["deployment"] or function_app_config["deployment"]["storage"] is None):
         function_app_config["deployment"]["storage"] = functionapp_deployment_storage = {"type": "blobContainer", "value": None, "authentication": None}
         
+    if (functionapp_deployment_storage["value"] is None):
+        if (deployment_storage_name == None):
+            raise ValidationError("Please provide a values for --deployment-storage-name and --deployment-storage-container-name as function app deployment storage value is not set.")
+    
     if ("authentication" not in functionapp_deployment_storage or functionapp_deployment_storage["authentication"] is None):
         if (deployment_storage_auth_type == None):
             raise ValidationError("Please provide a value for --deployment-storage-auth-type as function app deployment storage authentication type is not set.")
-        
         functionapp_deployment_storage["authentication"] = {"type": "SystemAssignedIdentity", "userAssignedIdentityResourceId": None, "storageAccountConnectionStringName": None}
 
     # Storage
@@ -1636,7 +1639,7 @@ def update_deployment_configs(cmd, resource_group_name, name,
     # Authentication
     if (deployment_storage_auth_type != None):
         assign_identities = None
-        if deployment_storage_auth_type == 'storageAccountConnectionString':
+        if deployment_storage_auth_type == 'StorageAccountConnectionString':
             deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
             configs = get_site_configs(cmd, resource_group_name, name, slot)
             
@@ -1646,17 +1649,17 @@ def update_deployment_configs(cmd, resource_group_name, name,
                                                             value=deployment_storage_conn_string))
             update_flex_functionapp_configuration(cmd, resource_group_name, name, configs)
             
-            functionapp_deployment_storage["authentication"]["type"] = 'StorageAccountConnectionString'
+            functionapp_deployment_storage["authentication"]["type"] = deployment_storage_auth_type
             functionapp_deployment_storage["authentication"]["userAssignedIdentityResourceId"] = None
             functionapp_deployment_storage["authentication"]["storageAccountConnectionStringName"] = "DEPLOYMENT_STORAGE_CONNECTION_STRING"
-        elif deployment_storage_auth_type == 'systemAssignedIdentity':
+        elif deployment_storage_auth_type == 'SystemAssignedIdentity':
             assign_identities = ['[system]']
-            functionapp_deployment_storage["authentication"]["type"] = 'SystemAssignedIdentity'
+            functionapp_deployment_storage["authentication"]["type"] = deployment_storage_auth_type
             functionapp_deployment_storage["authentication"]["userAssignedIdentityResourceId"] = None
             functionapp_deployment_storage["authentication"]["storageAccountConnectionStringName"] = None
-        elif deployment_storage_auth_type == 'userAssignedIdentity':
+        elif deployment_storage_auth_type == 'UserAssignedIdentity':
             assign_identities = [deployment_storage_auth_value]
-            functionapp_deployment_storage["authentication"]["type"] = 'UserAssignedIdentity'
+            functionapp_deployment_storage["authentication"]["type"] = deployment_storage_auth_type
             deployment_storage_user_assigned_identity = _get_or_create_user_assigned_identity(cmd, resource_group_name, name, deployment_storage_auth_value, functionapp_location)
             functionapp_deployment_storage["authentication"]["userAssignedIdentityResourceId"] = deployment_storage_user_assigned_identity.id
             functionapp_deployment_storage["authentication"]["storageAccountConnectionStringName"] = None
@@ -1664,12 +1667,13 @@ def update_deployment_configs(cmd, resource_group_name, name,
         else:
             raise ValidationError("Invalid value for --deployment-storage-auth-type. Please try again with a valid value.")
             
-        if (deployment_storage_auth_type != 'storageAccountConnectionString' and assign_identities is not None):
+        if (deployment_storage_auth_type != 'StorageAccountConnectionString' and assign_identities is not None):
             identity = assign_identity(cmd, resource_group_name, name, assign_identities,'Contributor', None, None)
-            functionapp.identity = identity
+            logger.warning("Assigned identity '%s' to function app '%s'", identity, name)
+            functionapp["properties"]["identity"] = identity
 
-        if deployment_storage_auth_type == 'systemAssignedIdentity':
-            _assign_deployment_storage_managed_identity_role(cmd.cli_ctx, deployment_storage, functionapp.identity.principal_id)
+        if deployment_storage_auth_type == 'SystemAssignedIdentity':
+            _assign_deployment_storage_managed_identity_role(cmd.cli_ctx, deployment_storage, functionapp["properties"]["identity"]["principal_id"])
         
     functionapp["properties"]["functionAppConfig"] = function_app_config
 
