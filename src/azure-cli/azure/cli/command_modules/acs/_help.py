@@ -316,6 +316,9 @@ parameters:
   - name: --data-collection-settings
     type: string
     short-summary: Path to JSON file containing data collection settings for Monitoring addon.
+  - name: --azure-monitor-private-link-scope-resource-id
+    type: string
+    short-summary: Resource ID of Azure Monitor Private Link scope for  Monitoring Addon.
   - name: --uptime-sla
     type: bool
     short-summary: --uptime-sla is deprecated. Please use '--tier standard' instead.
@@ -1023,6 +1026,7 @@ long-summary: |-
     - http_application_routing : configure ingress with automatic public DNS name creation.
     - monitoring               : turn on Log Analytics monitoring. Requires "--workspace-resource-id".
                                  Requires "--enable-msi-auth-for-monitoring" for managed identity auth.
+                                 Requires "--azure-monitor-private-link-scope-resource-id" for private link.
                                  Requires "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled
                                  If monitoring addon is enabled --no-wait argument will have no effect
     - virtual-node             : enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
@@ -1047,6 +1051,9 @@ parameters:
   - name: --data-collection-settings
     type: string
     short-summary: Path to JSON file containing data collection settings for Monitoring addon.
+  - name: --azure-monitor-private-link-scope-resource-id
+    type: string
+    short-summary: Resource ID of Azure Monitor Private Link scope for  Monitoring Addon.
   - name: --appgw-name
     type: string
     short-summary: Name of the application gateway to create/use in the node resource group. Use with ingress-azure addon.
