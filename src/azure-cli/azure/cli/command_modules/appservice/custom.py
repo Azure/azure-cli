@@ -1590,13 +1590,13 @@ def update_deployment_configs(cmd, resource_group_name, name,
     if (deployment_storage_name is not None) != (deployment_storage_container_name  is not None):
         raise ArgumentUsageError("Please provide both --deployment-storage-name and --deployment-storage-container-name nor neither.")
     
-    if deployment_storage_auth_type == 'userAssignedIdentity' and not deployment_storage_auth_value:
-        raise ArgumentUsageError('--deployment-storage-auth-value is required when --deployment-storage-auth-type is set to userAssignedIdentity.')
+    if deployment_storage_auth_type == 'UserAssignedIdentity' and not deployment_storage_auth_value:
+        raise ArgumentUsageError('--deployment-storage-auth-value is required when --deployment-storage-auth-type is set to UserAssignedIdentity.')
     
-    if deployment_storage_auth_value and deployment_storage_auth_type != 'userAssignedIdentity':
+    if deployment_storage_auth_value and deployment_storage_auth_type != 'UserAssignedIdentity':
         raise ArgumentUsageError(
-            '--deployment-storage-auth-value is only a valid input when --deployment-storage-auth-type set to userAssignedIdentity. '
-            'Please try again with --deployment-storage-auth-type set to userAssignedIdentity.'
+            '--deployment-storage-auth-value is only a valid input when --deployment-storage-auth-type set to UserAssignedIdentity. '
+            'Please try again with --deployment-storage-auth-type set to UserAssignedIdentity.'
         )
 
     NameValuePair = cmd.get_models('NameValuePair')
@@ -1637,11 +1637,11 @@ def update_deployment_configs(cmd, resource_group_name, name,
         functionapp_deployment_storage["type"] = "blobContainer"
         
     # Authentication
+    assign_identities = None
     if (deployment_storage_auth_type != None):
-        assign_identities = None
         if deployment_storage_auth_type == 'StorageAccountConnectionString':
             deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
-            configs = get_site_configs(cmd, resource_group_name, name, slot)
+            configs = get_site_configs(cmd, resource_group_name, name)
             
             if configs.app_settings is None:
                 configs.app_settings = []
@@ -1666,18 +1666,25 @@ def update_deployment_configs(cmd, resource_group_name, name,
             assign_identities = [deployment_storage_user_assigned_identity.id]
         else:
             raise ValidationError("Invalid value for --deployment-storage-auth-type. Please try again with a valid value.")
-            
-        if (deployment_storage_auth_type != 'StorageAccountConnectionString' and assign_identities is not None):
-            identity = assign_identity(cmd, resource_group_name, name, assign_identities,'Contributor', None, None)
-            logger.warning("Assigned identity '%s' to function app '%s'", identity, name)
-            functionapp["properties"]["identity"] = identity
-
-        if deployment_storage_auth_type == 'SystemAssignedIdentity':
-            _assign_deployment_storage_managed_identity_role(cmd.cli_ctx, deployment_storage, functionapp["properties"]["identity"]["principal_id"])
-        
     functionapp["properties"]["functionAppConfig"] = function_app_config
 
-    return update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+    logger.warning("Updated deployment storage for function app '%s'", result)
+    
+    client = web_client_factory(cmd.cli_ctx)
+    functionapp = client.web_apps.get(resource_group_name, name)
+    if (deployment_storage_auth_type != 'StorageAccountConnectionString' and assign_identities is not None):
+        identity = assign_identity(cmd, resource_group_name, name, assign_identities,'Contributor', None, None)
+        logger.warning("Assigned identity '%s' to function app '%s'", identity, name)
+        functionapp.identity = identity
+
+    if deployment_storage_auth_type == 'SystemAssignedIdentity':
+        _assign_deployment_storage_managed_identity_role(cmd.cli_ctx, deployment_storage, functionapp.identity.principal_id)
+        
+    poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp)
+    functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
+    return functionapp
+    
 
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
