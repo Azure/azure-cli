@@ -673,7 +673,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
 
     runtime_config = get_runtime_config(cmd, resource_group_name, name)
     runtime = runtime_config.get("name", "")
-    build_remote = build_remote or (True if runtime == 'python' else False)
+    build_remote = build_remote or runtime == 'python'
 
     zip_url = scm_url + '/api/publish?RemoteBuild={}&Deployer=az_cli'.format(build_remote)
     deployment_status_url = scm_url + '/api/deployments/latest'
@@ -1105,6 +1105,8 @@ def list_function_app(cmd, resource_group_name=None):
 
 
 def show_functionapp(cmd, resource_group_name, name, slot=None):
+    if is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+        return get_raw_functionapp(cmd, resource_group_name, name)
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not app:
         raise ResourceNotFoundError("Unable to find resource'{}', in ResourceGroup '{}'.".format(name,
@@ -1648,7 +1650,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         if max_replicas is not None:
             setattr(configs, 'function_app_scale_limit', max_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
-    return update_flex_functionapp_configuration(cmd, resource_group_name, name, configs)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
 
 
 def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
@@ -1679,7 +1681,7 @@ def update_flex_functionapp(cmd, resource_group_name, name, functionapp):
     url = url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + url
     body = json.dumps(functionapp)
-    response = send_raw_request(cmd.cli_ctx, "PATCH", request_url, body=body)
+    response = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body)
     return response.json()
 
 
@@ -2211,7 +2213,7 @@ def _resolve_hostname_through_dns(hostname):
     return socket.gethostbyname(hostname)
 
 
-def create_webapp_slot(cmd, resource_group_name, name, slot, configuration_source=None,
+def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None,
                        deployment_container_image_name=None, docker_registry_server_password=None,
                        docker_registry_server_user=None):
     container_args = deployment_container_image_name or docker_registry_server_password or docker_registry_server_user
@@ -2224,13 +2226,13 @@ def create_webapp_slot(cmd, resource_group_name, name, slot, configuration_sourc
 
     Site, SiteConfig, NameValuePair = cmd.get_models('Site', 'SiteConfig', 'NameValuePair')
     client = web_client_factory(cmd.cli_ctx)
-    site = client.web_apps.get(resource_group_name, name)
-    site_config = get_site_configs(cmd, resource_group_name, name, None)
+    site = client.web_apps.get(resource_group_name, webapp)
+    site_config = get_site_configs(cmd, resource_group_name, webapp, None)
     if not site:
-        raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
+        raise ResourceNotFoundError("'{}' app doesn't exist".format(webapp))
     if 'functionapp' in site.kind:
         raise ValidationError("'{}' is a function app. Please use "
-                              "`az functionapp deployment slot create`.".format(name))
+                              "`az functionapp deployment slot create`.".format(webapp))
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     slot_def.site_config = SiteConfig()
@@ -2239,9 +2241,9 @@ def create_webapp_slot(cmd, resource_group_name, name, slot, configuration_sourc
     # app settings to perform the container image validation:
     if configuration_source and site_config.windows_fx_version:
         # get settings from the source
-        clone_from_prod = configuration_source.lower() == name.lower()
+        clone_from_prod = configuration_source.lower() == webapp.lower()
         src_slot = None if clone_from_prod else configuration_source
-        app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+        app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
                                                'list_application_settings', src_slot)
         settings = []
         for k, v in app_settings.properties.items():
@@ -2249,11 +2251,11 @@ def create_webapp_slot(cmd, resource_group_name, name, slot, configuration_sourc
                      "DOCKER_REGISTRY_SERVER_URL"):
                 settings.append(NameValuePair(name=k, value=v))
         slot_def.site_config = SiteConfig(app_settings=settings)
-    poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, site_envelope=slot_def, slot=slot)
+    poller = client.web_apps.begin_create_or_update_slot(resource_group_name, webapp, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if configuration_source:
-        update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source,
+        update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source,
                                               deployment_container_image_name, docker_registry_server_password,
                                               docker_registry_server_user,
                                               docker_registry_server_url=docker_registry_server_url)
@@ -3015,16 +3017,16 @@ def list_deployment_logs(cmd, resource_group, name, slot=None):
     return response.json() or []
 
 
-def config_slot_auto_swap(cmd, resource_group_name, name, slot, auto_swap_slot=None, disable=None):
+def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
     client = web_client_factory(cmd.cli_ctx)
-    site_config = client.web_apps.get_configuration_slot(resource_group_name, name, slot)
+    site_config = client.web_apps.get_configuration_slot(resource_group_name, webapp, slot)
     site_config.auto_swap_slot_name = '' if disable else (auto_swap_slot or 'production')
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, site_config)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp, 'update_configuration', slot, site_config)
 
 
-def list_slots(cmd, resource_group_name, name):
+def list_slots(cmd, resource_group_name, webapp):
     client = web_client_factory(cmd.cli_ctx)
-    slots = list(client.web_apps.list_slots(resource_group_name, name))
+    slots = list(client.web_apps.list_slots(resource_group_name, webapp))
     for slot in slots:
         slot.name = slot.name.split('/')[-1]
         setattr(slot, 'app_service_plan', parse_resource_id(slot.server_farm_id)['name'])
@@ -3032,7 +3034,7 @@ def list_slots(cmd, resource_group_name, name):
     return slots
 
 
-def swap_slot(cmd, resource_group_name, name, slot, target_slot=None, preserve_vnet=None, action='swap'):
+def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, preserve_vnet=None, action='swap'):
     client = web_client_factory(cmd.cli_ctx)
     # Default isPreserveVnet to 'True' if preserve_vnet is 'None'
     isPreserveVnet = preserve_vnet if preserve_vnet is not None else 'true'
@@ -3041,26 +3043,26 @@ def swap_slot(cmd, resource_group_name, name, slot, target_slot=None, preserve_v
     CsmSlotEntity = cmd.get_models('CsmSlotEntity')
     slot_swap_entity = CsmSlotEntity(target_slot=target_slot or 'production', preserve_vnet=isPreserveVnet)
     if action == 'swap':
-        poller = client.web_apps.begin_swap_slot(resource_group_name, name, slot, slot_swap_entity)
+        poller = client.web_apps.begin_swap_slot(resource_group_name, webapp, slot, slot_swap_entity)
         return poller
     if action == 'preview':
         if slot is None:
-            result = client.web_apps.apply_slot_config_to_production(resource_group_name, name, slot_swap_entity)
+            result = client.web_apps.apply_slot_config_to_production(resource_group_name, webapp, slot_swap_entity)
         else:
-            result = client.web_apps.apply_slot_configuration_slot(resource_group_name, name, slot, slot_swap_entity)
+            result = client.web_apps.apply_slot_configuration_slot(resource_group_name, webapp, slot, slot_swap_entity)
         return result
     # we will reset both source slot and target slot
     if target_slot is None:
-        client.web_apps.reset_production_slot_config(resource_group_name, name)
+        client.web_apps.reset_production_slot_config(resource_group_name, webapp)
     else:
-        client.web_apps.reset_slot_configuration_slot(resource_group_name, name, target_slot)
+        client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, target_slot)
     return None
 
 
-def delete_slot(cmd, resource_group_name, name, slot):
+def delete_slot(cmd, resource_group_name, webapp, slot):
     client = web_client_factory(cmd.cli_ctx)
     # TODO: once swagger finalized, expose other parameters like: delete_all_slots, etc...
-    client.web_apps.delete_slot(resource_group_name, name, slot)
+    client.web_apps.delete_slot(resource_group_name, webapp, slot)
 
 
 def set_traffic_routing(cmd, resource_group_name, name, distribution):
@@ -4125,19 +4127,6 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location):
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
-def update_flex_functionapp_configuration(cmd, resource_group_name, name, configs):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    client = web_client_factory(cmd.cli_ctx)
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    config_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/config/web?api-version={}'
-    config_url = config_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + config_url
-    configs_json = configs.serialize()
-    body = json.dumps(configs_json)
-    response = send_raw_request(cmd.cli_ctx, "PATCH", request_url, body=body)
-    return response.json()
-
-
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
                                         max_burst=None, location=None, tags=None, zone_redundant=False):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
@@ -4455,13 +4444,13 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         endpoints = deployment_storage.primary_endpoints
         deployment_config_storage_value = getattr(endpoints, 'blob') + deployment_storage_container_name
 
-        deployment_storage_auth_type = deployment_storage_auth_type or 'systemAssignedIdentity'
+        deployment_storage_auth_type = deployment_storage_auth_type or 'SystemAssignedIdentity'
 
-        if deployment_storage_auth_value and deployment_storage_auth_type != 'userAssignedIdentity':
+        if deployment_storage_auth_value and deployment_storage_auth_type != 'UserAssignedIdentity':
             raise ArgumentUsageError(
                 '--deployment-storage-auth-value is only a valid input for --deployment-storage-auth-type '
-                'set to userAssignedIdentity. Please try again with --deployment-storage-auth-type set to '
-                'userAssignedIdentity.'
+                'set to UserAssignedIdentity. Please try again with --deployment-storage-auth-type set to '
+                'UserAssignedIdentity.'
             )
 
         function_app_config = {}
@@ -4476,7 +4465,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             }
         }
 
-        if deployment_storage_auth_type == 'userAssignedIdentity':
+        if deployment_storage_auth_type == 'UserAssignedIdentity':
             deployment_storage_user_assigned_identity = _get_or_create_user_assigned_identity(
                 cmd,
                 resource_group_name,
@@ -4485,12 +4474,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 flexconsumption_location)
             deployment_storage_auth_value = deployment_storage_user_assigned_identity.id
             deployment_storage_auth_config["userAssignedIdentityResourceId"] = deployment_storage_auth_value
-        elif deployment_storage_auth_type == 'storageAccountConnectionString':
+        elif deployment_storage_auth_type == 'StorageAccountConnectionString':
             deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
             site_config.app_settings.append(NameValuePair(name='DEPLOYMENT_STORAGE_CONNECTION_STRING',
                                                           value=deployment_storage_conn_string))
             deployment_storage_auth_value = 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
-            deployment_storage_auth_config["storageAccountConnectionStringName"] = deployment_storage_auth_value
+            deployment_storage_auth_config["StorageAccountConnectionStringName"] = deployment_storage_auth_value
 
         always_ready_dict = _parse_key_value_pairs(always_ready_instances)
         always_ready_config = []
@@ -4508,13 +4497,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             "instanceMemoryMB": instance_memory or DEFAULT_INSTANCE_SIZE,
             "alwaysReady": always_ready_config
         }
-
-        if deployment_storage_auth_type == 'userAssignedIdentity':
-            assign_identities = [deployment_storage_auth_value]
-            _assign_deployment_storage_managed_identity_role(cmd.cli_ctx, deployment_storage,
-                                                             deployment_storage_user_assigned_identity.principal_id)
-        elif deployment_storage_auth_type == 'systemAssignedIdentity':
-            assign_identities = ['[system]']
 
     if environment is not None:
         if consumption_plan_location is not None:
@@ -4776,14 +4758,20 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                               image, registry_username,
                                               registry_password)
 
+    if flexconsumption_location is not None:
+        if deployment_storage_auth_type == 'UserAssignedIdentity':
+            assign_identity(cmd, resource_group_name, name, [deployment_storage_auth_value])
+            _assign_deployment_storage_managed_identity_role(cmd.cli_ctx, deployment_storage,
+                                                             deployment_storage_user_assigned_identity.principal_id)
+
+        elif deployment_storage_auth_type == 'SystemAssignedIdentity':
+            assign_identity(cmd, resource_group_name, name, ['[system]'], STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID,
+                            None, deployment_storage.id)
+
     if assign_identities is not None:
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,
                                    role, None, scope)
         functionapp.identity = identity
-
-    if deployment_storage_auth_type == 'systemAssignedIdentity':
-        _assign_deployment_storage_managed_identity_role(cmd.cli_ctx, deployment_storage,
-                                                         functionapp.identity.principal_id)
 
     return functionapp
 

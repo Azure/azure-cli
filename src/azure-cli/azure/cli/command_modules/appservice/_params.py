@@ -442,7 +442,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
     with self.argument_context('webapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
-        c.argument('name', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
+        c.argument('webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                    help='Name of the webapp', id_part='name',
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
         c.argument('auto_swap_slot', help='target slot to auto swap', default='production')
@@ -939,7 +939,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
     with self.argument_context('functionapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
-        c.argument('name', arg_type=functionapp_name_arg_type,
+        # This is set to webapp to simply reuse webapp functions, without rewriting same functions for function apps.
+        # The help will still show "-n or --name", so it should not be a problem to do it this way
+        c.argument('webapp', arg_type=functionapp_name_arg_type,
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                    help='Name of the function app', id_part='name')
         c.argument('auto_swap_slot', help='target slot to auto swap', default='production')
