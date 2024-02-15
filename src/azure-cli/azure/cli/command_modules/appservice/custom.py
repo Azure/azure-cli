@@ -4479,7 +4479,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             site_config.app_settings.append(NameValuePair(name='DEPLOYMENT_STORAGE_CONNECTION_STRING',
                                                           value=deployment_storage_conn_string))
             deployment_storage_auth_value = 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
-            deployment_storage_auth_config["StorageAccountConnectionStringName"] = deployment_storage_auth_value
+            deployment_storage_auth_config["storageAccountConnectionStringName"] = deployment_storage_auth_value
 
         always_ready_dict = _parse_key_value_pairs(always_ready_instances)
         always_ready_config = []
@@ -4765,7 +4765,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                                              deployment_storage_user_assigned_identity.principal_id)
 
         elif deployment_storage_auth_type == 'SystemAssignedIdentity':
-            assign_identity(cmd, resource_group_name, name, ['[system]'], STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID,
+            assign_identity(cmd, resource_group_name, name, ['[system]'], 'Storage Blob Data Contributor',
                             None, deployment_storage.id)
 
     if assign_identities is not None:
