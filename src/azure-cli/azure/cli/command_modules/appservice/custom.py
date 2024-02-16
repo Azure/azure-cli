@@ -1676,7 +1676,7 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
                                   "again with a valid value.")
     functionapp["properties"]["functionAppConfig"] = function_app_config
 
-    update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
 
     client = web_client_factory(cmd.cli_ctx)
     functionapp = client.web_apps.get(resource_group_name, name)
@@ -1697,7 +1697,8 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
 
     poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
-    return functionapp
+    return result.get("properties", {}).get("functionAppConfig", {}).get(
+        "deployment", {})
 
 
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
@@ -1803,11 +1804,9 @@ def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
 
 def update_flex_functionapp(cmd, resource_group_name, name, functionapp):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    client = web_client_factory(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
-    # TODO: switch to use new api version is available
-    url = url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
+    url = url_base.format(subscription_id, resource_group_name, name, '2023-12-01')
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + url
     body = json.dumps(functionapp)
     response = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body)
@@ -1829,7 +1828,10 @@ def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
 
     functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]["alwaysReady"] = updated_always_ready_config
 
-    return update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+
+    return result.get("properties", {}).get("functionAppConfig", {}).get(
+        "scaleAndConcurrency", {})
 
 
 def get_runtime_config(cmd, resource_group_name, name):
@@ -1866,7 +1868,10 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
 
     functionapp["properties"]["functionAppConfig"]["runtime"]["version"] = version
 
-    return update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+
+    return result.get("properties", {}).get("functionAppConfig", {}).get(
+        "runtime", {})
 
 
 def update_always_ready_settings(cmd, resource_group_name, name, settings):
@@ -1897,7 +1902,10 @@ def update_always_ready_settings(cmd, resource_group_name, name, settings):
 
     functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]["alwaysReady"] = updated_always_ready_config
 
-    return update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+
+    return result.get("properties", {}).get("functionAppConfig", {}).get(
+        "scaleAndConcurrency", {})
 
 
 def get_scale_config(cmd, resource_group_name, name):
@@ -1940,7 +1948,10 @@ def update_scale_config(cmd, resource_group_name, name, maximum_instance_count=N
 
     functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"] = scale_config
 
-    return update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+
+    return result.get("properties", {}).get("functionAppConfig", {}).get(
+        "scaleAndConcurrency", {})
 
 
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
@@ -4851,12 +4862,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         existing_properties = functionapp_def.serialize()["properties"]
         functionapp_def.additional_properties["properties"] = existing_properties
         functionapp_def.additional_properties["properties"]["functionAppConfig"] = function_app_config
-        # TODO: use following poller if new API version is released
-        # poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
-        #                                                 api_version='2023-12-01')
-
-    poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
-    functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
+        poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
+                                                        api_version='2023-12-01')
+        functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
+    else:
+        poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
+        functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if environment is not None:
         functionapp = client.web_apps.get(resource_group_name, name)
@@ -4911,6 +4922,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,
                                    role, None, scope)
         functionapp.identity = identity
+
+    if flexconsumption_location is not None:
+        return get_raw_functionapp(cmd, resource_group_name, name)
 
     return functionapp
 
