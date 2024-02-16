@@ -2836,10 +2836,7 @@ def cli_cosmosdb_sql_database_restore(cmd,
                 restorable_database_account.location,
                 restorable_database_account.name)
 
-            latest_database_delete_time, latest_database_create_or_recreate_time, database_rid = process_restorable_databases(restorable_databases, database_name)
-
-            logger.debug("latest_delete_time: {} latest_create_time: {}"
-                "database_rid: {}".format(latest_database_delete_time, latest_database_create_or_recreate_time, database_rid))
+            latest_database_delete_time, latest_database_create_or_recreate_time, database_rid = process_restorable_databases(restorable_databases, database_name)  # pylint: disable=unused-argument
 
             # Database is alive if create or recreate timestamp is later than latest delete timestamp
             database_alive = latest_database_create_or_recreate_time > latest_database_delete_time or latest_database_delete_time == datetime.datetime.max
@@ -3023,7 +3020,7 @@ def cli_cosmosdb_mongodb_database_restore(cmd,
                 restorable_database_account.location,
                 restorable_database_account.name)
 
-            latest_database_delete_time, latest_database_create_or_recreate_time, database_rid = process_restorable_databases(restorable_databases, database_name)
+            latest_database_delete_time, latest_database_create_or_recreate_time, database_rid = process_restorable_databases(restorable_databases, database_name)  # pylint: disable=unused-argument
 
             # Database is alive if create or recreate timestamp is later than latest delete timestamp
             database_alive = latest_database_create_or_recreate_time > latest_database_delete_time or latest_database_delete_time == datetime.datetime.max
@@ -3205,7 +3202,7 @@ def cli_cosmosdb_gremlin_database_restore(cmd,
                 restorable_database_account.location,
                 restorable_database_account.name)
 
-            latest_database_delete_time, latest_database_create_or_recreate_time, database_rid = process_restorable_databases(restorable_databases, database_name)
+            latest_database_delete_time, latest_database_create_or_recreate_time, database_rid = process_restorable_databases(restorable_databases, database_name)  # pylint: disable=unused-argument
 
             # Database is alive if create or recreate timestamp is later than latest delete timestamp
             database_alive = latest_database_create_or_recreate_time > latest_database_delete_time or latest_database_delete_time == datetime.datetime.max
