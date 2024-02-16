@@ -1599,20 +1599,19 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
 
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
 
-    if ("functionAppConfig" in functionapp["properties"]):
-        function_app_config = functionapp["properties"]["functionAppConfig"]
-    else:
-        function_app_config = {"deployment": None, "runtime": None, "scaleAndConcurrency": None}
+    # TODO: see if this is actually necessary and remove it otherwise
+    if 'functionAppConfig' not in functionapp["properties"]:
+        functionapp["properties"]["functionAppConfig"] = {}
+        if 'deployment' not in functionapp["properties"]["functionAppConfig"]:
+            functionapp["properties"]["functionAppConfig"]["deployment"] = {
+                "storage": {
+                    "type": "blobContainer"
+                }
+            }
 
-    if ("deployment" not in function_app_config or function_app_config["deployment"] is None):
-        function_app_config["deployment"] = {"storage": None}
+    functionapp_deployment_storage = functionapp["properties"]["functionAppConfig"]["deployment"]["storage"]
 
     deployment_storage = None
-    functionapp_deployment_storage = None
-    if ("storage" not in function_app_config["deployment"] or function_app_config["deployment"]["storage"] is None):
-        function_app_config["deployment"]["storage"] = functionapp_deployment_storage = {"type": "blobContainer",
-                                                                                         "value": None,
-                                                                                         "authentication": None}
 
     if (functionapp_deployment_storage["value"] is None):
         if deployment_storage_name is None:
@@ -1674,7 +1673,7 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
         else:
             raise ValidationError("Invalid value for --deployment-storage-auth-type. Please try "
                                   "again with a valid value.")
-    functionapp["properties"]["functionAppConfig"] = function_app_config
+    functionapp["properties"]["functionAppConfig"]["deployment"]["storage"] = functionapp_deployment_storage
 
     result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
 
