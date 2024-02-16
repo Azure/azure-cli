@@ -1460,6 +1460,8 @@ def get_oidc_client_setting_app_setting_name(provider_name):
 # only accept .pfx or .pem file
 def load_cert_file(file_path, cert_password=None):
     from base64 import b64encode
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.serialization import pkcs12
     from OpenSSL import crypto
     import os
 
@@ -1477,12 +1479,11 @@ def load_cert_file(file_path, cert_password=None):
             elif os.path.splitext(file_path)[1] in ['.pfx']:
                 cert_data = f.read()
                 try:
-                    p12 = crypto.load_pkcs12(cert_data, cert_password)
+                    p12 = pkcs12.load_pkcs12(cert_data, bytes(cert_password, "utf-8") if cert_password is not None else None)
                 except Exception as e:
                     raise FileOperationError('Failed to load the certificate file. This may be due to an incorrect or missing password. Please double check and try again.\nError: {}'.format(e)) from e
-                x509 = p12.get_certificate()
-                digest_algorithm = 'sha256'
-                thumbprint = x509.digest(digest_algorithm).decode("utf-8").replace(':', '')
+                x509 = p12.cert.certificate
+                thumbprint = x509.fingerprint(hashes.SHA256()).hex()
                 blob = b64encode(cert_data).decode("utf-8")
             else:
                 raise FileOperationError('Not a valid file type. Only .PFX and .PEM files are supported.')
