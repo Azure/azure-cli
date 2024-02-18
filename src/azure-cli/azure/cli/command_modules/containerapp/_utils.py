@@ -1480,7 +1480,7 @@ def load_cert_file(file_path, cert_password=None):
                 cert_data = f.read()
                 try:
                     # The password to use to decrypt the data. None if the PKCS12 is not encrypted.
-                    cert_password_bytes = cert_password.encode('utf-8') if cert_password is not None else None
+                    cert_password_bytes = cert_password.encode('utf-8') if cert_password else None
                     p12 = pkcs12.load_pkcs12(cert_data, cert_password_bytes)
                 except Exception as e:
                     raise FileOperationError('Failed to load the certificate file. This may be due to an incorrect or missing password. Please double check and try again.\nError: {}'.format(e)) from e
