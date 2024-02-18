@@ -1041,6 +1041,7 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
                 create_dcra=True,
                 enable_syslog=False,
                 data_collection_settings=None,
+                azure_monitor_private_link_scope_resource_id=None,
             )
     except TypeError:
         pass
@@ -1075,6 +1076,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       enable_msi_auth_for_monitoring=True,
                       enable_syslog=False,
                       data_collection_settings=None,
+                      azure_monitor_private_link_scope_resource_id=None,
                       no_wait=False,):
     instance = client.get(resource_group_name, name)
     msi_auth = False
@@ -1083,6 +1085,15 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
     else:
         enable_msi_auth_for_monitoring = False
     subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    is_private_cluster = False
+    if instance.api_server_access_profile and instance.api_server_access_profile.enable_private_cluster:
+        is_private_cluster= True
+    else:
+        is_private_cluster = False
+
+    if not is_private_cluster and azure_monitor_private_link_scope_resource_id is not None:
+        raise ArgumentUsageError("--azure-monitor-private-link-scope-resource-id can only be used with private cluster.")
 
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id,
@@ -1098,7 +1109,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               rotation_poll_interval=rotation_poll_interval,
                               no_wait=no_wait,
                               enable_syslog=enable_syslog,
-                              data_collection_settings=data_collection_settings)
+                              data_collection_settings=data_collection_settings,
+                              azure_monitor_private_link_scope_resource_id=azure_monitor_private_link_scope_resource_id)
 
     enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
         and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
@@ -1128,7 +1140,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                         create_dcr=True,
                         create_dcra=True,
                         enable_syslog=enable_syslog,
-                        data_collection_settings=data_collection_settings)
+                        data_collection_settings=data_collection_settings,
+                        azure_monitor_private_link_scope_resource_id=azure_monitor_private_link_scope_resource_id)
                 else:
                     raise ArgumentUsageError(
                         "--enable-msi-auth-for-monitoring can not be used on clusters with service principal auth.")
@@ -1139,6 +1152,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                         "--enable-syslog can not be used without MSI auth.")
                 if data_collection_settings is not None:
                     raise ArgumentUsageError("--data-collection-settings can not be used without MSI auth.")
+                if azure_monitor_private_link_scope_resource_id is not None:
+                    raise ArgumentUsageError("--azure-monitor-private-link-scope-resource-id supported only in MSI auth mode.")
                 ensure_container_insights_for_monitoring(
                     cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id, resource_group_name, name, instance.location, aad_route=False)
 
@@ -1179,7 +1194,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    rotation_poll_interval=None,
                    no_wait=False,
                    enable_syslog=False,
-                   data_collection_settings=None,):
+                   data_collection_settings=None,
+                   azure_monitor_private_link_scope_resource_id=None,):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
                                                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                 operation_group='managed_clusters')

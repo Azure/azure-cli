@@ -330,7 +330,8 @@ def ensure_container_insights_for_monitoring(
     create_dcr=False,
     create_dcra=False,
     enable_syslog=False,
-    data_collection_settings=None
+    data_collection_settings=None,
+    azure_monitor_private_link_scope_resource_id=None
 ):
     """
     Either adds the ContainerInsights solution to a LA Workspace OR sets up a DCR (Data Collection Rule) and DCRA
@@ -364,12 +365,19 @@ def ensure_container_insights_for_monitoring(
         workspace_resource_id
     )
 
-    # extract subscription ID and resource group from workspace_resource_id URL
+    # extract subscription ID and workspace name from workspace_resource_id
     try:
         subscription_id = workspace_resource_id.split("/")[2]
     except IndexError:
         raise AzCLIError(
-            "Could not locate resource group in workspace-resource-id URL."
+            "Could not locate resource group in workspace-resource-id."
+        )
+
+    try:
+        workspace_name = workspace_resource_id.split("/")[8]
+    except IndexError:
+        raise AzCLIError(
+            "Could not locate workspace name in workspace-resource-id."
         )
 
     location = ""
@@ -398,6 +406,43 @@ def ensure_container_insights_for_monitoring(
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         )
+
+        dataCollectionEndpointName = f"MSCI-{location}-{cluster_name}"
+        # Max length of the DCE name is 64 chars
+        dataCollectionEndpointName = dataCollectionEndpointName[0:64]
+        dce_resource_id = ""
+
+        if azure_monitor_private_link_scope_resource_id is not None:
+            dce_resource_id = (
+            f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
+            f"providers/Microsoft.Insights/dataCollectionEndpoints/{dataCollectionEndpointName}"
+            )
+            dce_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                f"{dce_resource_id}?api-version=2022-06-01"
+            # create the DCE
+            dce_creation_body_ = json.dumps(
+                {
+                    "location": location,
+                    "kind": "Linux",
+                    "properties": {
+                       "networkAcls": {
+                         "publicNetworkAccess": "Disabled"
+                       }
+                    },
+                }
+            )
+            for _ in range(3):
+                try:
+                    send_raw_request(
+                        cmd.cli_ctx, "PUT", dce_url, body=dce_creation_body_
+                    )
+                    error = None
+                    break
+                except AzCLIError as e:
+                    error = e
+            else:
+                raise error
+
         if create_dcr:
             # first get the association between region display names and region IDs (because for some reason
             # the "which RPs are available in which regions" check returns region display names)
@@ -475,6 +520,7 @@ def ensure_container_insights_for_monitoring(
                                 }
                             ]
                         },
+                        "dataCollectionEndpointId": dce_resource_id
                     },
                 }
             )
@@ -555,6 +601,7 @@ def ensure_container_insights_for_monitoring(
                                 }
                             ]
                         },
+                        "dataCollectionEndpointId": dce_resource_id
                     },
                 }
             )
@@ -596,6 +643,89 @@ def ensure_container_insights_for_monitoring(
                         "PUT" if not remove_monitoring else "DELETE",
                         association_url,
                         body=association_body,
+                    )
+                    error = None
+                    break
+                except AzCLIError as e:
+                    error = e
+            else:
+                raise error
+        # create dce association
+        if azure_monitor_private_link_scope_resource_id:
+            association_body = json.dumps(
+                {
+                    "location": cluster_region,
+                    "properties": {
+                        "dataCollectionEndpointId": dce_resource_id,
+                        "description": "routes monitoring data to a Log Analytics workspace",
+                    },
+                }
+            )
+            association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint?api-version=2022-06-01"
+            for _ in range(3):
+                try:
+                    send_raw_request(
+                        cmd.cli_ctx,
+                        "PUT" if not remove_monitoring else "DELETE",
+                        association_url,
+                        body=association_body,
+                    )
+                    error = None
+                    break
+                except AzCLIError as e:
+                    error = e
+            else:
+                raise error
+
+            #link DCE to AMPLS
+            link_dce_ampls_body = json.dumps(
+                {
+                    "location": cluster_region,
+                    "properties": {
+                        "linkedResourceId": dce_resource_id,
+                        "description": "links data collection endpoint to a AMPLS resource",
+                    },
+                }
+            )
+            link_dce_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                f"{azure_monitor_private_link_scope_resource_id}/{dataCollectionEndpointName}-connection?apiVersion:2021-07-01-preview"
+
+            for _ in range(3):
+                try:
+                    send_raw_request(
+                        cmd.cli_ctx,
+                        "PUT",
+                        link_dce_ampls_url,
+                        body=link_dce_ampls_body,
+                    )
+                    error = None
+                    break
+                except AzCLIError as e:
+                    error = e
+            else:
+                raise error
+
+            # link workspace to AMPLS
+            link_ws_ampls_body = json.dumps(
+                {
+                    "location": cluster_region,
+                    "properties": {
+                        "linkedResourceId": workspace_resource_id,
+                        "description": "links data collection endpoint to a Workspace ResourceId",
+                    },
+                }
+            )
+            link_ws_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                f"{azure_monitor_private_link_scope_resource_id}/{workspace_name}-connection?apiVersion:2021-07-01-preview"
+
+            for _ in range(3):
+                try:
+                    send_raw_request(
+                        cmd.cli_ctx,
+                        "PUT",
+                        link_ws_ampls_url,
+                        body=link_ws_ampls_body,
                     )
                     error = None
                     break
