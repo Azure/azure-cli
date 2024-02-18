@@ -1463,7 +1463,6 @@ def load_cert_file(file_path, cert_password=None):
     from OpenSSL import crypto
     from cryptography.hazmat.primitives.serialization import pkcs12
     from cryptography.hazmat.primitives import hashes
-
     import os
 
     cert_data = None
