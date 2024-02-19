@@ -143,7 +143,7 @@ DEPENDENCIES = [
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',
     'scp~=0.13.2',
-    'semver==2.13.0',
+    'semver~=3.0.0',
     'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
     'urllib3',
