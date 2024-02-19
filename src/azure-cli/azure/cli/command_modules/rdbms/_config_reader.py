@@ -29,8 +29,8 @@ def get_cloud(cmd):
 
 
 def get_cloud_cluster(cmd, location, subscription_id):
-    cloud = get_cloud(cmd)
     try:
+        cloud = get_cloud(cmd)
         clusters = cloud[location]
     except KeyError:
         clusters = None
