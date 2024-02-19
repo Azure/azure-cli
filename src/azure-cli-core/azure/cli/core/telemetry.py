@@ -73,6 +73,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.allow_broker = None
         self.msal_telemetry = None
         self.secrets_detected = None
+        self.user_agent = None
 
     def add_event(self, name, properties):
         for key in self.instrumentation_key:
@@ -152,6 +153,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             'Context.Default.VS.Core.Distro.Name': _get_distro_name(),  # eg. 'CentOS Linux 8'
             'Context.Default.VS.Core.Distro.Id': _get_distro_id(),  # eg. 'centos'
             'Context.Default.VS.Core.Distro.Version': _get_distro_version(),  # eg. '8.4.2105'
+            'Context.Dafault.VS.Core.Istty': sys.stdin.isatty(),
             'Context.Default.VS.Core.User.Id': _get_installation_id(),
             'Context.Default.VS.Core.User.IsMicrosoftInternal': 'False',
             'Context.Default.VS.Core.User.IsOptedIn': 'True',
@@ -182,6 +184,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result,
                               'ClientRequestId',
                               lambda: self.application.data['headers'].get('x-ms-client-request-id', ''))
+        set_custom_properties(result, 'UserAgent', _get_user_agent())
         set_custom_properties(result, 'CoreVersion', _get_core_version)
         set_custom_properties(result, 'TelemetryVersion', "2.0")
         set_custom_properties(result, 'InstallationId', _get_installation_id)
@@ -471,6 +474,12 @@ def set_msal_telemetry(msal_telemetry):
 
 
 @decorators.suppress_all_exceptions()
+def set_user_agent(user_agent):
+    if user_agent:
+        _session.user_agent = user_agent
+
+
+@decorators.suppress_all_exceptions()
 def set_secrets_detected(secrets_detected):
     _session.secrets_detected = secrets_detected
 
@@ -677,6 +686,17 @@ def _get_shell_type():
     if in_cloud_console():
         return 'cloud-shell'
     return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
+
+
+@decorators.suppress_all_exceptions(fallback_return='')
+def _get_user_agent():
+    if _session.user_agent:
+        return _session.user_agent
+    from azure.cli.core.util import get_az_user_agent
+    agents = [get_az_user_agent()]
+    if 'AZURE_HTTP_USER_AGENT' in os.environ:
+        agents.append(os.environ['AZURE_HTTP_USER_AGENT'])
+    return ' '.join(agents)
 
 
 @decorators.suppress_all_exceptions(fallback_return='')
