@@ -47,7 +47,8 @@ setup() {
 
     assert_consent "Add Microsoft as a trusted package signer?" ${global_consent}
     set -v
-    curl -fssL https://packages.microsoft.com/keys/microsoft.asc |\
+    sudo mkdir -p /etc/apt/keyrings
+    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc |\
       gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg
     set +v
 
