@@ -88,7 +88,7 @@ URIs: https://packages.microsoft.com/repos/azure-cli/
 Suites: ${CLI_REPO}
 Components: main
 Architectures: $(dpkg --print-architecture)
-Signed-by: /etc/apt/keyrings/microsoft.gpg" | sudo tee /etc/apt/sources.list.d/azure-cli.sources
+Signed-by: /etc/apt/keyrings/microsoft.gpg" | tee /etc/apt/sources.list.d/azure-cli.sources
     apt-get update
     set +v
 
