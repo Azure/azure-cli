@@ -7023,7 +7023,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
         self.cmd('vm host delete -n {host} --host-group {host-group} -g {rg} --yes')
         self.cmd('vm host group delete -n {host-group} -g {rg} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_redeploy_', location='centraluseuap')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_redeploy_', location='eastus')
     def test_vm_host_redeploy(self, resource_group):
         self.kwargs.update({
             'host-group': 'my-host-group',
