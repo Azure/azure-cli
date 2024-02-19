@@ -225,7 +225,7 @@ long-summary: >
 
     To Migrate a Azure MySQL single server to Azure MySQL Flexible server. For more information for network configuration, see
 
-    - Migrate Azure Database for MySQL - Single Server to Flexible Server using Azure MySQL Import CLI
+    - Migrate Azure Database for MySQL - Single Server to Flexible Server using Azure Database for MySQL Import CLI
 
     https://learn.microsoft.com/en-us/azure/mysql/migrate/migrate-single-flexible-mysql-import-cli
 

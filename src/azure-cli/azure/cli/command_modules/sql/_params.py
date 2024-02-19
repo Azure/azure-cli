@@ -31,7 +31,9 @@ from azure.mgmt.sql.models import (
     ServerConnectionType,
     ServerKeyType,
     StorageKeyType,
-    TransparentDataEncryptionState
+    TransparentDataEncryptionState,
+    FreemiumType,
+    ManagedInstanceDatabaseFormat
 )
 
 from azure.cli.core.commands.parameters import (
@@ -1261,7 +1263,9 @@ def load_arguments(self, _):
                 'weekly_retention',
                 'monthly_retention',
                 'yearly_retention',
-                'week_of_year'])
+                'week_of_year',
+                'make_backups_immutable',
+                'backup_storage_access_tier'])
 
         c.argument('weekly_retention',
                    help='Retention for the weekly backup. '
@@ -1280,6 +1284,16 @@ def load_arguments(self, _):
 
         c.argument('week_of_year',
                    help='The Week of Year, 1 to 52, in which to take the yearly LTR backup.')
+
+        c.argument('make_backups_immutable',
+                   help='Whether to make the LTR backups immutable.',
+                   arg_type=get_three_state_flag())
+
+        c.argument('backup_storage_access_tier',
+                   options_list=['--access-tier', '--backup-storage-access-tier'],
+                   arg_type=get_enum_type(["Hot", "Archive"]),
+                   help='The access tier of a LTR backup.'
+                   'Possible values = [Hot, Archive]')
 
     with self.argument_context('sql db ltr-backup') as c:
         c.argument('location_name',
@@ -1697,7 +1711,8 @@ def load_arguments(self, _):
                 'license_type',
                 'subnet_id',
                 'vcores',
-                'tags'
+                'tags',
+                'maintenance_configuration_id'
             ])
 
         c.argument('vcores',
@@ -1711,6 +1726,10 @@ def load_arguments(self, _):
             required=True,
             help='Name or ID of the subnet that allows access to an Instance Pool. '
                  'If subnet name is provided, --vnet-name must be provided.')
+
+        c.argument('maintenance_configuration_id',
+                   options_list=['--maint-config-id', '-m'],
+                   help='Assign maintenance configuration to this managed instance.')
 
         # Create args that will be used to build up the Instance Pool's Sku object
         create_args_for_complex_type(
@@ -1726,6 +1745,45 @@ def load_arguments(self, _):
                 options_list=['--vnet-name'],
                 help='The virtual network name',
                 validator=validate_subnet)
+
+    with self.argument_context('sql instance-pool update') as c:
+        # Create args that will be used to build up the InstancePool object
+        create_args_for_complex_type(
+            c, 'parameters', InstancePool, [
+                'license_type',
+                'vcores',
+                'tags',
+                'maintenance_configuration_id'
+            ])
+
+        c.argument('tier',
+                   arg_type=tier_param_type,
+                   required=False,
+                   help='The edition component of the sku. Allowed values include: '
+                   'GeneralPurpose, BusinessCritical.')
+
+        c.argument('family',
+                   arg_type=family_param_type,
+                   required=False,
+                   help='The compute generation component of the sku. '
+                   'Allowed values include: Gen4, Gen5.')
+
+        c.argument('vcores',
+                   arg_type=capacity_param_type,
+                   help='Capacity of the instance pool in vcores.')
+
+        c.argument('maintenance_configuration_id',
+                   options_list=['--maint-config-id', '-m'],
+                   help='Assign maintenance configuration to this managed instance.')
+
+        create_args_for_complex_type(
+            c, 'sku', Sku, [
+                'family',
+                'name',
+                'tier',
+            ])
+
+        c.ignore('name')  # Hide sku name
 
     ###############################################
     #                sql server                   #
@@ -2266,7 +2324,10 @@ def load_arguments(self, _):
                 'maintenance_configuration_id',
                 'primary_user_assigned_identity_id',
                 'key_id',
-                'zone_redundant'
+                'zone_redundant',
+                'instance_pool_name',
+                'database_format',
+                'pricing_model'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -2340,6 +2401,25 @@ def load_arguments(self, _):
                    help='Service Principal type to be used for this Managed Instance. '
                    'Possible values are SystemAssigned and None')
 
+        c.argument('instance_pool_name',
+                   required=False,
+                   options_list=['--instance-pool-name'],
+                   help='Name of the Instance Pool where managed instance will be placed.')
+
+        c.argument('database_format',
+                   required=False,
+                   options_list=['--database-format'],
+                   arg_type=get_enum_type(ManagedInstanceDatabaseFormat),
+                   help='Managed Instance database format specific to the SQL. Allowed values include: '
+                   'AlwaysUpToDate, SQLServer2022.')
+
+        c.argument('pricing_model',
+                   required=False,
+                   options_list=['--pricing-model'],
+                   arg_type=get_enum_type(FreemiumType),
+                   help='Managed Instance pricing model. Allowed values include: '
+                   'Regular, Freemium.')
+
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -2348,6 +2428,7 @@ def load_arguments(self, _):
                 'requested_backup_storage_redundancy',
                 'tags',
                 'yes',
+                'instance_pool_name'
             ])
 
         c.argument('administrator_login_password',
@@ -2399,6 +2480,25 @@ def load_arguments(self, _):
                    required=False,
                    help='Service Principal type to be used for this Managed Instance. '
                    'Possible values are SystemAssigned and None')
+
+        c.argument('instance_pool_name',
+                   required=False,
+                   options_list=['--instance-pool-name'],
+                   help='Name of the Instance Pool where managed instance will be placed.')
+
+        c.argument('database_format',
+                   required=False,
+                   options_list=['--database-format'],
+                   arg_type=get_enum_type(ManagedInstanceDatabaseFormat),
+                   help='Managed Instance database format specific to the SQL. Allowed values include: '
+                   'AlwaysUpToDate, SQLServer2022.')
+
+        c.argument('pricing_model',
+                   required=False,
+                   options_list=['--pricing-model'],
+                   arg_type=get_enum_type(FreemiumType),
+                   help='Managed Instance pricing model. Allowed values include: '
+                   'Regular, Freemium.')
 
     with self.argument_context('sql mi show') as c:
         c.argument('expand_ad_admin',

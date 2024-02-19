@@ -163,7 +163,10 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
 
 def set_container_permission(client, public_access=None, **kwargs):
     acl_response = client.get_container_access_policy()
-    signed_identifiers = {} if not acl_response.get('signed_identifiers', None) else acl_response['signed_identifiers']
+    signed_identifiers = {}
+    if acl_response.get('signed_identifiers'):
+        for identifier in acl_response["signed_identifiers"]:
+            signed_identifiers[identifier.id] = identifier.access_policy
     return client.set_container_access_policy(signed_identifiers=signed_identifiers,
                                               public_access=public_access, **kwargs)
 
@@ -560,12 +563,21 @@ def transform_blob_type(cmd, blob_type):
 
 # pylint: disable=protected-access
 def _adjust_block_blob_size(client, blob_type, length):
-    if not blob_type or blob_type != 'block' or length is None:
+    if not blob_type or blob_type == 'page' or length is None:
         return
+
+    # increase the block size to 8MB when blob size is >= 8MB to enable high throughput block/append blob
+    if length >= 8 * 1024 * 1024:
+        client._config.max_block_size = 8 * 1024 * 1024
+        client._config.max_single_put_size = 256 * 1024 * 1024
+
     # increase the block size to 100MB when the block list will contain more than 50,000 blocks(each block 4MB)
     if length > 50000 * 4 * 1024 * 1024:
         client._config.max_block_size = 100 * 1024 * 1024
         client._config.max_single_put_size = 256 * 1024 * 1024
+
+    if blob_type == 'append':
+        return
 
     # increase the block size to 4000MB when the block list will contain more than 50,000 blocks(each block 100MB)
     if length > 50000 * 100 * 1024 * 1024:
@@ -613,6 +625,7 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
     if blob_type == 'append':
         if client.exists(timeout=timeout):
             client.get_blob_properties(lease=lease_id, timeout=timeout, **check_blob_args)
+        upload_args['max_concurrency'] = 1
     else:
         upload_args['if_modified_since'] = if_modified_since
         upload_args['if_unmodified_since'] = if_unmodified_since

@@ -7,13 +7,14 @@ import os
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, NoneCheck, StringCheck, StringContainCheck, JMESPathCheckExists)
 from ..storage_test_util import StorageScenarioMixin
-from azure.cli.testsdk.scenario_tests import record_only
+from azure.cli.testsdk.scenario_tests import record_only, AllowLargeResponse
 
 
 class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(location='EastUS2')
-    def test_storage_file_copy_scenario(self, resource_group, storage_account):
+    @StorageAccountPreparer(location='EastUS2', parameter_name='storage_account')
+    @StorageAccountPreparer(location='EastUS2', parameter_name='storage_account_2')
+    def test_storage_file_copy_scenario(self, resource_group, storage_account, storage_account_2):
         account_info = self.get_account_info(resource_group, storage_account)
         s1 = self.create_share(account_info)
         s2 = self.create_share(account_info)
@@ -63,6 +64,17 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage file copy start -s {} -p "{}" --source-share {} --source-path "{}"',
                          account_info, s2, dst_file, s1, src_file) \
             .assert_with_checks(JMESPathCheck('status', 'success'))
+
+        # test copy between two different storage accounts
+        account_2_info = self.get_account_info(resource_group, storage_account_2)
+        s3 = self.create_share(account_2_info)
+        src_file = 'source_file.txt'
+        dst_file = 'dst_file.txt'
+        self.storage_cmd('storage file upload -p "{}" --share-name {} --source "{}"', account_2_info,
+                         src_file, s3, local_file)
+        self.storage_cmd('storage file copy start -s {} -p "{}" --source-share {} --source-path "{}" '
+                         '--source-account-name {} --source-account-key {}',
+                         account_info, s2, dst_file, s3, src_file, account_2_info[0], account_2_info[1])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(location='EastUS2')
@@ -471,6 +483,7 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(location='EastUS2')
+    @AllowLargeResponse()
     def test_storage_file_trailing_dot_scenario(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         s1 = self.create_share(account_info)
@@ -488,6 +501,10 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage directory create --share-name {} --name {} --fail-on-exist',
                          account_info, share, directory) \
             .assert_with_checks(JMESPathCheck('created', True))
+        connection_string = self.cmd('storage account show-connection-string -n {}'.format(account_info[0])
+                                     ).get_output_in_json()['connectionString']
+        self.storage_cmd('storage directory create --share-name {} --name {} --connection-string {}',
+                         account_info, share, directory, connection_string)
         self.storage_cmd('storage directory list -s {}', account_info, share) \
             .assert_with_checks(JMESPathCheck('length(@)', 1))
         self.storage_cmd('storage directory show --share-name {} -n {}',
@@ -498,6 +515,9 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage directory create --share-name {} --name {} --fail-on-exist --disallow-trailing-dot',
                          account_info, share, directory) \
             .assert_with_checks(JMESPathCheck('created', True))
+        self.storage_cmd('storage directory create --share-name {} --name {}  --disallow-trailing-dot '
+                         '--connection-string {}',
+                         account_info, share, directory, connection_string)
         self.storage_cmd('storage directory list -s {}', account_info, share) \
             .assert_with_checks(JMESPathCheck('length(@)', 2))
         self.storage_cmd('storage directory show --share-name {} -n {} --disallow-trailing-dot',
@@ -513,6 +533,10 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
                          share, source_file, filename)
         self.storage_cmd('storage file exists -s {} -p {}', account_info, share, filename) \
             .assert_with_checks(JMESPathCheck('exists', True))
+        connection_string = self.cmd('storage account show-connection-string -n {}'.format(account_info[0])
+                                     ).get_output_in_json()['connectionString']
+        self.storage_cmd('storage file upload --share-name {} --source "{}" -p {} --connection-string {}',
+                         account_info, share, source_file, filename, connection_string)
 
         if os.path.isfile(dest_file):
             os.remove(dest_file)
@@ -559,5 +583,7 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage file upload --share-name {} --source "{}" -p {} --disallow-trailing-dot',
                          account_info,
                          share, source_file, filename)
+        self.storage_cmd('storage file upload --share-name {} --source "{}" -p {} --disallow-trailing-dot '
+                         '--connection-string {}', account_info, share, source_file, filename, connection_string)
         self.storage_cmd('storage file exists -s {} -p {} --disallow-trailing-dot', account_info, share, filename) \
             .assert_with_checks(JMESPathCheck('exists', True))

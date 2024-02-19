@@ -86,10 +86,6 @@ def _polish_bad_errors(ex, creating_plan):
                                   "If creating an App Service Plan with --zone-redundant/-z, "
                                   "please see supported regions here: "
                                   "https://docs.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
-                    elif 'Not enough available reserved instance servers to satisfy' in detail:
-                        detail = ("Plan with Linux worker can only be created in a group " +
-                                  "which has never contained a Windows worker, and vice versa. " +
-                                  "Please use a new resource group. Original error:" + detail)
         else:
             detail = json.loads(ex.error_msg.response.text())['Message']
         ex = CLIError(detail)
@@ -142,7 +138,7 @@ def load_command_table(self, _):
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
         g.custom_command('create-remote-connection', 'create_tunnel', exception_handler=ex_handler_factory())
-        g.custom_command('deploy', 'perform_onedeploy', validator=validate_onedeploy_params)
+        g.custom_command('deploy', 'perform_onedeploy_webapp', validator=validate_onedeploy_params)
         g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp',
                                  custom_func_name='update_webapp', command_type=appservice_custom)
 
@@ -332,18 +328,18 @@ def load_command_table(self, _):
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
-        g.custom_command('deploy', 'perform_onedeploy', validator=validate_onedeploy_params, is_preview=True)
+        g.custom_command('deploy', 'perform_onedeploy_functionapp', validator=validate_onedeploy_params, is_preview=True)
         g.generic_update_command('update', getter_name="get_functionapp", setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
                                  custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk,
                                  validator=validate_functionapp_on_containerapp_update)
 
     with self.command_group('functionapp config') as g:
-        g.custom_command('set', 'update_site_configs', validator=validate_functionapp_on_containerapp_site_config_set, exception_handler=ex_handler_factory())
+        g.custom_command('set', 'update_site_configs_functionapp', validator=validate_functionapp_on_containerapp_site_config_set, exception_handler=ex_handler_factory())
         g.custom_show_command('show', 'get_site_configs', validator=validate_functionapp_on_containerapp_site_config_show, exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)
-        g.custom_command('set', 'update_app_settings', exception_handler=ex_handler_factory())
+        g.custom_command('set', 'update_app_settings_functionapp', exception_handler=ex_handler_factory())
         g.custom_command('delete', 'delete_app_settings', exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp config hostname') as g:
