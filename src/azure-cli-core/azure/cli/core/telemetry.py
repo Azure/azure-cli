@@ -529,10 +529,12 @@ def _get_config():
 
 @decorators.suppress_all_exceptions()
 def _get_secrets_warning_config():
-    show_secrets_warning = _get_config().getboolean('clients', 'show_secrets_warning', fallback=None)
-    if show_secrets_warning is None:
+    from configparser import NoSectionError, NoOptionError
+    try:
+        show_secrets_warning = _get_config().getboolean('clients', 'show_secrets_warning')
+        return 'on' if show_secrets_warning else 'off'
+    except (NoSectionError, NoOptionError):
         return None
-    return 'on' if show_secrets_warning else 'off'
 
 
 # internal utility functions
