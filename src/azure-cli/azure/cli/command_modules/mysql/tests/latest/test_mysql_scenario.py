@@ -2179,7 +2179,7 @@ class FlexibleServerAdvancedThreatProtectionScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @ServerPreparer(engine_type='mysql', location=DEFAULT_LOCATION)
-    def test_advanced_threat_protection_mgmt(self, resource_group, server):
+    def test_mysql_advanced_threat_protection_mgmt(self, resource_group, server):
         self._test_advanced_threat_protection_mgmt('mysql', resource_group, server)
 
     def _test_advanced_threat_protection_mgmt(self, database_engine, resource_group, server):
