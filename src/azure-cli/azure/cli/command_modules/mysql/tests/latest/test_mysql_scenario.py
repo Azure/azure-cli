@@ -2185,7 +2185,7 @@ class FlexibleServerAdvancedThreatProtectionScenarioTest(ScenarioTest):
     def _test_advanced_threat_protection_mgmt(self, database_engine, resource_group, server):
         # ATP invalid state validation
         with self.assertRaises(ValueError):
-            self.cmd('{} flexible-server advanced-threat-protection update -g {} -n {}'
+            self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} -n {}'
                      ' --state {}'
                      .format(database_engine, resource_group, server, 'Invalid'))
        
@@ -2193,14 +2193,14 @@ class FlexibleServerAdvancedThreatProtectionScenarioTest(ScenarioTest):
         state_disabled = AdvancedThreatProtectionState.DISABLED.value
 
         # get advanced threat protection setting
-        response = self.cmd('{} flexible-server advanced-threat-protection show -g {} -n {}'
+        response = self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} -n {}'
                             .format(database_engine, resource_group, server))
 
         # flip the setting, if current setting is disabled, then enable it and vice versa
         new_defender_state = state_enabled if response.get_output_in_json()['state'] == state_disabled else state_disabled
 
         # update advanced threat protection setting
-        self.cmd('{} flexible-server advanced-threat-protection update -g {} -n {}'
+        self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} -n {}'
                  ' --state {}'
                  .format(database_engine, resource_group, server, new_defender_state),
                  checks=[

@@ -293,7 +293,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('server_name', arg_type=server_name_arg_type)
 
     # Advanced Threat Protection
-    with self.argument_context('mysql flexible-server advanced-threat-protection update') as c:
+    with self.argument_context('mysql flexible-server advanced-threat-protection-setting update') as c:
         c.argument('state',
                    options_list=['--state'],
                    help="State of server's advanced threat protection setting. ")
