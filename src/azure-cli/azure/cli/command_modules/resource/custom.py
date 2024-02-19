@@ -72,112 +72,55 @@ def _build_resource_id(**kwargs):
         return None
 
 
-def _get_parameter_type(template_obj, schema_node, visited=None):
-    if schema_node is None:
-        return None
+def _rfc6901_decode(encoded):
+    return unquote(encoded).replace("~1", "/").replace("~0", "~")
 
-    if 'type' in schema_node:
-        return schema_node['type']
 
-    if '$ref' not in schema_node:
-        return None
+def _get_json_pointer_segments(json_pointer):
+    return [_rfc6901_decode(segment) for segment in json_pointer.split('/')]
 
-    if visited is None:
-        visited = set()
 
-    pointer = schema_node['$ref']
-    if pointer in visited:
-        logger.warning("Cyclic type reference detected at '%s'", pointer)
-        return None
-    visited.add(pointer)
+def _resolve_parameter_type(parameter, template):
+    current = parameter
+    visited = set()
+    while '$ref' in current:
+        referenced = current.get('$ref')
+        if referenced in visited:
+            raise CLIError("Cycle detected with processing {}.".format(referenced))
+        visited.add(referenced)
 
-    class _UninitalizedState:
-        def get(self, segment):
-            if segment == '#':
-                return _Initialized()
+        segments = _get_json_pointer_segments(referenced)
+        if len(segments) < 2 or segments[0] != "#" or not (segments[1] in ['definitions', 'parameters', 'outputs']):
+            raise CLIError("Invalid $ref {}.".format(referenced))
 
-            return _TerminalState()
+        resolved = _resolve_type_from_path(referenced, segments[2:], template.get(segments[1])).copy()
 
-        def resolve(self):
-            return None
+        # it's possible to override some of these properties: the highest-level non-null value wins
+        if current.get('nullable', None) is not None:
+            resolved['nullable'] = current.get('nullable')
+        if current.get('minLength', None) is not None:
+            resolved['minLength'] = current.get('minLength')
+        if current.get('maxLength', None) is not None:
+            resolved['maxLength'] = current.get('maxLength')
+        if current.get('allowedValues', None) is not None:
+            resolved['allowedValues'] = current.get('allowedValues')
 
-    class _TerminalState:
-        def get(self, _):
-            return self
+        current = resolved
 
-        def resolve(self):
-            return None
+    return current
 
-    class _Initialized:
-        def get(self, segment):
-            if segment in ['definitions', 'parameters', 'outputs'] and segment in template_obj:
-                return _InSchemaDictionary(template_obj[segment])
 
-            return _TerminalState()
+def _resolve_type_from_path(current_ref, segments, definitions):
+    current = definitions
+    for segment in segments:
+        if isinstance(current, dict) and segment in current:
+            current = current[segment]
+        elif isinstance(current, list) and segment.isdigit() and 0 <= int(segment) < len(current):
+            current = current[int(segment)]
+        else:
+            raise CLIError("Failed to resolve path {}.".format(current_ref))
 
-        def resolve(self):
-            return None
-
-    class _InSchemaDictionary:
-        def __init__(self, schema_dict):
-            self.schema_dict = schema_dict
-
-        def get(self, segment):
-            for key, value in self.schema_dict.items():
-                if key.lower() == segment:
-                    return _InSchemaNode(value)
-
-            return _TerminalState()
-
-        def resolve(self):
-            return None
-
-    class _InSchemaArray:
-        def __init__(self, schema_array):
-            self.schema_array = schema_array
-
-        def get(self, segment):
-            if segment.isdigit() and len(self.schema_array) > int(segment):
-                return _InSchemaNode(self.schema_array[int(segment)])
-
-            return _TerminalState()
-
-        def resolve(self):
-            return None
-
-    class _InSchemaNode:
-        def __init__(self, schema_node):
-            self.schema_node = schema_node
-
-        def get(self, segment):
-            property_value = None
-            for key, value in self.schema_node.items():
-                if key.lower() == segment:
-                    property_value = value
-                    break
-
-            if property_value is None:
-                return _TerminalState()
-
-            if segment == 'properties':
-                return _InSchemaDictionary(property_value)
-
-            if segment in ['items', 'additionalproperties']:
-                return _InSchemaNode(property_value)
-
-            if segment == 'prefixitems':
-                return _InSchemaArray(property_value)
-
-            return _TerminalState()
-
-        def resolve(self):
-            return self.schema_node
-
-    state = _UninitalizedState()
-    for segment in pointer.split('/'):
-        state = state.get(unquote(segment).replace('~1', '/').replace('~0', '~').lower())
-
-    return _get_parameter_type(template_obj, state.resolve(), visited)
+    return current
 
 
 def _try_parse_key_value_object(parameters, template_obj, value):
@@ -195,7 +138,9 @@ def _try_parse_key_value_object(parameters, template_obj, value):
         raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
                        .format(key, ', '.join(sorted(template_obj.get('parameters', {}).keys()))))
 
-    param_type = _get_parameter_type(template_obj, param)
+    param_type_data = _resolve_parameter_type(param, template_obj)
+    param_type = param_type_data.get('type')
+
     if param_type:
         param_type = param_type.lower()
     if param_type in ['object', 'array', 'secureobject']:
@@ -275,7 +220,11 @@ def _find_missing_parameters(parameters, template):
     missing = OrderedDict()
     for parameter_name in template_parameters:
         parameter = template_parameters[parameter_name]
+        param_type_data = _resolve_parameter_type(parameter, template)
+
         if 'defaultValue' in parameter:
+            continue
+        if param_type_data.get('nullable', False):
             continue
         if parameters is not None and parameters.get(parameter_name, None) is not None:
             continue
