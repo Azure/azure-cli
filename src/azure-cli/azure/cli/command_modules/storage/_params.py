@@ -804,9 +804,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='The source storage container name. Required when no --policy provided.')
             c.argument('destination_container', options_list=['--destination-container', '--dcont'],
                        help='The destination storage container name. Required when no --policy provided.')
-
-    with self.argument_context('storage account or-policy create') as c:
-        c.argument('properties', or_policy_type, validator=validate_or_policy)
+            c.argument('properties', or_policy_type, validator=validate_or_policy)
 
     with self.argument_context('storage account or-policy rule') as c:
         c.argument('policy_id', policy_id_type)
