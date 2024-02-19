@@ -83,6 +83,11 @@ setup() {
             exit 1
         fi
     fi
+
+    if [ -f /etc/apt/sources.list.d/azure-cli.sources ]; then
+        rm /etc/apt/sources.list.d/azure-cli.sources
+    fi
+
     echo "Types: deb
 URIs: https://packages.microsoft.com/repos/azure-cli/
 Suites: ${CLI_REPO}
