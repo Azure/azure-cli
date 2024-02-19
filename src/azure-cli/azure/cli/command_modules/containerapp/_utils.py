@@ -1484,7 +1484,7 @@ def load_cert_file(file_path, cert_password=None):
                     p12 = pkcs12.load_pkcs12(cert_data, cert_password_bytes)
                 except Exception as e:
                     raise FileOperationError('Failed to load the certificate file. This may be due to an incorrect or missing password. Please double check and try again.\nError: {}'.format(e)) from e
-                if p12 is None or p12.cert is None:
+                if p12.cert is None:
                     raise ValidationError("Failed to load the certificate file. The loading result is None.")
                 x509 = p12.cert.certificate
                 thumbprint = x509.fingerprint(hashes.SHA256()).hex().upper()
