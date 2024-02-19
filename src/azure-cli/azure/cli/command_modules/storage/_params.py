@@ -791,7 +791,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The destination storage account name or resource Id. Apply --account-name value as '
                    'destination account when there is no destination account provided in --policy and '
                    '--destination-account.')
-        c.argument('properties', or_policy_type)
+        c.argument('properties', or_policy_type, validator=validate_or_policy)
         c.argument('prefix_match', prefix_math_type)
         c.argument('min_creation_time', min_creation_time_type)
 
@@ -804,7 +804,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='The source storage container name. Required when no --policy provided.')
             c.argument('destination_container', options_list=['--destination-container', '--dcont'],
                        help='The destination storage container name. Required when no --policy provided.')
-            c.argument('properties', or_policy_type, validator=validate_or_policy)
 
     with self.argument_context('storage account or-policy rule') as c:
         c.argument('policy_id', policy_id_type)
