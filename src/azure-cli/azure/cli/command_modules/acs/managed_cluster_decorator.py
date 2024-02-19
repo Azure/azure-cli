@@ -5131,6 +5131,13 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return self.raw_param.get("upgrade_override_until")
 
+    def get_enable_app_routing(self) -> bool:
+        """Obtain the value of enable_app_routing.
+
+        :return: bool
+        """
+        return self.raw_param.get("enable_app_routing")
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -6228,6 +6235,22 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             self.context.set_intermediate("azuremonitormetrics_addon_enabled", True, overwrite_exists=True)
         return mc
 
+    def set_up_ingress_web_app_routing(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up web app routing profile in ingress profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        addons = self.context.get_enable_addons()
+        if "web_application_routing" in addons or self.context.get_enable_app_routing():
+            if mc.ingress_profile is None:
+                mc.ingress_profile = self.models.ManagedClusterIngressProfile()  # pylint: disable=no-member
+            mc.ingress_profile.web_app_routing = (
+                self.models.ManagedClusterIngressProfileWebAppRouting(enabled=True)  # pylint: disable=no-member
+            )
+        return mc
+
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
@@ -6300,6 +6323,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_azure_monitor_profile(mc)
         # set up azure service mesh profile
         mc = self.set_up_azure_service_mesh_profile(mc)
+        # set up app routing profile
+        mc = self.set_up_ingress_web_app_routing(mc)
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
             mc = self._restore_defaults_in_mc(mc)

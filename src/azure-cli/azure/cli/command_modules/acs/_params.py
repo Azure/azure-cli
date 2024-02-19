@@ -312,6 +312,7 @@ def load_arguments(self, _):
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('rotation_poll_interval')
         c.argument('enable_sgxquotehelper', action='store_true')
+        c.argument("enable_app_routing", action="store_true")
 
         # nodepool paramerters
         c.argument('nodepool_name', default='nodepool1',

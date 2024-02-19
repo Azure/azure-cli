@@ -575,6 +575,7 @@ def aks_create(
     enable_sgxquotehelper=False,
     enable_secret_rotation=False,
     rotation_poll_interval=None,
+    enable_app_routing=None,
     # nodepool paramerters
     nodepool_name="nodepool1",
     node_vm_size=None,
