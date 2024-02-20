@@ -170,6 +170,8 @@ def is_centauri_functionapp(cmd, resource_group, name):
 def is_flex_functionapp(cli_ctx, resource_group, name):
     client = web_client_factory(cli_ctx)
     app = client.web_apps.get(resource_group, name)
+    if app.server_farm_id is None:
+        return False
     parse_plan_id = parse_resource_id(app.server_farm_id)
     plan_info = client.app_service_plans.get(parse_plan_id['resource_group'], parse_plan_id['name'])
     return plan_info.sku.tier.lower() == 'flexconsumption'

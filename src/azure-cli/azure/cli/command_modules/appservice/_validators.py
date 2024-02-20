@@ -163,8 +163,10 @@ def validate_functionapp_on_containerapp_site_config_show(cmd, namespace):
 
 def validate_functionapp_on_flex_plan(cmd, namespace):
     resource_group_name = namespace.resource_group_name
-    name = namespace.name
+    name = _get_app_name(namespace)
     functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    if functionapp.server_farm_id is None:
+        return
     parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
     client = web_client_factory(cmd.cli_ctx)
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
@@ -179,6 +181,8 @@ def validate_is_flex_functionapp(cmd, namespace):
     resource_group_name = namespace.resource_group_name
     name = namespace.name
     functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    if functionapp.server_farm_id is None:
+        raise ValidationError('This command is only valid for Azure Functions on the FlexConsumption plan.')
     parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
     client = web_client_factory(cmd.cli_ctx)
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
