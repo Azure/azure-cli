@@ -651,7 +651,7 @@ def ensure_container_insights_for_monitoring(
             else:
                 raise error
         # create dce association
-        if azure_monitor_private_link_scope_resource_id:
+        if azure_monitor_private_link_scope_resource_id is not None:
             association_body = json.dumps(
                 {
                     "location": cluster_region,
