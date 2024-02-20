@@ -2761,6 +2761,8 @@ def process_restorable_databases(restorable_databases, database_name):
     # Database never deleted then reset it to max time
     latest_database_delete_time = datetime.datetime.max if latest_database_delete_time == datetime.datetime.utcfromtimestamp(0) else latest_database_delete_time
 
+    logger.debug('process_restorable_databases: latest_database_delete_time {} latest_database_create_or_recreate_time {} database_name {}'.format(latest_database_delete_time, latest_database_create_or_recreate_time, database_name))  # pylint: disable=logging-format-interpolation
+
     return latest_database_delete_time, latest_database_create_or_recreate_time, database_rid
 
 
@@ -2785,6 +2787,8 @@ def process_restorable_collections(restorable_collections, collection_name, data
 
     # Collection never deleted then reset it to max time
     latest_collection_delete_time = datetime.datetime.max if latest_collection_delete_time == datetime.datetime.utcfromtimestamp(0) else latest_collection_delete_time
+
+    logger.debug('process_restorable_databases: latest_collection_delete_time {} latest_collection_create_or_recreate_time {} database_name {} collection_name {}'.format(latest_collection_delete_time, latest_collection_create_or_recreate_time, database_name, collection_name))  # pylint: disable=logging-format-interpolation
 
     return latest_collection_delete_time, latest_collection_create_or_recreate_time
 
