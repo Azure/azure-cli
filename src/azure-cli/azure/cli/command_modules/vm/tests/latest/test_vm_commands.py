@@ -9151,6 +9151,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vm1': 'vm1',
             'vm2': 'vm2',
+            'vm3': 'vm3',
         })
         self.cmd('vm create -g {rg} -n {vm1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
@@ -9161,6 +9162,14 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         # create with image whose hyperVGeneration is v2 and under features does not contains TrustedLaunch
         self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7_6-gen2:latest --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('securityProfile', 'None')
+        ])
+
+        # create VM with specifying security type Standard
+        # and image whose hyperVGeneration is v2 and under features contains TrustedLaunch
+        self.cmd('vm create -g {rg} -n {vm3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest '
+                 '--admin-username clitest1 --generate-ssh-key --security-type Standard --nsg-rule None')
+        self.cmd('vm show -g {rg} -n {vm3}', checks=[
             self.check('securityProfile', 'None')
         ])
 
