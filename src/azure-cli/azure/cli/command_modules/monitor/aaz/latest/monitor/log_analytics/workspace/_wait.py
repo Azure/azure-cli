@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2022-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2023-09-01"],
         ]
     }
 
@@ -121,7 +121,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -269,6 +269,11 @@ class Wait(AAZWaitCommand):
             features.immediate_purge_data_on30_days = AAZBoolType(
                 serialized_name="immediatePurgeDataOn30Days",
                 nullable=True,
+            )
+            features.unified_sentinel_billing_only = AAZBoolType(
+                serialized_name="unifiedSentinelBillingOnly",
+                nullable=True,
+                flags={"read_only": True},
             )
 
             private_link_scoped_resources = cls._schema_on_200.properties.private_link_scoped_resources
