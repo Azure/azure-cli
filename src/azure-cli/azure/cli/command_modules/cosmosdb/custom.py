@@ -2846,7 +2846,7 @@ def cli_cosmosdb_sql_database_restore(cmd,
             database_alive = latest_database_create_or_recreate_time > latest_database_delete_time or latest_database_delete_time == datetime.datetime.max
 
             if database_alive:
-                raise CLIError("Cannot find a deleted database with name {} in this account with name {} in location {}".format(database_name, account_name, restorable_database_account.location))
+                raise CLIError("Database with name {} already exists in this account with name {} in location {}".format(database_name, account_name, restorable_database_account.location))
 
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
             restore_time = latest_database_delete_time + datetime.timedelta(seconds=-1)
@@ -3030,7 +3030,7 @@ def cli_cosmosdb_mongodb_database_restore(cmd,
             database_alive = latest_database_create_or_recreate_time > latest_database_delete_time or latest_database_delete_time == datetime.datetime.max
 
             if database_alive:
-                raise CLIError("Cannot find a deleted database with name {} in this account with name {} in location {}".format(database_name, account_name, restorable_database_account.location))
+                raise CLIError("Database with name {} already exists in this account with name {} in location {}".format(database_name, account_name, restorable_database_account.location))
 
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
             restore_time = latest_database_delete_time + datetime.timedelta(seconds=-1)
@@ -3212,7 +3212,7 @@ def cli_cosmosdb_gremlin_database_restore(cmd,
             database_alive = latest_database_create_or_recreate_time > latest_database_delete_time or latest_database_delete_time == datetime.datetime.max
 
             if database_alive:
-                raise CLIError("Cannot find a deleted database with name {} in this account with name {} in location {}".format(database_name, account_name, restorable_database_account.location))
+                raise CLIError("Database with name {} already exists in this account with name {} in location {}".format(database_name, account_name, restorable_database_account.location))
 
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
             restore_time = latest_database_delete_time + datetime.timedelta(seconds=-1)
@@ -3395,8 +3395,8 @@ def cli_cosmosdb_table_restore(cmd,
             # Table is alive if create or recreate timestamp is later than latest delete timestamp
             table_alive = latest_table_create_or_recreate_time > latest_table_delete_time or latest_table_delete_time == datetime.datetime.max
 
-            if (table_alive):
-                raise CLIError("Cannot find a deleted table with name {} in this account with name {} in location {}".format(table_name, account_name, restorable_database_account.location))
+            if table_alive:
+                raise CLIError("Table with name {} already exists in this account with name {} in location {}".format(table_name, account_name, restorable_database_account.location))
 
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
             restore_time = latest_table_delete_time + datetime.timedelta(seconds=-1)
