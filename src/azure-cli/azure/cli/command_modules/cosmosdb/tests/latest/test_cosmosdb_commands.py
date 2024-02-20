@@ -3147,7 +3147,11 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
 
-        self.assertRaises(Exception, lambda: self.cmd('az cosmosdb sql container restore -g {rg} -a {acc} -d {db_name} -n {ctn_name}'))
+        self.cmd('az cosmosdb sql container restore -g {rg} -a {acc} -d {db_name} -n {ctn_name}')
+
+        self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 0
 
         self.cmd('az cosmosdb sql container restore -g {rg} -a {acc} -d {db_name} -n {ctn_name} --restore-timestamp {rts}')
 
