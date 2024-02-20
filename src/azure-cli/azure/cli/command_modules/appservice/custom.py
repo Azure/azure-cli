@@ -612,7 +612,7 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
         enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout, slot, build_remote)
         response = check_flex_app_after_deployment(cmd, resource_group_name, name)
         return response
-    build_remote = build_remote == 'true' or False
+    build_remote = build_remote is True or build_remote == 'true'
     if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
     if build_remote and app.reserved:

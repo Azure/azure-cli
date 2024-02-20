@@ -47,6 +47,19 @@ def _get_zip_deploy_headers(username, password, cmd_mock_client):
     return headers
 
 
+def _get_flex_zip_deploy_headers(cmd_mock_client):
+    from urllib3.util import make_headers
+    from azure.cli.core.util import get_az_user_agent
+
+    headers = make_headers()
+    headers['Authorization'] = "Bearer 1234"
+    headers['Content-Type'] = 'application/zip'
+    headers['Cache-Control'] = 'no-cache'
+    headers['User-Agent'] = get_az_user_agent()
+    headers['x-ms-client-request-id'] = cmd_mock_client.data['headers']['x-ms-client-request-id']
+    return headers
+
+
 class TestFunctionappMocked(unittest.TestCase):
     def setUp(self):
         self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
@@ -202,15 +215,17 @@ class TestFunctionappMocked(unittest.TestCase):
         web_client_mock.web_apps.get.assert_called_with('rg', 'name')
         enable_zip_deploy_mock.assert_called_with(cmd_mock, 'rg', 'name', 'src', None, None)
 
-    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers')
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://mock-scm')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_runtime_config')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers_flex')
     @mock.patch('requests.post', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom._check_zip_deployment_status')
+    @mock.patch('azure.cli.command_modules.appservice.custom._check_zip_deployment_status_flex')
     def test_enable_zip_deploy_flex(self,
                                     check_zip_deployment_status_mock,
                                     requests_post_mock,
-                                    get_scm_url_mock,
-                                    get_scm_headers_mock):
+                                    get_scm_site_headers_flex_mock,
+                                    get_runtime_config_mock,
+                                    get_scm_url_mock):
         # prepare
         cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
@@ -220,19 +235,23 @@ class TestFunctionappMocked(unittest.TestCase):
         response.status_code = 202
         requests_post_mock.return_value = response
 
-        expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd', cmd_mock.cli_ctx)
-        get_scm_headers_mock.return_value = expected_zip_deploy_headers
+        get_runtime_config_mock.return_value = {
+            "name": "java",
+        }
+
+        expected_zip_deploy_headers = _get_flex_zip_deploy_headers(cmd_mock.cli_ctx)
+        get_scm_site_headers_flex_mock.return_value = expected_zip_deploy_headers
 
         # action
         with mock.patch('builtins.open', new_callable=mock.mock_open, read_data='zip-content'):
             enable_zip_deploy_flex(cmd_mock, 'rg', 'name', 'src', slot=None, build_remote=True)
 
         # assert
-        requests_post_mock.assert_called_with('https://mock-scm/api/Deploy/Zip?RemoteBuild=True&Deployer=az_cli', data='zip-content',
+        requests_post_mock.assert_called_with('https://mock-scm/api/publish?RemoteBuild=True&Deployer=az_cli', data='zip-content',
                                               headers=expected_zip_deploy_headers, verify=mock.ANY)
         # TODO improve authorization matcher
         check_zip_deployment_status_mock.assert_called_with(cmd_mock, 'rg', 'name',
-                                                            'https://mock-scm/api/deployments/latest', mock.ANY, None)
+                                                            'https://mock-scm/api/deployments/latest', None)
 
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers')
