@@ -681,10 +681,8 @@ def ensure_container_insights_for_monitoring(
             #link DCE to AMPLS
             link_dce_ampls_body = json.dumps(
                 {
-                    "location": cluster_region,
                     "properties": {
                         "linkedResourceId": dce_resource_id,
-                        "description": "links data collection endpoint to a AMPLS resource",
                     },
                 }
             )
@@ -709,10 +707,8 @@ def ensure_container_insights_for_monitoring(
             # link workspace to AMPLS
             link_ws_ampls_body = json.dumps(
                 {
-                    "location": cluster_region,
                     "properties": {
                         "linkedResourceId": workspace_resource_id,
-                        "description": "links data collection endpoint to a Workspace ResourceId",
                     },
                 }
             )
