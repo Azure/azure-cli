@@ -1223,8 +1223,17 @@ def update_containerappsjob_logic(cmd,
                     scale_rule_def["auth"] = auth_def
                     if not scale_def:
                         scale_def = JobScaleModel
-                    scale_def["rules"] = [scale_rule_def]
-                    eventTriggerConfig_def["scale"]["rules"] = scale_def["rules"]
+                    if "rules" not in eventTriggerConfig_def["scale"]:
+                        eventTriggerConfig_def["scale"]["rules"] = []
+                    existing_rules = eventTriggerConfig_def["scale"]["rules"]
+                    updated_rule = False
+                    for rule in existing_rules:
+                        if rule["name"] == scale_rule_name:
+                            rule.update(scale_rule_def)
+                            updated_rule = True
+                            break
+                    if not updated_rule:
+                        existing_rules.append(scale_rule_def)
 
             new_containerappsjob["properties"]["configuration"]["eventTriggerConfig"] = eventTriggerConfig_def
 
