@@ -9,19 +9,4 @@
 # flake8: noqa
 
 from .__cmd_group import *
-from ._break_file_locks import *
-from ._create import *
-from ._delete import *
-from ._finalize_relocation import *
-from ._get_groupid_list_for_ldapuser import *
-from ._list import *
-from ._migrate_backup import *
-from ._pool_change import *
-from ._populate_availability_zone import *
-from ._relocate import *
-from ._reset_cifs_pw import *
-from ._revert import *
-from ._revert_relocation import *
 from ._show import *
-from ._update import *
-from ._wait import *

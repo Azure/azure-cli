@@ -12,16 +12,17 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles volume backup delete",
+    "netappfiles volume migrate-backup",
+    is_preview=True,
 )
-class Delete(AAZCommand):
-    """Delete a backup of the volume
+class MigrateBackup(AAZCommand):
+    """Migrate the backups under volume to backup vault
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2022-11-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/backups/{}", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/migratebackups", "2022-11-01-preview"],
         ]
     }
 
@@ -48,16 +49,7 @@ class Delete(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
-            ),
-        )
-        _args_schema.backup_name = AAZStrArg(
-            options=["-b", "--name", "--backup-name"],
-            help="The name of the backup",
-            required=True,
-            id_part="child_name_3",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_.]{0,255}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
             ),
         )
         _args_schema.pool_name = AAZStrArg(
@@ -75,7 +67,7 @@ class Delete(AAZCommand):
             required=True,
         )
         _args_schema.volume_name = AAZStrArg(
-            options=["-n", "-v", "--volume-name"],
+            options=["--volume-name"],
             help="The name of the volume",
             required=True,
             id_part="child_name_2",
@@ -85,11 +77,21 @@ class Delete(AAZCommand):
                 min_length=1,
             ),
         )
+
+        # define Arg Group "Body"
+
+        _args_schema = cls._args_schema
+        _args_schema.backup_vault_id = AAZStrArg(
+            options=["--backup-vault-id"],
+            arg_group="Body",
+            help="The ResourceId of the Backup Vault",
+            required=True,
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.BackupsDelete(ctx=self.ctx)()
+        yield self.BackupsUnderVolumeMigrateBackups(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -100,7 +102,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class BackupsDelete(AAZHttpOperation):
+    class BackupsUnderVolumeMigrateBackups(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -110,16 +112,7 @@ class Delete(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
+                    None,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
@@ -139,13 +132,13 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/backups/{backupName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/migrateBackups",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "DELETE"
+            return "POST"
 
         @property
         def error_format(self):
@@ -156,10 +149,6 @@ class Delete(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "accountName", self.ctx.args.account_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "backupName", self.ctx.args.backup_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -185,21 +174,38 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2022-11-01-preview",
                     required=True,
                 ),
             }
             return parameters
 
-        def on_200(self, session):
-            pass
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+            }
+            return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("backupVaultId", AAZStrType, ".backup_vault_id", typ_kwargs={"flags": {"required": True}})
+
+            return self.serialize_content(_content_value)
 
         def on_204(self, session):
             pass
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
+class _MigrateBackupHelper:
+    """Helper class for MigrateBackup"""
 
 
-__all__ = ["Delete"]
+__all__ = ["MigrateBackup"]

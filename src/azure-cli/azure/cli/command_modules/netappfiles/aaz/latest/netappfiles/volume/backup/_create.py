@@ -55,7 +55,7 @@ class Create(AAZCommand):
             help="The name of the backup",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_.]{0,255}$",
             ),
         )
         _args_schema.pool_name = AAZStrArg(

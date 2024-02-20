@@ -59,7 +59,7 @@ class Update(AAZCommand):
             required=True,
             id_part="child_name_3",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_.]{0,255}$",
             ),
         )
         _args_schema.pool_name = AAZStrArg(
