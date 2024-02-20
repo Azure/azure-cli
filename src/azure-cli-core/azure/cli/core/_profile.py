@@ -26,8 +26,11 @@ _SUBSCRIPTION_ID = 'id'
 _SUBSCRIPTION_NAME = 'name'
 # Tenant of the token which is used to list the subscription
 _TENANT_ID = 'tenantId'
-# Home tenant of the subscription, which maps to tenantId in 'Subscriptions - List REST API'
-# https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
+# Token tenant's default domain. Maps to defaultDomain in 'Tenants - List' REST API
+# https://learn.microsoft.com/en-us/rest/api/resources/tenants/list
+_TENANT_DEFAULT_DOMAIN = 'tenantDefaultDomain'
+# Home tenant of the subscription. Maps to tenantId in 'Subscriptions - List' REST API
+# https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/list
 _HOME_TENANT_ID = 'homeTenantId'
 _MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'
@@ -91,17 +94,22 @@ def _get_cloud_console_token_endpoint():
     return os.environ.get('MSI_ENDPOINT')
 
 
-def _attach_token_tenant(subscription, tenant):
-    """Attach the token tenant ID to the subscription as tenant_id, so that CLI knows which token should be used
+def _attach_token_tenant(subscription, tenant, tenant_id_description=None):
+    """Attach the token tenant information to the subscription. CLI uses tenant_id to know which token should be used
     to access the subscription.
 
     This function supports multiple APIs:
       - v2016_06_01's Subscription doesn't have tenant_id
-      - v2019_11_01's Subscription has tenant_id representing the home tenant ID. It will mapped to home_tenant_id
+      - v2019_11_01's Subscription has tenant_id representing the home tenant ID. It's mapped to home_tenant_id
+      - v2022_12_01's TenantIdDescription has default_domain. It's mapped to tenant_default_domain.
     """
     if hasattr(subscription, "tenant_id"):
         setattr(subscription, 'home_tenant_id', subscription.tenant_id)
     setattr(subscription, 'tenant_id', tenant)
+
+    # Attach tenant_default_domain, if available
+    if tenant_id_description and hasattr(tenant_id_description, "default_domain"):
+        setattr(subscription, 'tenant_default_domain', tenant_id_description.default_domain)
 
 
 # pylint: disable=too-many-lines,too-many-instance-attributes,unused-argument
@@ -515,13 +523,14 @@ class Profile:
             index_to_subscription_map[index_str] = sub
 
             # TODO: make index_str blue
-            table_data.append({
+            row = {
                 'No': f'[{index_str}]',
                 'Subscription name': sub[_SUBSCRIPTION_NAME],
-                'Subscription ID': sub[_SUBSCRIPTION_ID],
-                # TODO: Retrieve tenant domain name
-                'Tenant Domain Name': sub[_TENANT_ID]
-            })
+                'Subscription ID': sub[_SUBSCRIPTION_ID]
+            }
+            if _TENANT_DEFAULT_DOMAIN in sub:
+                row['Tenant Domain Name'] = sub[_TENANT_DEFAULT_DOMAIN]
+            table_data.append(row)
 
         from tabulate import tabulate
         table_str = tabulate(table_data, headers="keys", tablefmt="simple", disable_numparse=True)
@@ -806,7 +815,9 @@ class SubscriptionFinder:
             specific_tenant_credential = identity.get_user_credential(username)
 
             try:
-                subscriptions = self.find_using_specific_tenant(tenant_id, specific_tenant_credential)
+
+                subscriptions = self.find_using_specific_tenant(tenant_id, specific_tenant_credential,
+                                                                tenant_id_description=t)
             except AuthenticationError as ex:
                 # because user creds went through the 'common' tenant, the error here must be
                 # tenant specific, like the account was disabled. For such errors, we will continue
@@ -852,12 +863,18 @@ class SubscriptionFinder:
                 logger.warning("%s", t.tenant_id_name)
         return all_subscriptions
 
-    def find_using_specific_tenant(self, tenant, credential):
+    def find_using_specific_tenant(self, tenant, credential, tenant_id_description=None):
+        """List subscriptions that can be accessed from a specific tenant.
+
+        :param tenant: tenant ID
+        :param credential: credential for the tenant
+        :param tenant_id_description: tenant Id information retrieved from 'Tenants - List' REST API
+        """
         client = self._create_subscription_client(credential)
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
         for s in subscriptions:
-            _attach_token_tenant(s, tenant)
+            _attach_token_tenant(s, tenant, tenant_id_description=tenant_id_description)
             all_subscriptions.append(s)
         self.tenants.append(tenant)
         return all_subscriptions
@@ -890,6 +907,10 @@ def _transform_subscription_for_multiapi(s, s_dict):
     """
     if hasattr(s, 'home_tenant_id'):
         s_dict[_HOME_TENANT_ID] = s.home_tenant_id
+
+    if hasattr(s, 'tenant_default_domain'):
+        s_dict[_TENANT_DEFAULT_DOMAIN] = s.tenant_default_domain
+
     if hasattr(s, 'managed_by_tenants'):
         if s.managed_by_tenants is None:
             s_dict[_MANAGED_BY_TENANTS] = None
