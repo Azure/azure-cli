@@ -3003,6 +3003,7 @@ def update_long_term_retention(
         monthly_retention=None,
         yearly_retention=None,
         week_of_year=None,
+        make_backups_immutable=None,
         backup_storage_access_tier=None,
         **kwargs):
     '''
@@ -3013,6 +3014,13 @@ def update_long_term_retention(
 
     if yearly_retention and not week_of_year:
         raise CLIError('Please specify week of year for yearly retention.')
+
+    if make_backups_immutable:
+        confirmation = prompt_y_n("""Immutable LTR backups can't be changed or deleted.
+         You'll be charged for LTR backups for the full retention period.
+         Do you want to proceed?""")
+        if not confirmation:
+            return
 
     if backup_storage_access_tier and backup_storage_access_tier.lower() not in BACKUP_STORAGE_ACCESS_TIERS:
         raise CLIError('Please specify a valid backup storage access tier type for backup storage access tier.'
@@ -3025,6 +3033,8 @@ def update_long_term_retention(
     kwargs['yearly_retention'] = yearly_retention
 
     kwargs['week_of_year'] = week_of_year
+
+    kwargs['make_backups_immutable'] = make_backups_immutable
 
     kwargs['backup_storage_access_tier'] = backup_storage_access_tier
 
@@ -5055,7 +5065,9 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         yes=None,
         service_principal_type=None,
         zone_redundant=None,
-        instance_pool_name=None):
+        instance_pool_name=None,
+        database_format=None,
+        pricing_model=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -5127,6 +5139,12 @@ def managed_instance_update(  # pylint: disable=too-many-locals
 
     if instance_pool_name is not None:
         instance.instance_pool_id = _get_managed_instance_pool_resource_id(cmd.cli_ctx, resource_group_name, instance_pool_name)
+
+    if database_format is not None:
+        instance.database_format = database_format
+
+    if pricing_model is not None:
+        instance.pricing_model = pricing_model
 
     return instance
 

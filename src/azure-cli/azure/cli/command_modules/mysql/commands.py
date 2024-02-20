@@ -102,7 +102,7 @@ def load_command_table(self, _):
 
     with self.command_group('mysql flexible-server import', mysql_flexible_servers_sdk,
                             custom_command_type=mysql_custom,
-                            client_factory=cf_mysql_flexible_servers, is_preview=True) as g:
+                            client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('create', 'flexible_server_import_create', table_transformer=table_transform_output)
 
     with self.command_group('mysql flexible-server firewall-rule', mysql_flexible_firewall_rule_sdk,
@@ -171,7 +171,7 @@ def load_command_table(self, _):
 
     with self.command_group('mysql flexible-server export', mysql_flexible_export_sdk,
                             custom_command_type=mysql_custom,
-                            client_factory=cf_mysql_flexible_export) as g:
+                            client_factory=cf_mysql_flexible_export, is_preview=True) as g:
         g.custom_command('create', 'flexible_server_export_create')
 
     with self.command_group('mysql flexible-server identity', mysql_flexible_servers_sdk,

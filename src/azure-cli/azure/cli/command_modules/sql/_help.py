@@ -242,7 +242,7 @@ type: command
 short-summary: Update long term retention settings for a database.
 examples:
   - name: Set long term retention for a database.
-    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26 --access-tier "Archive"
+    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26 --access-tier "Archive" --make-backups-immutable true
 """
 
 helps['sql db ltr-policy show'] = """
@@ -898,6 +898,8 @@ examples:
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -z false
   - name: Create managed instance with instance pool name
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --instance-pool-name myinstancepool
+  - name: Create managed instance with database format and pricing model
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --database-format Regular --pricing-model AlwaysUpToDate
 """
 
 helps['sql mi delete'] = """
@@ -1031,6 +1033,8 @@ examples:
     text: az sql mi update -g mygroup -n myinstance --instance-pool-name myinstancepool
   - name: Move managed instance out of instance pool
     text: az sql mi update -g mygroup -n myinstance --remove instancePoolId --capacity vcorecapacity
+  - name: Update mi database format and pricing model
+    text: az sql mi update -g mygroup -n myinstance --database-format Regular --pricing-model AlwaysUpToDate
 """
 
 helps['sql midb'] = """

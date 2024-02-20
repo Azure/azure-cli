@@ -163,12 +163,36 @@ AzureFairfaxRegionToOmsRegionMap = {
 }
 
 
+# mapping for azure us nat cloud
+AzureUSNatLocationToOmsRegionCodeMap = {
+    "usnatwest": "USNW",
+    "usnateast": "USNE",
+}
+
+AzureUSNatRegionToOmsRegionMap = {
+    "usnatwest": "usnatwest",
+    "usnateast": "usnateast",
+}
+
+# mapping for azure us sec cloud
+AzureUSSecLocationToOmsRegionCodeMap = {
+    "usseceast": "USSE",
+    "ussecwest": "USSW",
+}
+
+AzureUSSecRegionToOmsRegionMap = {
+    "usseceast": "usseceast",
+    "ussecwest": "ussecwest",
+}
+
+
 # pylint: disable=too-many-locals
 def ensure_default_log_analytics_workspace_for_monitoring(
     cmd, subscription_id, resource_group_name
 ):
     rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
     cloud_name = cmd.cli_ctx.cloud.name
+    workspace_region_code = "EUS"
 
     if cloud_name.lower() == "azurecloud":
         workspace_region = AzureCloudRegionToOmsRegionMap.get(
@@ -191,6 +215,21 @@ def ensure_default_log_analytics_workspace_for_monitoring(
         workspace_region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(
             workspace_region, "USGV"
         )
+    elif cloud_name.lower() == "usnat":
+        workspace_region = AzureUSNatRegionToOmsRegionMap.get(
+            rg_location, "usnatwest"
+        )
+        workspace_region_code = AzureUSNatLocationToOmsRegionCodeMap.get(
+            workspace_region, "USNW"
+        )
+    elif cloud_name.lower() == "ussec":
+        workspace_region = AzureUSSecRegionToOmsRegionMap.get(
+            rg_location, "ussecwest"
+        )
+        workspace_region_code = AzureUSSecLocationToOmsRegionCodeMap.get(
+            workspace_region, "USSW"
+        )
+
     else:
         logger.error(
             "AKS Monitoring addon not supported in cloud : %s", cloud_name

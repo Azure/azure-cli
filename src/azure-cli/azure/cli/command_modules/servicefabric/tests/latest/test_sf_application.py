@@ -84,6 +84,7 @@ class ServiceFabricApplicationTests(ScenarioTest):
         with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf application show -g {rg} -c {cluster_name} --application-name {app_name}')
 
+    @unittest.skip("Cannot succeed in live run with sever failure 'ClusterChildResourceOperationFailed'")
     @ResourceGroupPreparer()
     @KeyVaultPreparer(name_prefix='sfrp-cli-kv-', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
     def test_application_related(self, key_vault, resource_group):
