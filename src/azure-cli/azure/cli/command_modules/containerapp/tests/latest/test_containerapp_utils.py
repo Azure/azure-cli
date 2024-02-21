@@ -3,8 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
+import os
 
-from azure.cli.command_modules.containerapp._utils import clean_null_values
+from azure.cli.command_modules.containerapp._utils import clean_null_values, load_cert_file
+from azure.cli.core.azclierror import CLIInternalError
+
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class UtilsTest(unittest.TestCase):
@@ -206,6 +210,35 @@ class UtilsTest(unittest.TestCase):
         }
         self.assertEqual(expect_result_for_new, result_new)
         self.assertEqual(expect_result_for_old, result_old)
+
+    def test_load_cert_file(self):
+        pfx_file = os.path.join(TEST_DIR, 'data', 'cert.pfx')
+        testpassword = 'test12'
+        blob, thumbprint = load_cert_file(pfx_file, testpassword)
+        self.assertEqual("8D2DC3BF7DF8D2BA32705E079A9C0015FE9CBC7062C8583FE19B7F068AFDC2C9", thumbprint)
+
+        pfx_file = os.path.join(TEST_DIR, 'data', 'cert2.pfx')
+        testpassword = ''
+        blob, thumbprint = load_cert_file(pfx_file, testpassword)
+        self.assertEqual("346C37A6F29AB35063AC42A470CB2F95DB2A068E3E14A17E80A258BE9713E2BF", thumbprint)
+
+        # test load with wrong password
+        pfx_file = os.path.join(TEST_DIR, 'data', 'cert2.pfx')
+        testpassword = 'test12'
+        thumbprint = ''
+        try:
+            blob, thumbprint = load_cert_file(pfx_file, testpassword)
+        except CLIInternalError as e:
+            self.assertTrue(e.error_msg.error_msg.__contains__('Invalid password or PKCS12 data'))
+        self.assertEqual('', thumbprint)
+
+        pfx_file = os.path.join(TEST_DIR, 'data', 'cert2.pfx')
+        blob, thumbprint = load_cert_file(pfx_file)
+        self.assertEqual("346C37A6F29AB35063AC42A470CB2F95DB2A068E3E14A17E80A258BE9713E2BF", thumbprint)
+
+        pem_file = os.path.join(TEST_DIR, 'data', 'cert.pem')
+        blob, thumbprint = load_cert_file(pem_file)
+        self.assertEqual("FEAD2E32FB423702763C1093ACD431E2A05CD55F1419F4BAA6CD5E64030EF499", thumbprint)
 
 
 # Remove null/None/empty properties in a model since the PATCH API will delete those. Not needed once we move to the SDK
