@@ -384,12 +384,11 @@ def update_containerapp_logic(cmd,
         new_containerapp["properties"]["template"] = r["properties"]["template"]
 
     # Doing this while API has bug. If env var is an empty string, API doesn't return "value" even though the "value" should be an empty string
-    if "properties" in containerapp_def and "template" in containerapp_def["properties"] and "containers" in containerapp_def["properties"]["template"]:
-        for container in containerapp_def["properties"]["template"]["containers"]:
-            if "env" in container:
-                for e in container["env"]:
-                    if "value" not in e:
-                        e["value"] = ""
+    for container in safe_get(containerapp_def, "properties", "template", "containers", default=[]):
+        if "env" in container:
+            for e in container["env"]:
+                if "value" not in e:
+                    e["value"] = ""
 
     update_map = {}
     update_map['scale'] = min_replicas is not None or max_replicas is not None or scale_rule_name

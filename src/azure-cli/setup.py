@@ -77,7 +77,7 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=30.4.0',
     'azure-mgmt-containerinstance==10.1.0',
     'azure-mgmt-containerregistry==10.1.0',
-    'azure-mgmt-containerservice~=29.0.0',
+    'azure-mgmt-containerservice~=29.1.0',
     'azure-mgmt-cosmosdb==9.4.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -191,6 +191,7 @@ setup(
             'resources/GenerateRandomAppNames.json'
         ],
         'azure.cli.command_modules.rdbms': [
+            '*.json',
             'randomname/adjectives.txt',
             'randomname/nouns.txt',
             'templates/mysql_githubaction_template.yaml',
