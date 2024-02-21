@@ -687,7 +687,7 @@ def ensure_container_insights_for_monitoring(
                 }
             )
             link_dce_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{azure_monitor_private_link_scope_resource_id}/scopedresources/{dataCollectionEndpointName}-connection?apiVersion:2021-07-01-preview"
+                f"{azure_monitor_private_link_scope_resource_id}/scopedresources/{dataCollectionEndpointName}-connection?api-version=2021-07-01-preview"
 
             for _ in range(3):
                 try:
@@ -713,7 +713,7 @@ def ensure_container_insights_for_monitoring(
                 }
             )
             link_ws_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{azure_monitor_private_link_scope_resource_id}/scopedresources/{workspace_name}-connection?apiVersion:2021-07-01-preview"
+                f"{azure_monitor_private_link_scope_resource_id}/scopedresources/{workspace_name}-connection?api-version=2021-07-01-preview"
 
             for _ in range(3):
                 try:
