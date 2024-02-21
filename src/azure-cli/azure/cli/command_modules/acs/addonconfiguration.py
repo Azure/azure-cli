@@ -418,8 +418,8 @@ def ensure_container_insights_for_monitoring(
 
         if azure_monitor_private_link_scope_resource_id is not None:
             dce_resource_id = (
-            f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
-            f"providers/Microsoft.Insights/dataCollectionEndpoints/{dataCollectionEndpointName}"
+                f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
+                f"providers/Microsoft.Insights/dataCollectionEndpoints/{dataCollectionEndpointName}"
             )
             dce_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
                 f"{dce_resource_id}?api-version=2022-06-01"
@@ -429,10 +429,10 @@ def ensure_container_insights_for_monitoring(
                     "location": location,
                     "kind": "Linux",
                     "properties": {
-                       "networkAcls": {
-                         "publicNetworkAccess": "Disabled"
-                       }
-                    },
+                        "networkAcls": {
+                            "publicNetworkAccess": "Disabled"
+                        }
+                    }
                 }
             )
             for _ in range(3):
@@ -682,7 +682,7 @@ def ensure_container_insights_for_monitoring(
             else:
                 raise error
 
-            #link DCE to AMPLS
+            # link DCE to AMPLS
             link_dce_ampls_body = json.dumps(
                 {
                     "properties": {
