@@ -288,13 +288,13 @@ def ensure_default_log_analytics_workspace_for_monitoring(
     return ws_resource_id
 
 
-def sanitize_loganalytics_ws_resource_id(workspace_resource_id):
-    workspace_resource_id = workspace_resource_id.strip()
-    if not workspace_resource_id.startswith("/"):
-        workspace_resource_id = "/" + workspace_resource_id
-    if workspace_resource_id.endswith("/"):
-        workspace_resource_id = workspace_resource_id.rstrip("/")
-    return workspace_resource_id
+def sanitize_resource_id(resource_id):
+    resource_id = resource_id.strip()
+    if not resource_id.startswith("/"):
+        resource_id = "/" + resource_id
+    if resource_id.endswith("/"):
+        resource_id = resource_id.rstrip("/")
+    return resource_id
 
 
 def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
@@ -352,6 +352,9 @@ def ensure_container_insights_for_monitoring(
     if (not is_private_cluster or not aad_route) and azure_monitor_private_link_scope_resource_id is not None:
         raise AzCLIError("--azure-monitor-private-link-scope-resource-id can only be used with private cluster in MSI mode.")
 
+    if azure_monitor_private_link_scope_resource_id is not None:
+       azure_monitor_private_link_scope_resource_id = sanitize_resource_id(azure_monitor_private_link_scope_resource_id)
+
     # workaround for this addon key which has been seen lowercased in the wild
     for key in list(addon.config):
         if (
@@ -365,7 +368,7 @@ def ensure_container_insights_for_monitoring(
     workspace_resource_id = addon.config[
         CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID
     ]
-    workspace_resource_id = sanitize_loganalytics_ws_resource_id(
+    workspace_resource_id = sanitize_resource_id(
         workspace_resource_id
     )
 
