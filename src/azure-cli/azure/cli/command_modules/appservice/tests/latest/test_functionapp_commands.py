@@ -636,65 +636,144 @@ class FunctionappDapr(LiveScenarioTest):
 
 
 class FunctionAppFlex(LiveScenarioTest):
+    def test_functionapp_list_flexconsumption_locations(self):
+        locations = self.cmd('functionapp list-flexconsumption-locations').get_output_in_json()
+        self.assertTrue(len(locations) == 14)
+
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
-    def test_functionapp_flex_create(self, resource_group, storage_account):
+    def test_functionapp_flex_scale_config(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionapp', 40)
-        plan = '{}LinuxFlexPlan'.format(FLEX_ASP_LOCATION_FUNCTIONAPP)
+        plan = '{}FlexPlan'.format(FLEX_ASP_LOCATION_FUNCTIONAPP)
 
-        self.cmd('functionapp create -g {} -n {} -f {} -s {} --os-type Linux --functions-version 4 --runtime dotnet --always-ready-instances {} --instance-size {} --maximum-instances {}'
-                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account, 5, 512, 100)).assert_with_checks([
-                     JMESPathCheck('state', 'Running'),
-                     JMESPathCheck('name', functionapp_name),
-                     JMESPathCheck('reserved', True),
-                     JMESPathCheck('kind', 'functionapp,linux'),
-                     JMESPathCheck('containerSize', 512),
-                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
-
-        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('siteConfig.minimumElasticInstanceCount', 5),
-            JMESPathCheck('siteConfig.functionAppScaleLimit', 100)
-        ])
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java --always-ready-instances http=10 --instance-memory 512 --maximum-instance-count 150'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+        self.assertTrue(functionapp['functionAppConfig']['scaleAndConcurrency']['maximumInstanceCount'] == 150)
+        self.assertTrue(functionapp['functionAppConfig']['scaleAndConcurrency']['instanceMemoryMB'] == 512)
+        self.assertTrue(functionapp['functionAppConfig']['scaleAndConcurrency']['alwaysReady'][0]['name'] == 'http')
+        self.assertTrue(functionapp['functionAppConfig']['scaleAndConcurrency']['alwaysReady'][0]['instanceCount'] == 10)
+        self.assertTrue(len(functionapp['functionAppConfig']['scaleAndConcurrency']['alwaysReady']) == 1)
 
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('sku.tier', 'FlexConsumption'),
-            JMESPathCheck('sku.name', 'FL1')
+            JMESPathCheck('sku.name', 'FC1')
         ])
+
+        scale_config = self.cmd('functionapp scale config set -g {} -n {} --maximum-instance-count 200 --instance-memory 2048 --trigger-type http --trigger-settings perInstanceConcurrency=5'
+                               .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue(scale_config['maximumInstanceCount'] == 200)
+        self.assertTrue(scale_config['instanceMemoryMB'] == 2048)
+        self.assertTrue(scale_config['triggers']['http']['perInstanceConcurrency'] == 5)
+
+        scale_config = self.cmd('functionapp scale config always-ready set -g {} -n {} --settings http=8 hello=15'
+                                .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue(scale_config['alwaysReady'][0]['name'] == 'http')
+        self.assertTrue(scale_config['alwaysReady'][0]['instanceCount'] == 8)
+        self.assertTrue(scale_config['alwaysReady'][1]['name'] == 'hello')
+        self.assertTrue(scale_config['alwaysReady'][1]['instanceCount'] == 15)
+        self.assertTrue(len(scale_config['alwaysReady']) == 2)
+
+        scale_config = self.cmd('functionapp scale config always-ready delete -g {} -n {} --setting-names http'
+                                .format()).get_output_in_json()
+        self.assertTrue(scale_config['alwaysReady'][0]['name'] == 'hello')
+        self.assertTrue(scale_config['alwaysReady'][0]['instanceCount'] == 15)
+        self.assertTrue(len(scale_config['alwaysReady']) == 1)
+
+        scale_config = self.cmd('functionapp scale config show -g {} -n {}'
+                                .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue(scale_config['maximumInstanceCount'] == 200)
+        self.assertTrue(scale_config['instanceMemoryMB'] == 2048)
+        self.assertTrue(scale_config['triggers']['http']['perInstanceConcurrency'] == 5)
+        self.assertTrue(scale_config['alwaysReady'][0]['name'] == 'hello')
+        self.assertTrue(scale_config['alwaysReady'][0]['instanceCount'] == 15)
 
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
-    def test_functionapp_flex_update(self, resource_group, storage_account):
+    def test_functionapp_flex_runtime_config(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionapp', 40)
+        functionapp_name2 = self.create_random_name(
+            'functionapp', 40)
 
-        self.cmd('functionapp create -g {} -n {} -f {} -s {} --os-type Linux --functions-version 4 --runtime dotnet --always-ready-instances 5 --instance-size 512 --maximum-instances 100'
-                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
-                     JMESPathCheck('state', 'Running'),
-                     JMESPathCheck('name', functionapp_name),
-                     JMESPathCheck('reserved', True),
-                     JMESPathCheck('kind', 'functionapp,linux'),
-                     JMESPathCheck('containerSize', 512),
-                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
 
-        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('siteConfig.minimumElasticInstanceCount', 5),
-            JMESPathCheck('siteConfig.functionAppScaleLimit', 100)
-        ])
+        self.assertTrue(functionapp['functionAppConfig']['scaleAndConcurrency']['maximumInstanceCount'] == 100)
+        self.assertTrue(functionapp['functionAppConfig']['scaleAndConcurrency']['instanceMemoryMB'] == 2048)
+        self.assertTrue(functionapp['functionAppConfig']['runtime']['name'] == 'java')
+        self.assertTrue(functionapp['functionAppConfig']['runtime']['version'] == '17.0')
 
-        self.cmd('functionapp config set -g {} -n {} --instance-size 1280'
-                 .format(resource_group, functionapp_name))
+        functionapp2 = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java --runtime-version 11.0'
+                               .format(resource_group, functionapp_name2, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
 
-        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('containerSize', 1280)
-        ])
+        self.assertTrue(functionapp2['functionAppConfig']['scaleAndConcurrency']['maximumInstanceCount'] == 100)
+        self.assertTrue(functionapp2['functionAppConfig']['scaleAndConcurrency']['instanceMemoryMB'] == 2048)
+        self.assertTrue(functionapp2['functionAppConfig']['runtime']['name'] == 'java')
+        self.assertTrue(functionapp2['functionAppConfig']['runtime']['version'] == '11.0')
 
-        self.cmd('functionapp config set -g {} -n {} --always-ready-instances 7 --maximum-instances 200'
-                 .format(resource_group, functionapp_name)).assert_with_checks([
-                    JMESPathCheck('minimumElasticInstanceCount', 7),
-                    JMESPathCheck('functionAppScaleLimit', 200)
-                 ])
+        self.cmd('functionapp runtime config set -g {} -n {} --runtime-version 17.0'
+                 .format(resource_group, functionapp_name2))
+
+        runtime_config = self.cmd('functionapp runtime config show -g {} -n {}'
+                                  .format(resource_group, functionapp_name2))
+        self.assertTrue(runtime_config['name'] == 'java')
+        self.assertTrue(runtime_config['version'] == '17.0')
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_deployment_config(self, resource_group):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+        storage_name = self.create_random_name('funcstorage1', 24)
+        container_name = self.create_random_name('funccontainer', 24)
+        storage2_name = self.create_random_name('funcstorage2', 24)
+        identity_name = self.create_random_name('id1', 8)
+
+        storage_account = self.cmd('storage account create -g {} -n -l {} --sku Standard_LRS'
+                                   .format(resource_group, storage_name, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
+        storage_account_blob_endpoint = storage_account['primaryEndpoints']['blob']
+        deployment_storage_account = self.cmd('storage account create -g {} -n {} -l {} --sku Standard_LRS'
+                                              .format(resource_group, storage2_name, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
+        deployment_account_blob_endpoint = deployment_storage_account['primaryEndpoints']['blob']
+        self.cmd('storage container create -g {} -n {} --account-name {} --public-access blob'
+                 .format(resource_group, container_name, storage2_name))
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java --deployment-storage-auth-type storageAccountConnectionString'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_name)).get_output_in_json()
+        self.assertTrue(functionapp['functionAppConfig']['deployment']['storage']['type'] == 'blobContainer')
+        self.assertTrue(functionapp['functionAppConfig']['deployment']['storage']['value'].startswith(storage_account_blob_endpoint))
+        self.assertTrue(functionapp['functionAppConfig']['deployment']['storage']['authentication']['type'] == 'StorageAccountConnectionString')
+        self.assertTrue(functionapp['functionAppConfig']['deployment']['storage']['authentication']['userAssignedIdentityResourceId'] is None)
+        self.assertTrue(functionapp['functionAppConfig']['deployment']['storage']['authentication']['storageAccountConnectionStringName'] == 'DEPLOYMENT_STORAGE_CONNECTION_STRING')
+        app_settings = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue('DEPLOYMENT_STORAGE_CONNECTION_STRING' in [kp['name'] for kp in app_settings])
+
+        deployment_config = self.cmd('functionapp deployment config set -g {} -n {} --deployment-storage-name {} --deployment-storage-container-name {}'
+                                     .format(resource_group, functionapp_name, storage2_name, container_name))
+        self.assertTrue(deployment_config['storage']['type'] == 'blobContainer')
+        self.assertTrue(deployment_config['storage']['value'] == (deployment_account_blob_endpoint + container_name))
+
+        deployment_config = self.cmd('functionapp deployment config set -g {} -n {} --deployment-storage-auth-type systemAssignedIdentity')
+        self.assertTrue(deployment_config['storage']['authentication']['type'] == 'SystemAssignedIdentity')
+        self.assertTrue(deployment_config['storage']['authentication']['userAssignedIdentityResourceId'] is None)
+        self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] is None)
+
+        identity = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name)).get_output_in_json()
+        deployment_config = self.cmd('functionapp deployment config set -g {} -n {} --deployment-storage-auth-type userAssignedIdentity --deployment-storage-auth-value {}'
+                                     .format(resource_group, functionapp_name, identity['id']))
+        self.assertTrue(deployment_config['storage']['authentication']['type'] == 'UserAssignedIdentity')
+        self.assertTrue(deployment_config['storage']['authentication']['userAssignedIdentityResourceId'] == identity['id'])
+        self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] is None)
+
+        deployment_config = self.cmd('functionapp deployment config show -g {} -n {}'.format(resource_group, functionapp_name))
+        self.assertTrue(deployment_config['storage']['type'] == 'blobContainer')
+        self.assertTrue(deployment_config['storage']['value'] == (deployment_account_blob_endpoint + container_name))
+        self.assertTrue(deployment_config['storage']['authentication']['type'] == 'UserAssignedIdentity')
+        self.assertTrue(deployment_config['storage']['authentication']['userAssignedIdentityResourceId'] == identity['id'])
+        self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] is None)
 
 
 class FunctionAppManagedEnvironment(ScenarioTest):

@@ -380,6 +380,34 @@ examples:
     text: az functionapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname cname.mycustomdomain.com
 """
 
+helps['functionapp deployment config'] = """
+type: group
+short-summary: Manage a function app's deployment configuration.
+"""
+
+helps['functionapp deployment config set'] = """
+type: command
+short-summary: Update an existing function app's deployment configuration.
+examples:
+  - name: Set the function app's deployment storage.
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-storage-name MyStorageAccount --deployment-storage-container-name MyStorageContainer
+  - name: Set the function app's deployment storage authentication method.
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-storage-auth-type userAssignedIdentity --deployment-storage-auth-value myAssignedId
+"""
+
+helps['functionapp deployment config show'] = """
+type: command
+short-summary: Get the details of a function app's deployment configuration.
+examples:
+  - name: Get the details of a function app's deployment configuration.
+    text: az functionapp deployment config show --name MyFunctionApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp runtime'] = """
+type: group
+short-summary: Manage a function app's runtime.
+"""
+
 helps['functionapp runtime config'] = """
 type: group
 short-summary: Manage a function app's runtime configuration.
@@ -399,6 +427,11 @@ short-summary: Get the details of a function app's runtime configuration.
 examples:
   - name: Get the details of a function app's runtime configuration.
     text: az functionapp runtime config show --name MyFunctionApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp scale'] = """
+type: group
+short-summary: Manage a function app's scale.
 """
 
 helps['functionapp scale config'] = """
