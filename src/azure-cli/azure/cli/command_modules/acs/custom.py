@@ -1091,8 +1091,6 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
     is_private_cluster = False
     if instance.api_server_access_profile and instance.api_server_access_profile.enable_private_cluster:
         is_private_cluster= True
-    else:
-        is_private_cluster = False
 
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id,
