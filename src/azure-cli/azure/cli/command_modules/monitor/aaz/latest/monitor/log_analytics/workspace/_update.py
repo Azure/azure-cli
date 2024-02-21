@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01",
+        "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2022-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2023-09-01"],
         ]
     }
 
@@ -146,7 +146,7 @@ class Update(AAZCommand):
             arg_group="Sku",
             help="The capacity reservation level for this workspace, when CapacityReservation sku is selected. The maximum value is 1000 and must be in multiples of 100. If you want to increase the limit, please contact LAIngestionRate@microsoft.com.",
             nullable=True,
-            enum={"100": 100, "1000": 1000, "200": 200, "2000": 2000, "300": 300, "400": 400, "500": 500, "5000": 5000},
+            enum={"100": 100, "1000": 1000, "10000": 10000, "200": 200, "2000": 2000, "25000": 25000, "300": 300, "400": 400, "500": 500, "5000": 5000, "50000": 50000},
         )
         return cls._args_schema
 
@@ -228,7 +228,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -327,7 +327,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -567,6 +567,11 @@ class _UpdateHelper:
         features.immediate_purge_data_on30_days = AAZBoolType(
             serialized_name="immediatePurgeDataOn30Days",
             nullable=True,
+        )
+        features.unified_sentinel_billing_only = AAZBoolType(
+            serialized_name="unifiedSentinelBillingOnly",
+            nullable=True,
+            flags={"read_only": True},
         )
 
         private_link_scoped_resources = _schema_workspace_read.properties.private_link_scoped_resources
