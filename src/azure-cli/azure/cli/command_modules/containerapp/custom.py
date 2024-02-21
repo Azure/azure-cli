@@ -51,7 +51,6 @@ from ._models import (
     RegistryCredentials as RegistryCredentialsModel,
     ContainerResources as ContainerResourcesModel,
     Scale as ScaleModel,
-    JobScale as JobScaleModel,
     Container as ContainerModel,
     GitHubActionConfiguration,
     RegistryInfo as RegistryInfoModel,
