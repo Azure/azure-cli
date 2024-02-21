@@ -26,15 +26,16 @@ class KeyReplacer(RecordingProcessor):
     # pylint: disable=no-self-use
     def _replace_string_keys(self, val):
         import re
-        if 'primaryKey' in val:
-            val = re.sub(r'"primaryKey":( ?)"([^"]+)"', r'"primaryKey":"{}"'
+        val_lower = val.lower()
+        if 'primarykey' in val_lower:
+            val = re.sub(r'"primarykey":( ?)"([^"]+)"', r'"primaryKey":"{}"'
                          .format(MOCK_KEY), val, flags=re.IGNORECASE)
-        if 'secondaryKey' in val:
-            val = re.sub(r'"secondaryKey":( ?)"([^"]+)"', r'"secondaryKey":"{}"'
+        if 'secondarykey' in val_lower:
+            val = re.sub(r'"secondarykey":( ?)"([^"]+)"', r'"secondaryKey":"{}"'
                          .format(MOCK_KEY), val, flags=re.IGNORECASE)
-        if any(['SharedAccessKey=' in val, 'sharedaccesskey=' in val]):
+        if 'sharedaccesskey=' in val_lower:
             # Replaces live key with `mock_key` in `SharedAccessKey=live_key` or `sharedaccesskey=live_key` string response
-            val = re.sub(r'[S|s]hared[A|a]ccess[K|k]ey=([^\*=]+=);?', 'SharedAccessKey={};'
+            val = re.sub(r'sharedaccesskey=([^\*=]+=);?', 'SharedAccessKey={};'
                          .format(MOCK_KEY), val, flags=re.IGNORECASE)
         return val
 
