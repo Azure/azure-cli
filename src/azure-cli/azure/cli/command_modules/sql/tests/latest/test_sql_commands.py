@@ -285,6 +285,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_3 = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_4 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
@@ -331,6 +332,17 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('publicNetworkAccess', 'Disabled')])
+        
+        # test create sql server with retentionDays passed in, verify retentionDays == 7
+        self.cmd('sql server create -g {} --name {} '
+                 '--admin-user {} --admin-password {} --retention-days {}'
+                 .format(resource_group_1, server_name_4, admin_login, admin_passwords[0], '7'),
+                 checks=[
+                     JMESPathCheck('name', server_name_3),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('retentionDays', '7')])
 
     @ResourceGroupPreparer(parameter_name='resource_group', location='westeurope')
     def test_sql_server_public_network_access_update_mgmt(self, resource_group, resource_group_location):
@@ -623,7 +635,6 @@ class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, outbound_firewall_rule_allowed_fqdn_2), checks=NoneCheck())
         self.cmd('sql server outbound-firewall-rule list -g {} --server {}'
                  .format(resource_group, server), checks=[JMESPathCheck('length(@)', 1)])
-
 
 class SqlServerDbMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2')
