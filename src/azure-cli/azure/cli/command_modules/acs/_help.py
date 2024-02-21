@@ -1051,7 +1051,7 @@ parameters:
   - name: --data-collection-settings
     type: string
     short-summary: Path to JSON file containing data collection settings for Monitoring addon.
-  - name: --azure-monitor-private-link-scope-resource-id
+  - name: --azure-monitor-private-link-scope-resource-id -s
     type: string
     short-summary: Resource ID of Azure Monitor Private Link scope for  Monitoring Addon.
   - name: --appgw-name
