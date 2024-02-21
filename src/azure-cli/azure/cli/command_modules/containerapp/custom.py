@@ -1201,16 +1201,7 @@ def update_containerappsjob_logic(cmd,
                     eventTriggerConfig_def["scale"]["maxExecutions"] = max_executions
                 if polling_interval is not None:
                     eventTriggerConfig_def["scale"]["pollingInterval"] = polling_interval
-
-                scale_def = None
-                if min_executions is not None or max_executions is not None or polling_interval is not None:
-                    scale_def = JobScaleModel
-                    scale_def["pollingInterval"] = polling_interval
-                    scale_def["minExecutions"] = min_executions
-                    scale_def["maxReplicas"] = max_executions
-                # so we don't overwrite rules
-                if safe_get(new_containerappsjob, "properties", "template", "scale", "rules"):
-                    new_containerappsjob["properties"]["template"]["scale"].pop(["rules"])
+                # ScaleRule
                 if scale_rule_name:
                     scale_rule_type = scale_rule_type.lower()
                     scale_rule_def = ScaleRuleModel
