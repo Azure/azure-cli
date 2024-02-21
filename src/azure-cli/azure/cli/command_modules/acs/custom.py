@@ -566,6 +566,7 @@ def aks_create(
     enable_msi_auth_for_monitoring=True,
     enable_syslog=False,
     data_collection_settings=None,
+    azure_monitor_private_link_scope_resource_id=None,
     aci_subnet_name=None,
     appgw_name=None,
     appgw_subnet_cidr=None,

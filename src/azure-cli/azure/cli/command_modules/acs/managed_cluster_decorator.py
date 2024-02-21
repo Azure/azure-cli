@@ -2681,6 +2681,18 @@ class AKSManagedClusterContext(BaseAKSContext):
                 )
         return data_collection_settings_file_path
 
+    def get_azure_monitor_private_link_scope_resource_id(self) -> Union[str, None]:
+        """Obtain the value of azure_monitor_private_link_scope_resource_id.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        azure_monitor_private_link_scope_resource_id = self.raw_param.get("azure_monitor_private_link_scope_resource_id")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return azure_monitor_private_link_scope_resource_id
+
     # pylint: disable=no-self-use
     def get_virtual_node_addon_os_type(self) -> str:
         """Helper function to obtain the os_type of virtual node addon.
@@ -5719,7 +5731,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             create_dcr=True,
             create_dcra=False,
             enable_syslog=self.context.get_enable_syslog(),
-            data_collection_settings=self.context.get_data_collection_settings()
+            data_collection_settings=self.context.get_data_collection_settings(),
+            azure_monitor_private_link_scope_resource_id=self.context.get_azure_monitor_private_link_scope_resource_id(),
         )
         # set intermediate
         self.context.set_intermediate("monitoring_addon_enabled", True, overwrite_exists=True)
@@ -6404,6 +6417,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     create_dcr=False,
                     create_dcra=True,
                     enable_syslog=self.context.get_enable_syslog(),
+                    azure_monitor_private_link_scope_resource_id=self.context.get_azure_monitor_private_link_scope_resource_id(),
                 )
 
         # ingress appgw addon
@@ -7659,6 +7673,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     create_dcr=False,
                     create_dcra=True,
                     enable_syslog=self.context.get_enable_syslog(),
+                    azure_monitor_private_link_scope_resource_id=self.context.get_azure_monitor_private_link_scope_resource_id(),
                 )
 
         # ingress appgw addon

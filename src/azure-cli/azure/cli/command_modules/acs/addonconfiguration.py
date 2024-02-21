@@ -410,7 +410,7 @@ def ensure_container_insights_for_monitoring(
         dataCollectionEndpointName = f"MSCI-{location}-{cluster_name}"
         # Max length of the DCE name is 64 chars
         dataCollectionEndpointName = dataCollectionEndpointName[0:64]
-        dce_resource_id = ""
+        dce_resource_id = None
 
         if azure_monitor_private_link_scope_resource_id is not None:
             dce_resource_id = (
