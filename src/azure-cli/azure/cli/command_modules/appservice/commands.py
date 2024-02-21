@@ -336,7 +336,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp deployment config') as g:
         g.custom_command('set', 'update_deployment_configs', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
-        g.custom_command('show', 'get_deployment_configs', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_show_command('show', 'get_deployment_configs', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
 
     with self.command_group('functionapp config') as g:
         g.custom_command('set', 'update_site_configs_functionapp', validator=validate_functionapp_on_containerapp_site_config_set, exception_handler=ex_handler_factory())
@@ -348,11 +348,11 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_app_settings', exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp runtime config') as g:
-        g.custom_command('show', 'get_runtime_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_show_command('show', 'get_runtime_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
         g.custom_command('set', 'update_runtime_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
 
     with self.command_group('functionapp scale config') as g:
-        g.custom_command('show', 'get_scale_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_show_command('show', 'get_scale_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
         g.custom_command('set', 'update_scale_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
 
     with self.command_group('functionapp scale config always-ready') as g:
