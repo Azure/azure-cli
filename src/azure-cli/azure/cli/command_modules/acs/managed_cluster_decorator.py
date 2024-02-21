@@ -5732,6 +5732,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             create_dcra=False,
             enable_syslog=self.context.get_enable_syslog(),
             data_collection_settings=self.context.get_data_collection_settings(),
+            is_private_cluster=self.context.get_enable_private_cluster(),
             azure_monitor_private_link_scope_resource_id=self.context.get_azure_monitor_private_link_scope_resource_id(),
         )
         # set intermediate

@@ -1042,6 +1042,7 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
                 create_dcra=True,
                 enable_syslog=False,
                 data_collection_settings=None,
+                is_private_cluster=False,
                 azure_monitor_private_link_scope_resource_id=None,
             )
     except TypeError:
@@ -1093,9 +1094,6 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
     else:
         is_private_cluster = False
 
-    if not is_private_cluster and azure_monitor_private_link_scope_resource_id is not None:
-        raise ArgumentUsageError("--azure-monitor-private-link-scope-resource-id can only be used with private cluster.")
-
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id,
                               enable_msi_auth_for_monitoring=enable_msi_auth_for_monitoring,
@@ -1142,6 +1140,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                         create_dcra=True,
                         enable_syslog=enable_syslog,
                         data_collection_settings=data_collection_settings,
+                        is_private_cluster=is_private_cluster,
                         azure_monitor_private_link_scope_resource_id=azure_monitor_private_link_scope_resource_id)
                 else:
                     raise ArgumentUsageError(

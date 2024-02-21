@@ -331,6 +331,7 @@ def ensure_container_insights_for_monitoring(
     create_dcra=False,
     enable_syslog=False,
     data_collection_settings=None,
+    is_private_cluster=False,
     azure_monitor_private_link_scope_resource_id=None
 ):
     """
@@ -347,6 +348,9 @@ def ensure_container_insights_for_monitoring(
     """
     if not addon.enabled:
         return None
+
+    if (not is_private_cluster or not aad_route) and azure_monitor_private_link_scope_resource_id is not None:
+        raise AzCLIError("--azure-monitor-private-link-scope-resource-id can only be used with private cluster in MSI mode.")
 
     # workaround for this addon key which has been seen lowercased in the wild
     for key in list(addon.config):
