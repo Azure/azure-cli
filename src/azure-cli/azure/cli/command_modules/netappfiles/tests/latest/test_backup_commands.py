@@ -3,11 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from knack.log import get_logger
 import time
 import unittest
 LOCATION = "westus2"
 VNET_LOCATION = "westus2"
 
+logger = get_logger(__name__)
 
 class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):
@@ -43,6 +45,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
     def create_backup(self, account_name, pool_name, volume_name, backup_name, backup_only=False, vnet_name=None):
         if not backup_only:
             # create account, pool and volume
+            logger.warning('create account %s, pool %s and volume %s', account_name, pool_name, volume_name)
             self.create_volume(account_name, pool_name, volume_name, vnet_name=vnet_name)
 
             # volume update with backup policy
@@ -64,6 +67,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         attempts = 0
         while attempts < 60:
             attempts += 1
+            logger.warning('wait for backup created (%s) account: %s, pool: %s and volume: %s backup_name: %s', attempts, account_name, pool_name, volume_name, backup_name)
             backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s -b %s" %
                               (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
             if backup['provisioningState'] != "Creating":
