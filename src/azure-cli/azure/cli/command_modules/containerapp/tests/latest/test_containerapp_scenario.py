@@ -87,6 +87,33 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('length(properties.configuration.secrets)', 2)
         ])
 
+    @live_only()  # Pass lively, But failed in playback mode with error: WebSocketBadStatusException: Handshake status 401 Unauthorized
+    @ResourceGroupPreparer(location="eastus2")
+    def test_containerapp_exec(self, resource_group):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+        env = prepare_containerapp_env_for_app_e2e_tests(self)
+
+        containerapp_name = self.create_random_name(prefix='containerapp-e2e', length=24)
+        # create an app with ingress is None
+        app = self.cmd(f'containerapp create -g {resource_group} -n {containerapp_name} --environment {env}', checks=[
+            JMESPathCheck('name', containerapp_name),
+            JMESPathCheck('properties.configuration.ingress', None),
+
+        ]).get_output_in_json()
+
+        self.cmd(f'containerapp exec -g {resource_group} -n {containerapp_name}')
+
+        self.cmd(f'containerapp exec -g {resource_group} -n {containerapp_name} --command ls')
+
+        revision = app["properties"]["latestRevisionName"]
+        replica_list = self.cmd(
+            f'containerapp replica list -g {resource_group} -n {containerapp_name} --revision {app["properties"]["latestRevisionName"]}',
+            expect_failure=False).get_output_in_json()
+
+        self.cmd(f'containerapp exec -g {resource_group} -n {containerapp_name}  --replica {replica_list[0]["name"]} --revision {revision} --command ls', expect_failure=False)
+
+        #  Test internal App
+
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
