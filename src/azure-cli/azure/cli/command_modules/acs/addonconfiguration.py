@@ -288,13 +288,13 @@ def ensure_default_log_analytics_workspace_for_monitoring(
     return ws_resource_id
 
 
-def sanitize_loganalytics_ws_resource_id(resource_id):
-    resource_id = resource_id.strip()
-    if not resource_id.startswith("/"):
-        resource_id = "/" + resource_id
-    if resource_id.endswith("/"):
-        resource_id = resource_id.rstrip("/")
-    return resource_id
+def sanitize_loganalytics_ws_resource_id(workspace_resource_id):
+    workspace_resource_id = workspace_resource_id.strip()
+    if not workspace_resource_id.startswith("/"):
+        workspace_resource_id = "/" + workspace_resource_id
+    if workspace_resource_id.endswith("/"):
+        workspace_resource_id = workspace_resource_id.rstrip("/")
+    return workspace_resource_id
 
 
 def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
