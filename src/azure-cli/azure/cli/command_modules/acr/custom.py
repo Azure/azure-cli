@@ -5,6 +5,7 @@
 
 # pylint: disable=too-many-locals
 
+import os
 import re
 from knack.util import CLIError
 from knack.log import get_logger
@@ -347,7 +348,10 @@ def acr_show_usage(cmd, client, registry_name, resource_group_name=None):
 
 def get_docker_command(is_diagnostics_context=False):
     from ._errors import DOCKER_COMMAND_ERROR, DOCKER_DAEMON_ERROR
-    docker_command = 'docker'
+    if os.getenv('DOCKER_COMMAND'):
+        docker_command = os.getenv('DOCKER_COMMAND')
+    else:
+        docker_command = 'docker'
 
     from subprocess import PIPE, Popen, CalledProcessError
     try:
