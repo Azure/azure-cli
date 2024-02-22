@@ -8,6 +8,7 @@ import os
 from datetime import datetime, timedelta, timezone
 # pylint: disable=too-many-lines
 from knack.log import get_logger
+from knack.prompting import prompt_y_n
 from azure.mgmt.core.tools import is_valid_resource_id
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
@@ -126,6 +127,10 @@ os_windows = 'Windows'
 os_linux = 'Linux'
 password_offset = 33
 password_length = 15
+vm_policy_type_map = {
+    'v2': 'enhanced',
+    'v1': 'standard'
+}
 enhanced_policy_type = "v2"
 standard_policy_type = "v1"
 # pylint: disable=too-many-function-args
@@ -1007,7 +1012,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     vm_item_properties.source_resource_id = item.properties.source_resource_id
     vm_item = ProtectedItemResource(properties=vm_item_properties)
     existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
-                                            item.properties.policy_name)
+                                         item.properties.policy_name)
     if is_critical_operation:
         if cust_help.is_retention_duration_decreased(existing_policy, policy, "AzureIaasVM"):
             # update the payload with critical operation and add auxiliary header for cross tenant case
@@ -1018,11 +1023,15 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
                 cmd.cli_ctx, resource_group_name, vault_name, "updateProtection")]
 
     # Raise warning for standard->enhanced policy
-    existing_policy_type = enhanced_policy_type if existing_policy.properties.policy_type.lower() == "v2" else standard_policy_type
-    new_policy_type = enhanced_policy_type if policy.properties.policy_type.lower() == "v2" else standard_policy_type
-    if (new_policy_type == enhanced_policy_type and existing_policy_type == existing_policy_type):
-        logger.warning('Upgrading to enhanced policy can incur additional charges. Once upgraded to the enhanced '
-                       'policy, it is not possible to revert back to the standard policy.')
+    existing_policy_type = existing_policy.properties.policy_type.lower()
+    new_policy_type = policy.properties.policy_type.lower()
+    if (new_policy_type in vm_policy_type_map and vm_policy_type_map[new_policy_type] == 'enhanced'
+        and existing_policy_type in vm_policy_type_map and vm_policy_type_map[existing_policy_type] == 'standard'):
+        warning_prompt = ('Upgrading to enhanced policy can incur additional charges. Once upgraded to the enhanced '
+                          'policy, it is not possible to revert back to the standard policy. Do you want to continue?')
+        if not prompt_y_n(warning_prompt):
+            logger.warning('Cancelling policy update operation')
+            return None
 
     # Update policy
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
