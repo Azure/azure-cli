@@ -395,10 +395,11 @@ class AFDRouteCreate(_AFDRouteCreate):
         if not has_value(args.enable_caching) or args.enable_caching.to_serialized_data() is False:
             cache_configuration = None
         else:
-            if args.cache_configuration is None:
-                cache_configuration['compression_settings']['content_types_to_compress'] = default_content_types()
-            else:
+            if not has_value(args.enable_compression) or args.enable_compression.to_serialized_data() is False:
                 cache_configuration['compression_settings']['content_types_to_compress'] = []
+            else:
+                if not has_value(args.content_types_to_compress):
+                    cache_configuration['compression_settings']['content_types_to_compress'] = default_content_types()
 
         args.cache_configuration = cache_configuration
 
