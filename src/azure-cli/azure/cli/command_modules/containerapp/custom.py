@@ -51,7 +51,6 @@ from ._models import (
     RegistryCredentials as RegistryCredentialsModel,
     ContainerResources as ContainerResourcesModel,
     Scale as ScaleModel,
-    JobScale as JobScaleModel,
     Container as ContainerModel,
     GitHubActionConfiguration,
     RegistryInfo as RegistryInfoModel,
@@ -384,12 +383,11 @@ def update_containerapp_logic(cmd,
         new_containerapp["properties"]["template"] = r["properties"]["template"]
 
     # Doing this while API has bug. If env var is an empty string, API doesn't return "value" even though the "value" should be an empty string
-    if "properties" in containerapp_def and "template" in containerapp_def["properties"] and "containers" in containerapp_def["properties"]["template"]:
-        for container in containerapp_def["properties"]["template"]["containers"]:
-            if "env" in container:
-                for e in container["env"]:
-                    if "value" not in e:
-                        e["value"] = ""
+    for container in safe_get(containerapp_def, "properties", "template", "containers", default=[]):
+        if "env" in container:
+            for e in container["env"]:
+                if "value" not in e:
+                    e["value"] = ""
 
     update_map = {}
     update_map['scale'] = min_replicas is not None or max_replicas is not None or scale_rule_name
@@ -592,7 +590,7 @@ def update_containerapp_logic(cmd,
         scale_def["maxReplicas"] = max_replicas
     # so we don't overwrite rules
     if safe_get(new_containerapp, "properties", "template", "scale", "rules"):
-        new_containerapp["properties"]["template"]["scale"].pop(["rules"])
+        new_containerapp["properties"]["template"]["scale"].pop("rules")
     if scale_rule_name:
         if not scale_rule_type:
             scale_rule_type = "http"
@@ -1201,16 +1199,7 @@ def update_containerappsjob_logic(cmd,
                     eventTriggerConfig_def["scale"]["maxExecutions"] = max_executions
                 if polling_interval is not None:
                     eventTriggerConfig_def["scale"]["pollingInterval"] = polling_interval
-
-                scale_def = None
-                if min_executions is not None or max_executions is not None or polling_interval is not None:
-                    scale_def = JobScaleModel
-                    scale_def["pollingInterval"] = polling_interval
-                    scale_def["minExecutions"] = min_executions
-                    scale_def["maxReplicas"] = max_executions
-                # so we don't overwrite rules
-                if safe_get(new_containerappsjob, "properties", "template", "scale", "rules"):
-                    new_containerappsjob["properties"]["template"]["scale"].pop(["rules"])
+                # ScaleRule
                 if scale_rule_name:
                     scale_rule_type = scale_rule_type.lower()
                     scale_rule_def = ScaleRuleModel
@@ -1221,10 +1210,17 @@ def update_containerappsjob_logic(cmd,
                     scale_rule_def["type"] = scale_rule_type
                     scale_rule_def["metadata"] = metadata_def
                     scale_rule_def["auth"] = auth_def
-                    if not scale_def:
-                        scale_def = JobScaleModel
-                    scale_def["rules"] = [scale_rule_def]
-                    eventTriggerConfig_def["scale"]["rules"] = scale_def["rules"]
+                    if safe_get(eventTriggerConfig_def, "scale", "rules") is None:
+                        eventTriggerConfig_def["scale"]["rules"] = []
+                    existing_rules = eventTriggerConfig_def["scale"]["rules"]
+                    updated_rule = False
+                    for rule in existing_rules:
+                        if rule["name"] == scale_rule_name:
+                            rule.update(scale_rule_def)
+                            updated_rule = True
+                            break
+                    if not updated_rule:
+                        existing_rules.append(scale_rule_def)
 
             new_containerappsjob["properties"]["configuration"]["eventTriggerConfig"] = eventTriggerConfig_def
 
@@ -1564,6 +1560,9 @@ def start_containerappjob_execution_yaml(cmd, name, resource_group_name, file_na
         raise InvalidArgumentValueError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapp job execution YAML.') from ex
 
     containerappjobexec_def = _convert_object_from_snake_to_camel_case(_object_to_dict(containerappjobexec_def))
+
+    # Remove "additionalProperties" attributes that are introduced in the deserialization.
+    _remove_additional_attributes(containerappjobexec_def)
 
     # Clean null values since this is an update
     containerappjobexec_def = clean_null_values(containerappjobexec_def)
@@ -3590,7 +3589,9 @@ def containerapp_up(cmd,
     env = ContainerAppEnvironment(cmd, managed_env, resource_group, location=location, logs_key=logs_key, logs_customer_id=logs_customer_id)
     app = ContainerApp(cmd, name, resource_group, None, image, env, target_port, registry_server, registry_user, registry_pass, env_vars, workload_profile_name, ingress)
 
-    _set_up_defaults(cmd, name, resource_group_name, logs_customer_id, location, resource_group, env, app)
+    # Check and see if registry username and passwords are specified. If so, set is_registry_server_params_set to True to use those creds.
+    is_registry_server_params_set = bool(registry_server and registry_user and registry_pass)
+    _set_up_defaults(cmd, name, resource_group_name, logs_customer_id, location, resource_group, env, app, is_registry_server_params_set)
 
     if app.check_exists():
         if app.get()["properties"]["provisioningState"] == "InProgress":

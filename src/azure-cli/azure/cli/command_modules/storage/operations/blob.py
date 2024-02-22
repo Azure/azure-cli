@@ -163,7 +163,10 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
 
 def set_container_permission(client, public_access=None, **kwargs):
     acl_response = client.get_container_access_policy()
-    signed_identifiers = {} if not acl_response.get('signed_identifiers', None) else acl_response['signed_identifiers']
+    signed_identifiers = {}
+    if acl_response.get('signed_identifiers'):
+        for identifier in acl_response["signed_identifiers"]:
+            signed_identifiers[identifier.id] = identifier.access_policy
     return client.set_container_access_policy(signed_identifiers=signed_identifiers,
                                               public_access=public_access, **kwargs)
 
