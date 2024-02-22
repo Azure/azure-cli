@@ -34,9 +34,9 @@ parameters:
     short-summary: 'State of the advanced threat protection setting'
 examples:
   - name: Enable the advanced threat protection setting.
-    text: az mysql flexible-server advanced-threat-protection-setting update -g mygroup -s myserver --state Enabled
+    text: az mysql flexible-server advanced-threat-protection-setting update -g mygroup -n myserver --state Enabled
   - name: Disable the advanced threat protection setting.
-    text: az mysql flexible-server advanced-threat-protection-setting update -g mygroup -s myserver --state Disabled
+    text: az mysql flexible-server advanced-threat-protection-setting update -g mygroup -n myserver --state Disabled
 """
 
 helps['mysql flexible-server create'] = """
