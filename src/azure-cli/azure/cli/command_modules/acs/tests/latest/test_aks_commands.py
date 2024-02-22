@@ -7791,7 +7791,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
-            'body': '{\\"location\\":\\"global\\"}'
         })
 
         if user_assigned_identity:
