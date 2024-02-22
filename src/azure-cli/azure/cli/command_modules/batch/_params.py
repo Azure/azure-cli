@@ -272,7 +272,7 @@ def load_arguments(self, _):
         c.extra('write_accelerator_enabled', arg_type=get_three_state_flag(),
                 options_list=('--enable-write-accel'),
                 arg_group="Pool: OS Disk",
-                help="Specifies whether writeAccelerator should be enabled or disabled on the disk.")
+                help="Specify whether writeAccelerator should be enabled or disabled on the disk.")
         c.argument('target_node_communication_mode', options_list=['--target-communication'],
                    help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
                    arg_type=get_enum_type(NodeCommunicationMode))
