@@ -6675,23 +6675,22 @@ class NetworkVirtualApplianceIdentityScenarioTest(ScenarioTest):
 
 class NetworkVirtualApplianceConnectionScenarioTest(ScenarioTest):
     @live_only()
- 
-    @ResourceGroupPreparer(location='eastus', name_prefix='test_network_virtual_appliance_connection')
+    @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance_connection')
     @AllowLargeResponse(size_kb=9999)
     def test_network_virtual_appliance_connection(self, resource_group):
         from time import sleep
         subscriptionId = self.get_subscription_id()
         self.kwargs.update({
             'vwan': 'clitestvwan',
-            'vhub': 'clitestvhub',
-            'nvaname': 'cli_virtual_appliance',
-            'name': 'defaultConnection',
+            'vhub': 'clittestvhub',
+            'nva_name': 'clivirtualappliance',
             'rg': resource_group,
+            'name': 'defaultConnection',
             'subscription': subscriptionId
         })
         self.cmd('extension add -n virtual-wan')
         self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
-        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.1.0.0/16 --sku Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard')
         routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
         retry_count = 0
         while routing_state != 'Provisioned':
@@ -6700,20 +6699,23 @@ class NetworkVirtualApplianceConnectionScenarioTest(ScenarioTest):
             retry_count += 1
             sleep(360)
             routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
-            
-        
-        self.cmd('network virtual-appliance create -n {nvaname} -g {rg} --vhub {vhub} --vendor "checkpoint" '
+        self.cmd('network virtual-appliance create -n {nva_name} -g {rg} --vhub {vhub} --vendor "checkpoint" '
                  '--scale-unit 2 -v latest --asn 64512 --init-config "echo $abc" ',
                  checks=[
-                     self.check('name', '{nvaname}'),
+                     self.check('name', '{nva_name}'),
                      self.check('virtualApplianceAsn', 64512),
-                     self.check('cloudInitConfiguration', "echo $abc")
+                     self.check('cloudInitConfiguration', 'echo $abc')
                  ])
-       
-        self.cmd('network virtual-appliance connection show -n {name} -g {rg} --nva {nvaname} --subscription {subscription}', checks=[
+        self.cmd('network virtual-appliance show -g {rg} -n {nva_name}', 
+                 checks=[
+                     self.check('name', '{nva_name}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                     ])
+        self.cmd('network virtual-appliance connection show -n {name} -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
             self.check('name', '{name}')
         ])
-        self.cmd('network virtual-appliance connection list -g {rg} --nva {nvaname} --subscription {subscription}', checks=[
+        self.cmd('network virtual-appliance connection list -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
             self.check('length(@)', 1)
         ])
 
