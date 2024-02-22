@@ -2115,7 +2115,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-        
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_azure_service_mesh_enable_disable(self, resource_group, resource_group_location):
@@ -6065,7 +6065,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-        
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_nodepool_drain_timeout(self, resource_group, resource_group_location):
@@ -7778,12 +7778,20 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         self.create_new_cluster_with_monitoring_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=True, syslog_enabled=True)
 
-    def create_new_cluster_with_monitoring_aad_auth(self, resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False, data_collection_settings=None):
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_private_cluster_with_monitoring_aad_auth_msi_with_ampls(self, resource_group, resource_group_location,):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.create_new_cluster_with_monitoring_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False, data_collection_settings=None, use_ampls=True)
+
+    def create_new_cluster_with_monitoring_aad_auth(self, resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False, data_collection_settings=None, use_ampls=False):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'location': resource_group_location,
-            'ssh_key_value': self.generate_ssh_keys()
+            'ssh_key_value': self.generate_ssh_keys(),
+            'body': '{\\"location\\":\\"global\\"}'
         })
 
         if user_assigned_identity:
@@ -7794,6 +7802,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             print(f"identity_id: {identity_id}")
             print("********************")
 
+        if use_ampls:
+            ampls_cmd = f'monitor private-link-scope create -g {resource_group} -n {aks_name}_ampls'
+            resp = self.cmd(ampls_cmd).get_output_in_json()
+            ampls_resource_id = resp["id"]
+            print("********************")
+            print(f"azure monitor private link scope resource id: {ampls_resource_id}")
+            print("********************")
+
+
         # create
         create_cmd = f'aks create --resource-group={resource_group} --name={aks_name} --location={resource_group_location} ' \
                      '--enable-managed-identity ' \
@@ -7803,6 +7820,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd += f'--assign-identity {identity_id} ' if user_assigned_identity else ''
         create_cmd += f'--enable-syslog ' if syslog_enabled else ''
         create_cmd += f'--data-collection-settings {data_collection_settings} ' if data_collection_settings else ''
+        create_cmd += f'--enable-private-cluster ' if use_ampls else ''
+        create_cmd += f'--azure-monitor-private-link-scope-resource-id {ampls_resource_id} ' if use_ampls else ''
 
         response = self.cmd(create_cmd, checks=[
             self.check('addonProfiles.omsagent.enabled', True),
@@ -7817,6 +7836,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         location = resource_group_location
         dataCollectionRuleName = f"MSCI-{location}-{aks_name}"
         dataCollectionRuleName = dataCollectionRuleName[0:64]
+        dataCollectionEndpointName = dataCollectionRuleName
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2022-06-01'
         self.cmd(get_cmd, checks=[
@@ -7838,6 +7858,27 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 self.check('properties.dataFlows[0].streams[0]', f'Microsoft-ContainerLogV2'),
                 self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.enableContainerLogV2', True)
             ])
+
+        if use_ampls:
+            dce_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionEndpoints/{dataCollectionEndpointName}"
+            # check the DCR has dataCollectionEndpoint
+            self.cmd(get_cmd, checks=[
+                self.check('properties.dataCollectionEndpointId', f'{dce_resource_id}')
+            ])
+            # check the DCE was created with the right settings
+            dce_cmd = f'rest --method get --url https://management.azure.com{dce_resource_id}?api-version=2022-06-01'
+            self.cmd(dce_cmd, checks=[
+               self.check('properties.networkAcls.publicNetworkAccess', f'Disabled'),
+               self.check('properties.provisioningState', f'Succeeded')
+            ])
+
+            # check the AMPLS was linked with DCE and workspace
+            ampls_scoped_resources_cmd = f'rest --method get --url https://management.azure.com{ampls_resource_id}/scopedresources?api-version=2021-07-01-preview'
+            self.cmd(ampls_scoped_resources_cmd, checks=[
+               self.check('value[0].properties.linkedResourceId', f'{dce_resource_id}'),
+               self.check('value[1].properties.linkedResourceId', f'{workspace_resource_id}'),
+            ])
+
         # check that the DCR-A was created
         dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension"
         get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2022-06-01'
@@ -9641,7 +9682,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--location={location} '
             '--ssh-key-value={ssh_key_value} '
             '--node-count=1 '
-            '--node-vm-size={node_vm_size} ' 
+            '--node-vm-size={node_vm_size} '
             '{asg_ids_argument} '
             '{allowed_host_ports_argument}',
             checks=[
