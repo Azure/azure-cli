@@ -2208,7 +2208,7 @@ class FlexibleServerAdvancedThreatProtectionScenarioTest(ScenarioTest):
                      JMESPathCheck('state', new_defender_state)])
 
         # get advanced threat protection settings after the update
-        self.cmd('{} flexible-server advanced-threat-protection show -g {} -n {}'
+        self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} -n {}'
                  .format(database_engine, resource_group, server),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
