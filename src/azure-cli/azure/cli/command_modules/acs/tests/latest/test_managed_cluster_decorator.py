@@ -7535,7 +7535,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             create_dcr=False,
             create_dcra=True,
             enable_syslog=None,
-            data_collection_settings=None,
             azure_monitor_private_link_scope_resource_id=None,
         )
 
@@ -10525,7 +10524,6 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             create_dcr=False,
             create_dcra=True,
             enable_syslog=None,
-            data_collection_settings=None,
             azure_monitor_private_link_scope_resource_id=None,
         )
 
