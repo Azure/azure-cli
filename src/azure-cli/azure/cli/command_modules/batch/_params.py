@@ -261,7 +261,7 @@ def load_arguments(self, _):
                 options_list=('--os-disk-caching'),
                 arg_group="Pool: OS Disk",
                 arg_type=get_enum_type(['None', 'ReadOnly', 'ReadWrite']),
-                help="Specifies the caching requirements. Possible values are: None, ReadOnly, ReadWrite. The default values are: None for Standard storage. ReadOnly for Premium storage.")
+                help="Specify the caching requirements. Possible values are: None, ReadOnly, ReadWrite. The default values are: None for Standard storage. ReadOnly for Premium storage.")
         c.extra('storage_account_type',
                 arg_group="Pool: OS Disk",
                 help="The storage account type for managed disk")
