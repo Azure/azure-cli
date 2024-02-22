@@ -49,6 +49,9 @@ aks create:
       nodepool_allowed_host_ports:
         rule_exclusions:
         - option_length_too_long
+      azure-monitor-private-link-scope-resource-id:
+        rule_exclusions:
+        - option_length_too_long
 
 aks enable-addons:
   parameters:
@@ -61,6 +64,9 @@ aks enable-addons:
       disable_secret_rotation:
           rule_exclusions:
           - option_length_too_long
+      azure-monitor-private-link-scope-resource-id:
+        rule_exclusions:
+        - option_length_too_long
 aks update:
   parameters:
       disable_secret_rotation:
@@ -112,6 +118,9 @@ aks update:
           rule_exclusions:
           - option_length_too_long
       node_os_upgrade_channel:
+        rule_exclusions:
+        - option_length_too_long
+      azure-monitor-private-link-scope-resource-id:
         rule_exclusions:
         - option_length_too_long
 ...
