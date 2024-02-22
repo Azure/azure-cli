@@ -249,7 +249,7 @@ def load_command_table(self, _):
         g.keyvault_custom('download', 'download_certificate')
         g.keyvault_custom('get-default-policy', 'get_default_policy')
 
-    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)). \
+    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES)). \
         replace('.', '_').replace('-', '_')
 
     if data_api_version != '2016_10_01':

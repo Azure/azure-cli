@@ -10,6 +10,7 @@ import unittest
 import os
 from pytest import skip
 import requests
+from knack.util import CLIError
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (
@@ -1273,6 +1274,93 @@ class WebAppUpE2ETests(ScenarioTest):
             JMESPathCheck('sku.name', 'S1')
         ])
 
+
+        # cleanup
+        # switch back the working dir
+        os.chdir(current_working_dir)
+        # delete temp_dir
+        import shutil
+        shutil.rmtree(temp_dir)
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_up_runtimestatus', location='eastus')
+    def test_webapp_up_track_runtimestatus_runtimesuccessful(self, resource_group):
+        plan_name = self.create_random_name('plan-linux', 24)
+        webapp_name = self.create_random_name('app-linux', 24)
+        zip_file_name = os.path.join(TEST_DIR, 'node-Express-up.zip')
+
+        # create a temp directory and unzip the code to this folder
+        import zipfile
+        import tempfile
+        temp_dir = tempfile.mkdtemp()
+        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
+        zip_ref.extractall(temp_dir)
+        current_working_dir = os.getcwd()
+
+        # change the working dir to the dir where the code has been extracted to
+        up_working_dir = os.path.join(temp_dir, 'myExpressApp')
+        os.chdir(up_working_dir)
+
+        self.cmd('webapp up -g {} -n {} --os-type linux --track-status'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck('resourcegroup', resource_group),
+            JMESPathCheck('name', webapp_name),
+        ])
+
+        # cleanup
+        # switch back the working dir
+        os.chdir(current_working_dir)
+        # delete temp_dir
+        import shutil
+        shutil.rmtree(temp_dir)
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_up_runtimestatus', location='eastus')
+    def test_webapp_up_track_runtimestatus_buildfailed(self, resource_group):
+        plan_name = self.create_random_name('plan-linux', 24)
+        webapp_name = self.create_random_name('app-linux', 24)
+        zip_file_name = os.path.join(TEST_DIR, 'data', 'nodebuildfailed.zip')
+
+        # create a temp directory and unzip the code to this folder
+        import zipfile
+        import tempfile
+        temp_dir = tempfile.mkdtemp()
+        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
+        zip_ref.extractall(temp_dir)
+        current_working_dir = os.getcwd()
+
+        # change the working dir to the dir where the code has been extracted to
+        os.chdir(temp_dir)
+
+        with self.assertRaisesRegexp(CLIError, "Deployment failed because the build process failed"):
+            self.cmd('webapp up -g {} -n {} --os-type linux -r "NODE|20-LTS" --track-status'.format(resource_group, webapp_name))
+
+        # cleanup
+        # switch back the working dir
+        os.chdir(current_working_dir)
+        # delete temp_dir
+        import shutil
+        shutil.rmtree(temp_dir)
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_up_runtimestatus', location='eastus')
+    def test_webapp_up_track_runtimestatus_runtimefailed(self, resource_group):
+        plan_name = self.create_random_name('plan-linux', 24)
+        webapp_name = self.create_random_name('app-linux', 24)
+        zip_file_name = os.path.join(TEST_DIR, 'data', 'noderuntimefailed.zip')
+
+        # create a temp directory and unzip the code to this folder
+        import zipfile
+        import tempfile
+        temp_dir = tempfile.mkdtemp()
+        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
+        zip_ref.extractall(temp_dir)
+        current_working_dir = os.getcwd()
+
+        # change the working dir to the dir where the code has been extracted to
+        os.chdir(temp_dir)
+
+        with self.assertRaisesRegexp(CLIError, "Deployment failed because the site failed to start within 10 mins."):
+            self.cmd('webapp up -g {} -n {} --os-type linux -r "NODE|20-LTS" --track-status'.format(resource_group, webapp_name))
 
         # cleanup
         # switch back the working dir

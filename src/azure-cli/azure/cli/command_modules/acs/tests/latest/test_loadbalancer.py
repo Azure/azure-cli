@@ -22,6 +22,7 @@ class TestLoadBalancer(unittest.TestCase):
         outbound_ip_prefixes = None
         outbound_ports = 80
         idle_timeout = 3600
+        backend_pool_type = "nodeIP"
 
         # store all the models used by load balancer
         load_balancer_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).load_balancer_models
@@ -57,6 +58,7 @@ class TestLoadBalancer(unittest.TestCase):
             outbound_ip_prefixes,
             outbound_ports,
             idle_timeout,
+            backend_pool_type,
             profile,
             load_balancer_models,
         )
@@ -67,6 +69,7 @@ class TestLoadBalancer(unittest.TestCase):
         self.assertEqual(p.outbound_ip_prefixes, None)
         self.assertEqual(p.allocated_outbound_ports, 80)
         self.assertEqual(p.idle_timeout_in_minutes, 3600)
+        self.assertEqual(p.backend_pool_type, "nodeIP")
 
     def test_update_load_balancer_profile(self):
         cmd = MockCmd(MockCLI())
@@ -76,6 +79,7 @@ class TestLoadBalancer(unittest.TestCase):
         outbound_ip_prefixes = None
         outbound_ports = 80
         idle_timeout = 3600
+        backend_pool_type = "nodeIP"
 
         # store all the models used by load balancer
         load_balancer_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).load_balancer_models
@@ -101,6 +105,7 @@ class TestLoadBalancer(unittest.TestCase):
             outbound_ip_prefixes,
             outbound_ports,
             idle_timeout,
+            backend_pool_type,
             profile,
             load_balancer_models,
         )
@@ -109,6 +114,7 @@ class TestLoadBalancer(unittest.TestCase):
         self.assertEqual(p.outbound_i_ps.public_i_ps,  [load_balancer_models.ResourceReference(id=x.strip()) for x in ['ip1']])
         self.assertEqual(p.allocated_outbound_ports, 80)
         self.assertEqual(p.idle_timeout_in_minutes, 3600)
+        self.assertEqual(p.backend_pool_type, "nodeIP")
 
     def test_configure_load_balancer_profile_error(self):
         cmd = MockCmd(MockCLI())
@@ -118,6 +124,7 @@ class TestLoadBalancer(unittest.TestCase):
         outbound_ip_prefixes = None
         outbound_ports = 80
         idle_timeout = 3600
+        backend_pool_type = "nodeIP"
 
         load_balancer_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).load_balancer_models
         # store all the models used by load balancer
@@ -153,6 +160,7 @@ class TestLoadBalancer(unittest.TestCase):
             outbound_ip_prefixes,
             outbound_ports,
             idle_timeout,
+            backend_pool_type,
             profile,
             load_balancer_models,
         )
@@ -161,6 +169,7 @@ class TestLoadBalancer(unittest.TestCase):
         self.assertEqual(p.outbound_i_ps.public_i_ps,  [load_balancer_models.ResourceReference(id=x.strip()) for x in ["testpip1","testpip2"]])
         self.assertEqual(p.allocated_outbound_ports, 80)
         self.assertEqual(p.idle_timeout_in_minutes, 3600)
+        self.assertEqual(p.backend_pool_type, "nodeIP")
 
 
 if __name__ == '__main__':

@@ -15,15 +15,18 @@ wrong_vmsize_error = CLIError('Invalid VM size. Example for Valid values: '
                               'For Standard Sku : (C0, C1, C2, C3, C4, C5, C6), '
                               'for Premium Sku : (P1, P2, P3, P4, P5)')
 allowed_auth_methods = ['SAS', 'ManagedIdentity']
+
+
 # region Custom Commands
 
 
 # pylint: disable=unused-argument
 def cli_redis_export(cmd, client, resource_group_name, name, prefix, container,
-                     preferred_data_archive_auth_method=None, file_format=None):
+                     preferred_data_archive_auth_method=None, file_format=None, storage_subscription_id=None):
     from azure.mgmt.redis.models import ExportRDBParameters
     parameters = ExportRDBParameters(prefix=prefix, container=container, format=file_format,
-                                     preferred_data_archive_auth_method=preferred_data_archive_auth_method)
+                                     preferred_data_archive_auth_method=preferred_data_archive_auth_method,
+                                     storage_subscription_id=storage_subscription_id)
     return client.begin_export_data(resource_group_name, name, parameters)
 
 
@@ -70,7 +73,8 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
         redis_version=instance.redis_version,
         public_network_access=instance.public_network_access,
         sku=instance.sku,
-        tags=instance.tags
+        tags=instance.tags,
+        update_channel=instance.update_channel
     )
     return update_params
 
@@ -87,9 +91,10 @@ def cli_redis_create(cmd, client,
                      redis_configuration=None, enable_non_ssl_port=None, tenant_settings=None,
                      shard_count=None, minimum_tls_version=None, subnet_id=None, static_ip=None,
                      zones=None, replicas_per_master=None, redis_version=None, mi_system_assigned=None,
-                     mi_user_assigned=None):
+                     mi_user_assigned=None, update_channel=None):
     # pylint:disable=line-too-long
-    if ((sku.lower() in ['standard', 'basic'] and vm_size.lower() not in allowed_c_family_sizes) or (sku.lower() in ['premium'] and vm_size.lower() not in allowed_p_family_sizes)):
+    if ((sku.lower() in ['standard', 'basic'] and vm_size.lower() not in allowed_c_family_sizes) or (
+            sku.lower() in ['premium'] and vm_size.lower() not in allowed_p_family_sizes)):
         raise wrong_vmsize_error
     tenant_settings_in_json = {}
     if tenant_settings is not None:
@@ -115,7 +120,8 @@ def cli_redis_create(cmd, client,
         redis_version=redis_version,
         identity=identity,
         public_network_access=None,
-        tags=tags)
+        tags=tags,
+        update_channel=update_channel)
     return client.begin_create(resource_group_name, name, params)
 
 
@@ -187,10 +193,11 @@ def cli_redis_regenerate_key(client, resource_group_name, name, key_type):
 
 
 def cli_redis_import(client, resource_group_name, name, files,
-                     preferred_data_archive_auth_method=None, file_format=None):
+                     preferred_data_archive_auth_method=None, file_format=None, storage_subscription_id=None):
     from azure.mgmt.redis.models import ImportRDBParameters
     return client.begin_import_data(resource_group_name, name, ImportRDBParameters(files=files, format=file_format,
-                                    preferred_data_archive_auth_method=preferred_data_archive_auth_method))
+                                    preferred_data_archive_auth_method=preferred_data_archive_auth_method,
+                                    storage_subscription_id=storage_subscription_id))
 
 
 def cli_redis_force_reboot(client, resource_group_name, name, reboot_type, shard_id=None):
@@ -280,5 +287,20 @@ def build_identity(mi_system_assigned, mi_user_assigned):
     return ManagedServiceIdentity(
         type=identityType.value,
         user_assigned_identities=userIdentities)
+
+
+def cli_redis_access_policy_create(client, resource_group_name, cache_name, access_policy_name, permissions):
+    from azure.mgmt.redis.models import RedisCacheAccessPolicy
+    param = RedisCacheAccessPolicy(permissions=permissions)
+    return client.begin_create_update(resource_group_name, cache_name, access_policy_name, param)
+
+
+def cli_redis_access_policy_assignment_create(client, resource_group_name, cache_name, access_policy_assignment_name,
+                                              access_policy_name, object_id, object_id_alias):
+    from azure.mgmt.redis.models import RedisCacheAccessPolicyAssignment
+    param = RedisCacheAccessPolicyAssignment(object_id=object_id,
+                                             object_id_alias=object_id_alias,
+                                             access_policy_name=access_policy_name)
+    return client.begin_create_update(resource_group_name, cache_name, access_policy_assignment_name, param)
 
 # endregion

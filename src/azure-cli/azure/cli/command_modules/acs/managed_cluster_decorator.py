@@ -4,7 +4,9 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
+import copy
 import os
+import semver
 import re
 import time
 from types import SimpleNamespace
@@ -31,6 +33,11 @@ from azure.cli.command_modules.acs._consts import (
     AgentPoolDecoratorMode,
     DecoratorEarlyExitException,
     DecoratorMode,
+    CONST_AZURE_SERVICE_MESH_MODE_DISABLED,
+    CONST_AZURE_SERVICE_MESH_MODE_ISTIO,
+    CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START,
+    CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE,
+    CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
 )
 from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
@@ -119,6 +126,7 @@ ManagedClusterStorageProfileDiskCSIDriver = TypeVar('ManagedClusterStorageProfil
 ManagedClusterStorageProfileFileCSIDriver = TypeVar('ManagedClusterStorageProfileFileCSIDriver')
 ManagedClusterStorageProfileBlobCSIDriver = TypeVar('ManagedClusterStorageProfileBlobCSIDriver')
 ManagedClusterStorageProfileSnapshotController = TypeVar('ManagedClusterStorageProfileSnapshotController')
+ServiceMeshProfile = TypeVar("ServiceMeshProfile")
 
 # TODO
 # 1. remove enable_rbac related implementation
@@ -1874,6 +1882,19 @@ class AKSManagedClusterContext(BaseAKSContext):
             "load_balancer_idle_timeout"
         )
 
+    def get_load_balancer_backend_pool_type(self) -> Union[str, None]:
+        """Obtain the value of load_balancer_backend_pool_type.
+        :return: string
+        """
+        # read the original value passed by the command
+        load_balancer_backend_pool_type = self.raw_param.get(
+            "load_balancer_backend_pool_type"
+        )
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return load_balancer_backend_pool_type
+
     def get_nat_gateway_managed_outbound_ip_count(self) -> Union[int, None]:
         """Obtain the value of nat_gateway_managed_outbound_ip_count.
 
@@ -2112,16 +2133,15 @@ class AKSManagedClusterContext(BaseAKSContext):
     def _get_network_plugin_mode(self, enable_validation: bool = False) -> Union[str, None]:
         # read the original value passed by the command
         network_plugin_mode = self.raw_param.get("network_plugin_mode")
-        # try to read the property value corresponding to the parameter from the `mc` object
 
-        # if create, try and read from the mc object
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.network_plugin_mode is not None
-            ):
-                network_plugin_mode = self.mc.network_profile.network_plugin_mode
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            not network_plugin_mode and
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.network_plugin_mode is not None
+        ):
+            network_plugin_mode = self.mc.network_profile.network_plugin_mode
 
         if enable_validation:
             # todo(tyler-lloyd) do we need any validation?
@@ -2148,10 +2168,12 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string or None
         """
-        # read the original value passed by the command
+
         network_plugin = self.raw_param.get("network_plugin")
+
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
+            not network_plugin and
             self.mc and
             self.mc.network_profile and
             self.mc.network_profile.network_plugin is not None
@@ -4062,6 +4084,198 @@ class AKSManagedClusterContext(BaseAKSContext):
         support_plan = self.raw_param.get("k8s_support_plan")
         return support_plan
 
+    def get_initial_service_mesh_profile(self) -> ServiceMeshProfile:
+        """ Obtain the initial service mesh profile from parameters.
+        This function is used only when setting up a new AKS cluster.
+        :return: initial service mesh profile
+        """
+
+        # returns a service mesh profile only if '--enable-azure-service-mesh' is applied
+        enable_asm = self.raw_param.get("enable_azure_service_mesh", False)
+        if enable_asm:
+            return self.models.ServiceMeshProfile(
+                mode=CONST_AZURE_SERVICE_MESH_MODE_ISTIO,
+                istio=self.models.IstioServiceMesh(),
+            )
+
+        return None
+
+    # pylint: disable=too-many-branches
+    def update_azure_service_mesh_profile(self) -> ServiceMeshProfile:
+        """ Update azure service mesh profile.
+        This function clone the existing service mesh profile, then apply user supplied changes
+        like enable or disable mesh, enable or disable internal or external ingress gateway
+        then return the updated service mesh profile.
+        It does not overwrite the service mesh profile attribute of the managed cluster.
+        :return: updated service mesh profile
+        """
+
+        updated = False
+        new_profile = self.models.ServiceMeshProfile(mode=CONST_AZURE_SERVICE_MESH_MODE_DISABLED) \
+            if self.mc.service_mesh_profile is None else copy.deepcopy(self.mc.service_mesh_profile)
+
+        # enable/disable
+        enable_asm = self.raw_param.get("enable_azure_service_mesh", False)
+        disable_asm = self.raw_param.get("disable_azure_service_mesh", False)
+        mesh_upgrade_command = self.raw_param.get("mesh_upgrade_command", None)
+
+        if enable_asm and disable_asm:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot both enable and disable azure service mesh at the same time.",
+            )
+
+        if disable_asm:
+            if new_profile is None or new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_DISABLED:
+                raise ArgumentUsageError(
+                    "Istio has not been enabled for this cluster, please refer to https://aka.ms/asm-aks-addon-docs "
+                    "for more details on enabling Azure Service Mesh."
+                )
+            new_profile.mode = CONST_AZURE_SERVICE_MESH_MODE_DISABLED
+            updated = True
+        elif enable_asm:
+            if new_profile is not None and new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_ISTIO:
+                raise ArgumentUsageError(
+                    "Istio has already been enabled for this cluster, please refer to https://aka.ms/asm-aks-upgrade-docs "
+                    "for more details on updating the mesh profile."
+                )
+            requested_revision = self.raw_param.get("revision", None)
+            new_profile.mode = CONST_AZURE_SERVICE_MESH_MODE_ISTIO
+            if new_profile.istio is None:
+                new_profile.istio = self.models.IstioServiceMesh()
+            if mesh_upgrade_command is None and requested_revision is not None:
+                new_profile.istio.revisions = [requested_revision]
+            updated = True
+
+        enable_ingress_gateway = self.raw_param.get("enable_ingress_gateway", False)
+        disable_ingress_gateway = self.raw_param.get("disable_ingress_gateway", False)
+        ingress_gateway_type = self.raw_param.get("ingress_gateway_type", None)
+
+        if enable_ingress_gateway and disable_ingress_gateway:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot both enable and disable azure service mesh ingress gateway at the same time.",
+            )
+
+        # deal with gateways
+        if enable_ingress_gateway or disable_ingress_gateway:
+            # if a gateway is enabled, enable the mesh
+            if enable_ingress_gateway:
+                new_profile.mode = CONST_AZURE_SERVICE_MESH_MODE_ISTIO
+                updated = True
+
+            if not ingress_gateway_type:
+                raise RequiredArgumentMissingError("--ingress-gateway-type is required.")
+
+            # ensure necessary fields
+            if new_profile.istio.components is None:
+                new_profile.istio.components = self.models.IstioComponents()
+                updated = True
+            if new_profile.istio.components.ingress_gateways is None:
+                new_profile.istio.components.ingress_gateways = []
+                updated = True
+
+            # make update if the gateway already exist
+            gateway_exists = False
+            for ingress in new_profile.istio.components.ingress_gateways:
+                if ingress.mode == ingress_gateway_type:
+                    ingress.enabled = enable_ingress_gateway
+                    gateway_exists = True
+                    updated = True
+                    break
+
+            # gateway not exist, append
+            if not gateway_exists:
+                new_profile.istio.components.ingress_gateways.append(
+                    self.models.IstioIngressGateway(
+                        mode=ingress_gateway_type,
+                        enabled=enable_ingress_gateway,
+                    )
+                )
+                updated = True
+
+        # deal with plugin ca
+        key_vault_id = self.raw_param.get("key_vault_id", None)
+        ca_cert_object_name = self.raw_param.get("ca_cert_object_name", None)
+        ca_key_object_name = self.raw_param.get("ca_key_object_name", None)
+        root_cert_object_name = self.raw_param.get("root_cert_object_name", None)
+        cert_chain_object_name = self.raw_param.get("cert_chain_object_name", None)
+
+        if any([key_vault_id, ca_cert_object_name, ca_key_object_name, root_cert_object_name, cert_chain_object_name]):
+            if key_vault_id is None:
+                raise InvalidArgumentValueError('--key-vault-id is required to use Azure Service Mesh plugin CA feature.')
+            if ca_cert_object_name is None:
+                raise InvalidArgumentValueError('--ca-cert-object-name is required to use Azure Service Mesh plugin CA feature.')
+            if ca_key_object_name is None:
+                raise InvalidArgumentValueError('--ca-key-object-name is required to use Azure Service Mesh plugin CA feature.')
+            if root_cert_object_name is None:
+                raise InvalidArgumentValueError('--root-cert-object-name is required to use Azure Service Mesh plugin CA feature.')
+            if cert_chain_object_name is None:
+                raise InvalidArgumentValueError('--cert-chain-object-name is required to use Azure Service Mesh plugin CA feature.')
+
+        if key_vault_id is not None and (
+                not is_valid_resource_id(key_vault_id) or "providers/Microsoft.KeyVault/vaults" not in key_vault_id):
+            raise InvalidArgumentValueError(
+                key_vault_id + " is not a valid Azure Keyvault resource ID."
+            )
+
+        if enable_asm and all([key_vault_id, ca_cert_object_name, ca_key_object_name, root_cert_object_name, cert_chain_object_name]):
+            if new_profile.istio.certificate_authority is None:
+                new_profile.istio.certificate_authority = self.models.IstioCertificateAuthority()
+            if new_profile.istio.certificate_authority.plugin is None:
+                new_profile.istio.certificate_authority.plugin = self.models.IstioPluginCertificateAuthority()
+            new_profile.istio.certificate_authority.plugin.key_vault_id = key_vault_id
+            new_profile.istio.certificate_authority.plugin.cert_object_name = ca_cert_object_name
+            new_profile.istio.certificate_authority.plugin.key_object_name = ca_key_object_name
+            new_profile.istio.certificate_authority.plugin.root_cert_object_name = root_cert_object_name
+            new_profile.istio.certificate_authority.plugin.cert_chain_object_name = cert_chain_object_name
+            updated = True
+
+        # deal with mesh upgrade commands
+        if mesh_upgrade_command is not None:
+            if new_profile is None or new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_DISABLED:
+                raise ArgumentUsageError(
+                    "Istio has not been enabled for this cluster, please refer to https://aka.ms/asm-aks-addon-docs "
+                    "for more details on enabling Azure Service Mesh."
+                )
+            requested_revision = self.raw_param.get("revision", None)
+            if mesh_upgrade_command == CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE or mesh_upgrade_command == CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK:
+                if len(new_profile.istio.revisions) < 2:
+                    raise ArgumentUsageError('Azure Service Mesh upgrade is not in progress.')
+
+                sorted_revisons = self._sort_revisions(new_profile.istio.revisions)
+                if mesh_upgrade_command == CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE:
+                    revision_to_remove = sorted_revisons[0]
+                    revision_to_keep = sorted_revisons[-1]
+                else:
+                    revision_to_remove = sorted_revisons[-1]
+                    revision_to_keep = sorted_revisons[0]
+                msg = (f"This operation will remove Istio control plane for revision {revision_to_remove}. "
+                       f"Please ensure all data plane workloads have been rolled over to revision {revision_to_keep} so that they are still part of the mesh. "
+                       "\nAre you sure you want to proceed?")
+                if prompt_y_n(msg, default="y"):
+                    new_profile.istio.revisions.remove(revision_to_remove)
+                    updated = True
+            elif mesh_upgrade_command == CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START and requested_revision is not None:
+                if new_profile.istio.revisions is None:
+                    new_profile.istio.revisions = []
+                new_profile.istio.revisions.append(requested_revision)
+                updated = True
+
+        if updated:
+            return new_profile
+
+        return self.mc.service_mesh_profile
+
+    def _sort_revisions(self, revisions):
+        def _convert_revision_to_semver(rev):
+            sr = rev.replace("asm-", "")
+            sv = sr.replace("-", ".", 1)
+            # Add a custom patch version of 0
+            sv += ".0"
+            return semver.VersionInfo.parse(sv)
+
+        sorted_revisions = sorted(revisions, key=_convert_revision_to_semver)
+        return sorted_revisions
+
     def _get_uptime_sla(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of uptime_sla.
 
@@ -5345,6 +5559,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             self.context.get_load_balancer_outbound_ip_prefixes(),
             self.context.get_load_balancer_outbound_ports(),
             self.context.get_load_balancer_idle_timeout(),
+            self.context.get_load_balancer_backend_pool_type(),
             models=self.models.load_balancer_models,
         )
 
@@ -5909,6 +6124,17 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             mc.auto_upgrade_profile.node_os_upgrade_channel = node_os_upgrade_channel
         return mc
 
+    def set_up_azure_service_mesh_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up azure service mesh for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        profile = self.context.get_initial_service_mesh_profile()
+        if profile is not None:
+            mc.service_mesh_profile = profile
+        return mc
+
     def set_up_auto_scaler_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up autoscaler profile for the ManagedCluster object.
 
@@ -6072,6 +6298,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_k8s_support_plan(mc)
         # set up azure monitor metrics profile
         mc = self.set_up_azure_monitor_profile(mc)
+        # set up azure service mesh profile
+        mc = self.set_up_azure_service_mesh_profile(mc)
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
             mc = self._restore_defaults_in_mc(mc)
@@ -6520,6 +6748,14 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 is_service_principal=is_service_principal,
             )
 
+    def update_azure_service_mesh_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update azure service mesh profile for the ManagedCluster object.
+        """
+        self._ensure_mc(mc)
+
+        mc.service_mesh_profile = self.context.update_azure_service_mesh_profile()
+        return mc
+
     def update_sku(self, mc: ManagedCluster) -> ManagedCluster:
         """Update sku (uptime sla) for the ManagedCluster object.
 
@@ -6600,6 +6836,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 outbound_ip_prefixes=self.context.get_load_balancer_outbound_ip_prefixes(),
                 outbound_ports=self.context.get_load_balancer_outbound_ports(),
                 idle_timeout=self.context.get_load_balancer_idle_timeout(),
+                backend_pool_type=self.context.get_load_balancer_backend_pool_type(),
                 profile=mc.network_profile.load_balancer_profile,
                 models=self.models.load_balancer_models)
         return mc
@@ -6784,6 +7021,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         network_plugin_mode = self.context.get_network_plugin_mode()
         if network_plugin_mode:
             mc.network_profile.network_plugin_mode = network_plugin_mode
+
+        network_plugin = self.context.get_network_plugin()
+        if network_plugin:
+            mc.network_profile.network_plugin = network_plugin
 
         (
             pod_cidr,
@@ -7400,8 +7641,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         cluster, cluster_resource_id, self.cmd
                     )
             elif (
-                self.context.raw_param.get("enable_addons") is not None or
-                self.context.raw_param.get("disable_addons") is not None
+                self.context.raw_param.get("enable_addons") is not None
             ):
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()

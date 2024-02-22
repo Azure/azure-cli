@@ -436,6 +436,37 @@ examples:
         az image builder optimizer show -n myTemplate -g myGroup --defer
 """
 
+helps['image builder error-handler'] = """
+type: group
+short-summary: Manage image builder template error handler.
+"""
+
+helps['image builder error-handler add'] = """
+type: command
+short-summary: Add error handler to an existing image builder template.
+long-summary: Must be used with --defer
+"""
+
+helps['image builder error-handler remove'] = """
+type: command
+short-summary: Remove error handler from an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Remove error handler from an existing image builder template.
+    text: |
+        az image builder error-handler remove -n myTemplate -g myGroup --defer
+"""
+
+helps['image builder error-handler show'] = """
+type: command
+short-summary: Show error handler of an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Show error handler of an existing image builder template.
+    text: |
+        az image builder error-handler show -n myTemplate -g myGroup --defer
+"""
+
 helps['image builder identity'] = """
 type: group
 short-summary: Manage identities of an image builder template.
@@ -1541,7 +1572,7 @@ examples:
         az vm create -n MyVm -g MyResourceGroup --image Debian11 --vnet-name MyVnet --subnet subnet1 \\
             --availability-set MyAvailabilitySet --public-ip-address-dns-name MyUniqueDnsName \\
             --ssh-key-values @key-file
-  - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, two data disks (10GB and 20GB), and then generate ssh key pairs.
+  - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, two data disks (10GB and 20GB), and then generate RSA ssh key pairs.
     text: |
         az vm create -n MyVm -g MyResourceGroup --public-ip-address-dns-name MyUniqueDnsName \\
             --image Ubuntu2204 --data-disk-sizes-gb 10 20 --size Standard_DS2_v2 \\
