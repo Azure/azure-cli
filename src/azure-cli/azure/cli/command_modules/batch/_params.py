@@ -243,7 +243,7 @@ def load_arguments(self, _):
                 help='This property can be used by user in the request to enable or disable the Host Encryption for the virtual machine or virtual machine scale set. This will enable the encryption for all the disks including Resource/Temp disk at host itself. The default behavior is: The Encryption at host will be disabled unless this property is set to true for the resource.')
         c.extra('security_type',
                 arg_group='Pool: Security Profile',
-                help='Specifies the SecurityType of the virtual machine. It has to be set to any specified value to enable UefiSettings. The default behavior is: UefiSettings will not be enabled unless this property is set.')
+                help='Specify the SecurityType of the virtual machine. It has to be set to any specified value to enable UefiSettings. The default behavior is: UefiSettings will not be enabled unless this property is set.')
         c.extra('secure_boot_enabled', arg_type=get_three_state_flag(),
                 options_list=('--enable-secure-boot'),
                 arg_group='Pool: Security Profile',
