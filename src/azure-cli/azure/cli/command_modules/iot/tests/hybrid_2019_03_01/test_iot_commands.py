@@ -6,9 +6,14 @@
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-
+from ..utils.recording_processors import KeyReplacer
 
 class IoTHubTest(ScenarioTest):
+
+    def __init__(self, method_name):
+        super(IoTHubTest, self).__init__(
+            method_name, recording_processors=[KeyReplacer()]
+    )
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')

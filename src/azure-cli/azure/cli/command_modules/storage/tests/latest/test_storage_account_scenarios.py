@@ -2466,6 +2466,10 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['rules'][0]['destinationContainer'], dest_container)
         self.assertEqual(result['rules'][0]['filters']['minCreationTime'], '2020-02-19T16:05:00Z')
 
+        src_policy_id = result["policyId"]
+        self.kwargs.update({"src_policy_id": src_policy_id})
+        self.cmd('storage account or-policy update -g {rg} -n {src_sc} -p @"{policy}" --policy-id {src_policy_id}')
+
         # Service behavior change: (InvalidObjectReplicationPolicy) SourceAccount can not be overwritten
         # # Update ORS policy
         # result = self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(

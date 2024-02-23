@@ -133,7 +133,9 @@ class Add(AAZCommand):
 
     @register_callback
     def pre_operations(self):
-        pass
+        name = self.ctx.args.name
+        if has_value(name) and len(name.to_serialized_data()) > 37:
+            raise ValueError("Name exceeds the maximum character limit of 37.")
 
     @register_callback
     def post_operations(self):
