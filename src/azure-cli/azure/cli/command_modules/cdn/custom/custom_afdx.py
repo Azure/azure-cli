@@ -192,13 +192,13 @@ class AFDOriginGroupCreate(_AFDOriginGroupCreate):
         args_schema.enable_health_probe = AAZBoolArg(
             options=['--enable-health-probe'],
             help='Indicates whether to enable probe on the origin group.',
-            blank=False,
+            blank=True,
         )
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        if args.enable_health_probe.to_serialized_data() is False:
+        if not has_value(args.enable_health_probe) or args.enable_health_probe.to_serialized_data() is False:
             args.probe_path = None
             args.probe_protocol = None
             args.probe_interval_in_seconds = None
@@ -212,6 +212,7 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
         args_schema.enable_health_probe = AAZBoolArg(
             options=['--enable-health-probe'],
             help='Indicates whether to enable probe on the origin group.',
+            blank=True,
         )
         return args_schema
 
@@ -222,12 +223,15 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
             'profile_name': args.profile_name,
             'origin_group_name': args.origin_group_name
         })
-        if not has_value(args.enable_health_probe) and existing['healthProbeSettings'] is not None:
-            if 'probePath' in existing['healthProbeSettings'] \
-                    or 'probeProtocol' in existing['healthProbeSettings'] \
-                    or 'probeIntervalInSeconds' in existing['healthProbeSettings'] \
-                    or 'probeRequestType' in existing['healthProbeSettings']:
-                args.enable_health_probe = True
+        if not has_value(args.enable_health_probe):
+            if existing['healthProbeSettings'] is not None:
+                if 'probePath' in existing['healthProbeSettings'] \
+                        or 'probeProtocol' in existing['healthProbeSettings'] \
+                        or 'probeIntervalInSeconds' in existing['healthProbeSettings'] \
+                        or 'probeRequestType' in existing['healthProbeSettings']:
+                    args.enable_health_probe = True
+                else:
+                    args.enable_health_probe = False
             else:
                 args.enable_health_probe = False
 
