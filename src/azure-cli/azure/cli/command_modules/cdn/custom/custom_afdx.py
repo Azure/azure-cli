@@ -135,6 +135,16 @@ class AFDProfileUpdate(_AFDProfileUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.identity_type = AAZBoolArg(
+            options=['--identity-type'],
+            help='The identity type of the profile.',
+            enum=['SystemAssigned', 'None', 'UserAssigned', 'SystemAssigned,UserAssigned'],
+        )
+        args_schema.user_assigned_identities = AAZListArg(
+            options=['--user-assigned-identities'],
+            help='The user assigned identities of the profile.',
+        )
+        args_schema.user_assigned_identities.Element = AAZStrArg()
         args_schema.location._registered = False
         args_schema.sku._registered = False
         return args_schema
@@ -150,6 +160,20 @@ class AFDProfileUpdate(_AFDProfileUpdate):
             raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
         existing_location = None if 'location' not in existing else existing['location']
         args.location = existing_location
+        existing_user_assigned_identities = {} if 'identity' not in existing or \
+            'userAssignedIdentities' not in existing['identity'] else existing['identity']['userAssignedIdentities']
+        user_assigned_identities = identities(existing_user_assigned_identities, args.user_assigned_identities)
+        args.identity = {
+            'type': args.identity_type,
+            'userAssignedIdentities': user_assigned_identities
+        }
+
+
+def identities(existing_user_assigned_identities, user_assigned_identities):
+    for identity in user_assigned_identities:
+        if identity not in existing_user_assigned_identities:
+            existing_user_assigned_identities[identity] = {}
+    return existing_user_assigned_identities
 
 
 class AFDEndpointCreate(_AFDEndpointCreate):
