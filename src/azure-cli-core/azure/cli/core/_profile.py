@@ -793,6 +793,7 @@ class SubscriptionFinder:
                            "Use 'az login --allow-no-subscriptions' to have tenant level access.")
             for t in empty_tenants:
                 logger.warning("%s", t.tenant_id_name)
+            logger.warning('')
 
         # Show warning for MFA tenants
         if mfa_tenants:
@@ -800,6 +801,8 @@ class SubscriptionFinder:
                            "Use 'az login --tenant TENANT_ID' to explicitly login to a tenant.")
             for t in mfa_tenants:
                 logger.warning("%s", t.tenant_id_name)
+            logger.warning('')
+
         return all_subscriptions
 
     def find_using_specific_tenant(self, tenant, credential):
