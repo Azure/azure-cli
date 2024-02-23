@@ -7,7 +7,8 @@
 from azure.mgmt.cdn.models import (MinimumTlsVersion, ProtocolType, SkuName, UpdateRule, DeleteRule, CertificateType,
                                    ResourceType)
 from azure.cli.core.aaz._base import has_value
-from azure.cli.command_modules.cdn.aaz.latest.cdn.custom_domain import EnableHttps as _CDNEnableHttps
+from azure.cli.command_modules.cdn.aaz.latest.cdn.custom_domain import EnableHttps as _CDNEnableHttps, \
+    Delete as _CDNCustomDomainDelete
 from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDProfileShow, \
     Create as _AFDProfileCreate, Update as _AFDProfileUpdate, Delete as _AFDProfileDelete, \
     List as _AFDProfileList
@@ -241,6 +242,13 @@ class CDNEnableHttps(_CDNEnableHttps):
                 }
                 args.cdn = cdn
                 args.protocol_type = ProtocolType.ip_based
+
+
+class CDNCustomDomainDelete(_CDNCustomDomainDelete):
+    @classmethod
+    def _handler(self, command_args):
+        super()._handler(command_args)
+        return self.build_lro_poller(self._execute_operations, None)
 
 
 class CDNOriginCreate(_CDNOriginCreate):

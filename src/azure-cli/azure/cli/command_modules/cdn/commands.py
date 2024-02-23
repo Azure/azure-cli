@@ -74,6 +74,9 @@ def load_command_table(self, _):
     from .custom.custom_cdn import CDNEnableHttps
     self.command_table['cdn custom-domain enable-https'] = CDNEnableHttps(loader=self)
 
+    from .custom.custom_cdn import CDNCustomDomainDelete
+    self.command_table['cdn custom-domain delete'] = CDNCustomDomainDelete(loader=self)
+
     from azure.cli.command_modules.cdn.aaz.latest.cdn.endpoint import Show
     self.command_table['cdn endpoint rule show'] = Show(loader=self)
     self.command_table['cdn endpoint rule condition show'] = Show(loader=self)
