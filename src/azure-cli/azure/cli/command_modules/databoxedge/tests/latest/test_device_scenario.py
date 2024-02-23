@@ -5,6 +5,7 @@
 
 import time
 from azure.cli.testsdk import ScenarioTest,ResourceGroupPreparer
+from azure.cli.testsdk.scenario_tests import record_only
 
 
 class TestDevice(ScenarioTest):
@@ -66,6 +67,7 @@ class TestDevice(ScenarioTest):
         time.sleep(30)
         self.cmd('databoxedge device list -g {rg}', checks=[self.is_empty()])
 
+    @record_only()
     def test_device_subresource(self):
         self.kwargs.update({
             'share_name': self.create_random_name('share', 10),
