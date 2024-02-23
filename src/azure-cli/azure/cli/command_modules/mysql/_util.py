@@ -582,7 +582,6 @@ def get_current_utc_time():
 
 
 class ImportFromStorageState(Enum):
-    STARTING = "Starting"
     PROVISIONING = "Provisioning Server"
     IMPORTING = "Importing"
     DEFAULT = "Running"
@@ -592,7 +591,7 @@ class ImportFromStorageProgressHook:
 
     def __init__(self):
         self._import_started = False
-        self._import_state = ImportFromStorageState.STARTING
+        self._import_state = ImportFromStorageState.DEFAULT
         self._import_estimated_completion_time = None
 
     def update_progress(self, operation_progress_response):

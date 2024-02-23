@@ -12,7 +12,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.mgmt.iothub.models import RoutingSource
 from azure.cli.command_modules.iot.shared import IdentityType
 from azure.core.exceptions import HttpResponseError
-from .recording_processors import KeyReplacer
+from ..utils.recording_processors import KeyReplacer
 
 
 class IoTHubTest(ScenarioTest):

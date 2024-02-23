@@ -11,6 +11,7 @@ from msrestazure.tools import is_valid_resource_id
 
 def create_condition(match_variable,
                      operator, match_values=None, selector=None, negate_condition=None, transforms=None):
+    condition = None
     if match_variable == 'RemoteAddress':
         condition = {
             "remote_address": {
@@ -249,6 +250,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                   preserve_unmatched_path=None, sub_id=None, resource_group_name=None, profile_name=None,
                   endpoint_name=None, origin_group=None, query_string_caching_behavior=None,
                   enable_compression=None, enable_caching=None, forwarding_protocol=None):
+    action = None
     if action_name == "CacheExpiration":
         action = {
             "cache_expiration": {
