@@ -472,13 +472,14 @@ class CDNEndpointCreate(_CDNEndpointCreate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.origin = AAZListArg(
             options=['--origin'],
-            help='Endpoint origin specified by the following space-delimited 6 tuple: '
+            help='Endpoint origin specified by the following space-delimited 7 tuple: '
             'www.example.com http_port https_port private_link_resource_id '
-            'private_link_location private_link_approval_message. '
+            'private_link_location private_link_approval_message origin_name. '
             'The HTTP and HTTPS ports and the private link resource ID and location are optional. '
             'The HTTP and HTTPS ports default to 80 and 443, respectively. '
             'Private link fields are only valid for the sku Standard_Microsoft, '
-            'and private_link_location is required if private_link_resource_id is set.',
+            'and private_link_location is required if private_link_resource_id is set. '
+            'the origin name is optional and defaults to origin.',
             required=True,
         )
         args_schema.origin.Element = AAZStrArg()
@@ -520,6 +521,7 @@ class CDNEndpointCreate(_CDNEndpointCreate):
         private_link_resource_id = None
         private_link_location = None
         private_link_approval_message = None
+        origin_name = 'origin'
 
         if len(args.origin) > 1:
             http_port = int(args.origin[1].to_serialized_data())
@@ -530,9 +532,11 @@ class CDNEndpointCreate(_CDNEndpointCreate):
             private_link_location = args.origin[4]
         if len(args.origin) > 5:
             private_link_approval_message = args.origin[5]
+        if len(args.origin) > 6:
+            origin_name = args.origin[6]
 
         args.origins = [{
-            'name': 'origin',
+            'name': origin_name,
             'host_name': host_name,
             'http_port': http_port,
             'https_port': https_port,
