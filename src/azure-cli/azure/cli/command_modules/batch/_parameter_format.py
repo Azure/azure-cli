@@ -76,6 +76,7 @@ IGNORE_PARAMETERS = [
     'virtual_machine_configuration.windows_configuration',
     'virtual_machine_configuration.container_configuration',
     'virtual_machine_configuration.license_type',
+    'virtual_machine_configuration.service_artifact_reference'
     'task_scheduling_policy',
     'container_settings',
     'user_identity',
@@ -95,7 +96,6 @@ IGNORE_PARAMETERS = [
     'resource_file.storage_container_url',
     'resource_file.blob_prefix',
     'resource_file.auto_storage_container_name',
-    'virtual_machine_configuration.service_artifact_reference'
 ]
 
 # Options to be flattened into multiple arguments.
