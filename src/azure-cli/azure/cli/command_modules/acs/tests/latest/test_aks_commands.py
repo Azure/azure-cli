@@ -105,6 +105,18 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             resource_group, identity_name)).get_output_in_json()
         return identity.get("id")
 
+    def test_aks_get_version_table(self, location="westus2"):
+        self.kwargs.update({
+            'location': location
+        })
+
+        # show k8s versions in table format
+        self.cmd('aks get-versions -l {location} -o table', checks=[
+            StringContainCheck("SupportPlan"), # column name is printed
+            StringContainCheck("KubernetesOfficial"), # every GA version should have this
+            StringContainCheck("AKSLongTermSupport") # we should always have at least 1 LTS version which have this SupportPlan
+        ])
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_default(self, resource_group, resource_group_location):
@@ -690,6 +702,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_service_no_wait(self, resource_group, resource_group_location, sp_name, sp_password):
@@ -734,12 +747,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # show k8s versions
         self.cmd('aks get-versions -l {location}', checks=[
-            self.exists('values[*].patchVersions.keys(@)[]')
-        ])
-
-        # show k8s versions in table format
-        self.cmd('aks get-versions -l {location} -o table', checks=[
-            StringContainCheck(self.kwargs['k8s_version'])
+            self.exists('values[*].patchVersions.keys(@)[]'), # check result not empty
+            StringContainCheck(self.kwargs['k8s_version']) # check the version we want is present
         ])
 
         # get versions for upgrade
@@ -3504,12 +3513,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # show k8s versions
         self.cmd('aks get-versions -l {location}', checks=[
-            self.exists('values[*].patchVersions.keys(@)[]')
-        ])
-
-        # show k8s versions in table format
-        self.cmd('aks get-versions -l {location} -o table', checks=[
-            StringContainCheck(self.kwargs['k8s_version'])
+            self.exists('values[*].patchVersions.keys(@)[]'), # check result not empty
+            StringContainCheck(self.kwargs['k8s_version']) # check the version we want is present
         ])
 
         # get versions for upgrade
@@ -6200,6 +6205,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('networkProfile.loadBalancerProfile.allocatedOutboundPorts', 1024),
+            self.check('networkProfile.loadBalancerProfile.idleTimeoutInMinutes', 10)
+        ])
+
+        # update
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--load-balancer-outbound-ports 0'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.loadBalancerProfile.allocatedOutboundPorts', 0),
             self.check('networkProfile.loadBalancerProfile.idleTimeoutInMinutes', 10)
         ])
 
