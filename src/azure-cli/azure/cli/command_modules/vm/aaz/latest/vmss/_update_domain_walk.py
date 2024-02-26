@@ -12,13 +12,13 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "vmss force-recovery-service-fabric-platform-update-domain-walk",
+    "vmss update-domain-walk",
 )
-class ForceRecoveryServiceFabricPlatformUpdateDomainWalk(AAZCommand):
+class UpdateDomainWalk(AAZCommand):
     """Manual platform update domain walk to update virtual machines in a service fabric virtual machine scale set.
 
     :example: Force recovery service fabric platform update domain walk
-        az force-recovery-service-fabric-platform-update-domain-walk -g rg --vmss-name vmss --platform-update-domain
+        az vmss update-domain-walk -g rg --vmss-name vmss --platform-update-domain
     """
 
     _aaz_info = {
@@ -188,8 +188,8 @@ class ForceRecoveryServiceFabricPlatformUpdateDomainWalk(AAZCommand):
             return cls._schema_on_200
 
 
-class _ForceRecoveryServiceFabricPlatformUpdateDomainWalkHelper:
-    """Helper class for ForceRecoveryServiceFabricPlatformUpdateDomainWalk"""
+class _UpdateDomainWalkHelper:
+    """Helper class for UpdateDomainWalk"""
 
 
-__all__ = ["ForceRecoveryServiceFabricPlatformUpdateDomainWalk"]
+__all__ = ["UpdateDomainWalk"]
