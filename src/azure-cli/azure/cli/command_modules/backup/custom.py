@@ -181,8 +181,8 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
 
         # If the vault exists, we move to the update flow instead
         return update_vault(client, vault_name, resource_group_name, tags, public_network_access,
-                     immutability_state, cross_subscription_restore_state, classic_alerts,
-                     azure_monitor_alerts_for_job_failures)
+                            immutability_state, cross_subscription_restore_state, classic_alerts,
+                            azure_monitor_alerts_for_job_failures)
     except CoreResourceNotFoundError:
         vault_properties = VaultProperties()
 
@@ -1028,13 +1028,13 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
         existing_policy_type = existing_policy.properties.policy_type.lower()
         new_policy_type = policy.properties.policy_type.lower()
         if (new_policy_type in vm_policy_type_map and vm_policy_type_map[new_policy_type] == 'enhanced' and
-        existing_policy_type in vm_policy_type_map and vm_policy_type_map[existing_policy_type] == 'standard'):
+                existing_policy_type in vm_policy_type_map and vm_policy_type_map[existing_policy_type] == 'standard'):
             warning_prompt = ('Upgrading to enhanced policy can incur additional charges. Once upgraded to the enhanced '
-                            'policy, it is not possible to revert back to the standard policy. Do you want to continue?')
+                              'policy, it is not possible to revert back to the standard policy. Do you want to continue?')
             if not prompt_y_n(warning_prompt):
                 logger.warning('Cancelling policy update operation')
                 return None
-    except:
+    except (AttributeError):
         logger.warning("Unable to fetch policy type for either existing or new policy. Proceeding with update.")
 
     # Update policy
