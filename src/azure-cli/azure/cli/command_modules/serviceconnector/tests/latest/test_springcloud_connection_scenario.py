@@ -15,7 +15,7 @@ from azure.cli.command_modules.serviceconnector._resource_config import (
     SOURCE_RESOURCES,
     TARGET_RESOURCES
 )
-from ._test_utils import CredentialReplacer, UserMICredentialReplacer
+from ._test_utils import CredentialReplacer, ConfigCredentialReplacer
 
 
 @unittest.skip('Need spring-cloud and spring extension installed')
@@ -24,7 +24,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
     def __init__(self, method_name):
         super(SpringCloudConnectionScenarioTest, self).__init__(
             method_name,
-            recording_processors=[CredentialReplacer(), UserMICredentialReplacer()]
+            recording_processors=[CredentialReplacer(), ConfigCredentialReplacer()]
         )
 
     # @record_only

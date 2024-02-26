@@ -594,6 +594,14 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             'usage error: The "--os-disk-secure-vm-disk-encryption-set" can only be passed in '
             'when "--os-disk-security-encryption-type" is "DiskWithVMGuestState"')
 
+    os_disk_security_encryption_type = getattr(namespace, 'os_disk_security_encryption_type', None)
+    if os_disk_security_encryption_type and os_disk_security_encryption_type.lower() == 'nonpersistedtpm':
+        if ((getattr(namespace, 'security_type', None) != 'ConfidentialVM') or
+                not getattr(namespace, 'enable_vtpm', None)):
+            raise ArgumentUsageError(
+                'usage error: The "--os-disk-security-encryption-type NonPersistedTPM" can only be passed in '
+                'when "--security-type" is "ConfidentialVM" and "--enable-vtpm" is True')
+
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
@@ -1332,23 +1340,37 @@ def _validate_trusted_launch(namespace):
         namespace.enable_secure_boot = True
 
 
-def trusted_launch_set_default(namespace, generation_version):
+def trusted_launch_set_default(namespace, generation_version, features):
     if not generation_version:
         return
 
-    from ._constants import UPGRADE_SECURITY_HINT
-    if generation_version == 'V1' or namespace.security_type == 'Standard':
+    trusted_launch = ["TrustedLaunchSupported", "TrustedLaunchAndConfidentialVmSupported"]
+
+    features_security_type = None
+    for item in features:
+        if hasattr(item, 'name') and hasattr(item, 'value') and item.name == 'SecurityType':
+            features_security_type = item.value
+            break
+
+    from ._constants import UPGRADE_SECURITY_HINT, COMPATIBLE_SECURITY_TYPE_VALUE
+    if generation_version == 'V1':
         logger.warning(UPGRADE_SECURITY_HINT)
 
     elif generation_version == 'V2':
-        if namespace.security_type is None:
-            namespace.security_type = 'TrustedLaunch'
+        if features_security_type in trusted_launch:
+            if namespace.security_type is None:
+                namespace.security_type = 'TrustedLaunch'
 
-        if namespace.enable_vtpm is None:
-            namespace.enable_vtpm = True
+            if namespace.security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
+                if namespace.enable_vtpm is None:
+                    namespace.enable_vtpm = True
 
-        if namespace.enable_secure_boot is None:
-            namespace.enable_secure_boot = True
+                if namespace.enable_secure_boot is None:
+                    namespace.enable_secure_boot = True
+        else:
+            if namespace.security_type is None:
+                namespace.security_type = COMPATIBLE_SECURITY_TYPE_VALUE
+            logger.warning(UPGRADE_SECURITY_HINT)
 
 
 def _validate_generation_version_and_trusted_launch(cmd, namespace):
@@ -1391,7 +1413,9 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
                                        namespace.os_sku, os_version)
             generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
                                                                              'hyper_v_generation') else None
-            trusted_launch_set_default(namespace, generation_version)
+            features = vm_image_info.features if hasattr(vm_image_info, 'features') and vm_image_info.features else []
+
+            trusted_launch_set_default(namespace, generation_version, features)
             return
 
     # create vm with os disk

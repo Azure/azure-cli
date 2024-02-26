@@ -370,6 +370,25 @@ class AKSAgentPoolContext(BaseAKSContext):
             host_group_id = raw_value
         return host_group_id
 
+    def get_crg_id(self) -> Union[str, None]:
+        return self._get_crg_id()
+
+    def _get_crg_id(self) -> Union[str, None]:
+        """Obtain the value of crg_id.
+
+        :return: string or None
+        """
+        raw_value = self.raw_param.get("crg_id")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        value_from_agentpool = None
+        if self.agentpool and hasattr(self.agentpool, "capacity_reservation_group_id"):
+            value_from_agentpool = self.agentpool.capacity_reservation_group_id
+        if value_from_agentpool is not None:
+            crg_id = value_from_agentpool
+        else:
+            crg_id = raw_value
+        return crg_id
+
     def _get_kubernetes_version(self, read_only: bool = False) -> str:
         """Internal function to dynamically obtain the value of kubernetes_version according to the context.
 
@@ -952,6 +971,26 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return drain_timeout
+
+    def get_node_soak_duration(self):
+        """Obtain the value of node_soak_duration.
+
+        :return: int
+        """
+        # read the original value passed by the command
+        node_soak_duration = self.raw_param.get("node_soak_duration")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                self.agentpool.upgrade_settings and
+                self.agentpool.upgrade_settings.node_soak_duration_in_minutes is not None
+            ):
+                node_soak_duration = self.agentpool.upgrade_settings.node_soak_duration_in_minutes
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return node_soak_duration
 
     def get_vm_set_type(self) -> str:
         """Obtain the value of vm_set_type, default value is CONST_VIRTUAL_MACHINE_SCALE_SETS.
@@ -1543,6 +1582,10 @@ class AKSAgentPoolAddDecorator:
         if drain_timeout:
             upgrade_settings.drain_timeout_in_minutes = drain_timeout
 
+        node_soak_duration = self.context.get_node_soak_duration()
+        if node_soak_duration:
+            upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
+
         agentpool.upgrade_settings = upgrade_settings
         return agentpool
 
@@ -1588,6 +1631,15 @@ class AKSAgentPoolAddDecorator:
         self._ensure_agentpool(agentpool)
 
         agentpool.gpu_instance_profile = self.context.get_gpu_instance_profile()
+        return agentpool
+
+    def set_up_crg_id(self, agentpool: AgentPool) -> AgentPool:
+        """Set up crg related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+        agentpool.capacity_reservation_group_id = self.context.get_crg_id()
         return agentpool
 
     def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:
@@ -1644,6 +1696,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_gpu_properties(agentpool)
         # set up agentpool network profile
         agentpool = self.set_up_agentpool_network_profile(agentpool)
+        # set up crg id
+        agentpool = self.set_up_crg_id(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)
@@ -1827,6 +1881,11 @@ class AKSAgentPoolUpdateDecorator:
         drain_timeout = self.context.get_drain_timeout()
         if drain_timeout:
             upgrade_settings.drain_timeout_in_minutes = drain_timeout
+            agentpool.upgrade_settings = upgrade_settings
+
+        node_soak_duration = self.context.get_node_soak_duration()
+        if node_soak_duration:
+            upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
             agentpool.upgrade_settings = upgrade_settings
 
         return agentpool
