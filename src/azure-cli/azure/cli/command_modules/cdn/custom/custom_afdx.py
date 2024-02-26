@@ -125,12 +125,15 @@ class AFDProfileCreate(_AFDProfileCreate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.identity_type = AAZStrArg(
             options=['--identity-type'],
-            help='The identity type of the profile.',
-            enum=['SystemAssigned', 'None', 'UserAssigned'],
+            help='Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).',
+            enum=['SystemAssigned', 'None', 'UserAssigned', 'SystemAssigned, UserAssigned'],
         )
         args_schema.user_assigned_identities = AAZListArg(
             options=['--user-assigned-identities'],
-            help='The user assigned identities of the profile.',
+            help='The set of user assigned identities associated with the resource. '
+            'The userAssignedIdentities dictionary keys will be ARM resource ids in the form: '
+            '\'/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupName}}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{{identityName}}. '
+            'The dictionary values can be empty objects ({{}}) in requests.',
         )
         args_schema.user_assigned_identities.Element = AAZStrArg()
         args_schema.location._registered = False
@@ -141,8 +144,8 @@ class AFDProfileCreate(_AFDProfileCreate):
         args.location = 'global'
         user_assigned_identities = {}
         for identity in args.user_assigned_identities:
-            user_assigned_identities[identity] = {}
-        if args.identity_type == 'UserAssigned':
+            user_assigned_identities[identity.to_serialized_data()] = {}
+        if args.identity_type == 'UserAssigned' or args.identity_type == 'SystemAssigned, UserAssigned':
             args.identity = {
                 'type': args.identity_type,
                 'userAssignedIdentities': user_assigned_identities
@@ -161,12 +164,15 @@ class AFDProfileUpdate(_AFDProfileUpdate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.identity_type = AAZStrArg(
             options=['--identity-type'],
-            help='The identity type of the profile.',
-            enum=['SystemAssigned', 'None', 'UserAssigned'],
+            help='Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).',
+            enum=['SystemAssigned', 'None', 'UserAssigned', 'SystemAssigned, UserAssigned'],
         )
         args_schema.user_assigned_identities = AAZListArg(
             options=['--user-assigned-identities'],
-            help='The user assigned identities of the profile.',
+            help='The set of user assigned identities associated with the resource. '
+            'The userAssignedIdentities dictionary keys will be ARM resource ids in the form: '
+            '\'/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupName}}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{{identityName}}. '
+            'The dictionary values can be empty objects ({{}}) in requests.',
         )
         args_schema.user_assigned_identities.Element = AAZStrArg()
         args_schema.location._registered = False
@@ -186,10 +192,10 @@ class AFDProfileUpdate(_AFDProfileUpdate):
         args.location = existing_location
 
         if has_value(args.identity_type):
-            if args.identity_type == 'UserAssigned':
-                existing_user_assigned_identities = {} if 'identity' not in existing or \
-                    'userAssignedIdentities' not in existing['identity'] else existing['identity']['userAssignedIdentities']
-                user_assigned_identities = identities(existing_user_assigned_identities, args.user_assigned_identities)
+            user_assigned_identities = {}
+            for identity in args.user_assigned_identities:
+                user_assigned_identities[identity.to_serialized_data()] = {}
+            if args.identity_type == 'UserAssigned' or args.identity_type == 'SystemAssigned, UserAssigned':
                 args.identity = {
                     'type': args.identity_type,
                     'userAssignedIdentities': user_assigned_identities
@@ -200,13 +206,6 @@ class AFDProfileUpdate(_AFDProfileUpdate):
                 }
             else:
                 args.identity = None
-
-
-def identities(existing_user_assigned_identities, user_assigned_identities):
-    for identity in user_assigned_identities:
-        if identity.to_serialized_data() not in existing_user_assigned_identities:
-            existing_user_assigned_identities[identity.to_serialized_data()] = {}
-    return existing_user_assigned_identities
 
 
 class AFDEndpointCreate(_AFDEndpointCreate):
