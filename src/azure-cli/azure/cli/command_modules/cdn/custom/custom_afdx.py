@@ -123,12 +123,29 @@ class AFDProfileCreate(_AFDProfileCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.identity_type = AAZBoolArg(
+            options=['--identity-type'],
+            help='The identity type of the profile.',
+            enum=['SystemAssigned', 'None', 'UserAssigned', 'SystemAssigned,UserAssigned'],
+        )
+        args_schema.user_assigned_identities = AAZListArg(
+            options=['--user-assigned-identities'],
+            help='The user assigned identities of the profile.',
+        )
+        args_schema.user_assigned_identities.Element = AAZStrArg()
         args_schema.location._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
         args.location = 'global'
+        user_assigned_identities = {}
+        for identity in args.user_assigned_identities:
+            user_assigned_identities[identity] = {}
+        args.identity = {
+            'type': args.identity_type,
+            'userAssignedIdentities': user_assigned_identities
+        }
 
 
 class AFDProfileUpdate(_AFDProfileUpdate):
