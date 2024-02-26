@@ -123,10 +123,10 @@ class AFDProfileCreate(_AFDProfileCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.identity_type = AAZBoolArg(
+        args_schema.identity_type = AAZStrArg(
             options=['--identity-type'],
             help='The identity type of the profile.',
-            enum=['SystemAssigned', 'None', 'UserAssigned', 'SystemAssigned,UserAssigned'],
+            enum=['SystemAssigned', 'None', 'UserAssigned'],
         )
         args_schema.user_assigned_identities = AAZListArg(
             options=['--user-assigned-identities'],
@@ -142,20 +142,27 @@ class AFDProfileCreate(_AFDProfileCreate):
         user_assigned_identities = {}
         for identity in args.user_assigned_identities:
             user_assigned_identities[identity] = {}
-        args.identity = {
-            'type': args.identity_type,
-            'userAssignedIdentities': user_assigned_identities
-        }
+        if args.identity_type == 'UserAssigned':
+            args.identity = {
+                'type': args.identity_type,
+                'userAssignedIdentities': user_assigned_identities
+            }
+        elif args.identity_type == 'SystemAssigned':
+            args.identity = {
+                'type': args.identity_type
+            }
+        else:
+            args.identity = None
 
 
 class AFDProfileUpdate(_AFDProfileUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.identity_type = AAZBoolArg(
+        args_schema.identity_type = AAZStrArg(
             options=['--identity-type'],
             help='The identity type of the profile.',
-            enum=['SystemAssigned', 'None', 'UserAssigned', 'SystemAssigned,UserAssigned'],
+            enum=['SystemAssigned', 'None', 'UserAssigned'],
         )
         args_schema.user_assigned_identities = AAZListArg(
             options=['--user-assigned-identities'],
@@ -177,19 +184,28 @@ class AFDProfileUpdate(_AFDProfileUpdate):
             raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
         existing_location = None if 'location' not in existing else existing['location']
         args.location = existing_location
-        existing_user_assigned_identities = {} if 'identity' not in existing or \
-            'userAssignedIdentities' not in existing['identity'] else existing['identity']['userAssignedIdentities']
-        user_assigned_identities = identities(existing_user_assigned_identities, args.user_assigned_identities)
-        args.identity = {
-            'type': args.identity_type,
-            'userAssignedIdentities': user_assigned_identities
-        }
+
+        if has_value(args.identity_type):
+            if args.identity_type == 'UserAssigned':
+                existing_user_assigned_identities = {} if 'identity' not in existing or \
+                    'userAssignedIdentities' not in existing['identity'] else existing['identity']['userAssignedIdentities']
+                user_assigned_identities = identities(existing_user_assigned_identities, args.user_assigned_identities)
+                args.identity = {
+                    'type': args.identity_type,
+                    'userAssignedIdentities': user_assigned_identities
+                }
+            elif args.identity_type == 'SystemAssigned':
+                args.identity = {
+                    'type': args.identity_type
+                }
+            else:
+                args.identity = None
 
 
 def identities(existing_user_assigned_identities, user_assigned_identities):
     for identity in user_assigned_identities:
-        if identity not in existing_user_assigned_identities:
-            existing_user_assigned_identities[identity] = {}
+        if identity.to_serialized_data() not in existing_user_assigned_identities:
+            existing_user_assigned_identities[identity.to_serialized_data()] = {}
     return existing_user_assigned_identities
 
 
