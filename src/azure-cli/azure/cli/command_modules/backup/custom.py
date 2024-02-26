@@ -990,7 +990,7 @@ def list_items(cmd, client, resource_group_name, vault_name, container_name=None
 
 
 def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id=None,
-                           is_critical_operation=False):
+                           is_critical_operation=False, yes=False):
     if item.properties.backup_management_type != policy.properties.backup_management_type:
         raise CLIError(
             """
@@ -1027,7 +1027,8 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     try:
         existing_policy_type = existing_policy.properties.policy_type.lower()
         new_policy_type = policy.properties.policy_type.lower()
-        if (new_policy_type in vm_policy_type_map and vm_policy_type_map[new_policy_type] == 'enhanced' and
+        if (not yes and
+                new_policy_type in vm_policy_type_map and vm_policy_type_map[new_policy_type] == 'enhanced' and
                 existing_policy_type in vm_policy_type_map and vm_policy_type_map[existing_policy_type] == 'standard'):
             warning_prompt = ('Upgrading to enhanced policy can incur additional charges. Once upgraded to the enhanced '
                               'policy, it is not possible to revert back to the standard policy. Do you want to continue?')
