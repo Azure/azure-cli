@@ -1650,11 +1650,12 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
         deployment_storage_auth_config["type"] = deployment_storage_auth_type
         if deployment_storage_auth_type == 'StorageAccountConnectionString':
             deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
+            conn_string_app_setting = deployment_storage_auth_value or 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
             update_app_settings(cmd, resource_group_name, name,
-                                ["DEPLOYMENT_STORAGE_CONNECTION_STRING={}".format(deployment_storage_conn_string)])
+                                ["{}={}".format(conn_string_app_setting, deployment_storage_conn_string)])
             deployment_storage_auth_config["userAssignedIdentityResourceId"] = None
             deployment_storage_auth_config["storageAccountConnectionStringName"] = \
-                "DEPLOYMENT_STORAGE_CONNECTION_STRING"
+                conn_string_app_setting
         elif deployment_storage_auth_type == 'SystemAssignedIdentity':
             assign_identities = ['[system]']
             deployment_storage_auth_config["userAssignedIdentityResourceId"] = None
@@ -4615,9 +4616,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             deployment_storage_auth_config["userAssignedIdentityResourceId"] = deployment_storage_auth_value
         elif deployment_storage_auth_type == 'StorageAccountConnectionString':
             deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
-            site_config.app_settings.append(NameValuePair(name='DEPLOYMENT_STORAGE_CONNECTION_STRING',
+            conn_string_app_setting = deployment_storage_auth_value or 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
+            site_config.app_settings.append(NameValuePair(name=conn_string_app_setting,
                                                           value=deployment_storage_conn_string))
-            deployment_storage_auth_value = 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
+            deployment_storage_auth_value = conn_string_app_setting
             deployment_storage_auth_config["storageAccountConnectionStringName"] = deployment_storage_auth_value
 
         always_ready_dict = _parse_key_value_pairs(always_ready_instances)
