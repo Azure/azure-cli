@@ -769,7 +769,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                     raise CLIError(dns_zone, " is not a valid Azure DNS Zone resource ID.")
 
         return dns_zone_resource_ids
-    
+
     def get_keyvault_id(self) -> str:
         """Obtain the value of keyvault_id.
 
@@ -6406,7 +6406,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             # set intermediate
             self.context.set_intermediate("azuremonitormetrics_addon_enabled", True, overwrite_exists=True)
         return mc
-    
+
     def set_up_ingress_web_app_routing(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up the app routing profile in the ingress profile for the ManagedCluster object.
 
@@ -7610,7 +7610,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             image_cleaner_profile.interval_hours = interval_hours
 
         return mc
-    
+
     # pylint: disable=too-many-branches
     def update_app_routing_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update app routing profile for the ManagedCluster object.
@@ -7940,15 +7940,16 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         attach_acr = self.context.get_attach_acr()
         keyvault_id = self.context.get_keyvault_id()
         enable_azure_keyvault_secrets_provider_addon = self.context.get_enable_kv() or (
-            mc.addon_profiles and mc.addon_profiles.get(CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME)
-            and mc.addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME].enabled)
+            mc.addon_profiles and mc.addon_profiles.get(CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME) and
+            mc.addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME].enabled)
 
+        # pylint: disable=too-many-boolean-expressions
         if (
             monitoring_addon_enabled or
             ingress_appgw_addon_enabled or
             virtual_node_addon_enabled or
             (enable_managed_identity and attach_acr) or
-            enable_azure_keyvault_secrets_provider_addon
+            (keyvault_id and enable_azure_keyvault_secrets_provider_addon)
         ):
             return True
         return False
@@ -8041,8 +8042,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     subscription_id=self.context.get_subscription_id(),
                     is_service_principal=False,
                 )
-        
-         # attach keyvault to app routing addon
+
+        # attach keyvault to app routing addon
         from azure.cli.command_modules.keyvault.custom import set_policy
         from azure.cli.command_modules.acs._client_factory import get_keyvault_client
         keyvault_id = self.context.get_keyvault_id()

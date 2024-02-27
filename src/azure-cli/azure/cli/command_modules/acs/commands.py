@@ -234,8 +234,8 @@ def load_command_table(self, _):
             'rollback',
             'aks_mesh_upgrade_rollback',
             supports_no_wait=True)
-    
-     # AKS approuting commands
+
+    # AKS approuting commands
     with self.command_group(
         "aks approuting", managed_clusters_sdk, client_factory=cf_managed_clusters
     ) as g:

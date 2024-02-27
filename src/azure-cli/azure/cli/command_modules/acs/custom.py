@@ -2934,6 +2934,7 @@ def _aks_mesh_update(
 
     return aks_update_decorator.update_mc(mc)
 
+
 def aks_approuting_enable(
         cmd,
         client,
@@ -3077,7 +3078,6 @@ def _aks_approuting_update(
         dns_zone_resource_ids=None,
         attach_zones=None
 ):
-    from azure.cli.command_modules.acs._consts import DecoratorEarlyExitException
     from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterUpdateDecorator
 
     raw_parameters = locals()
