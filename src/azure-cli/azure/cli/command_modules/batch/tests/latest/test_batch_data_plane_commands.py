@@ -90,8 +90,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                                 expect_failure=True)
 
         result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_A1 '
-                                '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04"'
-                                ' --disk-encryption-targets "TemporaryDisk"')
+                                '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
+                                '--disk-encryption-targets "TemporaryDisk"')
 
         time.sleep(120)
 
@@ -136,6 +136,81 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                            self.check('length(metadata)', 2),
                            self.check('metadata[0].name', 'a'),
                            self.check('metadata[1].value', 'd')])
+
+        self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
+        
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer()
+    def test_batch_pool_trustedLaunch_cmd(
+            self,
+            resource_group,
+            batch_account_name):
+        endpoint = self.get_account_endpoint(
+            batch_account_name,
+            resource_group).replace("https://", "")
+        key = self.get_account_key(
+            batch_account_name,
+            resource_group)
+        
+        self.kwargs.update({
+            'p_id': 'xplatCreatedPool',
+            'acc_n': batch_account_name,
+            'acc_k': key,
+            'acc_u': endpoint
+        })
+
+        self.batch_cmd('batch pool create --id {p_id} --vm-size "standard_d2s_v3" '
+                        '--image "canonical:ubuntuserver:18.04-lts" '
+                        '--node-agent-sku-id "batch.node.ubuntu 18.04" '
+                        '--target-dedicated-nodes 2 '
+                        '--security-type "TrustedLaunch" '
+                        '--encryption-at-host true '
+                        '--enable-secure-boot true '
+                        '--enable-vtpm true')
+        
+        res = self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()
+
+        self.assertTrue(res['virtualMachineConfiguration']['securityProfile']['securityType'])
+        self.assertTrue(res['virtualMachineConfiguration']['securityProfile']['encryptionAtHost'])
+        self.assertTrue(res['virtualMachineConfiguration']['securityProfile']['uefiSettings']['secureBootEnabled'])
+        self.assertTrue(res['virtualMachineConfiguration']['securityProfile']['uefiSettings']['vTpmEnabled'])
+
+        self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
+
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer()
+    def test_batch_pool_osDisk_cmd(
+            self,
+            resource_group,
+            batch_account_name):
+        endpoint = self.get_account_endpoint(
+            batch_account_name,
+            resource_group).replace("https://", "")
+        key = self.get_account_key(
+            batch_account_name,
+            resource_group)
+        
+        self.kwargs.update({
+            'p_id': 'xplatCreatedPool',
+            'acc_n': batch_account_name,
+            'acc_k': key,
+            'acc_u': endpoint
+        })
+
+        self.batch_cmd('batch pool create --id {p_id} --vm-size "standard_d2s_v3" '
+                        '--image "canonical:0001-com-ubuntu-server-focal:20_04-lts" '
+                        '--node-agent-sku-id "batch.node.ubuntu 20.04" '
+                        '--target-dedicated-nodes 2 '
+                        '--os-disk-size 100 '
+                        '--os-disk-caching ReadWrite '
+                        '--storage-account-type "StandardSSD_LRS" ')
+        
+        res = self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()
+        print(res)
+
+        self.assertTrue(res['virtualMachineConfiguration']['osDisk']['caching'])
+        self.assertTrue(res['virtualMachineConfiguration']['osDisk']['managedDisk']['storageAccountType'])
+        self.assertTrue(res['virtualMachineConfiguration']['osDisk']['diskSizeGb'])
 
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
 
