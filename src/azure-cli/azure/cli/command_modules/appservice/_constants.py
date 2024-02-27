@@ -102,6 +102,37 @@ WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
 DEFAULT_CENTAURI_IMAGE = 'mcr.microsoft.com/azure-functions/dotnet7-quickstart-demo:1.0'
 ACR_IMAGE_SUFFIX = ".azurecr.io"
 
+FLEX_RUNTIMES = [
+    {
+        'runtime': 'dotnet-isolated',
+        'version': '6'
+    },
+    {
+        'runtime': 'java',
+        'version': '17.0'
+    },
+    {
+        'runtime': 'node',
+        'version': '18'
+    },
+    {
+        'runtime': 'python',
+        'version': '3.10'
+    },
+    {
+        'runtime': 'powershell',
+        'version': '7.2'
+    }
+]
+
+FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
+
+DEFAULT_INSTANCE_SIZE = 2048
+
+DEPLOYMENT_STORAGE_AUTH_TYPES = ['systemAssignedIdentity', 'userAssignedIdentity', 'storageAccountConnectionString']
+
+STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+
 RUNTIME_STATUS_TEXT_MAP = {
     "BuildInProgress": "Building the app...",
     "BuildSuccessful": "Build successful.",
@@ -136,3 +167,48 @@ LANGUAGE_EOL_DEPRECATION_NOTICES = {
                "14-lts-is-ending-on-30-april-2023/",
     "node|16": "https://azure.microsoft.com/en-us/updates/node16support/"
 }
+
+FLEX_RUNTIMES = [
+    {
+        'runtime': 'dotnet-isolated',
+        'version': '6'
+    },
+    {
+        'runtime': 'dotnet-isolated',
+        'version': '8'
+    },
+    {
+        'runtime': 'java',
+        'version': '17.0'
+    },
+    {
+        'runtime': 'java',
+        'version': '11.0'
+    },
+    {
+        'runtime': 'node',
+        'version': '18'
+    },
+    {
+        'runtime': 'python',
+        'version': '3.10'
+    },
+    {
+        'runtime': 'python',
+        'version': '3.11'
+    },
+    {
+        'runtime': 'powershell',
+        'version': '7.2'
+    }
+]
+
+FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
+
+DEFAULT_INSTANCE_SIZE = 2048
+
+DEFAULT_MAXIMUM_INSTANCE_COUNT = 100
+
+DEPLOYMENT_STORAGE_AUTH_TYPES = ['SystemAssignedIdentity', 'UserAssignedIdentity', 'StorageAccountConnectionString']
+
+STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'

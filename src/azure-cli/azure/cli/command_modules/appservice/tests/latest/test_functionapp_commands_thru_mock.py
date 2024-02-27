@@ -11,6 +11,7 @@ from knack.util import CLIError
 from azure.cli.command_modules.appservice.custom import (
     enable_zip_deploy_functionapp,
     enable_zip_deploy,
+    enable_zip_deploy_flex,
     add_remote_build_app_settings,
     remove_remote_build_app_settings,
     config_source_control,
@@ -52,11 +53,13 @@ class TestFunctionappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', return_value=False)
     @mock.patch('azure.cli.command_modules.appservice.custom.enable_zip_deploy')
     @mock.patch('azure.cli.command_modules.appservice.custom.add_remote_build_app_settings')
     def test_functionapp_zip_deploy_flow(self,
                                          add_remote_build_app_settings_mock,
                                          enable_zip_deploy_mock,
+                                         is_flex_functionapp_mock,
                                          parse_resource_id_mock,
                                          web_client_factory_mock):
         cmd_mock = _get_test_cmd()
@@ -73,11 +76,13 @@ class TestFunctionappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', return_value=False)
     @mock.patch('azure.cli.command_modules.appservice.custom.enable_zip_deploy')
     @mock.patch('azure.cli.command_modules.appservice.custom.remove_remote_build_app_settings')
     def test_functionapp_zip_deploy_flow(self,
                                          remove_remote_build_app_settings_mock,
                                          enable_zip_deploy_mock,
+                                         is_flex_functionapp_mock,
                                          parse_resource_id_mock,
                                          web_client_factory_mock):
         cmd_mock = _get_test_cmd()
@@ -98,7 +103,9 @@ class TestFunctionappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom.validate_zip_deploy_app_setting_exists')
     @mock.patch('azure.cli.command_modules.appservice.custom.upload_zip_to_storage')
     @mock.patch('azure.cli.command_modules.appservice.custom.is_plan_consumption', return_value=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', return_value=False)
     def test_functionapp_linux_consumption_non_remote_build(self,
+                                                            is_flex_functionapp_mock,
                                                             is_plan_consumption_mock,
                                                             upload_zip_to_storage_mock,
                                                             validate_zip_deploy_app_setting_exists_mock,
@@ -132,7 +139,9 @@ class TestFunctionappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom.validate_zip_deploy_app_setting_exists')
     @mock.patch('azure.cli.command_modules.appservice.custom.upload_zip_to_storage')
     @mock.patch('azure.cli.command_modules.appservice.custom.is_plan_consumption', return_value=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', return_value=False)
     def test_functionapp_linux_consumption_non_remote_build_with_slot(self,
+                                                            is_flex_functionapp_mock,
                                                             is_plan_consumption_mock,
                                                             upload_zip_to_storage_mock,
                                                             validate_zip_deploy_app_setting_exists_mock,
@@ -164,9 +173,11 @@ class TestFunctionappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom.add_remote_build_app_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', return_value=False)
     @mock.patch('azure.cli.command_modules.appservice.custom.enable_zip_deploy')
     def test_functionapp_remote_build_supports_linux(self,
                                                      enable_zip_deploy_mock,
+                                                     is_flex_functionapp_mock,
                                                      parse_resource_id_mock,
                                                      web_client_factory_mock,
                                                      add_remote_build_app_settings_mock,
@@ -190,6 +201,39 @@ class TestFunctionappMocked(unittest.TestCase):
         # assert
         web_client_mock.web_apps.get.assert_called_with('rg', 'name')
         enable_zip_deploy_mock.assert_called_with(cmd_mock, 'rg', 'name', 'src', None, None)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://mock-scm')
+    @mock.patch('requests.post', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._check_zip_deployment_status')
+    def test_enable_zip_deploy_flex(self,
+                                    check_zip_deployment_status_mock,
+                                    requests_post_mock,
+                                    get_scm_url_mock,
+                                    get_scm_headers_mock):
+        # prepare
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        response = mock.MagicMock()
+        response.status_code = 202
+        requests_post_mock.return_value = response
+
+        expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd', cmd_mock.cli_ctx)
+        get_scm_headers_mock.return_value = expected_zip_deploy_headers
+
+        # action
+        with mock.patch('builtins.open', new_callable=mock.mock_open, read_data='zip-content'):
+            enable_zip_deploy_flex(cmd_mock, 'rg', 'name', 'src', slot=None, build_remote=True)
+
+        # assert
+        requests_post_mock.assert_called_with('https://mock-scm/api/Deploy/Zip?RemoteBuild=True&Deployer=az_cli', data='zip-content',
+                                              headers=expected_zip_deploy_headers, verify=mock.ANY)
+        # TODO improve authorization matcher
+        check_zip_deployment_status_mock.assert_called_with(cmd_mock, 'rg', 'name',
+                                                            'https://mock-scm/api/deployments/latest', mock.ANY, None)
+
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers')
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', side_effect=ValueError())
