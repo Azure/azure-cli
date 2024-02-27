@@ -105,6 +105,8 @@ parameters:
 """
 
 helps['lab environment delete'] = """
+[!CAUTION]
+Deleting resources in your lab is permanent, and cannot be undone.
 type: command
 short-summary: Delete an environment from a lab.
 """
