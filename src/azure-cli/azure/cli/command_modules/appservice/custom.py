@@ -4060,6 +4060,110 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         self._stacks = stacks
 
 
+class _FlexFunctionAppStackRuntimeHelper:
+    class Runtime:
+        def __init__(self, name, version, app_insights=False, default=False, sku=None, end_of_life_date=None):
+            self.name = name
+            self.version = version
+            self.app_insights = app_insights
+            self.default = default
+            self.sku = sku
+            self.end_of_life_date = end_of_life_date
+
+    def __init__(self, cmd, location, runtime, runtime_version=None):
+        self._cmd = cmd
+        self._location = location
+        self._runtime = runtime
+        self._runtime_version = runtime_version
+        self._stacks = []
+
+    @property
+    def stacks(self):
+        self._load_stacks()
+        return self._stacks
+
+    def get_flex_raw_function_app_stacks(self, cmd, location, runtime):
+        # stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?api-version=2020-10-01'
+        # '&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}'
+        # request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + stacks_api_url.format(location, runtime)
+        # response = send_raw_request(cmd.cli_ctx, "GET", request_url)
+        # return response.json()['value']
+
+        # temporary use of constant since the changes are not available yet
+        from ._constants import SAMPLE
+        return json.loads(SAMPLE)['value']
+
+    def _parse_raw_stacks(self, stacks):
+        runtime_to_version = {}
+        for runtime in stacks:
+            for major_version in runtime['properties']['majorVersions']:
+                for minor_version in major_version['minorVersions']:
+                    runtime_version = minor_version['value']
+                    runtime_settings = minor_version['stackSettings']['linuxRuntimeSettings']
+                    runtime_name = (runtime_settings['appSettingsDictionary']['FUNCTIONS_WORKER_RUNTIME']
+                                    or runtime['name'])
+                    if runtime_settings['Sku'] is None:
+                        continue
+                    runtime_version_properties = {
+                        'isDefault': runtime_settings.get('isDefault', False),
+                        'sku': runtime_settings['Sku'],
+                        'applicationInsights': runtime_settings['appInsightsSettings']['isSupported'],
+                        'endOfLifeDate': runtime_settings['endOfLifeDate']
+                    }
+
+                    runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
+                    runtime_to_version[runtime_name][runtime_version] = runtime_version_properties
+
+        for runtime_name, versions in runtime_to_version.items():
+            for version_name, version_properties in versions.items():
+                r = self._create_runtime_from_properties(runtime_name, version_name, version_properties)
+                self._stacks.append(r)
+
+    def _create_runtime_from_properties(self, runtime_name, version_name, version_properties):
+        return self.Runtime(name=runtime_name,
+                            version=version_name,
+                            app_insights=version_properties['applicationInsights'],
+                            default=version_properties['isDefault'],
+                            sku=version_properties['sku'],
+                            end_of_life_date=version_properties['endOfLifeDate'])
+
+    def _load_stacks(self):
+        if self._stacks:
+            return
+        stacks = self.get_flex_raw_function_app_stacks(self._cmd, self._location, self._runtime)
+        self._parse_raw_stacks(stacks)
+
+    def resolve(self, runtime, version=None):
+        runtimes = self.stacks
+        if not runtimes:
+            raise ValidationError("Runtime {} not supported for function apps on the Flex Consumption plan")
+        if version is None:
+            return self.get_default_version()
+        matched_runtime_version = next((r for r in runtimes if r.version == version), None)
+        if not matched_runtime_version:
+            old_to_new_version = {
+                "11": "11.0",
+                "8": "8.0",
+                "7": "7.0",
+                "6.0": "6",
+                "1.8": "8.0",
+                "17": "17.0"
+            }
+            new_version = old_to_new_version.get(version)
+            matched_runtime_version = next((r for r in runtimes if r.version == new_version), None)
+        if not matched_runtime_version:
+            versions = [r.version for r in runtimes]
+            raise ValidationError("Invalid version {0} for runtime {1} for function apps on the Flex Consumption"
+                                  " plan. Supported versions for runtime {1} are {2}."
+                                  .format(version, runtime, versions))
+        return matched_runtime_version
+
+    def get_default_version(self):
+        runtimes = self.stacks
+        runtimes.sort(key=lambda r: r.default, reverse=True)
+        return runtimes[0]
+
+
 class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
     # pylint: disable=too-few-public-methods,too-many-instance-attributes
     class Runtime:
@@ -4722,23 +4826,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             deployment_storage_auth_value = conn_string_app_setting
             deployment_storage_auth_config["storageAccountConnectionStringName"] = deployment_storage_auth_value
 
-        always_ready_dict = _parse_key_value_pairs(always_ready_instances)
-        always_ready_config = []
-
-        for key, value in always_ready_dict.items():
-            always_ready_config.append(
-                {
-                    "name": key,
-                    "instanceCount": max(0, validate_and_convert_to_int(key, value))
-                }
-            )
-
-        function_app_config["scaleAndConcurrency"] = {
-            "maximumInstanceCount": maximum_instance_count or DEFAULT_MAXIMUM_INSTANCE_COUNT,
-            "instanceMemoryMB": instance_memory or DEFAULT_INSTANCE_SIZE,
-            "alwaysReady": always_ready_config
-        }
-
     if environment is not None:
         if consumption_plan_location is not None:
             raise ArgumentUsageError(
@@ -4773,33 +4860,40 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
 
     if flexconsumption_location:
-        runtimes = [r for r in FLEX_RUNTIMES if r['runtime'] == runtime]
-        if not runtimes:
-            supported_runtimes = set(map(lambda x: x['runtime'], FLEX_RUNTIMES))
-            raise ValidationError("Invalid runtime. Supported runtimes for function apps on Flex App Service "
-                                  "plans are {0}".format(list(supported_runtimes)))
-        if runtime_version is not None:
-            lang = next((r for r in runtimes if r['version'] == runtime_version), None)
-            if lang is None:
-                supported_versions = list(map(lambda x: x['version'], runtimes))
-                raise ValidationError("Invalid version {0} for runtime {1} for function apps on the Flex "
-                                      "Consumption plan. Supported version for runtime {1} is {2}."
-                                      .format(runtime_version, runtime, supported_versions))
-        else:
-            runtime_version = runtimes[0]['version']
-
-    runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
-    matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
-                                             runtime_version, functions_version, is_linux)
+        runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, flexconsumption_location, runtime, runtime_version)
+        matched_runtime = runtime_helper.resolve(runtime, runtime_version)
+    else:
+        runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
+        matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
+                                                 runtime_version, functions_version, is_linux)
 
     if flexconsumption_location:
-        runtime = matched_runtime.name
-        version = matched_runtime.site_config_dict.linux_fx_version.split("|")[1]
+        flex_sku = [s for s in matched_runtime.sku if s['skuCode'] == 'FC'][0]
+        runtime = flex_sku['functionAppConfigProperties']['runtime']['name']
+        version = flex_sku['functionAppConfigProperties']['runtime']['version']
         runtime_config = {
             "name": runtime,
             "version": version
         }
         function_app_config["runtime"] = runtime_config
+        always_ready_dict = _parse_key_value_pairs(always_ready_instances)
+        always_ready_config = []
+
+        for key, value in always_ready_dict.items():
+            always_ready_config.append(
+                {
+                    "name": key,
+                    "instanceCount": max(0, validate_and_convert_to_int(key, value))
+                }
+            )
+
+        default_instance_memory = [x for x in flex_sku['instanceMemoryMB'] if x['isDefault'] is True][0]
+
+        function_app_config["scaleAndConcurrency"] = {
+            "maximumInstanceCount": maximum_instance_count or flex_sku['maximumInstanceCount']['defaultValue'],
+            "instanceMemoryMB": instance_memory or default_instance_memory['size'],
+            "alwaysReady": always_ready_config
+        }
 
     SiteConfigPropertiesDictionary = cmd.get_models('SiteConfigPropertiesDictionary')
 
