@@ -4,16 +4,20 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk.scenario_tests.decorators import AllowLargeResponse, live_only
 
 
 class AcrArtifactStreamingCommandsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
+    @AllowLargeResponse()
+    @live_only()
     def test_acr_artifact_streaming(self, resource_group):
         repo = 'microsoft'
         tag = 'azure-cli'
+        registry_name = self.create_random_name('clireg', 20)
         self.kwargs.update({
-            'registry_name': self.create_random_name('clireg', 20),
+            'registry_name': registry_name,
             'rg_loc': 'southcentralus',
             'sku': 'Premium',
             'repo': repo,
@@ -23,6 +27,7 @@ class AcrArtifactStreamingCommandsTests(ScenarioTest):
             'conversionVersion': 'v1',
             'source_reg_id': '/subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourcegroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub'
         })
+        
         # Create ACR
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),
