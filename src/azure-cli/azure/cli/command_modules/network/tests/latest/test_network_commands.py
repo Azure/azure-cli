@@ -6726,7 +6726,7 @@ class NetworkVirtualApplianceConnectionScenarioTest(ScenarioTest):
             'nva_name': 'clivirtualappliance',
             'rg': resource_group,
             'name': 'defaultConnection',
-            'subscription': subscriptionId           
+            'subscription': subscriptionId
         })
         self.cmd('extension add -n virtual-wan')
         self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
