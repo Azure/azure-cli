@@ -181,3 +181,245 @@ DEFAULT_MAXIMUM_INSTANCE_COUNT = 100
 DEPLOYMENT_STORAGE_AUTH_TYPES = ['SystemAssignedIdentity', 'UserAssignedIdentity', 'StorageAccountConnectionString']
 
 STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+
+SAMPLE = r"""
+{
+  "value": [
+    {
+      "id": null,
+      "name": "python",
+      "type": "Microsoft.Web/functionAppStacks?stackOsType=All",
+      "properties": {
+        "displayText": "Python",
+        "value": "python",
+        "preferredOs": "linux",
+        "majorVersions": [
+          {
+            "displayText": "Python 3",
+            "value": "3",
+            "minorVersions": [
+              {
+                "displayText": "Python 3.11",
+                "value": "3.11",
+                "stackSettings": {
+                  "linuxRuntimeSettings": {
+                    "runtimeVersion": "Python|3.11",
+                    "remoteDebuggingSupported": false,
+                    "isPreview": false,
+                    "isDefault": true,
+                    "isHidden": false,
+                    "appInsightsSettings": {
+                      "isSupported": true
+                    },
+                    "gitHubActionSettings": {
+                      "isSupported": true,
+                      "supportedVersion": "3.11"
+                    },
+                    "appSettingsDictionary": {
+                      "FUNCTIONS_WORKER_RUNTIME": "python"
+                    },
+                    "siteConfigPropertiesDictionary": {
+                      "use32BitWorkerProcess": false,
+                      "linuxFxVersion": "Python|3.11"
+                    },
+                    "supportedFunctionsExtensionVersions": [
+                      "~4"
+                    ],
+                    "endOfLifeDate": "Sun Oct 31 2027 00:00:00 GMT+0000 (Coordinated Universal Time)",
+                    "Sku": [
+                      {
+                        "skuCode": "FC",
+                        "instanceMemoryMB": [
+                          {
+                            "size": 512,
+                            "isDefault": false
+                          },
+                          {
+                            "size": 2048,
+                            "isDefault": true
+                          },
+                          {
+                            "size": 4096,
+                            "isDefault": false
+                          }
+                        ],
+                        "maximumInstanceCount": {
+                          "lowestMaximumInstanceCount": 40,
+                          "highestMaximumInstanceCount": 1000,
+                          "defaultValue": 100
+                        },
+                        "functionAppConfigProperties": {
+                          "runtime": {
+                            "name": "python",
+                            "version": "3.11"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "displayText": "Python 3.10",
+                "value": "3.10",
+                "stackSettings": {
+                  "linuxRuntimeSettings": {
+                    "runtimeVersion": "Python|3.10",
+                    "remoteDebuggingSupported": false,
+                    "isPreview": false,
+                    "isDefault": true,
+                    "isHidden": false,
+                    "appInsightsSettings": {
+                      "isSupported": true
+                    },
+                    "gitHubActionSettings": {
+                      "isSupported": true,
+                      "supportedVersion": "3.10"
+                    },
+                    "appSettingsDictionary": {
+                      "FUNCTIONS_WORKER_RUNTIME": "python"
+                    },
+                    "siteConfigPropertiesDictionary": {
+                      "use32BitWorkerProcess": false,
+                      "linuxFxVersion": "Python|3.10"
+                    },
+                    "supportedFunctionsExtensionVersions": [
+                      "~4"
+                    ],
+                    "endOfLifeDate": "Sat Oct 31 2026 00:00:00 GMT+0000 (Coordinated Universal Time)",
+                    "Sku": [
+                      {
+                        "skuCode": "FC",
+                        "instanceMemoryMB": [
+                          {
+                            "size": 512,
+                            "isDefault": false
+                          },
+                          {
+                            "size": 2048,
+                            "isDefault": true
+                          },
+                          {
+                            "size": 4096,
+                            "isDefault": false
+                          }
+                        ],
+                        "maximumInstanceCount": {
+                          "lowestMaximumInstanceCount": 40,
+                          "highestMaximumInstanceCount": 1000,
+                          "defaultValue": 100
+                        },
+                        "functionAppConfigProperties": {
+                          "runtime": {
+                            "name": "python",
+                            "version": "3.10"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "displayText": "Python 3.9",
+                "value": "3.9",
+                "stackSettings": {
+                  "linuxRuntimeSettings": {
+                    "runtimeVersion": "Python|3.9",
+                    "remoteDebuggingSupported": false,
+                    "isPreview": false,
+                    "isDefault": false,
+                    "appInsightsSettings": {
+                      "isSupported": true
+                    },
+                    "gitHubActionSettings": {
+                      "isSupported": true,
+                      "supportedVersion": "3.9"
+                    },
+                    "appSettingsDictionary": {
+                      "FUNCTIONS_WORKER_RUNTIME": "python"
+                    },
+                    "siteConfigPropertiesDictionary": {
+                      "use32BitWorkerProcess": false,
+                      "linuxFxVersion": "Python|3.9"
+                    },
+                    "supportedFunctionsExtensionVersions": [
+                      "~4",
+                      "~3"
+                    ],
+                    "endOfLifeDate": "Fri Oct 31 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
+                    "Sku": null
+                  }
+                }
+              },
+              {
+                "displayText": "Python 3.8",
+                "value": "3.8",
+                "stackSettings": {
+                  "linuxRuntimeSettings": {
+                    "runtimeVersion": "Python|3.8",
+                    "remoteDebuggingSupported": false,
+                    "appInsightsSettings": {
+                      "isSupported": true
+                    },
+                    "gitHubActionSettings": {
+                      "isSupported": true,
+                      "supportedVersion": "3.8"
+                    },
+                    "appSettingsDictionary": {
+                      "FUNCTIONS_WORKER_RUNTIME": "python"
+                    },
+                    "siteConfigPropertiesDictionary": {
+                      "use32BitWorkerProcess": false,
+                      "linuxFxVersion": "Python|3.8"
+                    },
+                    "supportedFunctionsExtensionVersions": [
+                      "~4",
+                      "~3"
+                    ],
+                    "endOfLifeDate": "Thu Oct 31 2024 00:00:00 GMT+0000 (Coordinated Universal Time)",
+                    "Sku": null
+                  }
+                }
+              },
+              {
+                "displayText": "Python 3.7",
+                "value": "3.7",
+                "stackSettings": {
+                  "linuxRuntimeSettings": {
+                    "runtimeVersion": "Python|3.7",
+                    "remoteDebuggingSupported": false,
+                    "appInsightsSettings": {
+                      "isSupported": true
+                    },
+                    "gitHubActionSettings": {
+                      "isSupported": true,
+                      "supportedVersion": "3.7"
+                    },
+                    "appSettingsDictionary": {
+                      "FUNCTIONS_WORKER_RUNTIME": "python"
+                    },
+                    "siteConfigPropertiesDictionary": {
+                      "use32BitWorkerProcess": false,
+                      "linuxFxVersion": "Python|3.7"
+                    },
+                    "supportedFunctionsExtensionVersions": [
+                      "~4",
+                      "~3",
+                      "~2"
+                    ],
+                    "endOfLifeDate": "Fri Jun 30 2023 00:00:00 GMT+0000 (Coordinated Universal Time)",
+                    "Sku": null
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "nextLink": null,
+  "id": null
+}
+"""
