@@ -30,10 +30,8 @@ from azure.cli.testsdk import (
     StringContainCheck,
     live_only)
 
-from azure.mgmt.sql.models import (
-    AdvancedThreatProtectionName,
-    AdvancedThreatProtectionState
-)
+from azure.mgmt.sql.models import AdvancedThreatProtectionState
+
 
 # Constants
 SERVER_NAME_PREFIX = 'azuredbclitest-'
@@ -90,7 +88,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self._test_flexible_server_paid_iops_mgmt('mysql', resource_group)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @ResourceGroupPreparer(location='northeurope')
     def test_mysql_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('mysql', resource_group)
     
@@ -139,8 +137,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         storage_size = 32
         version = '5.7'
-        location = DEFAULT_LOCATION
-        sku_name = DEFAULT_GENERAL_PURPOSE_SKU
+        location = 'northeurope'
+        sku_name = 'Standard_D2ds_v4'
         memory_optimized_sku = DEFAULT_MEMORY_OPTIMIZED_SKU
         tier = 'GeneralPurpose'
         backup_retention = 7
@@ -2183,18 +2181,13 @@ class FlexibleServerAdvancedThreatProtectionScenarioTest(ScenarioTest):
         self._test_advanced_threat_protection_mgmt('mysql', resource_group, server)
 
     def _test_advanced_threat_protection_mgmt(self, database_engine, resource_group, server):
-        # ATP invalid state validation
-        with self.assertRaises(ValueError):
-            self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} -n {}'
-                     ' --state {}'
-                     .format(database_engine, resource_group, server, 'Invalid'))
-       
         state_enabled = AdvancedThreatProtectionState.ENABLED.value
         state_disabled = AdvancedThreatProtectionState.DISABLED.value
 
         # get advanced threat protection setting
         response = self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} -n {}'
-                            .format(database_engine, resource_group, server))
+                            .format(database_engine, resource_group, server),
+                            checks=[JMESPathCheck('resourceGroup', resource_group)])
 
         # flip the setting, if current setting is disabled, then enable it and vice versa
         new_defender_state = state_enabled if response.get_output_in_json()['state'] == state_disabled else state_disabled
@@ -2208,12 +2201,29 @@ class FlexibleServerAdvancedThreatProtectionScenarioTest(ScenarioTest):
                      JMESPathCheck('state', new_defender_state)])
 
         # get advanced threat protection settings after the update
-        self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} -n {}'
-                 .format(database_engine, resource_group, server),
+        response = self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} -n {}'
+                            .format(database_engine, resource_group, server),
+                            checks=[
+                                JMESPathCheck('resourceGroup', resource_group),
+                                JMESPathCheck('state', new_defender_state)])
+        
+        # flip the setting, if current setting is disabled, then enable it and vice versa
+        new_defender_state = state_enabled if response.get_output_in_json()['state'] == state_disabled else state_disabled
+
+        # update advanced threat protection setting one more time to again get back to the original state
+        self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(database_engine, resource_group, server, new_defender_state),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', new_defender_state)])
 
+        # get advanced threat protection settings after the update
+        response = self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} -n {}'
+                            .format(database_engine, resource_group, server),
+                            checks=[
+                                JMESPathCheck('resourceGroup', resource_group),
+                                JMESPathCheck('state', new_defender_state)])
 
 class MySQLExportTest(ScenarioTest):
     profile = None

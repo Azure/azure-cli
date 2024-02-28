@@ -46,11 +46,6 @@ def flexible_server_advanced_threat_protection_update(cmd, client, resource_grou
     '''
     Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
     '''
-    allowed_states = [mysql_flexibleservers.models.AdvancedThreatProtectionState.ENABLED.value, mysql_flexibleservers.models.AdvancedThreatProtectionState.DISABLED.value]
-
-    if state not in allowed_states:
-        raise ValueError("Invalid defender state provided, allowed values - {}".format(allowed_states))
-
     parameters = {
         'state': state
     }
