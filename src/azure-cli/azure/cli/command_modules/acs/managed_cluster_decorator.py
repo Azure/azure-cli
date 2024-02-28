@@ -4330,9 +4330,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         new_profile, updated_ingress_gateways_asm = self._handle_ingress_gateways_asm(new_profile)
         updated |= updated_ingress_gateways_asm
 
-        new_profile, updated_egress_gateways_asm = self._handle_egress_gateways_asm(new_profile)
-        updated |= updated_egress_gateways_asm
-
         new_profile, updated_pluginca_asm = self._handle_pluginca_asm(new_profile)
         updated |= updated_pluginca_asm
 
