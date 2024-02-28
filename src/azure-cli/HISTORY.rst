@@ -14,9 +14,9 @@ Release History
 **AKS**
 
 * Add monitoring addon to support default workspace in AGC (#28326)
-* `az aks get-versions`: Showing extra column on supportPlan (#28325)
+* `az aks get-versions`: Show extra column on supportPlan (#28325)
 * `az aks create/update`: Update region map for default region creation with new Azure Monitor Workspace regions (#28236)
-* `az aks update`: Zero can be set to outbound-ports,outbound-ip-count in loadbalancer profile and outbound-ip-count in natgateway profile in aks (#28273)
+* `az aks update`: Zero can be set to outbound-ports,outbound-ip-count in loadbalancer profile and outbound-ip-count in natgateway profile in AKS (#28273)
 
 **API Management**
 
@@ -52,16 +52,13 @@ Release History
 * `az vm host redeploy`: Add command to redeploy the dedicated host (#28418)
 * Fix #28397: `az vm create`: Fix creating VM with `--security-type Standard` (#28409)
 * `az vmss application set`: Fix updates to the purchase plan are not supported when updating VMSS (#28230)
-* `az vmss`: Add new command `update-domain-walk` to support updating vm in a service fabric vmss (#28300)
-
-**container app**
-
-* Fix #28226: `az containerapp job update`: Update existing scale rules if `--scale-rule-name` is passed (#28408)
+* `az vmss update-domain-walk`: Add new command to support updating vm in a service fabric vmss (#28300)
 
 **Containerapp**
 
 * `az containerapp revision copy`: Fix `--from-revision` bug for inheriting a specific revision contains scale rules (#28272)
 * `az containerapp update`: Fix TypeError: Argument of type 'NoneType' is not iterable (#28401)
+* Fix #28226: `az containerapp job update`: Update existing scale rules if `--scale-rule-name` is passed (#28408)
 
 **Cosmos DB**
 
@@ -91,7 +88,7 @@ Release History
 
 **SQL VM**
 
-* Fix #27300: `az sql vm group create`: `cluster_subnet_type` should only be passed into `WsfcDomainProfile` (#27301)
+* Fix #27300: `az sql vm group create`: `--cluster-subnet-type` should only be passed into `WsfcDomainProfile` (#27301)
 
 **Storage**
 
