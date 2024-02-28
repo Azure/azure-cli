@@ -197,10 +197,11 @@ def load_command_table(self, _):
             'aks_mesh_enable',
             supports_no_wait=True)
         g.custom_command(
-            'disable',
-            'aks_mesh_disable',
+            "disable",
+            "aks_mesh_disable",
             supports_no_wait=True,
-            confirmation=True)
+            confirmation="Existing Azure Service Mesh Profile values will be reset.\n"
+            + "Are you sure you want to perform this operation?")
         g.custom_command(
             'enable-ingress-gateway',
             'aks_mesh_enable_ingress_gateway',

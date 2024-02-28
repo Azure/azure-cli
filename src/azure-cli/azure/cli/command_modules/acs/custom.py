@@ -2926,7 +2926,7 @@ def _aks_mesh_update(
     )
 
     try:
-        mc = aks_update_decorator.update_mc_profile_default()
+        mc = aks_update_decorator.fetch_mc()
         mc = aks_update_decorator.update_azure_service_mesh_profile(mc)
     except DecoratorEarlyExitException:
         return None
