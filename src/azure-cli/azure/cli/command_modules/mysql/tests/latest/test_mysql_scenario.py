@@ -932,7 +932,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 
     def _test_flexible_server_gtid_reset(self, database_engine, resource_group):
-        location = "eastus"
+        location = 'northeurope'
         general_purpose_sku = "Standard_D2ds_v4"
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
