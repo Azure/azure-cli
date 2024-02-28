@@ -66,23 +66,18 @@ jobs:
   pool:
     name: ${{ variables.windows_pool }}
   steps:
-#  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
-#    displayName: 'Run Credential Scanner'
-#    inputs:
-#      toolMajorVersion: V2
-#      suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
-#      toolVersionV2: '2.1.17'
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@3
+    displayName: 'Run Credential Scanner'
+    inputs:
+      toolVersion: '2.1.17'
+      suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
 
-  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@2
     displayName: 'Post Analysis'
     inputs:
-      AllTools: false
-      BinSkim: false
-      CredScan: true
-      PoliCheck: false
-      RoslynAnalyzers: false
-      TSLint: false
-      ToolLogsNotFoundAction: 'Standard'
+      GdnBreakAllTools: false
+      GdnBreakGdnToolCredScan: true
+      GdnBreakGdnToolCredScanSeverity: Error
 
 - job: PolicyCheck
   displayName: "Policy Check"
