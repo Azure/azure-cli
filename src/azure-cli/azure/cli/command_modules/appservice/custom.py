@@ -83,9 +83,9 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
-                         VERSION_2022_09_01, FLEX_RUNTIMES, FLEX_SUBNET_DELEGATION, DEFAULT_INSTANCE_SIZE,
+                         VERSION_2022_09_01, FLEX_RUNTIMES, FLEX_SUBNET_DELEGATION,
                          RUNTIME_STATUS_TEXT_MAP, LANGUAGE_EOL_DEPRECATION_NOTICES,
-                         STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID, DEFAULT_MAXIMUM_INSTANCE_COUNT)
+                         STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -4035,8 +4035,8 @@ class _FlexFunctionAppStackRuntimeHelper:
                 for minor_version in major_version['minorVersions']:
                     runtime_version = minor_version['value']
                     runtime_settings = minor_version['stackSettings']['linuxRuntimeSettings']
-                    runtime_name = (runtime_settings['appSettingsDictionary']['FUNCTIONS_WORKER_RUNTIME']
-                                    or runtime['name'])
+                    runtime_name = (runtime_settings['appSettingsDictionary']['FUNCTIONS_WORKER_RUNTIME'] or
+                                    runtime['name'])
                     if runtime_settings['Sku'] is None:
                         continue
                     runtime_version_properties = {
@@ -5382,51 +5382,12 @@ def list_consumption_locations(cmd):
 
 
 def list_flexconsumption_locations(cmd):
-    return [
-        {
-            "name": "eastus",
-        },
-        {
-            "name": "northeurope"
-        },
-        {
-            "name": "eastasia"
-        },
-        {
-            "name": "centralus"
-        },
-        {
-            "name": "uksouth"
-        },
-        {
-            "name": "eastus2"
-        },
-        {
-            "name": "eastus2euap"
-        },
-        {
-            "name": "australiaeast"
-        },
-        {
-            "name": "westus2"
-        },
-        {
-            "name": "westus3"
-        },
-        {
-            "name": "southcentralus"
-        },
-        {
-            "name": "swedencentral"
-        },
-        {
-            "name": "southeastasia"
-        },
-        {
-            "name": "northcentralus(stage)"
-        },
-
-    ]
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    sub_id = get_subscription_id(cmd.cli_ctx)
+    geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2022-03-01'
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + geo_regions_api.format(sub_id)
+    regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
+    return [{'name': x['name'].lower().replace(' ', '')} for x in regions]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
