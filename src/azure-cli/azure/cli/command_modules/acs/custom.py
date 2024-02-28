@@ -610,6 +610,7 @@ def aks_create(
     gpu_instance_profile=None,
     # azure service mesh
     enable_azure_service_mesh=None,
+    revision=None,
     # azure monitor profile
     enable_azure_monitor_metrics=False,
     azure_monitor_workspace_resource_id=None,

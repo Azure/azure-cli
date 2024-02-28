@@ -7301,6 +7301,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             self.client,
             {
                 "enable_azure_service_mesh": True,
+                "revision": "asm-1-88"
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -7312,11 +7313,35 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             location="test_location",
             service_mesh_profile=self.models.ServiceMeshProfile(
                 mode="Istio",
-                istio=self.models.IstioServiceMesh()
+                istio=self.models.IstioServiceMesh(
+                    revisions=["asm-1-88"]
+                )
             ),
         )
 
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        dec_3 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_azure_service_mesh": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.set_up_azure_service_mesh_profile(mc_3)
+
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            service_mesh_profile=self.models.ServiceMeshProfile(
+                mode="Istio",
+                istio=self.models.IstioServiceMesh()
+            ),
+        )
+
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
 
     def test_construct_mc_profile_default(self):
         import inspect

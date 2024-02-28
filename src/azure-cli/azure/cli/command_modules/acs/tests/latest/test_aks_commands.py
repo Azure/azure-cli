@@ -117,6 +117,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             StringContainCheck("AKSLongTermSupport") # we should always have at least 1 LTS version which have this SupportPlan
         ])
 
+    def _get_asm_supported_revision(self, location):
+        revisions_cmd = f"aks mesh get-revisions -l {location}"
+        revisions = self.cmd(revisions_cmd).get_output_in_json()
+        assert len(revisions["meshRevisions"]) > 0
+        return revisions['meshRevisions'][0]['revision']
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_default(self, resource_group, resource_group_location):
@@ -2133,6 +2139,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
+            "revision": self._get_asm_supported_revision(resource_group_location),
         })
 
         # create cluster without --enable-azure-service-mesh
@@ -2144,7 +2151,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # enable azure service mesh again
-        update_cmd = 'aks mesh enable --resource-group={resource_group} --name={name}'
+        update_cmd = "aks mesh enable --resource-group={resource_group} --name={name} --revision={revision}"
         self.cmd(update_cmd, checks=[
             self.check('serviceMeshProfile.mode', 'Istio'),
         ])
@@ -2178,13 +2185,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
+            "revision": self._get_asm_supported_revision(resource_group_location),
         })
 
         # create cluster with --enable-azure-service-mesh
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureServiceMeshPreview ' \
                      '--ssh-key-value={ssh_key_value} ' \
-                     '--enable-azure-service-mesh --output=json'
+                     "--enable-azure-service-mesh --revision={revision} --output=json"
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('serviceMeshProfile.mode', 'Istio'),
@@ -2232,6 +2240,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
             'akv_resource_id': akv_resource_id,
+            'revision': self._get_asm_supported_revision(resource_group_location),
         })
 
         # create cluster
@@ -2258,7 +2267,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--ca-cert-object-name my-ca-cert ' \
                      '--ca-key-object-name my-ca-key ' \
                      '--cert-chain-object-name my-cert-chain ' \
-                     '--root-cert-object-name my-root-cert'
+                     '--root-cert-object-name my-root-cert ' \
+                     '--revision {revision}'
 
         self.cmd(update_cmd, checks=[
             self.check('serviceMeshProfile.mode', 'Istio'),
@@ -2300,6 +2310,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
+            'revision': self._get_asm_supported_revision(resource_group_location),
         })
 
         # create cluster
@@ -2311,7 +2322,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # enable azure service mesh
-        enable_cmd = 'aks mesh enable --resource-group={resource_group} --name={name}'
+        enable_cmd = "aks mesh enable --resource-group={resource_group} --name={name} --revision={revision}"
         self.cmd(enable_cmd, checks=[
             self.check('serviceMeshProfile.mode', 'Istio'),
         ])
