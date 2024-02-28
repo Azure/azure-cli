@@ -1455,7 +1455,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         self._test_mysql_flexible_server_public_access_custom('mysql', resource_group)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @ResourceGroupPreparer(location='northeurope')
     def test_mysql_flexible_server_public_access_restore(self, resource_group):
         self._test_mysql_flexible_server_public_access_restore('mysql', resource_group)
 
