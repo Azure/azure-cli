@@ -1984,8 +1984,8 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="eastus2")
-    @ServerPreparer(engine_type='mysql', location="eastus2")
+    @ResourceGroupPreparer(location="northeurope")
+    @ServerPreparer(engine_type='mysql', location="northeurope")
     def test_mysql_flexible_server_backups_mgmt(self, resource_group, server):
         self._test_backups_mgmt('mysql', resource_group, server)
 
