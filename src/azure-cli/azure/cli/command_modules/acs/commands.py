@@ -237,17 +237,17 @@ def load_command_table(self, _):
 
     # AKS approuting commands
     with self.command_group(
-        "aks approuting", managed_clusters_sdk, client_factory=cf_managed_clusters
+        'aks approuting', managed_clusters_sdk, client_factory=cf_managed_clusters
     ) as g:
-        g.custom_command("enable", "aks_approuting_enable")
-        g.custom_command("disable", "aks_approuting_disable", confirmation=True)
-        g.custom_command("update", "aks_approuting_update")
+        g.custom_command('enable', 'aks_approuting_enable')
+        g.custom_command('disable', 'aks_approuting_disable', confirmation=True)
+        g.custom_command('update', 'aks_approuting_update')
 
     # AKS approuting dns-zone commands
     with self.command_group(
-        "aks approuting zone", managed_clusters_sdk, client_factory=cf_managed_clusters
+        'aks approuting zone', managed_clusters_sdk, client_factory=cf_managed_clusters
     ) as g:
-        g.custom_command("add", "aks_approuting_zone_add")
-        g.custom_command("delete", "aks_approuting_zone_delete", confirmation=True)
-        g.custom_command("update", "aks_approuting_zone_update")
-        g.custom_command("list", "aks_approuting_zone_list")
+        g.custom_command('add', 'aks_approuting_zone_add')
+        g.custom_command('delete', 'aks_approuting_zone_delete', confirmation=True)
+        g.custom_command('update', 'aks_approuting_zone_update')
+        g.custom_command('list', 'aks_approuting_zone_list')
