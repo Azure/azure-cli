@@ -2139,7 +2139,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
-            "revision": self._get_asm_supported_revision(resource_group_location),
+            'revision': self._get_asm_supported_revision(resource_group_location),
         })
 
         # create cluster without --enable-azure-service-mesh
@@ -2151,7 +2151,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # enable azure service mesh again
-        update_cmd = "aks mesh enable --resource-group={resource_group} --name={name} --revision={revision}"
+        update_cmd = 'aks mesh enable --resource-group={resource_group} --name={name} --revision={revision}'
         self.cmd(update_cmd, checks=[
             self.check('serviceMeshProfile.mode', 'Istio'),
         ])
@@ -2185,14 +2185,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
-            "revision": self._get_asm_supported_revision(resource_group_location),
+            'revision': self._get_asm_supported_revision(resource_group_location),
         })
 
         # create cluster with --enable-azure-service-mesh
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureServiceMeshPreview ' \
                      '--ssh-key-value={ssh_key_value} ' \
-                     "--enable-azure-service-mesh --revision={revision} --output=json"
+                     '--enable-azure-service-mesh --revision={revision} --output=json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('serviceMeshProfile.mode', 'Istio'),
@@ -2322,7 +2322,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # enable azure service mesh
-        enable_cmd = "aks mesh enable --resource-group={resource_group} --name={name} --revision={revision}"
+        enable_cmd = 'aks mesh enable --resource-group={resource_group} --name={name} --revision={revision}'
         self.cmd(enable_cmd, checks=[
             self.check('serviceMeshProfile.mode', 'Istio'),
         ])
