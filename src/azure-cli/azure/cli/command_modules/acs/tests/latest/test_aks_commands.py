@@ -10150,6 +10150,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('upgradeSettings.overrideSettings.until', '2020-02-22T22:30:17+00:00')
         ])
 
+        print()
+
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
