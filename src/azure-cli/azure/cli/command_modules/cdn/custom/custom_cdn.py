@@ -177,9 +177,9 @@ class CDNEnableHttps(_CDNEnableHttps):
                 has_value(args.user_cert_secret_name) or has_value(args.user_cert_secret_version) or \
                 has_value(args.user_cert_subscription_id) or has_value(args.user_cert_vault_name):
             # If any BYOC flags are set, make sure they all are (except secret version).
-            if has_value(args.user_cert_group_name) or has_value(args.user_cert_protocol_type) or \
-                    has_value(args.user_cert_secret_name) or \
-                    has_value(args.user_cert_vault_name):
+            if not has_value(args.user_cert_group_name) or not has_value(args.user_cert_protocol_type) or \
+                    not has_value(args.user_cert_secret_name) or \
+                    not has_value(args.user_cert_vault_name):
                 # BYOC is enabled, so make sure the secret version is set to None.
                 raise CLIError("--user-cert-group-name, --user-cert-vault-name, --user-cert-secret-name, "
                                "and --user-cert-protocol-type are all required for user managed certificates.")
@@ -196,7 +196,7 @@ class CDNEnableHttps(_CDNEnableHttps):
             azure_key_vault = {
                 'certificate_source_parameters': {
                     'delete_rule': DeleteRule.NO_ACTION,
-                    'resource_group': args.user_cert_group_name,
+                    'resource_group_name': args.user_cert_group_name,
                     'secret_name': args.user_cert_secret_name,
                     'subscription_id': args.user_cert_subscription_id,
                     'type_name': 'KeyVaultCertificateSourceParameters',
@@ -245,7 +245,6 @@ class CDNEnableHttps(_CDNEnableHttps):
 
 
 class CDNCustomDomainDelete(_CDNCustomDomainDelete):
-    @classmethod
     def _handler(self, command_args):
         super()._handler(command_args)
         return self.build_lro_poller(self._execute_operations, None)

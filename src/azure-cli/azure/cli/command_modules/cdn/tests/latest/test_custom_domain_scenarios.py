@@ -101,15 +101,15 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'cdn-cli-test-3'
-        origin = 'www.contoso.com'
+        endpoint_name = 'cdn-cli-test-aaz-2'
+        origin = 'www.microsoft1.com'
         endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.cdn-cli-test-3.azfdtest.xyz'
+        hostname = custom_domain_name + '.aaz-2.clitest.azfdtest.xyz'
         # Use alternate hostnames for dogfood.
         if '.azureedge-test.net' in endpoint['hostName']:
-            hostname = custom_domain_name + '.cdn-cli-test-3-df.azfdtest.xyz'
+            hostname = custom_domain_name + '.aaz-2-df.clitest.azfdtest.xyz'
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
 
         checks = [JMESPathCheck('name', custom_domain_name),
@@ -142,19 +142,19 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'cdn-cli-test-4'
-        origin = 'www.contoso.com'
+        endpoint_name = 'cdn-cli-test-aaz-4'
+        origin = 'www.microsoft1.com'
         endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         # Create custom domains for CDN managed cert and BYOC
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
         byoc_custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.cdn-cli-test-4.azfdtest.xyz'
-        byoc_hostname = byoc_custom_domain_name + '.cdn-cli-test-4.azfdtest.xyz'
+        hostname = custom_domain_name + '.aaz-4.clitest.azfdtest.xyz'
+        byoc_hostname = byoc_custom_domain_name + '.aaz-4.clitest.azfdtest.xyz'
         # Use alternate hostnames for dogfood.
         if '.azureedge-test.net' in endpoint['hostName']:
-            hostname = custom_domain_name + '.cdn-cli-test-4-df.azfdtest.xyz'
-            byoc_hostname = byoc_custom_domain_name + '.cdn-cli-test-4-df.azfdtest.xyz'
+            hostname = custom_domain_name + '.aaz-4-df.clitest.azfdtest.xyz'
+            byoc_hostname = byoc_custom_domain_name + '.aaz-4-df.clitest.azfdtest.xyz'
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, byoc_custom_domain_name, byoc_hostname)
 
@@ -169,16 +169,14 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.custom_domain_show_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, checks=checks)
 
         # Enable custom HTTPS with a CDN managed certificate.
-        checks = [JMESPathCheck('name', custom_domain_name),
-                  JMESPathCheck('hostName', hostname),
-                  JMESPathCheck('customHttpsProvisioningState', 'Enabling'),
-                  JMESPathCheck('customHttpsProvisioningSubstate', 'SubmittingDomainControlValidationRequest')]
+        checks = [JMESPathCheck('properties.hostName', hostname),
+                  JMESPathCheck('properties.customHttpsProvisioningState', 'Enabling'),
+                  JMESPathCheck('properties.customHttpsProvisioningSubstate', 'SubmittingDomainControlValidationRequest')]
         self.custom_domain_enable_https_command(resource_group,
                                                 profile_name,
                                                 endpoint_name,
                                                 custom_domain_name,
-                                                min_tls_version='1.0',
-                                                checks=checks)
+                                                min_tls_version='1.0')
 
         # Create a TLS cert to use for BYOC.
         cert_name = self.create_random_name(prefix='cert', length=20)
@@ -189,7 +187,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         # Enable custom HTTPS with a custom certificate
         # With the latest service side change to move the certificate validation to RP layer, the request will be rejected.
-        with self.assertRaisesRegexp(HttpResponseError, "The certificate imported from the Key Vault is a Self Signed certificate and is not permitted for Bring Your Own Certificate"):
+        with self.assertRaisesRegexp(HttpResponseError, "The certificate chain includes an invalid number of certificates. The number of certificates should be greater than 2"):
             self.custom_domain_enable_https_command(resource_group,
                                                     profile_name,
                                                     endpoint_name,
@@ -212,16 +210,16 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'cdn-cli-test-5'
-        origin = 'www.contoso.com'
+        endpoint_name = 'cdn-cli-test-aaz-5'
+        origin = 'www.microsoft1.com'
         endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         # Create custom domain for BYOC
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.cdn-cli-test-5.azfdtest.xyz'
+        hostname = custom_domain_name + '.aaz-5.clitest.azfdtest.xyz'
         # Use alternate hostname for dogfood.
         if '.azureedge-test.net' in endpoint['hostName']:
-            hostname = custom_domain_name + '.cdn-cli-test-5-df.azfdtest.xyz'
+            hostname = custom_domain_name + '.aaz-5-df.clitest.azfdtest.xyz'
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
 
         # Verify the created custom domain doesn't have custom HTTPS enabled.
@@ -236,7 +234,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         # Enable custom HTTPS with the custom certificate.
         # With the latest service side change to move the certificate validation to RP layer, the request will be rejected.
-        with self.assertRaisesRegexp(HttpResponseError, "The certificate imported from the Key Vault is a Self Signed certificate and is not permitted for Bring Your Own Certificate"):
+        with self.assertRaisesRegexp(HttpResponseError, "The certificate chain includes an invalid number of certificates. The number of certificates should be greater than 2"):
             self.custom_domain_enable_https_command(resource_group,
                                                     profile_name,
                                                     endpoint_name,
