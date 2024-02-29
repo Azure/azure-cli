@@ -39,7 +39,7 @@ SERVER_NAME_MAX_LENGTH = 20
 DEFAULT_LOCATION = "eastus2euap"
 DEFAULT_PAIRED_LOCATION = "centraluseuap"
 DEFAULT_GENERAL_PURPOSE_SKU = "Standard_D2s_v3"
-DEFAULT_MEMORY_OPTIMIZED_SKU = "Standard_E2s_v3"
+DEFAULT_MEMORY_OPTIMIZED_SKU = "Standard_E4ads_v5"
 RESOURCE_RANDOM_NAME = "clirecording"
 STORAGE_ACCOUNT_PREFIX = "storageaccount"
 STORAGE_ACCOUNT_NAME_MAX_LENGTH = 20
@@ -198,6 +198,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server list -g {}'.format(database_engine, resource_group),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
+        print('******************** restore *****************')
         restore_server_name = 'restore-' + server_name
         self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
                  .format(database_engine, resource_group, restore_server_name, server_name),
@@ -660,14 +661,14 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  database_engine, resource_group, target_server_config), checks=NoneCheck())
 
     def _test_flexible_server_georestore_update_mgmt(self, database_engine, resource_group):
-        location = DEFAULT_LOCATION
-        target_location = DEFAULT_PAIRED_LOCATION
+        location = 'eastus'
+        target_location = 'westus'
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
         self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none --tier {} --sku-name {}'
-                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', DEFAULT_GENERAL_PURPOSE_SKU))
+                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', 'Standard_D2ds_v4'))
 
         self.cmd('{} flexible-server show -g {} -n {}'
                  .format(database_engine, resource_group, source_server),
@@ -2175,8 +2176,8 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
 class FlexibleServerAdvancedThreatProtectionScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @ServerPreparer(engine_type='mysql', location=DEFAULT_LOCATION)
+    @ResourceGroupPreparer(location='eastus2')
+    @ServerPreparer(engine_type='mysql', location='eastus2')
     def test_mysql_advanced_threat_protection_mgmt(self, resource_group, server):
         self._test_advanced_threat_protection_mgmt('mysql', resource_group, server)
 
