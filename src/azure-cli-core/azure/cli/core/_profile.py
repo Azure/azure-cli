@@ -485,6 +485,7 @@ class Profile:
         dic.update((_get_key_name(x, secondary_key_name), x) for x in new_subscriptions)
         subscriptions = list(dic.values())
         if subscriptions:
+            # Automatically pick one first
             if active_one:
                 new_active_one = next(
                     (x for x in new_subscriptions if _match_account(x, active_subscription_id, secondary_key_name,
@@ -494,9 +495,15 @@ class Profile:
                     s[_IS_DEFAULT_SUBSCRIPTION] = False
 
                 if not new_active_one:
-                    new_active_one = Profile._pick_working_subscription(new_subscriptions, interactive=interactive)
+                    new_active_one = Profile._pick_working_subscription(new_subscriptions)
             else:
-                new_active_one = Profile._pick_working_subscription(new_subscriptions, interactive=interactive)
+                new_active_one = Profile._pick_working_subscription(new_subscriptions)
+
+            # Let the user interactively select one
+            if interactive:
+                picked = Profile._interactively_select_subscription(subscriptions, new_active_one)
+                if picked:
+                    return picked
 
             new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
             default_sub_id = new_active_one[_SUBSCRIPTION_ID]
@@ -505,16 +512,13 @@ class Profile:
         self._storage[_SUBSCRIPTIONS] = subscriptions
 
     @staticmethod
-    def _pick_working_subscription(subscriptions, interactive=None):
-        if interactive:
-            picked = Profile._interactively_pick_subscription(subscriptions)
-            if picked:
-                return picked
+    def _pick_working_subscription(subscriptions):
+        """Pick the first enabled subscription"""
         s = next((x for x in subscriptions if x.get(_STATE) == 'Enabled'), None)
         return s or subscriptions[0]
 
     @staticmethod
-    def _interactively_pick_subscription(subscriptions):
+    def _interactively_select_subscription(subscriptions, active_one):
         index_to_subscription_map = {}
         table_data = []
         subscriptions_sorted = sorted(subscriptions, key=lambda s: s[_SUBSCRIPTION_NAME].lower())
@@ -525,7 +529,8 @@ class Profile:
 
             # TODO: make index_str blue
             row = {
-                'No': f'[{index_str}]',
+                # TODO: make * yellow
+                'No': f'[{index_str}]' + ('(*)' if sub == active_one else ''),
                 'Subscription name': sub[_SUBSCRIPTION_NAME],
                 'Subscription ID': sub[_SUBSCRIPTION_ID]
             }
@@ -537,9 +542,12 @@ class Profile:
         table_str = tabulate(table_data, headers="keys", tablefmt="simple", disable_numparse=True)
 
         print()
-        print('Select a subscription and tenant:')
+        print('[Tenant and subscription selection]')
         print()
         print(table_str)
+        print()
+        print(f"(*) Default tenant is '{active_one[_TENANT_DEFAULT_DOMAIN]}' and subscription is "
+              f"'{active_one[_SUBSCRIPTION_NAME]}({active_one[_SUBSCRIPTION_ID]})'.")
         print()
 
         from knack.prompting import prompt, NoTTYException
@@ -548,9 +556,10 @@ class Profile:
         while True:
             try:
                 # TODO: Make text in parentheses grey
-                select_index = prompt(
-                    'Which subscription and tenant would you like to choose '
-                    '(Type a number or Enter for no changes): ')
+                select_index = prompt('Select a subscription and tenant (Type a number or Enter for no changes): ')
+                # Nothing is typed, keep current selection
+                if select_index == '':
+                    return active_one
                 return index_to_subscription_map[select_index]
             except KeyError:
                 logger.warning("Invalid selection.")
