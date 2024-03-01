@@ -517,7 +517,8 @@ class Profile:
     def _interactively_pick_subscription(subscriptions):
         index_to_subscription_map = {}
         table_data = []
-        for index, sub in enumerate(subscriptions, start=1):
+        subscriptions_sorted = sorted(subscriptions, key=lambda s: s[_SUBSCRIPTION_NAME].lower())
+        for index, sub in enumerate(subscriptions_sorted, start=1):
             # There is no need to use int, as int requires parsing. str match is sufficient.
             index_str = str(index)  # '1', '2', ...
             index_to_subscription_map[index_str] = sub
