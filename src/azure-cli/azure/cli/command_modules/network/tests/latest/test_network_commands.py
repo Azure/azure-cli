@@ -6775,9 +6775,21 @@ class NetworkVirtualApplianceConnectionScenarioTest(ScenarioTest):
         self.cmd('network virtual-appliance connection show -n {name} -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
             self.check('name', '{name}')
         ])
+
         self.cmd('network virtual-appliance connection list -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
             self.check('length(@)', 1)
         ])
+
+        self.cmd('network virtual-appliance connection update '
+                 '-n {name} '
+                 '-g {rg} '
+                 '--nva {nva_name} '
+                 '--labels [label1,label2] ')
+        
+        self.cmd('network virtual-appliance connection show -n {name} -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
+            self.check('length(properties.routingConfiguration.propagatedRouteTables.labels)', 2),
+            self.check('properties.routingConfiguration.propagatedRouteTables.labels[0]', 'label1')
+        ]) 
 
 class NetworkExtendedLocation(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_network_lb_edge_zone', location='eastus2euap')
