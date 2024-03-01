@@ -9,6 +9,8 @@ import os
 import time
 
 from OpenSSL import crypto
+from cryptography.hazmat.primitives.serialization import pkcs12
+from cryptography.hazmat.primitives import hashes
 
 try:
     from urllib.parse import urlparse
@@ -1383,20 +1385,19 @@ def _get_thumbprint_from_secret_identifier(cli_ctx, vault, secret_identifier):
     secret = client_not_arm.get_secret(secret_name, secret_version)
     cert_bytes = secret.value
     x509 = None
+    thumbprint = None
     import base64
     decoded = base64.b64decode(cert_bytes)
     try:
-        x509 = crypto.load_pkcs12(decoded).get_certificate()
+        p12 = pkcs12.load_pkcs12(decoded, None)
     except (ValueError, crypto.Error):
         pass
 
-    if not x509:
-        x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_bytes)
-
-    if not x509:
-        raise Exception('invalid certificate')  # pylint: disable=broad-exception-raised
-
-    thumbprint = x509.digest("sha1").decode("utf-8").replace(':', '')
+    if p12.cert is None:
+            raise Exception("certificate is None")
+    
+    x509 = p12.cert.certificate
+    thumbprint = x509.fingerprint(hashes.SHA1()).hex().upper()
     return thumbprint
 
 
@@ -1453,12 +1454,12 @@ def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, s
         try:
             import base64
             decoded = base64.b64decode(secret_value)
-            p12 = crypto.load_pkcs12(decoded)
+            p12 = pkcs12.load_pkcs12(decoded, None)
             f_pem = open(pem_path, 'wb')
             f_pem.write(crypto.dump_privatekey(
-                crypto.FILETYPE_PEM, p12.get_privatekey()))
+                crypto.FILETYPE_PEM, p12.key))
             f_pem.write(crypto.dump_certificate(
-                crypto.FILETYPE_PEM, p12.get_certificate()))
+                crypto.FILETYPE_PEM, p12.cert))
             ca = p12.get_ca_certificates()
             if ca is not None:
                 for cert in ca:
@@ -1474,7 +1475,7 @@ def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, s
         try:
             import base64
             decoded = base64.b64decode(secret_value)
-            p12 = crypto.load_pkcs12(decoded)
+            p12 = pkcs12.load_pkcs12(decoded, None)
             with open(pfx_path, 'wb') as f:
                 f.write(decoded)
         except Exception as ex:  # pylint: disable=broad-except
