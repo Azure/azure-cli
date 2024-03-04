@@ -655,8 +655,8 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
-
-    @unittest.skip('Requests to disable analytics temporarily blocked in production. Will reenable test once disable analytics capability is restored.')
+    
+    @record_only()# Requests to disable analytics temporarily blocked in production. Will reenable test once disable analytics capability is restored.
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_disable_analytics')
     def test_cosmosdb_sql_container_update_disable_analytics(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)
