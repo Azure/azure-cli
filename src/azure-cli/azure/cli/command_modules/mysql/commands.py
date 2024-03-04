@@ -90,7 +90,8 @@ def load_command_table(self, _):
     with self.command_group('mysql flexible-server advanced-threat-protection-setting',
                             mysql_advanced_threat_protection_sdk,
                             custom_command_type=mysql_custom,
-                            client_factory=cf_mysql_advanced_threat_protection) as g:
+                            client_factory=cf_mysql_advanced_threat_protection,
+                            is_preview=True) as g:
         g.custom_command('update', 'flexible_server_advanced_threat_protection_update')
         g.custom_show_command('show', 'flexible_server_advanced_threat_protection_show')
 
