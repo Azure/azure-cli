@@ -401,7 +401,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
         # test create sql server with retention days passed in, verify retentionDays == 7
         self.cmd('sql server create -g {} --name {} '
-                 '--admin-user {} --admin-password {} --retention-days {}'
+                 '--admin-user {} --admin-password {} --retention-days-soft-delete {}'
                  .format(resource_group_1, server_name_1, admin_login, admin_passwords[0], '7'),
                  checks=[
                      JMESPathCheck('name', server_name_1),
@@ -419,7 +419,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
         # test create sql server with retention days passed in, verify retentionDays == 7
         self.cmd('sql server create -g {} --name {} '
-                 '--admin-user {} --admin-password {} --retention-days {}'
+                 '--admin-user {} --admin-password {} --retention-days-soft-delete {}'
                  .format(resource_group, server_name, admin_login, admin_passwords[0], '7'),
                  checks=[
                      JMESPathCheck('name', server_name),
@@ -430,7 +430,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         
         # test update sql server with retention days passed in, verify retentionDays == 7
         self.cmd('sql server create -g {} --name {} '
-                 '--admin-user {} --admin-password {} --retention-days {}'
+                 '--admin-user {} --admin-password {} --retention-days-soft-delete {}'
                  .format(resource_group, server_name, admin_login, admin_passwords[0], '1'),
                  checks=[
                      JMESPathCheck('name', server_name),
