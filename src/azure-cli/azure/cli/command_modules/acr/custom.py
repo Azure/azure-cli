@@ -56,7 +56,8 @@ def acr_create(cmd,
                zone_redundancy=None,
                allow_trusted_services=None,
                allow_exports=None,
-               tags=None):
+               tags=None,
+               allow_metadata_search=None):
 
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
@@ -78,6 +79,9 @@ def acr_create(cmd,
 
     if identity or key_encryption_key:
         _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_key)
+
+    if allow_metadata_search is not None:
+        _configure_metadata_search(cmd, registry, allow_metadata_search)
 
     _handle_network_bypass(cmd, registry, allow_trusted_services)
     _handle_export_policy(cmd, registry, allow_exports)
@@ -122,7 +126,8 @@ def acr_update_custom(cmd,
                       allow_trusted_services=None,
                       anonymous_pull_enabled=None,
                       allow_exports=None,
-                      tags=None):
+                      tags=None,
+                      allow_metadata_search=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
         instance.sku = Sku(name=sku)
@@ -144,6 +149,9 @@ def acr_update_custom(cmd,
 
     if default_action is not None:
         _configure_default_action(cmd, instance, default_action)
+
+    if allow_metadata_search is not None:
+        _configure_metadata_search(cmd, instance, allow_metadata_search)
 
     _handle_network_bypass(cmd, instance, allow_trusted_services)
     _handle_export_policy(cmd, instance, allow_exports)
@@ -609,3 +617,8 @@ def _ensure_identity_resource_id(subscription_id, resource_group, resource):
 def list_private_link_resources(cmd, client, registry_name, resource_group_name=None):
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
     return client.list_private_link_resources(resource_group_name, registry_name)
+
+
+def _configure_metadata_search(cmd, registry, enabled):
+    MetadataSearch = cmd.get_models('MetadataSearch')
+    registry.metadata_search = (MetadataSearch.enabled if enabled else MetadataSearch.disabled)

@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.58.0
+++++++
+* [BREAKING CHANGE] `az login`: Replace `allow_broker` with `enable_broker_on_windows` (#27726)
+
 2.57.0
 ++++++
 * `aaz`: Handle null value when deserialize output (#28253)

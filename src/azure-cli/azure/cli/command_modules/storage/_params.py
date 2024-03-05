@@ -1063,7 +1063,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('length', type=int, help='Number of bytes to read from the stream. This is optional, but should be '
                                             'supplied for optimal performance. Cooperate with --data.', is_preview=True,
                    min_api='2019-02-02')
-        c.argument('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags", is_preview=True,
+        c.argument('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags",
                    help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
                         'operation will overwrite the existing data. If set to False, the operation will fail with '
                         'ResourceExistsError. The exception to the above is with Append blob types: if set to False and the '
@@ -1100,20 +1100,24 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         c.argument('source', options_list=('--source', '-s'))
         c.argument('destination', options_list=('--destination', '-d'))
-        c.argument('max_connections', type=int,
+        c.argument('max_connections', type=int, arg_group="Additional Flags",
                    help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
         c.argument('maxsize_condition', arg_group='Content Control')
         c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group='Content Control')
-        c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()))
-        c.extra('no_progress', progress_type, validator=add_progress_callback)
-        c.extra('tier', tier_type, is_preview=True, validator=blob_tier_validator_track2)
-        c.extra('overwrite', arg_type=get_three_state_flag(), is_preview=True,
+        c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()),
+                   arg_group="Additional Flags")
+        c.extra('no_progress', progress_type, validator=add_progress_callback, arg_group="Additional Flags")
+        c.extra('tier', tier_type, is_preview=True, validator=blob_tier_validator_track2, arg_group="Additional Flags")
+        c.extra('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags",
                 help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
                      'operation will overwrite the existing data. If set to False, the operation will fail with '
                      'ResourceExistsError. The exception to the above is with Append blob types: if set to False and the '
                      'data already exists, an error will not be raised and the data will be appended to the existing '
                      'blob. If set overwrite=True, then the existing append blob will be deleted, and a new one created. '
                      'Defaults to False.')
+        c.extra('tags', arg_type=tags_type, arg_group="Additional Flags")
+        c.argument('metadata', arg_group="Additional Flags")
+        c.argument('timeout', arg_group="Additional Flags")
 
     with self.argument_context('storage blob download', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         c.register_blob_arguments_track2()

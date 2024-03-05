@@ -531,6 +531,9 @@ parameters:
   - name: --enable-asm --enable-azure-service-mesh
     type: bool
     short-summary: Enable Azure Service Mesh addon.
+  - name: --revision
+    type: string
+    short-summary: Azure Service Mesh revision to install.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
