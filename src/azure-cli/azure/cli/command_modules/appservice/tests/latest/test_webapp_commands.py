@@ -1979,6 +1979,44 @@ class WebappUpdateTest(ScenarioTest):
         ])
 
 
+class BasicAuthScenarioTest(LiveScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_update(self, resource_group):
+        webapp_name = self.create_random_name('webapp-basicAuth-test', 40)
+        plan_name = self.create_random_name('webapp-basicAuth-plan', 40)
+        self.cmd('appservice plan create -g {} -n {} --sku S1'
+                 .format(resource_group, plan_name))
+
+        namespace = 'Microsoft.Web'
+        resource_type = 'basicPublishingCredentialsPolicies'
+
+        # webapp create with basic_auth enabled
+        basic_auth = 'enabled'
+        self.cmd('webapp create -g {} -n {} --plan {} --basic-auth {}'
+                 .format(resource_group, webapp_name, plan_name, basic_auth))
+        self.cmd('resource show -g {} --name ftp --namespace {} --resource-type {} --parent sites/{}'
+                 .format(resource_group, namespace, resource_type, webapp_name)).assert_with_checks([
+                     JMESPathCheck('properties.allow', True)
+                 ])
+        self.cmd('resource show -g {} --name scm --namespace {} --resource-type {} --parent sites/{}'
+                 .format(resource_group, namespace, resource_type, webapp_name)).assert_with_checks([
+                     JMESPathCheck('properties.allow', True)
+                 ])
+
+        # webapp update with basic_auth enabled
+        basic_auth = 'disabled'
+        self.cmd('webapp update -g {} -n {} --basic-auth {}'
+                 .format(resource_group, webapp_name, basic_auth))
+        self.cmd('resource show -g {} --name ftp --namespace {} --resource-type {} --parent sites/{}'
+                 .format(resource_group, namespace, resource_type, webapp_name)).assert_with_checks([
+                     JMESPathCheck('properties.allow', False)
+                 ])
+        self.cmd('resource show -g {} --name scm --namespace {} --resource-type {} --parent sites/{}'
+                 .format(resource_group, namespace, resource_type, webapp_name)).assert_with_checks([
+                     JMESPathCheck('properties.allow', False)
+                 ])
+
+
 class WebappZipDeployScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_zipDeploy', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_deploy_zip(self, resource_group):

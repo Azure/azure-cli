@@ -577,11 +577,51 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
             JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
 
 
+class FunctionappDaprConfig(ScenarioTest):
+    @ResourceGroupPreparer(location='northeurope')
+    @StorageAccountPreparer()
+    def test_functionapp_enable_dapr(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappdapr', 32)
+        managed_environment_name = self.create_random_name(
+            'managedenvironment', 40
+        )
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location northeurope --logs-destination none'
+            .format(managed_environment_name, resource_group))
+
+        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --functions-version 4 --enable-dapr false'.format(
+            resource_group,
+            functionapp_name,
+            storage_account,
+            managed_environment_name
+        )).assert_with_checks([
+            JMESPathCheck('daprConfig', None)
+        ])
+
+        self.cmd('functionapp config container set -g {} -n {} --enable-dapr true --dapr-app-id daprappid --dal false'.format(
+            resource_group,
+            functionapp_name
+        ))
+        
+        time.sleep(1200)
+        
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck('daprConfig.enabled', True),
+            JMESPathCheck('daprConfig.appId', 'daprappid'),
+            JMESPathCheck('daprConfig.appPort', None),
+            JMESPathCheck('daprConfig.httpReadBufferSize', 4),
+            JMESPathCheck('daprConfig.httpMaxRequestSize', 4),
+            JMESPathCheck('daprConfig.logLevel', 'info'),
+            JMESPathCheck('daprConfig.enableApiLogging', False)
+        ])
+
+
 class FunctionappDapr(LiveScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
     @StorageAccountPreparer()
-    def test_functionapp_dapr_config_e2e(self, resource_group, storage_account):
+    def test_functionapp_disable_dapr(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappdapr', 24)
         managed_environment_name = self.create_random_name(
@@ -594,7 +634,7 @@ class FunctionappDapr(LiveScenarioTest):
             "northeurope"
         ))
 
-        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --dapr-app-id daprappid --dapr-app-port 800 --dhmrs 4 --dhrbs 50 --dapr-log-level debug --enable-dapr true --functions-version 4'.format(
+        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --dapr-app-id daprappid --dapr-app-port 800 --dhmrs 4 --dhrbs 50 --dapr-log-level debug --enable-dapr true --dal true --functions-version 4'.format(
             resource_group,
             functionapp_name,
             storage_account,
@@ -606,12 +646,12 @@ class FunctionappDapr(LiveScenarioTest):
             JMESPathCheck('daprConfig.httpReadBufferSize', 50),
             JMESPathCheck('daprConfig.httpMaxRequestSize', 4),
             JMESPathCheck('daprConfig.logLevel', 'debug'),
-            JMESPathCheck('daprConfig.enableApiLogging', False)
+            JMESPathCheck('daprConfig.enableApiLogging', True)
         ])
 
         time.sleep(1200)
 
-        self.cmd('functionapp config container set -g {} -n {} --dapr-app-id daprappid1 --dapr-app-port 80 --dal --dhmrs 6 --dhrbs 60 --dapr-log-level warn --enable-dapr false'.format(
+        self.cmd('functionapp config container set -g {} -n {} --enable-dapr false'.format(
             resource_group,
             functionapp_name
         ))
@@ -620,6 +660,52 @@ class FunctionappDapr(LiveScenarioTest):
 
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
             JMESPathCheck('daprConfig.enabled', False),
+            JMESPathCheck('daprConfig.appId', None),
+            JMESPathCheck('daprConfig.appPort', None),
+            JMESPathCheck('daprConfig.httpReadBufferSize', None),
+            JMESPathCheck('daprConfig.httpMaxRequestSize', None),
+            JMESPathCheck('daprConfig.logLevel', 'info'),
+            JMESPathCheck('daprConfig.enableApiLogging', False)
+        ])
+
+    @ResourceGroupPreparer(location='northeurope')
+    @StorageAccountPreparer()
+    def test_functionapp_update_enabled_dapr(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappdapr', 32)
+        managed_environment_name = self.create_random_name(
+            'managedenvironment', 40
+        )
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location northeurope --logs-destination none'
+            .format(managed_environment_name, resource_group))
+
+        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --functions-version 4 --enable-dapr true --dapr-app-id daprappid'.format(
+            resource_group,
+            functionapp_name,
+            storage_account,
+            managed_environment_name
+        )).assert_with_checks([
+            JMESPathCheck('daprConfig.enabled', True),
+            JMESPathCheck('daprConfig.appId', 'daprappid'),
+            JMESPathCheck('daprConfig.appPort', None),
+            JMESPathCheck('daprConfig.httpReadBufferSize', 4),
+            JMESPathCheck('daprConfig.httpMaxRequestSize', 4),
+            JMESPathCheck('daprConfig.logLevel', 'info'),
+            JMESPathCheck('daprConfig.enableApiLogging', False)
+        ])
+
+        time.sleep(1200)
+
+        self.cmd('functionapp config container set -g {} -n {} --dapr-app-id daprappid1 --dapr-app-port 80 --dal true --dhmrs 6 --dhrbs 60 --dapr-log-level warn'.format(
+            resource_group,
+            functionapp_name
+        ))
+
+        time.sleep(1200)
+
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck('daprConfig.enabled', True),
             JMESPathCheck('daprConfig.appId', 'daprappid1'),
             JMESPathCheck('daprConfig.appPort', 80),
             JMESPathCheck('daprConfig.httpReadBufferSize', 60),

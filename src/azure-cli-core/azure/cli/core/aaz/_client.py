@@ -47,12 +47,12 @@ class AAZClientConfiguration(Configuration):
             self,
             **kwargs
     ):
-        from azure.core.pipeline.policies import UserAgentPolicy, HeadersPolicy, ProxyPolicy, \
+        from azure.core.pipeline.policies import HeadersPolicy, ProxyPolicy, \
             RetryPolicy, CustomHookPolicy, RedirectPolicy, SansIOHTTPPolicy
-        from azure.cli.core.sdk.policies import SafeNetworkTraceLoggingPolicy
+        from azure.cli.core.sdk.policies import SafeNetworkTraceLoggingPolicy, RecordTelemetryUserAgentPolicy
         from ._http_policy import AAZBearerTokenCredentialPolicy
 
-        self.user_agent_policy = kwargs.get('user_agent_policy') or UserAgentPolicy(**kwargs)
+        self.user_agent_policy = kwargs.get('user_agent_policy') or RecordTelemetryUserAgentPolicy(**kwargs)
         self.headers_policy = kwargs.get('headers_policy') or HeadersPolicy(**kwargs)
         self.proxy_policy = kwargs.get('proxy_policy') or ProxyPolicy(**kwargs)
         self.logging_policy = kwargs.get('logging_policy') or SafeNetworkTraceLoggingPolicy(**kwargs)
