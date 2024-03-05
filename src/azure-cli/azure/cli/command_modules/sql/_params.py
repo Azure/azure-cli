@@ -1848,10 +1848,11 @@ def load_arguments(self, _):
         c.argument('federated_client_id',
                    options_list=['--federated-client-id', '--fid'],
                    help='The federated client id used in cross tenant CMK scenario.')
-        
+
         c.argument('retention_days',
                    options_list=['--retention-days-soft-delete'],
-                   help='The number of days (from 0 to 7 inclusive) that your server will be recoverable after initial deletion.',
+                   help='The number of days (from 0 to 7 inclusive) that your server will be'
+                   'recoverable after initial deletion.',
                    is_preview=True)
 
     with self.argument_context('sql server create') as c:
@@ -1894,20 +1895,22 @@ def load_arguments(self, _):
         c.argument('external_admin_principal_type',
                    options_list=['--external-admin-principal-type'],
                    help='User, Group or Application')
-        
+
         c.argument('retention_days',
                    options_list=['--retention-days-soft-delete'],
                    required=False,
-                   help='The number of days (from 0 to 7 inclusive) that your server will be recoverable after initial deletion.')
+                   help='The number of days (from 0 to 7 inclusive) that your server will be'
+                   'recoverable after initial deletion.')
 
     with self.argument_context('sql server update') as c:
         c.argument('administrator_login_password',
                    help='The administrator login password.')
-        
+
         c.argument('retention_days',
                    options_list=['--retention-days-soft-delete'],
                    required=False,
-                   help='The number of days (from 0 to 7 inclusive) that your server will be recoverable after initial deletion.')
+                   help='The number of days (from 0 to 7 inclusive) that your server will be'
+                   'recoverable after initial deletion.')
 
     with self.argument_context('sql server show') as c:
         c.argument('expand_ad_admin',
