@@ -1552,7 +1552,7 @@ examples:
   - name: Create a server with disabled public network access to server.
     text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword -e false
   - name: Create a server with soft delete retention (7 days) setting.
-    text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword --retention-days 7
+    text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword --retention-days-soft-delete 7
   - name: Create a server without SQL Admin, with AD admin and AD Only enabled.
     text: az sql server create --enable-ad-only-auth --external-admin-principal-type User --external-admin-name myUserName --external-admin-sid c5e964e2-6bb2-1111-1111-3b16ec0e1234 -g myResourceGroup -n myServer
   - name: Create a server without SQL Admin, with AD admin, AD Only enabled, User ManagedIdenties and Identity Type is SystemAssigned,UserAssigned.
