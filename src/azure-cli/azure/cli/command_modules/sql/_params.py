@@ -1850,7 +1850,7 @@ def load_arguments(self, _):
                    help='The federated client id used in cross tenant CMK scenario.')
 
         c.argument('retention_days',
-                   options_list=['--retention-days-soft-delete'],
+                   options_list=['--retention-days-soft-delete', '-rd'],
                    help='The number of days (from 0 to 7 inclusive) that your server will be'
                    'recoverable after initial deletion.',
                    is_preview=True)
@@ -1897,7 +1897,7 @@ def load_arguments(self, _):
                    help='User, Group or Application')
 
         c.argument('retention_days',
-                   options_list=['--retention-days-soft-delete'],
+                   options_list=['--retention-days-soft-delete', '-rd'],
                    required=False,
                    help='The number of days (from 0 to 7 inclusive) that your server will be'
                    'recoverable after initial deletion.')
@@ -1907,7 +1907,7 @@ def load_arguments(self, _):
                    help='The administrator login password.')
 
         c.argument('retention_days',
-                   options_list=['--retention-days-soft-delete'],
+                   options_list=['--retention-days-soft-delete', '-rd'],
                    required=False,
                    help='The number of days (from 0 to 7 inclusive) that your server will be'
                    'recoverable after initial deletion.')
