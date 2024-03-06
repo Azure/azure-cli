@@ -1,0 +1,300 @@
+interactions:
+- request:
+    body: '{"location": "global", "properties": {"zoneType": "Public"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '60'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.26058-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns_tmlink000001/providers/Microsoft.Network/dnsZones/mytestzone2.com?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_tmlink000001\/providers\/Microsoft.Network\/dnszones\/mytestzone2.com","name":"mytestzone2.com","type":"Microsoft.Network\/dnszones","etag":"74bd2d4b-524b-4a09-93fb-58661505588d","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-33.ppe.azure-dns.com.","ns2-33.ppe.azure-dns.net.","ns3-33.ppe.azure-dns.org.","ns4-33.ppe.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '555'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 06 Mar 2024 21:47:38 GMT
+      etag:
+      - 74bd2d4b-524b-4a09-93fb-58661505588d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: DF07EBBB938A4DDB95C5C34ADF23044F Ref B: CO6AA3150218017 Ref C: 2024-03-06T21:47:34Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"location": "global", "name": "tm2", "properties": {"dnsConfig": {"relativeName":
+      "mytesttrafficmanager2", "ttl": 30}, "monitorConfig": {"path": "/", "port":
+      80, "protocol": "HTTP"}, "profileStatus": "Enabled", "trafficRoutingMethod":
+      "Performance"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network traffic-manager profile create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '251'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --unique-dns-name --routing-method
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.26058-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns_tmlink000001/providers/Microsoft.Network/trafficmanagerprofiles/tm2?api-version=2022-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_tmlink000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm2","name":"tm2","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Performance","dnsConfig":{"relativeName":"mytesttrafficmanager2","fqdn":"mytesttrafficmanager2.preprodtrafficmanager.azure","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled","maxReturn":null}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '687'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 06 Mar 2024 21:47:42 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '4499'
+      x-msedge-ref:
+      - 'Ref A: 1AD7E8B6A5594D1BA37893AFB6FFABE2 Ref B: CO6AA3150220035 Ref C: 2024-03-06T21:47:39Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"TTL": 3600, "trafficManagementProfile": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns_tmlink000001/providers/Microsoft.Network/trafficManagerProfiles/tm2"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '216'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -z -n --traffic-management-profile
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.26058-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns_tmlink000001/providers/Microsoft.Network/dnsZones/mytestzone2.com/A/tmlink?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_tmlink000001\/providers\/Microsoft.Network\/dnszones\/mytestzone2.com\/A\/tmlink","name":"tmlink","type":"Microsoft.Network\/dnszones\/A","etag":"48096e70-cb5c-44e5-b097-f57d779028ae","properties":{"fqdn":"tmlink.mytestzone2.com.","TTL":30,"targetResource":{},"trafficManagementProfile":{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_tmlink000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm2"},"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '576'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 06 Mar 2024 21:48:00 GMT
+      etag:
+      - 48096e70-cb5c-44e5-b097-f57d779028ae
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+      x-msedge-ref:
+      - 'Ref A: 2A381C159ACB4BB39B799F0971F8A3A7 Ref B: CO6AA3150218025 Ref C: 2024-03-06T21:47:43Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"targetResources": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns_tmlink000001/providers/Microsoft.Network/trafficManagerProfiles/tm2"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns list-references
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '196'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --parameters
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.26058-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/getDnsResourceReference?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"properties":{"dnsResourceReferences":[{"dnsResources":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_tmlink000001\/providers\/microsoft.network\/dnsZones\/mytestzone2.com\/A\/tmlink"}],"targetResource":{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourcegroups\/cli_test_dns_tmlink000001\/providers\/microsoft.network\/trafficmanagerprofiles\/tm2"}}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '417'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 06 Mar 2024 21:48:01 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-msedge-ref:
+      - 'Ref A: 10F8373838C641359EF1D8F59AAF7CBB Ref B: CO6AA3150217031 Ref C: 2024-03-06T21:48:01Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -z -n --remove
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.26058-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns_tmlink000001/providers/Microsoft.Network/dnsZones/mytestzone2.com/A/tmlink?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_tmlink000001\/providers\/Microsoft.Network\/dnszones\/mytestzone2.com\/A\/tmlink","name":"tmlink","type":"Microsoft.Network\/dnszones\/A","etag":"48096e70-cb5c-44e5-b097-f57d779028ae","properties":{"fqdn":"tmlink.mytestzone2.com.","TTL":30,"targetResource":{},"trafficManagementProfile":{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_tmlink000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm2"},"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '576'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 06 Mar 2024 21:48:02 GMT
+      etag:
+      - 48096e70-cb5c-44e5-b097-f57d779028ae
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-msedge-ref:
+      - 'Ref A: 8E3A9737E1DA4906BC1A2D79195261AF Ref B: CO6AA3150220037 Ref C: 2024-03-06T21:48:02Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"etag": "48096e70-cb5c-44e5-b097-f57d779028ae", "properties": {"TTL":
+      30}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '75'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -z -n --remove
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.26058-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns_tmlink000001/providers/Microsoft.Network/dnsZones/mytestzone2.com/A/tmlink?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_tmlink000001\/providers\/Microsoft.Network\/dnszones\/mytestzone2.com\/A\/tmlink","name":"tmlink","type":"Microsoft.Network\/dnszones\/A","etag":"10bddbf9-d03a-4b6e-83c3-0c3eef8e024d","properties":{"fqdn":"tmlink.mytestzone2.com.","TTL":30,"ARecords":[],"targetResource":{},"trafficManagementProfile":{},"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 06 Mar 2024 21:48:22 GMT
+      etag:
+      - 10bddbf9-d03a-4b6e-83c3-0c3eef8e024d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 736520111A2A4A90B02BE3D25885C87F Ref B: CO6AA3150220037 Ref C: 2024-03-06T21:48:02Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1
