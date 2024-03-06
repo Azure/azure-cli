@@ -70,8 +70,8 @@ class Create(AAZCommand):
             help="ID of an Azure resource from which the DNS resource value is taken.",
         )
         _args_schema.traffic_management_profile = AAZStrArg(
-            options=["--traffic-management-profile"],
-            help="A reference to an azure traffic manager profile resource from where the dns resource value is taken.",
+            options=["--tm-profile", "--traffic-management-profile"],
+            help="A reference to an Azure Traffic Manager Profile resource from where the DNS resource value is taken.",
             is_experimental=True,
         )
 
