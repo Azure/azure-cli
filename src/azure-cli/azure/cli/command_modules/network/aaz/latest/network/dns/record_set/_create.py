@@ -69,6 +69,11 @@ class Create(AAZCommand):
             options=["--target-resource"],
             help="ID of an Azure resource from which the DNS resource value is taken.",
         )
+        _args_schema.traffic_management_profile = AAZStrArg(
+            options=["--traffic-management-profile"],
+            help="A reference to an azure traffic manager profile resource from where the dns resource value is taken.",
+            is_experimental=True,
+        )
 
         # define Arg Group "Parameters"
 
@@ -496,6 +501,7 @@ class Create(AAZCommand):
                 properties.set_prop("caaRecords", AAZListType, ".caa_records")
                 properties.set_prop("metadata", AAZDictType, ".metadata")
                 properties.set_prop("targetResource", AAZObjectType)
+                properties.set_prop("trafficManagementProfile", AAZObjectType)
 
             aaaa_records = _builder.get(".properties.AAAARecords")
             if aaaa_records is not None:
@@ -632,6 +638,10 @@ class Create(AAZCommand):
             if target_resource is not None:
                 target_resource.set_prop("id", AAZStrType, ".target_resource")
 
+            traffic_management_profile = _builder.get(".properties.trafficManagementProfile")
+            if traffic_management_profile is not None:
+                traffic_management_profile.set_prop("id", AAZStrType, ".traffic_management_profile")
+
             return self.serialize_content(_content_value)
 
         def on_200_201(self, session):
@@ -720,6 +730,11 @@ class Create(AAZCommand):
             properties.target_resource = AAZObjectType(
                 serialized_name="targetResource",
             )
+            _CreateHelper._build_schema_sub_resource_read(properties.target_resource)
+            properties.traffic_management_profile = AAZObjectType(
+                serialized_name="trafficManagementProfile",
+            )
+            _CreateHelper._build_schema_sub_resource_read(properties.traffic_management_profile)
 
             aaaa_records = cls._schema_on_200_201.properties.aaaa_records
             aaaa_records.Element = AAZObjectType()
@@ -847,14 +862,26 @@ class Create(AAZCommand):
             metadata = cls._schema_on_200_201.properties.metadata
             metadata.Element = AAZStrType()
 
-            target_resource = cls._schema_on_200_201.properties.target_resource
-            target_resource.id = AAZStrType()
-
             return cls._schema_on_200_201
 
 
 class _CreateHelper:
     """Helper class for Create"""
+
+    _schema_sub_resource_read = None
+
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
+
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
+
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
+
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Create"]
