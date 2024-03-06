@@ -2856,12 +2856,9 @@ def aks_mesh_get_upgrades(
         logger.warning("No mesh upgrade profiles found for the cluster '%s' " +
                        "in the resource group '%s'.", name, resource_group_name)
         return None
-    upgrades = []
-    for item in upgradeProfiles:
-        upgrades.append(item.properties)
-
-    if upgrades:
-        return upgrades[0]
+    upgrade = next(upgradeProfiles, None)
+    if upgrade:
+        return upgrade.properties
     return None
 
 
