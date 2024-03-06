@@ -86,8 +86,8 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.traffic_management_profile = AAZStrArg(
-            options=["--tm-profile", "--traffic-management-profile"],
-            help="A reference to an Azure Traffic Manager Profile resource from where the DNS resource value is taken.",
+            options=["--traffic-management-profile"],
+            help="A reference to an azure traffic manager profile resource from where the dns resource value is taken.",
             is_experimental=True,
             nullable=True,
         )
