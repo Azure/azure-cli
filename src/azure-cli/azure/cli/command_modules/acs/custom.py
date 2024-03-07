@@ -2833,6 +2833,17 @@ def aks_mesh_get_revisions(
     return None
 
 
+def check_iterator(iterator):
+    import itertools
+    try:
+        first = next(iterator)
+    except StopIteration:   # iterator is empty
+        return True, iterator
+    except TypeError:       # iterator is not iterable, e.g. None
+        return True, iterator
+    return False, itertools.chain([first], iterator)
+
+
 def aks_mesh_get_upgrades(
         cmd,
         client,
@@ -2840,16 +2851,14 @@ def aks_mesh_get_upgrades(
         name
 ):
     upgradeProfiles = client.list_mesh_upgrade_profiles(resource_group_name, name)
-    # 'upgradeProfiles' is an ItemPaged object
-    upgrades = []
-    # Iterate over items within pages
-    for page in upgradeProfiles.by_page():
-        for item in page:
-            upgrades.append(item)
-
-    if upgrades:
-        return upgrades[0].properties
-
+    is_empty, upgradeProfiles = check_iterator(upgradeProfiles)
+    if is_empty:
+        logger.warning("No mesh upgrade profiles found for the cluster '%s' " +
+                       "in the resource group '%s'.", name, resource_group_name)
+        return None
+    upgrade = next(upgradeProfiles, None)
+    if upgrade:
+        return upgrade.properties
     return None
 
 
