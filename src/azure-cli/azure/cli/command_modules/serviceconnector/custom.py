@@ -387,8 +387,8 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     if not new_addon and not target_id:
         raise RequiredArgumentMissingError(err_msg.format('--target-id'))
 
-    auth_action = 'optOut' if (opt_out_list is not None and
-                                 OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
+    auth_action = 'optOutAllAuth' if (opt_out_list is not None and
+                                      OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
                                          system_identity_auth_info, service_principal_auth_info_secret, new_addon,
                                          auth_action)
@@ -662,8 +662,9 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
     if client_type is None and not all_auth_info:
         raise ValidationError(
             'Either client type or auth info should be specified to update')
-    if auth_info is not None:
-        auth_info['action'] = auth_action
+    auth_action = 'optOutAllAuth' if (opt_out_list is not None and
+                                      OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
+    auth_info["auth_mode"] = auth_action
 
     if linker.get('secretStore') and linker.get('secretStore').get('keyVaultId'):
         key_vault_id = key_vault_id or linker.get('secretStore').get('keyVaultId')
@@ -1045,6 +1046,8 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                                  OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
     public_network_action = 'optOut' if (opt_out_list is not None and
                                          OPT_OUT_OPTION.PUBLIC_NETWORK.value in opt_out_list) else None
+    auth_action = 'optOutAllAuth' if (opt_out_list is not None and
+                                      OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
 
     # create bootstrap-server
     parameters = {
@@ -1058,7 +1061,8 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                 'secret_type': 'rawValue',
                 'value': kafka_secret
             },
-            'auth_type': 'secret'
+            'auth_type': 'secret',
+            'auth_mode': auth_action
         },
         'secret_store': {
             'key_vault_id': key_vault_id,
@@ -1093,7 +1097,8 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                 'secret_type': 'rawValue',
                 'value': schema_secret
             },
-            'auth_type': 'secret'
+            'auth_type': 'secret',
+            'auth_mode': auth_action
         },
         'secret_store': {
             'key_vault_id': key_vault_id,
@@ -1141,6 +1146,8 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                                  OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
     public_network_action = 'optOut' if (opt_out_list is not None and
                                          OPT_OUT_OPTION.PUBLIC_NETWORK.value in opt_out_list) else None
+    auth_action = 'optOutAllAuth' if (opt_out_list is not None and
+                                      OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
 
     # use the suffix to decide the connection type
     if connection_name.endswith('_schema'):  # the schema registry connection
@@ -1165,7 +1172,8 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             'auth_info': {
                 'name': schema_key or server_linker.get('authInfo').get('name'),
                 'secret': schema_secret,
-                'auth_type': 'secret'
+                'auth_type': 'secret',
+                'auth_mode': auth_action
             },
             'secret_store': {
                 'key_vault_id': key_vault_id,
@@ -1205,7 +1213,8 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             'auth_info': {
                 'name': kafka_key or schema_linker.get('authInfo').get('name'),
                 'secret': kafka_secret,
-                'auth_type': 'secret'
+                'auth_type': 'secret',
+                'auth_mode': auth_action
             },
             'secret_store': {
                 'key_vault_id': key_vault_id,

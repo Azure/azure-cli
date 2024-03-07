@@ -381,7 +381,7 @@ def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
         raise ValidationError('Only one auth info is needed')
     auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
     if auth_info is not None and auth_action is not None:
-        auth_info['action'] = auth_action
+        auth_info['auth_mode'] = auth_action
     return auth_info
 
 
