@@ -19,7 +19,7 @@ short-summary: Manage the server's advanced threat protection setting.
 
 helps['mysql flexible-server advanced-threat-protection-setting show'] = """
 type: command
-short-summary: Gets the server's advanced threat protection setting.
+short-summary: Get the server's advanced threat protection setting.
 examples:
   - name: Get the advanced threat protection setting.
     text: az mysql flexible-server advanced-threat-protection-setting show -g mygroup -n myserver
