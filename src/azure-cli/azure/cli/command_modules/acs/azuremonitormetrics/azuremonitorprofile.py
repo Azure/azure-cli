@@ -18,7 +18,6 @@ from azure.cli.command_modules.acs.azuremonitormetrics.helper import (
 )
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.create import create_rules
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.delete import delete_rules
-from knack.util import CLIError
 
 
 # pylint: disable=line-too-long

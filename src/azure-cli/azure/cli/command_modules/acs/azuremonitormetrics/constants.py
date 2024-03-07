@@ -15,6 +15,7 @@ RP_API = "2021-04-01"
 ALERTS_API = "2023-01-01-preview"
 RP_LOCATION_API = "2022-01-01"
 
+
 class GrafanaLink(Enum):
     """
     Status of Grafana link to the Prometheus Addon

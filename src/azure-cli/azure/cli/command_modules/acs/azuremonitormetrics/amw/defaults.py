@@ -3,12 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
-from azure.cli.command_modules.acs.azuremonitormetrics.deaults import get_default_region
 from azure.cli.command_modules.acs.azuremonitormetrics.responseparsers.amwlocationresponseparser import (
     parseResourceProviderResponseForLocations
 )
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import RP_LOCATION_API
-from knack.util import CLIError
+
+
+def get_default_region(cmd):
+    cloud_name = cmd.cli_ctx.cloud.name
+    if cloud_name.lower() == 'azurechinacloud':
+        raise "chinanorth3"
+    if cloud_name.lower() == 'azureusgovernment':
+        return "usgovvirginia"
+    return "eastus"
 
 
 def get_supported_rp_locations(cmd, rp_name, subscription):
