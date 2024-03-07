@@ -27,7 +27,7 @@ examples:
 
 helps['mysql flexible-server advanced-threat-protection-setting update'] = """
 type: command
-short-summary: Updates the server's advanced threat protection setting.
+short-summary: Update the server's advanced threat protection setting.
 parameters:
   - name: --state
     type: string
