@@ -779,6 +779,32 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
         c.argument('yes', help='Do not prompt for confirmation')
 
+    # TODO(k.a): review
+    with self.argument_context('stack group validate') as c:
+        c.argument('name', arg_type=stacks_name_type)
+        c.argument(
+            'resource_group',
+            arg_type=resource_group_name_type,
+            help='The resource group where the deployment stack will be created.')
+        c.argument('template_file', arg_type=deployment_template_file_type)
+        c.argument('template_spec', arg_type=deployment_template_spec_type)
+        c.argument('template_uri', arg_type=deployment_template_uri_type)
+        c.argument('query_string', arg_type=deployment_query_string_type)
+        c.argument(
+            'parameters', arg_type=deployment_parameters_type,
+            help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
+        c.argument('description', arg_type=stacks_description_type)
+        c.argument('subscription', arg_type=subscription_type)
+        c.argument('delete_resources', arg_type=stacks_delete_resources_type)
+        c.argument('delete_resource_groups', arg_type=stacks_delete_resource_groups_type)
+        c.argument('delete_all', arg_type=stacks_delete_all_type)
+        c.argument('deny_settings_mode', arg_type=stacks_deny_settings_mode)
+        c.argument('deny_settings_excluded_principals', arg_type=stacks_excluded_principals)
+        c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
+        c.argument('deny_settings_apply_to_child_scopes', arg_type=stacks_apply_to_child_scopes)
+        c.argument('tags', tags_type)
+        c.argument('yes', help='Do not prompt for confirmation')
+
     for scope in ['stack group show', 'stack group export']:
         with self.argument_context(scope) as c:
             c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)

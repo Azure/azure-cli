@@ -424,6 +424,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_deployment_stack_at_resource_group')
         g.custom_command('create', 'create_deployment_stack_at_resource_group', supports_no_wait=True, validator=validate_deployment_stack_files, table_transformer=transform_stacks)
         g.custom_command('export', 'export_template_deployment_stack_at_resource_group', table_transformer=transform_stacks_export)
+        g.custom_command('validate', 'validate_deployment_stack_at_resource_group', supports_no_wait=True, validator=validate_deployment_stack_files)
 
     # az deployment group
     with self.command_group('deployment group', resource_deployment_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
