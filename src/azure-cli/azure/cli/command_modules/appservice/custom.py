@@ -23,7 +23,8 @@ from functools import reduce
 import invoke
 from nacl import encoding, public
 
-import OpenSSL.crypto
+from cryptography.hazmat.primitives.serialization import pkcs12
+from cryptography.hazmat.primitives import hashes
 from fabric import Connection
 
 from knack.prompting import prompt_pass, NoTTYException, prompt_y_n
@@ -3024,8 +3025,8 @@ def upload_ssl_cert(cmd, resource_group_name,
 
     try:
         thumb_print = _get_cert(certificate_password, certificate_file)
-    except OpenSSL.crypto.Error as e:
-        raise UnclassifiedUserFault(f"Failed to get the certificate's thrumbprint with error: '{e}'. "
+    except Exception as e:
+        raise UnclassifiedUserFault(f"Failed to get the certificate's thumbprint with error: '{e}'. "
                                     "Please double check the certificate password.") from e
     if certificate_name:
         cert_name = certificate_name
@@ -3043,10 +3044,11 @@ def _generate_cert_name(thumb_print, hosting_environment, location, resource_gro
 
 def _get_cert(certificate_password, certificate_file):
     ''' Decrypts the .pfx file '''
-    p12 = OpenSSL.crypto.load_pkcs12(open(certificate_file, 'rb').read(), certificate_password)
-    cert = p12.get_certificate()
-    digest_algorithm = 'sha1'
-    thumbprint = cert.digest(digest_algorithm).decode("utf-8").replace(':', '')
+    cert_password_bytes = certificate_password.encode('utf-8') if certificate_password else None
+    with open(certificate_file, 'rb') as f:
+        p12 = pkcs12.load_pkcs12(f.read(), cert_password_bytes)
+    cert = p12.cert.certificate
+    thumbprint = cert.fingerprint(hashes.SHA1()).hex().upper()
     return thumbprint
 
 
