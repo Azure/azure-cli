@@ -93,6 +93,11 @@ def is_mysql_target(command_name):
     return target_name.lower() == "mysql-flexible"
 
 
+def is_k8s_source(command_name):
+    source_name = command_name.split(' ')[1]
+    return source_name.lower() == "aks"
+
+
 class AddUserAssignedIdentityAuthInfo(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string, namespace.command)
@@ -114,7 +119,7 @@ class AddUserAssignedIdentityAuthInfo(argparse.Action):
                 d['client_id'] = v[0]
             elif kl == 'subs-id':
                 d['subscription_id'] = v[0]
-            elif is_mysql_target(command_name) and kl == 'mysql-identity-id':
+            elif is_mysql_target(command_name) and not is_k8s_source(command_name) and kl == 'mysql-identity-id':
                 d['mysql-identity-id'] = v[0]
             else:
                 raise ValidationError('Unsupported Key {} is provided for parameter --user-identity. All '

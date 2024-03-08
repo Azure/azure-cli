@@ -269,3 +269,8 @@ class KubernetesConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('aks connection delete --id {} --yes'.format(connection_id))
+
+
+    @record_only
+    def test_kubernetes_storage_blob_workload_identity_e2e(self):
+        pass

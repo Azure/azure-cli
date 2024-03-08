@@ -66,6 +66,7 @@ class AUTH_TYPE(Enum):
     SecretAuto = 'secret(auto)'  # secret which don't need user provide name & password
     SystemIdentity = 'system-managed-identity'
     UserIdentity = 'user-managed-identity'
+    WorkloadIdentity = 'workload-identity'
     ServicePrincipalSecret = 'service-principal'
     UserAccount = 'user-account'
 
@@ -108,7 +109,7 @@ SOURCE_RESOURCES = {
     RESOURCE.FunctionApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}',
     RESOURCE.SpringCloud: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}',
     RESOURCE.SpringCloudDeprecated: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}',
-    # RESOURCE.KubernetesCluster: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.ContainerService/managedClusters/{cluster}',
+    RESOURCE.KubernetesCluster: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.ContainerService/managedClusters/{cluster}',
     RESOURCE.ContainerApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.App/containerApps/{app}'
 }
 
@@ -712,6 +713,9 @@ AUTH_TYPE_PARAMS = {
             'action': AddUserAssignedIdentityAuthInfo
         }
     },
+    AUTH_TYPE.WorkloadIdentity: {
+
+    },
     AUTH_TYPE.ServicePrincipalSecret: {
         'service_principal_auth_info_secret': {
             'options': ['--service-principal'],
@@ -828,23 +832,23 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
-        RESOURCE.CosmosCassandra: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.CosmosGremlin: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.CosmosMongo: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.CosmosTable: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.CosmosSql: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosCassandra: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosGremlin: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosMongo: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosTable: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosSql: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
 
-        RESOURCE.StorageBlob: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.StorageQueue: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.StorageBlob: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.StorageQueue: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageFile: [AUTH_TYPE.SecretAuto],
-        RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.StorageTable: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
 
-        RESOURCE.KeyVault: [AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.AppConfig: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.EventHub: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.ServiceBus: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.SignalR: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.WebPubSub: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.KeyVault: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.AppConfig: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.EventHub: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.ServiceBus: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.SignalR: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.WebPubSub: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
     },

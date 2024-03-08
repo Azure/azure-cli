@@ -53,6 +53,7 @@ def get_auth_info_params(auth_type):
         AUTH_TYPE.SystemIdentity: '--system-identity',
         AUTH_TYPE.ServicePrincipalSecret: '--service-principal client-id=XX object-id=XX secret=XX',
         AUTH_TYPE.UserIdentity: '--user-identity client-id=XX subs-id=XX',
+        AUTH_TYPE.WorkloadIdentity: '--workload-identity client-id=XX subs-id=XX',
         AUTH_TYPE.UserAccount: '--user-account',
     }
 
@@ -65,7 +66,7 @@ def get_source_display_name(sourcename):
         display_name = 'spring app'
     return display_name
 
-
+# enable_csi help?
 for source in SOURCE_RESOURCES:
     if not should_load_source(source):
         continue
@@ -270,6 +271,15 @@ for source in SOURCE_RESOURCES:
                 client-id      : Required. Client id of the user assigned identity.
                 subs-id        : Required. Subscription id of the user assigned identity.
         ''' if AUTH_TYPE.UserIdentity in auth_types else ''
+        workload_identity_param = '''
+            - name: --workload-identity
+              short-summary: The Microsoft Entra Workload ID with AKS.
+              long-summary: |
+                Usage: --workload-identity client-id=XX subs-id=XX
+
+                client-id      : Required. Client id of the user assigned identity.
+                subs-id        : Required. Subscription id of the user assigned identity.
+        ''' if AUTH_TYPE.UserIdentity in auth_types else ''
         service_principal_param = '''
             - name: --service-principal
               short-summary: The service principal auth info
@@ -315,6 +325,7 @@ for source in SOURCE_RESOURCES:
             {secret_auto_param}
             {system_identity_param}
             {user_identity_param}
+            {workload_identity_param}
             {service_principal_param}
           examples:
             - name: Create a connection between {source_display_name} and {target} interactively
@@ -353,6 +364,7 @@ for source in SOURCE_RESOURCES:
             {secret_auto_param}
             {system_identity_param}
             {user_identity_param}
+            {workload_identity_param}
             {service_principal_param}
           examples:
             - name: Update the client type of a connection with resource name
