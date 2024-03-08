@@ -2802,6 +2802,7 @@ def validate_deployment_stack_at_resource_group(
         cmd, rcf, 'resourceGroup', deployment_stack_model, template_file, template_spec, template_uri, parameters,
         query_string)
 
+    # TODO(k.a): reuse deployment's validate polling flow
     return sdk_no_wait(
         no_wait, rcf.deployment_stacks.begin_preflight_validate_stack_at_resource_group, resource_group, name,
         deployment_stack_model)
