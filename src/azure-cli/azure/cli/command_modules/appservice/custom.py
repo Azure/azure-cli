@@ -5573,7 +5573,7 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
     # Indicates whether the status has been non empty in previous calls
     has_response = False
     while num_trials < total_trials:
-        time.sleep(2)
+        time.sleep(1)
         response = requests.get(deployment_status_url, headers=headers,
                                 verify=not should_disable_connection_verify())
         try:
