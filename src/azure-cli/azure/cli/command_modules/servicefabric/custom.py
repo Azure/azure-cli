@@ -1394,7 +1394,7 @@ def _get_thumbprint_from_secret_identifier(cli_ctx, vault, secret_identifier):
         pass
 
     if p12.cert is None:
-        raise Exception("certificate is None") # pylint: disable=broad-exception-raised
+        raise Exception("certificate is None")  # pylint: disable=broad-exception-raised
 
     x509 = p12.cert.certificate
     thumbprint = x509.fingerprint(hashes.SHA1()).hex().upper()
