@@ -1285,7 +1285,7 @@ def _prepare_stacks_delete_detach_models(rcf, action_on_unmanage):
 
     aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = None, None, None
 
-    if action_on_unmanage == StacksActionOnUmanage.DETACH_ALL:
+    if action_on_unmanage == StacksActionOnUnmanage.DETACH_ALL:
         aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = detach_model, detach_model, detach_model
     elif action_on_unmanage == StacksActionOnUnmanage.DELETE_RESOURCES:
         aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = delete_model, detach_model, detach_model
