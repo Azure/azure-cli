@@ -298,6 +298,7 @@ def load_arguments(self, _):
                    options_list=["--enable-azure-service-mesh", "--enable-asm"],
                    action='store_true',
                    is_preview=True)
+        c.argument("revision", validator=validate_azure_service_mesh_revision)
         # addons
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('workspace_resource_id')
@@ -314,6 +315,7 @@ def load_arguments(self, _):
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('rotation_poll_interval')
         c.argument('enable_sgxquotehelper', action='store_true')
+        c.argument('enable_app_routing', action="store_true")
 
         # nodepool paramerters
         c.argument('nodepool_name', default='nodepool1',
@@ -719,6 +721,25 @@ def load_arguments(self, _):
 
     with self.argument_context('aks mesh upgrade start') as c:
         c.argument('revision', validator=validate_azure_service_mesh_revision, required=True)
+
+    with self.argument_context('aks approuting enable') as c:
+        c.argument('enable_kv', action='store_true')
+        c.argument('keyvault_id', options_list=['--attach-kv'])
+
+    with self.argument_context('aks approuting update') as c:
+        c.argument('keyvault_id', options_list=['--attach-kv'])
+        c.argument('enable_kv', action='store_true')
+
+    with self.argument_context('aks approuting zone add') as c:
+        c.argument('dns_zone_resource_ids', options_list=['--ids'], required=True)
+        c.argument('attach_zones')
+
+    with self.argument_context('aks approuting zone delete') as c:
+        c.argument('dns_zone_resource_ids', options_list=['--ids'], required=True)
+
+    with self.argument_context('aks approuting zone update') as c:
+        c.argument('dns_zone_resource_ids', options_list=['--ids'], required=True)
+        c.argument('attach_zones')
 
 
 def _get_default_install_location(exe_name):

@@ -153,7 +153,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             'Context.Default.VS.Core.Distro.Name': _get_distro_name(),  # eg. 'CentOS Linux 8'
             'Context.Default.VS.Core.Distro.Id': _get_distro_id(),  # eg. 'centos'
             'Context.Default.VS.Core.Distro.Version': _get_distro_version(),  # eg. '8.4.2105'
-            'Context.Dafault.VS.Core.Istty': sys.stdin.isatty(),
+            'Context.Dafault.VS.Core.Istty': str(sys.stdin.isatty()),
             'Context.Default.VS.Core.User.Id': _get_installation_id(),
             'Context.Default.VS.Core.User.IsMicrosoftInternal': 'False',
             'Context.Default.VS.Core.User.IsOptedIn': 'True',
@@ -224,7 +224,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'EnableBrokerOnWindows', str(self.enable_broker_on_windows))
         set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
         set_custom_properties(result, 'SecretsWarning', _get_secrets_warning_config())
-        set_custom_properties(result, 'SecretsDetected', self.secrets_detected)
+        set_custom_properties(result, 'SecretsDetected', str(self.secrets_detected))
 
         return result
 
