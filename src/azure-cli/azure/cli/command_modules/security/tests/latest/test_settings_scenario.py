@@ -21,7 +21,6 @@ class SecurityCenterSettingsTests(ScenarioTest):
         setting = self.cmd('az security setting show -n Sentinel').get_output_in_json()
         assert setting["kind"] == "AlertSyncSettings"
 
-    def test_security_settings_update(self):
         setting = self.cmd('az security setting update -n Sentinel --alert-sync-settings Enabled=True').get_output_in_json()
         assert setting['enabled'] == True
 
