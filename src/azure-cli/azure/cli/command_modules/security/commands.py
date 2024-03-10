@@ -7,8 +7,6 @@ from azure.cli.core.commands import CliCommandType
 from ._client_factory import (cf_security_tasks,
                               cf_security_alerts,
                               cf_security_alerts_suppression_rule,
-                            #   cf_security_settings,
-                            #   cf_security_contacts,
                               cf_security_auto_provisioning_settings,
                               cf_security_discovered_security_solutions,
                               cf_security_external_security_solutions,
@@ -99,18 +97,6 @@ def load_command_table(self, _):
         client_factory=cf_security_alerts_suppression_rule,
         operation_group='security_alerts_suppression_rule'
     )
-
-    # security_settings_sdk = CliCommandType(
-    #     operations_tmpl='azure.mgmt.security.operations#SettingsOperations.{}',
-    #     client_factory=cf_security_settings,
-    #     operation_group='security_settings'
-    # )
-
-    # security_contacts_sdk = CliCommandType(
-    #     operations_tmpl='azure.mgmt.security.operations#SecurityContactsOperations.{}',
-    #     client_factory=cf_security_contacts,
-    #     operation_group='security_contacts'
-    # )
 
     security_auto_provisioning_settings_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#AutoProvisioningSettingsOperations.{}',
