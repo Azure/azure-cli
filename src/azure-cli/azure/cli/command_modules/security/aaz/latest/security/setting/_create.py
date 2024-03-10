@@ -16,6 +16,10 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create settings about different configurations in Microsoft Defender for Cloud
+
+    :example: Create a security setting
+        az security setting create -n Sentinel --alert-sync-settings enabled=true
+        az security setting create -n MCAS --data-export-settings enabled=true
     """
 
     _aaz_info = {

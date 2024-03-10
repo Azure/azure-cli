@@ -17,8 +17,9 @@ from azure.cli.core.aaz import *
 class Update(AAZCommand):
     """Update settings about different configurations in Microsoft Defender for Cloud
 
-    :example: Updates a security setting "Sentinel" to be enabled.
-        az security setting update -n "Sentinel" --enabled true
+    :example: Updates a security setting
+        az security setting update -n Sentinel --alert-sync-settings enabled=true
+        az security setting update -n MCAS --data-export-settings enabled=true
     """
 
     _aaz_info = {
