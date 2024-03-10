@@ -15,30 +15,25 @@ class SecurityCenterSecurityContactsTests(ScenarioTest):
         previous_contacts_count = len(security_contacts)
         assert previous_contacts_count >= 0
 
-        self.kwargs.update({
-            'notificationsByRole': dict(state = "On", roles = ["Owner"]),
-            'alertNotifications': dict(state = "On", minimalSeverity = "Low")
-        })
-
-        self.kwargs['notifications-by-role'] = dict(state = "On", roles = ["Owner"])
-
-        # self.cmd('az security contact create -n \'default\' --emails \'john@contoso.com\' --phone \'214-275-4038\' --notifications-by-role \"{"state":"On","roles":["Owner"]}\" --alert-notifications \"{"state":"On","minimalSeverity":"Low"}\"')
-        self.cmd('az security contact create -n default --emails john@contoso.com --phone 214-275-4038 --notifications-by-role {notificationsByRole} --alert-notifications {alertNotifications}')
-
+        contact = self.cmd('az security contact create -n default --emails john@contoso.com --phone 214-275-4038 --notifications-by-role state=On roles=[Owner,ServiceAdmin] --alert-notifications state=On minimalSeverity=Low').get_output_in_json()
+        
+        assert contact["name"] == "default"
+        assert contact["emails"] == "john@contoso.com"
+        
         security_contacts = self.cmd('az security contact list').get_output_in_json()
         assert len(security_contacts) > 0
 
-        # contact = self.cmd('az security contact show -n default').get_output_in_json()
+        contact = self.cmd('az security contact show -n default').get_output_in_json()
 
-        # assert contact["emails"] == "john@contoso.com"
+        assert contact["emails"] == "john@contoso.com"
 
-        # self.cmd('az security contact create -n \'default\' --emails \'john@contoso.com\' --phone \'214-275-4038\' --notifications-by-role \"{"state":"On","roles":["Owner"]}\" --alert-notifications \"{"state":"On","minimalSeverity":"Low"}\"')
+        contact = self.cmd('az security contact create -n default --emails john@contoso.com;lisa@contoso.com --phone 214-275-4038 --notifications-by-role state=On roles=[Owner,ServiceAdmin] --alert-notifications state=On minimalSeverity=Low').get_output_in_json()
 
-        # contact = self.cmd('az security contact show -n default').get_output_in_json()
+        contact = self.cmd('az security contact show -n default').get_output_in_json()
 
-        # assert contact["emails"] == "lisa@contoso.com"
+        assert contact["emails"] == "john@contoso.com;lisa@contoso.com"
 
-        # self.cmd('az security contact delete -n default')
+        self.cmd('az security contact delete -n default --yes')
 
-        # security_contacts = self.cmd('az security contact list').get_output_in_json()
-        # assert len(security_contacts) == previous_contacts_count
+        security_contacts = self.cmd('az security contact list').get_output_in_json()
+        assert len(security_contacts) == previous_contacts_count

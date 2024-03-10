@@ -16,19 +16,18 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts?api-version=2020-01-01-preview
   response:
     body:
-      string: '[{"properties":{"alertNotifications":{"state":"On","minimalSeverity":"Low"},"notificationsByRole":{"state":"On","roles":["Owner"]},"emails":"john@contoso.com;jane@contoso.com","phone":"214-275-4038"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default","name":"default","type":"Microsoft.Security/securityContacts","etag":"\"780015fa-0000-0d00-0000-65edaa7d0000\"","location":"West
-        Europe"}]'
+      string: '{"value":[]}'
     headers:
       api-supported-versions:
       - 2020-01-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '451'
+      - '12'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 10 Mar 2024 12:47:04 GMT
+      - Sun, 10 Mar 2024 15:25:11 GMT
       expires:
       - '-1'
       pragma:
@@ -40,14 +39,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '748'
+      - '749'
       x-msedge-ref:
-      - 'Ref A: E957F053EA3D4FAD913E2F741EE51E44 Ref B: MRS211050619049 Ref C: 2024-03-10T12:47:05Z'
+      - 'Ref A: DBFEA02F3AF94B16B6A19D1524246761 Ref B: MRS211050619019 Ref C: 2024-03-10T15:25:11Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"emails": "john@contoso.com", "phone": "214-275-4038"}}'
+    body: '{"properties": {"alertNotifications": {"minimalSeverity": "Low", "state":
+      "On"}, "emails": "john@contoso.com", "notificationsByRole": {"roles": ["Owner",
+      "ServiceAdmin"], "state": "On"}, "phone": "214-275-4038"}}'
     headers:
       Accept:
       - application/json
@@ -58,31 +59,181 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '71'
+      - '212'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -n --emails --phone
+      - -n --emails --phone --notifications-by-role --alert-notifications
       User-Agent:
       - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default?api-version=2020-01-01-preview
   response:
     body:
-      string: '{"error":{"code":"BadRequest","message":"The json value of notificationsByRole
-        failed validation, with reason: NotificationsByRole : NotificationsByRole
-        value cannot be null!, error tracking number: 4264a1d1-45f2-4c24-bd99-297a0aaea7f6"}}'
+      string: '{"properties":{"alertNotifications":{"state":"On","minimalSeverity":"Low"},"notificationsByRole":{"state":"On","roles":["Owner","ServiceAdmin"]},"emails":"john@contoso.com","phone":"214-275-4038"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default","name":"default","type":"Microsoft.Security/securityContacts","etag":"\"7c009a13-0000-0d00-0000-65edd0da0000\"","location":"West
+        Europe"}'
     headers:
       api-supported-versions:
       - 2020-01-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '238'
+      - '447'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Sun, 10 Mar 2024 12:47:06 GMT
+      - Sun, 10 Mar 2024 15:25:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 6AF90CFA908B455288EE7DC08F05FB3F Ref B: MRS211050315009 Ref C: 2024-03-10T15:25:12Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security contact list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts?api-version=2020-01-01-preview
+  response:
+    body:
+      string: '[{"properties":{"alertNotifications":{"state":"On","minimalSeverity":"Low"},"notificationsByRole":{"state":"On","roles":["Owner","ServiceAdmin"]},"emails":"john@contoso.com","phone":"214-275-4038"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default","name":"default","type":"Microsoft.Security/securityContacts","etag":"\"7c009a13-0000-0d00-0000-65edd0da0000\"","location":"West
+        Europe"}]'
+    headers:
+      api-supported-versions:
+      - 2020-01-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '449'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 10 Mar 2024 15:25:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '747'
+      x-msedge-ref:
+      - 'Ref A: 604714E73188474E9A270F8D3F17F545 Ref B: MRS211050314031 Ref C: 2024-03-10T15:25:14Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security contact show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default?api-version=2020-01-01-preview
+  response:
+    body:
+      string: '{"properties":{"alertNotifications":{"state":"On","minimalSeverity":"Low"},"notificationsByRole":{"state":"On","roles":["Owner","ServiceAdmin"]},"emails":"john@contoso.com","phone":"214-275-4038"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default","name":"default","type":"Microsoft.Security/securityContacts","etag":"\"7c009a13-0000-0d00-0000-65edd0da0000\"","location":"West
+        Europe"}'
+    headers:
+      api-supported-versions:
+      - 2020-01-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '447'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 10 Mar 2024 15:25:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+      x-msedge-ref:
+      - 'Ref A: BB372073BAA048059CEE5B8A6685ED6A Ref B: MRS211050314037 Ref C: 2024-03-10T15:25:15Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"alertNotifications": {"minimalSeverity": "Low", "state":
+      "On"}, "emails": "john@contoso.com;lisa@contoso.com", "notificationsByRole":
+      {"roles": ["Owner", "ServiceAdmin"], "state": "On"}, "phone": "214-275-4038"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security contact create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '229'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --emails --phone --notifications-by-role --alert-notifications
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default?api-version=2020-01-01-preview
+  response:
+    body:
+      string: '{"properties":{"alertNotifications":{"state":"On","minimalSeverity":"Low"},"notificationsByRole":{"state":"On","roles":["Owner","ServiceAdmin"]},"emails":"john@contoso.com;lisa@contoso.com","phone":"214-275-4038"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default","name":"default","type":"Microsoft.Security/securityContacts","etag":"\"7c00cf13-0000-0d00-0000-65edd0dd0000\"","location":"West
+        Europe"}'
+    headers:
+      api-supported-versions:
+      - 2020-01-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '464'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 10 Mar 2024 15:25:16 GMT
       expires:
       - '-1'
       pragma:
@@ -96,8 +247,153 @@ interactions:
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '248'
       x-msedge-ref:
-      - 'Ref A: E43E6EC2D48B4AF98FBF75D7B5D93E5D Ref B: MRS211050314033 Ref C: 2024-03-10T12:47:06Z'
+      - 'Ref A: 8B8AD22C81114DDBA73A6E5159E28F70 Ref B: MRS211050619019 Ref C: 2024-03-10T15:25:16Z'
     status:
-      code: 400
-      message: Bad Request
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security contact show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default?api-version=2020-01-01-preview
+  response:
+    body:
+      string: '{"properties":{"alertNotifications":{"state":"On","minimalSeverity":"Low"},"notificationsByRole":{"state":"On","roles":["Owner","ServiceAdmin"]},"emails":"john@contoso.com;lisa@contoso.com","phone":"214-275-4038"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default","name":"default","type":"Microsoft.Security/securityContacts","etag":"\"7c00cf13-0000-0d00-0000-65edd0dd0000\"","location":"West
+        Europe"}'
+    headers:
+      api-supported-versions:
+      - 2020-01-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '464'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 10 Mar 2024 15:25:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '748'
+      x-msedge-ref:
+      - 'Ref A: CCC0F7FBF3384AFDB1D582FE76694CF5 Ref B: MRS211050619017 Ref C: 2024-03-10T15:25:17Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security contact delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --yes
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default?api-version=2020-01-01-preview
+  response:
+    body:
+      string: '{}'
+    headers:
+      api-supported-versions:
+      - 2020-01-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 10 Mar 2024 15:25:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-msedge-ref:
+      - 'Ref A: C3BBE0ACF6AC41ECB3040CE3E06C439F Ref B: MRS211050619021 Ref C: 2024-03-10T15:25:18Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security contact list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts?api-version=2020-01-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      api-supported-versions:
+      - 2020-01-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 10 Mar 2024 15:25:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '747'
+      x-msedge-ref:
+      - 'Ref A: 4EB410F7775B4D51975638033C22A281 Ref B: MRS211050313047 Ref C: 2024-03-10T15:25:19Z'
+    status:
+      code: 200
+      message: OK
 version: 1
