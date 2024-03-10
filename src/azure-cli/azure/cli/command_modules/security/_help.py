@@ -376,14 +376,14 @@ type: group
 short-summary: View your security contacts.
 """
 
-helps['security contact create'] = """
-type: command
-short-summary: Creates a security contact.
-examples:
-  - name: Creates a security contact.
-    text: >
-        az security contact create -n "default1" --email 'john@contoso.com' --phone '(214)275-4038' --alert-notifications 'on' --alerts-admins 'on'
-"""
+# helps['security contact create'] = """
+# type: command
+# short-summary: Creates a security contact.
+# examples:
+#   - name: Creates a security contact.
+#     text: >
+#         az security contact create -n "default1" --email 'john@contoso.com' --phone '(214)275-4038' --alert-notifications 'on' --alerts-admins 'on'
+# """
 
 helps['security contact delete'] = """
 type: command

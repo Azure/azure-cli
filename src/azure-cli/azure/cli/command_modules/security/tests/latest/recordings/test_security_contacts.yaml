@@ -11,47 +11,43 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts?api-version=2017-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts?api-version=2020-01-01-preview
   response:
     body:
-      string: '{"value":[{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"ahabas@microsoft.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/ahabas-microsoft.com","name":"ahabas-microsoft.com","type":"Microsoft.Security/securityContacts","etag":"\"e8009d7a-0000-0d00-0000-610a507b0000\"","location":"West
-        Europe"},{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"urielc@microsoft.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/urielc-microsoft.com","name":"urielc-microsoft.com","type":"Microsoft.Security/securityContacts","etag":"\"e8009d7a-0000-0d00-0000-610a507b0000\"","location":"West
-        Europe"}]}'
+      string: '[{"properties":{"alertNotifications":{"state":"On","minimalSeverity":"Low"},"notificationsByRole":{"state":"On","roles":["Owner"]},"emails":"john@contoso.com;jane@contoso.com","phone":"214-275-4038"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default","name":"default","type":"Microsoft.Security/securityContacts","etag":"\"780015fa-0000-0d00-0000-65edaa7d0000\"","location":"West
+        Europe"}]'
     headers:
       api-supported-versions:
-      - 2017-08-01-preview
+      - 2020-01-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '781'
+      - '451'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 04 Aug 2021 08:51:34 GMT
+      - Sun, 10 Mar 2024 12:47:04 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '749'
+      - '748'
+      x-msedge-ref:
+      - 'Ref A: E957F053EA3D4FAD913E2F741EE51E44 Ref B: MRS211050619049 Ref C: 2024-03-10T12:47:05Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"email": "john@contoso.com", "phone": "", "alertNotifications":
-      "off", "alertsToAdmins": "off"}}'
+    body: '{"properties": {"emails": "john@contoso.com", "phone": "214-275-4038"}}'
     headers:
       Accept:
       - application/json
@@ -62,350 +58,46 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '112'
+      - '71'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -n --email --alert-notifications --alerts-admins
+      - -n --emails --phone
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default?api-version=2020-01-01-preview
   response:
     body:
-      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"john@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","etag":"\"ea006e5c-0000-0d00-0000-610a55170000\"","location":"West
-        Europe"}'
+      string: '{"error":{"code":"BadRequest","message":"The json value of notificationsByRole
+        failed validation, with reason: NotificationsByRole : NotificationsByRole
+        value cannot be null!, error tracking number: 4264a1d1-45f2-4c24-bd99-297a0aaea7f6"}}'
     headers:
       api-supported-versions:
-      - 2017-08-01-preview
+      - 2020-01-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '356'
+      - '238'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Wed, 04 Aug 2021 08:51:34 GMT
+      - Sun, 10 Mar 2024 12:47:06 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '248'
+      x-msedge-ref:
+      - 'Ref A: E43E6EC2D48B4AF98FBF75D7B5D93E5D Ref B: MRS211050314033 Ref C: 2024-03-10T12:47:06Z'
     status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - security contact list
-      Connection:
-      - keep-alive
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts?api-version=2017-08-01-preview
-  response:
-    body:
-      string: '{"value":[{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"ahabas@microsoft.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/ahabas-microsoft.com","name":"ahabas-microsoft.com","type":"Microsoft.Security/securityContacts","etag":"\"ea006e5c-0000-0d00-0000-610a55170000\"","location":"West
-        Europe"},{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"urielc@microsoft.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/urielc-microsoft.com","name":"urielc-microsoft.com","type":"Microsoft.Security/securityContacts","etag":"\"ea006e5c-0000-0d00-0000-610a55170000\"","location":"West
-        Europe"},{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"john@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","etag":"\"ea006e5c-0000-0d00-0000-610a55170000\"","location":"West
-        Europe"}]}'
-    headers:
-      api-supported-versions:
-      - 2017-08-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '1138'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 04 Aug 2021 08:51:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '749'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - security contact show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
-  response:
-    body:
-      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"john@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","etag":"\"ea006e5c-0000-0d00-0000-610a55170000\"","location":"West
-        Europe"}'
-    headers:
-      api-supported-versions:
-      - 2017-08-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '356'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 04 Aug 2021 08:51:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '749'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"email": "lisa@contoso.com", "phone": "", "alertNotifications":
-      "off", "alertsToAdmins": "off"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - security contact create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '112'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -n --email --alert-notifications --alerts-admins
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
-  response:
-    body:
-      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"lisa@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","etag":"\"ea00335d-0000-0d00-0000-610a55190000\"","location":"West
-        Europe"}'
-    headers:
-      api-supported-versions:
-      - 2017-08-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '356'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 04 Aug 2021 08:51:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - security contact show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
-  response:
-    body:
-      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"lisa@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","etag":"\"ea00335d-0000-0d00-0000-610a55190000\"","location":"West
-        Europe"}'
-    headers:
-      api-supported-versions:
-      - 2017-08-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '356'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 04 Aug 2021 08:51:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '749'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - security contact delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -n
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
-  response:
-    body:
-      string: ''
-    headers:
-      api-supported-versions:
-      - 2017-08-01-preview
-      cache-control:
-      - no-cache
-      date:
-      - Wed, 04 Aug 2021 08:51:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 204
-      message: No Content
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - security contact list
-      Connection:
-      - keep-alive
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts?api-version=2017-08-01-preview
-  response:
-    body:
-      string: '{"value":[{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"ahabas@microsoft.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/ahabas-microsoft.com","name":"ahabas-microsoft.com","type":"Microsoft.Security/securityContacts","etag":"\"ea00d45d-0000-0d00-0000-610a551b0000\"","location":"West
-        Europe"},{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"urielc@microsoft.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/urielc-microsoft.com","name":"urielc-microsoft.com","type":"Microsoft.Security/securityContacts","etag":"\"ea00d45d-0000-0d00-0000-610a551b0000\"","location":"West
-        Europe"}]}'
-    headers:
-      api-supported-versions:
-      - 2017-08-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '781'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 04 Aug 2021 08:51:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '749'
-    status:
-      code: 200
-      message: OK
+      code: 400
+      message: Bad Request
 version: 1

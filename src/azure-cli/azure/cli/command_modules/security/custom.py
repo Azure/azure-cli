@@ -230,25 +230,25 @@ def delete_security_alerts_suppression_rule_scope(client, rule_name, field):
 # --------------------------------------------------------------------------------------------
 
 
-def list_security_settings(client):
+# def list_security_settings(client):
 
-    return client.list()
-
-
-def get_security_setting(client, setting_name):
-
-    return client.get(setting_name)
+#     return client.list()
 
 
-def update_security_setting(client, setting_name, enabled):
+# def get_security_setting(client, setting_name):
 
-    if setting_name == SettingName.SENTINEL:
-        setting = AlertSyncSettings()
-    else:
-        setting = DataExportSettings()
+#     return client.get(setting_name)
 
-    setting.enabled = enabled
-    return client.update(setting_name, setting)
+
+# def update_security_setting(client, setting_name, enabled):
+
+#     if setting_name == SettingName.SENTINEL:
+#         setting = AlertSyncSettings()
+#     else:
+#         setting = DataExportSettings()
+
+#     setting.enabled = enabled
+#     return client.update(setting_name, setting)
 
 
 # --------------------------------------------------------------------------------------------
@@ -256,38 +256,38 @@ def update_security_setting(client, setting_name, enabled):
 # --------------------------------------------------------------------------------------------
 
 
-def list_security_contacts(client):
+# def list_security_contacts(client):
 
-    return client.list()
-
-
-def get_security_contact(client, resource_name):
-
-    return client.get(resource_name)
+#     return client.list()
 
 
-def create_security_contact(client, resource_name, email, phone=None, alert_notifications=None, alerts_admins=None):
+# def get_security_contact(client, resource_name):
 
-    if alert_notifications is None:
-        alert_notifications = ''
-
-    if alerts_admins is None:
-        alerts_admins = ''
-
-    if phone is None:
-        phone = ''
-
-    new_contact = SecurityContact(email=email,
-                                  phone=phone,
-                                  alert_notifications=alert_notifications,
-                                  alerts_to_admins=alerts_admins)
-
-    return client.create(resource_name, new_contact)
+#     return client.get(resource_name)
 
 
-def delete_security_contact(client, resource_name):
+# def create_security_contact(client, resource_name, email, phone=None, alert_notifications=None, alerts_admins=None):
 
-    return client.delete(resource_name)
+#     if alert_notifications is None:
+#         alert_notifications = ''
+
+#     if alerts_admins is None:
+#         alerts_admins = ''
+
+#     if phone is None:
+#         phone = ''
+
+#     new_contact = SecurityContact(email=email,
+#                                   phone=phone,
+#                                   alert_notifications=alert_notifications,
+#                                   alerts_to_admins=alerts_admins)
+
+#     return client.create(resource_name, new_contact)
+
+
+# def delete_security_contact(client, resource_name):
+
+#     return client.delete(resource_name)
 
 
 # --------------------------------------------------------------------------------------------
