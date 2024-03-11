@@ -4124,9 +4124,14 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.additional_capabilities.hibernation_enabled = enable_hibernation
 
     if security_posture_reference_id is not None:
-        SecurityPostureReference = cmd.get_models('SecurityPostureReference')
-        vmss.virtual_machine_profile.security_posture_reference = SecurityPostureReference(
-            id=security_posture_reference_id)
+        security_posture_reference = vmss.virtual_machine_profile.security_posture_reference
+        if security_posture_reference is None:
+            SecurityPostureReference = cmd.get_models('SecurityPostureReference')
+            security_posture_reference = SecurityPostureReference()
+
+        security_posture_reference.id = security_posture_reference_id
+
+        vmss.virtual_machine_profile.security_posture_reference = security_posture_reference
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
