@@ -128,8 +128,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                                                 min_tls_version='None',
                                                 checks=checks)
 
-        with self.assertRaises(HttpResponseError):
-            self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
+        self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
 
     @unittest.skip("Duplicate cdn endpoint name, cannot rerun live.")
     @ResourceGroupPreparer()
