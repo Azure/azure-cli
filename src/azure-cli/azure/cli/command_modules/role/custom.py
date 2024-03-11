@@ -20,7 +20,6 @@ import re
 import uuid
 
 import dateutil.parser
-from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError, todict
 from msrestazure.azure_exceptions import CloudError
@@ -1174,7 +1173,7 @@ def create_service_principal_for_rbac(
         existing_sps = list(graph_client.service_principal_list(filter=query_exp))
 
     app_start_date = datetime.datetime.now(datetime.timezone.utc)
-    app_end_date = app_start_date + relativedelta(years=years or 1)
+    app_end_date = app_start_date + datetime.timedelta(days=_years_to_days(years))
 
     use_cert = False
     public_cert_string = None
@@ -1659,7 +1658,7 @@ def _build_key_credentials(key_value=None, key_type=None, key_usage=None,
         start_date = dateutil.parser.parse(start_date)
 
     if not end_date:
-        end_date = start_date + relativedelta(years=1) - relativedelta(hours=24)
+        end_date = start_date + datetime.timedelta(days=_years_to_days(1))
     elif isinstance(end_date, str):
         end_date = dateutil.parser.parse(end_date)
 
@@ -1705,7 +1704,7 @@ def _reset_credential(cmd, graph_object, add_password_func, remove_password_func
         raise CLIError('usage error: --years | --end-date')
     if end_date is None:
         years = years or 1
-        app_end_date = app_start_date + relativedelta(years=years)
+        app_end_date = app_start_date + datetime.timedelta(days=_years_to_days(years))
     else:
         app_end_date = dateutil.parser.parse(end_date)
         if app_end_date.tzinfo is None:
@@ -2001,3 +2000,7 @@ def _get_member_groups(get_member_group_func, identifier, security_enabled_only)
         "securityEnabledOnly": security_enabled_only
     }
     return get_member_group_func(identifier, body)
+
+
+def _years_to_days(years):
+    return years * 365
