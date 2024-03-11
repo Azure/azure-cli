@@ -414,7 +414,7 @@ class NetworkPrivateLinkService(ScenarioTest):
             self.check('length(ipConfigurations)', 1),
             self.check('length(loadBalancerFrontendIpConfigurations)', 1)
         ])
-
+        self.cmd('network private-link-service list-auto-approved -l westus', self.check('type(@)', 'array'))
         self.cmd('network private-link-service delete -g {rg} -n {lks1}')
 
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies false', checks=[
@@ -3041,6 +3041,10 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
                 self.check('publicIp.provisioningState', 'Succeeded')
             ])
 
+        # test ddos protection status
+        self.cmd('network application-gateway create -g {rg} -n testag --public-ip-address {ip1} --sku Standard_v2 --priority 1001')
+        self.cmd('network public-ip ddos-protection-statu show -g {rg} -n {ip1}', self.check('isWorkloadProtected', False))
+
         self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Disabled --ddos-protection-plan null',
                  checks=[
                      self.check('ddosSettings.protectionMode', 'Disabled'),
@@ -3050,6 +3054,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
                  ])
         self.cmd('network ddos-protection delete -g {rg} -n {ddos}')
 
+        self.cmd('network application-gateway delete -g {rg} -n testag')
         self.cmd('network public-ip delete -g {rg} -n {ip1}')
         self.cmd('network public-ip list -g {rg}',
                  checks=self.check("length[?name == '{ip1}']", None))
@@ -3719,6 +3724,46 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
         # Expecting no results as we just deleted the only lb in the resource group
         self.cmd('network lb list --resource-group {rg}',
                  checks=self.check('length(@)', 3))
+
+    @live_only()
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_with_cross_subscription_id_', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_with_cross_subscription_id_', location='eastus2euap',
+                           parameter_name='aux_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_network_lb_with_cross_subscription_id(self, resource_group, aux_resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'rg2': aux_resource_group,
+            'aux_sub': AUX_SUBSCRIPTION,
+            'lb': self.create_random_name("lb", 12),
+            'vnet': self.create_random_name("vnet", 12),
+            "subnet": self.create_random_name("subnet", 12),
+            'lb2': self.create_random_name("lb2", 12),
+            'publicip': self.create_random_name("publicip", 12),
+        })
+        
+        vnet = self.cmd('network vnet create -n {vnet} -g {rg2} --subnet-name {subnet} --subscription {aux_sub}', checks=[
+            self.check('newVNet.name', '{vnet}'),
+        ]).get_output_in_json()
+
+        self.kwargs['vnet_id'] = vnet['newVNet']['id']
+        self.kwargs['subnet_id'] = vnet['newVNet']['subnets'][0]['id']
+
+        self.cmd('network lb create -g {rg} -n {lb} --subnet {subnet_id} --sku Standard', checks=[
+            self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
+        ])
+
+        public_ip_address_id = self.cmd('network public-ip create -g {rg2} -n {publicip} --subscription {aux_sub}', checks=[
+            self.check('publicIp.name', '{publicip}')
+        ]).get_output_in_json()['publicIp']['id']
+
+        self.kwargs['publicip_id'] = public_ip_address_id
+
+        self.cmd('network lb create -g {rg} -n {lb2} --public-ip-address {publicip_id} --sku Standard', checks=[
+            self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
+            self.check('loadBalancer.frontendIPConfigurations[0].properties.publicIPAddress.id', '{publicip_id}'),
+        ])
 
 
 class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
@@ -5262,6 +5307,26 @@ class NetworkVnetGatewayMultiAuth(ScenarioTest):
                  '--radius-secret 111_aaa --radius-server 30.1.1.15',
                  checks=[self.check('length(vpnClientConfiguration.vpnAuthenticationTypes)', 3)])
 
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_allow_traffic')
+    def test_network_vnet_gateway_allow_traffic(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet',
+            'ip': 'pip',
+            'gw': 'gw',
+            'gw_sku': 'VpnGw2',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --public-ip-address {ip} --vnet {vnet} --sku {gw_sku} '
+                 '--gateway-type Vpn --vpn-type RouteBased --address-prefix 40.1.0.0/24 --client-protocol OpenVPN '
+                 '--allow-remote-vnet-traffic true --allow-vwan-traffic true',
+                 checks=[self.check('vnetGateway.allowRemoteVnetTraffic', True),
+                         self.check('vnetGateway.allowVirtualWanTraffic', True)])
+        self.cmd('network vnet-gateway update -g {rg} -n {gw} --allow-remote-vnet-traffic false --allow-vwan-traffic false',
+                 checks=[self.check('allowRemoteVnetTraffic', False),
+                         self.check('allowVirtualWanTraffic', False)])
+
 
 class NetworkVirtualRouter(ScenarioTest):
 
@@ -5829,6 +5894,34 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vpn-connection list -g {rg} --vnet-gateway {gw1}', checks=[
             self.check('length(@)', 1)
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_sku_', location='westus3')
+    def test_network_vpn_gateway_sku(self, resource_group):
+        self.kwargs.update({
+            'vnet1': 'myvnet1',
+            'gw1': 'gateway1',
+            'ip1': 'pubip1',
+            'custom_routes1': "101.168.0.6/32",
+            'custom_routes2': "102.168.0.6/32"
+        })
+
+        self.cmd('network public-ip create -n {ip1} -g {rg}')
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')
+
+        self.cmd(
+            "network vnet-gateway create -n {gw1} -g {rg} --public-ip-address {ip1} --vnet {vnet1} --gateway-type ExpressRoute --sku ErGwScale --min-scale-unit 3 --max-scale-unit 5",
+            checks=[
+                self.check("vnetGateway.autoScaleConfiguration.bounds.max", 5),
+                self.check("vnetGateway.autoScaleConfiguration.bounds.min", 3),
+            ]
+        )
+        self.cmd(
+            "network vnet-gateway update -n {gw1} -g {rg} --min-scale-unit 4 --max-scale-unit 8",
+            checks=[
+                self.check("autoScaleConfiguration.bounds.max", 8),
+                self.check("autoScaleConfiguration.bounds.min", 4),
+            ]
+        )
 
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_aad_')
     def test_network_vpn_gateway_aad(self, resource_group):
@@ -6639,6 +6732,64 @@ class NetworkVirtualApplianceIdentityScenarioTest(ScenarioTest):
                      self.check('identity.type', 'UserAssigned')
                  ])
         self.cmd('network virtual-appliance delete -n {nva_name4} -g {rg} -y')
+
+class NetworkVirtualApplianceConnectionScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance_connection')
+    @AllowLargeResponse(size_kb=9999)
+    def test_network_virtual_appliance_connection(self, resource_group):
+        from time import sleep
+        subscriptionId = self.get_subscription_id()
+        self.kwargs.update({
+            'vwan': 'clitestvwan',
+            'vhub': 'clittestvhub',
+            'nva_name': 'clivirtualappliance',
+            'rg': resource_group,
+            'name': 'defaultConnection',
+            'subscription': subscriptionId
+        })
+        self.cmd('extension add -n virtual-wan')
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard')
+        routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+        retry_count = 0
+        while routing_state != 'Provisioned':
+            if retry_count == 20:
+                break
+            retry_count += 1
+            sleep(360)
+            routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+        self.cmd('network virtual-appliance create -n {nva_name} -g {rg} --vhub {vhub} --vendor "checkpoint" '
+                 '--scale-unit 2 -v latest --asn 64512 --init-config "echo $abc" ',
+                 checks=[
+                     self.check('name', '{nva_name}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                 ])
+        self.cmd('network virtual-appliance show -g {rg} -n {nva_name}', 
+                 checks=[
+                     self.check('name', '{nva_name}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                     ])
+        self.cmd('network virtual-appliance connection show -n {name} -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
+            self.check('name', '{name}')
+        ])
+
+        self.cmd('network virtual-appliance connection list -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        self.cmd('network virtual-appliance connection update '
+                 '-n {name} '
+                 '-g {rg} '
+                 '--nva {nva_name} '
+                 '--labels [label1,label2] ')
+        
+        self.cmd('network virtual-appliance connection show -n {name} -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
+            self.check('length(properties.routingConfiguration.propagatedRouteTables.labels)', 2),
+            self.check('properties.routingConfiguration.propagatedRouteTables.labels[0]', 'label1')
+        ]) 
 
 class NetworkExtendedLocation(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_network_lb_edge_zone', location='eastus2euap')

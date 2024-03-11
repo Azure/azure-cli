@@ -7,7 +7,7 @@
 import os
 import unittest
 
-from azure.cli.testsdk import JMESPathCheck, ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
+from azure.cli.testsdk import JMESPathCheck, ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only
 from knack.util import CLIError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from datetime import datetime, timedelta, timezone
@@ -655,7 +655,8 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
-
+    
+    @record_only() # Requests to disable analytics temporarily blocked in production. Will reenable test once disable analytics capability is restored.
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_disable_analytics')
     def test_cosmosdb_sql_container_update_disable_analytics(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)
@@ -3147,7 +3148,11 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
 
-        self.assertRaises(Exception, lambda: self.cmd('az cosmosdb sql container restore -g {rg} -a {acc} -d {db_name} -n {ctn_name}'))
+        self.cmd('az cosmosdb sql container restore -g {rg} -a {acc} -d {db_name} -n {ctn_name}')
+
+        self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 0
 
         self.cmd('az cosmosdb sql container restore -g {rg} -a {acc} -d {db_name} -n {ctn_name} --restore-timestamp {rts}')
 
@@ -3332,7 +3337,20 @@ class CosmosDBTests(ScenarioTest):
             'az cosmosdb mongodb collection list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(collection_list) == 0
 
-        self.assertRaises(Exception, lambda: self.cmd('az cosmosdb mongodb collection restore -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json())
+        # Delete database now and then recreate the database try to restore collection
+        self.cmd('az cosmosdb mongodb database delete -g {rg} -a {acc} -n {db_name} --yes')
+        database_list = self.cmd('az cosmosdb mongodb database list -g {rg} -a {acc}').get_output_in_json()
+        assert len(database_list) == 0
+
+        self.cmd('az cosmosdb mongodb database restore -g {rg} -a {acc} -n {db_name} --restore-timestamp {rts}').get_output_in_json()
+
+        database_list = self.cmd('az cosmosdb mongodb database list -g {rg} -a {acc}').get_output_in_json()
+        assert len(database_list) == 1
+
+        self.cmd('az cosmosdb mongodb collection restore -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
+        collection_list = self.cmd(
+            'az cosmosdb mongodb collection list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(collection_list) == 1
 
         # Restore collection and validate collection got restored
         self.cmd('az cosmosdb mongodb collection restore -g {rg} -a {acc} -d {db_name} -n {col_name} --restore-timestamp {rts}').get_output_in_json()
