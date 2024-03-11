@@ -39,7 +39,7 @@ def create_app(client,
 
     try:
         apps = client.applications.list(resource_group_name, cluster_name)
-        for app in apps.value:
+        for app in apps:
             if app.name.lower() == application_name.lower():
                 logger.info("Application '%s' already exists", application_name)
                 return app
@@ -88,7 +88,7 @@ def update_app(client,
         if application_type_version:
             appResource.type_version = application_type_version
         if application_parameters:
-            appResource.parameters.update(application_parameters)
+            appResource.parameters = application_parameters
         if minimum_nodes is not None:
             appResource.minimum_nodes = minimum_nodes
         if maximum_nodes is not None:
@@ -121,7 +121,7 @@ def update_app(client,
 def create_app_type(client, resource_group_name, cluster_name, application_type_name):
     try:
         appTypes = client.application_types.list(resource_group_name, cluster_name)
-        for appType in appTypes.value:
+        for appType in appTypes:
             if appType.name.lower() == application_type_name.lower():
                 logger.info("Application type '%s' already exists", application_type_name)
                 return appType
@@ -143,7 +143,7 @@ def create_app_type_version(client,
     create_app_type(client, resource_group_name, cluster_name, application_type_name)
     try:
         appTypeVerions = client.application_type_versions.list(resource_group_name, cluster_name, application_type_name)
-        for appTypeVerion in appTypeVerions.value:
+        for appTypeVerion in appTypeVerions:
             if appTypeVerion.name.lower() == version.lower():
                 logger.info("Application type version '%s' already exists", version)
                 return appTypeVerion
