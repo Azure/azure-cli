@@ -321,21 +321,6 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_security_alert')
         g.custom_command('update', 'update_security_alert')
 
-    # with self.command_group('security setting',
-    #                         security_settings_sdk,
-    #                         client_factory=cf_security_settings) as g:
-    #     g.custom_command('list', 'list_security_settings')
-    #     g.custom_show_command('show', 'get_security_setting')
-    #     g.custom_command('update', 'update_security_setting')
-
-    # with self.command_group('security contact',
-    #                         security_contacts_sdk,
-    #                         client_factory=cf_security_contacts) as g:
-    #     g.custom_command('list', 'list_security_contacts')
-    #     g.custom_show_command('show', 'get_security_contact')
-    #     g.custom_command('create', 'create_security_contact')
-    #     g.custom_command('delete', 'delete_security_contact')
-
     with self.command_group('security auto-provisioning-setting',
                             security_auto_provisioning_settings_sdk,
                             client_factory=cf_security_auto_provisioning_settings) as g:
