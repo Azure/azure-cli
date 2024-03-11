@@ -259,8 +259,8 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
         # any connection with csi enabled is a valid connection
         if source_name == RESOURCE.KubernetesCluster:
             for connection in key_vault_connections:
-                if connection.get('target_service', dict()).get(
-                        'resource_properties', dict()).get('connect_as_kubernetes_csi_driver'):
+                if connection.get('targetService', dict()).get(
+                        'resourceProperties', dict()).get('connectAsKubernetesCsiDriver'):
                     return
             return {'authType': 'userAssignedIdentity'}
 
