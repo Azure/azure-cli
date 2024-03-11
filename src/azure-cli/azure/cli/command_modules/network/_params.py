@@ -335,12 +335,12 @@ def load_arguments(self, _):
         for item in ['record_type', 'record_set_type']:
             c.argument(item, ignore_type, validator=validate_dns_record_type)
 
-    for item in ['', 'a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'srv', 'tlsa', 'txt']:
+    for item in ['', 'a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'srv', 'tlsa', 'txt']:
         with self.argument_context('network dns record-set {} create'.format(item)) as c:
             c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
             c.argument('if_none_match', help='Create the record set only if it does not already exist.', action='store_true')
 
-    for item in ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'srv', 'tlsa', 'txt']:
+    for item in ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'srv', 'tlsa', 'txt']:
         with self.argument_context('network dns record-set {} add-record'.format(item)) as c:
             c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
             c.argument('record_set_name',
@@ -388,6 +388,14 @@ def load_arguments(self, _):
     with self.argument_context('network dns record-set mx') as c:
         c.argument('exchange', options_list=['--exchange', '-e'], help='Exchange metric.')
         c.argument('preference', options_list=['--preference', '-p'], help='Preference metric.')
+    
+    with self.argument_context('network dns record-set naptr') as c:
+        c.argument('order', help='The order in which the NAPTR records MUST be processed in order to accurately represent the ordered list of rules. The ordering is from lowest to highest. Valid values: 0-65535.', type=int)
+        c.argument('preference', help='The preference specifies the order in which NAPTR records with equal "order" values should be processed, low numbers being processed before high numbers. Valid values: 0-65535.', type=int)
+        c.argument('flags', help='The flags specific to DDDS applications. Values currently defined in RFC 3404 are uppercase and lowercase letters "A", "P", "S", and "U", and the empty string, "". Enclose Flags in quotation marks.')
+        c.argument('services', help='The services specific to DDDS applications. Enclose Services in quotation marks.')
+        c.argument('regexp', help='The regular expression that the DDDS application uses to convert an input value into an output value. For example: an IP phone system might use a regular expression to convert a phone number that is entered by a user into a SIP URI. Enclose the regular expression in quotation marks. Specify either a value for "regexp" or a value for "replacement".')
+        c.argument('replacement', help='The replacement is a fully qualified domain name (FQDN) of the next domain name that you want the DDDS application to submit a DNS query for. The DDDS application replaces the input value with the value specified for replacement. Specify either a value for "regexp" or a value for "replacement". If you specify a value for "regexp", specify a dot (.) for "replacement".')
 
     with self.argument_context('network dns record-set ns') as c:
         c.argument('dname', options_list=['--nsdname', '-d'], help='Name server domain name.')

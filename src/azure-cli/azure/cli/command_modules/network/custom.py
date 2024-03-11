@@ -112,28 +112,30 @@ from .aaz.latest.network.vpn_connection.packet_capture import Stop as _VpnConnPa
 from .aaz.latest.network.vpn_connection.shared_key import Update as _VpnConnSharedKeyUpdate
 from .operations.dns import (RecordSetAShow as DNSRecordSetAShow, RecordSetAAAAShow as DNSRecordSetAAAAShow,  # pylint: disable=unused-import
                              RecordSetDSShow as DNSRecordSetDSShow, RecordSetMXShow as DNSRecordSetMXShow,
-                             RecordSetNSShow as DNSRecordSetNSShow, RecordSetPTRShow as DNSRecordSetPTRShow,
-                             RecordSetSRVShow as DNSRecordSetSRVShow, RecordSetTLSAShow as DNSRecordSetTLSAShow,
-                             RecordSetTXTShow as DNSRecordSetTXTShow, RecordSetCAAShow as DNSRecordSetCAAShow,
-                             RecordSetCNAMEShow as DNSRecordSetCNAMEShow, RecordSetSOAShow as DNSRecordSetSOAShow)
+                             RecordSetNAPTRShow as DNSRecordSetNAPTRShow, RecordSetNSShow as DNSRecordSetNSShow,
+                             RecordSetPTRShow as DNSRecordSetPTRShow, RecordSetSRVShow as DNSRecordSetSRVShow, 
+                             RecordSetTLSAShow as DNSRecordSetTLSAShow, RecordSetTXTShow as DNSRecordSetTXTShow, 
+                             RecordSetCAAShow as DNSRecordSetCAAShow, RecordSetCNAMEShow as DNSRecordSetCNAMEShow, 
+                             RecordSetSOAShow as DNSRecordSetSOAShow)
 from .operations.dns import (RecordSetACreate as DNSRecordSetACreate, RecordSetAAAACreate as DNSRecordSetAAAACreate,  # pylint: disable=unused-import
                              RecordSetDSCreate as DNSRecordSetDSCreate, RecordSetMXCreate as DNSRecordSetMXCreate,
-                             RecordSetNSCreate as DNSRecordSetNSCreate, RecordSetPTRCreate as DNSRecordSetPTRCreate,
-                             RecordSetSRVCreate as DNSRecordSetSRVCreate, RecordSetTLSACreate as DNSRecordSetTLSACreate,
-                             RecordSetTXTCreate as DNSRecordSetTXTCreate, RecordSetCAACreate as DNSRecordSetCAACreate,
-                             RecordSetCNAMECreate as DNSRecordSetCNAMECreate, RecordSetSOACreate as DNSRecordSetSOACreate)
+                             RecordSetNAPTRShow as DNSRecordSetNAPTRShow, RecordSetNSCreate as DNSRecordSetNSCreate, 
+                             RecordSetPTRCreate as DNSRecordSetPTRCreate, RecordSetSRVCreate as DNSRecordSetSRVCreate, 
+                             RecordSetTLSACreate as DNSRecordSetTLSACreate, RecordSetTXTCreate as DNSRecordSetTXTCreate, 
+                             RecordSetCAACreate as DNSRecordSetCAACreate, RecordSetCNAMECreate as DNSRecordSetCNAMECreate, 
+                             RecordSetSOACreate as DNSRecordSetSOACreate)
 from .operations.dns import (RecordSetAUpdate as DNSRecordSetAUpdate, RecordSetAAAAUpdate as DNSRecordSetAAAAUpdate,  # pylint: disable=unused-import
                              RecordSetDSUpdate as DNSRecordSetDSUpdate, RecordSetMXUpdate as DNSRecordSetMXUpdate,
-                             RecordSetNSUpdate as DNSRecordSetNSUpdate, RecordSetPTRUpdate as DNSRecordSetPTRUpdate,
-                             RecordSetSRVUpdate as DNSRecordSetSRVUpdate, RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate,
-                             RecordSetTXTUpdate as DNSRecordSetTXTUpdate, RecordSetCAAUpdate as DNSRecordSetCAAUpdate,
-                             RecordSetCNAMEUpdate as DNSRecordSetCNAMEUpdate)
+                             RecordSetNAPTRShow as DNSRecordSetNAPTRShow, RecordSetNSUpdate as DNSRecordSetNSUpdate, 
+                             RecordSetPTRUpdate as DNSRecordSetPTRUpdate, RecordSetSRVUpdate as DNSRecordSetSRVUpdate, 
+                             RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate, RecordSetTXTUpdate as DNSRecordSetTXTUpdate, 
+                             RecordSetCAAUpdate as DNSRecordSetCAAUpdate, RecordSetCNAMEUpdate as DNSRecordSetCNAMEUpdate)
 from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetAAAADelete as DNSRecordSetAAAADelete,  # pylint: disable=unused-import
                              RecordSetDSDelete as DNSRecordSetDSDelete, RecordSetMXDelete as DNSRecordSetMXDelete,
-                             RecordSetNSDelete as DNSRecordSetNSDelete, RecordSetPTRDelete as DNSRecordSetPTRDelete,
-                             RecordSetSRVDelete as DNSRecordSetSRVDelete, RecordSetTLSADelete as DNSRecordSetTLSADelete,
-                             RecordSetTXTDelete as DNSRecordSetTXTDelete, RecordSetCAADelete as DNSRecordSetCAADelete,
-                             RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
+                             RecordSetNAPTRDelete as DNSRecordSetNAPTRDelete, RecordSetNSDelete as DNSRecordSetNSDelete, 
+                             RecordSetPTRDelete as DNSRecordSetPTRDelete, RecordSetSRVDelete as DNSRecordSetSRVDelete, 
+                             RecordSetTLSADelete as DNSRecordSetTLSADelete, RecordSetTXTDelete as DNSRecordSetTXTDelete, 
+                             RecordSetCAADelete as DNSRecordSetCAADelete, RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)
 RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
@@ -2550,6 +2552,7 @@ def _type_to_property_name(key):
         'cname': ('cname_record', "CNAMERecord"),
         'ds': ('ds_records', "DSRecords"),
         'mx': ('mx_records', "MXRecords"),
+        'naptr': ('naptr_records', "NAPTRRecords"),
         'ns': ('ns_records', "NSRecords"),
         'ptr': ('ptr_records', "PTRRecords"),
         'soa': ('soa_record', "SOARecord"),
@@ -2608,6 +2611,8 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
                 record_obj.update({'key_tag': record["key_tag"], 'algorithm': record["algorithm"], 'digest_type': record["digest"]["algorithm_type"], 'digest': record["digest"]["value"]})
             elif record_type == 'mx':
                 record_obj.update({'preference': record["preference"], 'host': record["exchange"].rstrip('.') + '.'})
+            elif record_type == 'naptr':
+                record_obj.update({'order': record["order"], 'preference': record["preference"], 'flags': record["flags"], 'services': record["services"], 'regexp': record["regexp"], 'replacement': record["replacement"].rstrip('.') + '.'})
             elif record_type == 'ns':
                 record_obj.update({'host': record["nsdname"].rstrip('.') + '.'})
             elif record_type == 'ptr':
@@ -2676,6 +2681,9 @@ def _build_record(cmd, data):
                     "digest": {"algorithm_type": int(data["digest_type"]), "value": data["digest"]}}
         if record_type == 'mx':
             return {"preference": int(data["preference"]), "exchange": data["host"]}
+        if record_type == 'naptr':
+            return {"order": int(data["order"]), "preference": int(data["preference"]), "flags": data["flags"],
+                    "services": data["services"], "regexp": data["regexp"], "replacement": data["replacement"]}
         if record_type == 'ns':
             return {"nsdname": data["host"]}
         if record_type == 'ptr':
@@ -2884,6 +2892,14 @@ def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, pref
                             ttl=ttl, if_none_match=if_none_match)
 
 
+def add_dns_naptr_record(cmd, resource_group_name, zone_name, record_set_name, order, preference, flags, services, regexp, replacement,
+                         ttl=3600, if_none_match=None):
+    record = {"flags": flags, "order": order, "preference": preference, "regexp": regexp, "replacement": replacement, "services": services}
+    record_type = 'naptr'
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl, if_none_match=if_none_match)
+
+
 def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname,
                       subscription_id=None, ttl=3600, if_none_match=None):
     record = {"nsdname": dname}
@@ -2979,6 +2995,13 @@ def remove_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, p
                           keep_empty_record_set=keep_empty_record_set)
 
 
+def remove_dns_naptr_record(cmd, resource_group_name, zone_name, record_set_name, order, preference, flags, services, regexp, replacement, keep_empty_record_set=False):
+    record = {"flags": flags, "order": order, "preference": preference, "regexp": regexp, "replacement": replacement, "services": services}
+    record_type = 'naptr'
+    return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
+
+
 def remove_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname,
                          keep_empty_record_set=False):
     record = {"nsdname": dname}
@@ -3056,6 +3079,13 @@ def _check_ds_record_exist(record, exist_list):
 def _check_mx_record_exist(record, exist_list):
     for r in exist_list:
         if (r["preference"], r["exchange"]) == (record["preference"], record["exchange"]):
+            return True
+    return False
+
+
+def _check_naptr_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r["flags"], r["order"], r["preference"], r["regexp"], r["replacement"], r["services"]) == (record["flags"], record["order"], record["preference"], record["regexp"], record["replacement"], record["services"]):
             return True
     return False
 

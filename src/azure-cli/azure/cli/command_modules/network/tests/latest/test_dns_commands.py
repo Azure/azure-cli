@@ -161,6 +161,7 @@ class DnsScenarioTest(ScenarioTest):
             'ds': '--key-tag 15288 --algorithm 5 --digest-type 2 --digest 49FD46E6C4B45C55D4AC',
             'mx': '--exchange 12 --preference 13',
             'ns': '--nsdname foobar.com',
+            'naptr': '--flags "U" --order 10 --preference 20 --services "E2U+sip" --regexp "!^.*$!sip:customer-service@example.com!" --replacement .',
             'ptr': '--ptrdname foobar.com',
             'soa': '--email foo.com --expire-time 30 --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123',
             'srv': '--port 1234 --priority 1 --target target.com --weight 50',
@@ -168,7 +169,7 @@ class DnsScenarioTest(ScenarioTest):
             'txt': '--value some_text'
         }
 
-        record_types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'srv', 'tlsa', 'txt']
+        record_types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'srv', 'tlsa', 'txt']
 
         for t in record_types:
             # test creating the record set and then adding records
@@ -240,6 +241,7 @@ class DnsScenarioTest(ScenarioTest):
             'cname': '--cname mycname',
             'ds': '--key-tag 15288 --algorithm 5 --digest-type 2 --digest 49FD46E6C4B45C55D4AC',
             'mx': '--exchange 12 --preference 13',
+            'naptr': '--flags "U" --order 10 --preference 20 --services "E2U+sip" --regexp "!^.*$!sip:customer-service@example.com!" --replacement .',
             'ns': '--nsdname foobar.com',
             'ptr': '--ptrdname foobar.com',
             'soa': '--email foo.com --expire-time 30 --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123',
@@ -248,7 +250,7 @@ class DnsScenarioTest(ScenarioTest):
             'txt': '--value some_text'
         }
 
-        record_types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'srv', 'tlsa', 'txt']
+        record_types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'srv', 'tlsa', 'txt']
 
         for t in record_types:
             add_command = 'set-record' if t == 'cname' else 'add-record'

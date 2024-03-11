@@ -62,6 +62,7 @@ class RecordSetUpdate(_RecordSetUpdate):
         args_schema.cname_record._registered = False
         args_schema.ds_records._registered = False
         args_schema.mx_records._registered = False
+        args_schema.naptr_records._registered = False
         args_schema.ns_records._registered = False
         args_schema.ptr_records._registered = False
         args_schema.soa_record._registered = False
@@ -124,6 +125,16 @@ class RecordSetMXUpdate(RecordSetUpdate):
         args = self.ctx.args
         args.record_type = "MX"
 
+@register_command("network dns record-set naptr update")
+class RecordSetNAPTRUpdate(RecordSetUpdate):
+    """ Update an NAPTR record set.
+
+    :example: Update an NAPTR record set.
+        az network dns record-set naptr update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
+    """
+    def pre_operations(self):
+        args = self.ctx.args
+        args.record_type = "NAPTR"
 
 @register_command("network dns record-set ns update")
 class RecordSetNSUpdate(RecordSetUpdate):
@@ -268,6 +279,18 @@ class RecordSetMXShow(RecordSetShow):
     def pre_operations(self):
         args = self.ctx.args
         args.record_type = "MX"
+
+
+@register_command("network dns record-set naptr show")
+class RecordSetNAPTRShow(RecordSetShow):
+    """ Get an NAPTR record set.
+
+    :example: Get an NAPTR record set.
+        az network dns record-set naptr show -g MyResourceGroup -z www.mysite.com -n MyRecordSet
+    """
+    def pre_operations(self):
+        args = self.ctx.args
+        args.record_type = "NAPTR"
 
 
 @register_command("network dns record-set ns show")
@@ -437,6 +460,18 @@ class RecordSetMXList(RecordSetList):
         args.record_type = "MX"
 
 
+@register_command("network dns record-set naptr list")
+class RecordSetNAPTRList(RecordSetList):
+    """ List NAPTR record sets in a zone.
+
+    :example: List NAPTR record sets in a zone.
+        az network dns record-set naptr list -g MyResourceGroup -z www.mysite.com
+    """
+    def pre_operations(self):
+        args = self.ctx.args
+        args.record_type = "NAPTR"
+
+
 @register_command("network dns record-set ns list")
 class RecordSetNSList(RecordSetList):
     """ List NS record sets in a zone.
@@ -580,6 +615,18 @@ class RecordSetMXDelete(RecordSetDelete):
     def pre_operations(self):
         args = self.ctx.args
         args.record_type = "MX"
+
+
+@register_command("network dns record-set naptr delete", confirmation="Are you sure you want to perform this operation?")
+class RecordSetNAPTRDelete(RecordSetDelete):
+    """ Delete an NAPTR record set.
+
+    :example: Delete an NAPTR record set.
+        az network dns record-set naptr delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
+    """
+    def pre_operations(self):
+        args = self.ctx.args
+        args.record_type = "NAPTR"
 
 
 @register_command("network dns record-set ns delete", confirmation="Are you sure you want to perform this operation?")
@@ -740,6 +787,18 @@ class RecordSetMXCreate(RecordSetCreate):
     def pre_operations(self):
         args = self.ctx.args
         args.record_type = "MX"
+
+
+@register_command("network dns record-set naptr create")
+class RecordSetNAPTRCreate(RecordSetCreate):
+    """ Create an NAPTR record set.
+
+    :example: Create an NAPTR record set.
+        az network dns record-set naptr create -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
+    """
+    def pre_operations(self):
+        args = self.ctx.args
+        args.record_type = "NAPTR"
 
 
 @register_command("network dns record-set ns create")
