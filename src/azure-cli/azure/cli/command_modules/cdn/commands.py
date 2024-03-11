@@ -7,7 +7,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands import CliCommandType
 
-from ._client_factory import (cf_endpoints, cf_waf_policy, cf_waf_rule_set, cf_afd_rules)
+from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_waf_policy, cf_waf_rule_set, cf_afd_rules)
 
 
 def _not_found(message):
@@ -37,6 +37,7 @@ def load_command_table(self, _):
     endpoint_not_found_msg = _not_found_msg.format('Endpoint')
     waf_policy_not_found_msg = _not_found_msg.format('WAF Policy')
     rule_not_found_msg = _not_found_msg.format('Rule')
+    cd_not_found_msg = _not_found_msg.format('Custom Domain')
 
     cdn_endpoints_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cdn.operations#EndpointsOperations.{}',
@@ -56,6 +57,16 @@ def load_command_table(self, _):
         exception_handler=_not_found(rule_not_found_msg)
     )
 
+    cdn_domain_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cdn.operations#CustomDomainsOperations.{}',
+        client_factory=cf_custom_domain,
+        exception_handler=_not_found(cd_not_found_msg)
+    )
+
+    with self.command_group('cdn custom-domain', cdn_domain_sdk) as g:
+        g.custom_command('enable-https', 'enable_custom_https', client_factory=cf_cdn)
+        g.command('disable-https', 'disable_custom_https')
+
     from .custom.custom_cdn import CDNProfileCreate
     self.command_table['cdn profile create'] = CDNProfileCreate(loader=self)
 
@@ -71,8 +82,8 @@ def load_command_table(self, _):
     from .custom.custom_cdn import CDNProfileList
     self.command_table['cdn profile list'] = CDNProfileList(loader=self)
 
-    from .custom.custom_cdn import CDNEnableHttps
-    self.command_table['cdn custom-domain enable-https'] = CDNEnableHttps(loader=self)
+    # from .custom.custom_cdn import CDNEnableHttps
+    # self.command_table['cdn custom-domain enable-https'] = CDNEnableHttps(loader=self)
 
     from .custom.custom_cdn import CDNCustomDomainDelete
     self.command_table['cdn custom-domain delete'] = CDNCustomDomainDelete(loader=self)

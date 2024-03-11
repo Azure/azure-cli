@@ -7,7 +7,7 @@
 from azure.mgmt.cdn.models import (MinimumTlsVersion, ProtocolType, SkuName, UpdateRule, DeleteRule, CertificateType,
                                    ResourceType)
 from azure.cli.core.aaz._base import has_value
-from azure.cli.command_modules.cdn.aaz.latest.cdn.custom_domain import EnableHttps as _CDNEnableHttps, \
+from azure.cli.command_modules.cdn.aaz.latest.cdn.custom_domain import EnableHttps as _EnableHttps, \
     Delete as _CDNCustomDomainDelete
 from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDProfileShow, \
     Create as _AFDProfileCreate, Update as _AFDProfileUpdate, Delete as _AFDProfileDelete, \
@@ -120,7 +120,7 @@ class CDNProfileDelete(_AFDProfileDelete):
         return args_schema
 
 
-class CDNEnableHttps(_CDNEnableHttps):
+class CDNEnableHttps(_EnableHttps):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)

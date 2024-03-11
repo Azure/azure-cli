@@ -101,15 +101,15 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'cdn-cli-test-aaz-2'
+        endpoint_name = 'cdn-cli-test-aaz-v3'
         origin = 'www.microsoft1.com'
         endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.aaz-2.clitest.azfdtest.xyz'
+        hostname = custom_domain_name + '.aaz-v3.clitest.azfdtest.xyz'
         # Use alternate hostnames for dogfood.
         if '.azureedge-test.net' in endpoint['hostName']:
-            hostname = custom_domain_name + '.aaz-2-df.clitest.azfdtest.xyz'
+            hostname = custom_domain_name + '.aaz-v3-df.clitest.azfdtest.xyz'
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
 
         checks = [JMESPathCheck('name', custom_domain_name),
@@ -169,14 +169,16 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.custom_domain_show_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, checks=checks)
 
         # Enable custom HTTPS with a CDN managed certificate.
-        checks = [JMESPathCheck('properties.hostName', hostname),
-                  JMESPathCheck('properties.customHttpsProvisioningState', 'Enabling'),
-                  JMESPathCheck('properties.customHttpsProvisioningSubstate', 'SubmittingDomainControlValidationRequest')]
+        checks = [JMESPathCheck('name', custom_domain_name),
+                  JMESPathCheck('hostName', hostname),
+                  JMESPathCheck('customHttpsProvisioningState', 'Enabling'),
+                  JMESPathCheck('customHttpsProvisioningSubstate', 'SubmittingDomainControlValidationRequest')]
         self.custom_domain_enable_https_command(resource_group,
                                                 profile_name,
                                                 endpoint_name,
                                                 custom_domain_name,
-                                                min_tls_version='1.0')
+                                                min_tls_version='1.0',
+                                                checks=checks)
 
         # Create a TLS cert to use for BYOC.
         cert_name = self.create_random_name(prefix='cert', length=20)
