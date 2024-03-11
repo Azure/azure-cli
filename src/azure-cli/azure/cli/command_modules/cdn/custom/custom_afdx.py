@@ -992,7 +992,6 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
             options=['--source-pattern'],
             help='A request URI pattern that identifies the type of requests that may be rewritten.',
         )
-        args_schema.transforms.Element = AAZStrArg()
         args_schema.actions._registered = False
         args_schema.conditions._registered = False
         return args_schema
@@ -1126,7 +1125,6 @@ class AFDRuleActionRemove(_AFDRuleUpdate):
             options=['--source-pattern'],
             help='A request URI pattern that identifies the type of requests that may be rewritten.',
         )
-        args_schema.transforms.Element = AAZStrArg()
         args_schema.index = AAZIntArg(
             options=['--index'],
             help='The index of the condition/action.',
