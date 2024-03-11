@@ -768,7 +768,7 @@ class AFDRuleCreate(_AFDRuleCreate):
             origin_group=args.origin_group,
             sub_id=self.ctx.subscription_id,
             enable_caching=args.enable_caching,
-            resource_group_name=args.resource_group,
+            resource_group=args.resource_group,
             profile_name=args.profile_name,
             enable_compression=args.enable_compression,
             query_string_caching_behavior=args.query_string_caching_behavior,
@@ -820,7 +820,7 @@ class AFDRuleconditionAdd(_AFDRuleUpdate):
         args = self.ctx.args
 
         existing = _RuleShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group_name,
+            'resource_group': args.resource_group,
             'profile_name': args.profile_name,
             'rule_set_name': args.rule_set_name,
             'rule_name': args.rule_name
@@ -879,7 +879,7 @@ class AFDRuleconditionRemove(_AFDRuleUpdate):
         args = self.ctx.args
 
         existing = _RuleShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group_name,
+            'resource_group': args.resource_group,
             'profile_name': args.profile_name,
             'rule_set_name': args.rule_set_name,
             'rule_name': args.rule_name
@@ -1000,7 +1000,7 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
     def pre_operations(self):
         args = self.ctx.args
         existing = _RuleShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group_name,
+            'resource_group': args.resource_group,
             'profile_name': args.profile_name,
             'rule_set_name': args.rule_set_name,
             'rule_name': args.rule_name
@@ -1016,7 +1016,7 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
             origin_group=args.origin_group,
             sub_id=self.ctx.subscription_id,
             enable_caching=args.enable_caching,
-            resource_group_name=args.resource_group,
+            resource_group=args.resource_group,
             profile_name=args.profile_name,
             enable_compression=args.enable_compression,
             query_string_caching_behavior=args.query_string_caching_behavior,
@@ -1139,7 +1139,7 @@ class AFDRuleActionRemove(_AFDRuleUpdate):
     def pre_operations(self):
         args = self.ctx.args
         existing = _RuleShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group_name,
+            'resource_group': args.resource_group,
             'profile_name': args.profile_name,
             'rule_set_name': args.rule_set_name,
             'rule_name': args.rule_name
@@ -1152,11 +1152,11 @@ class AFDRuleActionRemove(_AFDRuleUpdate):
         args.actions = actions
 
 
-def list_afd_rule_condition(cmd, resource_group_name,
+def list_afd_rule_condition(cmd, resource_group,
                             profile_name, rule_set_name,
                             rule_name):
     existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
+        'resource_group': resource_group,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
         'rule_name': rule_name
@@ -1165,11 +1165,11 @@ def list_afd_rule_condition(cmd, resource_group_name,
     return existing['conditions']
 
 
-def list_afd_rule_action(cmd, resource_group_name,
+def list_afd_rule_action(cmd, resource_group,
                          profile_name, rule_set_name,
                          rule_name):
     existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
+        'resource_group': resource_group,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
         'rule_name': rule_name
