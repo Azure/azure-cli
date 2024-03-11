@@ -393,8 +393,8 @@ class CDNOriginGroupUpdate(_CDNOriginGroupUpdate):
             'as a comma-separated list of origin names or origin resource IDs.',
         )
         args_schema.origin.Element = AAZStrArg()
-        args_schema.response_error_detection_error_types = AAZStrArg(
-            options=['--response-error-detection-error-types'],
+        args_schema.response_error_detection_status_code_ranges = AAZStrArg(
+            options=['--response-error-detection-status-code-ranges'],
             help='Type of response errors for real user requests for which origin will be deemed unhealthy',
         )
         args_schema.response_error_detection_failover_threshold = AAZIntArg(
