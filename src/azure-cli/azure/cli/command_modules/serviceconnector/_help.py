@@ -66,7 +66,6 @@ def get_source_display_name(sourcename):
         display_name = 'spring app'
     return display_name
 
-# enable_csi help?
 for source in SOURCE_RESOURCES:
     if not should_load_source(source):
         continue
@@ -277,9 +276,9 @@ for source in SOURCE_RESOURCES:
               long-summary: |
                 Usage: --workload-identity client-id=XX subs-id=XX
 
-                client-id      : Required. Client id of the user assigned identity.
-                subs-id        : Required. Subscription id of the user assigned identity.
-        ''' if AUTH_TYPE.UserIdentity in auth_types else ''
+                client-id      : Required. Client id of the workload identity, i.e., a user assigned identity.
+                subs-id        : Required. Subscription id of the workload identity, i.e., a user assigned identity.
+        ''' if AUTH_TYPE.WorkloadIdentity in auth_types else ''
         service_principal_param = '''
             - name: --service-principal
               short-summary: The service principal auth info
@@ -348,6 +347,7 @@ for source in SOURCE_RESOURCES:
             secret_auto_param=secret_auto_param,
             system_identity_param=system_identity_param,
             user_identity_param=user_identity_param,
+            workload_identity_param=workload_identity_param,
             service_principal_param=service_principal_param,
             source_params=source_params,
             target_params=target_params,
@@ -380,6 +380,7 @@ for source in SOURCE_RESOURCES:
             secret_auto_param=secret_auto_param,
             system_identity_param=system_identity_param,
             user_identity_param=user_identity_param,
+            workload_identity_param=workload_identity_param,
             service_principal_param=service_principal_param,
             source_params=source_params,
             connection_id=connection_id,

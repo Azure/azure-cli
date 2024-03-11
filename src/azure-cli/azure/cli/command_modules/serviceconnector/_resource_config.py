@@ -713,8 +713,13 @@ AUTH_TYPE_PARAMS = {
             'action': AddUserAssignedIdentityAuthInfo
         }
     },
+    # use user_identity_auth_info for workload identity, these two auth types do not overlap
     AUTH_TYPE.WorkloadIdentity: {
-
+        'user_identity_auth_info': {
+            'options': ['--workload-identity'],
+            'help': 'The workload identity auth info',
+            'action': AddUserAssignedIdentityAuthInfo
+        }
     },
     AUTH_TYPE.ServicePrincipalSecret: {
         'service_principal_auth_info_secret': {
