@@ -714,7 +714,6 @@ class CDNEndpointRuleAdd(_CDNEndpointUpdate):
         args_schema.redirect_protocol = AAZStrArg(
             options=['--redirect-protocol'],
             help='Protocol to use for the redirect.',
-            enum=['Http', 'Https', 'MatchRequest']
         )
         args_schema.redirect_type = AAZStrArg(
             options=['--redirect-type'],
@@ -920,7 +919,6 @@ class CDNEndpointRuleActionAdd(_CDNEndpointUpdate):
         args_schema.redirect_protocol = AAZStrArg(
             options=['--redirect-protocol'],
             help='Protocol to use for the redirect.',
-            enum=['Http', 'Https', 'MatchRequest']
         )
         args_schema.redirect_type = AAZStrArg(
             options=['--redirect-type'],
