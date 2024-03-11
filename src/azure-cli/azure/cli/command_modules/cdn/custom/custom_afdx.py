@@ -858,7 +858,7 @@ class AFDRuleconditionRemove(_AFDRuleUpdate):
         conditions = create_conditions_from_existing(existing['conditions'])
 
         if len(conditions) > 1 and args.index < len(conditions):
-            conditions.pop(args.index)
+            conditions.pop(args.index.to_serialized_data())
         else:
             logger.warning('Invalid condition index found. This command will be skipped. Please check the rule.')
         args.conditions = conditions
@@ -1020,7 +1020,7 @@ class AFDRuleActionRemove(_AFDRuleUpdate):
         })
         actions = create_actions_from_existing(existing['actions'])
         if len(actions) > 1 and args.index < len(actions):
-            actions.pop(args.index)
+            actions.pop(args.index.to_serialized_data())
         else:
             logger.warning('Invalid condition index found. This command will be skipped. Please check the rule.')
         args.actions = actions
