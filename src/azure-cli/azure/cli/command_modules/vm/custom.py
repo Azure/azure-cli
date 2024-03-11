@@ -3171,7 +3171,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 os_disk_delete_option=None, data_disk_delete_option=None, regular_priority_count=None,
                 regular_priority_percentage=None, disk_controller_type=None, nat_rule_name=None,
                 enable_osimage_notification=None, max_surge=None, disable_integrity_monitoring_autoupgrade=False,
-                enable_hibernation=None, enable_proxy_agent=None, proxy_agent_mode=None):
+                enable_hibernation=None, enable_proxy_agent=None, proxy_agent_mode=None,
+                security_posture_reference_id=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3477,7 +3478,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             regular_priority_percentage=regular_priority_percentage, disk_controller_type=disk_controller_type,
             enable_osimage_notification=enable_osimage_notification, max_surge=max_surge,
             enable_hibernation=enable_hibernation, enable_proxy_agent=enable_proxy_agent,
-            proxy_agent_mode=proxy_agent_mode)
+            proxy_agent_mode=proxy_agent_mode, security_posture_reference_id=security_posture_reference_id)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3904,7 +3905,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
                 regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
                 enable_osimage_notification=None, custom_data=None, enable_hibernation=None,
-                security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, **kwargs):
+                security_type=None, enable_proxy_agent=None, proxy_agent_mode=None,
+                security_posture_reference_id=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4120,6 +4122,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.additional_capabilities = AdditionalCapabilities(hibernation_enabled=enable_hibernation)
         else:
             vmss.additional_capabilities.hibernation_enabled = enable_hibernation
+
+    if security_posture_reference_id is not None:
+        SecurityPostureReference = cmd.get_models('SecurityPostureReference')
+        vmss.virtual_machine_profile.security_posture_reference = SecurityPostureReference(
+            id=security_posture_reference_id)
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)

@@ -966,7 +966,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         os_disk_secure_vm_disk_encryption_set=None, os_disk_delete_option=None,
                         regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
                         enable_osimage_notification=None, max_surge=None, enable_hibernation=None,
-                        enable_proxy_agent=None, proxy_agent_mode=None):
+                        enable_proxy_agent=None, proxy_agent_mode=None, security_posture_reference_id=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1434,6 +1434,11 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
             'capacityReservationGroup': {
                 'id': capacity_reservation_group
             }
+        }
+
+    if security_posture_reference_id:
+        virtual_machine_profile['securityPostureReference'] = {
+            'id': security_posture_reference_id
         }
 
     if virtual_machine_profile:

@@ -764,6 +764,9 @@ def load_arguments(self, _):
         c.argument('data_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2022-03-01', arg_group='Storage', help='Specify whether data disk should be deleted or detached upon VMSS Flex deletion (This feature is only for VMSS with flexible orchestration mode)')
         c.argument('max_surge', arg_type=get_three_state_flag(), min_api='2022-11-01', is_preview=True,
                    help='Specify it to create new virtual machines to upgrade the scale set, rather than updating the existing virtual machines.')
+        c.argument('security_posture_reference_id', min_api='2023-03-01',
+                   options_list=['--security-posture-reference-id', '--security-posture-id'],
+                   help='The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         c.argument('application_gateway', help='Name to use when creating a new application gateway (default) or referencing an existing one. Can also reference an existing application gateway by ID or specify "" for none.', options_list=['--app-gateway'])
@@ -809,6 +812,9 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
         c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch"]), min_api='2020-06-01', help='Specify the security type of the virtual machine scale set.')
+        c.argument('security_posture_reference_id', min_api='2023-03-01',
+                   options_list=['--security-posture-reference-id', '--security-posture-id'],
+                   help='The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest')
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
 
