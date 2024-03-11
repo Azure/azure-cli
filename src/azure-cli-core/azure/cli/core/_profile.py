@@ -145,6 +145,9 @@ class Profile:
         """
         For service principal, `password` is a dict returned by ServicePrincipalAuth.build_credential
         """
+        # Only for quick debugging
+        return self._invoke_interactive_subscription_selection_demo()
+
         if not scopes:
             scopes = self._arm_scope
 
@@ -501,9 +504,7 @@ class Profile:
 
             # Let the user interactively select one
             if interactive:
-                picked = Profile._interactively_select_subscription(subscriptions, new_active_one)
-                if picked:
-                    return picked
+                new_active_one = Profile._interactively_select_subscription(subscriptions, new_active_one)
 
             new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
             default_sub_id = new_active_one[_SUBSCRIPTION_ID]
@@ -519,6 +520,7 @@ class Profile:
 
     @staticmethod
     def _interactively_select_subscription(subscriptions, active_one):
+        from azure.cli.core.style import format_styled_text, Style
         index_to_subscription_map = {}
         table_data = []
         subscriptions_sorted = sorted(subscriptions, key=lambda s: s[_SUBSCRIPTION_NAME].lower())
@@ -527,10 +529,10 @@ class Profile:
             index_str = str(index)  # '1', '2', ...
             index_to_subscription_map[index_str] = sub
 
+            asterisk = format_styled_text((Style.WARNING, '(*)'))
             # TODO: make index_str blue
             row = {
-                # TODO: make * yellow
-                'No': f'[{index_str}]' + ('(*)' if sub == active_one else ''),
+                'No': f'[{index_str}]' + (asterisk if sub == active_one else ''),
                 'Subscription name': sub[_SUBSCRIPTION_NAME],
                 'Subscription ID': sub[_SUBSCRIPTION_ID]
             }
@@ -546,7 +548,8 @@ class Profile:
         print()
         print(table_str)
         print()
-        print(f"(*) Default tenant is '{active_one[_TENANT_DEFAULT_DOMAIN]}' and subscription is "
+        print("The default is marked with an *; "
+              f"the default tenant is '{active_one[_TENANT_DEFAULT_DOMAIN]}' and subscription is "
               f"'{active_one[_SUBSCRIPTION_NAME]}({active_one[_SUBSCRIPTION_ID]})'.")
         print()
 
@@ -760,6 +763,46 @@ class Profile:
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
 
+    def _invoke_interactive_subscription_selection_demo(self):
+        # Random order, as returned by REST API
+        subscriptions = [
+            # 2
+            {
+                "id": "00000000-0000-0000-0000-222222222222",
+                "name": "sub 2",
+                "tenantDefaultDomain": "microsoft.onmicrosoft.com",
+                "tenantId": "00000000-0000-0000-1111-111111111111",
+                "environmentName": "AzureCloud",
+            },
+            # 1
+            {
+                "id": "00000000-0000-0000-0000-111111111111",
+                "name": "SUB 1",
+                "tenantDefaultDomain": "microsoft.onmicrosoft.com",
+                "tenantId": "00000000-0000-0000-1111-111111111111",
+                "environmentName": "AzureCloud",
+            },
+            # 3
+            {
+                "id": "00000000-0000-0000-0000-333333333333",
+                "name": "Sub 4",
+                "tenantDefaultDomain": "microsoft.onmicrosoft.com",
+                "tenantId": "00000000-0000-0000-1111-111111111111",
+                "environmentName": "AzureCloud",
+            },
+            # 3
+            {
+                "id": "00000000-0000-0000-1111-222222222222",
+                "name": "N/A(tenant level account)",
+                "tenantDefaultDomain": "azuresdkteam.onmicrosoft.com",
+                "tenantId": "00000000-0000-0000-1111-222222222222",
+                "environmentName": "AzureCloud",
+            }
+        ]
+        selected = self._interactively_select_subscription(subscriptions, subscriptions[0])
+        print('selected:')
+        print(selected)
+        return subscriptions
 
 class MsiAccountTypes:
     # pylint: disable=no-method-argument,no-self-argument
