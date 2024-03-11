@@ -25,7 +25,7 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.endpoint import Show as _AFDEn
     Create as _AFDEndpointCreate, Update as _AFDEndpointUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin_group import Show as _AFDOriginGroupShow, \
     Create as _AFDOriginGroupCreate, Update as _AFDOriginGroupUpdate
-from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZDateArg
+from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZTimeArg, AAZIntArg
 from knack.log import get_logger
 from .custom_rule_util import (create_condition, create_action,
                                create_conditions_from_existing, create_actions_from_existing)
