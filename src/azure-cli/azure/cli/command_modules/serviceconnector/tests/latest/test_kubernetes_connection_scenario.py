@@ -330,7 +330,8 @@ class KubernetesConnectionScenarioTest(ScenarioTest):
         self.cmd('aks connection delete --id {} --yes'.format(connection_id))
 
 
-    @record_only()
+    # @record_only()
+    # key vault connection name differs every run
     def test_kubernetes_storageblob_secretstore_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
