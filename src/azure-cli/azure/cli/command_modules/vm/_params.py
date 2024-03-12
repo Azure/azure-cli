@@ -767,6 +767,10 @@ def load_arguments(self, _):
         c.argument('security_posture_reference_id', min_api='2023-03-01',
                    options_list=['--security-posture-reference-id', '--security-posture-id'],
                    help='The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest')
+        c.argument('security_posture_reference_exclude_extensions', min_api='2023-03-01', type=validate_file_or_dict,
+                   options_list=['--security-posture-reference-exclude-extensions', '--exclude-extensions'],
+                   help='List of virtual machine extensions to exclude when applying the Security Posture. Either a Json string or a file path is acceptable. '
+                        'Please refer to https://docs.microsoft.com/rest/api/compute/virtualmachinescalesets/get#virtualmachineextension for the data format.')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         c.argument('application_gateway', help='Name to use when creating a new application gateway (default) or referencing an existing one. Can also reference an existing application gateway by ID or specify "" for none.', options_list=['--app-gateway'])
@@ -815,6 +819,10 @@ def load_arguments(self, _):
         c.argument('security_posture_reference_id', min_api='2023-03-01',
                    options_list=['--security-posture-reference-id', '--security-posture-id'],
                    help='The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest')
+        c.argument('security_posture_reference_exclude_extensions', min_api='2023-03-01', type=validate_file_or_dict,
+                   options_list=['--security-posture-reference-exclude-extensions', '--exclude-extensions'],
+                   help='List of virtual machine extensions to exclude when applying the Security Posture. Either a Json string or a file path is acceptable. '
+                        'Please refer to https://docs.microsoft.com/rest/api/compute/virtualmachinescalesets/get#virtualmachineextension for the data format.')
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
 
