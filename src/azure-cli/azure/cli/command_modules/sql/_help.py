@@ -899,7 +899,7 @@ examples:
   - name: Create managed instance with instance pool name
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --instance-pool-name myinstancepool
   - name: Create managed instance with database format and pricing model
-    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --database-format Regular --pricing-model AlwaysUpToDate
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --database-format AlwaysUpToDate --pricing-model Regular
 """
 
 helps['sql mi delete'] = """
@@ -1034,7 +1034,7 @@ examples:
   - name: Move managed instance out of instance pool
     text: az sql mi update -g mygroup -n myinstance --remove instancePoolId --capacity vcorecapacity
   - name: Update mi database format and pricing model
-    text: az sql mi update -g mygroup -n myinstance --database-format Regular --pricing-model AlwaysUpToDate
+    text: az sql mi update -g mygroup -n myinstance --database-format AlwaysUpToDate --pricing-model Regular
 """
 
 helps['sql midb'] = """

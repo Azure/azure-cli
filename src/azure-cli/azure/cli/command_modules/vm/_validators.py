@@ -1352,7 +1352,7 @@ def trusted_launch_set_default(namespace, generation_version, features):
             features_security_type = item.value
             break
 
-    from ._constants import UPGRADE_SECURITY_HINT
+    from ._constants import UPGRADE_SECURITY_HINT, COMPATIBLE_SECURITY_TYPE_VALUE
     if generation_version == 'V1':
         logger.warning(UPGRADE_SECURITY_HINT)
 
@@ -1361,14 +1361,15 @@ def trusted_launch_set_default(namespace, generation_version, features):
             if namespace.security_type is None:
                 namespace.security_type = 'TrustedLaunch'
 
-            if namespace.enable_vtpm is None:
-                namespace.enable_vtpm = True
+            if namespace.security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
+                if namespace.enable_vtpm is None:
+                    namespace.enable_vtpm = True
 
-            if namespace.enable_secure_boot is None:
-                namespace.enable_secure_boot = True
+                if namespace.enable_secure_boot is None:
+                    namespace.enable_secure_boot = True
         else:
             if namespace.security_type is None:
-                namespace.security_type = 'Standard'
+                namespace.security_type = COMPATIBLE_SECURITY_TYPE_VALUE
             logger.warning(UPGRADE_SECURITY_HINT)
 
 
