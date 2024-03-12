@@ -265,8 +265,9 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
     print_styled_text("[Available styles]\n")
     placeholder = '████ {:8s}: {}\n'
     styled_text = [
-        (Style.PRIMARY, placeholder.format("White", "Primary text color")),
+        (Style.PRIMARY, placeholder.format("Default", "Primary text color")),
         (Style.SECONDARY, placeholder.format("Grey", "Secondary text color")),
+        (Style.HIGHLIGHT, placeholder.format("White", "Highlight text color")),
         (Style.IMPORTANT, placeholder.format("Magenta", "Important text color")),
         (Style.ACTION, placeholder.format(
             "Blue", "Commands, parameters, and system inputs (White in legacy powershell terminal)")),
