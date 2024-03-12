@@ -761,7 +761,7 @@ class AFDRuleCreate(_AFDRuleCreate):
         action = create_action(
             args.action_name, args.cache_behavior, args.cache_duration, args.header_action,
             args.header_name, args.header_value, None,
-            None if args.query_parameters is None else ','.join(args.query_parameters),
+            None if not has_value(args.query_parameters) else ','.join(args.query_parameters.to_serialized_data()),
             args.redirect_type, args.redirect_protocol, args.custom_hostname,
             args.custom_path, args.custom_querystring, args.custom_fragment, args.source_pattern,
             args.destination, args.preserve_unmatched_path,
@@ -979,7 +979,7 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
         action = create_action(
             args.action_name, args.cache_behavior, args.cache_duration, args.header_action,
             args.header_name, args.header_value, None,
-            None if args.query_parameters is None else ','.join(args.query_parameters),
+            None if not has_value(args.query_parameters) else ','.join(args.query_parameters.to_serialized_data()),
             args.redirect_type, args.redirect_protocol, args.custom_hostname,
             args.custom_path, args.custom_querystring, args.custom_fragment, args.source_pattern,
             args.destination, args.preserve_unmatched_path,
