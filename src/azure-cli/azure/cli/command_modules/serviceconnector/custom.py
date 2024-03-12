@@ -291,6 +291,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       target_resource_group=None, target_id=None,
                       secret_auth_info=None, secret_auth_info_auto=None,
                       user_identity_auth_info=None, system_identity_auth_info=None,
+                      workload_identity_auth_info=None,                     # only used as arg
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
                       service_endpoint=None,
@@ -616,6 +617,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
                       source_resource_group=None, source_id=None, indentifier=None,
                       secret_auth_info=None, secret_auth_info_auto=None,
                       user_identity_auth_info=None, system_identity_auth_info=None,
+                      workload_identity_auth_info=None,
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
                       service_endpoint=None,

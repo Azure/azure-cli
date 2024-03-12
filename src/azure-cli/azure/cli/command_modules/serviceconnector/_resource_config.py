@@ -711,9 +711,9 @@ AUTH_TYPE_PARAMS = {
             'action': AddUserAssignedIdentityAuthInfo
         }
     },
-    # use user_identity_auth_info for workload identity, these two auth types do not overlap
+    # used only as argument, same action as user identity
     AUTH_TYPE.WorkloadIdentity: {
-        'user_identity_auth_info': {
+        'workload_identity_auth_info': {
             'options': ['--workload-identity'],
             'help': 'The workload identity auth info',
             'action': AddUserAssignedIdentityAuthInfo
