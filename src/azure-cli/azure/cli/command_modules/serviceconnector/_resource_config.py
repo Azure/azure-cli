@@ -231,7 +231,6 @@ SOURCE_RESOURCES_PARAMS = {
             'options': ['--deployment'],
             'help': 'The deployment name of the app',
             'placeholder': 'MyDeployment',
-            'deprecate_info': ' Note: The default value of `--deployment` is removed. Use `--deployment default` if you want stay in default behavior.',
         }
     },
     RESOURCE.KubernetesCluster: {
@@ -284,9 +283,8 @@ SOURCE_RESOURCES_OPTIONAL_PARAMS = {
     RESOURCE.SpringCloud: {
         'deployment': {
             'options': ['--deployment'],
-            'help': 'The deployment name of the app. Note: The default value of `--deployment` is removed. Use `--deployment default` if you want stay in default behavior.',
+            'help': 'The deployment name of the app.',
             'placeholder': 'MyDeployment',
-            'deprecate_info': ' Note: The default value of `--deployment` is removed. Use `--deployment default` if you want stay in default behavior.',
         },
     }
 }

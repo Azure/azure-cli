@@ -621,7 +621,7 @@ def validate_update_params(cmd, namespace):
     missing_args = dict()
     if not validate_connection_id(namespace):
         missing_args.update(get_missing_source_args(cmd, namespace))
-    missing_args.update(get_missing_auth_args(cmd, namespace))
+    # missing_args.update(get_missing_auth_args(cmd, namespace))
     missing_args.update(get_missing_connection_name(namespace))
     return missing_args
 

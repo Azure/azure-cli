@@ -66,6 +66,7 @@ def get_source_display_name(sourcename):
         display_name = 'spring app'
     return display_name
 
+
 for source in SOURCE_RESOURCES:
     if not should_load_source(source):
         continue
