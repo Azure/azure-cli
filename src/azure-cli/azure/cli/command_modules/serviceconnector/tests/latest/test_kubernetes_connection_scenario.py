@@ -5,10 +5,12 @@
 # --------------------------------------------------------------------------
 
 import unittest
+
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.testsdk import (
     ScenarioTest,
-    record_only
+    record_only,
+    live_only
 )
 from azure.cli.command_modules.serviceconnector._resource_config import (
     RESOURCE,
@@ -330,7 +332,7 @@ class KubernetesConnectionScenarioTest(ScenarioTest):
         self.cmd('aks connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @live_only()
     # key vault connection name differs every run
     def test_kubernetes_storageblob_secretstore_e2e(self):
         self.kwargs.update({
