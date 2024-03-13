@@ -60,6 +60,34 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
 
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_update_sku', location='westus')
+    @AllowLargeResponse()
+    def test_monitor_log_analytics_workspace_update_sku(self, resource_group):
+        workspace_name = self.create_random_name('clitest', 20)
+        self.kwargs.update({
+            'name': workspace_name
+        })
+
+        self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --quota 1 --level 100 --sku CapacityReservation", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('retentionInDays', 30),
+            self.check('sku.name', 'CapacityReservation'),
+            self.check('sku.capacityReservationLevel', 100),
+            self.check('workspaceCapping.dailyQuotaGb', 1.0)
+        ])
+
+        import time
+        time.sleep(60)
+
+        self.cmd("monitor log-analytics workspace update -g {rg} -n {name} --quota 2 --level 200 --sku Standard", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.capacityReservationLevel', 200),
+            self.check('sku.name', 'Standard'),
+            self.check('workspaceCapping.dailyQuotaGb', 2.0)
+        ])
+
+        self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
+
     @record_only()
     def test_monitor_log_analytics_workspace_linked_service_common_scenario(self):
         cluster_resource_id_1 = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/azure-cli-test' \

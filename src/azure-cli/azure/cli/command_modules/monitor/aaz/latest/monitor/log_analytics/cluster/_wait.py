@@ -202,6 +202,7 @@ class Wait(AAZWaitCommand):
             properties = cls._schema_on_200.properties
             properties.associated_workspaces = AAZListType(
                 serialized_name="associatedWorkspaces",
+                flags={"read_only": True},
             )
             properties.billing_type = AAZStrType(
                 serialized_name="billingType",
