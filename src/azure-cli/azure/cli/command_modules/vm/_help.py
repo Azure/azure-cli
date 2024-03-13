@@ -2792,6 +2792,10 @@ examples:
   - name: Create a Windows VMSS with patch mode 'Manual' (Currently patch mode 'AutomaticByPlatform' is not supported during VMSS creation as health extension which is required for 'AutomaticByPlatform' mode cannot be set during VMSS creation).
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image Win2019Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible
+  - name: Create a VMSS with specifying the security posture to be used for all virtual machines in the scale set.
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version} --security-posture-reference-id /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest \\
+            --security-posture-reference-exclude-extensions "c:\\tmp\\exclude_extensions.json"
 """
 
 helps['vmss deallocate'] = """
@@ -3315,6 +3319,10 @@ examples:
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.imageReference.id=imageID
   - name: Update a Linux VMSS to patch mode 'AutomaticByPlatform'.
     text: az vmss update -n MyVmss -g MyResourceGroup --set virtualMachineProfile.osProfile.linuxConfiguration.patchSettings.patchMode=AutomaticByPlatform
+  - name: Update a VMSS with specifying the security posture to be used for all virtual machines in the scale set.
+    text: >
+        az vmss update -n MyVmss -g MyResourceGroup --security-posture-reference-id /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest \\
+            --security-posture-reference-exclude-extensions "c:\\tmp\\exclude_extensions.json"
 """
 
 helps['vmss update-instances'] = """
