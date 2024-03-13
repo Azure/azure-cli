@@ -344,7 +344,10 @@ class DnsScenarioTest(ScenarioTest):
         self.kwargs['tm_id'] = tm['TrafficManagerProfile']['id']
 
         record = self.cmd('network dns record-set a create -g {rg} -z {zone} -n a1 --target-resource {tm_id}',
-                 checks=self.check("targetResource.id.contains(@, '{tm}')", True)).get_output_in_json()
+                 checks=[
+                     self.check("targetResource.id.contains(@, '{tm}')", True),
+                     self.check('trafficManagementProfile.id', None)
+                 ]).get_output_in_json()
         
         references = self.cmd('az network dns list-references --parameters {tm_id}',
                  checks=self.check('length(dnsResourceReferences)', 1)).get_output_in_json()
@@ -352,7 +355,42 @@ class DnsScenarioTest(ScenarioTest):
         self.assertEqual(references['dnsResourceReferences'][0]['dnsResources'][0]['id'].lower(), record['id'].lower())
 
         self.cmd('network dns record-set a update -g {rg} -z {zone} -n a1 --remove targetResource',
-                 checks=self.check('targetResource.id', None))
+                 checks=[
+                     self.check('targetResource.id', None),
+                     self.check('trafficManagementProfile.id', None)
+                 ])
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dns_tmlink')
+    def test_dns_tmlink(self, resource_group):
+
+        self.kwargs.update({
+            'zone': 'mytestzone2.com',
+            'tm_dns': 'mytesttrafficmanager2',
+            'tm': 'tm2'
+        })
+
+        self.cmd('network dns zone create -g {rg} -n {zone}')
+        tm = self.cmd('network traffic-manager profile create -g {rg} -n {tm} --unique-dns-name {tm_dns} --routing-method performance').get_output_in_json()
+
+        self.kwargs['tm_id'] = tm['TrafficManagerProfile']['id']
+
+        record = self.cmd('network dns record-set a create -g {rg} -z {zone} -n tmlink --traffic-management-profile {tm_id}',
+                 checks=[
+                     self.check("trafficManagementProfile.id.contains(@, '{tm}')", True),
+                     self.check('targetResource.id', None)
+                 ]).get_output_in_json()
+
+        references = self.cmd('az network dns list-references --parameters {tm_id}',
+                 checks=self.check('length(dnsResourceReferences)', 1)).get_output_in_json()
+
+        self.assertEqual(references['dnsResourceReferences'][0]['dnsResources'][0]['id'].lower(), record['id'].lower())
+
+        self.cmd('network dns record-set a update -g {rg} -z {zone} -n tmlink --remove trafficManagementProfile',
+                 checks=[
+                     self.check('trafficManagementProfile.id', None),
+                     self.check('targetResource.id', None)
+                 ])
 
 
 class DnsParseZoneFiles(unittest.TestCase):

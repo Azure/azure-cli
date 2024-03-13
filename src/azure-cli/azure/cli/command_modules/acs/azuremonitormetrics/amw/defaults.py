@@ -3,12 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
-from azure.cli.command_modules.acs.azuremonitormetrics.deaults import get_default_region
 from azure.cli.command_modules.acs.azuremonitormetrics.responseparsers.amwlocationresponseparser import (
     parseResourceProviderResponseForLocations
 )
-from azure.cli.command_modules.acs.azuremonitormetrics.constants import RP_LOCATION_API, MapToClosestMACRegion
-from knack.util import CLIError
+from azure.cli.command_modules.acs.azuremonitormetrics.constants import RP_LOCATION_API
+
+
+def get_default_region(cmd):
+    cloud_name = cmd.cli_ctx.cloud.name
+    if cloud_name.lower() == 'azurechinacloud':
+        raise "chinanorth3"
+    if cloud_name.lower() == 'azureusgovernment':
+        return "usgovvirginia"
+    return "eastus"
 
 
 def get_supported_rp_locations(cmd, rp_name, subscription):
@@ -26,16 +33,11 @@ def get_supported_rp_locations(cmd, rp_name, subscription):
 def get_default_mac_region(cmd, cluster_region, subscription):
     supported_locations = get_supported_rp_locations(cmd, 'Microsoft.Monitor', subscription)
     if cluster_region == 'centraluseuap':
-        return MapToClosestMACRegion[cluster_region]
+        return 'eastus2euap'
     if cluster_region in supported_locations:
         return cluster_region
     if len(supported_locations) > 0:
         return supported_locations[0]
-    cloud_name = cmd.cli_ctx.cloud.name
-    if cloud_name.lower() == 'azurechinacloud':
-        raise CLIError("Azure China Cloud is not supported for the Azure Monitor Metrics addon")
-    if cloud_name.lower() == 'azureusgovernment':
-        return "usgovvirginia"
     # default to public cloud
     return get_default_region(cmd)
 
