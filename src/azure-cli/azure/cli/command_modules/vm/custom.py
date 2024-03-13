@@ -3907,7 +3907,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
                 enable_osimage_notification=None, custom_data=None, enable_hibernation=None,
                 security_type=None, enable_proxy_agent=None, proxy_agent_mode=None,
-                security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,  **kwargs):
+                security_posture_reference_id=None, security_posture_reference_exclude_extensions=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions

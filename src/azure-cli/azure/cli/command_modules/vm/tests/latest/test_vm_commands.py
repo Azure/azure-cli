@@ -9068,6 +9068,27 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
             self.check('osProfile.linuxConfiguration.patchSettings.patchMode', 'AutomaticByPlatform')
         ])
 
+#
+# class VMSSSecurityPostureScenarioTest(ScenarioTest):
+#
+#     @ResourceGroupPreparer(name_prefix='cli_test_vmss_security_posture_reference_')
+#     def test_vmss_security_posture_reference(self, resource_group):
+#         self.kwargs.update({
+#             'vmss': self.create_random_name('clitestvmss', 20),
+#             'security_posture_reference_id': '/internal/Providers/Microsoft.Compute/galleries/SecurityPostureGallery-uiualhwjibht/securityPostures/VMSSUniformLinux/versions/1.0.0'
+#         })
+#
+#         self.cmd('vmss create -g {rg} -n {vmss} --image Win2022Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --admin-username azureuser --admin-password testPassword0 '
+#                  '--security-posture-reference-id {security_posture_reference_id}')
+#
+#         # Due to the service bug that patch mode is not returned in response body, we need verify the patch mode of virtual machines inside the VMSS as a workaround.
+#         self.cmd('vm show -g {rg} -n {vm}', checks=[
+#             self.check('osProfile.windowsConfiguration.enableAutomaticUpdates', False),
+#             self.check('osProfile.windowsConfiguration.patchSettings.patchMode', 'Manual')
+#         ])
+#
+#         self.cmd('vmss update -g {rg} -n {vmss} --security-posture-reference-id {security_posture_reference_id}')
+
 
 class VMDiskLogicalSectorSize(ScenarioTest):
 
