@@ -4863,6 +4863,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         existing_properties = functionapp_def.serialize()["properties"]
         functionapp_def.additional_properties["properties"] = existing_properties
         functionapp_def.additional_properties["properties"]["functionAppConfig"] = function_app_config
+        functionapp_def.additional_properties["properties"]["sku"] = "FlexConsumption"
         poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
                                                         api_version='2023-12-01')
         functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -5571,7 +5572,7 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
     # Indicates whether the status has been non empty in previous calls
     has_response = False
     while num_trials < total_trials:
-        time.sleep(2)
+        time.sleep(1)
         response = requests.get(deployment_status_url, headers=headers,
                                 verify=not should_disable_connection_verify())
         try:
