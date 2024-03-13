@@ -148,6 +148,12 @@ class Update(AAZCommand):
             nullable=True,
             enum={"100": 100, "1000": 1000, "10000": 10000, "200": 200, "2000": 2000, "25000": 25000, "300": 300, "400": 400, "500": 500, "5000": 5000, "50000": 50000},
         )
+        _args_schema.sku_name = AAZStrArg(
+            options=["--sku", "--sku-name"],
+            arg_group="Sku",
+            help="The name of the SKU.",
+            enum={"CapacityReservation": "CapacityReservation", "Free": "Free", "LACluster": "LACluster", "PerGB2018": "PerGB2018", "PerNode": "PerNode", "Premium": "Premium", "Standalone": "Standalone", "Standard": "Standard"},
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -410,6 +416,7 @@ class Update(AAZCommand):
             sku = _builder.get(".properties.sku")
             if sku is not None:
                 sku.set_prop("capacityReservationLevel", AAZIntType, ".capacity_reservation_level")
+                sku.set_prop("name", AAZStrType, ".sku_name", typ_kwargs={"flags": {"required": True}})
 
             workspace_capping = _builder.get(".properties.workspaceCapping")
             if workspace_capping is not None:

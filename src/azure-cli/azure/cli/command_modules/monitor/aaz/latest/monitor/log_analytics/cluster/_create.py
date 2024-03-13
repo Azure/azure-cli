@@ -368,6 +368,7 @@ class Create(AAZCommand):
             properties = cls._schema_on_200_201.properties
             properties.associated_workspaces = AAZListType(
                 serialized_name="associatedWorkspaces",
+                flags={"read_only": True},
             )
             properties.billing_type = AAZStrType(
                 serialized_name="billingType",

@@ -501,6 +501,7 @@ class _UpdateHelper:
         properties = _schema_cluster_read.properties
         properties.associated_workspaces = AAZListType(
             serialized_name="associatedWorkspaces",
+            flags={"read_only": True},
         )
         properties.billing_type = AAZStrType(
             serialized_name="billingType",
