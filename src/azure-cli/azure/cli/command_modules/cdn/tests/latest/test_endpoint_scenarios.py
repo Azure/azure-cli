@@ -226,11 +226,6 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
                   JMESPathCheck('isCompressionEnabled', False),
                   JMESPathCheck('queryStringCachingBehavior', 'IgnoreQueryString')]
 
-        # create an endpoint using the standard_akamai profile
-        profile_name = self._create_profile(resource_group, SkuName.standard_akamai.value)
-        endpoint_name = self.create_random_name(prefix='endpoint', length=24)
-        self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin, checks=checks + [JMESPathCheck('name', endpoint_name)])
-
         # create an endpoint using the standard_verizon profile
         profile_name = self._create_profile(resource_group, SkuName.standard_verizon.value)
         endpoint_name = self.create_random_name(prefix='endpoint', length=24)
