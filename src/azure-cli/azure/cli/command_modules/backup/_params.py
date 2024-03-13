@@ -207,6 +207,7 @@ def load_arguments(self, _):
         c.argument('backup_management_type', backup_management_type)
         c.argument('workload_type', workload_type)
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
+        c.argument('yes', options_list=['--yes', '-y'], help='Skip confirmation when updating Standard to Enhanced Policies.', action='store_true')
 
     with self.argument_context('backup item list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)

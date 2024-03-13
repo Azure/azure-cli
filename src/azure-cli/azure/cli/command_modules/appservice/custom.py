@@ -23,7 +23,8 @@ from functools import reduce
 import invoke
 from nacl import encoding, public
 
-import OpenSSL.crypto
+from cryptography.hazmat.primitives.serialization import pkcs12
+from cryptography.hazmat.primitives import hashes
 from fabric import Connection
 
 from knack.prompting import prompt_pass, NoTTYException, prompt_y_n
@@ -109,8 +110,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
-                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, public_network_access=None,
-                  acr_use_identity=False):
+                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
+                  public_network_access=None, acr_use_identity=False, basic_auth=""):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -295,7 +296,20 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,
                                    role, None, scope)
         webapp.identity = identity
+
+    _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth.lower())
     return webapp
+
+
+def _enable_basic_auth(cmd, app_name, slot_name, resource_group, enabled):
+    if not enabled or enabled == "":
+        return
+    CsmPublishingCredentialsPoliciesEntity = cmd.get_models("CsmPublishingCredentialsPoliciesEntity")
+    csmPublishingCredentialsPoliciesEntity = CsmPublishingCredentialsPoliciesEntity(allow=enabled == "enabled")
+    _generic_site_operation(cmd.cli_ctx, resource_group, app_name,
+                            'update_ftp_allowed', slot_name, csmPublishingCredentialsPoliciesEntity)
+    _generic_site_operation(cmd.cli_ctx, resource_group, app_name,
+                            'update_scm_allowed', slot_name, csmPublishingCredentialsPoliciesEntity)
 
 
 def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, webapp_location, vnet_sub_id=None):
@@ -932,7 +946,7 @@ def get_webapp(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
 
-def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=None,  # pylint: disable=unused-argument
+def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=None, basic_auth="",  # pylint: disable=unused-argument
                skip_custom_domain_verification=None, force_dns_registration=None, ttl_in_seconds=None, **kwargs):  # pylint: disable=unused-argument
     instance = kwargs['parameters']
     client = web_client_factory(cmd.cli_ctx)
@@ -940,6 +954,8 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
     kwargs = dict(resource_group_name=resource_group_name, name=name, site_envelope=instance)
     if slot:
         kwargs['slot'] = slot
+
+    _enable_basic_auth(cmd, name, slot, resource_group_name, basic_auth.lower())
 
     return updater(**kwargs)
 
@@ -3417,8 +3433,8 @@ def upload_ssl_cert(cmd, resource_group_name,
 
     try:
         thumb_print = _get_cert(certificate_password, certificate_file)
-    except OpenSSL.crypto.Error as e:
-        raise UnclassifiedUserFault(f"Failed to get the certificate's thrumbprint with error: '{e}'. "
+    except Exception as e:
+        raise UnclassifiedUserFault(f"Failed to get the certificate's thumbprint with error: '{e}'. "
                                     "Please double check the certificate password.") from e
     if certificate_name:
         cert_name = certificate_name
@@ -3436,10 +3452,11 @@ def _generate_cert_name(thumb_print, hosting_environment, location, resource_gro
 
 def _get_cert(certificate_password, certificate_file):
     ''' Decrypts the .pfx file '''
-    p12 = OpenSSL.crypto.load_pkcs12(open(certificate_file, 'rb').read(), certificate_password)
-    cert = p12.get_certificate()
-    digest_algorithm = 'sha1'
-    thumbprint = cert.digest(digest_algorithm).decode("utf-8").replace(':', '')
+    cert_password_bytes = certificate_password.encode('utf-8') if certificate_password else None
+    with open(certificate_file, 'rb') as f:
+        p12 = pkcs12.load_pkcs12(f.read(), cert_password_bytes)
+    cert = p12.cert.certificate
+    thumbprint = cert.fingerprint(hashes.SHA1()).hex().upper()
     return thumbprint
 
 
@@ -4326,12 +4343,12 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
     updated_functionapp = json.dumps(
         {
             "properties": {
-                "daprConfig": {
+                "daprConfig": {"enabled": False} if functionapp.dapr_config is None else {
                     "enabled": functionapp.dapr_config.enabled,
                     "appId": functionapp.dapr_config.app_id,
                     "appPort": functionapp.dapr_config.app_port,
-                    "httpReadBufferSize": functionapp.dapr_config.http_read_buffer_size,
-                    "httpMaxRequestSize": functionapp.dapr_config.http_max_request_size,
+                    "httpReadBufferSize": functionapp.dapr_config.http_read_buffer_size or 4,
+                    "httpMaxRequestSize": functionapp.dapr_config.http_max_request_size or 4,
                     "logLevel": functionapp.dapr_config.log_level,
                     "enableApiLogging": functionapp.dapr_config.enable_api_logging
                 },
@@ -4364,19 +4381,37 @@ def update_dapr_and_workload_config(cmd, resource_group_name, name, enabled=None
                                     enable_api_logging=None, workload_profile_name=None, cpu=None, memory=None):
     site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
     DaprConfig = cmd.get_models('DaprConfig')
-    if site.dapr_config is None:
-        site.dapr_config = DaprConfig()
 
-    import inspect
-    frame = inspect.currentframe()
-    bool_flags = ['enabled', 'enable_api_logging']
-    int_flags = ['app_port', 'http_max_request_size', 'http_read_buffer_size']
-    args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
-    for arg in args[3:10]:
-        if arg in int_flags and values[arg] is not None:
-            values[arg] = validate_and_convert_to_int(arg, values[arg])
-        if values.get(arg, None):
-            setattr(site.dapr_config, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
+    if enabled is None:
+        if site.dapr_config and site.dapr_config.enabled is False:
+            site.dapr_config = None
+    elif enabled == "false":
+        site.dapr_config = None
+    elif enabled == "true":
+        if site.dapr_config is None:
+            site.dapr_config = DaprConfig()
+            site.dapr_config.enabled = True
+        elif site.dapr_config and site.dapr_config.enabled is False:
+            site.dapr_config.enabled = True
+
+    if any([app_id, app_port, http_max_request_size, http_read_buffer_size, log_level, enable_api_logging]) \
+            and site.dapr_config is None:
+        raise ArgumentUsageError("usage error: parameters --dapr-app-id, "
+                                 "--dapr-app-port, --dapr-http-max-request-size, "
+                                 "--dapr-http-read-buffer-size, --dapr-log-level and "
+                                 "--dapr-enable-api-logging must be used with parameter --enable-dapr true.")
+
+    if site.dapr_config is not None:
+        import inspect
+        frame = inspect.currentframe()
+        bool_flags = ['enabled', 'enable_api_logging']
+        int_flags = ['app_port', 'http_max_request_size', 'http_read_buffer_size']
+        args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
+        for arg in args[3:10]:
+            if arg in int_flags and values[arg] is not None:
+                values[arg] = validate_and_convert_to_int(arg, values[arg])
+            if values.get(arg, None):
+                setattr(site.dapr_config, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     if cpu is not None and memory is not None:
         setattr(site.resource_config, 'cpu', cpu)
@@ -4418,6 +4453,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 4.")
         functions_version = '4'
+    enable_dapr = (enable_dapr == "true")
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if any([cpu, memory, workload_profile_name]) and environment is None:
@@ -4441,6 +4477,13 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                            "dapr-enable-api-logging must be used with parameter --environment,"
                                            "please provide the name of the container app environment using "
                                            "--environment.")
+    if any([dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
+            dapr_log_level, dapr_enable_api_logging]) and not enable_dapr:
+        raise ArgumentUsageError("usage error: parameters --dapr-app-id, "
+                                 "--dapr-app-port, --dapr-http-max-request-size, "
+                                 "--dapr-http-read-buffer-size, --dapr-log-level and "
+                                 "dapr-enable-api-logging must be used with parameter --enable-dapr true.")
+
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair, DaprConfig, ResourceConfig = cmd.get_models('SiteConfig', 'NameValuePair',
                                                                            'DaprConfig', 'ResourceConfig')
@@ -4493,8 +4536,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     site_config = SiteConfig(app_settings=[])
     client = web_client_factory(cmd.cli_ctx)
 
-    dapr_config = DaprConfig()
-
     if vnet or subnet:
         if plan:
             if is_valid_resource_id(plan):
@@ -4527,7 +4568,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         subnet_resource_id = None
         vnet_route_all_enabled = None
 
-    functionapp_def = Site(location=None, site_config=site_config, dapr_config=dapr_config, tags=tags,
+    functionapp_def = Site(location=None, site_config=site_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
                            vnet_route_all_enabled=vnet_route_all_enabled)
 
@@ -4803,13 +4844,16 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if enable_dapr:
             logger.warning("Please note while using Dapr Extension for Azure Functions, app port is "
                            "mandatory when using Dapr triggers and should be empty when using only Dapr bindings.")
+            dapr_enable_api_logging = (dapr_enable_api_logging == "true")
+            dapr_config = DaprConfig()
             dapr_config.enabled = True
             dapr_config.app_id = dapr_app_id
             dapr_config.app_port = dapr_app_port
-            dapr_config.http_max_request_size = dapr_http_max_request_size
-            dapr_config.http_read_buffer_size = dapr_http_read_buffer_size
+            dapr_config.http_max_request_size = dapr_http_max_request_size or 4
+            dapr_config.http_read_buffer_size = dapr_http_read_buffer_size or 4
             dapr_config.log_level = dapr_log_level
             dapr_config.enable_api_logging = dapr_enable_api_logging
+            functionapp_def.dapr_config = dapr_config
 
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
         location = managed_environment.location
@@ -6097,7 +6141,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
-              app_service_environment=None, track_status=False):
+              app_service_environment=None, track_status=False, basic_auth=""):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -6267,6 +6311,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
             if match:
                 _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_config, runtime_version)
         create_json['runtime_version'] = runtime_version
+
+    _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth.lower())
+
     # Zip contents & Deploy
     logger.warning("Creating zip with contents of dir %s ...", src_dir)
     # zip contents & deploy

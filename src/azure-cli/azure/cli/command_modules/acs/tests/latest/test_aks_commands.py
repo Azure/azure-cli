@@ -105,6 +105,24 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             resource_group, identity_name)).get_output_in_json()
         return identity.get("id")
 
+    def test_aks_get_version_table(self, location="westus2"):
+        self.kwargs.update({
+            'location': location
+        })
+
+        # show k8s versions in table format
+        self.cmd('aks get-versions -l {location} -o table', checks=[
+            StringContainCheck("SupportPlan"), # column name is printed
+            StringContainCheck("KubernetesOfficial"), # every GA version should have this
+            StringContainCheck("AKSLongTermSupport") # we should always have at least 1 LTS version which have this SupportPlan
+        ])
+
+    def _get_asm_supported_revision(self, location):
+        revisions_cmd = f"aks mesh get-revisions -l {location}"
+        revisions = self.cmd(revisions_cmd).get_output_in_json()
+        assert len(revisions["meshRevisions"]) > 0
+        return revisions['meshRevisions'][0]['revision']
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_default(self, resource_group, resource_group_location):
@@ -690,6 +708,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_service_no_wait(self, resource_group, resource_group_location, sp_name, sp_password):
@@ -734,12 +753,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # show k8s versions
         self.cmd('aks get-versions -l {location}', checks=[
-            self.exists('values[*].patchVersions.keys(@)[]')
-        ])
-
-        # show k8s versions in table format
-        self.cmd('aks get-versions -l {location} -o table', checks=[
-            StringContainCheck(self.kwargs['k8s_version'])
+            self.exists('values[*].patchVersions.keys(@)[]'), # check result not empty
+            StringContainCheck(self.kwargs['k8s_version']) # check the version we want is present
         ])
 
         # get versions for upgrade
@@ -2124,6 +2139,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
+            'revision': self._get_asm_supported_revision(resource_group_location),
         })
 
         # create cluster without --enable-azure-service-mesh
@@ -2135,7 +2151,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # enable azure service mesh again
-        update_cmd = 'aks mesh enable --resource-group={resource_group} --name={name}'
+        update_cmd = 'aks mesh enable --resource-group={resource_group} --name={name} --revision={revision}'
         self.cmd(update_cmd, checks=[
             self.check('serviceMeshProfile.mode', 'Istio'),
         ])
@@ -2169,13 +2185,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
+            'revision': self._get_asm_supported_revision(resource_group_location),
         })
 
         # create cluster with --enable-azure-service-mesh
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureServiceMeshPreview ' \
                      '--ssh-key-value={ssh_key_value} ' \
-                     '--enable-azure-service-mesh --output=json'
+                     '--enable-azure-service-mesh --revision={revision} --output=json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('serviceMeshProfile.mode', 'Istio'),
@@ -2223,6 +2240,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
             'akv_resource_id': akv_resource_id,
+            'revision': self._get_asm_supported_revision(resource_group_location),
         })
 
         # create cluster
@@ -2249,7 +2267,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--ca-cert-object-name my-ca-cert ' \
                      '--ca-key-object-name my-ca-key ' \
                      '--cert-chain-object-name my-cert-chain ' \
-                     '--root-cert-object-name my-root-cert'
+                     '--root-cert-object-name my-root-cert ' \
+                     '--revision {revision}'
 
         self.cmd(update_cmd, checks=[
             self.check('serviceMeshProfile.mode', 'Istio'),
@@ -2291,6 +2310,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
+            'revision': self._get_asm_supported_revision(resource_group_location),
         })
 
         # create cluster
@@ -2302,7 +2322,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # enable azure service mesh
-        enable_cmd = 'aks mesh enable --resource-group={resource_group} --name={name}'
+        enable_cmd = 'aks mesh enable --resource-group={resource_group} --name={name} --revision={revision}'
         self.cmd(enable_cmd, checks=[
             self.check('serviceMeshProfile.mode', 'Istio'),
         ])
@@ -3504,12 +3524,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # show k8s versions
         self.cmd('aks get-versions -l {location}', checks=[
-            self.exists('values[*].patchVersions.keys(@)[]')
-        ])
-
-        # show k8s versions in table format
-        self.cmd('aks get-versions -l {location} -o table', checks=[
-            StringContainCheck(self.kwargs['k8s_version'])
+            self.exists('values[*].patchVersions.keys(@)[]'), # check result not empty
+            StringContainCheck(self.kwargs['k8s_version']) # check the version we want is present
         ])
 
         # get versions for upgrade
@@ -6200,6 +6216,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('networkProfile.loadBalancerProfile.allocatedOutboundPorts', 1024),
+            self.check('networkProfile.loadBalancerProfile.idleTimeoutInMinutes', 10)
+        ])
+
+        # update
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--load-balancer-outbound-ports 0'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.loadBalancerProfile.allocatedOutboundPorts', 0),
             self.check('networkProfile.loadBalancerProfile.idleTimeoutInMinutes', 10)
         ])
 
@@ -10139,3 +10164,570 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="eastus"
+    )
+    def test_aks_create_with_app_routing_enabled(
+        self, resource_group, resource_group_location
+    ):
+        """This test case exercises creating an AKS cluster with app routing addon enabled."""
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+
+        # create cluster with app routing addon enabled
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "aks_name": aks_name,
+                "location": resource_group_location,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={aks_name} --location={location} "
+            "--ssh-key-value={ssh_key_value} --enable-app-routing "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.webAppRouting.enabled", True),
+            ],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="eastus",
+        preserve_default_location=True,
+    )
+    def test_aks_approuting_enable_disable(
+        self, resource_group, resource_group_location
+    ):
+        """This test case exercises enabling and disabling app routing addon in an AKS cluster."""
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+
+        # create cluster without app routing
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "aks_name": aks_name,
+                "location": resource_group_location,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={aks_name} --location={location} "
+            "--ssh-key-value={ssh_key_value}"
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+            ],
+        )
+
+        # enable app routing
+        enable_app_routing_cmd = (
+            "aks approuting enable --resource-group={resource_group} --name={aks_name}"
+        )
+        self.cmd(
+            enable_app_routing_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.webAppRouting.enabled", True),
+            ],
+        )
+
+        # disable app routing
+        disable_app_routing_cmd = "aks approuting disable --resource-group={resource_group} --name={aks_name} --yes"
+        self.cmd(
+            disable_app_routing_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.webAppRouting.enabled", False),
+            ],
+        )
+
+        # delete cluster
+        delete_cmd = "aks delete --resource-group={resource_group} --name={aks_name} --yes --no-wait"
+        self.cmd(delete_cmd, checks=[self.is_empty()])
+
+    @AllowLargeResponse(8192)
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="eastus",
+        preserve_default_location=True,
+    )
+    def test_aks_approuting_enable_with_keyvault_secrets_provider_addon_and_keyvault_id(
+        self, resource_group, resource_group_location
+    ):
+        """This test case exercises enabling app routing addon in an AKS cluster along with keyvault secrets provider addon."""
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+
+        # create cluster
+        aks_name = self.create_random_name("cliakstest", 16)
+        kv_name = self.create_random_name("cliakstestkv", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "aks_name": aks_name,
+                "kv_name": kv_name,
+                "location": resource_group_location,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        # create keyvault with rbac auth enabled
+        create_keyvault_cmd = "keyvault create --resource-group={resource_group} --location={location} --name={kv_name} --enable-rbac-authorization=true"
+        keyvault = self.cmd(
+            create_keyvault_cmd,
+            checks=[
+                self.check("properties.provisioningState", "Succeeded"),
+                self.check("properties.enableRbacAuthorization", True),
+                self.check("name", kv_name),
+            ],
+        ).get_output_in_json()
+        keyvault_id = keyvault["id"]
+        self.kwargs.update({"keyvault_id": keyvault_id})
+
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={aks_name} --location={location} "
+            "--ssh-key-value={ssh_key_value} "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+            ],
+        )
+
+        # enable app routing with keyvault secrets provider addon enabled
+        enable_app_routing_cmd = "aks approuting enable --enable-kv --attach-kv {keyvault_id} --resource-group={resource_group} --name={aks_name}"
+        self.cmd(
+            enable_app_routing_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.webAppRouting.enabled", True),
+                self.check("addonProfiles.azureKeyvaultSecretsProvider.enabled", True),
+            ],
+        )
+
+        # delete cluster
+        delete_cmd = "aks delete --resource-group={resource_group} --name={aks_name} --yes --no-wait"
+        self.cmd(delete_cmd, checks=[self.is_empty()])
+
+    @AllowLargeResponse(8192)
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="eastus",
+        preserve_default_location=True,
+    )
+    def test_aks_approuting_update(self, resource_group, resource_group_location):
+        """This test case exercises updating app routing addon in an AKS cluster."""
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        kv_name = self.create_random_name("cliakstestkv", 16)
+
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "aks_name": aks_name,
+                "kv_name": kv_name,
+                "location": resource_group_location,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        # create keyvault with rbac auth enabled
+        create_keyvault_cmd = "keyvault create --resource-group={resource_group} --location={location} --name={kv_name} --enable-rbac-authorization=true"
+        keyvault = self.cmd(
+            create_keyvault_cmd,
+            checks=[
+                self.check("properties.provisioningState", "Succeeded"),
+                self.check("properties.enableRbacAuthorization", True),
+                self.check("name", kv_name),
+            ],
+        ).get_output_in_json()
+        keyvault_id = keyvault["id"]
+
+        self.kwargs.update({"keyvault_id": keyvault_id})
+
+        # create cluster with app routing enabled
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={aks_name} --location={location} "
+            "--ssh-key-value={ssh_key_value} --enable-app-routing"
+        )
+        result = self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.webAppRouting.enabled", True),
+            ],
+        ).get_output_in_json()
+        object_id = result["ingressProfile"]["webAppRouting"]["identity"]["objectId"]
+        self.kwargs.update({"object_id": object_id})
+
+        # update with enable_rbac_authorization flag in keyvault set to true
+        update_cmd = (
+            "aks approuting update --resource-group={resource_group} --name={aks_name} --enable-kv "
+            "--attach-kv {keyvault_id}"
+        )
+
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.webAppRouting.enabled", True),
+                self.check("addonProfiles.azureKeyvaultSecretsProvider.enabled", True),
+            ],
+        )
+
+        # update keyvault with rbac auth disabled
+        update_keyvault_cmd = "keyvault update --resource-group={resource_group} --name={kv_name} --enable-rbac-authorization=false"
+        self.cmd(
+            update_keyvault_cmd,
+            checks=[
+                self.check("properties.provisioningState", "Succeeded"),
+                self.check("properties.enableRbacAuthorization", False),
+                self.check("name", kv_name),
+            ],
+        )
+
+        # update with enable_rbac_authorization flag in keyvault set to false
+        update_cmd = (
+            "aks approuting update --resource-group={resource_group} --name={aks_name} "
+            "--attach-kv {keyvault_id}"
+        )
+
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.webAppRouting.enabled", True),
+                self.check("addonProfiles.azureKeyvaultSecretsProvider.enabled", True),
+            ],
+        )
+
+        check_access_policy_cmd = "az keyvault show --resource-group={resource_group} --name={kv_name} --query \"properties.accessPolicies[?objectId=='{object_id}']\" -o json"
+        self.cmd(
+            check_access_policy_cmd,
+            checks=[
+                self.check("length(@)", 1),
+                self.check("[0].objectId", "{object_id}"),
+                self.check("[0].permissions.certificates", ["Get"]),
+                self.check("[0].permissions.keys", None),
+                self.check("[0].permissions.secrets", ["Get"]),
+                self.check("[0].permissions.storage", None),
+            ],
+        )
+
+        # delete cluster
+        delete_cmd = "aks delete --resource-group={resource_group} --name={aks_name} --yes --no-wait"
+        self.cmd(delete_cmd, checks=[self.is_empty()])
+
+    # live only due to workspace is not mocked
+    @live_only()
+    @AllowLargeResponse(8192)
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="eastus",
+        preserve_default_location=True,
+    )
+    def test_aks_approuting_update_with_monitoring_addon_enabled(self, resource_group, resource_group_location):
+        """This test case exercises updating app routing addon in an AKS cluster with monitoring addon enabled."""
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        kv_name = self.create_random_name("cliakstestkv", 16)
+
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "aks_name": aks_name,
+                "kv_name": kv_name,
+                "location": resource_group_location,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        # create keyvault with rbac auth enabled
+        create_keyvault_cmd = "keyvault create --resource-group={resource_group} --location={location} --name={kv_name} --enable-rbac-authorization=true"
+        keyvault = self.cmd(
+            create_keyvault_cmd,
+            checks=[
+                self.check("properties.provisioningState", "Succeeded"),
+                self.check("properties.enableRbacAuthorization", True),
+                self.check("name", kv_name),
+            ],
+        ).get_output_in_json()
+        keyvault_id = keyvault["id"]
+
+        self.kwargs.update({"keyvault_id": keyvault_id})
+
+        # create cluster with app routing and monitoring addon enabled
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={aks_name} --location={location} "
+            "--ssh-key-value={ssh_key_value} --enable-app-routing --enable-addons monitoring"
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("addonProfiles.omsagent.enabled", True),
+                self.check("ingressProfile.webAppRouting.enabled", True),
+            ],
+        ).get_output_in_json()
+
+        # update with enable_rbac_authroization flag in keyvault set to true
+        update_cmd = (
+            "aks approuting update --resource-group={resource_group} --name={aks_name} --enable-kv "
+            "--attach-kv {keyvault_id}"
+        )
+
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.webAppRouting.enabled", True),
+                self.check("addonProfiles.azureKeyvaultSecretsProvider.enabled", True),
+            ],
+        )
+
+        # delete cluster
+        delete_cmd = "aks delete --resource-group={resource_group} --name={aks_name} --yes --no-wait"
+        self.cmd(delete_cmd, checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="eastus",
+        preserve_default_location=True,
+    )
+    def test_aks_approuting_zone_add_delete_list(
+        self, resource_group, resource_group_location
+    ):
+        """This test case exercises adding, deleting and listing zones to app routing addon in an AKS cluster."""
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        dns_zone_1 = self.create_random_name("cliakstest", 16) + ".com"
+        dns_zone_2 = self.create_random_name("cliakstest", 16) + ".com"
+
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "aks_name": aks_name,
+                "dns_zone_1": dns_zone_1,
+                "dns_zone_2": dns_zone_2,
+                "location": resource_group_location,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        create_dns_zone_cmd_1 = "network dns zone create --resource-group={resource_group} --name {dns_zone_1}"
+        dns_zone_result = self.cmd(
+            create_dns_zone_cmd_1,
+            checks=[
+                self.check("name", dns_zone_1),
+            ],
+        ).get_output_in_json()
+        dns_zone_id_1 = dns_zone_result["id"]
+
+        create_dns_zone_cmd_2 = "network dns zone create --resource-group={resource_group} --name {dns_zone_2}"
+        dns_zone_result = self.cmd(
+            create_dns_zone_cmd_2,
+            checks=[
+                self.check("name", dns_zone_2),
+            ],
+        ).get_output_in_json()
+        dns_zone_id_2 = dns_zone_result["id"]
+
+        self.kwargs.update(
+            {"dns_zone_id_1": dns_zone_id_1, "dns_zone_id_2": dns_zone_id_2}
+        )
+
+        # create cluster with app routing enabled
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={aks_name} --location={location} "
+            "--ssh-key-value={ssh_key_value} --enable-app-routing"
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.webAppRouting.enabled", True),
+                self.check("ingressProfile.webAppRouting.dnsZoneResourceIds", None),
+            ],
+        )
+
+        # add dns zone
+        add_dns_zone_cmd = "aks approuting zone add --resource-group={resource_group} --name={aks_name} --ids {dns_zone_id_1}"
+        self.cmd(
+            add_dns_zone_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check(
+                    "ingressProfile.webAppRouting.dnsZoneResourceIds[0]", dns_zone_id_1
+                ),
+            ],
+        )
+
+        # add dns zone with --atach-zones flag
+        add_dns_zone_cmd = "aks approuting zone add --resource-group={resource_group} --name={aks_name} --ids {dns_zone_id_2} --attach-zones"
+        self.cmd(
+            add_dns_zone_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check(
+                    "ingressProfile.webAppRouting.dnsZoneResourceIds[0]", dns_zone_id_1
+                ),
+                self.check(
+                    "ingressProfile.webAppRouting.dnsZoneResourceIds[1]", dns_zone_id_2
+                ),
+            ],
+        )
+
+        # list dns zone
+        list_dns_zone_cmd = "aks approuting zone list --resource-group={resource_group} --name={aks_name}"
+        self.cmd(
+            list_dns_zone_cmd,
+            checks=[
+                self.check("length(@)", 2),
+                self.check("[0].resource_group", resource_group),
+                self.check("[0].type", "dnszones"),
+                self.check("[0].name", dns_zone_1),
+                self.check("[1].resource_group", resource_group),
+                self.check("[1].type", "dnszones"),
+                self.check("[1].name", dns_zone_2),
+            ],
+        )
+
+        # delete dns zone
+        delete_dns_zone_cmd = "aks approuting zone delete --resource-group={resource_group} --name={aks_name} --ids {dns_zone_id_1} --yes"
+        self.cmd(
+            delete_dns_zone_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check(
+                    "ingressProfile.webAppRouting.dnsZoneResourceIds[0]", dns_zone_id_2
+                ),
+            ],
+        )
+
+        # delete cluster
+        delete_cmd = "aks delete --resource-group={resource_group} --name={aks_name} --yes --no-wait"
+        self.cmd(delete_cmd, checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="eastus",
+        preserve_default_location=True,
+    )
+    def test_aks_approuting_zone_update(self, resource_group, resource_group_location):
+        """This test case exercises updating zones for the app routing addon in an AKS cluster."""
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        dns_zone_1 = self.create_random_name("cliakstest", 16) + ".com"
+        dns_zone_2 = self.create_random_name("cliakstest", 16) + ".com"
+
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "aks_name": aks_name,
+                "dns_zone_1": dns_zone_1,
+                "dns_zone_2": dns_zone_2,
+                "location": resource_group_location,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        create_dns_zone_cmd_1 = "network dns zone create --resource-group={resource_group} --name {dns_zone_1}"
+        dns_zone_1 = self.cmd(
+            create_dns_zone_cmd_1,
+            checks=[
+                self.check("name", dns_zone_1),
+            ],
+        ).get_output_in_json()
+        dns_zone_id_1 = dns_zone_1["id"]
+
+        create_dns_zone_cmd_2 = "network dns zone create --resource-group={resource_group} --name {dns_zone_2}"
+        dns_zone_2 = self.cmd(
+            create_dns_zone_cmd_2,
+            checks=[
+                self.check("name", dns_zone_2),
+            ],
+        ).get_output_in_json()
+        dns_zone_id_2 = dns_zone_2["id"]
+
+        self.kwargs.update(
+            {"dns_zone_id_1": dns_zone_id_1, "dns_zone_id_2": dns_zone_id_2}
+        )
+
+        # create cluster with app routing enabled
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={aks_name} --location={location} "
+            "--ssh-key-value={ssh_key_value} --enable-app-routing"
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.webAppRouting.enabled", True),
+                self.check("ingressProfile.webAppRouting.dnsZoneResourceIds", None),
+            ],
+        )
+
+        # add dns zone
+        add_dns_zone_cmd = "aks approuting zone add --resource-group={resource_group} --name={aks_name} --ids {dns_zone_id_1}"
+        self.cmd(
+            add_dns_zone_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check(
+                    "ingressProfile.webAppRouting.dnsZoneResourceIds[0]", dns_zone_id_1
+                ),
+            ],
+        )
+
+        # update dns zone
+        update_dns_zone_cmd = "aks approuting zone update --resource-group={resource_group} --name={aks_name} --ids {dns_zone_id_2}"
+        self.cmd(
+            update_dns_zone_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check(
+                    "ingressProfile.webAppRouting.dnsZoneResourceIds[0]", dns_zone_id_2
+                ),
+            ],
+        )
+
+        # delete cluster
+        delete_cmd = "aks delete --resource-group={resource_group} --name={aks_name} --yes --no-wait"
+        self.cmd(delete_cmd, checks=[self.is_empty()])

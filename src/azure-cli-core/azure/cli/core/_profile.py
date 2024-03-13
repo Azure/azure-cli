@@ -856,13 +856,14 @@ def _create_identity_instance(cli_ctx, *args, **kwargs):
     # EXPERIMENTAL: Use core.use_msal_http_cache=False to turn off MSAL HTTP cache.
     use_msal_http_cache = cli_ctx.config.getboolean('core', 'use_msal_http_cache', fallback=True)
 
-    # PREVIEW: On Windows, use core.allow_broker=true to use broker (WAM) for authentication.
-    allow_broker = cli_ctx.config.getboolean('core', 'allow_broker', fallback=False)
+    # PREVIEW: On Windows, use core.enable_broker_on_windows=true to use broker (WAM) for authentication.
+    enable_broker_on_windows = cli_ctx.config.getboolean('core', 'enable_broker_on_windows', fallback=False)
     from .telemetry import set_broker_info
-    set_broker_info(allow_broker=allow_broker)
+    set_broker_info(enable_broker_on_windows)
 
     # PREVIEW: In Azure Stack environment, use core.instance_discovery=false to disable MSAL's instance discovery.
     instance_discovery = cli_ctx.config.getboolean('core', 'instance_discovery', True)
 
-    return Identity(*args, encrypt=encrypt, use_msal_http_cache=use_msal_http_cache, allow_broker=allow_broker,
+    return Identity(*args, encrypt=encrypt, use_msal_http_cache=use_msal_http_cache,
+                    enable_broker_on_windows=enable_broker_on_windows,
                     instance_discovery=instance_discovery, **kwargs)

@@ -5,6 +5,7 @@
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.mysql._client_factory import (
+    cf_mysql_advanced_threat_protection,
     cf_mysql_flexible_servers,
     cf_mysql_flexible_firewall_rules,
     cf_mysql_flexible_config,
@@ -30,6 +31,11 @@ def load_command_table(self, _):
     mysql_flexible_servers_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#ServersOperations.{}',
         client_factory=cf_mysql_flexible_servers
+    )
+
+    mysql_advanced_threat_protection_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#AdvancedThreatProtectionSettingsOperations.{}',
+        client_factory=cf_mysql_advanced_threat_protection
     )
 
     mysql_flexible_firewall_rule_sdk = CliCommandType(
@@ -80,6 +86,15 @@ def load_command_table(self, _):
     # MERU COMMANDS
     mysql_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.mysql.custom#{}')
 
+    # Advanced Threat Protection
+    with self.command_group('mysql flexible-server advanced-threat-protection-setting',
+                            mysql_advanced_threat_protection_sdk,
+                            custom_command_type=mysql_custom,
+                            client_factory=cf_mysql_advanced_threat_protection,
+                            is_preview=True) as g:
+        g.custom_command('update', 'flexible_server_advanced_threat_protection_update')
+        g.custom_show_command('show', 'flexible_server_advanced_threat_protection_show')
+
     with self.command_group('mysql flexible-server', mysql_flexible_servers_sdk,
                             custom_command_type=mysql_custom,
                             client_factory=cf_mysql_flexible_servers) as g:
@@ -102,7 +117,7 @@ def load_command_table(self, _):
 
     with self.command_group('mysql flexible-server import', mysql_flexible_servers_sdk,
                             custom_command_type=mysql_custom,
-                            client_factory=cf_mysql_flexible_servers, is_preview=True) as g:
+                            client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('create', 'flexible_server_import_create', table_transformer=table_transform_output)
 
     with self.command_group('mysql flexible-server firewall-rule', mysql_flexible_firewall_rule_sdk,

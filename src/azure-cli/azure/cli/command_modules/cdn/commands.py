@@ -272,6 +272,12 @@ def load_command_table(self, _):
     from .custom.custom_afdx import AFDOriginUpdate
     self.command_table['afd origin update'] = AFDOriginUpdate(loader=self)
 
+    from .custom.custom_afdx import AFDOriginGroupCreate
+    self.command_table['afd origin-group create'] = AFDOriginGroupCreate(loader=self)
+
+    from .custom.custom_afdx import AFDOriginGroupUpdate
+    self.command_table['afd origin-group update'] = AFDOriginGroupUpdate(loader=self)
+
     from .custom.custom_afdx import AFDRouteCreate
     self.command_table['afd route create'] = AFDRouteCreate(loader=self)
 
