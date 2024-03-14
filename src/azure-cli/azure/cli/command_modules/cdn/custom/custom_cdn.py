@@ -165,7 +165,8 @@ class CDNEnableHttps(_EnableHttps):
             'profile_name': args.profile_name
         })
 
-        if has_value(args.min_tls_version) and args.min_tls_version.to_serialized_data().casefold() == 'none'.casefold():
+        if has_value(args.min_tls_version) and \
+                args.min_tls_version.to_serialized_data().casefold() == 'none'.casefold():
             args.minimum_tls_version = MinimumTlsVersion.none
         elif args.min_tls_version == '1.0':
             args.minimum_tls_version = MinimumTlsVersion.tls10
@@ -186,7 +187,8 @@ class CDNEnableHttps(_EnableHttps):
             if not has_value(args.user_cert_subscription_id):
                 args.user_cert_subscription_id = self.ctx.subscription_id
             # All BYOC params are set, let's create the https parameters
-            if not has_value(args.user_cert_protocol_type) or args.user_cert_protocol_type.to_serialized_data().lower() == 'sni':
+            if not has_value(args.user_cert_protocol_type) or \
+                    args.user_cert_protocol_type.to_serialized_data().lower() == 'sni':
                 args.user_cert_protocol_type = ProtocolType.server_name_indication
             elif args.user_cert_protocol_type.to_serialized_data().lower() == 'ip':
                 args.user_cert_protocol_type = ProtocolType.ip_based
@@ -502,7 +504,8 @@ class CDNEndpointCreate(_CDNEndpointCreate):
         )
         args_schema.enable_compression = AAZBoolArg(
             options=['--enable-compression'],
-            help='If compression is enabled, content will be served as compressed if user requests for a compressed version. '
+            help='If compression is enabled, content will be served as compressed '
+            'if user requests for a compressed version. '
             'Content won\'t be compressed on CDN when requested content is smaller than 1 byte or larger than 1 MB.',
             blank=True
         )
@@ -578,7 +581,8 @@ class CDNEndpointUpdate(_CDNEndpointUpdate):
         )
         args_schema.enable_compression = AAZBoolArg(
             options=['--enable-compression'],
-            help='If compression is enabled, content will be served as compressed if user requests for a compressed version. '
+            help='If compression is enabled, content will be served as compressed '
+            'if user requests for a compressed version. '
             'Content won\'t be compressed on CDN when requested content is smaller than 1 byte or larger than 1 MB.',
             blank=True
         )
@@ -597,8 +601,10 @@ class CDNEndpointUpdate(_CDNEndpointUpdate):
         })
         if has_value(args.default_origin_group):
             if '/' not in args.default_origin_group.to_serialized_data():
-                args.default_origin_group = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
-                                            f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/endpoints/{args.endpoint_name}' \
+                args.default_origin_group = f'/subscriptions/{self.ctx.subscription_id}' \
+                                            f'/resourceGroups/{args.resource_group}' \
+                                            f'/providers/Microsoft.Cdn/profiles/{args.profile_name}' \
+                                            f'/endpoints/{args.endpoint_name}' \
                                             f'/originGroups/{args.default_origin_group}'
         if has_value(args.enable_compression):
             args.is_compression_enabled = args.enable_compression
@@ -834,7 +840,8 @@ class CDNEndpointRuleRemove(_CDNEndpointUpdate):
                     pop_index = idx
                     break
 
-            # To guarantee the consecutive rule order, we need to make sure the rule with order larger than the deleted one
+            # To guarantee the consecutive rule order,
+            # we need to make sure the rule with order larger than the deleted one
             # to decrease its order by one. Rule with order 0 is special and no rule order adjustment is required.
             if pop_index != -1:
                 pop_order = delivery_policy['rules'][pop_index]['order']
