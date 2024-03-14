@@ -257,12 +257,15 @@ class CDNOriginCreate(_CDNOriginCreate):
         args_schema.disabled = AAZBoolArg(
             options=['--disabled'],
             help='Don\'t use the origin for load balancing.',
+            blank=True
         )
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.enable = not args.disabled
+        if not has_value(args.disabled):
+            args.disabled = False
+        args.enabled = not args.disabled
         if not has_value(args.http_port):
             args.http_port = 80
         if not has_value(args.https_port):
@@ -280,15 +283,95 @@ class CDNOriginUpdate(_CDNOriginUpdate):
         args_schema.disabled = AAZBoolArg(
             options=['--disabled'],
             help='Don\'t use the origin for load balancing.',
+            blank=True
         )
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.enable = not args.disabled
+        if not has_value(args.disabled):
+            args.disabled = False
+        args.enabled = not args.disabled
 
 
 class CDNOriginGroupCreate(_CDNOriginGroupCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.probe_interval = AAZIntArg(
+            options=['--probe-interval'],
+            help='The frequency to perform health probes in seconds.',
+            blank=240
+        )
+        args_schema.probe_method = AAZStrArg(
+            options=['--probe-method'],
+            help='The request method to use for health probes.',
+            blank='HEAD'
+        )
+        args_schema.probe_path = AAZStrArg(
+            options=['--probe-path'],
+            help='The path relative to the origin that is used to determine the health of the origin.',
+        )
+        args_schema.probe_protocol = AAZStrArg(
+            options=['--probe-protocol'],
+            help='The protocol to use for health probes.',
+            blank='Http'
+        )
+        args_schema.origins = AAZStrArg(
+            options=['--origins'],
+            help='The origins load balanced by this origin group, '
+            'as a comma-separated list of origin names or origin resource IDs.',
+        )
+        args_schema.response_error_detection_status_code_ranges = AAZStrArg(
+            options=['--response-error-detection-status-code-ranges'],
+            help='Type of response errors for real user requests for which origin will be deemed unhealthy',
+        )
+        args_schema.response_error_detection_failover_threshold = AAZIntArg(
+            options=['--response-error-detection-failover-threshold'],
+            help='The percentage of failed requests in the sample where failover should trigger.',
+        )
+        args_schema.response_error_detection_error_types = AAZStrArg(
+            options=['--response-error-detection-error-types'],
+            help='The list of Http status code ranges '
+            'that are considered as server errors for origin and it is marked as unhealthy.',
+        )
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+
+        health_probe_settings = {
+            'probe_interval_in_seconds': args.probe_interval,
+            'probe_request_type': args.probe_method,
+            'probe_path': args.probe_path,
+            'probe_protocol': args.probe_protocol,
+        }
+        args.health_probe_settings = health_probe_settings
+
+        formatted_origins = []
+        if has_value(args.origins):
+            for origin in args.origins.to_serialized_data().split(','):
+                # If the origin is not an ID, assume it's a name and format it as an ID.
+                if '/' not in origin:
+                    origin = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
+                             f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/endpoints/{args.endpoint_name}' \
+                             f'/origins/{origin}'
+                formatted_origins.append({'id': origin})
+        args.formatted_origins = formatted_origins
+
+        response_based_origin_error_detection_settings = None
+        if has_value(args.response_error_detection_error_types) or \
+           has_value(args.response_error_detection_failover_threshold) or \
+           has_value(args.response_error_detection_status_code_ranges):
+            response_based_origin_error_detection_settings = {
+                'http_error_ranges': _parse_ranges(args.response_error_detection_status_code_ranges),
+                'response_based_detected_error_types': args.response_error_detection_error_types,
+                'response_based_failover_threshold_percentage': args.response_error_detection_failover_threshold
+            }
+        args.response_based_origin_error_detection_settings = response_based_origin_error_detection_settings
+
+
+class CDNOriginGroupUpdate(_CDNOriginGroupUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -330,91 +413,6 @@ class CDNOriginGroupCreate(_CDNOriginGroupCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if not has_value(args.probe_method):
-            args.probe_method = 'HEAD'
-        if not has_value(args.probe_protocol):
-            args.probe_protocol = 'Http'
-        if not has_value(args.probe_interval):
-            args.probe_interval = 240
-        health_probe_settings = {
-            'probe_interval_in_seconds': args.probe_interval,
-            'probe_method': args.probe_method,
-            'probe_path': args.probe_path,
-            'probe_protocol': args.probe_protocol,
-        }
-        args.health_probe_settings = health_probe_settings
-
-        formatted_origins = []
-        if has_value(args.origins):
-            for origin in args.origins.to_serialized_data().split(','):
-                # If the origin is not an ID, assume it's a name and format it as an ID.
-                if '/' not in origin:
-                    origin = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
-                             f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/endpoints/{args.endpoint_name}' \
-                             f'/origins/{origin}'
-                formatted_origins.append({'id': origin})
-        args.formatted_origins = formatted_origins
-
-        response_based_error_detection_settings = None
-        if has_value(args.response_error_detection_error_types) or \
-           has_value(args.response_error_detection_failover_threshold) or \
-           has_value(args.response_error_detection_status_code_ranges):
-            response_based_error_detection_settings = {
-                'http_error_ranges': _parse_ranges(args.response_error_detection_status_code_ranges),
-                'response_based_detected_error_types': args.response_error_detection_error_types,
-                'response_based_failover_threshold_percentage': args.response_error_detection_failover_threshold
-            }
-        args.response_based_origin_error_detection_settings = response_based_error_detection_settings
-
-
-class CDNOriginGroupUpdate(_CDNOriginGroupUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.probe_interval = AAZIntArg(
-            options=['--probe-interval'],
-            help='The frequency to perform health probes in seconds.',
-        )
-        args_schema.probe_method = AAZStrArg(
-            options=['--probe-method'],
-            help='The request method to use for health probes.',
-        )
-        args_schema.probe_path = AAZStrArg(
-            options=['--probe-path'],
-            help='The path relative to the origin that is used to determine the health of the origin.',
-        )
-        args_schema.probe_protocol = AAZStrArg(
-            options=['--probe-protocol'],
-            help='The protocol to use for health probes.',
-        )
-        args_schema.origin = AAZListArg(
-            options=['--origin-name'],
-            help='The origins load balanced by this origin group, '
-            'as a comma-separated list of origin names or origin resource IDs.',
-        )
-        args_schema.origin.Element = AAZStrArg()
-        args_schema.response_error_detection_status_code_ranges = AAZStrArg(
-            options=['--response-error-detection-status-code-ranges'],
-            help='Type of response errors for real user requests for which origin will be deemed unhealthy',
-        )
-        args_schema.response_error_detection_failover_threshold = AAZIntArg(
-            options=['--response-error-detection-failover-threshold'],
-            help='The percentage of failed requests in the sample where failover should trigger.',
-        )
-        args_schema.response_error_detection_error_types = AAZStrArg(
-            options=['--response-error-detection-error-types'],
-            help='The list of Http status code ranges '
-            'that are considered as server errors for origin and it is marked as unhealthy.',
-        )
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.probe_method):
-            args.probe_method = args.probe_method.to_serialized_data().upper()
-        if has_value(args.probe_protocol):
-            args.probe_protocol = args.probe_protocol.to_serialized_data().upper()
-
         existing = _CDNOriginGroupShow(cli_ctx=self.cli_ctx)(command_args={
             'resource_group': args.resource_group,
             'profile_name': args.profile_name,
@@ -428,7 +426,7 @@ class CDNOriginGroupUpdate(_CDNOriginGroupUpdate):
         elif args.probe_path.to_serialized_data() == '':
             args.probe_path = None
         if not has_value(args.probe_method):
-            args.probe_method = existing['healthProbeSettings']['probeMethod']
+            args.probe_method = existing['healthProbeSettings']['probeRequestType']
         elif args.probe_method.to_serialized_data() == '':
             args.probe_method = None
         if not has_value(args.probe_protocol):
@@ -441,7 +439,7 @@ class CDNOriginGroupUpdate(_CDNOriginGroupUpdate):
             args.probe_interval = None
         health_probe_settings = {
             'probe_interval_in_seconds': args.probe_interval,
-            'probe_method': args.probe_method,
+            'probe_request_type': args.probe_method,
             'probe_path': args.probe_path,
             'probe_protocol': args.probe_protocol,
         }
@@ -452,7 +450,7 @@ class CDNOriginGroupUpdate(_CDNOriginGroupUpdate):
             args.origins = args.origins.to_serialized_data()
         else:
             args.origins = existing['origins']
-        for origin in args.origins.split(','):
+        for origin in str(args.origins).split(','):
             # If the origin is not an ID, assume it's a name and format it as an ID.
             if '/' not in origin:
                 origin = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
@@ -461,16 +459,16 @@ class CDNOriginGroupUpdate(_CDNOriginGroupUpdate):
             formatted_origins.append({'id': origin})
         args.formatted_origins = formatted_origins
 
-        response_based_error_detection_settings = None
+        response_based_origin_error_detection_settings = None
         if has_value(args.response_error_detection_error_types) or \
            has_value(args.response_error_detection_failover_threshold) or \
            has_value(args.response_error_detection_status_code_ranges):
-            response_based_error_detection_settings = {
+            response_based_origin_error_detection_settings = {
                 'http_error_ranges': _parse_ranges(args.response_error_detection_status_code_ranges),
                 'response_based_detected_error_types': args.response_error_detection_error_types,
                 'response_based_failover_threshold_percentage': args.response_error_detection_failover_threshold
             }
-        args.response_based_error_detection_settings = response_based_error_detection_settings
+        args.response_based_origin_error_detection_settings = response_based_origin_error_detection_settings
 
 
 class CDNEndpointCreate(_CDNEndpointCreate):
@@ -528,7 +526,7 @@ class CDNEndpointCreate(_CDNEndpointCreate):
         private_link_resource_id = None
         private_link_location = None
         private_link_approval_message = None
-        origin_name = 'origin'
+        origin_name = host_name.to_serialized_data().replace('.', '-')
 
         if len(args.origin) > 1:
             http_port = int(args.origin[1].to_serialized_data())
@@ -599,7 +597,9 @@ class CDNEndpointUpdate(_CDNEndpointUpdate):
         })
         if has_value(args.default_origin_group):
             if '/' not in args.default_origin_group.to_serialized_data():
-                args.default_origin_group = f'{args.id}/originGroups/{args.default_origin_group}'
+                args.default_origin_group = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
+                                            f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/endpoints/{args.endpoint_name}' \
+                                            f'/originGroups/{args.default_origin_group}'
         if has_value(args.enable_compression):
             args.is_compression_enabled = args.enable_compression
         if not has_value(args.enable_compression):

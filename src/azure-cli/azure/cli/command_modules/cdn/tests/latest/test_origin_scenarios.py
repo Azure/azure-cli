@@ -8,7 +8,7 @@ from .scenario_mixin import CdnScenarioMixin
 
 class CdnOriginScenarioTest(CdnScenarioMixin, ScenarioTest):
 
-    @record_only()  # This tests relies on a specific subscription with existing resources
+    # @record_only()  # This tests relies on a specific subscription with existing resources
     @ResourceGroupPreparer()
     def test_origin_crud(self, resource_group):
 
