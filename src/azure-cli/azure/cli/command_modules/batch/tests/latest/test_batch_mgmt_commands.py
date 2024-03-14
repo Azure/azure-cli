@@ -17,8 +17,8 @@ from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
 
 class BatchMgmtScenarioTests(ScenarioTest):
 
-    def __init__(self, method_name):
-        super().__init__(method_name, random_config_dir=True, recording_processors=[
+    def __init__(self, method_name, *arg, **kwargs):
+        super().__init__(method_name, *arg, random_config_dir=True, **kwargs, recording_processors=[
             BatchAccountKeyReplacer(),
             StorageSASReplacer()
         ])
@@ -344,8 +344,8 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
 
 class BatchMgmtByosScenarioTests(ScenarioTest):
 
-    def __init__(self, method_name):
-        super().__init__(method_name, random_config_dir=True)
+    def __init__(self, method_name, *arg, **kwargs):
+        super().__init__(method_name, *arg, random_config_dir=True, **kwargs)
     
     @ResourceGroupPreparer(location='eastus')
     def test_batch_byos_account_cmd(self):
