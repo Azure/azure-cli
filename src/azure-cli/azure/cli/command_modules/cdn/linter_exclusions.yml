@@ -145,6 +145,12 @@ afd rule update:
         match_processing_behavior:
             rule_exclusions:
             - option_length_too_long
+afd rule action:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+afd rule condition:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
 afd rule action add:
     parameters:
         preserve_unmatched_path:
@@ -153,6 +159,24 @@ afd rule action add:
         query_string_caching_behavior:
             rule_exclusions:
             - option_length_too_long
+        match_processing_behavior:
+            rule_exclusions:
+            - option_length_too_long     
+afd rule action remove:
+    parameters:
+        match_processing_behavior:
+            rule_exclusions:
+            - option_length_too_long
+afd rule condition add:
+    parameters:
+        match_processing_behavior:
+            rule_exclusions:
+            - option_length_too_long     
+afd rule condition remove:
+    parameters:
+        match_processing_behavior:
+            rule_exclusions:
+            - option_length_too_long     
 afd security-policy create:
     parameters:
         web_application_firewall:
@@ -174,4 +198,135 @@ cdn endpoint:
 afd endpoint:
     rule_exclusions:
     - require_wait_command_if_no_wait
+cdn endpoint create:
+    parameters:
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn endpoint rule action add:
+    parameters:
+        content_types_to_compress:
+            rule_exclusions:
+            - option_length_too_long
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn endpoint rule action remove:
+    parameters:
+        content_types_to_compress:
+            rule_exclusions:
+            - option_length_too_long
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn endpoint rule add:
+    parameters:
+        content_types_to_compress:
+            rule_exclusions:
+            - option_length_too_long
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn endpoint rule condition add:
+    parameters:
+        content_types_to_compress:
+            rule_exclusions:
+            - option_length_too_long
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn endpoint rule condition remove:
+    parameters:
+        content_types_to_compress:
+            rule_exclusions:
+            - option_length_too_long
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn endpoint rule remove:
+    parameters:
+        content_types_to_compress:
+            rule_exclusions:
+            - option_length_too_long
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn endpoint update:
+    parameters:
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn origin create:
+    parameters:
+        private_link_approval_message:
+            rule_exclusions:
+            - option_length_too_long
+        private_link_resource_id:
+            rule_exclusions:
+            - option_length_too_long
+cdn origin-group create:
+    parameters:
+        response_based_origin_error_detection_settings:
+            rule_exclusions:
+            - option_length_too_long
+        response_error_detection_error_types:
+            rule_exclusions:
+            - option_length_too_long
+        response_error_detection_failover_threshold:
+            rule_exclusions:
+            - option_length_too_long
+        response_error_detection_status_code_ranges:
+            rule_exclusions:
+            - option_length_too_long
+        traffic_restoration_time_to_healed_or_new_endpoints_in_minutes:
+            rule_exclusions:
+            - option_length_too_long
+cdn origin-group update:
+    parameters:
+        response_based_origin_error_detection_settings:
+            rule_exclusions:
+            - option_length_too_long
+        response_error_detection_error_types:
+            rule_exclusions:
+            - option_length_too_long
+        response_error_detection_failover_threshold:
+            rule_exclusions:
+            - option_length_too_long
+        response_error_detection_status_code_ranges:
+            rule_exclusions:
+            - option_length_too_long
+        traffic_restoration_time_to_healed_or_new_endpoints_in_minutes:
+            rule_exclusions:
+            - option_length_too_long
+cdn profile create:
+    parameters:
+        origin_response_timeout_seconds:
+            rule_exclusions:
+            - option_length_too_long
+cdn profile update:
+    parameters:
+        origin_response_timeout_seconds:
+            rule_exclusions:
+            - option_length_too_long
 ...
