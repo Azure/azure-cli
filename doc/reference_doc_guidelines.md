@@ -129,6 +129,10 @@ examples:
 
 For more information on `_help.py` see [Azure CLI Help System](https://github.com/Azure/azure-cli/blob/dev/doc/authoring_help.md).
 
+### Multi-step commands
+
+Any reference command that executes more than one Azure CLI command, like our `up` commands, must include the list of Azure CLI references that are being executed by the single command. Use the **long-summary** property for this information. See an example in [az something]().
+
 ### Examples
 
 Examples given in the reference documentation provide customers with information on how to use a given command and associated parameters. Examples are usually created in `_help.py` and published in [MicrosoftDocs/azure-docs-cli/latest/docs-ref-autogen](https://github.com/MicrosoftDocs/azure-docs-cli/tree/main/latest/docs-ref-autogen).
