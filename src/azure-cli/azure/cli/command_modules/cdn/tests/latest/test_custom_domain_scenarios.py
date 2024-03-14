@@ -11,6 +11,7 @@ from azure.mgmt.cdn.models import (SkuName, CustomHttpsProvisioningState, Protoc
                                    CertificateType)
 
 from azure.core.exceptions import (HttpResponseError, ResourceNotFoundError, ResourceExistsError)
+from knack.util import CLIError
 
 
 class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
@@ -41,7 +42,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
             self.cmd(
                 'cdn custom-domain enable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
 
-        with self.assertRaises(ResourceNotFoundError):
+        with self.assertRaises(CLIError):
             self.cmd(
                 'cdn custom-domain disable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
 
@@ -101,15 +102,15 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'cdn-cli-test-aaz-v3'
+        endpoint_name = 'cdn-cli-test-aaz-v4'
         origin = 'www.microsoft1.com'
         endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.aaz-v3.clitest.azfdtest.xyz'
+        hostname = custom_domain_name + '.aaz-v4.clitest.azfdtest.xyz'
         # Use alternate hostnames for dogfood.
         if '.azureedge-test.net' in endpoint['hostName']:
-            hostname = custom_domain_name + '.aaz-v3-df.clitest.azfdtest.xyz'
+            hostname = custom_domain_name + '.aaz-v4-df.clitest.azfdtest.xyz'
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
 
         checks = [JMESPathCheck('name', custom_domain_name),
@@ -130,7 +131,6 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
 
-    @unittest.skip("Duplicate cdn endpoint name, cannot rerun live.")
     @ResourceGroupPreparer()
     @KeyVaultPreparer(location='centralus', name_prefix='cdncli-byoc', name_len=24)
     def test_cdn_custom_domain_https_msft(self, resource_group, key_vault):
