@@ -30,13 +30,16 @@ from azure.cli.testsdk import (
     StringContainCheck,
     live_only)
 
+from azure.mgmt.sql.models import AdvancedThreatProtectionState
+
+
 # Constants
 SERVER_NAME_PREFIX = 'azuredbclitest-'
 SERVER_NAME_MAX_LENGTH = 20
 DEFAULT_LOCATION = "eastus2euap"
 DEFAULT_PAIRED_LOCATION = "centraluseuap"
 DEFAULT_GENERAL_PURPOSE_SKU = "Standard_D2s_v3"
-DEFAULT_MEMORY_OPTIMIZED_SKU = "Standard_E2s_v3"
+DEFAULT_MEMORY_OPTIMIZED_SKU = "Standard_E4ads_v5"
 RESOURCE_RANDOM_NAME = "clirecording"
 STORAGE_ACCOUNT_PREFIX = "storageaccount"
 STORAGE_ACCOUNT_NAME_MAX_LENGTH = 20
@@ -85,7 +88,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self._test_flexible_server_paid_iops_mgmt('mysql', resource_group)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @ResourceGroupPreparer(location='northeurope')
     def test_mysql_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('mysql', resource_group)
     
@@ -134,8 +137,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         storage_size = 32
         version = '5.7'
-        location = DEFAULT_LOCATION
-        sku_name = DEFAULT_GENERAL_PURPOSE_SKU
+        location = 'northeurope'
+        sku_name = 'Standard_D2ds_v4'
         memory_optimized_sku = DEFAULT_MEMORY_OPTIMIZED_SKU
         tier = 'GeneralPurpose'
         backup_retention = 7
@@ -657,14 +660,14 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  database_engine, resource_group, target_server_config), checks=NoneCheck())
 
     def _test_flexible_server_georestore_update_mgmt(self, database_engine, resource_group):
-        location = DEFAULT_LOCATION
-        target_location = DEFAULT_PAIRED_LOCATION
+        location = 'eastus'
+        target_location = 'westus'
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
         self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none --tier {} --sku-name {}'
-                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', DEFAULT_GENERAL_PURPOSE_SKU))
+                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', 'Standard_D2ds_v4'))
 
         self.cmd('{} flexible-server show -g {} -n {}'
                  .format(database_engine, resource_group, source_server),
@@ -927,7 +930,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 
     def _test_flexible_server_gtid_reset(self, database_engine, resource_group):
-        location = "eastus"
+        location = 'northeurope'
         general_purpose_sku = "Standard_D2ds_v4"
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -1450,7 +1453,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         self._test_mysql_flexible_server_public_access_custom('mysql', resource_group)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @ResourceGroupPreparer(location='northeurope')
     def test_mysql_flexible_server_public_access_restore(self, resource_group):
         self._test_mysql_flexible_server_public_access_restore('mysql', resource_group)
 
@@ -1979,8 +1982,8 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="eastus2")
-    @ServerPreparer(engine_type='mysql', location="eastus2")
+    @ResourceGroupPreparer(location="northeurope")
+    @ServerPreparer(engine_type='mysql', location="northeurope")
     def test_mysql_flexible_server_backups_mgmt(self, resource_group, server):
         self._test_backups_mgmt('mysql', resource_group, server)
 
@@ -2167,6 +2170,60 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
         # delete everything
         for server_name in [replica[0], replica[1], server]:
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+
+class FlexibleServerAdvancedThreatProtectionScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='eastus2')
+    @ServerPreparer(engine_type='mysql', location='eastus2')
+    def test_mysql_advanced_threat_protection_mgmt(self, resource_group, server):
+        self._test_advanced_threat_protection_mgmt('mysql', resource_group, server)
+
+    def _test_advanced_threat_protection_mgmt(self, database_engine, resource_group, server):
+        state_enabled = AdvancedThreatProtectionState.ENABLED.value
+        state_disabled = AdvancedThreatProtectionState.DISABLED.value
+
+        # get advanced threat protection setting
+        response = self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} -n {}'
+                            .format(database_engine, resource_group, server),
+                            checks=[JMESPathCheck('resourceGroup', resource_group)])
+
+        # flip the setting, if current setting is disabled, then enable it and vice versa
+        new_defender_state = state_enabled if response.get_output_in_json()['state'] == state_disabled else state_disabled
+
+        # update advanced threat protection setting
+        self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(database_engine, resource_group, server, new_defender_state),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', new_defender_state)])
+
+        # get advanced threat protection settings after the update
+        response = self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} -n {}'
+                            .format(database_engine, resource_group, server),
+                            checks=[
+                                JMESPathCheck('resourceGroup', resource_group),
+                                JMESPathCheck('state', new_defender_state)])
+        
+        # flip the setting, if current setting is disabled, then enable it and vice versa
+        new_defender_state = state_enabled if response.get_output_in_json()['state'] == state_disabled else state_disabled
+
+        # update advanced threat protection setting one more time to again get back to the original state
+        self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(database_engine, resource_group, server, new_defender_state),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', new_defender_state)])
+
+        # get advanced threat protection settings after the update
+        response = self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} -n {}'
+                            .format(database_engine, resource_group, server),
+                            checks=[
+                                JMESPathCheck('resourceGroup', resource_group),
+                                JMESPathCheck('state', new_defender_state)])
 
 class MySQLExportTest(ScenarioTest):
     profile = None
