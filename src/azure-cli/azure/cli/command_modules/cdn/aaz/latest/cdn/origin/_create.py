@@ -118,17 +118,17 @@ class Create(AAZCommand):
             help="The Alias of the Private Link resource. Populating this optional field indicates that this origin is 'Private'",
         )
         _args_schema.private_link_approval_message = AAZStrArg(
-            options=["--private-link-approval-message"],
+            options=["-m", "--private-link-approval-message"],
             arg_group="Properties",
             help="A custom message to be included in the approval request to connect to the Private Link.",
         )
         _args_schema.private_link_location = AAZStrArg(
-            options=["--private-link-location"],
+            options=["-l", "--private-link-location"],
             arg_group="Properties",
             help="The location of the Private Link resource. Required only if 'privateLinkResourceId' is populated",
         )
         _args_schema.private_link_resource_id = AAZStrArg(
-            options=["--private-link-resource-id"],
+            options=["-p", "--private-link-resource-id"],
             arg_group="Properties",
             help="The Resource Id of the Private Link resource. Populating this optional field indicates that this backend is 'Private'",
         )
