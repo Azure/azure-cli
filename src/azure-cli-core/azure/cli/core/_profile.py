@@ -529,15 +529,20 @@ class Profile:
             index_str = str(index)  # '1', '2', ...
             index_to_subscription_map[index_str] = sub
 
-            asterisk = format_styled_text((Style.WARNING, '(*)'))
-            # TODO: make index_str blue
+            # asterisk = format_styled_text((Style.WARNING, '*'))
+            asterisk = ' *'
+            is_default_one = sub == active_one
+
+            def highlight_text(text):
+                return format_styled_text((Style.HIGHLIGHT, text)) if is_default_one else text
+
             row = {
-                'No': f'[{index_str}]' + (asterisk if sub == active_one else ''),
-                'Subscription name': sub[_SUBSCRIPTION_NAME],
-                'Subscription ID': sub[_SUBSCRIPTION_ID]
+                'No': f'[{index_str}]' + (asterisk if is_default_one else ''),
+                'Subscription name': highlight_text(sub[_SUBSCRIPTION_NAME]),
+                'Subscription ID': highlight_text(sub[_SUBSCRIPTION_ID])
             }
             if _TENANT_DEFAULT_DOMAIN in sub:
-                row['Tenant Domain Name'] = sub[_TENANT_DEFAULT_DOMAIN]
+                row['Tenant Domain Name'] = highlight_text(sub[_TENANT_DEFAULT_DOMAIN])
             table_data.append(row)
 
         from tabulate import tabulate
@@ -550,7 +555,7 @@ class Profile:
         print()
         print("The default is marked with an *; "
               f"the default tenant is '{active_one[_TENANT_DEFAULT_DOMAIN]}' and subscription is "
-              f"'{active_one[_SUBSCRIPTION_NAME]}({active_one[_SUBSCRIPTION_ID]})'.")
+              f"'{active_one[_SUBSCRIPTION_NAME]}' ({active_one[_SUBSCRIPTION_ID]}).")
         print()
 
         from knack.prompting import prompt, NoTTYException
@@ -562,8 +567,14 @@ class Profile:
                 select_index = prompt('Select a subscription and tenant (Type a number or Enter for no changes): ')
                 # Nothing is typed, keep current selection
                 if select_index == '':
-                    return active_one
-                return index_to_subscription_map[select_index]
+                    pass
+                else:
+                    active_one = index_to_subscription_map[select_index]
+                    # Echo the selection
+                    print()
+                    print(f"Tenant: {active_one[_TENANT_DEFAULT_DOMAIN]}")
+                    print(f"Subscription: {active_one[_SUBSCRIPTION_NAME]} ({active_one[_SUBSCRIPTION_ID]})")
+                return active_one
             except KeyError:
                 logger.warning("Invalid selection.")
                 # Let retry
@@ -785,24 +796,23 @@ class Profile:
             # 3
             {
                 "id": "00000000-0000-0000-0000-333333333333",
-                "name": "Sub 4",
+                "name": "Sub 3",
                 "tenantDefaultDomain": "microsoft.onmicrosoft.com",
                 "tenantId": "00000000-0000-0000-1111-111111111111",
                 "environmentName": "AzureCloud",
             },
             # 3
             {
-                "id": "00000000-0000-0000-1111-222222222222",
+                "id": "00000000-0000-0000-1111-111111111111",
                 "name": "N/A(tenant level account)",
                 "tenantDefaultDomain": "azuresdkteam.onmicrosoft.com",
-                "tenantId": "00000000-0000-0000-1111-222222222222",
+                "tenantId": "00000000-0000-0000-1111-111111111111",
                 "environmentName": "AzureCloud",
             }
         ]
         selected = self._interactively_select_subscription(subscriptions, subscriptions[0])
-        print('selected:')
-        print(selected)
-        return subscriptions
+        return []
+
 
 class MsiAccountTypes:
     # pylint: disable=no-method-argument,no-self-argument

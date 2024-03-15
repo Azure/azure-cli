@@ -66,7 +66,7 @@ THEME_NONE = None
 THEME_DARK = {
     Style.PRIMARY: DEFAULT,
     Style.SECONDARY: '\x1b[90m',  # Bright Foreground Black
-    Style.HIGHLIGHT: '\x1b[97m',  # Bright Foreground White
+    Style.HIGHLIGHT: '\x1b[92m',  # Bright Foreground White
     Style.IMPORTANT: '\x1b[95m',  # Bright Foreground Magenta
     Style.ACTION: '\x1b[94m',  # Bright Foreground Blue
     Style.HYPERLINK: '\x1b[96m',  # Bright Foreground Cyan
@@ -79,7 +79,7 @@ THEME_DARK = {
 THEME_LIGHT = {
     Style.PRIMARY: DEFAULT,
     Style.SECONDARY: '\x1b[90m',  # Bright Foreground Black
-    Style.HIGHLIGHT: '\x1b[30m',  # Foreground Black
+    Style.HIGHLIGHT: '\x1b[32m',  # Foreground Black
     Style.IMPORTANT: '\x1b[35m',  # Foreground Magenta
     Style.ACTION: '\x1b[34m',  # Foreground Blue
     Style.HYPERLINK: '\x1b[36m',  # Foreground Cyan
@@ -93,6 +93,7 @@ THEME_LIGHT = {
 THEME_CLOUD_SHELL = {
     Style.PRIMARY: _rgb_hex('#ffffff'),
     Style.SECONDARY: _rgb_hex('#bcbcbc'),
+    Style.HIGHLIGHT: _rgb_hex('#70d784'),  # Same as Style.SUCCESS, for now
     Style.IMPORTANT: _rgb_hex('#f887ff'),
     Style.ACTION: _rgb_hex('#6cb0ff'),
     Style.HYPERLINK: _rgb_hex('#72d7d8'),

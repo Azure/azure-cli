@@ -149,7 +149,8 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     all_subscriptions = list(subscriptions)
     for sub in all_subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
-    return all_subscriptions
+
+    return None if interactive else all_subscriptions
 
 
 def logout(cmd, username=None):
