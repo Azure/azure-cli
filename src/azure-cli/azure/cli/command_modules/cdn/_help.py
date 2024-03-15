@@ -221,11 +221,6 @@ examples:
         --enable-compression
 """
 
-helps['cdn endpoint rule'] = """
-type: group
-short-summary: Manage delivery rules for an endpoint.
-"""
-
 helps['cdn endpoint rule add'] = """
 type: command
 short-summary: Add a delivery rule to a CDN endpoint.
@@ -272,11 +267,6 @@ examples:
         az cdn endpoint rule show -g group -n endpoint --profile-name profile
 """
 
-helps['cdn endpoint rule condition'] = """
-type: group
-short-summary: Manage delivery rule conditions for an endpoint.
-"""
-
 helps['cdn endpoint rule condition add'] = """
 type: command
 short-summary: Add a condition to a delivery rule.
@@ -306,10 +296,6 @@ examples:
         az cdn endpoint rule condition show -g group -n endpoint --profile-name profile-name
 """
 
-helps['cdn endpoint rule action'] = """
-type: group
-short-summary: Manage delivery rule actions for an endpoint.
-"""
 
 helps['cdn endpoint rule action add'] = """
 type: command
@@ -646,11 +632,6 @@ examples:
   #     --origins origin-0,origin-1 --response-error-detection-error-types TcpErrorsOnly
   #     --response-error-detection-failover-threshold 5
   #     --response-error-detection-status-code-ranges 300-399,500-599
-"""
-
-helps['cdn profile'] = """
-type: group
-short-summary: Manage CDN profiles to define an edge network.
 """
 
 helps['cdn profile create'] = """
