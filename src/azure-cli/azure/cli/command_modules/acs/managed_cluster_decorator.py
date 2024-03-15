@@ -311,6 +311,9 @@ class AKSManagedClusterContext(BaseAKSContext):
                 "ensure_cluster_identity_permission_on_kubelet_identity"
             ] = ensure_cluster_identity_permission_on_kubelet_identity
             external_functions["subnet_role_assignment_exists"] = subnet_role_assignment_exists
+            # azure container storage functions
+            external_functions["perform_enable_azure_container_storage"] = perform_enable_azure_container_storage
+            external_functions["perform_disable_azure_container_storage"] = perform_disable_azure_container_storage
             self.__external_functions = SimpleNamespace(**external_functions)
         return self.__external_functions
 
@@ -6167,29 +6170,31 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             if not mc.agent_pool_profiles:
                 raise UnknownError("Encountered an unexpected error while getting the agent pools from the cluster.")
             agentpool = mc.agent_pool_profiles[0]
-            agentpool_name_list = [agentpool.name]
+            agentpool_details = []
+            pool_details = {}
+            pool_details["name"] = agentpool.name
+            pool_details["vm_size"] = agentpool.vm_size
+            agentpool_details.append(pool_details)
             # Marking the only agentpool name as the valid nodepool for
             # installing Azure Container Storage during `az aks create`
             nodepool_list = agentpool.name
 
-            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import check_if_extension_is_installed
-            is_extension_already_installed = check_if_extension_is_installed(
-                self.cmd,
-                self.context.get_resource_group_name(),
-                self.context.get_name(),
+            from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                validate_enable_azure_container_storage_params
             )
-            from azure.cli.command_modules.acs.azurecontainerstorage._validators import validate_enable_disable_azure_container_storage_params
-            validate_enable_disable_azure_container_storage_params(
-                True,
-                None,
-                pool_name,
+            validate_enable_azure_container_storage_params(
                 pool_type,
+                pool_name,
                 pool_sku,
                 pool_option,
                 pool_size,
                 nodepool_list,
-                agentpool_name_list,
-                is_extension_already_installed,
+                agentpool_details,
+                False,
+                False,
+                False,
+                False,
+                False,
             )
 
             # Setup Azure Container Storage labels on the nodepool
@@ -7640,6 +7645,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    # pylint: disable=too-many-statements,too-many-locals
     def update_azure_container_storage(self, mc: ManagedCluster) -> ManagedCluster:
         """Update azure container storage for the Managed Cluster object
         :return: ManagedCluster
@@ -7657,7 +7663,15 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 'and --disable-azure-container-storage together.'
             )
 
+        # pylint: disable=too-many-nested-blocks
         if enable_azure_container_storage or disable_azure_container_storage:
+            # Require the agent pool profiles for azure container storage
+            # operations. Raise exception if not found.
+            if not mc.agent_pool_profiles:
+                raise UnknownError(
+                    "Encounter an unexpected error while getting agent pool profiles from the cluster "
+                    "in the process of updating agentpool profile."
+                )
             pool_name = self.context.raw_param.get("storage_pool_name")
             pool_option = self.context.raw_param.get("storage_pool_option")
             pool_sku = self.context.raw_param.get("storage_pool_sku")
@@ -7675,64 +7689,73 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 self.cmd,
                 self.context.get_resource_group_name(),
                 self.context.get_name(),
+                mc.agent_pool_profiles,
             )
 
             if enable_azure_container_storage:
-                # Incase of enable_azure_container_storage,
-                # we will collect the agentpool_details and
-                # perform validations based on these details.
-                # Incase of disable_azure_container_storage,
-                # no processing is required on the nodepool list.
-                if not mc.agent_pool_profiles:
-                    raise UnknownError(
-                        "Encounter an unexpected error while getting agent pool profiles from the cluster "
-                        "in the process of updating agentpool profile."
-                    )
-
+                from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
+                    CONST_ACSTOR_IO_ENGINE_LABEL_KEY,
+                    CONST_ACSTOR_IO_ENGINE_LABEL_VAL
+                )
+                labelled_nodepool_arr = []
                 for agentpool in mc.agent_pool_profiles:
+                    pool_details = {}
                     pool_details["vm_size"] = agentpool.vm_size
+                    node_name = agentpool.name
+                    pool_details["name"] = node_name
                     if agentpool.node_labels is not None:
-                        pool_details["node_labels"] = agentpool.node_labels
-                    pool_type["name"] = agentpool.name
+                        node_labels = agentpool.node_labels
+                        if node_labels is not None and \
+                           node_labels.get(CONST_ACSTOR_IO_ENGINE_LABEL_KEY) is not None and \
+                           node_name is not None:
+                            labelled_nodepool_arr.append(node_name)
+                        pool_details["node_labels"] = node_labels
                     agentpool_details.append(pool_details)
 
-                # Incase of a new installation, handle the default values of the
-                # nodepool on which we will install Azure Container Storage.
-                # When not defined, either pick nodepool1 as default, or if only
+                # Incase of a new installation, if the nodepool list is not defined
+                # then check for all the nodepools which are marked with acstor io-engine
+                # labels and include them for installation. If none of the nodepools are
+                # labelled, either pick nodepool1 as default, or if only
                 # one nodepool exists, choose the only nodepool by default.
                 if not is_extension_installed:
                     if nodepool_list is None:
                         nodepool_list = "nodepool1"
-                        if len(agentpool_details) == 1:
+                        if len(labelled_nodepool_arr) > 0:
+                            nodepool_list = ','.join(labelled_nodepool_arr)
+                        elif len(agentpool_details) == 1:
                             pool_detail = agentpool_details[0]
                             nodepool_list = pool_detail.get("name")
 
-                from azure.cli.command_modules.acs.azurecontainerstorage._validators import validate_azure_container_storage_enable_operation
+                from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                    validate_enable_azure_container_storage_params
+                )
                 validate_enable_azure_container_storage_params(
                     enable_pool_type,
-                    is_extension_installed,
                     pool_name,
                     pool_sku,
                     pool_option,
                     pool_size,
                     nodepool_list,
                     agentpool_details,
+                    is_extension_installed,
                     is_azureDisk_enabled,
                     is_elasticSan_enabled,
                     is_ephemeralDisk_localssd_enabled,
                     is_ephemeralDisk_nvme_enabled,
                 )
 
-                if not is_extension_installed:
-                    # Set Azure Container Storage labels on the required nodepools
-                    azure_container_storage_nodepools_list = nodepool_list.split(',')
-                    from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
-                        CONST_ACSTOR_IO_ENGINE_LABEL_KEY,
-                        CONST_ACSTOR_IO_ENGINE_LABEL_VAL
-                    )
+                # If the extension is already installed,
+                # we expect that the Azure Container Storage
+                # nodes are already labelled. Use those label
+                # to generate the nodepool_list.
+                if is_extension_installed:
+                    nodepool_list = ','.join(labelled_nodepool_arr)
+                else:
+                    # Set Azure Container Storage labels on the required nodepools.
+                    nodepool_list_arr = nodepool_list.split(',')
                     for agentpool in mc.agent_pool_profiles:
                         labels = agentpool.node_labels
-                        if agentpool.name in azure_container_storage_nodepools_list:
+                        if agentpool.name in nodepool_list_arr:
                             if labels is None:
                                 labels = {}
                             labels[CONST_ACSTOR_IO_ENGINE_LABEL_KEY] = CONST_ACSTOR_IO_ENGINE_LABEL_VAL
@@ -7743,32 +7766,39 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                                 labels.pop(CONST_ACSTOR_IO_ENGINE_LABEL_KEY, None)
                         agentpool.node_labels = labels
 
-                    # set intermediates
-                    self.context.set_intermediate("azure_container_storage_nodepools", nodepool_list, overwrite_exists=True)
+                # set intermediates
+                self.context.set_intermediate("azure_container_storage_nodepools", nodepool_list, overwrite_exists=True)
                 self.context.set_intermediate("enable_azure_container_storage", True, overwrite_exists=True)
             if disable_azure_container_storage:
-                from azure.cli.command_modules.acs.azurecontainerstorage._validators import validate_disable_azure_container_storage_params
+                from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                    validate_disable_azure_container_storage_params
+                )
                 validate_disable_azure_container_storage_params(
                     disable_pool_type,
-                    is_extension_installed,
                     pool_name,
                     pool_sku,
                     pool_option,
                     pool_size,
                     nodepool_list,
+                    is_extension_installed,
                     is_azureDisk_enabled,
                     is_elasticSan_enabled,
-                    is_ephemeralDisk_localssd_enabled or is_ephemeralDisk_nvme_enabled,
+                    is_ephemeralDisk_localssd_enabled,
+                    is_ephemeralDisk_nvme_enabled,
                 )
                 pre_disable_validate = False
+
                 msg = (
-                    "Disabling Azure Container Storage will forcefully delete all the storagepools on the cluster and "
-                    "affect the applications using these storagepools. Forceful deletion of storagepools can also lead to "
-                    "leaking of storage resources which are being consumed. Do you want to validate whether any of "
-                    "the storagepools are being used before disabling Azure Container Storage?"
+                    "Disabling Azure Container Storage will forcefully delete all the storagepools in the cluster and "
+                    "affect the applications using these storagepools. Forceful deletion of storagepools can also "
+                    "lead to leaking of storage resources which are being consumed. Do you want to validate whether "
+                    "any of the storagepools are being used before disabling Azure Container Storage?"
                 )
 
-                if disable_pool_type != CONST_STORAGE_POOL_TYPE_ALL:
+                from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
+                    CONST_ACSTOR_ALL,
+                )
+                if disable_pool_type != CONST_ACSTOR_ALL:
                     msg = (
                         f"Disabling Azure Container Storage for storagepool type {disable_pool_type} "
                         "will forcefully delete all the storagepools of the same type and affect the "
@@ -7792,8 +7822,16 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             self.context.set_intermediate("is_extension_installed", is_extension_installed, overwrite_exists=True)
             self.context.set_intermediate("is_azureDisk_enabled", is_azureDisk_enabled, overwrite_exists=True)
             self.context.set_intermediate("is_elasticSan_enabled", is_elasticSan_enabled, overwrite_exists=True)
-            self.context.set_intermediate("is_ephemeralDisk_nvme_enabled", is_ephemeralDisk_nvme_enabled, overwrite_exists=True)
-            self.context.set_intermediate("is_ephemeralDisk_localssd_enabled", is_ephemeralDisk_localssd_enabled, overwrite_exists=True)
+            self.context.set_intermediate(
+                "is_ephemeralDisk_nvme_enabled",
+                is_ephemeralDisk_nvme_enabled,
+                overwrite_exists=True
+            )
+            self.context.set_intermediate(
+                "is_ephemeralDisk_localssd_enabled",
+                is_ephemeralDisk_localssd_enabled,
+                overwrite_exists=True
+            )
             self.context.set_intermediate("current_core_value", current_core_value, overwrite_exists=True)
 
         return mc
