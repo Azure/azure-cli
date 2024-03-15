@@ -1026,11 +1026,11 @@ class AFDRuleActionRemove(_AFDRuleUpdate):
         args.actions = actions
 
 
-def list_afd_rule_condition(cmd, resource_group,
+def list_afd_rule_condition(cmd, resource_group_name,
                             profile_name, rule_set_name,
                             rule_name):
     existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group,
+        'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
         'rule_name': rule_name
@@ -1039,11 +1039,11 @@ def list_afd_rule_condition(cmd, resource_group,
     return existing['conditions']
 
 
-def list_afd_rule_action(cmd, resource_group,
+def list_afd_rule_action(cmd, resource_group_name,
                          profile_name, rule_set_name,
                          rule_name):
     existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group,
+        'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
         'rule_name': rule_name
