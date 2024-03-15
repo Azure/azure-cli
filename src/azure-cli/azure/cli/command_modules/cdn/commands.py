@@ -7,7 +7,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands import CliCommandType
 
-from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_waf_policy, cf_waf_rule_set, cf_afd_rules)
+from ._client_factory import (cf_cdn, cf_custom_domain, cf_afd_rules)
 
 
 def _not_found(message):
@@ -34,22 +34,8 @@ _not_found_msg = "{}(s) not found. Please verify the resource(s), group or it's 
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
 def load_command_table(self, _):
-    endpoint_not_found_msg = _not_found_msg.format('Endpoint')
-    waf_policy_not_found_msg = _not_found_msg.format('WAF Policy')
     rule_not_found_msg = _not_found_msg.format('Rule')
     cd_not_found_msg = _not_found_msg.format('Custom Domain')
-
-    cdn_endpoints_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#EndpointsOperations.{}',
-        client_factory=cf_endpoints,
-        exception_handler=_not_found(endpoint_not_found_msg)
-    )
-
-    cdn_waf_policy_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#PoliciesOperations.{}',
-        client_factory=cf_waf_policy,
-        exception_handler=_not_found(waf_policy_not_found_msg)
-    )
 
     cdn_afd_rule_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cdn.operations#RulesOperations.{}',
@@ -131,52 +117,6 @@ def load_command_table(self, _):
 
     from .custom.custom_cdn import CDNEndpointRuleActionRemove
     self.command_table['cdn endpoint rule action remove'] = CDNEndpointRuleActionRemove(loader=self)
-
-    with self.command_group('cdn endpoint waf policy', cdn_endpoints_sdk, is_preview=True) as g:
-        g.custom_show_command('show', 'show_endpoint_waf_policy_link', client_factory=cf_endpoints)
-        g.custom_command('set', 'set_endpoint_waf_policy_link', client_factory=cf_endpoints)
-        g.custom_command('remove', 'remove_endpoint_waf_policy_link', client_factory=cf_endpoints, confirmation=True)
-
-    with self.command_group('cdn waf policy', cdn_waf_policy_sdk, is_preview=True,
-                            deprecate_info=self.deprecate(hide=False)) as g:
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.custom_command('set', 'set_waf_policy', client_factory=cf_waf_policy)
-        g.command('delete', 'delete', confirmation=True)
-
-    with self.command_group('cdn waf policy managed-rule-set', cdn_waf_policy_sdk, is_preview=True) as g:
-        g.custom_command('add', 'add_waf_policy_managed_rule_set', client_factory=cf_waf_policy)
-        g.custom_command('remove',
-                         'remove_waf_policy_managed_rule_set',
-                         client_factory=cf_waf_policy,
-                         confirmation=True)
-        g.custom_command('list', 'list_waf_policy_managed_rule_sets', client_factory=cf_waf_policy)
-        g.custom_show_command('show', 'show_waf_policy_managed_rule_set', client_factory=cf_waf_policy)
-        g.custom_command('list-available', 'list_waf_managed_rule_set', client_factory=cf_waf_rule_set)
-
-    with self.command_group('cdn waf policy managed-rule-set rule-group-override',
-                            cdn_waf_policy_sdk,
-                            is_preview=True) as g:
-        g.custom_command('set', 'set_waf_managed_rule_group_override', client_factory=cf_waf_policy)
-        g.custom_command('delete',
-                         'delete_waf_managed_rule_group_override',
-                         client_factory=cf_waf_policy,
-                         confirmation=True)
-        g.custom_command('list', 'list_waf_policy_managed_rule_group_overrides', client_factory=cf_waf_policy)
-        g.custom_show_command('show', 'show_waf_managed_rule_group_override', client_factory=cf_waf_policy)
-        g.custom_command('list-available', 'list_waf_managed_rule_groups', client_factory=cf_waf_rule_set)
-
-    with self.command_group('cdn waf policy custom-rule', cdn_waf_policy_sdk, is_preview=True) as g:
-        g.custom_command('set', 'set_waf_custom_rule', client_factory=cf_waf_policy)
-        g.custom_command('delete', 'delete_waf_custom_rule', client_factory=cf_waf_policy, confirmation=True)
-        g.custom_command('list', 'list_waf_custom_rules', client_factory=cf_waf_policy)
-        g.custom_show_command('show', 'show_waf_custom_rule', client_factory=cf_waf_policy)
-
-    with self.command_group('cdn waf policy rate-limit-rule', cdn_waf_policy_sdk, is_preview=True) as g:
-        g.custom_command('set', 'set_waf_rate_limit_rule', client_factory=cf_waf_policy)
-        g.custom_command('delete', 'delete_waf_rate_limit_rule', client_factory=cf_waf_policy, confirmation=True)
-        g.custom_command('list', 'list_waf_rate_limit_rules', client_factory=cf_waf_policy)
-        g.custom_show_command('show', 'show_waf_rate_limit_rule', client_factory=cf_waf_policy)
 
     with self.command_group('afd', is_preview=True):
         pass
