@@ -75,7 +75,7 @@ class Create(AAZCommand):
             help="Description for the storage Account.",
         )
         _args_schema.storage_account_credential_id = AAZStrArg(
-            options=["--storage-account-credential-id"],
+            options=["--sac-id", "--storage-account-credential-id"],
             arg_group="Properties",
             help="Storage Account Credential Id",
         )

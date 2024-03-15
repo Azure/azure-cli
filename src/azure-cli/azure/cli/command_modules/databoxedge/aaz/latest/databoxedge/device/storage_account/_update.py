@@ -79,7 +79,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.storage_account_credential_id = AAZStrArg(
-            options=["--storage-account-credential-id"],
+            options=["--sac-id", "--storage-account-credential-id"],
             arg_group="Properties",
             help="Storage Account Credential Id",
             nullable=True,
