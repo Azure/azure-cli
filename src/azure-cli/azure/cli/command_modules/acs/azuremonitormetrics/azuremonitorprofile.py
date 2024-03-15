@@ -75,7 +75,7 @@ def ensure_azure_monitor_profile_prerequisites(
         if grafana_resource_id is not None:
             if grafana_resource_id != "":
                 raise InvalidArgumentValueError(f"{cloud_name} does not support Azure Managed Grafana yet.")
-            
+
     if remove_azuremonitormetrics:
         unlink_azure_monitor_profile_artifacts(
             cmd,
