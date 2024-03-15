@@ -105,6 +105,18 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             resource_group, identity_name)).get_output_in_json()
         return identity.get("id")
 
+    def test_aks_get_version_table(self, location="westus2"):
+        self.kwargs.update({
+            'location': location
+        })
+
+        # show k8s versions in table format
+        self.cmd('aks get-versions -l {location} -o table', checks=[
+            StringContainCheck("SupportPlan"), # column name is printed
+            StringContainCheck("KubernetesOfficial"), # every GA version should have this
+            StringContainCheck("AKSLongTermSupport") # we should always have at least 1 LTS version which have this SupportPlan
+        ])
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_default(self, resource_group, resource_group_location):
@@ -690,6 +702,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_service_no_wait(self, resource_group, resource_group_location, sp_name, sp_password):
@@ -734,12 +747,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # show k8s versions
         self.cmd('aks get-versions -l {location}', checks=[
-            self.exists('values[*].patchVersions.keys(@)[]')
-        ])
-
-        # show k8s versions in table format
-        self.cmd('aks get-versions -l {location} -o table', checks=[
-            StringContainCheck(self.kwargs['k8s_version'])
+            self.exists('values[*].patchVersions.keys(@)[]'), # check result not empty
+            StringContainCheck(self.kwargs['k8s_version']) # check the version we want is present
         ])
 
         # get versions for upgrade
@@ -3504,12 +3513,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # show k8s versions
         self.cmd('aks get-versions -l {location}', checks=[
-            self.exists('values[*].patchVersions.keys(@)[]')
-        ])
-
-        # show k8s versions in table format
-        self.cmd('aks get-versions -l {location} -o table', checks=[
-            StringContainCheck(self.kwargs['k8s_version'])
+            self.exists('values[*].patchVersions.keys(@)[]'), # check result not empty
+            StringContainCheck(self.kwargs['k8s_version']) # check the version we want is present
         ])
 
         # get versions for upgrade
@@ -6101,6 +6106,45 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_nodepool_node_soak_duration(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        np_name = self.create_random_name('clinp', 12)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'nodepool_name': np_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--ssh-key-value={ssh_key_value} -c 1'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        add_nodepool_cmd = 'aks nodepool add -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
+                     '--mode user --node-soak-duration 5'
+        self.cmd(add_nodepool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('upgradeSettings.nodeSoakDurationInMinutes', 5),
+        ])
+
+        update_nodepool_cmd = 'aks nodepool update -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
+                      '--node-soak-duration 10'
+        self.cmd(update_nodepool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('upgradeSettings.nodeSoakDurationInMinutes', 10),
+        ])
+
+        #actually running an upgrade is too expensive for these tests.
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
     def test_aks_nodepool_stop_and_start(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
@@ -6161,6 +6205,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('networkProfile.loadBalancerProfile.allocatedOutboundPorts', 1024),
+            self.check('networkProfile.loadBalancerProfile.idleTimeoutInMinutes', 10)
+        ])
+
+        # update
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--load-balancer-outbound-ports 0'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.loadBalancerProfile.allocatedOutboundPorts', 0),
             self.check('networkProfile.loadBalancerProfile.idleTimeoutInMinutes', 10)
         ])
 

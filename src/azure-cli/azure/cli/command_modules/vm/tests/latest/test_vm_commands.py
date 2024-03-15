@@ -194,7 +194,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
 
         # Expecting the one we just added
         self.kwargs['rg_caps'] = resource_group.upper()  # test the command handles name with casing diff.
-        self.cmd('vm list-ip-addresses --resource-group {rg_caps}', checks=[
+        self.cmd('vm list-ip-addresses --resource-group {rg_caps} -n {vm}', checks=[
             self.check('length(@)', 1),
             self.check('[0].virtualMachine.name', '{vm}'),
             self.check('[0].virtualMachine.resourceGroup', '{rg}'),
@@ -6515,6 +6515,12 @@ class VMGalleryImage(ScenarioTest):
         if self.is_live:
             time.sleep(30)
 
+        self.cmd('sig update -g {rg} -r {gallery}', checks=[
+            self.check('softDeletePolicy.isSoftDeleteEnabled', False)
+        ])
+        if self.is_live:
+            time.sleep(30)
+
         from azure.cli.core.azclierror import InvalidArgumentValueError
         with self.assertRaises(InvalidArgumentValueError):
             self.cmd('sig image-version undelete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} --gallery-image-version {version}')
@@ -7016,6 +7022,22 @@ class DedicatedHostScenarioTest(ScenarioTest):
 
         self.cmd('vm host delete -n {host} --host-group {host-group} -g {rg} --yes')
         self.cmd('vm host group delete -n {host-group} -g {rg} --yes')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_redeploy_', location='eastus')
+    def test_vm_host_redeploy(self, resource_group):
+        self.kwargs.update({
+            'host-group': 'my-host-group',
+            'host': 'my-host',
+        })
+
+        self.cmd('vm host group create -n {host-group} -c 1 -g {rg}')
+        self.cmd('vm host group list -g {rg}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{host-group}')
+        ])
+        self.cmd('vm host create -n {host} --host-group {host-group} -d 0 -g {rg} --sku Dsv4-Type1')
+
+        self.cmd('vm host redeploy -n {host} --host-group {host-group} -g {rg}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_host_resize_', location='centraluseuap')
     def test_vm_host_resize(self, resource_group):
@@ -9145,6 +9167,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vm1': 'vm1',
             'vm2': 'vm2',
+            'vm3': 'vm3',
         })
         self.cmd('vm create -g {rg} -n {vm1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
@@ -9155,6 +9178,14 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         # create with image whose hyperVGeneration is v2 and under features does not contains TrustedLaunch
         self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7_6-gen2:latest --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('securityProfile', 'None')
+        ])
+
+        # create VM with specifying security type Standard
+        # and image whose hyperVGeneration is v2 and under features contains TrustedLaunch
+        self.cmd('vm create -g {rg} -n {vm3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest '
+                 '--admin-username clitest1 --generate-ssh-key --security-type Standard --nsg-rule None')
+        self.cmd('vm show -g {rg} -n {vm3}', checks=[
             self.check('securityProfile', 'None')
         ])
 

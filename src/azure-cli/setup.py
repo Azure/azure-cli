@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.56.0"
+VERSION = "2.58.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -52,7 +52,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.13.1",
     'azure-appconfiguration~=1.1.1',
-    'azure-batch~=14.0.0',
+    'azure-batch~=14.1.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
@@ -69,15 +69,15 @@ DEPENDENCIES = [
     'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization~=4.0.0',
     'azure-mgmt-batchai==7.0.0b1',
-    'azure-mgmt-batch~=17.0.0',
+    'azure-mgmt-batch~=17.2.0',
     'azure-mgmt-billing==6.0.0',
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
     'azure-mgmt-cognitiveservices~=13.5.0',
     'azure-mgmt-compute~=30.4.0',
     'azure-mgmt-containerinstance==10.1.0',
-    'azure-mgmt-containerregistry==10.1.0',
-    'azure-mgmt-containerservice~=29.0.0',
+    'azure-mgmt-containerregistry==10.3.0',
+    'azure-mgmt-containerservice~=29.1.0',
     'azure-mgmt-cosmosdb==9.4.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -191,6 +191,7 @@ setup(
             'resources/GenerateRandomAppNames.json'
         ],
         'azure.cli.command_modules.rdbms': [
+            '*.json',
             'randomname/adjectives.txt',
             'randomname/nouns.txt',
             'templates/mysql_githubaction_template.yaml',

@@ -3,6 +3,206 @@
 Release History
 ===============
 
+2.58.0
+++++++
+
+**ACR**
+
+* `az acr`: Update registry and webhook example names to be lowercase (#28364)
+* `az acr create/update`: Add new argument `--allow-metadata-search` to enable the metadata-search feature for the registry (#28082)
+
+**AKS**
+
+* Add monitoring addon to support default workspace in AGC (#28326)
+* `az aks get-versions`: Show extra column on supportPlan (#28325)
+* `az aks create/update`: Update region map for default region creation with new Azure Monitor Workspace regions (#28236)
+* `az aks update`: Zero can be set to outbound-ports,outbound-ip-count in loadbalancer profile and outbound-ip-count in natgateway profile in AKS (#28273)
+
+**API Management**
+
+* `az apim api export`: Add command to export an API Management API (#28279)
+
+**App Service**
+
+* `az webapp up/create/update`: Add new parameter `--basic-auth` to allow users to enable and disable basic auth (#28237)
+
+**ARM**
+
+* Fix #27855: `az bicep generate-params`: Bicep install messages sent to stdout (#28188)
+
+**Backup**
+
+* [BREAKING CHANGE] `az backup item set-policy`: Add warning prompt for migration from Standard to Enhanced Policy (#28317)
+
+**Batch**
+
+* `az batch pool create`: Add new parameter `--resource-tags` to support specifying resource tags for the pool. Any resource created for the pool will then also be tagged by the same resource tags (#28315)
+* `az batch pool create`: Add new parameters `--security-type`, `--encryption-at-host`, `--secure-boot-enabled`, and `--v-tpm-enabled` to support Trusted Launch Security Type for VMs/VMSS deployments (#28315)
+* `az batch pool create`: Add new parameters `--caching`, `--disk-size-gb`, `--write-accelerator-enabled`, and `--storage-account-type` to support Batch Node Agent temp disk-less SKUs (#28315)
+
+**CDN**
+
+* Fix #28240: `az afd rule create`: Cannot create without condition (#28422)
+* Fix #28223: `az afd route create`: Cannot create without `--content-types-to-compress` (#28421)
+* Fix #27744: `az afd origin-group`: Add parameter `--enable-health-probe` (#28432)
+
+**Compute**
+
+* `az vmss nic`: Update help messages to guild users to specific commands for Flexible VMSS (#28390)
+* `az vm host redeploy`: Add command to redeploy the dedicated host (#28418)
+* Fix #28397: `az vm create`: Fix creating VM with `--security-type Standard` (#28409)
+* `az vmss application set`: Fix updates to the purchase plan are not supported when updating VMSS (#28230)
+* `az vmss update-domain-walk`: Add new command to support updating vm in a service fabric vmss (#28300)
+
+**Containerapp**
+
+* `az containerapp revision copy`: Fix `--from-revision` bug for inheriting a specific revision contains scale rules (#28272)
+* `az containerapp update`: Fix TypeError: Argument of type 'NoneType' is not iterable (#28401)
+* Fix #28226: `az containerapp job update`: Update existing scale rules if `--scale-rule-name` is passed (#28408)
+
+**Cosmos DB**
+
+* `az cosmosdb sql database/container restore`: Fix support for restore of deleted database resource in the same SQL account (#28365)
+* `az cosmosdb mongodb database/collection restore`: Fix support for restore of deleted database resource in the same MongoDB account (#28365)
+* `az cosmosdb gremlin database/graph restore`: Fix support for restore of deleted database resource in the same gremlin account (#28365)
+* `az cosmosdb table restore`: Fix support for restore of deleted table resource in the same account (#28365)
+
+**MySQL**
+
+* `az mysql flexible-server import create`: Change the default progress message from starting to running (#28435)
+
+**Network**
+
+* `az network virtual-appliance connection`: Add show and list commands for NVA connection (#28431)
+* `az network vnet-gateway`: Add parameters `--allow-remote-vnet-traffic` and `--allow-vwan-traffic` (#28446)
+* `az network express-route gateway`: Add parameter `--allow-non-vwan-traffic` (#28446)
+
+**RDBMS**
+
+* Fix #27713: `az postgres flexible-server list-skus -o table`: Fix table output from list-skus command (#28108)
+
+**Security**
+
+* `az security api-collection`: Manage Azure API Management API connections to Microsoft Defender for APIs (#28285)
+* `az security security-connector`: Manage cloud security posture management (CSPM) and cloud workload protection (CWP) across multicloud resources (#28285)
+
+**SQL VM**
+
+* Fix #27300: `az sql vm group create`: `--cluster-subnet-type` should only be passed into `WsfcDomainProfile` (#27301)
+
+**Storage**
+
+* Fix #28356: `az storage account or-policy update`: Fix `-p @policy.json` to allow passing in json files (#28391)
+* `az storage blob upload-batch`: Support `--tags`, make `--overwrite` non-preview (#28410)
+
+2.57.0
+++++++
+
+**AKS**
+
+* `az aks upgrade`: Add forceupgrade settings to aks stable cli (#28200)
+* `az aks mesh`: Add `az aks mesh` commands to manage Azure Service Mesh in given cluster (#28206)
+* `az aks nodepool add/update/upgrade`: Add new parameter `--node-soak-duration` to wait after draining a node and before reimaging it and moving on to next node (#27604)
+
+**App Service**
+
+* `az functionapp create`: Use app insights connection string instead of instrumentation key (#27803)
+* `az webapp create`: Add new parameter `--acr-use-identity` to configure pull image from ACR using MSI when creating a container web app (#28209)
+* `az webapp up`: Add `--track-status` arg to use deploymentstatus API (#28235)
+* `az webapp deployment source config-zip`: Add `--track-status` arg to use deploymentstatus API (#28235)
+* `az functionapp create`: Only allow apps with functions version 4 (#28128)
+
+**Backup**
+
+* `az backup restore restore-disks`: Add support for disk restore in edge-zone backups (#28150)
+* `az backup restore restore-disks`: Support for Taiwan North and Taiwan North-West Cross region restore (#28150)
+
+**Billing**
+
+* `az billing account`: Add new command `list-invoice-section` to support listing invoice section (#28214)
+* `az billing account`: Add new command group `invoice-section` to support managing account invoice section (#28214)
+* `az billing`: Add new command `enrollment-account` to support managing enrollment account (#28214)
+* `az billing invoice section`: Add new command `initiate-transfer` to support intiating transfer (#28214)
+* `az billing profile`: Add new command `reservation list ` to support managing reservation (#28214)
+* `az billing`: Add new command group `transfer` to support managing transfer (#28214)
+
+**Compute**
+
+* `az image builder error-handler`: Add group to manage error handling options upon a build failure (#28106)
+* `az sshkey create`: Add parameter `--encryption-type` to specify the encryption type of SSH keys to be generated (#28143)
+* `az vm monitor log show`: Deprecate `azure-loganalytics` and apply `azure-monitor-query` (#28199)
+* `az vm/vmss create`: Support Trusted Launch as default deployment option (#28222)
+
+**Consumption**
+
+* Fix #20995 #23825: Update `az consumption` API version (#27833)
+
+**Containerapp**
+
+* `az containerapp update`: Fix issue for minReplicas in `--yaml` or `--min-replicas` is not set when the value is 0 (#28163)
+* `az containerapp up`: Fix issue when registry creds are provided for ACRs using `containerapp up` command (#28217)
+
+**Key Vault**
+
+* `az keyvault create`: Add warning for upcoming breaking change that `--enable-rbac-authorization` will default to `true` (#28178)
+* `az keyvault secret set-attributes`: Fix 'Datetime with no tzinfo will be considered UTC' warning (#28138)
+
+**Monitor**
+
+* `az monitor metrics`: Add `list-sub` and `list-sub-definition` (#28201)
+* `az monitor metrics list`: Fix `--top` help message (#28114)
+
+**MySQL**
+
+* `az mysql flexible-server import create`: Add support for operation progress estimated completion time for import from physical backup from azure blob to flexible server (#28243)
+
+**Network**
+
+* `az network vnet-gateway create/update`: Add parameter `--enable-private-ip` (#28158)
+* Fix #28131: `az network vnet-gateway list`: Conflict key when apply client flatten (#28170)
+* `az network express-route port authorization`: Support to manage authorization with express route port (#28149)
+* `az network private-link-service list-auto-approved`: Support to list all auto-approved private link services (#28149)
+* `az network public-ip ddos-protection-statu show`: Support to get the DDoS protection status of public IP address (#28149)
+* `az network vnet-gateway`: Support ExpressRoute SKU (#28219)
+* `az network lb create`: Support cross-subscription resource ID (#28247)
+
+**Packaging**
+
+* Support Windows ZIP package (#27911)
+
+**RDBMS**
+
+* `az postgres flexible-server private-endpoint-connection`: Add support for private endpoint connection commands like list, show, approve, reject, delete for PostgreSQL flexible server (#28142)
+* `az postgres flexible-server private-link-resource`: Add support for private link resource commands like list, show for PostgreSQL flexible server (#28142)
+* `az postgres flexible-server replica stop-replication`: Stop replication to a read replica and make it a read/write server. This command is deprecated. Use `az postgres flexible-server replica promote` instead. (#28189)
+
+**Redis**
+
+* `az redis flush`: Add support for flush operation (#27599)
+* `az redis create`: Add support for Microsoft Entra Authentication (#27599)
+* `az redis access-policy/access-policy-assignment`: New command groups to manage access policy (#27599)
+
+**Service Connector**
+
+* `az webapp/containerapp/spring connection create/update app-insights`: Support App Insights as target service (#28095)
+* `az webapp connection create sql`: Support auto install for serviceconnector-passwordless extension (#28168)
+* `az webapp/functionapp/containerapp/springapp connection`: Support Microsoft Entra ID auth types for table storage (#28162)
+* `az webapp/containerapp/spring connection create/update`: Support opt out action for configurationInfo and publicNetwork (#28079)
+
+**SQL**
+
+* `az sql db ltr-policy/ltr-backup`: Add support for backup storage access tier (#27928)
+* `az sql db ltr-policy set`: Add the make-backups-immutable parameter to ltr policy (#27983)
+* `az mi create/update`: Add optional parameter `--database-format` and `--pricing-model` for SQL Managed Server resource (#28173)
+* `az sql mi refresh-external-governance-status`: Add a new command for Azure SQL Managed Instance refresh external governance status (#28195)
+
+**Storage**
+
+* `az storage file copy start`: Fix when copying between two storage accounts and source file has no parent directory (#28123)
+* Fix #28202: `az storage container policy create`: Fix creating an access policy would delete public access permission (#28211)
+* `az storage container set-permission`: Fix failing when updating public access permission with an existing access policy (#28211)
+* Fix #21876: `az storage blob upload-batch/download-batch/delete-batch`: Add double quotes to `--pattern` value for unix shell (#28221)
+
 2.56.0
 ++++++
 

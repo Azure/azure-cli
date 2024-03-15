@@ -6697,7 +6697,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             self.context.get_cluster_autoscaler_profile() is None and
             self.context.get_api_server_authorized_ip_ranges() is None and
             self.context.get_nodepool_labels() is None and
-            self.context.get_nodepool_taints() is None
+            self.context.get_nodepool_taints() is None and
+            self.context.get_load_balancer_managed_outbound_ip_count() is None and
+            self.context.get_load_balancer_managed_outbound_ipv6_count() is None and
+            self.context.get_load_balancer_idle_timeout() is None and
+            self.context.get_load_balancer_outbound_ports() is None and
+            self.context.get_nat_gateway_managed_outbound_ip_count() is None and
+            self.context.get_nat_gateway_idle_timeout() is None
         )
 
         if not is_changed and is_default:
@@ -7922,8 +7928,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         cluster, cluster_resource_id, self.cmd
                     )
             elif (
-                self.context.raw_param.get("enable_addons") is not None or
-                self.context.raw_param.get("disable_addons") is not None
+                self.context.raw_param.get("enable_addons") is not None
             ):
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()

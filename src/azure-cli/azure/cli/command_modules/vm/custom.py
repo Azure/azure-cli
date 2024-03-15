@@ -2828,7 +2828,7 @@ def _get_vault_id_from_name(cli_ctx, client, vault_name):
 
 
 def get_vm_format_secret(cmd, secrets, certificate_store=None, keyvault=None, resource_group_name=None):
-    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1 import KeyVaultId
+    from azure.keyvault.secrets._shared import parse_key_vault_id
     import re
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     grouped_secrets = {}
@@ -2839,8 +2839,8 @@ def get_vm_format_secret(cmd, secrets, certificate_store=None, keyvault=None, re
 
     # group secrets by source vault
     for secret in merged_secrets:
-        parsed = KeyVaultId.parse_secret_id(secret)
-        match = re.search('://(.+?)\\.', parsed.vault)
+        parsed = parse_key_vault_id(secret)
+        match = re.search('://(.+?)\\.', parsed.vault_url)
         vault_name = match.group(1)
         if vault_name not in grouped_secrets:
             grouped_secrets[vault_name] = {
@@ -4604,6 +4604,11 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
             gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
         else:
             gallery.soft_delete_policy = {'is_soft_delete_enabled': soft_delete}
+    else:
+        # This is a workaround to solve historical legacy issues,
+        # send None to the service will let service not modify this property.
+        # We can delete this logic when the service no longer checks AFEC in the future.
+        gallery.soft_delete_policy = None
 
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -5664,7 +5669,7 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
         for treat_as_failure in treat_deployment_as_failure:
             vmss.virtual_machine_profile.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = (treat_as_failure.lower() == 'true')
             index += 1
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update, resource_group_name, vmss_name, vmss)
 
 
 def list_vmss_applications(cmd, vmss_name, resource_group_name):

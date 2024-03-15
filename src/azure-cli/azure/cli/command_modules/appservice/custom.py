@@ -75,13 +75,13 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            get_or_create_default_workspace, get_or_create_default_resource_group,
                            get_workspace)
 from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX,
-                         FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
+                         FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
                          VERSION_2022_09_01,
-                         RUNTIME_STATUS_TEXT_MAP)
+                         RUNTIME_STATUS_TEXT_MAP, LANGUAGE_EOL_DEPRECATION_NOTICES)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -105,8 +105,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
-                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, public_network_access=None,
-                  acr_use_identity=False):
+                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
+                  public_network_access=None, acr_use_identity=False, basic_auth=""):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -291,7 +291,20 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,
                                    role, None, scope)
         webapp.identity = identity
+
+    _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth.lower())
     return webapp
+
+
+def _enable_basic_auth(cmd, app_name, slot_name, resource_group, enabled):
+    if not enabled or enabled == "":
+        return
+    CsmPublishingCredentialsPoliciesEntity = cmd.get_models("CsmPublishingCredentialsPoliciesEntity")
+    csmPublishingCredentialsPoliciesEntity = CsmPublishingCredentialsPoliciesEntity(allow=enabled == "enabled")
+    _generic_site_operation(cmd.cli_ctx, resource_group, app_name,
+                            'update_ftp_allowed', slot_name, csmPublishingCredentialsPoliciesEntity)
+    _generic_site_operation(cmd.cli_ctx, resource_group, app_name,
+                            'update_scm_allowed', slot_name, csmPublishingCredentialsPoliciesEntity)
 
 
 def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, webapp_location, vnet_sub_id=None):
@@ -404,6 +417,27 @@ def parse_docker_image_name(deployment_container_image_name, environment=None):
     if environment:
         return hostname
     return "https://{}".format(hostname)
+
+
+def check_language_runtime(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    app = client.web_apps.get(resource_group_name, name)
+    is_linux = app.reserved
+    if is_functionapp(app):
+        runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, is_linux)
+        runtime = runtime_info['app_runtime']
+        runtime_version = runtime_info['app_runtime_version']
+        functions_version = runtime_info['functionapp_version']
+        runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=is_linux, windows=(not is_linux))
+        try:
+            runtime_helper.resolve(runtime, runtime_version, functions_version, is_linux)
+        except ValidationError as e:
+            logger.warning(e.error_msg)
+
+
+def update_app_settings_functionapp(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
+    check_language_runtime(cmd, resource_group_name, name)
+    return update_app_settings(cmd, resource_group_name, name, settings, slot, slot_settings)
 
 
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
@@ -555,6 +589,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
 
 
 def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
+    check_language_runtime(cmd, resource_group_name, name)
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     if app is None:
@@ -818,7 +853,7 @@ def get_webapp(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
 
-def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=None,  # pylint: disable=unused-argument
+def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=None, basic_auth="",  # pylint: disable=unused-argument
                skip_custom_domain_verification=None, force_dns_registration=None, ttl_in_seconds=None, **kwargs):  # pylint: disable=unused-argument
     instance = kwargs['parameters']
     client = web_client_factory(cmd.cli_ctx)
@@ -826,6 +861,8 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
     kwargs = dict(resource_group_name=resource_group_name, name=name, site_envelope=instance)
     if slot:
         kwargs['slot'] = slot
+
+    _enable_basic_auth(cmd, name, slot, resource_group_name, basic_auth.lower())
 
     return updater(**kwargs)
 
@@ -1790,6 +1827,28 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
                                                                           slot=slot))
 
 
+def update_site_configs_functionapp(cmd, resource_group_name, name, slot=None, number_of_workers=None,
+                                    linux_fx_version=None, windows_fx_version=None, pre_warmed_instance_count=None,
+                                    php_version=None, python_version=None, net_framework_version=None,
+                                    power_shell_version=None, java_version=None, java_container=None,
+                                    java_container_version=None, remote_debugging_enabled=None,
+                                    web_sockets_enabled=None, always_on=None, auto_heal_enabled=None,
+                                    use32_bit_worker_process=None, min_tls_version=None,
+                                    http20_enabled=None, app_command_line=None, ftps_state=None,
+                                    vnet_route_all_enabled=None, generic_configurations=None, min_replicas=None,
+                                    max_replicas=None):
+    check_language_runtime(cmd, resource_group_name, name)
+    return update_site_configs(cmd, resource_group_name, name, slot, number_of_workers, linux_fx_version,
+                               windows_fx_version, pre_warmed_instance_count, php_version,
+                               python_version, net_framework_version, power_shell_version,
+                               java_version, java_container, java_container_version,
+                               remote_debugging_enabled, web_sockets_enabled,
+                               always_on, auto_heal_enabled,
+                               use32_bit_worker_process, min_tls_version, http20_enabled, app_command_line,
+                               ftps_state, vnet_route_all_enabled, generic_configurations, min_replicas,
+                               max_replicas)
+
+
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
                                           image=None, registry_username=None,
                                           registry_password=None, slot=None, min_replicas=None, max_replicas=None,
@@ -1797,6 +1856,7 @@ def update_container_settings_functionapp(cmd, resource_group_name, name, regist
                                           dapr_http_max_request_size=None, dapr_http_read_buffer_size=None,
                                           dapr_log_level=None, dapr_enable_api_logging=None,
                                           workload_profile_name=None, cpu=None, memory=None):
+    check_language_runtime(cmd, resource_group_name, name)
     if is_centauri_functionapp(cmd, resource_group_name, name):
         _validate_cpu_momory_functionapp(cpu, memory)
         if any([enable_dapr, dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
@@ -3571,10 +3631,36 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 d["linux_fx_version"] = self.site_config_dict.linux_fx_version
             return d
 
+    class RuntimeEOL:
+        def __init__(self, name=None, version=None, eol=None):
+            self.name = name
+            self.version = version
+            self.eol = eol
+            self.display_name = "{}|{}".format(name, version)
+            self.deprecation_link = LANGUAGE_EOL_DEPRECATION_NOTICES.get(self.display_name)
+
     def __init__(self, cmd, linux=False, windows=False):
-        self.disallowed_functions_versions = {"~1", "~2"}
+        self.disallowed_functions_versions = {"~1", "~2", "~3"}
         self.KEYS = FUNCTIONS_STACKS_API_KEYS()
+        self.end_of_life_dates = []
         super().__init__(cmd, linux=linux, windows=windows)
+
+    def validate_end_of_life_date(self, runtime, version):
+        from dateutil.relativedelta import relativedelta
+        today = datetime.datetime.now(datetime.timezone.utc)
+        six_months = today + relativedelta(months=+6)
+        runtimes_eol = [r for r in self.end_of_life_dates if runtime == r.name]
+        matched_runtime_eol = next((r for r in runtimes_eol if r.version == version), None)
+        if matched_runtime_eol:
+            eol = matched_runtime_eol.eol
+            runtime_deprecation_link = matched_runtime_eol.deprecation_link or ''
+
+            if eol < today:
+                raise ValidationError('{} has reached EOL on {} and is no longer supported. {}'
+                                      .format(runtime, eol.date(), runtime_deprecation_link))
+            if eol < six_months:
+                logger.warning('%s will reach EOL on %s and will no longer be supported. %s',
+                               runtime, eol.date(), runtime_deprecation_link)
 
     def resolve(self, runtime, version=None, functions_version=None, linux=False, disable_version_error=False):
         stacks = self.stacks
@@ -3586,7 +3672,12 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                                   "Run 'az functionapp list-runtimes' for more details on supported runtimes. "
                                   .format(runtime, os, supported_runtimes))
         if version is None:
-            return self.get_default_version(runtime, functions_version, linux)
+            matched_runtime_version = self.get_default_version(runtime, functions_version, linux)
+            self.validate_end_of_life_date(
+                matched_runtime_version.name,
+                matched_runtime_version.version
+            )
+            return matched_runtime_version
         matched_runtime_version = next((r for r in runtimes if r.version == version), None)
         if not matched_runtime_version:
             # help convert previously acceptable versions into correct ones if match not found
@@ -3595,10 +3686,19 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 "8": "8.0",
                 "7": "7.0",
                 "6.0": "6",
-                "1.8": "8.0"
+                "1.8": "8.0",
+                "17": "17.0"
             }
             new_version = old_to_new_version.get(version)
             matched_runtime_version = next((r for r in runtimes if r.version == new_version), None)
+            if matched_runtime_version is not None:
+                version = new_version
+
+        self.validate_end_of_life_date(
+            runtime,
+            version
+        )
+
         if not matched_runtime_version:
             versions = [r.version for r in runtimes]
             if disable_version_error:
@@ -3656,7 +3756,10 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 valid_versions.append(self._format_version_name(v))
         return valid_versions
 
-    def _parse_minor_version(self, runtime_settings, major_version_name, minor_version_name, runtime_to_version):
+    def _parse_minor_version(self, runtime_settings, major_version_name, minor_version_name, runtime_to_version,
+                             runtime_to_version_eol):
+        runtime_name = (runtime_settings.app_settings_dictionary.get(self.KEYS.FUNCTIONS_WORKER_RUNTIME) or
+                        major_version_name)
         if not runtime_settings.is_deprecated:
             functions_versions = self._get_valid_function_versions(runtime_settings)
             if functions_versions:
@@ -3670,10 +3773,13 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                     self.KEYS.GIT_HUB_ACTION_SETTINGS: runtime_settings.git_hub_action_settings
                 }
 
-                runtime_name = (runtime_settings.app_settings_dictionary.get(self.KEYS.FUNCTIONS_WORKER_RUNTIME) or
-                                major_version_name)
                 runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
                 runtime_to_version[runtime_name][minor_version_name] = runtime_version_properties
+
+        # obtain end of life date for all runtime versions
+        if runtime_settings.end_of_life_date is not None:
+            runtime_to_version_eol[runtime_name] = runtime_to_version_eol.get(runtime_name, dict())
+            runtime_to_version_eol[runtime_name][minor_version_name] = runtime_settings.end_of_life_date
 
     def _create_runtime_from_properties(self, runtime_name, version_name, version_properties, linux):
         supported_func_versions = version_properties[self.KEYS.SUPPORTED_EXTENSION_VERSIONS]
@@ -3693,6 +3799,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
         # build a map of runtime -> runtime version -> runtime version properties
         runtime_to_version_linux = {}
         runtime_to_version_windows = {}
+        runtime_to_version_end_of_life = {}
         for runtime in stacks:
             for major_version in runtime.major_versions:
                 for minor_version in major_version.minor_versions:
@@ -3704,16 +3811,19 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                         self._parse_minor_version(runtime_settings=linux_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
-                                                  runtime_to_version=runtime_to_version_linux)
+                                                  runtime_to_version=runtime_to_version_linux,
+                                                  runtime_to_version_eol=runtime_to_version_end_of_life)
 
                     if windows_settings is not None and not windows_settings.is_hidden:
                         self._parse_minor_version(runtime_settings=windows_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
-                                                  runtime_to_version=runtime_to_version_windows)
+                                                  runtime_to_version=runtime_to_version_windows,
+                                                  runtime_to_version_eol=runtime_to_version_end_of_life)
 
         runtime_to_version_linux = self._format_version_names(runtime_to_version_linux)
         runtime_to_version_windows = self._format_version_names(runtime_to_version_windows)
+        runtime_to_version_end_of_life = self._format_version_names(runtime_to_version_end_of_life)
 
         for runtime_name, versions in runtime_to_version_windows.items():
             for version_name, version_properties in versions.items():
@@ -3724,6 +3834,11 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             for version_name, version_properties in versions.items():
                 r = self._create_runtime_from_properties(runtime_name, version_name, version_properties, linux=True)
                 self._stacks.append(r)
+
+        for runtime_name, versions in runtime_to_version_end_of_life.items():
+            for version_name, version_eol in versions.items():
+                r = self.RuntimeEOL(name=runtime_name, version=version_name, eol=version_eol)
+                self.end_of_life_dates.append(r)
 
 
 def get_app_insights_key(cli_ctx, resource_group, name):
@@ -3803,12 +3918,12 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
     updated_functionapp = json.dumps(
         {
             "properties": {
-                "daprConfig": {
+                "daprConfig": {"enabled": False} if functionapp.dapr_config is None else {
                     "enabled": functionapp.dapr_config.enabled,
                     "appId": functionapp.dapr_config.app_id,
                     "appPort": functionapp.dapr_config.app_port,
-                    "httpReadBufferSize": functionapp.dapr_config.http_read_buffer_size,
-                    "httpMaxRequestSize": functionapp.dapr_config.http_max_request_size,
+                    "httpReadBufferSize": functionapp.dapr_config.http_read_buffer_size or 4,
+                    "httpMaxRequestSize": functionapp.dapr_config.http_max_request_size or 4,
                     "logLevel": functionapp.dapr_config.log_level,
                     "enableApiLogging": functionapp.dapr_config.enable_api_logging
                 },
@@ -3840,16 +3955,38 @@ def update_dapr_and_workload_config(cmd, resource_group_name, name, enabled=None
                                     http_max_request_size=None, http_read_buffer_size=None, log_level=None,
                                     enable_api_logging=None, workload_profile_name=None, cpu=None, memory=None):
     site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
-    import inspect
-    frame = inspect.currentframe()
-    bool_flags = ['enabled', 'enable_api_logging']
-    int_flags = ['app_port', 'http_max_request_size', 'http_read_buffer_size']
-    args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
-    for arg in args[3:10]:
-        if arg in int_flags and values[arg] is not None:
-            values[arg] = validate_and_convert_to_int(arg, values[arg])
-        if values.get(arg, None):
-            setattr(site.dapr_config, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
+    DaprConfig = cmd.get_models('DaprConfig')
+
+    if enabled is None:
+        if site.dapr_config and site.dapr_config.enabled is False:
+            site.dapr_config = None
+    elif enabled == "false":
+        site.dapr_config = None
+    elif enabled == "true":
+        if site.dapr_config is None:
+            site.dapr_config = DaprConfig()
+            site.dapr_config.enabled = True
+        elif site.dapr_config and site.dapr_config.enabled is False:
+            site.dapr_config.enabled = True
+
+    if any([app_id, app_port, http_max_request_size, http_read_buffer_size, log_level, enable_api_logging]) \
+            and site.dapr_config is None:
+        raise ArgumentUsageError("usage error: parameters --dapr-app-id, "
+                                 "--dapr-app-port, --dapr-http-max-request-size, "
+                                 "--dapr-http-read-buffer-size, --dapr-log-level and "
+                                 "--dapr-enable-api-logging must be used with parameter --enable-dapr true.")
+
+    if site.dapr_config is not None:
+        import inspect
+        frame = inspect.currentframe()
+        bool_flags = ['enabled', 'enable_api_logging']
+        int_flags = ['app_port', 'http_max_request_size', 'http_read_buffer_size']
+        args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
+        for arg in args[3:10]:
+            if arg in int_flags and values[arg] is not None:
+                values[arg] = validate_and_convert_to_int(arg, values[arg])
+            if values.get(arg, None):
+                setattr(site.dapr_config, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     if cpu is not None and memory is not None:
         setattr(site.resource_config, 'cpu', cpu)
@@ -3875,9 +4012,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        workload_profile_name=None, cpu=None, memory=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
-        logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
-                       "be required. To create a 3.x function you would pass in the flag `--functions-version 3`")
-        functions_version = '3'
+        logger.warning("No functions version specified so defaulting to 4.")
+        functions_version = '4'
+    enable_dapr = (enable_dapr == "true")
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if any([cpu, memory, workload_profile_name]) and environment is None:
@@ -3899,6 +4036,13 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                            "dapr-enable-api-logging must be used with parameter --environment,"
                                            "please provide the name of the container app environment using "
                                            "--environment.")
+    if any([dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
+            dapr_log_level, dapr_enable_api_logging]) and not enable_dapr:
+        raise ArgumentUsageError("usage error: parameters --dapr-app-id, "
+                                 "--dapr-app-port, --dapr-http-max-request-size, "
+                                 "--dapr-http-read-buffer-size, --dapr-log-level and "
+                                 "dapr-enable-api-logging must be used with parameter --enable-dapr true.")
+
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair, DaprConfig, ResourceConfig = cmd.get_models('SiteConfig', 'NameValuePair',
                                                                            'DaprConfig', 'ResourceConfig')
@@ -3906,8 +4050,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     site_config = SiteConfig(app_settings=[])
     client = web_client_factory(cmd.cli_ctx)
-
-    dapr_config = DaprConfig()
 
     if vnet or subnet:
         if plan:
@@ -3938,7 +4080,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         subnet_resource_id = None
         vnet_route_all_enabled = None
 
-    functionapp_def = Site(location=None, site_config=site_config, dapr_config=dapr_config, tags=tags,
+    functionapp_def = Site(location=None, site_config=site_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
                            vnet_route_all_enabled=vnet_route_all_enabled)
 
@@ -3994,10 +4136,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         docker_registry_server_url = registry_server
     else:
         docker_registry_server_url = parse_docker_image_name(image, environment)
-
-    if functions_version == '2' and functionapp_def.location in FUNCTIONS_NO_V2_REGIONS:
-        raise ValidationError("2.x functions are not supported in this region. To create a 3.x function, "
-                              "pass in the flag '--functions-version 3'")
 
     if is_linux and not runtime and (consumption_plan_location or not image):
         raise ArgumentUsageError(
@@ -4111,13 +4249,16 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if enable_dapr:
             logger.warning("Please note while using Dapr Extension for Azure Functions, app port is "
                            "mandatory when using Dapr triggers and should be empty when using only Dapr bindings.")
+            dapr_enable_api_logging = (dapr_enable_api_logging == "true")
+            dapr_config = DaprConfig()
             dapr_config.enabled = True
             dapr_config.app_id = dapr_app_id
             dapr_config.app_port = dapr_app_port
-            dapr_config.http_max_request_size = dapr_http_max_request_size
-            dapr_config.http_read_buffer_size = dapr_http_read_buffer_size
+            dapr_config.http_max_request_size = dapr_http_max_request_size or 4
+            dapr_config.http_read_buffer_size = dapr_http_read_buffer_size or 4
             dapr_config.log_level = dapr_log_level
             dapr_config.enable_api_logging = dapr_enable_api_logging
+            functionapp_def.dapr_config = dapr_config
 
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
         location = managed_environment.location
@@ -4228,7 +4369,7 @@ def _validate_cpu_momory_functionapp(cpu=None, memory=None):
 def _get_extension_version_functionapp(functions_version):
     if functions_version is not None:
         return '~{}'.format(functions_version)
-    return '~2'
+    return '~4'
 
 
 def _get_app_setting_set_functionapp(site_config, app_setting):
@@ -5110,7 +5251,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
-              app_service_environment=None, track_status=False):
+              app_service_environment=None, track_status=False, basic_auth=""):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -5280,6 +5421,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
             if match:
                 _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_config, runtime_version)
         create_json['runtime_version'] = runtime_version
+
+    _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth.lower())
+
     # Zip contents & Deploy
     logger.warning("Creating zip with contents of dir %s ...", src_dir)
     # zip contents & deploy
