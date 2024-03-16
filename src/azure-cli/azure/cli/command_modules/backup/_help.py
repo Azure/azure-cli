@@ -9,7 +9,7 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['backup'] = """
 type: group
-short-summary: Manage Azure Backups.
+short-summary: Manage Azure Backups. Private build for support case, not supported for general scenarios.
 """
 
 helps['backup container'] = """
