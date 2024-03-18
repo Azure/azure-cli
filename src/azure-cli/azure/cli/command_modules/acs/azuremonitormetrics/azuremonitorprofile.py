@@ -18,6 +18,7 @@ from azure.cli.command_modules.acs.azuremonitormetrics.helper import (
 )
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.create import create_rules
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.delete import delete_rules
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 
 # pylint: disable=line-too-long
@@ -68,6 +69,13 @@ def ensure_azure_monitor_profile_prerequisites(
     remove_azuremonitormetrics,
     create_flow=False
 ):
+    cloud_name = cmd.cli_ctx.cloud.name
+    if cloud_name.lower() == "ussec" or cloud_name.lower() == "usnat" or cloud_name.lower() == "usdod":
+        grafana_resource_id = raw_parameters.get("grafana_resource_id")
+        if grafana_resource_id is not None:
+            if grafana_resource_id != "":
+                raise InvalidArgumentValueError(f"{cloud_name} does not support Azure Managed Grafana yet.")
+
     if remove_azuremonitormetrics:
         unlink_azure_monitor_profile_artifacts(
             cmd,
