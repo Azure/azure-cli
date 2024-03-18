@@ -18,6 +18,9 @@ class UpdateNetworkSiblingSet(AAZCommand):
     """Update the network features of a network sibling set
 
     Update the network features of the specified network sibling set
+
+    :example: Update Network sibling set
+        az -l westus2 --network-sibling-set-id {SIBLIING_SET_ID} --subnet-id {SUBNET_ID} --network-sibling-set-state-id {SIBLING_SET_STATE_ID} --network-features Standard
     """
 
     _aaz_info = {
