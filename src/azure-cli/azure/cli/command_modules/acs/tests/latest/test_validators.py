@@ -8,8 +8,10 @@ from types import SimpleNamespace
 
 from azure.cli.command_modules.acs import _validators as validators
 from azure.cli.core.azclierror import (
+    ArgumentUsageError,
     InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
+    RequiredArgumentMissingError,
 )
 import azure.cli.command_modules.acs.azurecontainerstorage._consts as acstor_consts
 import azure.cli.command_modules.acs.azurecontainerstorage._validators as acstor_validator
