@@ -276,6 +276,8 @@ class CDNOriginCreate(_CDNOriginCreate):
             args.priority = 1
         if not has_value(args.weight):
             args.weight = 1000
+        if int(args.priority) < 1 or int(args.priority) > 1000:
+            raise CLIError('Priority must be between 1 and 1000')
 
 
 class CDNOriginUpdate(_CDNOriginUpdate):
@@ -542,6 +544,9 @@ class CDNEndpointCreate(_CDNEndpointCreate):
             private_link_approval_message = args.origin[5]
         if len(args.origin) > 6:
             origin_name = args.origin[6]
+
+        if http_port < 1 or http_port > 65535 or https_port < 1 or https_port > 65535:
+            raise CLIError('Port number must be between 1 and 65535')
 
         args.origins = [{
             'name': origin_name,

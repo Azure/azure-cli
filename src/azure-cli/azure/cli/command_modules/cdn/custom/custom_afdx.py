@@ -26,6 +26,7 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.endpoint import Show as _AFDEn
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin_group import Show as _AFDOriginGroupShow, \
     Create as _AFDOriginGroupCreate, Update as _AFDOriginGroupUpdate
 from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZTimeArg, AAZIntArg
+from knack.util import CLIError
 from knack.log import get_logger
 from .custom_rule_util import (create_condition, create_action,
                                create_conditions_from_existing, create_actions_from_existing)
@@ -280,6 +281,8 @@ class AFDOriginCreate(_AFDOriginCreate):
                 'group_id': args.private_link_sub_resource_type
             }
         args.shared_private_link_resource = shared_private_link_resource
+        if int(args.priority) < 1 or int(args.priority) > 1000:
+            raise CLIError('Priority must be between 1 and 1000')
 
 
 class AFDOriginUpdate(_AFDOriginUpdate):
@@ -365,6 +368,8 @@ class AFDOriginUpdate(_AFDOriginUpdate):
         args.origin_host_header = args.origin_host_header if args.origin_host_header is not None \
             else existing['originHostHeader']
         args.priority = args.priority if args.priority is not None else existing['priority']
+        if int(args.priority) < 1 or int(args.priority) > 1000:
+            raise CLIError('Priority must be between 1 and 1000')
         args.weight = args.weight if args.weight is not None else existing['weight']
         args.enabled_state = args.enabled_state if args.enabled_state is not None else existing['enabledState']
         args.enforce_certificate_name_check = \
