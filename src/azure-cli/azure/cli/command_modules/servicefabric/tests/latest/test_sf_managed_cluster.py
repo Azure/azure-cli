@@ -93,6 +93,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'loc': 'eastasia',
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
+            'update_type': "ByUpgradeDomain"
         })
 
         self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --sku Standard --upgrade-mode Automatic --upgrade-cadence Wave1',
@@ -123,7 +124,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         timeout = time.time() + 300
         while True:
             try:
-                self.cmd('az sf managed-node-type node restart -g {rg} -c {cluster_name} -n snt --node-name snt_0 snt_1')
+                self.cmd('az sf managed-node-type node restart -g {rg} -c {cluster_name} -n snt --node-name snt_0 snt_1 --update-type {update_type}')
                 break
             except HttpResponseError:
                 if time.time() > timeout:
@@ -133,7 +134,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
 
         self.cmd('az sf managed-node-type node delete -g {rg} -c {cluster_name} -n snt --node-name snt_1')
 
-        self.cmd('az sf managed-node-type node reimage -g {rg} -c {cluster_name} -n snt --node-name snt_3')
+        self.cmd('az sf managed-node-type node reimage -g {rg} -c {cluster_name} -n snt --node-name snt_3 --update-type {update_type}')
 
         self.cmd('az sf managed-node-type delete -g {rg} -c {cluster_name} -n snt')
 

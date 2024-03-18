@@ -330,6 +330,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('is_stateless', arg_type=get_three_state_flag(), help='Indicates if the node type can only host Stateless workloads.', default=False)
         c.argument('multiple_placement_groups', options_list=['--multiple-placement-groups', '--multi-place-groups'], arg_type=get_three_state_flag(),
                    help='Indicates if scale set associated with the node type can be composed of multiple placement groups.', default=False)
+        c.argument('update_type', help='Specifies the way the operation will be performed', default='ByUpgradeDomain')
 
     with self.argument_context('sf managed-node-type node') as c:
         c.argument('node_name', nargs='+', help='list of target nodes to perform the operation.')

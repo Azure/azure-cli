@@ -546,7 +546,7 @@ short-summary: Restart nodes of a node type.
 examples:
   - name: Restart 2 nodes.
     text: >
-        az sf managed-node-type node restart -g testRG -c testCluster -n snt --node-name snt_0 snt_1
+        az sf managed-node-type node restart -g testRG -c testCluster -n snt --node-name snt_0 snt_1 --update-type ByUpgradeDomain
 """
 
 helps['sf managed-node-type node reimage'] = """
@@ -555,7 +555,7 @@ short-summary: Reimage nodes of a node type.
 examples:
   - name: Reimage 2 nodes.
     text: >
-        az sf managed-node-type node reimage -g testRG -c testCluster -n snt --node-name snt_0 snt_1
+        az sf managed-node-type node reimage -g testRG -c testCluster -n snt --node-name snt_0 snt_1 --update-type ByUpgradeDomain
 """
 
 helps['sf managed-node-type node delete'] = """

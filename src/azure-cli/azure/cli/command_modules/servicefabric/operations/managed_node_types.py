@@ -142,10 +142,11 @@ def reimage_node(cmd,
                  cluster_name,
                  node_type_name,
                  node_name,
+                 update_type,
                  force=False):
     try:
         nodes = [node_name] if isinstance(node_name, str) else node_name
-        action_parameters = NodeTypeActionParameters(nodes=nodes, force=force)
+        action_parameters = NodeTypeActionParameters(nodes=nodes, force=force, update_type=update_type)
         poller = client.node_types.begin_reimage(resource_group_name, cluster_name, node_type_name, parameters=action_parameters)
         LongRunningOperation(cmd.cli_ctx, start_msg='Reimaging nodes', finish_msg='Nodes reimaged')(poller)
     except HttpResponseError as ex:
@@ -159,10 +160,11 @@ def restart_node(cmd,
                  cluster_name,
                  node_type_name,
                  node_name,
+                 update_type,
                  force=False):
     try:
         nodes = [node_name] if isinstance(node_name, str) else node_name
-        action_parameters = NodeTypeActionParameters(nodes=nodes, force=force)
+        action_parameters = NodeTypeActionParameters(nodes=nodes, force=force, update_type=update_type)
         poller = client.node_types.begin_restart(resource_group_name, cluster_name, node_type_name, parameters=action_parameters)
         LongRunningOperation(cmd.cli_ctx, start_msg='Restarting nodes', finish_msg='Nodes restarted')(poller)
     except HttpResponseError as ex:
