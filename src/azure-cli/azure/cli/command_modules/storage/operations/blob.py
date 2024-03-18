@@ -961,6 +961,15 @@ def set_blob_tier_v2(client, tier, blob_type='block', rehydrate_priority=None, t
     raise ValueError('Blob tier is only applicable to block or page blob.')
 
 
+def set_blob_tier_batch(client, blobs, tier, blob_type='block', rehydrate_priority=None, if_tags_match_condition=None,
+                        **kwargs):
+    if blob_type == 'block':
+        return client.set_standard_blob_tier_blobs(tier, *blobs, rehydrate_priority=rehydrate_priority,
+                                                   if_tags_match_condition=if_tags_match_condition,
+                                                   raise_on_any_failure=False, **kwargs)
+    raise ValueError('Batch set blob tier is only applicable to block blobs.')
+
+
 def acquire_blob_lease(client, lease_duration=-1, **kwargs):
     client.acquire(lease_duration=lease_duration, **kwargs)
     return client.id

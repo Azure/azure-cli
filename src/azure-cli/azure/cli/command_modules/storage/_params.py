@@ -268,6 +268,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         min_api='2019-12-12', is_preview=True
     )
 
+    blobs_type = CLIArgumentType(
+        nargs='+',
+        help="space-separated blobs: blobname1 [blobname2 ....]"
+    )
+
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
@@ -1002,6 +1007,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(('High', 'Standard')), validator=blob_rehydrate_priority_validator,
                    is_preview=True, help="Indicate the priority with which to rehydrate an archived blob. "
                                          "The priority can be set on a blob only once, default value is Standard.")
+
+    with self.argument_context('storage blob set-tier-batch') as c:
+        from azure.cli.command_modules.storage._validators import (blob_rehydrate_priority_validator,
+                                                                   block_blob_tier_validator)
+        c.register_container_arguments()
+        c.argument('blobs', blobs_type)
+        c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(['block']))
+        c.argument('tier', validator=block_blob_tier_validator, help="The tier value to set the blob to.")
+        c.extra('rehydrate_priority', options_list=('--rehydrate-priority', '-r'),
+                   arg_type=get_enum_type(('High', 'Standard')), validator=blob_rehydrate_priority_validator,
+                   is_preview=True, help="Indicate the priority with which to rehydrate an archived blob. "
+                                         "The priority can be set on a blob only once, default value is Standard.")
+        c.extra('if_tags_match_condition',
+                help="Specify a SQL where clause on blob tags to operate only on blob with a matching value. ")
 
     with self.argument_context('storage blob set-legal-hold') as c:
         c.register_blob_arguments()
