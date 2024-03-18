@@ -625,7 +625,6 @@ def aks_create(
     storage_pool_size=None,
     storage_pool_sku=None,
     storage_pool_option=None,
-    node_provisioning_mode=None,
     # misc
     yes=False,
     no_wait=False,
@@ -776,7 +775,6 @@ def aks_update(
     storage_pool_sku=None,
     storage_pool_option=None,
     azure_container_storage_nodepools=None,
-    node_provisioning_mode=None,
     # misc
     yes=False,
     no_wait=False,
