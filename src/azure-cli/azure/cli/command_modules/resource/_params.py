@@ -790,7 +790,6 @@ def load_arguments(self, _):
         c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
         c.argument('deny_settings_apply_to_child_scopes', arg_type=stacks_apply_to_child_scopes)
         c.argument('tags', tags_type)
-        c.argument('yes', help='Do not prompt for confirmation')
 
     for scope in ['stack group show', 'stack group export']:
         with self.argument_context(scope) as c:

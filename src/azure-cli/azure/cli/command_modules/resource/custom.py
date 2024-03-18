@@ -2755,7 +2755,7 @@ def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_
 def validate_deployment_stack_at_resource_group(
     cmd, name, resource_group, deny_settings_mode, action_on_unmanage, template_file=None, template_spec=None,
     template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None,
-    deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None, no_wait=False
+    deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None, no_wait=False
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -2774,17 +2774,6 @@ def validate_deployment_stack_at_resource_group(
     if [template_file, template_spec, template_uri].count(None) < 2:
         raise InvalidArgumentValueError(
             "Please enter only one of the following: template file, template spec, or template url")
-
-    # build confirmation string
-    try:
-        if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
-            built_string = _build_stacks_confirmation_string(
-                rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum,
-                aou_management_groups_action_enum)
-            if not built_string:
-                return
-    except:  # pylint: disable=bare-except
-        pass
 
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
         resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum,
