@@ -281,7 +281,9 @@ class AFDOriginCreate(_AFDOriginCreate):
                 'group_id': args.private_link_sub_resource_type
             }
         args.shared_private_link_resource = shared_private_link_resource
-        if int(args.priority) < 1 or int(args.priority) > 1000:
+        if not has_value(args.priority):
+            args.priority = 1
+        elif int(args.priority.to_serialized_data()) < 1 or int(args.priority.to_serialized_data()) > 1000:
             raise CLIError('Priority must be between 1 and 1000')
 
 
@@ -367,9 +369,10 @@ class AFDOriginUpdate(_AFDOriginUpdate):
         args.https_port = args.https_port if args.https_port is not None else existing['httpsPort']
         args.origin_host_header = args.origin_host_header if args.origin_host_header is not None \
             else existing['originHostHeader']
-        args.priority = args.priority if args.priority is not None else existing['priority']
-        if int(args.priority) < 1 or int(args.priority) > 1000:
+        if has_value(args.priority) \
+                and (int(args.priority.to_serialized_data()) < 1 or int(args.priority.to_serialized_data()) > 1000):
             raise CLIError('Priority must be between 1 and 1000')
+        args.priority = args.priority if has_value(args.priority) else existing['priority']
         args.weight = args.weight if args.weight is not None else existing['weight']
         args.enabled_state = args.enabled_state if args.enabled_state is not None else existing['enabledState']
         args.enforce_certificate_name_check = \

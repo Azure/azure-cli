@@ -274,10 +274,10 @@ class CDNOriginCreate(_CDNOriginCreate):
             args.https_port = 443
         if not has_value(args.priority):
             args.priority = 1
+        elif int(args.priority.to_serialized_data()) < 1 or int(args.priority.to_serialized_data()) > 1000:
+            raise CLIError('Priority must be between 1 and 1000')
         if not has_value(args.weight):
             args.weight = 1000
-        if int(args.priority) < 1 or int(args.priority) > 1000:
-            raise CLIError('Priority must be between 1 and 1000')
 
 
 class CDNOriginUpdate(_CDNOriginUpdate):
