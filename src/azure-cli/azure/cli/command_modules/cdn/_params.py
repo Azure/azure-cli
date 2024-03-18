@@ -9,7 +9,7 @@ from azure.mgmt.cdn.models import (QueryStringCachingBehavior, DeliveryRuleActio
                                    AfdQueryStringCachingBehavior, Transform,
                                    MatchProcessingBehavior)
 
-from azure.cli.core.commands.parameters import get_three_state_flag, tags_type, get_enum_type
+from azure.cli.core.commands.parameters import get_three_state_flag, get_enum_type
 
 
 # pylint:disable=too-many-statements
