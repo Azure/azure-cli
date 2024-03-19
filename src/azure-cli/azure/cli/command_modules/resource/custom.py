@@ -2555,25 +2555,23 @@ def list_deployment_stack_at_subscription(cmd):
     return rcf.deployment_stacks.list_at_subscription()
 
 
-def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):  # pylint: disable=redefined-builtin
+def delete_deployment_stack_at_subscription(cmd, name=None, id=None, action_on_unmanage=None, yes=False):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
     delete_list = []
 
     delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
     delete_resource_groups_enum = rcf.deployment_stacks.models.UnmanageActionResourceGroupMode.Detach
+    delete_management_groups_enum = rcf.deployment_stacks.models.UnmanageActionResourceGroupMode.Detach
 
-    if delete_all:
+    if action_on_unmanage == StacksActionOnUnmanage.DELETE_ALL:
         delete_list.append("resources")
         delete_list.append("resource groups")
+        delete_list.append("management groups")
         delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
         delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    if delete_resource_groups:
-        delete_list.append("resource groups")
-        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    if delete_resources:
+        delete_management_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+    elif action_on_unmanage == StacksActionOnUnmanage.DELETE_RESOURCES:
         delete_list.append("resources")
         delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
 
@@ -2586,7 +2584,7 @@ def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_reso
                 return None
         else:
             confirmation += " and the specified resources: "
-            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+            response = prompt_y_n(confirmation + ", ".join(delete_list) + '?')
             if not response:
                 return None
 
@@ -2603,7 +2601,7 @@ def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_reso
                 rcf.deployment_stacks.get_at_subscription(name)
         except:
             raise ResourceNotFoundError("DeploymentStack " + delete_name + " not found in the current subscription scope.")
-        return rcf.deployment_stacks.begin_delete_at_subscription(delete_name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum)
+        return rcf.deployment_stacks.begin_delete_at_subscription(delete_name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum, unmanage_action_management_groups=delete_management_groups_enum)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
@@ -2685,25 +2683,23 @@ def list_deployment_stack_at_resource_group(cmd, resource_group):
     raise InvalidArgumentValueError("Please enter the resource group")
 
 
-def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):  # pylint: disable=redefined-builtin
+def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None, action_on_unmanage=None, yes=False):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
     delete_list = []
 
     delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
     delete_resource_groups_enum = rcf.deployment_stacks.models.UnmanageActionResourceGroupMode.Detach
+    delete_management_groups_enum = rcf.deployment_stacks.models.UnmanageActionResourceGroupMode.Detach
 
-    if delete_all:
+    if action_on_unmanage == StacksActionOnUnmanage.DELETE_ALL:
         delete_list.append("resources")
         delete_list.append("resource groups")
+        delete_list.append("management groups")
         delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
         delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    if delete_resource_groups:
-        delete_list.append("resource groups")
-        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    if delete_resources:
+        delete_management_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+    elif action_on_unmanage == StacksActionOnUnmanage.DELETE_RESOURCES:
         delete_list.append("resources")
         delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
 
@@ -2716,7 +2712,7 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=Non
                 return None
         else:
             confirmation += " and the specified resources: "
-            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+            response = prompt_y_n(confirmation + ", ".join(delete_list) + '?')
             if not response:
                 return None
 
@@ -2725,7 +2721,7 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=Non
             rcf.deployment_stacks.get_at_resource_group(resource_group, name)
         except:
             raise ResourceNotFoundError("DeploymentStack " + name + " not found in the current resource group scope.")
-        return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, resource_group, name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum)
+        return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, resource_group, name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum, unmanage_action_management_groups=delete_management_groups_enum)
     if id:
         stack_arr = id.split('/')
         if len(stack_arr) < 5:
@@ -2736,7 +2732,7 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=Non
             rcf.deployment_stacks.get_at_resource_group(stack_rg, name)
         except:
             raise ResourceNotFoundError("DeploymentStack " + name + " not found in the current resource group scope.")
-        return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, stack_rg, name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum)
+        return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, stack_rg, name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum, unmanage_action_management_groups=delete_management_groups_enum)
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
 
@@ -2930,25 +2926,23 @@ def list_deployment_stack_at_management_group(cmd, management_group_id):
     return rcf.deployment_stacks.list_at_management_group(management_group_id)
 
 
-def delete_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):  # pylint: disable=redefined-builtin
+def delete_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None, action_on_unmanage=None, yes=False):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
     delete_list = []
 
     delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
     delete_resource_groups_enum = rcf.deployment_stacks.models.UnmanageActionResourceGroupMode.Detach
+    delete_management_groups_enum = rcf.deployment_stacks.models.UnmanageActionResourceGroupMode.Detach
 
-    if delete_all:
+    if action_on_unmanage == StacksActionOnUnmanage.DELETE_ALL:
         delete_list.append("resources")
         delete_list.append("resource groups")
+        delete_list.append("management groups")
         delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
         delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    if delete_resource_groups:
-        delete_list.append("resource groups")
-        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    if delete_resources:
+        delete_management_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+    elif action_on_unmanage == StacksActionOnUnmanage.DELETE_RESOURCES:
         delete_list.append("resources")
         delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
 
@@ -2961,7 +2955,7 @@ def delete_deployment_stack_at_management_group(cmd, management_group_id, name=N
                 return None
         else:
             confirmation += " and the specified resources: "
-            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+            response = prompt_y_n(confirmation + ", ".join(delete_list) + '?')
             if not response:
                 return None
 
@@ -2979,7 +2973,7 @@ def delete_deployment_stack_at_management_group(cmd, management_group_id, name=N
         except:
             raise ResourceNotFoundError("DeploymentStack " + delete_name +
                                         " not found in the current management group scope.")
-        return rcf.deployment_stacks.begin_delete_at_management_group(management_group_id, delete_name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum)
+        return rcf.deployment_stacks.begin_delete_at_management_group(management_group_id, delete_name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum, unmanage_action_management_groups=delete_management_groups_enum)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
