@@ -533,12 +533,18 @@ class Profile:
             asterisk = ' *'
             is_default_one = sub == active_one
 
+            # Trim subscription name if it is too long
+            subscription_name = sub[_SUBSCRIPTION_NAME]
+            length_limit = 40
+            if len(subscription_name) > length_limit:
+                subscription_name = subscription_name[:length_limit-3] + '...'
+
             def highlight_text(text):
                 return format_styled_text((Style.HIGHLIGHT, text)) if is_default_one else text
 
             row = {
                 'No': f'[{index_str}]' + (asterisk if is_default_one else ''),
-                'Subscription name': highlight_text(sub[_SUBSCRIPTION_NAME]),
+                'Subscription name': highlight_text(subscription_name),
                 'Subscription ID': highlight_text(sub[_SUBSCRIPTION_ID])
             }
             if _TENANT_DEFAULT_DOMAIN in sub:
@@ -553,8 +559,9 @@ class Profile:
         print()
         print(table_str)
         print()
+        tenant_string = active_one.get(_TENANT_DEFAULT_DOMAIN, active_one[_TENANT_ID])
         print("The default is marked with an *; "
-              f"the default tenant is '{active_one[_TENANT_DEFAULT_DOMAIN]}' and subscription is "
+              f"the default tenant is '{tenant_string}' and subscription is "
               f"'{active_one[_SUBSCRIPTION_NAME]}' ({active_one[_SUBSCRIPTION_ID]}).")
         print()
 
@@ -563,7 +570,6 @@ class Profile:
         # Keep prompting until the user inputs a valid index
         while True:
             try:
-                # TODO: Make text in parentheses grey
                 select_index = prompt('Select a subscription and tenant (Type a number or Enter for no changes): ')
                 # Nothing is typed, keep current selection
                 if select_index == '':
@@ -572,7 +578,8 @@ class Profile:
                     active_one = index_to_subscription_map[select_index]
                     # Echo the selection
                     print()
-                    print(f"Tenant: {active_one[_TENANT_DEFAULT_DOMAIN]}")
+                    tenant_string = active_one.get(_TENANT_DEFAULT_DOMAIN, active_one[_TENANT_ID])
+                    print(f"Tenant: {tenant_string}")
                     print(f"Subscription: {active_one[_SUBSCRIPTION_NAME]} ({active_one[_SUBSCRIPTION_ID]})")
                 return active_one
             except KeyError:
@@ -796,7 +803,7 @@ class Profile:
             # 3
             {
                 "id": "00000000-0000-0000-0000-333333333333",
-                "name": "Sub 3",
+                "name": "Sub 3 with long long long long name",
                 "tenantDefaultDomain": "microsoft.onmicrosoft.com",
                 "tenantId": "00000000-0000-0000-1111-111111111111",
                 "environmentName": "AzureCloud",
@@ -807,6 +814,15 @@ class Profile:
                 "name": "N/A(tenant level account)",
                 "tenantDefaultDomain": "azuresdkteam.onmicrosoft.com",
                 "tenantId": "00000000-0000-0000-1111-222222222222",
+                "environmentName": "AzureCloud",
+            }
+        ]
+
+        subscriptions_no_tenant_domain = [
+            {
+                "id": "00000000-0000-0000-0000-222222222222",
+                "name": "sub 2",
+                "tenantId": "00000000-0000-0000-1111-111111111111",
                 "environmentName": "AzureCloud",
             }
         ]
