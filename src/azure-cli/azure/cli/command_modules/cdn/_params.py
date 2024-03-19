@@ -25,6 +25,9 @@ def load_arguments(self, _):
 
     # Custom Domain #
 
+    with self.argument_context('cdn custom-domain') as c:
+        c.argument('custom_domain_name', name_arg_type, id_part=None, help='Resource name of the custom domain.')
+
     with self.argument_context('cdn custom-domain enable-https') as c:
         c.argument('profile_name', id_part=None, help='Name of the parent profile.')
         c.argument('endpoint_name', help='Name of the parent endpoint.')
@@ -53,7 +56,6 @@ def load_arguments(self, _):
                    help='The secret version of the KeyVault certificate, If not specified, the "Latest" version will '
                         'always been used and the deployed certificate will be automatically rotated to the latest '
                         'version when a newer version of the certificate is available.')
-
     # AFDX
     # AFD Rules #
     with self.argument_context('afd rule') as c:

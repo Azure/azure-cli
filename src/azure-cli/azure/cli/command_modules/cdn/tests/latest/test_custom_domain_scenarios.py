@@ -7,8 +7,7 @@ import unittest
 from azure.cli.testsdk import ResourceGroupPreparer, KeyVaultPreparer, JMESPathCheck
 from azure.cli.testsdk import ScenarioTest
 from .scenario_mixin import CdnScenarioMixin
-from azure.mgmt.cdn.models import (SkuName, CustomHttpsProvisioningState, ProtocolType,
-                                   CertificateType)
+from azure.mgmt.cdn.models import (SkuName)
 
 from azure.core.exceptions import (HttpResponseError, ResourceNotFoundError, ResourceExistsError)
 from knack.util import CLIError
