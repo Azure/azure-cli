@@ -145,7 +145,7 @@ class Profile:
         """
         For service principal, `password` is a dict returned by ServicePrincipalAuth.build_credential
         """
-        # Only for quick debugging
+        # A shortcut for quick debugging
         return self._invoke_interactive_subscription_selection_demo()
 
         if not scopes:
@@ -806,7 +806,7 @@ class Profile:
                 "id": "00000000-0000-0000-1111-111111111111",
                 "name": "N/A(tenant level account)",
                 "tenantDefaultDomain": "azuresdkteam.onmicrosoft.com",
-                "tenantId": "00000000-0000-0000-1111-111111111111",
+                "tenantId": "00000000-0000-0000-1111-222222222222",
                 "environmentName": "AzureCloud",
             }
         ]
