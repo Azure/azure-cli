@@ -5,8 +5,6 @@
 
 import argparse
 
-from knack.util import CLIError
-
 
 # pylint:disable=protected-access
 # pylint:disable=too-few-public-methods
