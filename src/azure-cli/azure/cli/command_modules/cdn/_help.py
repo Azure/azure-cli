@@ -221,6 +221,11 @@ examples:
         --enable-compression
 """
 
+helps['cdn endpoint rule'] = """
+type: group
+short-summary: Manage delivery rules for an endpoint.
+"""
+
 helps['cdn endpoint rule add'] = """
 type: command
 short-summary: Add a delivery rule to a CDN endpoint.
@@ -267,6 +272,11 @@ examples:
         az cdn endpoint rule show -g group -n endpoint --profile-name profile
 """
 
+helps['cdn endpoint rule condition'] = """
+type: group
+short-summary: Manage delivery rule conditions for an endpoint.
+"""
+
 helps['cdn endpoint rule condition add'] = """
 type: command
 short-summary: Add a condition to a delivery rule.
@@ -296,6 +306,10 @@ examples:
         az cdn endpoint rule condition show -g group -n endpoint --profile-name profile-name
 """
 
+helps['cdn endpoint rule action'] = """
+type: group
+short-summary: Manage delivery rule actions for an endpoint.
+"""
 
 helps['cdn endpoint rule action add'] = """
 type: command
