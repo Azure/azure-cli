@@ -16,7 +16,9 @@ from azure.mgmt.servicefabricmanagedclusters.models import (
     NetworkSecurityRule,
     ManagedCluster,
     Sku,
-    ClientCertificate
+    ClientCertificate,
+    SettingsSectionDescription,
+    SettingsParameterDescription
 )
 
 from knack.log import get_logger
@@ -45,7 +47,10 @@ def create_cluster(cmd,
                    upgrade_mode=None,
                    upgrade_cadence=None,
                    code_version=None,
-                   tags=None):
+                   tags=None,
+                   http_gateway_token_auth_connection_port=None,
+                   enable_http_gateway_exclusive_auth_mode=False,
+                   ddos_protection_plan_id=None):
     try:
 
         rg = _get_resource_group_by_name(cmd.cli_ctx, resource_group_name)
@@ -72,6 +77,9 @@ def create_cluster(cmd,
         if gateway_connection_port is None:
             gateway_connection_port = 19080
 
+        if http_gateway_token_auth_connection_port is None:
+            http_gateway_token_auth_connection_port = 19801
+
         client_certs = None
         if client_cert_thumbprint is not None or client_cert_common_name is not None:
             client_certs = []
@@ -82,6 +90,14 @@ def create_cluster(cmd,
             if client_cert_issuer_thumbprint is not None:
                 client_cert_issuer_thumbprint = ','.join(client_cert_issuer_thumbprint)
             client_certs.append(ClientCertificate(is_admin=client_cert_is_admin, common_name=client_cert_common_name, issuer_thumbprint=client_cert_issuer_thumbprint))
+
+        parameters = []
+        parameters.append(SettingsParameterDescription(name='AADTenantID', value='72f988bf-86f1-41af-91ab-2d7cd011db47'))
+        parameters.append(SettingsParameterDescription(name='AADClusterApplication', value='db9c5a17-86be-40f6-9c7d-3db1c4145665'))
+        parameters.append(SettingsParameterDescription(name='AADClientApplication', value='3ae132df-d6db-4419-9171-2a5f2a394f53'))
+
+        settings = []
+        settings.append(SettingsSectionDescription(name='security', parameters=parameters))
 
         new_cluster = ManagedCluster(location=location,
                                      dns_name=dns_name,
@@ -94,7 +110,11 @@ def create_cluster(cmd,
                                      cluster_upgrade_mode=upgrade_mode,
                                      cluster_upgrade_cadence=upgrade_cadence,
                                      cluster_code_version=code_version,
-                                     tags=tags)
+                                     tags=tags,
+                                     http_gateway_token_auth_connection_port=http_gateway_token_auth_connection_port,
+                                     ddos_protection_plan_id=ddos_protection_plan_id,
+                                     enable_http_gateway_exclusive_auth_mode=enable_http_gateway_exclusive_auth_mode,
+                                     fabric_settings=settings)
 
         logger.info("Creating managed cluster '%s'", cluster_name)
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, new_cluster)
@@ -112,7 +132,9 @@ def update_cluster(cmd,
                    client_connection_port=None,
                    gateway_connection_port=None,
                    dns_name=None,
-                   tags=None):
+                   tags=None,
+                   http_gateway_token_auth_connection_port=None,
+                   enable_http_gateway_exclusive_auth_mode=False):
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
 
@@ -130,6 +152,12 @@ def update_cluster(cmd,
 
         if not cluster.public_i_pv6_prefix_id:
             cluster.public_i_pv6_prefix_id = None
+
+        if http_gateway_token_auth_connection_port is not None:
+            cluster.http_gateway_token_auth_connection_port = http_gateway_token_auth_connection_port
+
+        if enable_http_gateway_exclusive_auth_mode is not None:
+            cluster.enable_http_gateway_exclusive_auth_mode = enable_http_gateway_exclusive_auth_mode
 
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
