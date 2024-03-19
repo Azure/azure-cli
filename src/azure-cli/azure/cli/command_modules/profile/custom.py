@@ -150,6 +150,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     for sub in all_subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
 
+    # No output in interactive mode
     return None if interactive else all_subscriptions
 
 

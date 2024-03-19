@@ -146,7 +146,7 @@ class Profile:
         For service principal, `password` is a dict returned by ServicePrincipalAuth.build_credential
         """
         # A shortcut for quick debugging
-        return self._invoke_interactive_subscription_selection_demo()
+        # return self._invoke_interactive_subscription_selection_demo()
 
         if not scopes:
             scopes = self._arm_scope
@@ -571,25 +571,25 @@ class Profile:
         while True:
             try:
                 select_index = prompt('Select a subscription and tenant (Type a number or Enter for no changes): ')
-                # Nothing is typed, keep current selection
-                if select_index == '':
-                    pass
-                else:
-                    active_one = index_to_subscription_map[select_index]
-                    # Echo the selection
-                    print()
-                    tenant_string = active_one.get(_TENANT_DEFAULT_DOMAIN, active_one[_TENANT_ID])
-                    print(f"Tenant: {tenant_string}")
-                    print(f"Subscription: {active_one[_SUBSCRIPTION_NAME]} ({active_one[_SUBSCRIPTION_ID]})")
-                return active_one
-            except KeyError:
-                logger.warning("Invalid selection.")
-                # Let retry
             except NoTTYException:
                 # This is a good example showing interactive and non-TTY are not contradictory
-                logger.warning("No TTY to select the default subscription. Picking the first enabled subscription "
-                               "as the default one.")
-                break
+                logger.warning("No TTY to select the default subscription.")
+                return active_one
+
+            # Nothing is typed, keep current selection
+            if select_index == '':
+                return active_one
+            elif select_index in index_to_subscription_map:
+                active_one = index_to_subscription_map[select_index]
+                # Echo the selection
+                print()
+                tenant_string = active_one.get(_TENANT_DEFAULT_DOMAIN, active_one[_TENANT_ID])
+                print(f"Tenant: {tenant_string}")
+                print(f"Subscription: {active_one[_SUBSCRIPTION_NAME]} ({active_one[_SUBSCRIPTION_ID]})")
+                return active_one
+            else:
+                logger.warning("Invalid selection.")
+                # Let retry
 
     def is_tenant_level_account(self):
         return self.get_subscription()[_SUBSCRIPTION_NAME] == _TENANT_LEVEL_ACCOUNT_NAME
