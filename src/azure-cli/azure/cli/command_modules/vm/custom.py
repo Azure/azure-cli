@@ -748,7 +748,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     return sdk_no_wait(no_wait, client.snapshots.begin_create_or_update, resource_group_name, snapshot_name, snapshot)
 
 
-def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, access_level=None, file_format=None):
+def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_seconds,
+                          access_level=None, file_format=None):
     return _grant_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, is_disk=False,
                          access_level=access_level, file_format=file_format)
 
