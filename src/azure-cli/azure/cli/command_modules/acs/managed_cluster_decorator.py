@@ -8385,11 +8385,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         current_core_value = self.context.get_intermediate("current_core_value")
         pool_option = self.context.raw_param.get("storage_pool_option")
 
-        print("HERE?")
-
         # enable azure container storage
         if enable_azure_container_storage:
-            print("HERE GAIN?")
             if cluster.identity_profile is None or cluster.identity_profile["kubeletidentity"] is None:
                 logger.warning(
                     "Unexpected error getting kubelet's identity for the cluster."
