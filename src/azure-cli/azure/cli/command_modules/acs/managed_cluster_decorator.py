@@ -6757,12 +6757,11 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             pool_size = self.context.raw_param.get("storage_pool_size")
             kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
             node_resource_group = cluster.node_resource_group
-            nodepool_name = self.context.get_intermediate("azure_container_storage_nodepools")
-            agent_pool_details = []
+            agent_pool_vm_sizes = []
             if len(cluster.agent_pool_profiles) > 0:
                 # Cluster creation has only 1 agentpool
                 agentpool_profile = cluster.agent_pool_profiles[0]
-                agent_pool_details.append(agentpool_profile.vm_size)
+                agent_pool_vm_sizes.append(agentpool_profile.vm_size)
 
             self.context.external_functions.perform_enable_azure_container_storage(
                 self.cmd,
@@ -6776,8 +6775,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 pool_size,
                 pool_sku,
                 pool_option,
-                nodepool_name,
-                agent_pool_details,
+                agent_pool_vm_sizes,
                 True,
             )
 
@@ -8269,14 +8267,20 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         enable_azure_keyvault_secrets_provider_addon = self.context.get_enable_kv() or (
             mc.addon_profiles and mc.addon_profiles.get(CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME) and
             mc.addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME].enabled)
-
+        enable_azure_container_storage = self.context.get_intermediate(
+            "enable_azure_container_storage", default_value=False
+        )
+        disable_azure_container_storage = self.context.get_intermediate(
+            "disable_azure_container_storage", default_value=False
+        )
         # pylint: disable=too-many-boolean-expressions
         if (
             monitoring_addon_enabled or
             ingress_appgw_addon_enabled or
             virtual_node_addon_enabled or
             (enable_managed_identity and attach_acr) or
-            (keyvault_id and enable_azure_keyvault_secrets_provider_addon)
+            (keyvault_id and enable_azure_keyvault_secrets_provider_addon) or
+            (enable_azure_container_storage or disable_azure_container_storage)
         ):
             return True
         return False
@@ -8370,6 +8374,82 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     subscription_id=self.context.get_subscription_id(),
                     is_service_principal=False,
                 )
+
+        enable_azure_container_storage = self.context.get_intermediate("enable_azure_container_storage")
+        disable_azure_container_storage = self.context.get_intermediate("disable_azure_container_storage")
+        is_extension_installed = self.context.get_intermediate("is_extension_installed")
+        is_azureDisk_enabled = self.context.get_intermediate("is_azureDisk_enabled")
+        is_elasticSan_enabled = self.context.get_intermediate("is_elasticSan_enabled")
+        is_ephemeralDisk_localssd_enabled = self.context.get_intermediate("is_ephemeralDisk_localssd_enabled")
+        is_ephemeralDisk_nvme_enabled = self.context.get_intermediate("is_ephemeralDisk_nvme_enabled")
+        current_core_value = self.context.get_intermediate("current_core_value")
+        pool_option = self.context.raw_param.get("storage_pool_option")
+
+        print("HERE?")
+
+        # enable azure container storage
+        if enable_azure_container_storage:
+            print("HERE GAIN?")
+            if cluster.identity_profile is None or cluster.identity_profile["kubeletidentity"] is None:
+                logger.warning(
+                    "Unexpected error getting kubelet's identity for the cluster."
+                    "Unable to perform azure container storage operation."
+                )
+                return
+            pool_name = self.context.raw_param.get("storage_pool_name")
+            pool_type = self.context.raw_param.get("enable_azure_container_storage")
+            pool_sku = self.context.raw_param.get("storage_pool_sku")
+            pool_size = self.context.raw_param.get("storage_pool_size")
+            nodepool_list = self.context.get_intermediate("azure_container_storage_nodepools")
+            kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
+            acstor_nodepool_skus = []
+            for agentpool_profile in cluster.agent_pool_profiles:
+                if agentpool_profile.name in nodepool_list:
+                    acstor_nodepool_skus.append(agentpool_profile.vm_size)
+
+            self.context.external_functions.perform_enable_azure_container_storage(
+                self.cmd,
+                self.context.get_subscription_id(),
+                self.context.get_resource_group_name(),
+                self.context.get_name(),
+                self.context.get_node_resource_group(),
+                kubelet_identity_object_id,
+                pool_name,
+                pool_type,
+                pool_size,
+                pool_sku,
+                pool_option,
+                acstor_nodepool_skus,
+                False,
+                is_extension_installed,
+                is_azureDisk_enabled,
+                is_elasticSan_enabled,
+                is_ephemeralDisk_localssd_enabled,
+                is_ephemeralDisk_nvme_enabled,
+                current_core_value,
+            )
+
+        # disable azure container storage
+        if disable_azure_container_storage:
+            pool_type = self.context.raw_param.get("disable_azure_container_storage")
+            kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
+            pre_disable_validate = self.context.get_intermediate("pre_disable_validate_azure_container_storage")
+            self.context.external_functions.perform_disable_azure_container_storage(
+                self.cmd,
+                self.context.get_subscription_id(),
+                self.context.get_resource_group_name(),
+                self.context.get_name(),
+                self.context.get_node_resource_group(),
+                kubelet_identity_object_id,
+                pre_disable_validate,
+                pool_type,
+                pool_option,
+                is_elasticSan_enabled,
+                is_azureDisk_enabled,
+                is_ephemeralDisk_localssd_enabled,
+                is_ephemeralDisk_nvme_enabled,
+                current_core_value,
+            )
 
         # attach keyvault to app routing addon
         from azure.cli.command_modules.keyvault.custom import set_policy
