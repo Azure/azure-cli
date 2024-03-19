@@ -42,17 +42,17 @@ az storage blob show --name $blobName --container-name $containerName --connecti
 
 By specifying `--sas-token $sasToken` or `--connection-string $connectionString` configured using shared access signature (SAS), CLI can get a signed URI including a token that indicates how the resources may be accessed by the client.
 
-Here's an example of getting properties of a blob in a storage account with sas token:
+Here's an example of getting properties of a blob in a storage account with SAS token:
 ```
-# Generate a sas (Shared access signature) token
+# Generate a SAS (Shared access signature) token
 az storage account/container/blob/share/fs/queue/table generate-sas
 # Get blob properties with sas token
 az storage blob show --name $blobName --container-name $containerName --account-name $accountName --sas-token $sasToken
 ```
 
-Here's an example of getting properties of a blob in a storage account with connection string configured using sas:
+Here's an example of getting properties of a blob in a storage account with connection string configured using SAS:
 ```
-# Generate a sas (Shared access signature) token
+# Generate a SAS (Shared access signature) token
 az storage account/container/blob/share/fs/queue/table generate-sas
 # Configure a connection string(Each service endpoint is optional, although the connection string must contain at least one.)
 connectionString="BlobEndpoint=${blobEndpoint};QueueEndpoint=${queueEndpoint};TableEndpoint=${tableEndpoint};FileEndpoint=${fileEndpoint};SharedAccessSignature=${sasToken}"
