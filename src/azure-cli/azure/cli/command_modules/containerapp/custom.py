@@ -1591,6 +1591,14 @@ def listexecution_containerappsjob(cmd, resource_group_name, name):
         handle_raw_exception(e)
 
 
+def listreplica_containerappsjob(cmd, resource_group_name, name, execution_name):
+    try:
+        replicas = ContainerAppsJobClient.get_executions(cmd, resource_group_name, name, execution_name)
+        return replicas['value']
+    except CLIError as e:
+        handle_raw_exception(e)
+
+
 def getSingleExecution_containerappsjob(cmd, resource_group_name, name, job_execution_name):
     try:
         execution = ContainerAppsJobClient.get_single_execution(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name)
@@ -3511,6 +3519,59 @@ def stream_environment_logs(cmd, resource_group_name, name, follow=False, tail=N
 
     if not resp.ok:
         raise ValidationError(f"Got bad status from the logstream API: {resp.status_code}")
+
+    for line in resp.iter_lines():
+        if line:
+            logger.info("received raw log line: %s", line)
+            # these .replaces are needed to display color/quotations properly
+            # for some reason the API returns garbled unicode special characters (may need to add more in the future)
+            print(line.decode("utf-8").replace("\\u0022", "\u0022").replace("\\u001B", "\u001B").replace("\\u002B", "\u002B").replace("\\u0027", "\u0027"))
+
+
+def stream_job_logs(cmd, resource_group_name, name, container, execution=None, replica=None, follow=False, tail=None, output_format=None):
+    if tail:
+        if tail < 0 or tail > 300:
+            raise ValidationError("--tail must be between 0 and 300.")
+
+    sub = get_subscription_id(cmd.cli_ctx)
+    token_response = ContainerAppsJobClient.get_auth_token(cmd, resource_group_name, name)
+    token = token_response["properties"]["token"]
+
+    job = ContainerAppsJobClient.show(cmd, resource_group_name, name)
+    base_url = job["properties"]["eventStreamEndpoint"]
+    base_url = base_url[:base_url.index("/subscriptions/")]
+
+    if execution is None:
+        executions = ContainerAppsJobClient.get_executions(cmd, resource_group_name, name)['value']
+        if not executions:
+            raise ValidationError("No executions found for this job")
+        execution = executions[0]["name"]
+        logger.warning(f"No execution provided, defaulting to latest execution: {execution}")
+    
+    if replica is None:
+        replicas = ContainerAppsJobClient.get_replicas(cmd, resource_group_name, name, execution)['value']
+        if not replicas:
+            raise ValidationError("No replicas found for execution")
+        replica = replicas[0]["name"]
+        logger.warning(f"No replica provided, defaulting to latest replica: {replica}")
+
+    url = (f"{base_url}/subscriptions/{sub}/resourceGroups/{resource_group_name}/jobs/{name}"
+            f"/executions/{execution}/replicas/{replica}/containers/{container}/logstream")
+
+    logger.info("connecting to : %s", url)
+    request_params = {"follow": str(follow).lower(),
+                      "output": output_format,
+                      "tailLines": tail}
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = requests.get(url,
+                        timeout=None,
+                        stream=True,
+                        params=request_params,
+                        headers=headers)
+
+    if not resp.ok:
+        print(url)
+        raise ValidationError(f"Got bad status from the logstream API: {resp.status_code}. Error: {str(resp.content)}")
 
     for line in resp.iter_lines():
         if line:

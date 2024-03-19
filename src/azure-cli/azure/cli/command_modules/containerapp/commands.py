@@ -38,6 +38,8 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'stream_containerapp_logs', validator=validate_ssh)
     with self.command_group('containerapp env logs') as g:
         g.custom_show_command('show', 'stream_environment_logs')
+    with self.command_group('containerapp job logs') as g:
+        g.custom_show_command('show', 'stream_job_logs')
 
     with self.command_group('containerapp env') as g:
         g.custom_show_command('show', 'show_managed_environment')
@@ -60,6 +62,9 @@ def load_command_table(self, _):
     with self.command_group('containerapp job execution') as g:
         g.custom_show_command('list', 'listexecution_containerappsjob', table_transformer=transform_job_execution_list_output)
         g.custom_show_command('show', 'getSingleExecution_containerappsjob', table_transformer=transform_job_execution_show_output)
+
+    with self.command_group('containerapp job execution replica') as g:
+        g.custom_show_command('list', 'listreplica_containerappsjob')
 
     with self.command_group('containerapp job secret') as g:
         g.custom_command('list', 'list_secrets_job')
