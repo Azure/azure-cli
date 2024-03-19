@@ -1615,49 +1615,27 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
 
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
 
-    # TODO: see if this is actually necessary and remove it otherwise
-    if 'functionAppConfig' not in functionapp["properties"]:
-        functionapp["properties"]["functionAppConfig"] = {}
-        if 'deployment' not in functionapp["properties"]["functionAppConfig"]:
-            functionapp["properties"]["functionAppConfig"]["deployment"] = {
-                "storage": {
-                    "type": "blobContainer"
-                }
-            }
-
     functionapp_deployment_storage = functionapp["properties"]["functionAppConfig"]["deployment"]["storage"]
 
     deployment_storage = None
 
-    if (functionapp_deployment_storage["value"] is None):
-        if deployment_storage_name is None:
-            raise ValidationError("Please provide a values for --deployment-storage-name and "
-                                  "--deployment-storage-container-name as function app deployment "
-                                  "storage value is not set.")
-
-    if ("authentication" not in functionapp_deployment_storage or
-            functionapp_deployment_storage["authentication"] is None):
-        if deployment_storage_auth_type is None:
-            raise ValidationError("Please provide a value for --deployment-storage-auth-type as "
-                                  "function app deployment storage authentication type is not set.")
-        functionapp_deployment_storage["authentication"] = {"type": "SystemAssignedIdentity",
-                                                            "userAssignedIdentityResourceId": None,
-                                                            "storageAccountConnectionStringName": None}
-
     # Storage
     deployment_config_storage_value = None
-    if (deployment_storage_name is not None):
+    if deployment_storage_name is not None:
         deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx,
                                                                   resource_group_name,
                                                                   deployment_storage_name)
-        deployment_storage_container = _get_deployment_storage_container(cmd,
-                                                                         resource_group_name,
-                                                                         deployment_storage_name,
-                                                                         deployment_storage_container_name)
-        deployment_storage_container_name = deployment_storage_container.name
+        _validate_and_get_deployment_storage_container(cmd, resource_group_name,
+                                                       deployment_storage_name,
+                                                       deployment_storage_container_name)
         endpoints = deployment_storage.primary_endpoints
         deployment_config_storage_value = getattr(endpoints, 'blob') + deployment_storage_container_name
         functionapp_deployment_storage["value"] = deployment_config_storage_value
+    else:
+        existing_deployment_storage_name = urlparse(functionapp_deployment_storage["value"]).hostname.split(".")[0]
+        deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx,
+                                                                  resource_group_name,
+                                                                  existing_deployment_storage_name)
 
     # Authentication
     assign_identities = None
@@ -1690,12 +1668,11 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
         else:
             raise ValidationError("Invalid value for --deployment-storage-auth-type. Please try "
                                   "again with a valid value.")
+
     functionapp["properties"]["functionAppConfig"]["deployment"]["storage"] = functionapp_deployment_storage
 
     result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
 
-    client = web_client_factory(cmd.cli_ctx)
-    functionapp = client.web_apps.get(resource_group_name, name)
     if deployment_storage_auth_type == 'UserAssignedIdentity':
         assign_identity(cmd, resource_group_name, name, assign_identities)
         if not _has_deployment_storage_role_assignment_on_resource(
@@ -1711,10 +1688,7 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
         assign_identity(cmd, resource_group_name, name, assign_identities, 'Storage Blob Data Contributor',
                         None, deployment_storage.id)
 
-    poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp)
-    functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
-    return result.get("properties", {}).get("functionAppConfig", {}).get(
-        "deployment", {})
+    return result.get("properties", {}).get("functionAppConfig", {}).get("deployment", {})
 
 
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
@@ -1832,12 +1806,6 @@ def update_flex_functionapp(cmd, resource_group_name, name, functionapp):
 def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
 
-    # TODO: see if this is actually necessary and remove it otherwise
-    if 'functionAppConfig' not in functionapp["properties"]:
-        functionapp["properties"]["functionAppConfig"] = {}
-        if 'scaleAndConcurrency' not in functionapp["properties"]["functionAppConfig"]:
-            functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"] = {}
-
     always_ready_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady", [])
 
     updated_always_ready_config = [x for x in always_ready_config if x["name"] not in setting_names]
@@ -1860,12 +1828,6 @@ def get_runtime_config(cmd, resource_group_name, name):
 def update_runtime_config(cmd, resource_group_name, name, runtime_version):
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
 
-    # TODO: remove it later
-    if 'functionAppConfig' not in functionapp["properties"]:
-        functionapp["properties"]["functionAppConfig"] = {}
-        if 'runtime' not in functionapp["properties"]["functionAppConfig"]:
-            functionapp["properties"]["functionAppConfig"]["runtime"] = {}
-
     runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, True)
     runtime = runtime_info['app_runtime']
     functionapp_version = runtime_info['functionapp_version']
@@ -1880,7 +1842,7 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
 
     runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=True, windows=False)
     matched_runtime = runtime_helper.resolve(runtime, runtime_version, functionapp_version, True)
-    version = matched_runtime.version
+    version = matched_runtime.site_config_dict.linux_fx_version.split("|")[1]
 
     functionapp["properties"]["functionAppConfig"]["runtime"]["version"] = version
 
@@ -1892,12 +1854,6 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
 
 def update_always_ready_settings(cmd, resource_group_name, name, settings):
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
-
-    # TODO: see if this is actually necessary and remove it otherwise
-    if 'functionAppConfig' not in functionapp["properties"]:
-        functionapp["properties"]["functionAppConfig"] = {}
-        if 'scaleAndConcurrency' not in functionapp["properties"]["functionAppConfig"]:
-            functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"] = {}
 
     always_ready_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady", [])
 
@@ -1938,12 +1894,6 @@ def update_scale_config(cmd, resource_group_name, name, maximum_instance_count=N
                                            "--trigger-settings.")
 
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
-
-    # TODO: see if this is actually necessary and remove it otherwise
-    if 'functionAppConfig' not in functionapp["properties"]:
-        functionapp["properties"]["functionAppConfig"] = {}
-        if 'scaleAndConcurrency' not in functionapp["properties"]["functionAppConfig"]:
-            functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"] = {}
 
     scale_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]
 
@@ -4094,6 +4044,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             old_to_new_version = {
                 "11": "11.0",
                 "8": "8.0",
+                "8.0": "8",
                 "7": "7.0",
                 "6.0": "6",
                 "1.8": "8.0",
@@ -4726,6 +4677,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 raise ValidationError("Invalid version {0} for runtime {1} for function apps on the Flex "
                                       "Consumption plan. Supported version for runtime {1} is {2}."
                                       .format(runtime_version, runtime, supported_versions))
+        else:
+            runtime_version = runtimes[0]['version']
 
     runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
     matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
@@ -4733,7 +4686,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     if flexconsumption_location:
         runtime = matched_runtime.name
-        version = matched_runtime.version
+        version = matched_runtime.site_config_dict.linux_fx_version.split("|")[1]
         runtime_config = {
             "name": runtime,
             "version": version
@@ -5182,12 +5135,11 @@ def _get_or_create_deployment_storage_container(cmd, resource_group_name, functi
                                                                   deployment_storage_container_name,
                                                                   BlobContainer())
 
-    logger.warning(storage_container)
     return storage_container
 
 
-def _get_deployment_storage_container(cmd, resource_group_name, deployment_storage_name,
-                                      deployment_storage_container_name):
+def _validate_and_get_deployment_storage_container(cmd, resource_group_name, deployment_storage_name,
+                                                   deployment_storage_container_name):
     storage_client = get_mgmt_service_client(cmd.cli_ctx, StorageManagementClient)
     return storage_client.blob_containers.get(resource_group_name, deployment_storage_name,
                                               deployment_storage_container_name)

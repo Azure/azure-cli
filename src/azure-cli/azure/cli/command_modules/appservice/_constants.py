@@ -140,19 +140,15 @@ LANGUAGE_EOL_DEPRECATION_NOTICES = {
 FLEX_RUNTIMES = [
     {
         'runtime': 'dotnet-isolated',
-        'version': '6'
-    },
-    {
-        'runtime': 'dotnet-isolated',
-        'version': '8'
+        'version': '8.0'
     },
     {
         'runtime': 'java',
-        'version': '17.0'
+        'version': '17'
     },
     {
         'runtime': 'java',
-        'version': '11.0'
+        'version': '11'
     },
     {
         'runtime': 'node',
@@ -160,11 +156,11 @@ FLEX_RUNTIMES = [
     },
     {
         'runtime': 'python',
-        'version': '3.10'
+        'version': '3.11'
     },
     {
         'runtime': 'python',
-        'version': '3.11'
+        'version': '3.10'
     },
     {
         'runtime': 'powershell',
