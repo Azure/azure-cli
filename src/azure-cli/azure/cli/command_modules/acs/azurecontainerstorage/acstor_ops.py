@@ -186,7 +186,7 @@ def perform_enable_azure_container_storage(  # pylint: disable=too-many-statemen
                 "managedClusters",
                 CONST_ACSTOR_K8S_EXTENSION_NAME,
                 auto_upgrade_minor_version=True,
-                release_train="staging",
+                release_train="stable",
                 scope="cluster",
                 release_namespace="acstor",
                 configuration_settings=config_settings,
