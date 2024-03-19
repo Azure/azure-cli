@@ -7,7 +7,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands import CliCommandType
 
-from ._client_factory import (cf_cdn, cf_custom_domain, cf_afd_rules)
+from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_afd_rules)
 
 
 def _not_found(message):
@@ -36,6 +36,13 @@ _not_found_msg = "{}(s) not found. Please verify the resource(s), group or it's 
 def load_command_table(self, _):
     rule_not_found_msg = _not_found_msg.format('Rule')
     cd_not_found_msg = _not_found_msg.format('Custom Domain')
+    endpoint_not_found_msg = _not_found_msg.format('Endpoint')
+
+    cdn_endpoints_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cdn.operations#EndpointsOperations.{}',
+        client_factory=cf_endpoints,
+        exception_handler=_not_found(endpoint_not_found_msg)
+    )
 
     cdn_afd_rule_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cdn.operations#RulesOperations.{}',
@@ -106,17 +113,38 @@ def load_command_table(self, _):
     from .custom.custom_cdn import CDNEndpointRuleRemove
     self.command_table['cdn endpoint rule remove'] = CDNEndpointRuleRemove(loader=self)
 
-    from .custom.custom_cdn import CDNEndpointRuleConditionAdd
-    self.command_table['cdn endpoint rule condition add'] = CDNEndpointRuleConditionAdd(loader=self)
+    with self.command_group('cdn endpoint rule', cdn_endpoints_sdk, is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.custom_command('add', 'add_rule', client_factory=cf_cdn,
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
+        g.custom_command('remove', 'remove_rule', client_factory=cf_cdn,
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
 
-    from .custom.custom_cdn import CDNEndpointRuleConditionRemove
-    self.command_table['cdn endpoint rule condition remove'] = CDNEndpointRuleConditionRemove(loader=self)
+    with self.command_group('cdn endpoint rule condition', cdn_endpoints_sdk, is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.custom_command('add', 'add_condition', client_factory=cf_cdn,
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
+        g.custom_command('remove', 'remove_condition', client_factory=cf_cdn,
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
 
-    from .custom.custom_cdn import CDNEndpointRuleActionAdd
-    self.command_table['cdn endpoint rule action add'] = CDNEndpointRuleActionAdd(loader=self)
+    with self.command_group('cdn endpoint rule action', cdn_endpoints_sdk, is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.custom_command('add', 'add_action', client_factory=cf_cdn,
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
+        g.custom_command('remove', 'remove_action', client_factory=cf_cdn,
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
 
-    from .custom.custom_cdn import CDNEndpointRuleActionRemove
-    self.command_table['cdn endpoint rule action remove'] = CDNEndpointRuleActionRemove(loader=self)
+    # from .custom.custom_cdn import CDNEndpointRuleConditionAdd
+    # self.command_table['cdn endpoint rule condition add'] = CDNEndpointRuleConditionAdd(loader=self)
+
+    # from .custom.custom_cdn import CDNEndpointRuleConditionRemove
+    # self.command_table['cdn endpoint rule condition remove'] = CDNEndpointRuleConditionRemove(loader=self)
+
+    # from .custom.custom_cdn import CDNEndpointRuleActionAdd
+    # self.command_table['cdn endpoint rule action add'] = CDNEndpointRuleActionAdd(loader=self)
+
+    # from .custom.custom_cdn import CDNEndpointRuleActionRemove
+    # self.command_table['cdn endpoint rule action remove'] = CDNEndpointRuleActionRemove(loader=self)
 
     with self.command_group('afd', is_preview=True):
         pass

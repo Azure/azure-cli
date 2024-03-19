@@ -8,8 +8,10 @@ from azure.mgmt.cdn.models import (QueryStringCachingBehavior, DeliveryRuleActio
                                    ForwardingProtocol, DeliveryRuleCondition,
                                    AfdQueryStringCachingBehavior, Transform,
                                    MatchProcessingBehavior)
-
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import get_three_state_flag, get_enum_type
+from ._validators import (validate_origin)
+from ._actions import (OriginType)
 
 
 # pylint:disable=too-many-statements
@@ -19,7 +21,47 @@ def load_arguments(self, _):
     profile_name_help = 'Name of the CDN profile which is unique within the resource group.'
 
     # Endpoint #
+    with self.argument_context('cdn endpoint') as c:
+        c.argument('content_paths', nargs='+')
+        c.argument('endpoint_name', name_arg_type, id_part='child_name_1', help='Name of the CDN endpoint.')
+        c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('origins', options_list='--origin', nargs='+', action=OriginType, validator=validate_origin,
+                   help='Endpoint origin specified by the following space-delimited 6 tuple: '
+                        '`www.example.com http_port https_port private_link_resource_id private_link_location '
+                        'private_link_approval_message`. The HTTP and HTTPS ports and the private link resource ID and '
+                        'location are optional. The HTTP and HTTPS ports default to 80 and 443, respectively. Private '
+                        'link fields are only valid for the sku Standard_Microsoft, and private_link_location is '
+                        'required if private_link_resource_id is set.')
+        c.argument('is_http_allowed', arg_type=get_three_state_flag(invert=True), options_list='--no-http',
+                   help='Indicates whether HTTP traffic is not allowed on the endpoint. '
+                   'Default is to allow HTTP traffic.')
+        c.argument('is_https_allowed', arg_type=get_three_state_flag(invert=True), options_list='--no-https',
+                   help='Indicates whether HTTPS traffic is not allowed on the endpoint. '
+                   'Default is to allow HTTPS traffic.')
+        c.argument('origin_path',
+                   help='A directory path on the origin that Azure CDN can use to retrieve content from.')
+        c.argument('origin_host_header',
+                   help="The Host header to send for requests to this origin. If you leave this blank, "
+                        "the request hostname determines this value. "
+                        "Azure CDN origins, such as Web Apps, Blob Storage, and Cloud Services "
+                        "require this host header value to match the origin hostname by default.")
+        c.argument('is_compression_enabled', arg_type=get_three_state_flag(), options_list='--enable-compression',
+                   help='If compression is enabled, content will be served as compressed if '
+                        'user requests for a compressed version. Content won\'t be compressed '
+                        'on CDN when requested content is smaller than 1 byte or larger than 1 '
+                        'MB.')
 
+        c.argument('query_string_caching_behavior',
+                   options_list='--query-string-caching',
+                   arg_type=get_enum_type(QueryStringCachingBehavior),
+                   help="Defines how CDN caches requests that include query strings. "
+                        "You can ignore any query strings when caching, "
+                        "bypass caching to prevent requests that contain query strings from being cached, "
+                        "or cache every request with a unique URL.")
+
+        c.argument('profile_name', help=profile_name_help, id_part='name')
+        c.argument('content_types_to_compress', nargs='*',
+                   help='List of content types on which compression applies. The value should be a valid MIME type.')
     with self.argument_context('cdn endpoint rule') as c:
         configure_rule_parameters(c, False)
 
