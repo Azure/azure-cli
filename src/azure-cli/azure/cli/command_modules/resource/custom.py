@@ -2555,7 +2555,7 @@ def list_deployment_stack_at_subscription(cmd):
     return rcf.deployment_stacks.list_at_subscription()
 
 
-def delete_deployment_stack_at_subscription(cmd, name=None, id=None, action_on_unmanage=None, yes=False):  # pylint: disable=redefined-builtin
+def delete_deployment_stack_at_subscription(cmd, action_on_unmanage, name=None, id=None, yes=False):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
     delete_list = []
@@ -2683,7 +2683,7 @@ def list_deployment_stack_at_resource_group(cmd, resource_group):
     raise InvalidArgumentValueError("Please enter the resource group")
 
 
-def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None, action_on_unmanage=None, yes=False):  # pylint: disable=redefined-builtin
+def delete_deployment_stack_at_resource_group(cmd, action_on_unmanage, name=None, resource_group=None, id=None, yes=False):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
     delete_list = []
@@ -2926,7 +2926,7 @@ def list_deployment_stack_at_management_group(cmd, management_group_id):
     return rcf.deployment_stacks.list_at_management_group(management_group_id)
 
 
-def delete_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None, action_on_unmanage=None, yes=False):  # pylint: disable=redefined-builtin
+def delete_deployment_stack_at_management_group(cmd, management_group_id, action_on_unmanage, name=None, id=None, yes=False):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
     delete_list = []
