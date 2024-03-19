@@ -38,6 +38,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
+    CONST_PRIVATE_DNS_ZONE_CONTRIBUTOR_ROLE,
+    CONST_DNS_ZONE_CONTRIBUTOR_ROLE,
 )
 from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
@@ -101,8 +103,9 @@ from azure.cli.core.util import sdk_no_wait, truncate_text, get_file_json
 from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
+from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import is_valid_resource_id
+from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 logger = get_logger(__name__)
 
@@ -126,6 +129,8 @@ ManagedClusterStorageProfileDiskCSIDriver = TypeVar('ManagedClusterStorageProfil
 ManagedClusterStorageProfileFileCSIDriver = TypeVar('ManagedClusterStorageProfileFileCSIDriver')
 ManagedClusterStorageProfileBlobCSIDriver = TypeVar('ManagedClusterStorageProfileBlobCSIDriver')
 ManagedClusterStorageProfileSnapshotController = TypeVar('ManagedClusterStorageProfileSnapshotController')
+ManagedClusterIngressProfile = TypeVar("ManagedClusterIngressProfile")
+ManagedClusterIngressProfileWebAppRouting = TypeVar("ManagedClusterIngressProfileWebAppRouting")
 ServiceMeshProfile = TypeVar("ServiceMeshProfile")
 
 # TODO
@@ -700,6 +705,102 @@ class AKSManagedClusterContext(BaseAKSContext):
                 profile.enabled = False
 
         return profile
+
+    def get_enable_app_routing(self) -> bool:
+        """Obtain the value of enable_app_routing.
+
+        :return: bool
+        """
+        return self.raw_param.get("enable_app_routing")
+
+    def get_enable_kv(self) -> bool:
+        """Obtain the value of enable_kv.
+
+        :return: bool
+        """
+        return self.raw_param.get("enable_kv")
+
+    def get_dns_zone_resource_ids(self) -> Union[list, None]:
+        """Obtain the value of dns_zone_resource_ids.
+
+        :return: list or None
+        """
+        # read the original value passed by the command
+        dns_zone_resource_ids = self.raw_param.get("dns_zone_resource_ids")
+        # normalize
+        dns_zone_resource_ids = [
+            x.strip()
+            for x in (
+                dns_zone_resource_ids.split(",")
+                if dns_zone_resource_ids
+                else []
+            )
+        ]
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.ingress_profile and
+            self.mc.ingress_profile.web_app_routing and
+            self.mc.ingress_profile.web_app_routing.dns_zone_resource_ids is not None
+        ):
+            dns_zone_resource_ids = self.mc.ingress_profile.web_app_routing.dns_zone_resource_ids
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return dns_zone_resource_ids
+
+    def get_dns_zone_resource_ids_from_input(self) -> Union[List[str], None]:
+        """Obtain the value of dns_zone_resource_ids from the input.
+
+        :return: list of str or None
+        """
+        dns_zone_resource_ids_input = self.raw_param.get("dns_zone_resource_ids")
+        dns_zone_resource_ids = []
+
+        if dns_zone_resource_ids_input:
+            for dns_zone in dns_zone_resource_ids_input.split(","):
+                dns_zone = dns_zone.strip()
+                if dns_zone and is_valid_resource_id(dns_zone):
+                    dns_zone_resource_ids.append(dns_zone)
+                else:
+                    raise CLIError(dns_zone, " is not a valid Azure DNS Zone resource ID.")
+
+        return dns_zone_resource_ids
+
+    def get_keyvault_id(self) -> str:
+        """Obtain the value of keyvault_id.
+
+        :return: str
+        """
+        return self.raw_param.get("keyvault_id")
+
+    def get_attach_zones(self) -> bool:
+        """Obtain the value of attach_zones.
+
+        :return: bool
+        """
+        return self.raw_param.get("attach_zones")
+
+    def get_add_dns_zone(self) -> bool:
+        """Obtain the value of add_dns_zone.
+
+        :return: bool
+        """
+        return self.raw_param.get("add_dns_zone")
+
+    def get_delete_dns_zone(self) -> bool:
+        """Obtain the value of delete_dns_zone.
+
+        :return: bool
+        """
+        return self.raw_param.get("delete_dns_zone")
+
+    def get_update_dns_zone(self) -> bool:
+        """Obtain the value of update_dns_zone.
+
+        :return: bool
+        """
+        return self.raw_param.get("update_dns_zone")
 
     def get_enable_keda(self) -> bool:
         """Obtain the value of enable_keda.
@@ -4092,28 +4193,185 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         # returns a service mesh profile only if '--enable-azure-service-mesh' is applied
         enable_asm = self.raw_param.get("enable_azure_service_mesh", False)
+        revision = self.raw_param.get("revision", None)
+        revisions = None
+        if revision is not None:
+            revisions = [revision]
         if enable_asm:
             return self.models.ServiceMeshProfile(
                 mode=CONST_AZURE_SERVICE_MESH_MODE_ISTIO,
-                istio=self.models.IstioServiceMesh(),
+                istio=self.models.IstioServiceMesh(
+                    revisions=revisions
+                ),  # pylint: disable=no-member
             )
 
         return None
 
-    # pylint: disable=too-many-branches
-    def update_azure_service_mesh_profile(self) -> ServiceMeshProfile:
-        """ Update azure service mesh profile.
-        This function clone the existing service mesh profile, then apply user supplied changes
-        like enable or disable mesh, enable or disable internal or external ingress gateway
-        then return the updated service mesh profile.
-        It does not overwrite the service mesh profile attribute of the managed cluster.
-        :return: updated service mesh profile
-        """
-
+    def _handle_upgrade_asm(self, new_profile: ServiceMeshProfile) -> Tuple[ServiceMeshProfile, bool]:
+        mesh_upgrade_command = self.raw_param.get("mesh_upgrade_command", None)
         updated = False
-        new_profile = self.models.ServiceMeshProfile(mode=CONST_AZURE_SERVICE_MESH_MODE_DISABLED) \
-            if self.mc.service_mesh_profile is None else copy.deepcopy(self.mc.service_mesh_profile)
 
+        # deal with mesh upgrade commands
+        if mesh_upgrade_command is not None:
+            if new_profile is None or new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_DISABLED:
+                raise ArgumentUsageError(
+                    "Istio has not been enabled for this cluster, please refer to https://aka.ms/asm-aks-addon-docs "
+                    "for more details on enabling Azure Service Mesh."
+                )
+            requested_revision = self.raw_param.get("revision", None)
+            if mesh_upgrade_command in (
+                CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE,
+                CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
+            ):
+                if len(new_profile.istio.revisions) < 2:
+                    raise ArgumentUsageError('Azure Service Mesh upgrade is not in progress.')
+
+                sorted_revisons = self._sort_revisions(new_profile.istio.revisions)
+                if mesh_upgrade_command == CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE:
+                    revision_to_remove = sorted_revisons[0]
+                    revision_to_keep = sorted_revisons[-1]
+                else:
+                    revision_to_remove = sorted_revisons[-1]
+                    revision_to_keep = sorted_revisons[0]
+                msg = (
+                    f"This operation will remove Istio control plane for revision {revision_to_remove}. "
+                    f"Please ensure all data plane workloads have been rolled over to revision {revision_to_keep} "
+                    "so that they are still part of the mesh.\nAre you sure you want to proceed?"
+                )
+                if prompt_y_n(msg, default="y"):
+                    new_profile.istio.revisions.remove(revision_to_remove)
+                    updated = True
+            elif (
+                mesh_upgrade_command == CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START and
+                requested_revision is not None
+            ):
+                if new_profile.istio.revisions is None:
+                    new_profile.istio.revisions = []
+                new_profile.istio.revisions.append(requested_revision)
+                updated = True
+
+        return new_profile, updated
+
+    def _handle_pluginca_asm(self, new_profile: ServiceMeshProfile) -> Tuple[ServiceMeshProfile, bool]:
+        updated = False
+        enable_asm = self.raw_param.get("enable_azure_service_mesh", False)
+
+        # deal with plugin ca
+        key_vault_id = self.raw_param.get("key_vault_id", None)
+        ca_cert_object_name = self.raw_param.get("ca_cert_object_name", None)
+        ca_key_object_name = self.raw_param.get("ca_key_object_name", None)
+        root_cert_object_name = self.raw_param.get("root_cert_object_name", None)
+        cert_chain_object_name = self.raw_param.get("cert_chain_object_name", None)
+
+        if any([key_vault_id, ca_cert_object_name, ca_key_object_name, root_cert_object_name, cert_chain_object_name]):
+            if key_vault_id is None:
+                raise InvalidArgumentValueError(
+                    '--key-vault-id is required to use Azure Service Mesh plugin CA feature.'
+                )
+            if ca_cert_object_name is None:
+                raise InvalidArgumentValueError(
+                    '--ca-cert-object-name is required to use Azure Service Mesh plugin CA feature.'
+                )
+            if ca_key_object_name is None:
+                raise InvalidArgumentValueError(
+                    '--ca-key-object-name is required to use Azure Service Mesh plugin CA feature.'
+                )
+            if root_cert_object_name is None:
+                raise InvalidArgumentValueError(
+                    '--root-cert-object-name is required to use Azure Service Mesh plugin CA feature.'
+                )
+            if cert_chain_object_name is None:
+                raise InvalidArgumentValueError(
+                    '--cert-chain-object-name is required to use Azure Service Mesh plugin CA feature.'
+                )
+
+        if key_vault_id is not None and (
+                not is_valid_resource_id(key_vault_id) or "providers/Microsoft.KeyVault/vaults" not in key_vault_id):
+            raise InvalidArgumentValueError(
+                key_vault_id + " is not a valid Azure Keyvault resource ID."
+            )
+
+        if enable_asm and all(
+            [
+                key_vault_id,
+                ca_cert_object_name,
+                ca_key_object_name,
+                root_cert_object_name,
+                cert_chain_object_name,
+            ]
+        ):
+            if new_profile.istio.certificate_authority is None:
+                new_profile.istio.certificate_authority = (
+                    self.models.IstioCertificateAuthority()  # pylint: disable=no-member
+                )
+            if new_profile.istio.certificate_authority.plugin is None:
+                new_profile.istio.certificate_authority.plugin = (
+                    self.models.IstioPluginCertificateAuthority()  # pylint: disable=no-member
+                )
+            new_profile.mode = CONST_AZURE_SERVICE_MESH_MODE_ISTIO
+            new_profile.istio.certificate_authority.plugin.key_vault_id = key_vault_id
+            new_profile.istio.certificate_authority.plugin.cert_object_name = ca_cert_object_name
+            new_profile.istio.certificate_authority.plugin.key_object_name = ca_key_object_name
+            new_profile.istio.certificate_authority.plugin.root_cert_object_name = root_cert_object_name
+            new_profile.istio.certificate_authority.plugin.cert_chain_object_name = cert_chain_object_name
+            updated = True
+
+        return new_profile, updated
+
+    def _handle_ingress_gateways_asm(self, new_profile: ServiceMeshProfile) -> Tuple[ServiceMeshProfile, bool]:
+        updated = False
+        enable_ingress_gateway = self.raw_param.get("enable_ingress_gateway", False)
+        disable_ingress_gateway = self.raw_param.get("disable_ingress_gateway", False)
+        ingress_gateway_type = self.raw_param.get("ingress_gateway_type", None)
+
+        if enable_ingress_gateway and disable_ingress_gateway:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot both enable and disable azure service mesh ingress gateway at the same time.",
+            )
+
+        # deal with ingress gateways
+        if enable_ingress_gateway or disable_ingress_gateway:
+            # if an ingress gateway is enabled, enable the mesh
+            if enable_ingress_gateway:
+                new_profile.mode = CONST_AZURE_SERVICE_MESH_MODE_ISTIO
+                if new_profile.istio is None:
+                    new_profile.istio = self.models.IstioServiceMesh()  # pylint: disable=no-member
+                updated = True
+
+            if not ingress_gateway_type:
+                raise RequiredArgumentMissingError("--ingress-gateway-type is required.")
+
+            # ensure necessary fields
+            if new_profile.istio.components is None:
+                new_profile.istio.components = self.models.IstioComponents()  # pylint: disable=no-member
+                updated = True
+            if new_profile.istio.components.ingress_gateways is None:
+                new_profile.istio.components.ingress_gateways = []
+                updated = True
+
+            # make update if the ingress gateway already exist
+            ingress_gateway_exists = False
+            for ingress in new_profile.istio.components.ingress_gateways:
+                if ingress.mode == ingress_gateway_type:
+                    ingress.enabled = enable_ingress_gateway
+                    ingress_gateway_exists = True
+                    updated = True
+                    break
+
+            # ingress gateway not exist, append
+            if not ingress_gateway_exists:
+                new_profile.istio.components.ingress_gateways.append(
+                    self.models.IstioIngressGateway(  # pylint: disable=no-member
+                        mode=ingress_gateway_type,
+                        enabled=enable_ingress_gateway,
+                    )
+                )
+                updated = True
+
+        return new_profile, updated
+
+    def _handle_enable_disable_asm(self, new_profile: ServiceMeshProfile) -> Tuple[ServiceMeshProfile, bool]:
+        updated = False
         # enable/disable
         enable_asm = self.raw_param.get("enable_azure_service_mesh", False)
         disable_asm = self.raw_param.get("disable_azure_service_mesh", False)
@@ -4135,134 +4393,52 @@ class AKSManagedClusterContext(BaseAKSContext):
         elif enable_asm:
             if new_profile is not None and new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_ISTIO:
                 raise ArgumentUsageError(
-                    "Istio has already been enabled for this cluster, please refer to https://aka.ms/asm-aks-upgrade-docs "
-                    "for more details on updating the mesh profile."
+                    "Istio has already been enabled for this cluster, please refer to "
+                    "https://aka.ms/asm-aks-upgrade-docs for more details on updating the mesh profile."
                 )
             requested_revision = self.raw_param.get("revision", None)
             new_profile.mode = CONST_AZURE_SERVICE_MESH_MODE_ISTIO
             if new_profile.istio is None:
-                new_profile.istio = self.models.IstioServiceMesh()
+                new_profile.istio = self.models.IstioServiceMesh()  # pylint: disable=no-member
             if mesh_upgrade_command is None and requested_revision is not None:
                 new_profile.istio.revisions = [requested_revision]
             updated = True
 
-        enable_ingress_gateway = self.raw_param.get("enable_ingress_gateway", False)
-        disable_ingress_gateway = self.raw_param.get("disable_ingress_gateway", False)
-        ingress_gateway_type = self.raw_param.get("ingress_gateway_type", None)
+        return new_profile, updated
 
-        if enable_ingress_gateway and disable_ingress_gateway:
-            raise MutuallyExclusiveArgumentError(
-                "Cannot both enable and disable azure service mesh ingress gateway at the same time.",
-            )
+    # pylint: disable=too-many-branches,too-many-locals,too-many-statements
+    def update_azure_service_mesh_profile(self) -> ServiceMeshProfile:
+        """ Update azure service mesh profile.
 
-        # deal with gateways
-        if enable_ingress_gateway or disable_ingress_gateway:
-            # if a gateway is enabled, enable the mesh
-            if enable_ingress_gateway:
-                new_profile.mode = CONST_AZURE_SERVICE_MESH_MODE_ISTIO
-                updated = True
+        This function clone the existing service mesh profile, then apply user supplied changes
+        like enable or disable mesh, enable or disable internal or external ingress gateway
+        then return the updated service mesh profile.
 
-            if not ingress_gateway_type:
-                raise RequiredArgumentMissingError("--ingress-gateway-type is required.")
+        It does not overwrite the service mesh profile attribute of the managed cluster.
 
-            # ensure necessary fields
-            if new_profile.istio.components is None:
-                new_profile.istio.components = self.models.IstioComponents()
-                updated = True
-            if new_profile.istio.components.ingress_gateways is None:
-                new_profile.istio.components.ingress_gateways = []
-                updated = True
+        :return: updated service mesh profile
+        """
+        updated = False
+        new_profile = (
+            self.models.ServiceMeshProfile(mode=CONST_AZURE_SERVICE_MESH_MODE_DISABLED)  # pylint: disable=no-member
+            if self.mc.service_mesh_profile is None
+            else copy.deepcopy(self.mc.service_mesh_profile)
+        )
 
-            # make update if the gateway already exist
-            gateway_exists = False
-            for ingress in new_profile.istio.components.ingress_gateways:
-                if ingress.mode == ingress_gateway_type:
-                    ingress.enabled = enable_ingress_gateway
-                    gateway_exists = True
-                    updated = True
-                    break
+        new_profile, updated_enable_disable_asm = self._handle_enable_disable_asm(new_profile)
+        updated |= updated_enable_disable_asm
 
-            # gateway not exist, append
-            if not gateway_exists:
-                new_profile.istio.components.ingress_gateways.append(
-                    self.models.IstioIngressGateway(
-                        mode=ingress_gateway_type,
-                        enabled=enable_ingress_gateway,
-                    )
-                )
-                updated = True
+        new_profile, updated_ingress_gateways_asm = self._handle_ingress_gateways_asm(new_profile)
+        updated |= updated_ingress_gateways_asm
 
-        # deal with plugin ca
-        key_vault_id = self.raw_param.get("key_vault_id", None)
-        ca_cert_object_name = self.raw_param.get("ca_cert_object_name", None)
-        ca_key_object_name = self.raw_param.get("ca_key_object_name", None)
-        root_cert_object_name = self.raw_param.get("root_cert_object_name", None)
-        cert_chain_object_name = self.raw_param.get("cert_chain_object_name", None)
+        new_profile, updated_pluginca_asm = self._handle_pluginca_asm(new_profile)
+        updated |= updated_pluginca_asm
 
-        if any([key_vault_id, ca_cert_object_name, ca_key_object_name, root_cert_object_name, cert_chain_object_name]):
-            if key_vault_id is None:
-                raise InvalidArgumentValueError('--key-vault-id is required to use Azure Service Mesh plugin CA feature.')
-            if ca_cert_object_name is None:
-                raise InvalidArgumentValueError('--ca-cert-object-name is required to use Azure Service Mesh plugin CA feature.')
-            if ca_key_object_name is None:
-                raise InvalidArgumentValueError('--ca-key-object-name is required to use Azure Service Mesh plugin CA feature.')
-            if root_cert_object_name is None:
-                raise InvalidArgumentValueError('--root-cert-object-name is required to use Azure Service Mesh plugin CA feature.')
-            if cert_chain_object_name is None:
-                raise InvalidArgumentValueError('--cert-chain-object-name is required to use Azure Service Mesh plugin CA feature.')
-
-        if key_vault_id is not None and (
-                not is_valid_resource_id(key_vault_id) or "providers/Microsoft.KeyVault/vaults" not in key_vault_id):
-            raise InvalidArgumentValueError(
-                key_vault_id + " is not a valid Azure Keyvault resource ID."
-            )
-
-        if enable_asm and all([key_vault_id, ca_cert_object_name, ca_key_object_name, root_cert_object_name, cert_chain_object_name]):
-            if new_profile.istio.certificate_authority is None:
-                new_profile.istio.certificate_authority = self.models.IstioCertificateAuthority()
-            if new_profile.istio.certificate_authority.plugin is None:
-                new_profile.istio.certificate_authority.plugin = self.models.IstioPluginCertificateAuthority()
-            new_profile.istio.certificate_authority.plugin.key_vault_id = key_vault_id
-            new_profile.istio.certificate_authority.plugin.cert_object_name = ca_cert_object_name
-            new_profile.istio.certificate_authority.plugin.key_object_name = ca_key_object_name
-            new_profile.istio.certificate_authority.plugin.root_cert_object_name = root_cert_object_name
-            new_profile.istio.certificate_authority.plugin.cert_chain_object_name = cert_chain_object_name
-            updated = True
-
-        # deal with mesh upgrade commands
-        if mesh_upgrade_command is not None:
-            if new_profile is None or new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_DISABLED:
-                raise ArgumentUsageError(
-                    "Istio has not been enabled for this cluster, please refer to https://aka.ms/asm-aks-addon-docs "
-                    "for more details on enabling Azure Service Mesh."
-                )
-            requested_revision = self.raw_param.get("revision", None)
-            if mesh_upgrade_command == CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE or mesh_upgrade_command == CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK:
-                if len(new_profile.istio.revisions) < 2:
-                    raise ArgumentUsageError('Azure Service Mesh upgrade is not in progress.')
-
-                sorted_revisons = self._sort_revisions(new_profile.istio.revisions)
-                if mesh_upgrade_command == CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE:
-                    revision_to_remove = sorted_revisons[0]
-                    revision_to_keep = sorted_revisons[-1]
-                else:
-                    revision_to_remove = sorted_revisons[-1]
-                    revision_to_keep = sorted_revisons[0]
-                msg = (f"This operation will remove Istio control plane for revision {revision_to_remove}. "
-                       f"Please ensure all data plane workloads have been rolled over to revision {revision_to_keep} so that they are still part of the mesh. "
-                       "\nAre you sure you want to proceed?")
-                if prompt_y_n(msg, default="y"):
-                    new_profile.istio.revisions.remove(revision_to_remove)
-                    updated = True
-            elif mesh_upgrade_command == CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START and requested_revision is not None:
-                if new_profile.istio.revisions is None:
-                    new_profile.istio.revisions = []
-                new_profile.istio.revisions.append(requested_revision)
-                updated = True
+        new_profile, updated_upgrade_asm = self._handle_upgrade_asm(new_profile)
+        updated |= updated_upgrade_asm
 
         if updated:
             return new_profile
-
         return self.mc.service_mesh_profile
 
     def _sort_revisions(self, revisions):
@@ -6228,6 +6404,26 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             self.context.set_intermediate("azuremonitormetrics_addon_enabled", True, overwrite_exists=True)
         return mc
 
+    def set_up_ingress_web_app_routing(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up the app routing profile in the ingress profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        addons = self.context.get_enable_addons()
+        if "web_application_routing" in addons or self.context.get_enable_app_routing():
+            if mc.ingress_profile is None:
+                mc.ingress_profile = self.models.ManagedClusterIngressProfile()  # pylint: disable=no-member
+            mc.ingress_profile.web_app_routing = (
+                self.models.ManagedClusterIngressProfileWebAppRouting(enabled=True)  # pylint: disable=no-member
+            )
+            if "web_application_routing" in addons:
+                dns_zone_resource_ids = self.context.get_dns_zone_resource_ids()
+                mc.ingress_profile.web_app_routing.dns_zone_resource_ids = dns_zone_resource_ids
+
+        return mc
+
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
@@ -6293,6 +6489,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_http_proxy_config(mc)
         # set up workload autoscaler profile
         mc = self.set_up_workload_auto_scaler_profile(mc)
+        # set up app routing profile
+        mc = self.set_up_ingress_web_app_routing(mc)
 
         # setup k8s support plan
         mc = self.set_up_k8s_support_plan(mc)
@@ -7410,6 +7608,153 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    # pylint: disable=too-many-branches
+    def update_app_routing_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update app routing profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        # get parameters from context
+        enable_app_routing = self.context.get_enable_app_routing()
+        enable_keyvault_secret_provider = self.context.get_enable_kv()
+        dns_zone_resource_ids = self.context.get_dns_zone_resource_ids_from_input()
+
+        # update ManagedCluster object with app routing settings
+        mc.ingress_profile = (
+            mc.ingress_profile or
+            self.models.ManagedClusterIngressProfile()  # pylint: disable=no-member
+        )
+        mc.ingress_profile.web_app_routing = (
+            mc.ingress_profile.web_app_routing or
+            self.models.ManagedClusterIngressProfileWebAppRouting()  # pylint: disable=no-member
+        )
+        if enable_app_routing is not None:
+            if mc.ingress_profile.web_app_routing.enabled == enable_app_routing:
+                error_message = (
+                    "App Routing is already enabled.\n"
+                    if enable_app_routing
+                    else "App Routing is already disabled.\n"
+                )
+                raise CLIError(error_message)
+            mc.ingress_profile.web_app_routing.enabled = enable_app_routing
+
+        # enable keyvault secret provider addon
+        if enable_keyvault_secret_provider:
+            self._enable_keyvault_secret_provider_addon(mc)
+
+        # modify DNS zone resource IDs
+        if dns_zone_resource_ids:
+            self._update_dns_zone_resource_ids(mc, dns_zone_resource_ids)
+
+        return mc
+
+    def _enable_keyvault_secret_provider_addon(self, mc: ManagedCluster) -> None:
+        """Helper function to enable keyvault secret provider addon for the ManagedCluster object.
+
+        :return: None
+        """
+        addon_consts = self.context.get_addon_consts()
+        CONST_SECRET_ROTATION_ENABLED = addon_consts.get(
+            "CONST_SECRET_ROTATION_ENABLED"
+        )
+        CONST_ROTATION_POLL_INTERVAL = addon_consts.get(
+            "CONST_ROTATION_POLL_INTERVAL"
+        )
+        CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME = addon_consts.get(
+            "CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME"
+        )
+
+        mc.addon_profiles = mc.addon_profiles or {}
+        if not mc.addon_profiles.get(CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME):
+            mc.addon_profiles[
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+            ] = self.models.ManagedClusterAddonProfile(  # pylint: disable=no-member
+                enabled=True,
+                config={
+                    CONST_SECRET_ROTATION_ENABLED: "false",
+                    CONST_ROTATION_POLL_INTERVAL: "2m",
+                },
+            )
+        elif not mc.addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME].enabled:
+            mc.addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME].enabled = True
+            mc.addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME].config = {
+                CONST_SECRET_ROTATION_ENABLED: "false",
+                CONST_ROTATION_POLL_INTERVAL: "2m",
+            }
+
+    # pylint: disable=too-many-nested-blocks
+    def _update_dns_zone_resource_ids(self, mc: ManagedCluster, dns_zone_resource_ids) -> None:
+        """Helper function to update dns zone resource ids in app routing addon.
+
+        :return: None
+        """
+        add_dns_zone = self.context.get_add_dns_zone()
+        delete_dns_zone = self.context.get_delete_dns_zone()
+        update_dns_zone = self.context.get_update_dns_zone()
+        attach_zones = self.context.get_attach_zones()
+
+        if mc.ingress_profile and mc.ingress_profile.web_app_routing and mc.ingress_profile.web_app_routing.enabled:
+            if add_dns_zone:
+                mc.ingress_profile.web_app_routing.dns_zone_resource_ids = (
+                    mc.ingress_profile.web_app_routing.dns_zone_resource_ids or []
+                )
+                for dns_zone_id in dns_zone_resource_ids:
+                    if dns_zone_id not in mc.ingress_profile.web_app_routing.dns_zone_resource_ids:
+                        mc.ingress_profile.web_app_routing.dns_zone_resource_ids.append(dns_zone_id)
+                        if attach_zones:
+                            try:
+                                is_private_dns_zone = (
+                                    parse_resource_id(dns_zone_id).get("type").lower() == "privatednszones"
+                                )
+                                role = CONST_PRIVATE_DNS_ZONE_CONTRIBUTOR_ROLE if is_private_dns_zone else \
+                                    CONST_DNS_ZONE_CONTRIBUTOR_ROLE
+                                if not add_role_assignment(
+                                    self.cmd,
+                                    role,
+                                    mc.ingress_profile.web_app_routing.identity.object_id,
+                                    False,
+                                    scope=dns_zone_id
+                                ):
+                                    logger.warning(
+                                        'Could not create a role assignment for App Routing. '
+                                        'Are you an Owner on this subscription?')
+                            except Exception as ex:
+                                raise CLIError('Error in granting dns zone permissions to managed identity.\n') from ex
+            elif delete_dns_zone:
+                if mc.ingress_profile.web_app_routing.dns_zone_resource_ids:
+                    dns_zone_resource_ids = [
+                        x
+                        for x in mc.ingress_profile.web_app_routing.dns_zone_resource_ids
+                        if x not in dns_zone_resource_ids
+                    ]
+                    mc.ingress_profile.web_app_routing.dns_zone_resource_ids = dns_zone_resource_ids
+                else:
+                    raise CLIError('No DNS zone is used by App Routing.\n')
+            elif update_dns_zone:
+                mc.ingress_profile.web_app_routing.dns_zone_resource_ids = dns_zone_resource_ids
+                if attach_zones:
+                    try:
+                        for dns_zone in dns_zone_resource_ids:
+                            is_private_dns_zone = parse_resource_id(dns_zone).get("type").lower() == "privatednszones"
+                            role = CONST_PRIVATE_DNS_ZONE_CONTRIBUTOR_ROLE if is_private_dns_zone else \
+                                CONST_DNS_ZONE_CONTRIBUTOR_ROLE
+                            if not add_role_assignment(
+                                self.cmd,
+                                role,
+                                mc.ingress_profile.web_app_routing.identity.object_id,
+                                False,
+                                scope=dns_zone,
+                            ):
+                                logger.warning(
+                                    'Could not create a role assignment for App Routing. '
+                                    'Are you an Owner on this subscription?')
+                    except Exception as ex:
+                        raise CLIError('Error in granting dns zone permisions to managed identity.\n') from ex
+        else:
+            raise CLIError('App Routing must be enabled to modify DNS zone resource IDs.\n')
+
     def update_identity_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update identity profile for the ManagedCluster object.
 
@@ -7595,18 +7940,25 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         :return: bool
         """
+        from azure.cli.command_modules.acs._consts import CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
         # some addons require post cluster creation role assigment
         monitoring_addon_enabled = self.context.get_intermediate("monitoring_addon_enabled", default_value=False)
         ingress_appgw_addon_enabled = self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False)
         virtual_node_addon_enabled = self.context.get_intermediate("virtual_node_addon_enabled", default_value=False)
         enable_managed_identity = check_is_msi_cluster(mc)
         attach_acr = self.context.get_attach_acr()
+        keyvault_id = self.context.get_keyvault_id()
+        enable_azure_keyvault_secrets_provider_addon = self.context.get_enable_kv() or (
+            mc.addon_profiles and mc.addon_profiles.get(CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME) and
+            mc.addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME].enabled)
 
+        # pylint: disable=too-many-boolean-expressions
         if (
             monitoring_addon_enabled or
             ingress_appgw_addon_enabled or
             virtual_node_addon_enabled or
-            (enable_managed_identity and attach_acr)
+            (enable_managed_identity and attach_acr) or
+            (keyvault_id and enable_azure_keyvault_secrets_provider_addon)
         ):
             return True
         return False
@@ -7620,6 +7972,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         return
 
+    # pylint: disable=too-many-locals
     def postprocessing_after_mc_created(self, cluster: ManagedCluster) -> None:
         """Postprocessing performed after the cluster is created.
 
@@ -7699,6 +8052,65 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     subscription_id=self.context.get_subscription_id(),
                     is_service_principal=False,
                 )
+
+        # attach keyvault to app routing addon
+        from azure.cli.command_modules.keyvault.custom import set_policy
+        from azure.cli.command_modules.acs._client_factory import get_keyvault_client
+        from azure.cli.command_modules.acs._consts import CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+        keyvault_id = self.context.get_keyvault_id()
+        enable_azure_keyvault_secrets_provider_addon = (
+            self.context.get_enable_kv() or
+            (cluster.addon_profiles and
+             cluster.addon_profiles.get(CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME) and
+             cluster.addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME].enabled)
+        )
+        logger.warning("keyvaultid: %s, enable_kv: %s", keyvault_id, enable_azure_keyvault_secrets_provider_addon)
+        if keyvault_id:
+            if enable_azure_keyvault_secrets_provider_addon:
+                if cluster.ingress_profile and \
+                   cluster.ingress_profile.web_app_routing and \
+                   cluster.ingress_profile.web_app_routing.enabled:
+                    if not is_valid_resource_id(keyvault_id):
+                        raise InvalidArgumentValueError("Please provide a valid keyvault ID")
+                    self.cmd.command_kwargs['operation_group'] = 'vaults'
+                    keyvault_params = parse_resource_id(keyvault_id)
+                    keyvault_subscription = keyvault_params['subscription']
+                    keyvault_name = keyvault_params['name']
+                    keyvault_rg = keyvault_params['resource_group']
+                    keyvault_client = get_keyvault_client(self.cmd.cli_ctx, subscription_id=keyvault_subscription)
+                    keyvault = keyvault_client.get(resource_group_name=keyvault_rg, vault_name=keyvault_name)
+                    managed_identity_object_id = cluster.ingress_profile.web_app_routing.identity.object_id
+                    is_service_principal = False
+
+                    try:
+                        if keyvault.properties.enable_rbac_authorization:
+                            if not self.context.external_functions.add_role_assignment(
+                                self.cmd,
+                                "Key Vault Secrets User",
+                                managed_identity_object_id,
+                                is_service_principal,
+                                scope=keyvault_id,
+                            ):
+                                logger.warning(
+                                    "Could not create a role assignment for App Routing. "
+                                    "Are you an Owner on this subscription?"
+                                )
+                        else:
+                            keyvault = set_policy(
+                                self.cmd,
+                                keyvault_client,
+                                keyvault_rg,
+                                keyvault_name,
+                                object_id=managed_identity_object_id,
+                                secret_permissions=["Get"],
+                                certificate_permissions=["Get"],
+                            )
+                    except Exception as ex:
+                        raise CLIError('Error in granting keyvault permissions to managed identity.\n') from ex
+                else:
+                    raise CLIError('App Routing must be enabled to attach keyvault.\n')
+            else:
+                raise CLIError('Keyvault secrets provider addon must be enabled to attach keyvault.\n')
 
     def put_mc(self, mc: ManagedCluster) -> ManagedCluster:
         if self.check_is_postprocessing_required(mc):

@@ -2613,7 +2613,17 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             'csr_grp2': 'REQUEST-913-SCANNER-DETECTION',
             'csr_grp3': 'REQUEST-931-APPLICATION-ATTACK-RFI'
         })
-        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+
+        # create a waf-policy with default type and version
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}', checks=[
+            self.check('name', '{waf}'),
+            self.check('managedRules.managedRuleSets[0].ruleSetType', 'Microsoft_DefaultRuleSet'),
+            self.check('managedRules.managedRuleSets[0].ruleSetVersion', '2.1'),
+        ])
+        self.cmd('network application-gateway waf-policy delete -g {rg} -n {waf}')
+
+        # create a waf-policy
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf} --version 3.0 --type OWASP')
 
         # case 1: Initialize(add) managed rule set
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
@@ -2723,7 +2733,6 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].state', 'Disabled'),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].action', 'AnomalyScoring')
         ])
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
     def test_network_app_gateway_waf_policy_with_version_and_type(self, resource_group):
@@ -6775,9 +6784,21 @@ class NetworkVirtualApplianceConnectionScenarioTest(ScenarioTest):
         self.cmd('network virtual-appliance connection show -n {name} -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
             self.check('name', '{name}')
         ])
+
         self.cmd('network virtual-appliance connection list -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
             self.check('length(@)', 1)
         ])
+
+        self.cmd('network virtual-appliance connection update '
+                 '-n {name} '
+                 '-g {rg} '
+                 '--nva {nva_name} '
+                 '--labels [label1,label2] ')
+        
+        self.cmd('network virtual-appliance connection show -n {name} -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
+            self.check('length(properties.routingConfiguration.propagatedRouteTables.labels)', 2),
+            self.check('properties.routingConfiguration.propagatedRouteTables.labels[0]', 'label1')
+        ]) 
 
 class NetworkExtendedLocation(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_network_lb_edge_zone', location='eastus2euap')

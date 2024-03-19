@@ -5,6 +5,8 @@
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from knack.util import CLIError
+from azure.core.exceptions import HttpResponseError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 POOL_DEFAULT = "--service-level Premium --size 4"
 POOL_DEFAULT_TOO_SMALL = "--service-level 'Premium' --size 1"
@@ -54,7 +56,7 @@ class AzureNetAppFilesPoolServiceScenarioTest(ScenarioTest):
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
 
         self.cmd("az netappfiles account create --resource-group {rg} --account-name '%s' -l %s" % (account_name, LOCATION)).get_output_in_json()
-        with self.assertRaises(CLIError):
+        with self.assertRaises(HttpResponseError):
             self.cmd("az netappfiles pool create --resource-group {rg} --account-name %s --pool-name %s -l %s %s " % (account_name, pool_name, LOCATION, POOL_DEFAULT_TOO_SMALL)).get_output_in_json()
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_pool_', additional_tags={'owner': 'cli_test'})
@@ -63,7 +65,7 @@ class AzureNetAppFilesPoolServiceScenarioTest(ScenarioTest):
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
 
         self.cmd("az netappfiles account create --resource-group {rg} --account-name '%s' -l %s" % (account_name, LOCATION)).get_output_in_json()
-        with self.assertRaises(CLIError):
+        with self.assertRaises(InvalidArgumentValueError):
             self.cmd("az netappfiles pool create --resource-group {rg} --account-name %s --pool-name %s -l %s %s " % (account_name, pool_name, LOCATION, POOL_DEFAULT_STRING_SIZE)).get_output_in_json()
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_pool_', additional_tags={'owner': 'cli_test'})
