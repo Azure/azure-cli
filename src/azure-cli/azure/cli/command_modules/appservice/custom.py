@@ -4625,7 +4625,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         endpoints = deployment_storage.primary_endpoints
         deployment_config_storage_value = getattr(endpoints, 'blob') + deployment_storage_container_name
 
-        deployment_storage_auth_type = deployment_storage_auth_type or 'SystemAssignedIdentity'
+        deployment_storage_auth_type = deployment_storage_auth_type or 'StorageAccountConnectionString'
 
         if deployment_storage_auth_value and deployment_storage_auth_type != 'UserAssignedIdentity':
             raise ArgumentUsageError(
@@ -5171,8 +5171,8 @@ def _get_or_create_deployment_storage_container(cmd, resource_group_name, functi
                                                                deployment_storage_container_name)
     else:
         from random import randint
-        deployment_storage_container_name = "released-package{}{:07}".format(
-            _normalize_functionapp_name(functionapp_name)[:30], randint(0, 9999999))
+        deployment_storage_container_name = "app-package-{}-{:07}".format(
+            _normalize_functionapp_name(functionapp_name)[:32], randint(0, 9999999))
         logger.warning("Creating deployment storage account container '%s' ...", deployment_storage_container_name)
 
         from azure.mgmt.storage.models import BlobContainer
