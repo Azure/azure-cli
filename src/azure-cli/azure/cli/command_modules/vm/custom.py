@@ -232,7 +232,7 @@ def get_hyper_v_generation_from_vmss(cli_ctx, image_ref, location):  # pylint: d
 
 
 def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, access_level,
-                  secure_vm_guest_state_sas=None):
+                  secure_vm_guest_state_sas=None, file_format=None):
     AccessLevel, GrantAccessData = cmd.get_models('AccessLevel', 'GrantAccessData')
     client = _compute_client_factory(cmd.cli_ctx)
     op = client.disks if is_disk else client.snapshots
@@ -240,6 +240,8 @@ def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, 
                                         duration_in_seconds=duration_in_seconds)
     if secure_vm_guest_state_sas:
         grant_access_data.get_secure_vm_guest_state_sas = secure_vm_guest_state_sas
+    if file_format:
+        grant_access_data.file_format = file_format
 
     return op.begin_grant_access(resource_group_name, name, grant_access_data)
 
@@ -746,9 +748,9 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     return sdk_no_wait(no_wait, client.snapshots.begin_create_or_update, resource_group_name, snapshot_name, snapshot)
 
 
-def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, access_level=None):
+def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, access_level=None, file_format=None):
     return _grant_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, is_disk=False,
-                         access_level=access_level)
+                         access_level=access_level, file_format=file_format)
 
 
 def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryption_set=None,
