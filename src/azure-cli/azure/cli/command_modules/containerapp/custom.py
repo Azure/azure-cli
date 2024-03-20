@@ -3570,7 +3570,6 @@ def stream_job_logs(cmd, resource_group_name, name, container, execution=None, r
                         headers=headers)
 
     if not resp.ok:
-        print(url)
         raise ValidationError(f"Got bad status from the logstream API: {resp.status_code}. Error: {str(resp.content)}")
 
     for line in resp.iter_lines():
