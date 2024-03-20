@@ -3545,6 +3545,9 @@ def stream_job_logs(cmd, resource_group_name, name, container, execution=None, r
     base_url = job["properties"]["eventStreamEndpoint"]
     base_url = base_url[:base_url.index("/subscriptions/")]
 
+    if execution is None and replica is not None:
+        raise ValidationError("Cannot specify a replica without an execution")
+
     if execution is None:
         executions = ContainerAppsJobClient.get_executions(cmd, resource_group_name, name)['value']
         if not executions:
