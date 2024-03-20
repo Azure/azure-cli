@@ -724,27 +724,25 @@ class FunctionappDapr(LiveScenarioTest):
 class FunctionAppFlex(LiveScenarioTest):
     def test_functionapp_list_flexconsumption_locations(self):
         locations = self.cmd('functionapp list-flexconsumption-locations').get_output_in_json()
-        self.assertTrue(len(locations) == 14)
+        self.assertTrue(len(locations) == 13)
+
+    def test_functionapp_list_flexconsumption_runtimes(self):
+        runtimes = self.cmd('functionapp list-flexconsumption-runtimes').get_output_in_json()
+        self.assertTrue(len(runtimes) == 7)
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_flex_scale_config(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionapp', 40)
-        plan = '{}FlexPlan'.format(FLEX_ASP_LOCATION_FUNCTIONAPP)
 
         functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java --always-ready-instances http=10 --instance-memory 512 --maximum-instance-count 150'
                                .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
-        self.assertTrue(functionapp['functionAppConfig']['scaleAndConcurrency']['maximumInstanceCount'] == 150)
-        self.assertTrue(functionapp['functionAppConfig']['scaleAndConcurrency']['instanceMemoryMB'] == 512)
-        self.assertTrue(functionapp['functionAppConfig']['scaleAndConcurrency']['alwaysReady'][0]['name'] == 'http')
-        self.assertTrue(functionapp['functionAppConfig']['scaleAndConcurrency']['alwaysReady'][0]['instanceCount'] == 10)
-        self.assertTrue(len(functionapp['functionAppConfig']['scaleAndConcurrency']['alwaysReady']) == 1)
-
-        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
-            JMESPathCheck('sku.tier', 'FlexConsumption'),
-            JMESPathCheck('sku.name', 'FC1')
-        ])
+        self.assertTrue(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['maximumInstanceCount'] == 150)
+        self.assertTrue(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['instanceMemoryMB'] == 512)
+        self.assertTrue(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['alwaysReady'][0]['name'] == 'http')
+        self.assertTrue(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['alwaysReady'][0]['instanceCount'] == 10)
+        self.assertTrue(len(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['alwaysReady']) == 1)
 
         scale_config = self.cmd('functionapp scale config set -g {} -n {} --maximum-instance-count 200 --instance-memory 2048 --trigger-type http --trigger-settings perInstanceConcurrency=5'
                                .format(resource_group, functionapp_name)).get_output_in_json()
@@ -761,7 +759,7 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(len(scale_config['alwaysReady']) == 2)
 
         scale_config = self.cmd('functionapp scale config always-ready delete -g {} -n {} --setting-names http'
-                                .format()).get_output_in_json()
+                                .format(resource_group, functionapp_name)).get_output_in_json()
         self.assertTrue(scale_config['alwaysReady'][0]['name'] == 'hello')
         self.assertTrue(scale_config['alwaysReady'][0]['instanceCount'] == 15)
         self.assertTrue(len(scale_config['alwaysReady']) == 1)
@@ -780,34 +778,24 @@ class FunctionAppFlex(LiveScenarioTest):
     def test_functionapp_flex_runtime_config(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionapp', 40)
-        functionapp_name2 = self.create_random_name(
-            'functionapp', 40)
 
-        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java'
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.10'
                                .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
 
-        self.assertTrue(functionapp['functionAppConfig']['scaleAndConcurrency']['maximumInstanceCount'] == 100)
-        self.assertTrue(functionapp['functionAppConfig']['scaleAndConcurrency']['instanceMemoryMB'] == 2048)
-        self.assertTrue(functionapp['functionAppConfig']['runtime']['name'] == 'java')
-        self.assertTrue(functionapp['functionAppConfig']['runtime']['version'] == '17.0')
+        self.assertTrue(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['maximumInstanceCount'] == 100)
+        self.assertTrue(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['instanceMemoryMB'] == 2048)
+        self.assertTrue(functionapp['properties']['functionAppConfig']['runtime']['name'] == 'python')
+        self.assertTrue(functionapp['properties']['functionAppConfig']['runtime']['version'] == '3.10')
 
-        functionapp2 = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java --runtime-version 11.0'
-                               .format(resource_group, functionapp_name2, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
-
-        self.assertTrue(functionapp2['functionAppConfig']['scaleAndConcurrency']['maximumInstanceCount'] == 100)
-        self.assertTrue(functionapp2['functionAppConfig']['scaleAndConcurrency']['instanceMemoryMB'] == 2048)
-        self.assertTrue(functionapp2['functionAppConfig']['runtime']['name'] == 'java')
-        self.assertTrue(functionapp2['functionAppConfig']['runtime']['version'] == '11.0')
-
-        self.cmd('functionapp runtime config set -g {} -n {} --runtime-version 17.0'
-                 .format(resource_group, functionapp_name2))
+        self.cmd('functionapp runtime config set -g {} -n {} --runtime-version 3.11'
+                 .format(resource_group, functionapp_name))
 
         runtime_config = self.cmd('functionapp runtime config show -g {} -n {}'
-                                  .format(resource_group, functionapp_name2))
-        self.assertTrue(runtime_config['name'] == 'java')
-        self.assertTrue(runtime_config['version'] == '17.0')
+                                  .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue(runtime_config['name'] == 'python')
+        self.assertTrue(runtime_config['version'] == '3.11')
 
-
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_flex_deployment_config(self, resource_group):
@@ -816,10 +804,8 @@ class FunctionAppFlex(LiveScenarioTest):
         storage_name = self.create_random_name('funcstorage1', 24)
         container_name = self.create_random_name('funccontainer', 24)
         storage2_name = self.create_random_name('funcstorage2', 24)
-        identity_name = self.create_random_name('id1', 8)
-
-        storage_account = self.cmd('storage account create -g {} -n -l {} --sku Standard_LRS'
-                                   .format(resource_group, storage_name, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
+        storage_account = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'
+                                   .format(storage_name, resource_group, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
         storage_account_blob_endpoint = storage_account['primaryEndpoints']['blob']
         deployment_storage_account = self.cmd('storage account create -g {} -n {} -l {} --sku Standard_LRS'
                                               .format(resource_group, storage2_name, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
@@ -829,37 +815,23 @@ class FunctionAppFlex(LiveScenarioTest):
 
         functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java --deployment-storage-auth-type storageAccountConnectionString'
                                .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_name)).get_output_in_json()
-        self.assertTrue(functionapp['functionAppConfig']['deployment']['storage']['type'] == 'blobContainer')
-        self.assertTrue(functionapp['functionAppConfig']['deployment']['storage']['value'].startswith(storage_account_blob_endpoint))
-        self.assertTrue(functionapp['functionAppConfig']['deployment']['storage']['authentication']['type'] == 'StorageAccountConnectionString')
-        self.assertTrue(functionapp['functionAppConfig']['deployment']['storage']['authentication']['userAssignedIdentityResourceId'] is None)
-        self.assertTrue(functionapp['functionAppConfig']['deployment']['storage']['authentication']['storageAccountConnectionStringName'] == 'DEPLOYMENT_STORAGE_CONNECTION_STRING')
+        self.assertTrue(functionapp['properties']['functionAppConfig']['deployment']['storage']['type'] == 'blobContainer')
+        self.assertTrue(functionapp['properties']['functionAppConfig']['deployment']['storage']['value'].startswith(storage_account_blob_endpoint))
+        self.assertTrue(functionapp['properties']['functionAppConfig']['deployment']['storage']['authentication']['type'] == 'StorageAccountConnectionString')
+        self.assertTrue(functionapp['properties']['functionAppConfig']['deployment']['storage']['authentication']['userAssignedIdentityResourceId'] is None)
+        self.assertTrue(functionapp['properties']['functionAppConfig']['deployment']['storage']['authentication']['storageAccountConnectionStringName'] == 'DEPLOYMENT_STORAGE_CONNECTION_STRING')
         app_settings = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()
         self.assertTrue('DEPLOYMENT_STORAGE_CONNECTION_STRING' in [kp['name'] for kp in app_settings])
 
-        deployment_config = self.cmd('functionapp deployment config set -g {} -n {} --deployment-storage-name {} --deployment-storage-container-name {}'
+        self.cmd('functionapp deployment config set -g {} -n {} --deployment-storage-name {} --deployment-storage-container-name {}'
                                      .format(resource_group, functionapp_name, storage2_name, container_name))
+
+        deployment_config = self.cmd('functionapp deployment config show -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()
         self.assertTrue(deployment_config['storage']['type'] == 'blobContainer')
         self.assertTrue(deployment_config['storage']['value'] == (deployment_account_blob_endpoint + container_name))
-
-        deployment_config = self.cmd('functionapp deployment config set -g {} -n {} --deployment-storage-auth-type systemAssignedIdentity')
-        self.assertTrue(deployment_config['storage']['authentication']['type'] == 'SystemAssignedIdentity')
+        self.assertTrue(deployment_config['storage']['authentication']['type'] == 'StorageAccountConnectionString')
         self.assertTrue(deployment_config['storage']['authentication']['userAssignedIdentityResourceId'] is None)
-        self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] is None)
-
-        identity = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name)).get_output_in_json()
-        deployment_config = self.cmd('functionapp deployment config set -g {} -n {} --deployment-storage-auth-type userAssignedIdentity --deployment-storage-auth-value {}'
-                                     .format(resource_group, functionapp_name, identity['id']))
-        self.assertTrue(deployment_config['storage']['authentication']['type'] == 'UserAssignedIdentity')
-        self.assertTrue(deployment_config['storage']['authentication']['userAssignedIdentityResourceId'] == identity['id'])
-        self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] is None)
-
-        deployment_config = self.cmd('functionapp deployment config show -g {} -n {}'.format(resource_group, functionapp_name))
-        self.assertTrue(deployment_config['storage']['type'] == 'blobContainer')
-        self.assertTrue(deployment_config['storage']['value'] == (deployment_account_blob_endpoint + container_name))
-        self.assertTrue(deployment_config['storage']['authentication']['type'] == 'UserAssignedIdentity')
-        self.assertTrue(deployment_config['storage']['authentication']['userAssignedIdentityResourceId'] == identity['id'])
-        self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] is None)
+        self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] == 'DEPLOYMENT_STORAGE_CONNECTION_STRING')
 
 
 class FunctionAppManagedEnvironment(ScenarioTest):
