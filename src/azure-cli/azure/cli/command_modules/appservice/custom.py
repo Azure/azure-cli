@@ -67,7 +67,6 @@ from .utils import (_normalize_sku,
                     _get_location_from_webapp,
                     _normalize_flex_location,
                     _normalize_location,
-                    _normalize_location_for_vnet_integration,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
                     app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp,
@@ -326,9 +325,8 @@ def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, w
 
     cmd.cli_ctx.data['subscription_id'] = current_sub_id
 
-    vnet_location = _normalize_location_for_vnet_integration(cmd, vnet_location)
-    asp_location = _normalize_location_for_vnet_integration(cmd, webapp_location)
-
+    vnet_location = _normalize_location(cmd, vnet_location)
+    asp_location = _normalize_location(cmd, webapp_location)
     if vnet_location != asp_location:
         raise ArgumentUsageError("Unable to create webapp: vnet and App Service Plan must be in the same location. "
                                  "vnet location: {}. Plan location: {}.".format(vnet_location, asp_location))
@@ -1386,10 +1384,14 @@ def list_function_app_runtimes(cmd, os_type=None):
     linux_stacks = [r.to_dict() for r in runtime_helper.stacks if r.linux]
     windows_stacks = [r.to_dict() for r in runtime_helper.stacks if not r.linux]
     if linux and not windows:
-        return {LINUX_OS_NAME: linux_stacks, 'flex': FLEX_RUNTIMES}
+        return linux_stacks
     if windows and not linux:
         return windows_stacks
-    return {WINDOWS_OS_NAME: windows_stacks, LINUX_OS_NAME: linux_stacks, 'flex': FLEX_RUNTIMES}
+    return {WINDOWS_OS_NAME: windows_stacks, LINUX_OS_NAME: linux_stacks}
+
+
+def list_flexconsumption_runtimes():
+    return FLEX_RUNTIMES
 
 
 def delete_logic_app(cmd, resource_group_name, name, slot=None):
@@ -1606,11 +1608,12 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
         raise ArgumentUsageError('--deployment-storage-auth-value is required when '
                                  '--deployment-storage-auth-type is set to UserAssignedIdentity.')
 
-    if deployment_storage_auth_value and deployment_storage_auth_type != 'UserAssignedIdentity':
+    if deployment_storage_auth_value and deployment_storage_auth_type == 'SystemAssignedIdentity':
         raise ArgumentUsageError(
             '--deployment-storage-auth-value is only a valid input when '
-            '--deployment-storage-auth-type is set to UserAssignedIdentity. '
-            'Please try again with --deployment-storage-auth-type set to UserAssignedIdentity.'
+            '--deployment-storage-auth-type is set to UserAssignedIdentity or StorageAccountConnectionString. '
+            'Please try again with --deployment-storage-auth-type set to UserAssignedIdentity or '
+            'StorageAccountConnectionString.'
         )
 
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
@@ -4578,11 +4581,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
         deployment_storage_auth_type = deployment_storage_auth_type or 'StorageAccountConnectionString'
 
-        if deployment_storage_auth_value and deployment_storage_auth_type != 'UserAssignedIdentity':
+        if deployment_storage_auth_value and deployment_storage_auth_type == 'SystemAssignedIdentity':
             raise ArgumentUsageError(
-                '--deployment-storage-auth-value is only a valid input for --deployment-storage-auth-type '
-                'set to UserAssignedIdentity. Please try again with --deployment-storage-auth-type set to '
-                'UserAssignedIdentity.'
+                '--deployment-storage-auth-value is only a valid input when '
+                '--deployment-storage-auth-type is set to UserAssignedIdentity or StorageAccountConnectionString. '
+                'Please try again with --deployment-storage-auth-type set to UserAssignedIdentity or '
+                'StorageAccountConnectionString.'
             )
 
         function_app_config = {}
@@ -5040,8 +5044,7 @@ def try_create_application_insights(cmd, functionapp):
 
     ai_resource_group_name = functionapp.resource_group
     ai_name = functionapp.name
-    # Temporary change for testing
-    ai_location = functionapp.location.replace("(stage)", "").replace("stage", "")
+    ai_location = functionapp.location
 
     app_insights_client = get_mgmt_service_client(cmd.cli_ctx, ApplicationInsightsManagementClient)
     ai_properties = {
@@ -5324,11 +5327,7 @@ def list_flexconsumption_locations(cmd):
         },
         {
             "name": "southeastasia"
-        },
-        {
-            "name": "northcentralus(stage)"
-        },
-
+        }
     ]
 
 

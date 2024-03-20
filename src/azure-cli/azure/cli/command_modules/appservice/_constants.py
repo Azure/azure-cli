@@ -156,11 +156,11 @@ FLEX_RUNTIMES = [
     },
     {
         'runtime': 'python',
-        'version': '3.11'
+        'version': '3.10'
     },
     {
         'runtime': 'python',
-        'version': '3.10'
+        'version': '3.11'
     },
     {
         'runtime': 'powershell',

@@ -417,7 +417,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('memory', help="Required momory from 1.0 to 4.0 ending with ""Gi"" e.g. 1.0Gi, ", is_preview=True)
 
     with self.argument_context('functionapp runtime config') as c:
-        c.argument('runtime_version', help='The version of the functions runtime stack. Use "az functionapp list-runtimes" to check supported runtimes and versions', is_preview=True)
+        c.argument('runtime_version', help='The version of the functions runtime stack. Use "az functionapp list-flexconsumption-runtimes" to check supported runtimes and versions', is_preview=True)
 
     with self.argument_context('functionapp scale config') as c:
         c.argument('maximum_instance_count', type=int, help="The maximum number of instances.", is_preview=True)
