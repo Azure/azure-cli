@@ -1280,8 +1280,10 @@ def _prepare_stacks_excluded_principals(deny_settings_excluded_principals):
 
 
 def _prepare_stacks_delete_detach_models(rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources):
-    if action_on_unmanage != None and (delete_all or delete_resource_groups or delete_resources):
-        raise MutuallyExclusiveArgumentError("The --action-on-unmanage/--aou argument and the --delete-* options cannot be used together.", "Try to use the '--action-on-unmanage <value>' argument only.")
+    if action_on_unmanage is not None and (delete_all or delete_resource_groups or delete_resources):
+        raise MutuallyExclusiveArgumentError(
+            "The --action-on-unmanage/--aou argument and the --delete-* options cannot be used together.",
+            "Try to use the '--action-on-unmanage <value>' argument only.")
 
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
     delete_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
@@ -2612,7 +2614,7 @@ def export_template_deployment_stack_at_subscription(cmd, name=None, id=None):  
 
 def create_deployment_stack_at_resource_group(
     cmd, name, resource_group, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False,
-    delete_resources=False, template_file=None, template_spec=None,template_uri=None, query_string=None, parameters=None, description=None,
+    delete_resources=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None,
     deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False,
     tags=None, no_wait=False
 ):
