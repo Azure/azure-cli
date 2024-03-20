@@ -106,10 +106,7 @@ def load_arguments(self, _):
     stacks_stack_name_type = CLIArgumentType(help='The deployment stack name')
     stacks_stack_deployment_resource_group = CLIArgumentType(options_list=['--deployment-resource-group', '--dr'], help='The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
     stacks_stack_deployment_subscription = CLIArgumentType(options_list=['--deployment-subscription', '--ds'], help='The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
-    stacks_delete_resources_type = CLIArgumentType(arg_type=get_three_state_flag(), options_list=['--delete-resources'], help='Flag to indicate delete rather than detach for the resources.')
-    stacks_delete_resource_groups_type = CLIArgumentType(arg_type=get_three_state_flag(), options_list=['--delete-resource-groups'], help='Flag to indicate delete rather than detach for the resource groups.')
-    stacks_delete_all_type = CLIArgumentType(arg_type=get_three_state_flag(), options_list=['--delete-all'], help='Flag to indicate delete rather than detach for the resources and resource groups.')
-    stacks_action_on_unmanage_type = CLIArgumentType(arg_type=get_enum_type(StacksActionOnUnmanage), options_list=['--action-on-unmanage', '--aou'], help='Defines what happens to resources that are no longer managed after the stack is updated or deleted.')
+    stacks_action_on_unmanage_type = CLIArgumentType(arg_type=get_enum_type(StacksActionOnUnmanage), options_list=['--action-on-unmanage', '--aou'], default='detachAll', help='Defines what happens to resources that are no longer managed after the stack is updated or deleted.')
     stacks_deny_settings_mode = CLIArgumentType(arg_type=get_enum_type(DenySettingsMode), options_list=['--deny-settings-mode', '--dm'], help='Define which operations are denied on resources managed by the stack.')
     stacks_excluded_principals = CLIArgumentType(options_list=['--deny-settings-excluded-principals', '--ep'], help='List of AAD principal IDs excluded from the lock. Up to 5 principals are permitted.')
     stacks_excluded_actions = CLIArgumentType(options_list=['--deny-settings-excluded-actions', '--ea'], help="List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted.")
@@ -691,14 +688,29 @@ def load_arguments(self, _):
             c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
             c.argument('id', arg_type=stacks_stack_type)
             c.argument('subscription', arg_type=subscription_type)
-
+    
+    def add_deperecated_stack_delete_flags(argument_context):
+        c.argument(
+            'delete_resources', arg_type=get_three_state_flag(),
+            options_list=['--delete-resources', c.deprecate(
+                target='--delete-resources', redirect='--action-on-unmanage deleteResources', hide=True)],
+            help='Flag to indicate delete rather than detach for the resources.')
+        c.argument(
+            'delete_resource_groups', arg_type=get_three_state_flag(),
+            options_list=['--delete-resource-groups', c.deprecate(
+                target='--delete-resource-groups', redirect='--action-on-unmanage deleteAll', hide=True)],
+            help='Flag to indicate delete rather than detach for the resource groups.')
+        c.argument(
+            'delete_all', arg_type=get_three_state_flag(),
+            options_list=['--delete-all',
+                          c.deprecate(target='--delete-all', redirect='--action-on-unmanage deleteAll', hide=True)],
+            help='Flag to indicate delete rather than detach for the resources and resource groups.')
+        
     with self.argument_context('stack mg delete') as c:
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
-        c.argument('delete_resources', arg_type=stacks_delete_resources_type, deprecate_info=c.deprecate(target='--delete-resources', redirect='--action-on-unmanage deleteResources', hide=True))
-        c.argument('delete_resource_groups', arg_type=stacks_delete_resource_groups_type, deprecate_info=c.deprecate(target='--delete-resource-groups', redirect='--action-on-unmanage deleteAll', hide=True))
-        c.argument('delete_all', arg_type=stacks_delete_all_type, deprecate_info=c.deprecate(target='--delete-all', redirect='--action-on-unmanage deleteAll', hide=True))
+        add_deperecated_stack_delete_flags(c)
         c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
         c.argument('yes', help='Do not prompt for confirmation')
 
@@ -715,9 +727,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
-        c.argument('delete_resources', arg_type=stacks_delete_resources_type, deprecate_info=c.deprecate(target='--delete-resources', redirect='--action-on-unmanage deleteResources', hide=True))
-        c.argument('delete_resource_groups', arg_type=stacks_delete_resource_groups_type, deprecate_info=c.deprecate(target='--delete-resource-groups', redirect='--action-on-unmanage deleteAll', hide=True))
-        c.argument('delete_all', arg_type=stacks_delete_all_type, deprecate_info=c.deprecate(target='--delete-all', redirect='--action-on-unmanage deleteAll', hide=True))
+        add_deperecated_stack_delete_flags(c)
         c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
         c.argument('yes', help='Do not prompt for confirmation')
 
@@ -743,9 +753,7 @@ def load_arguments(self, _):
                 c.argument('parameters', arg_type=deployment_parameters_type, help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
                 c.argument('description', arg_type=stacks_description_type)
                 c.argument('subscription', arg_type=subscription_type)
-                c.argument('delete_resources', arg_type=stacks_delete_resources_type, deprecate_info=c.deprecate(target='--delete-resources', redirect='--action-on-unmanage deleteResources', hide=True))
-                c.argument('delete_resource_groups', arg_type=stacks_delete_resource_groups_type, deprecate_info=c.deprecate(target='--delete-resource-groups', redirect='--action-on-unmanage deleteAll', hide=True))
-                c.argument('delete_all', arg_type=stacks_delete_all_type, deprecate_info=c.deprecate(target='--delete-all', redirect='--action-on-unmanage deleteAll', hide=True))
+                add_deperecated_stack_delete_flags(c)
                 c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
                 c.argument('deny_settings_mode', arg_type=stacks_deny_settings_mode)
                 c.argument('deny_settings_excluded_principals', arg_type=stacks_excluded_principals)
@@ -772,9 +780,7 @@ def load_arguments(self, _):
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
-        c.argument('delete_resources', arg_type=stacks_delete_resources_type, deprecate_info=c.deprecate(target='--delete-resources', redirect='--action-on-unmanage deleteResources', hide=True))
-        c.argument('delete_resource_groups', arg_type=stacks_delete_resource_groups_type, deprecate_info=c.deprecate(target='--delete-resource-groups', redirect='--action-on-unmanage deleteAll', hide=True))
-        c.argument('delete_all', arg_type=stacks_delete_all_type, deprecate_info=c.deprecate(target='--delete-all', redirect='--action-on-unmanage deleteAll', hide=True))
+        add_deperecated_stack_delete_flags(c)
         c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
         c.argument('yes', help='Do not prompt for confirmation')
 
