@@ -240,6 +240,9 @@ def load_arguments(self, _):
         c.argument('elastic_san_resource_id', min_api='2023-04-02',
                    options_list=['--elastic-san-resource-id', '--elastic-san-id'],
                    help='This is the ARM id of the source elastic san volume snapshot.')
+
+    with self.argument_context('snapshot grant-access', resource_type=ResourceType.MGMT_COMPUTE, operation_group='snapshots') as c:
+        c.argument('file_format', arg_type=get_enum_type(self.get_models('FileFormat', operation_group='snapshots')), help='Used to specify the file format when making request for SAS on a VHDX file format snapshot.')
     # endregion
 
     # region Images
