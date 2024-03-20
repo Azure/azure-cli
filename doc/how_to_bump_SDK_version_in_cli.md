@@ -8,7 +8,7 @@ Developers need to do several things for bumping version:
 1. Upgrade CLI dependency
     - Upgrade the SDK version in [setup.py](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/setup.py), [requirements.py3.windows.txt](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/requirements.py3.windows.txt), [requirements.py3.Linux.txt](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/requirements.py3.Linux.txt) and [requirements.py3.Darwin.txt](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/requirements.py3.Darwin.txt)
 2. Update the used API version
-    - If it's not multi-api SDK, then nothing needed in this step
+    - If it's not multi-API SDK, then nothing needed in this step
     - If the SDK contains multiple APIs, the specified API version needs to be updated in CLI Core [AZURE_API_PROFILES](https://github.com/Azure/azure-cli/blob/ce74ae358b51aedfdfb6c32042b515d949618e33/src/azure-cli-core/azure/cli/core/profiles/_shared.py#L147) for 'latest' profile
 3. Regression test to check if it breaks existing features
     - Run `azdev test --no-exitfirst` to figure out all test failures in all modules after bumping version
@@ -50,7 +50,7 @@ For scenario b, variables `PACKAGE`, `TARGET_PACKAGE_VERSION`, `RESOURCE_TYPE` a
 - CUSTOM_WHL_URL: A download url for SDK whl file if you want to test based on private package
 - PACKAGE: The SDK package name, e.g., `azure-mgmt-network`. **Required for scenario b**. Leave it as empty for scenario a.
 - TARGET_PACKAGE_VERSION: The SDK new version, e.g., `19.3.0`. **Required for scenario b**. Leave it as empty for scenario a.
-- RESOURCE_TYPE: The resource type enum name define in [CLI Core](https://github.com/Azure/azure-cli/blob/ce74ae358b51aedfdfb6c32042b515d949618e33/src/azure-cli-core/azure/cli/core/profiles/_shared.py#L38), e.g., `MGMT_NETWORK`. Required if you want to update the API version definition in CLI Core. Usually used for multi-api SDKs. Leave it as empty for scenario a.
+- RESOURCE_TYPE: The resource type enum name define in [CLI Core](https://github.com/Azure/azure-cli/blob/ce74ae358b51aedfdfb6c32042b515d949618e33/src/azure-cli-core/azure/cli/core/profiles/_shared.py#L38), e.g., `MGMT_NETWORK`. Required if you want to update the API version definition in CLI Core. Usually used for multi-API SDKs. Leave it as empty for scenario a.
 - TARGET_API_VERSION: The new API version(s):
     - If the AZURE_API_PROFILES['latest'][RESOURCE_TYPE] definition is `str` type, then just fulfill this variable with new API version. For example, to update API version for [ResourceType.MGMT_NETWORK](https://github.com/Azure/azure-cli/blob/ce74ae358b51aedfdfb6c32042b515d949618e33/src/azure-cli-core/azure/cli/core/profiles/_shared.py#L150), use `2021-10-01` as variable value.
     - If the  AZURE_API_PROFILES['latest'][RESOURCE_TYPE] definition is `SDKProfile` type, then fulfill this variable with 'operation=version' pairs separated by space. For example, to update API version for [ResourceType.MGMT_COMPUTE](https://github.com/Azure/azure-cli/blob/ce74ae358b51aedfdfb6c32042b515d949618e33/src/azure-cli-core/azure/cli/core/profiles/_shared.py#L151-L164), use `default=2022-05-01 snapshots=2022-03-01 gallery_images=2021-12-01` as variable value. `default` means other operations except for explicitly listed ones.
