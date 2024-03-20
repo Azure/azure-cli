@@ -23,7 +23,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.resource.resources.models import GenericResource, DeploymentMode
 
-from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError, ResourceNotFoundError
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, ResourceNotFoundError
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
@@ -1281,7 +1281,7 @@ def _prepare_stacks_excluded_principals(deny_settings_excluded_principals):
 
 def _prepare_stacks_delete_detach_models(rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources):
     if action_on_unmanage != None and (delete_all or delete_resource_groups or delete_resources):
-        raise IncorrectUsageError('The --action-on-unmanage/--aou argument and the --delete-* options cannot be used together.')
+        raise MutuallyExclusiveArgumentError("The --action-on-unmanage/--aou argument and the --delete-* options cannot be used together.", "Try to use the '--action-on-unmanage <value>' argument only.")
 
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
     delete_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
