@@ -63,7 +63,7 @@ def load_command_table(self, _):
         g.custom_show_command('list', 'listexecution_containerappsjob', table_transformer=transform_job_execution_list_output)
         g.custom_show_command('show', 'getSingleExecution_containerappsjob', table_transformer=transform_job_execution_show_output)
 
-    with self.command_group('containerapp job execution replica') as g:
+    with self.command_group('containerapp job replica') as g:
         g.custom_show_command('list', 'listreplica_containerappsjob')
 
     with self.command_group('containerapp job secret') as g:

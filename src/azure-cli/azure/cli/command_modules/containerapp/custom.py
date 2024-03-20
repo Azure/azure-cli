@@ -1591,9 +1591,13 @@ def listexecution_containerappsjob(cmd, resource_group_name, name):
         handle_raw_exception(e)
 
 
-def listreplica_containerappsjob(cmd, resource_group_name, name, execution_name):
+def listreplica_containerappsjob(cmd, resource_group_name, name, execution=None):
+    if execution is None:
+        executions = ContainerAppsJobClient.get_executions(cmd=cmd, resource_group_name=resource_group_name, name=name)
+        execution = executions['value'][0]['name']
+        logger.warning('No execution specified. Using the latest execution: %s', execution)
     try:
-        replicas = ContainerAppsJobClient.get_executions(cmd, resource_group_name, name, execution_name)
+        replicas = ContainerAppsJobClient.get_replicas(cmd, resource_group_name, name, execution)
         return replicas['value']
     except CLIError as e:
         handle_raw_exception(e)
@@ -3546,17 +3550,17 @@ def stream_job_logs(cmd, resource_group_name, name, container, execution=None, r
         if not executions:
             raise ValidationError("No executions found for this job")
         execution = executions[0]["name"]
-        logger.warning(f"No execution provided, defaulting to latest execution: {execution}")
-    
+        logger.warning("No execution provided, defaulting to latest execution: %s", execution)
+
     if replica is None:
         replicas = ContainerAppsJobClient.get_replicas(cmd, resource_group_name, name, execution)['value']
         if not replicas:
             raise ValidationError("No replicas found for execution")
         replica = replicas[0]["name"]
-        logger.warning(f"No replica provided, defaulting to latest replica: {replica}")
+        logger.warning("No replica provided, defaulting to latest replica: %s", replica)
 
     url = (f"{base_url}/subscriptions/{sub}/resourceGroups/{resource_group_name}/jobs/{name}"
-            f"/executions/{execution}/replicas/{replica}/containers/{container}/logstream")
+           f"/executions/{execution}/replicas/{replica}/containers/{container}/logstream")
 
     logger.info("connecting to : %s", url)
     request_params = {"follow": str(follow).lower(),

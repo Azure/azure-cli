@@ -52,6 +52,16 @@ def load_arguments(self, _):
         c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None)
         c.argument('kind', options_list=["--type", "-t"], help="Type of logs to stream", arg_type=get_enum_type([LOG_TYPE_CONSOLE, LOG_TYPE_SYSTEM]), default=LOG_TYPE_CONSOLE)
 
+    with self.argument_context('containerapp job logs show') as c:
+        c.argument('follow', help="Print logs in real time if present.", arg_type=get_three_state_flag())
+        c.argument('tail', help="The number of past logs to print (0-300)", type=int, default=20)
+        c.argument('container', help="The name of the container")
+        c.argument('output_format', options_list=["--format"], help="Log output format", arg_type=get_enum_type(["json", "text"]), default="json")
+        c.argument('replica', help="The name of the replica. List replicas with 'az containerapp job replica list'. A replica may not exist if the job pod has been cleaned up.")
+        c.argument('execution', help="The name of the container app execution. Defaults to the latest execution.")
+        c.argument('name', name_type, id_part=None, help="The name of the Containerapp job.")
+        c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None)
+
     with self.argument_context('containerapp env logs show') as c:
         c.argument('follow', help="Print logs in real time if present.", arg_type=get_three_state_flag())
         c.argument('tail', help="The number of past logs to print (0-300)", type=int, default=20)
@@ -60,6 +70,12 @@ def load_arguments(self, _):
     with self.argument_context('containerapp replica') as c:
         c.argument('replica', help="The name of the replica. ")
         c.argument('revision', help="The name of the container app revision. Defaults to the latest revision.")
+        c.argument('name', name_type, id_part=None, help="The name of the Containerapp.")
+        c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None)
+
+    with self.argument_context('containerapp job replica') as c:
+        c.argument('replica', help="The name of the replica. ")
+        c.argument('execution', help="The name of the container app execution. Defaults to the latest execution.")
         c.argument('name', name_type, id_part=None, help="The name of the Containerapp.")
         c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None)
 

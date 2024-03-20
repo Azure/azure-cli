@@ -201,6 +201,26 @@ helps['containerapp logs show'] = """
           az containerapp logs show -n my-containerapp -g MyResourceGroup --replica MyReplica --revision MyRevision --container MyContainer
 """
 
+helps['containerapp job logs'] = """
+    type: group
+    short-summary: Show container app job logs
+"""
+
+helps['containerapp job logs show'] = """
+    type: command
+    short-summary: Show past logs and/or print logs in real time (with the --follow parameter). Note that the logs are only taken from one execution, replica, and container.
+    examples:
+    - name: Fetch the past 20 lines of logs from a job and return
+      text: |
+          az containerapp job logs show -n my-containerapp -g MyResourceGroup --container MyContainer
+    - name: Fetch 30 lines of past logs logs from a job and print logs as they come in
+      text: |
+          az containerapp job logs show -n my-containerapp -g MyResourceGroup --container MyContainer --follow --tail 30
+    - name: Fetch logs for a particular execution, replica, and container
+      text: |
+          az containerapp job logs show -n my-containerapp -g MyResourceGroup --execution MyExecution --replica MyReplica --container MyContainer
+"""
+
 # Replica Commands
 helps['containerapp replica'] = """
     type: group
@@ -229,6 +249,20 @@ helps['containerapp replica show'] = """
     - name: Show a replica from the a particular revision
       text: |
           az containerapp replica show -n my-containerapp -g MyResourceGroup --replica MyReplica --revision MyRevision
+"""
+
+helps['containerapp job replica'] = """
+    type: group
+    short-summary: Manage container app replicas
+"""
+
+helps['containerapp job replica list'] = """
+    type: command
+    short-summary: List a container app job execution's replica
+    examples:
+    - name: List a container app job's replicas in a particular execution
+      text: |
+          az containerapp job replica list -n my-containerapp -g MyResourceGroup --execution MyExecution
 """
 
 # Revision Commands
