@@ -125,18 +125,60 @@ class AFDProfileCreate(_AFDProfileCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.identity_type = AAZStrArg(
+            options=['--identity-type'],
+            help='Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).',
+            enum=['SystemAssigned', 'None', 'UserAssigned', 'SystemAssigned, UserAssigned'],
+        )
+        args_schema.user_assigned_identities = AAZListArg(
+            options=['--user-assigned-identities'],
+            help='The set of user assigned identities associated with the resource. '
+            'The userAssignedIdentities dictionary keys will be ARM resource ids in the form: '
+            '\'/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupName}}'
+            '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{{identityName}}. '
+            'The dictionary values can be empty objects ({{}}) in requests.',
+        )
+        args_schema.user_assigned_identities.Element = AAZStrArg()
         args_schema.location._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
         args.location = 'global'
+        user_assigned_identities = {}
+        for identity in args.user_assigned_identities:
+            user_assigned_identities[identity.to_serialized_data()] = {}
+        if args.identity_type == 'UserAssigned' or args.identity_type == 'SystemAssigned, UserAssigned':
+            args.identity = {
+                'type': args.identity_type,
+                'userAssignedIdentities': user_assigned_identities
+            }
+        elif args.identity_type == 'SystemAssigned':
+            args.identity = {
+                'type': args.identity_type
+            }
+        else:
+            args.identity = None
 
 
 class AFDProfileUpdate(_AFDProfileUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.identity_type = AAZStrArg(
+            options=['--identity-type'],
+            help='Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).',
+            enum=['SystemAssigned', 'None', 'UserAssigned', 'SystemAssigned, UserAssigned'],
+        )
+        args_schema.user_assigned_identities = AAZListArg(
+            options=['--user-assigned-identities'],
+            help='The set of user assigned identities associated with the resource. '
+            'The userAssignedIdentities dictionary keys will be ARM resource ids in the form: '
+            '\'/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupName}}'
+            '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{{identityName}}. '
+            'The dictionary values can be empty objects ({{}}) in requests.',
+        )
+        args_schema.user_assigned_identities.Element = AAZStrArg()
         args_schema.location._registered = False
         args_schema.sku._registered = False
         return args_schema
@@ -152,6 +194,22 @@ class AFDProfileUpdate(_AFDProfileUpdate):
             raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
         existing_location = None if 'location' not in existing else existing['location']
         args.location = existing_location
+
+        if has_value(args.identity_type):
+            user_assigned_identities = {}
+            for identity in args.user_assigned_identities:
+                user_assigned_identities[identity.to_serialized_data()] = {}
+            if args.identity_type == 'UserAssigned' or args.identity_type == 'SystemAssigned, UserAssigned':
+                args.identity = {
+                    'type': args.identity_type,
+                    'userAssignedIdentities': user_assigned_identities
+                }
+            elif args.identity_type == 'SystemAssigned':
+                args.identity = {
+                    'type': args.identity_type
+                }
+            else:
+                args.identity = None
 
 
 class AFDEndpointCreate(_AFDEndpointCreate):
