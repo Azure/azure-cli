@@ -524,6 +524,13 @@ class Profile:
         index_to_subscription_map = {}
         table_data = []
         subscriptions_sorted = sorted(subscriptions, key=lambda s: s[_SUBSCRIPTION_NAME].lower())
+
+        def get_tenant_string(subscription):
+            try:
+                return subscription[_TENANT_DEFAULT_DOMAIN]
+            except KeyError:
+                return subscription[_TENANT_ID]
+
         for index, sub in enumerate(subscriptions_sorted, start=1):
             # There is no need to use int, as int requires parsing. str match is sufficient.
             index_str = str(index)  # '1', '2', ...
@@ -545,10 +552,9 @@ class Profile:
             row = {
                 'No': f'[{index_str}]' + (asterisk if is_default_one else ''),
                 'Subscription name': highlight_text(subscription_name),
-                'Subscription ID': highlight_text(sub[_SUBSCRIPTION_ID])
+                'Subscription ID': highlight_text(sub[_SUBSCRIPTION_ID]),
+                'Tenant': highlight_text(get_tenant_string(sub))
             }
-            if _TENANT_DEFAULT_DOMAIN in sub:
-                row['Tenant Domain Name'] = highlight_text(sub[_TENANT_DEFAULT_DOMAIN])
             table_data.append(row)
 
         from tabulate import tabulate
@@ -559,7 +565,7 @@ class Profile:
         print()
         print(table_str)
         print()
-        tenant_string = active_one.get(_TENANT_DEFAULT_DOMAIN, active_one[_TENANT_ID])
+        tenant_string = get_tenant_string(active_one)
         print("The default is marked with an *; "
               f"the default tenant is '{tenant_string}' and subscription is "
               f"'{active_one[_SUBSCRIPTION_NAME]}' ({active_one[_SUBSCRIPTION_ID]}).")
@@ -583,9 +589,10 @@ class Profile:
                 active_one = index_to_subscription_map[select_index]
                 # Echo the selection
                 print()
-                tenant_string = active_one.get(_TENANT_DEFAULT_DOMAIN, active_one[_TENANT_ID])
+                tenant_string = get_tenant_string(active_one)
                 print(f"Tenant: {tenant_string}")
                 print(f"Subscription: {active_one[_SUBSCRIPTION_NAME]} ({active_one[_SUBSCRIPTION_ID]})")
+                print()
                 return active_one
             else:
                 logger.warning("Invalid selection.")

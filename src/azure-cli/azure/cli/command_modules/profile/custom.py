@@ -30,6 +30,17 @@ _CLOUD_CONSOLE_LOGIN_WARNING = ("Cloud Shell is automatically authenticated unde
                                 " Run 'az login' only if you need to use a different account")
 
 
+LOGIN_ANNOUNCEMENT = (
+    "[Announcements]\n"
+    "Share your feedback regarding your expereince with `az login` at https://aka.ms/azloginfeedback\n\n"
+    "If you encounter any problem, please open an issue at https://aka.ms/azclibug\n"
+)
+
+LOGIN_OUTPUT_WARNING = (
+    "[WARNING] The login output has been updated. Please be aware that it no longer displays the full list of "
+    "available subscriptions by default.\n"
+)
+
 def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
     from azure.cli.core.api import load_subscriptions
@@ -150,8 +161,13 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     for sub in all_subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
 
-    # No output in interactive mode
-    return None if interactive else all_subscriptions
+    # No JSON output in interactive mode
+    if interactive:
+        print(LOGIN_ANNOUNCEMENT)
+        logger.warning(LOGIN_OUTPUT_WARNING)
+        return
+
+    return all_subscriptions
 
 
 def logout(cmd, username=None):
