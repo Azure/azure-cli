@@ -185,6 +185,7 @@ def load_command_table(self, _):
                             custom_command_type=managed_node_type_custom_type) as g:
         g.custom_command('add', 'add_vm_extension')
         g.custom_command('delete', 'delete_vm_extension')
+        g.custom_command('update', 'update_vm_extension')
 
     with self.command_group('sf managed-node-type vm-secret', node_type_mgmt,
                             custom_command_type=managed_node_type_custom_type) as g:

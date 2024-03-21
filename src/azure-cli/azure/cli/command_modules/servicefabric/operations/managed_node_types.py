@@ -16,6 +16,9 @@ from azure.mgmt.servicefabricmanagedclusters.models import (
     SubResource,
     NodeTypeActionParameters
 )
+from azure.cli.command_modules.servicefabric._sf_utils import (
+    update_in_collection
+)
 
 from knack.log import get_logger
 
@@ -200,7 +203,8 @@ def add_vm_extension(cmd,
                      auto_upgrade_minor_version=True,
                      setting=None,
                      protected_setting=None,
-                     provision_after_extension=None):
+                     provision_after_extension=None,
+                     setup_order=None):
     try:
         node_type: NodeType = client.node_types.get(resource_group_name, cluster_name, node_type_name)
 
@@ -215,9 +219,47 @@ def add_vm_extension(cmd,
                                      auto_upgrade_minor_version=auto_upgrade_minor_version,
                                      settings=setting,
                                      protected_settings=protected_setting,
-                                     provision_after_extensions=provision_after_extension)
+                                     provision_after_extensions=provision_after_extension,
+                                     setup_order=setup_order)
 
         node_type.vm_extensions.append(newExtension)
+
+        poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
+        return LongRunningOperation(cmd.cli_ctx)(poller)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
+        raise
+
+def update_vm_extension(cmd,
+                     client,
+                     resource_group_name,
+                     cluster_name,
+                     node_type_name,
+                     extension_name,
+                     publisher,
+                     extension_type,
+                     type_handler_version=None,
+                     force_update_tag=None,
+                     auto_upgrade_minor_version=None,
+                     setting=None,
+                     protected_setting=None,
+                     provision_after_extension=None,
+                     setup_order=None):
+    try:
+        node_type: NodeType = client.node_types.get(resource_group_name, cluster_name, node_type_name)
+
+        newExtension = VMSSExtension(name=extension_name,
+                                     publisher=publisher,
+                                     type=extension_type,
+                                     type_handler_version=type_handler_version,
+                                     force_update_tag=force_update_tag,
+                                     auto_upgrade_minor_version=auto_upgrade_minor_version,
+                                     settings=setting,
+                                     protected_settings=protected_setting,
+                                     provision_after_extensions=provision_after_extension,
+                                     setup_order=setup_order)
+        
+        update_in_collection(node_type.vm_extensions, extension_name, newExtension, 'name')
 
         poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)

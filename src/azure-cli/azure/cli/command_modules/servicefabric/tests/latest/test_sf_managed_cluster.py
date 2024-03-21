@@ -163,8 +163,12 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'publisher': 'Microsoft.Compute',
             'extType': 'BGInfo',
             'extVer': '2.1',
+            'extVerUpdate': '2.2',
             'kv_name': key_vault,
-            'cert_name': self.create_random_name('sfrp-cli-', 24)
+            'cert_name': self.create_random_name('sfrp-cli-', 24),
+            'setup_order': 'BeforeSFRuntime',
+            'force_update_tag': 'updateTag',
+            'provision_after_extension': 'csetest'
         })
 
         self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password}',
@@ -176,8 +180,16 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
 
         # add extension
         self.cmd('az sf managed-node-type vm-extension add -g {rg} -c {cluster_name} -n pnt '
-                 ' --extension-name {extName} --publisher {publisher} --extension-type {extType} --type-handler-version {extVer} --auto-upgrade-minor-version',
-                 checks=[self.check('provisioningState', 'Succeeded')])
+                 ' --extension-name {extName} --publisher {publisher} --extension-type {extType} --type-handler-version {extVer} --auto-upgrade-minor-version --setup-order {setup_order}',
+                 checks=[self.check('provisioningState', 'Succeeded'),
+                         self.check('vmExtensions[0].setupOrder[0]', 'BeforeSFRuntime')])
+
+        self.cmd('az sf managed-node-type vm-extension update -g {rg} -c {cluster_name} -n pnt '
+                 ' --extension-name {extName} --publisher {publisher} --extension-type {extType} --type-handler-version {extVerUpdate} --auto-upgrade-minor-version --force-update-tag {force_update_tag}',
+                 checks=[self.check('provisioningState', 'Succeeded'),
+                         self.check('vmExtensions[0].typeHandlerVersion', '2.2'),
+                         self.check('vmExtensions[0].autoUpgradeMinorVersion', True),
+                         self.check('vmExtensions[0].forceUpdateTag', 'updateTag')])
 
         self.cmd('az sf managed-node-type show -g {rg} -c {cluster_name} -n pnt',
                  checks=[self.check('length(vmExtensions)', 1)])
