@@ -693,25 +693,10 @@ def load_arguments(self, _):
             c.argument('id', arg_type=stacks_stack_type)
             c.argument('subscription', arg_type=subscription_type)
 
-    def add_deprecated_stack_delete_flags(ctx):
-        ctx.argument(
-            'delete_resources', arg_type=get_three_state_flag(), options_list=['--delete-resources'],
-            help='Flag to indicate delete rather than detach for the resources.',
-            deprecate_info=ctx.deprecate(target='--delete-resources', redirect='--action-on-unmanage deleteResources'))
-        ctx.argument(
-            'delete_resource_groups', arg_type=get_three_state_flag(), options_list=['--delete-resource-groups'],
-            help='Flag to indicate delete rather than detach for the resource groups.',
-            deprecate_info=ctx.deprecate(target='--delete-resource-groups', redirect='--action-on-unmanage deleteAll'))
-        ctx.argument(
-            'delete_all', arg_type=get_three_state_flag(), options_list=['--delete-all'],
-            help='Flag to indicate delete rather than detach for the resources and resource groups.',
-            deprecate_info=ctx.deprecate(target='--delete-all', redirect='--action-on-unmanage deleteAll'))
-
     with self.argument_context('stack mg delete') as c:
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
-        add_deprecated_stack_delete_flags(c)
         c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
         c.argument('yes', help='Do not prompt for confirmation')
 
@@ -728,7 +713,6 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
-        add_deprecated_stack_delete_flags(c)
         c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
         c.argument('yes', help='Do not prompt for confirmation')
 
@@ -754,7 +738,6 @@ def load_arguments(self, _):
                 c.argument('parameters', arg_type=deployment_parameters_type, help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
                 c.argument('description', arg_type=stacks_description_type)
                 c.argument('subscription', arg_type=subscription_type)
-                add_deprecated_stack_delete_flags(c)
                 c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
                 c.argument('deny_settings_mode', arg_type=stacks_deny_settings_mode)
                 c.argument('deny_settings_excluded_principals', arg_type=stacks_excluded_principals)
@@ -782,7 +765,6 @@ def load_arguments(self, _):
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
-        add_deprecated_stack_delete_flags(c)
         c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
         c.argument('yes', help='Do not prompt for confirmation')
 
