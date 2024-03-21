@@ -2878,13 +2878,13 @@ short-summary: Create or update a deployment stack at management group scope
 examples:
   - name: Create a deployment stack using template file.
     text: az stack mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --location westus2 --description description --deny-settings-mode None
-  - name: Create a deployment stack with parameter file and delete resources.
-    text: az stack mg create --name StackName --management-group-id myMg --delete-resources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None
-  - name: Create a deployment stack with template spec and delete resource groups
-    text: az stack mg create --name StackName --management-group-id myMg --delete-resource-groups --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None
-  - name: Create a deployment stack using bicep file and delete all resources.
-    text: az stack mg create --name StackName --management-group-id myMg --delete-all --template-file simple.bicep --location westus2 --description description --deny-settings-mode None
-  - name: Create a deployment stack using parameters from key/value pairs
+  - name: Create a deployment stack with parameter file and delete resources on unmanage.
+    text: az stack mg create --name StackName --management-group-id myMg --action-on-unmanage deleteResources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack with template spec.
+    text: az stack mg create --name StackName --management-group-id myMg --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack using bicep file and delete all resources on unmanage.
+    text: az stack mg create --name StackName --management-group-id myMg --action-on-unmanage deleteAll --template-file simple.bicep --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack using parameters from key/value pairs.
     text: az stack mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None
@@ -2943,17 +2943,17 @@ short-summary: Create or update a deployment stack at subscription scope
 examples:
   - name: Create a deployment stack using template file.
     text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus2 --description description --deny-settings-mode None
-  - name: Create a deployment stack with parameter file and delete resources.
-    text: az stack sub create --name StackName --delete-resources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None
-  - name: Create a deployment stack with template spec and delete resource groups
-    text: az stack sub create --name StackName --delete-resource-groups --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None
-  - name: Create a deployment stack using bicep file and delete all resources.
-    text: az stack sub create --name StackName --delete-all --template-file simple.bicep --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack with parameter file and delete resources on unmanage.
+    text: az stack sub create --name StackName --action-on-unmanage deleteResources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack with template spec.
+    text: az stack sub create --name StackName --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack using bicep file and delete all resources on unmanage.
+    text: az stack sub create --name StackName --action-on-unmanage deleteAll --template-file simple.bicep --location westus2 --description description --deny-settings-mode None
   - name: Create a deployment stack at a different subscription.
     text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus2 --description description --subscription subscriptionId --deny-settings-mode None
   - name: Create a deployment stack and deploy at the resource group scope.
     text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus --deployment-resource-group ResourceGroup --description description --deny-settings-mode None
-  - name: Create a deployment stack using parameters from key/value pairs
+  - name: Create a deployment stack using parameters from key/value pairs.
     text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: az stack sub create --name StackName --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None
@@ -3010,17 +3010,17 @@ helps['stack group create'] = """
 type: command
 short-summary: Create or update a deployment stack at resource group scope
 examples:
-  - name: Create a deployment stack using template file and delete resources.
-    text: az stack group create --name StackName --resource-group ResourceGroup --delete-resources --template-file simpleTemplate.json --description description --deny-settings-mode None
-  - name: Create a deployment stack with parameter file and delete resource groups.
-    text: az stack group create --name StackName --resource-group ResourceGroup --delete-resource-groups --template-file simpleTemplate.json --parameters simpleTemplateParams.json --description description --deny-settings-mode None
-  - name: Create a deployment stack with template spec and delete all resources
-    text: az stack group create --name StackName --resource-group ResourceGroup --delete-all --template-spec TemplateSpecResourceIDWithVersion --description description --deny-settings-mode None
+  - name: Create a deployment stack using template file and delete resources on unmanage.
+    text: az stack group create --name StackName --resource-group ResourceGroup --action-on-unmanage deleteResources --template-file simpleTemplate.json --description description --deny-settings-mode None
+  - name: Create a deployment stack with parameter file.
+    text: az stack group create --name StackName --resource-group ResourceGroup --template-file simpleTemplate.json --parameters simpleTemplateParams.json --description description --deny-settings-mode None
+  - name: Create a deployment stack with template spec and delete all resources on unmanage.
+    text: az stack group create --name StackName --resource-group ResourceGroup --action-on-unmanage deleteAll --template-spec TemplateSpecResourceIDWithVersion --description description --deny-settings-mode None
   - name: Create a deployment stack using bicep file.
     text: az stack group create --name StackName --resource-group ResourceGroup --template-file simple.bicep --description description --deny-settings-mode None
-  - name: Create a deployment stack at a different subscription
+  - name: Create a deployment stack at a different subscription.
     text: az stack group create --name StackName --resource-group ResourceGroup --template-file simpleTemplate.json --description description --subscription subscriptionId --deny-settings-mode None
-  - name: Create a deployment stack using parameters from key/value pairs
+  - name: Create a deployment stack using parameters from key/value pairs.
     text: az stack group create --name StackName --template-file simpleTemplate.json --resource-group ResourceGroup --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: az stack group create --name StackName --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --resource-group ResourceGroup --deny-settings-mode None
