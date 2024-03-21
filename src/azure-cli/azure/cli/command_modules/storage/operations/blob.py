@@ -774,25 +774,6 @@ def storage_blob_delete_batch(client, source, source_container_name, blobs=None,
     if if_unmodified_since and not if_unmodified_since.tzinfo:
         if_unmodified_since = if_unmodified_since.replace(tzinfo=timezone.utc)
 
-    # @check_precondition_success
-    # def _delete_blob(blob_name):
-    #     delete_blob_args = {
-    #         'blob': blob_name,
-    #         'lease': lease_id,
-    #         'delete_snapshots': delete_snapshots,
-    #         'if_modified_since': if_modified_since,
-    #         'if_unmodified_since': if_unmodified_since,
-    #         'if_match': if_match,
-    #         'if_none_match': if_none_match,
-    #         'timeout': timeout
-    #     }
-    #     try:
-    #         container_client.delete_blob(**delete_blob_args)
-    #         return blob_name
-    #     except HttpResponseError as ex:
-    #         logger.debug(ex.exc_msg)
-    #         return None
-
     if blobs:
         source_blobs = blobs
         if pattern:
@@ -824,15 +805,19 @@ def storage_blob_delete_batch(client, source, source_container_name, blobs=None,
     if blobs is None:
         source_blobs = [blob[0] for blob in source_blobs]
 
-    results = container_client.delete_blobs(*source_blobs, delete_snapshots=delete_snapshots,
-                                            if_modified_since=if_modified_since,
-                                            if_unmodified_since=if_unmodified_since,
-                                            timeout=timeout,
-                                            raise_on_any_failure=False)
-    # results = [result for (include, result) in (_delete_blob(blob[0]) for blob in source_blobs) if result]
-    num_failures = len(source_blobs) - len([res for res in results if res.status_code==202])
+    # max single request allows 256 blobs
+    total_blobs = len(source_blobs)
+    num_failures = 0
+    for i in range(0, total_blobs, 256):
+        results = container_client.delete_blobs(*source_blobs[i:i+256], delete_snapshots=delete_snapshots,
+                                                if_modified_since=if_modified_since,
+                                                if_unmodified_since=if_unmodified_since,
+                                                timeout=timeout,
+                                                raise_on_any_failure=False)
+        num_failures += len([res for res in results if res.status_code != 202])
+
     if num_failures:
-        logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
+        logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, total_blobs)
 
 
 def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
@@ -983,9 +968,15 @@ def set_blob_tier_v2(client, tier, blob_type='block', rehydrate_priority=None, t
 def set_blob_tier_batch(client, blobs, tier, blob_type='block', rehydrate_priority=None, if_tags_match_condition=None,
                         **kwargs):
     if blob_type == 'block':
-        return client.set_standard_blob_tier_blobs(tier, *blobs, rehydrate_priority=rehydrate_priority,
-                                                   if_tags_match_condition=if_tags_match_condition,
-                                                   raise_on_any_failure=False, **kwargs)
+        # max single request allows 256 blobs
+        total_blobs = len(blobs)
+        results = []
+        for i in range(0, total_blobs, 256):
+            res = client.set_standard_blob_tier_blobs(tier, *blobs[i:i+256], rehydrate_priority=rehydrate_priority,
+                                                          if_tags_match_condition=if_tags_match_condition,
+                                                          raise_on_any_failure=False, **kwargs)
+            results.extend(res)
+        return results
     raise ValueError('Batch set blob tier is only applicable to block blobs.')
 
 
