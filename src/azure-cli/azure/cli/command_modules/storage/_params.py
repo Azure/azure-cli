@@ -1019,7 +1019,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(('High', 'Standard')), validator=blob_rehydrate_priority_validator,
                    is_preview=True, help="Indicate the priority with which to rehydrate an archived blob. "
                                          "The priority can be set on a blob only once, default value is Standard.")
-        c.extra('if_tags_match_condition',
+        c.extra('if_tags_match_condition', arg_group='Precondition',
                 help="Specify a SQL where clause on blob tags to operate only on blob with a matching value. ")
 
     with self.argument_context('storage blob set-legal-hold') as c:
@@ -1204,6 +1204,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()),
                    help='Required if the blob has associated snapshots.')
         c.argument('lease_id', help='The active lease id for the blob.')
+        c.argument('blobs', blobs_type, help="space-separated blobs: blobname1 [blobname2 ....]")
 
     with self.argument_context('storage blob lease') as c:
         c.argument('blob_name', arg_type=blob_name_type)

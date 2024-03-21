@@ -763,7 +763,7 @@ def show_blob(cmd, client, container_name, blob_name, snapshot=None, lease_id=No
     return blob
 
 
-def storage_blob_delete_batch(client, source, source_container_name, pattern=None, lease_id=None,
+def storage_blob_delete_batch(client, source, source_container_name, blobs=None, pattern=None, lease_id=None,
                               delete_snapshots=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False):
     container_client = client.get_container_client(source_container_name)
@@ -774,33 +774,44 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
     if if_unmodified_since and not if_unmodified_since.tzinfo:
         if_unmodified_since = if_unmodified_since.replace(tzinfo=timezone.utc)
 
-    @check_precondition_success
-    def _delete_blob(blob_name):
-        delete_blob_args = {
-            'blob': blob_name,
-            'lease': lease_id,
-            'delete_snapshots': delete_snapshots,
-            'if_modified_since': if_modified_since,
-            'if_unmodified_since': if_unmodified_since,
-            'if_match': if_match,
-            'if_none_match': if_none_match,
-            'timeout': timeout
-        }
-        try:
-            container_client.delete_blob(**delete_blob_args)
-            return blob_name
-        except HttpResponseError as ex:
-            logger.debug(ex.exc_msg)
-            return None
+    # @check_precondition_success
+    # def _delete_blob(blob_name):
+    #     delete_blob_args = {
+    #         'blob': blob_name,
+    #         'lease': lease_id,
+    #         'delete_snapshots': delete_snapshots,
+    #         'if_modified_since': if_modified_since,
+    #         'if_unmodified_since': if_unmodified_since,
+    #         'if_match': if_match,
+    #         'if_none_match': if_none_match,
+    #         'timeout': timeout
+    #     }
+    #     try:
+    #         container_client.delete_blob(**delete_blob_args)
+    #         return blob_name
+    #     except HttpResponseError as ex:
+    #         logger.debug(ex.exc_msg)
+    #         return None
 
-    source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
+    if blobs:
+        source_blobs = blobs
+        if pattern:
+            from ..util import _match_path
+            source_blobs = [blob for blob in blobs if _match_path(blob, pattern)]
+    else:
+        source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
     if dryrun:
         delete_blobs = []
-        for blob in source_blobs:
-            if not if_modified_since or blob[1].last_modified >= if_modified_since:
-                if not if_unmodified_since or blob[1].last_modified <= if_unmodified_since:
-                    delete_blobs.append(blob[0])
+        if blobs:
+            logger.warning('if --blobs is specified with --dryrun, blobs are not filtered by --if-modified-since '
+                           'or --if-unmodified-since ')
+            delete_blobs = source_blobs
+        else:
+            for blob in source_blobs:
+                if not if_modified_since or blob[1].last_modified >= if_modified_since:
+                    if not if_unmodified_since or blob[1].last_modified <= if_unmodified_since:
+                        delete_blobs.append(blob[0])
         logger.warning('delete action: from %s', source)
         logger.warning('    pattern %s', pattern)
         logger.warning('  container %s', source_container_name)
@@ -810,8 +821,16 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
             logger.warning('  - %s', blob)
         return []
 
-    results = [result for (include, result) in (_delete_blob(blob[0]) for blob in source_blobs) if result]
-    num_failures = len(source_blobs) - len(results)
+    if blobs is None:
+        source_blobs = [blob[0] for blob in source_blobs]
+
+    results = container_client.delete_blobs(*source_blobs, delete_snapshots=delete_snapshots,
+                                            if_modified_since=if_modified_since,
+                                            if_unmodified_since=if_unmodified_since,
+                                            timeout=timeout,
+                                            raise_on_any_failure=False)
+    # results = [result for (include, result) in (_delete_blob(blob[0]) for blob in source_blobs) if result]
+    num_failures = len(source_blobs) - len([res for res in results if res.status_code==202])
     if num_failures:
         logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
 

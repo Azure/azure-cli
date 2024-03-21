@@ -537,6 +537,13 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
             JMESPathCheck('length(@)', 0))
 
+        # delete with --blobs
+        src_container = create_and_populate_container()
+        self.storage_cmd('storage blob delete-batch -s {} --blobs apple/file_1 apple/file_2',
+                         storage_account_info, src_container)
+        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 39))
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
