@@ -693,17 +693,17 @@ def load_arguments(self, _):
         ctx.argument(
             'delete_resources', arg_type=get_three_state_flag(),
             options_list=['--delete-resources', ctx.deprecate(
-                target='--delete-resources', redirect='--action-on-unmanage deleteResources', hide=True)],
+                target='--delete-resources', redirect='--action-on-unmanage deleteResources')],
             help='Flag to indicate delete rather than detach for the resources.')
         ctx.argument(
             'delete_resource_groups', arg_type=get_three_state_flag(),
             options_list=['--delete-resource-groups', ctx.deprecate(
-                target='--delete-resource-groups', redirect='--action-on-unmanage deleteAll', hide=True)],
+                target='--delete-resource-groups', redirect='--action-on-unmanage deleteAll')],
             help='Flag to indicate delete rather than detach for the resource groups.')
         ctx.argument(
             'delete_all', arg_type=get_three_state_flag(),
             options_list=['--delete-all',
-                          ctx.deprecate(target='--delete-all', redirect='--action-on-unmanage deleteAll', hide=True)],
+                          ctx.deprecate(target='--delete-all', redirect='--action-on-unmanage deleteAll')],
             help='Flag to indicate delete rather than detach for the resources and resource groups.')
 
     with self.argument_context('stack mg delete') as c:
