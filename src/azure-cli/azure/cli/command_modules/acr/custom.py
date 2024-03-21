@@ -5,7 +5,6 @@
 
 # pylint: disable=too-many-locals
 
-import os
 import re
 from knack.util import CLIError
 from knack.log import get_logger
