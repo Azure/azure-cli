@@ -38,7 +38,11 @@ def post_request(cmd, subscription_id, rp_name, headers):
 
 
 # pylint: disable=line-too-long
-def rp_registrations(cmd, subscription_id):
+def rp_registrations(cmd, cluster_subscription_id, raw_parameters):
+    azure_monitor_workspace_resource_id = raw_parameters.get("azure_monitor_workspace_resource_id")
+    subscription_id = cluster_subscription_id
+    if azure_monitor_workspace_resource_id and azure_monitor_workspace_resource_id != "":
+        subscription_id = azure_monitor_workspace_resource_id.split("/")[2]
     from azure.cli.core.util import send_raw_request
     # Get list of RP's for RP's subscription
     try:
@@ -55,7 +59,6 @@ def rp_registrations(cmd, subscription_id):
     isInsightsRpRegistered = False
     isAlertsManagementRpRegistered = False
     isMoniotrRpRegistered = False
-    isDashboardRpRegistered = False
     json_response = json.loads(r.text)
     values_array = json_response["value"]
     for value in values_array:
@@ -64,9 +67,7 @@ def rp_registrations(cmd, subscription_id):
         if value["namespace"].lower() == "microsoft.alertsmanagement" and value["registrationState"].lower() == "registered":
             isAlertsManagementRpRegistered = True
         if value["namespace"].lower() == "microsoft.monitor" and value["registrationState"].lower() == "registered":
-            isAlertsManagementRpRegistered = True
-        if value["namespace"].lower() == "microsoft.dashboard" and value["registrationState"].lower() == "registered":
-            isAlertsManagementRpRegistered = True
+            isMoniotrRpRegistered = True
     if isInsightsRpRegistered is False:
         headers = ['User-Agent=azuremonitormetrics.register_insights_rp']
         post_request(cmd, subscription_id, "microsoft.insights", headers)
@@ -76,9 +77,30 @@ def rp_registrations(cmd, subscription_id):
     if isMoniotrRpRegistered is False:
         headers = ['User-Agent=azuremonitormetrics.register_monitor_rp']
         post_request(cmd, subscription_id, "microsoft.monitor", headers)
-    if isDashboardRpRegistered is False:
-        headers = ['User-Agent=azuremonitormetrics.register_dashboard_rp']
-        post_request(cmd, subscription_id, "microsoft.dashboard", headers)
+    
+    grafana_workspace_resource_id = raw_parameters.get("grafana_workspace_resource_id")
+    if grafana_workspace_resource_id and grafana_workspace_resource_id != "":
+      grafana_sub_id = grafana_workspace_resource_id.split("/")[2]
+      try:
+          headers = ['User-Agent=azuremonitormetrics.get_grafana_sub_rp_list']
+          armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
+          customUrl = "{0}/subscriptions/{1}/providers?api-version={2}&$select=namespace,registrationstate".format(
+              armendpoint,
+              grafana_sub_id,
+              RP_API
+          )
+          r = send_raw_request(cmd.cli_ctx, "GET", customUrl, headers=headers)
+      except CLIError as e:
+          raise CLIError(e)
+  
+      isDashboardRpRegistered = False
+      for value in values_array:
+          if value["namespace"].lower() == "microsoft.dashboard" and value["registrationState"].lower() == "registered":
+              isDashboardRpRegistered = True
+      if isDashboardRpRegistered is False:
+          headers = ['User-Agent=azuremonitormetrics.register_dashboard_rp']
+          post_request(cmd, subscription_id, "microsoft.dashboard", headers)
+    
 
 
 # pylint: disable=line-too-long
