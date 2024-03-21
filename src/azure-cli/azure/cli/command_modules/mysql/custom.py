@@ -494,7 +494,6 @@ def flexible_server_import_create(cmd, client,
             create_mode = 'Migrate'
         elif mode.lower() == 'online':
             create_mode = 'OnlineMigrate'
-
         # Generating source_server_id from data_source depending on whether it is a server_name or resource_id
         if not is_valid_resource_id(data_source):
             if len(data_source.split('/')) == 1:
