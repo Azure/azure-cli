@@ -103,7 +103,8 @@ logger = get_logger(__name__)
 
 def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements,too-many-branches
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
-                  deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
+                  deployment_local_git=None, container_registry_password=None, container_registry_user=None,
+                  container_registry_url=None, container_image_name=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
@@ -115,8 +116,22 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
+    if deployment_container_image_name and container_image_name:
+        raise MutuallyExclusiveArgumentError('usage error: --deployment-container-image-name | --container-image-name')
+    if container_registry_url and not container_image_name:
+        raise ArgumentUsageError("Please use --container-image-name to provide the image name")
 
-    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+    if container_registry_url:
+        container_registry_url = parse_container_registry_url(container_registry_url)
+    else:
+        container_registry_url = parse_docker_image_name(deployment_container_image_name)
+
+    if container_image_name:
+        container_image_name = container_image_name if not container_registry_url else "{}/{}".format(
+            urlparse(container_registry_url).hostname,
+            container_image_name[1:] if container_image_name.startswith('/') else container_image_name)
+    if deployment_container_image_name:
+        container_image_name = deployment_container_image_name
 
     client = web_client_factory(cmd.cli_ctx)
     plan_info = None
@@ -202,9 +217,12 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     current_stack = None
     if is_linux:
-        if not validate_container_app_create_options(runtime, deployment_container_image_name,
+        if not validate_container_app_create_options(runtime, container_image_name,
                                                      multicontainer_config_type, multicontainer_config_file):
-            raise ArgumentUsageError("usage error: --runtime | --deployment-container-image-name |"
+            if deployment_container_image_name:
+                raise ArgumentUsageError("usage error: --runtime | --deployment-container-image-name |"
+                                         " --multicontainer-config-type TYPE --multicontainer-config-file FILE")
+            raise ArgumentUsageError("usage error: --runtime | --container-image-name |"
                                      " --multicontainer-config-type TYPE --multicontainer-config-file FILE")
         if startup_file:
             site_config.app_command_line = startup_file
@@ -215,8 +233,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                 raise ValidationError("Linux Runtime '{}' is not supported."
                                       "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
             helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
-        elif deployment_container_image_name:
-            site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
+        elif container_image_name:
+            site_config.linux_fx_version = _format_fx_version(container_image_name)
             if name_validation.name_available:
                 site_config.app_settings.append(NameValuePair(name="WEBSITES_ENABLE_APP_SERVICE_STORAGE",
                                                               value="false"))
@@ -225,20 +243,22 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             site_config.linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
 
     elif plan_info.is_xenon:  # windows container webapp
-        if deployment_container_image_name:
-            site_config.windows_fx_version = _format_fx_version(deployment_container_image_name)
+        if container_image_name:
+            site_config.windows_fx_version = _format_fx_version(container_image_name)
         # set the needed app settings for container image validation
         if name_validation.name_available:
             site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_USERNAME",
-                                                          value=docker_registry_server_user))
+                                                          value=container_registry_user))
             site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_PASSWORD",
-                                                          value=docker_registry_server_password))
+                                                          value=container_registry_password))
             site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_URL",
-                                                          value=docker_registry_server_url))
+                                                          value=container_registry_url))
 
     elif runtime:  # windows webapp with runtime specified
-        if any([startup_file, deployment_container_image_name, multicontainer_config_file, multicontainer_config_type]):
+        if any([startup_file, deployment_container_image_name, container_image_name, multicontainer_config_file,
+                multicontainer_config_type]):
             raise ArgumentUsageError("usage error: --startup-file or --deployment-container-image-name or "
+                                     "--container-image-name or "
                                      "--multicontainer-config-type and --multicontainer-config-file is "
                                      "only appliable on linux webapp")
         match = helper.resolve(runtime, linux=is_linux)
@@ -282,11 +302,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name)
 
-    if deployment_container_image_name:
+    if container_image_name:
         logger.info("Updating container settings")
-        update_container_settings(cmd, resource_group_name, name, docker_registry_server_url,
-                                  deployment_container_image_name, docker_registry_server_user,
-                                  docker_registry_server_password=docker_registry_server_password)
+        update_container_settings(cmd, resource_group_name, name, container_registry_url,
+                                  container_image_name, container_registry_user,
+                                  container_registry_password=container_registry_password)
 
     if assign_identities is not None:
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,
@@ -396,12 +416,20 @@ def get_managed_environment(cmd, resource_group_name, environment_name):
         raise ResourceNotFoundError(error_message, recommendation_message)
 
 
-def validate_container_app_create_options(runtime=None, deployment_container_image_name=None,
+def validate_container_app_create_options(runtime=None, container_image_name=None,
                                           multicontainer_config_type=None, multicontainer_config_file=None):
     if bool(multicontainer_config_type) != bool(multicontainer_config_file):
         return False
-    opts = [runtime, deployment_container_image_name, multicontainer_config_type]
+    opts = [runtime, container_image_name, multicontainer_config_type]
     return len([x for x in opts if x]) == 1  # you can only specify one out the combinations
+
+
+def parse_container_registry_url(container_registry_url):
+    parsed_url = urlparse(container_registry_url)
+    if parsed_url.scheme:
+        return "{}://{}".format(parsed_url.scheme, parsed_url.hostname)
+    hostname = urlparse("https://{}".format(container_registry_url)).hostname
+    return "https://{}".format(hostname)
 
 
 def parse_docker_image_name(deployment_container_image_name, environment=None):
@@ -1782,37 +1810,37 @@ CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SER
 APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 
 
-def update_container_settings(cmd, resource_group_name, name, docker_registry_server_url=None,
-                              docker_custom_image_name=None, docker_registry_server_user=None,
-                              websites_enable_app_service_storage=None, docker_registry_server_password=None,
+def update_container_settings(cmd, resource_group_name, name, container_registry_url=None,
+                              container_image_name=None, container_registry_user=None,
+                              websites_enable_app_service_storage=None, container_registry_password=None,
                               multicontainer_config_type=None, multicontainer_config_file=None,
                               slot=None, min_replicas=None, max_replicas=None):
     settings = []
-    if docker_registry_server_url is not None:
-        settings.append('DOCKER_REGISTRY_SERVER_URL=' + docker_registry_server_url)
+    if container_registry_url is not None:
+        settings.append('DOCKER_REGISTRY_SERVER_URL=' + container_registry_url)
 
-    if (not docker_registry_server_user and not docker_registry_server_password and
-            docker_registry_server_url and '.azurecr.io' in docker_registry_server_url):
+    if (not container_registry_user and not container_registry_password and
+            container_registry_url and '.azurecr.io' in container_registry_url):
         logger.warning('No credential was provided to access Azure Container Registry. Trying to look up...')
-        parsed = urlparse(docker_registry_server_url)
+        parsed = urlparse(container_registry_url)
         registry_name = (parsed.netloc if parsed.scheme else parsed.path).split('.')[0]
         try:
-            docker_registry_server_user, docker_registry_server_password = _get_acr_cred(cmd.cli_ctx, registry_name)
+            container_registry_user, container_registry_password = _get_acr_cred(cmd.cli_ctx, registry_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.warning("Retrieving credentials failed with an exception:'%s'", ex)  # consider throw if needed
 
-    if docker_registry_server_user is not None:
-        settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + docker_registry_server_user)
-    if docker_registry_server_password is not None:
-        settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
+    if container_registry_user is not None:
+        settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + container_registry_user)
+    if container_registry_password is not None:
+        settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + container_registry_password)
     if websites_enable_app_service_storage:
         settings.append('WEBSITES_ENABLE_APP_SERVICE_STORAGE=' + websites_enable_app_service_storage)
 
-    if docker_registry_server_user or docker_registry_server_password or docker_registry_server_url or websites_enable_app_service_storage:  # pylint: disable=line-too-long
+    if container_registry_user or container_registry_password or container_registry_url or websites_enable_app_service_storage:  # pylint: disable=line-too-long
         update_app_settings(cmd, resource_group_name, name, settings, slot)
     settings = get_app_settings(cmd, resource_group_name, name, slot)
-    if docker_custom_image_name is not None:
-        _add_fx_version(cmd, resource_group_name, name, docker_custom_image_name, slot)
+    if container_image_name is not None:
+        _add_fx_version(cmd, resource_group_name, name, container_image_name, slot)
 
     if multicontainer_config_file and multicontainer_config_type:
         encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
@@ -1991,15 +2019,35 @@ def _resolve_hostname_through_dns(hostname):
 
 
 def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None,
-                       deployment_container_image_name=None, docker_registry_server_password=None,
-                       docker_registry_server_user=None):
-    container_args = deployment_container_image_name or docker_registry_server_password or docker_registry_server_user
+                       deployment_container_image_name=None,
+                       container_registry_url=None, container_image_name=None,
+                       container_registry_password=None, container_registry_user=None):
+    container_args = (deployment_container_image_name or container_registry_password or container_registry_user) or (
+        container_registry_password or container_registry_user or container_image_name)
     if container_args and not configuration_source:
-        raise ArgumentUsageError("Cannot use arguments --deployment-container_image_name, "
-                                 "--docker-registry-server_password, or --docker-registry-server-user without argument "
+        if deployment_container_image_name:
+            raise ArgumentUsageError("Cannot use arguments --deployment-container-image-name, "
+                                     "--container-registry-password, or --container-registry-user without argument "
+                                     "--configuration-source")
+        raise ArgumentUsageError("Cannot use arguments --container-image-name, "
+                                 "--container-registry-password, or --container-registry-user without argument "
                                  "--configuration-source")
+    if deployment_container_image_name and container_image_name:
+        raise MutuallyExclusiveArgumentError('usage error: --deployment-container-image-name | --container-image-name')
+    if container_registry_url and not container_image_name:
+        raise ArgumentUsageError("Please use --container-image-name to provide the image name")
 
-    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+    if container_registry_url:
+        container_registry_url = parse_container_registry_url(container_registry_url)
+    else:
+        container_registry_url = parse_docker_image_name(deployment_container_image_name)
+
+    if container_image_name:
+        container_image_name = container_image_name if not container_registry_url else "{}/{}".format(
+            urlparse(container_registry_url).hostname,
+            container_image_name[1:] if container_image_name.startswith('/') else container_image_name)
+    if deployment_container_image_name:
+        container_image_name = deployment_container_image_name
 
     Site, SiteConfig, NameValuePair = cmd.get_models('Site', 'SiteConfig', 'NameValuePair')
     client = web_client_factory(cmd.cli_ctx)
@@ -2033,9 +2081,9 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
 
     if configuration_source:
         update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source,
-                                              deployment_container_image_name, docker_registry_server_password,
-                                              docker_registry_server_user,
-                                              docker_registry_server_url=docker_registry_server_url)
+                                              container_image_name, container_registry_password,
+                                              container_registry_user,
+                                              container_registry_url=container_registry_url)
 
     result.name = result.name.split('/')[-1]
     return result
@@ -2066,7 +2114,7 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
         update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source,
                                               image, registry_password,
                                               registry_username,
-                                              docker_registry_server_url=docker_registry_server_url)
+                                              container_registry_url=docker_registry_server_url)
 
     result.name = result.name.split('/')[-1]
     return result
@@ -2094,8 +2142,8 @@ def _set_site_config_storage_keys(cmd, site_config):
 
 
 def update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source=None,
-                                          deployment_container_image_name=None, docker_registry_server_password=None,
-                                          docker_registry_server_user=None, docker_registry_server_url=None):
+                                          container_image_name=None, container_registry_password=None,
+                                          container_registry_user=None, container_registry_url=None):
 
     clone_from_prod = configuration_source.lower() == webapp.lower()
     site_config = get_site_configs(cmd, resource_group_name, webapp,
@@ -2131,12 +2179,12 @@ def update_slot_configuration_from_source(cmd, client, resource_group_name, weba
                                 'update_connection_strings',
                                 connection_strings, slot, client)
 
-    if deployment_container_image_name or docker_registry_server_password or docker_registry_server_user:
+    if container_image_name or container_registry_password or container_registry_user:
         update_container_settings(cmd, resource_group_name, webapp,
-                                  docker_custom_image_name=deployment_container_image_name, slot=slot,
-                                  docker_registry_server_user=docker_registry_server_user,
-                                  docker_registry_server_password=docker_registry_server_password,
-                                  docker_registry_server_url=docker_registry_server_url)
+                                  container_image_name=container_image_name, slot=slot,
+                                  container_registry_user=container_registry_user,
+                                  container_registry_password=container_registry_password,
+                                  container_registry_url=container_registry_url)
 
 
 def config_source_control(cmd, resource_group_name, name, repo_url, repository_type='git', branch=None,  # pylint: disable=too-many-locals
