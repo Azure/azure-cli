@@ -815,7 +815,8 @@ def __resolve_secret(cli_ctx, keyvault_reference):
         secret_id = json.loads(keyvault_reference.value)["uri"]
         kv_identifier = parse_key_vault_id(source_id=secret_id)
         from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_secret_client
-        keyvault_client = data_plane_azure_keyvault_secret_client(cli_ctx, kv_identifier.vault_url)
+        command_args = {'vault_base_url': kv_identifier.vault_url}
+        keyvault_client = data_plane_azure_keyvault_secret_client(cli_ctx, command_args)
 
         secret = keyvault_client.get_secret(name=kv_identifier.name,
                                             version=kv_identifier.version)

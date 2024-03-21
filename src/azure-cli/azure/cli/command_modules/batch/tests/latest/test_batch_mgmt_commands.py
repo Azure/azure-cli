@@ -10,14 +10,15 @@ from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, LiveScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType, get_sdk
+from .batch_preparers import BatchScenarioMixin
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
 
 
 class BatchMgmtScenarioTests(ScenarioTest):
 
-    def __init__(self, method_name):
-        super().__init__(method_name, recording_processors=[
+    def __init__(self, method_name, *arg, **kwargs):
+        super().__init__(method_name, *arg, random_config_dir=True, **kwargs, recording_processors=[
             BatchAccountKeyReplacer(),
             StorageSASReplacer()
         ])
@@ -341,31 +342,23 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         self.cmd('batch application list -g {rg} -n {acc}').assert_with_checks(self.is_empty())
 
 
-# These tests have requirements which cannot be met by CLI team so reserved for live testing.
-class BatchMgmtLiveScenarioTests(LiveScenarioTest):
-    @ResourceGroupPreparer(location='northeurope')
-    def test_batch_byos_account_cmd(self, resource_group):
-        storage_name = self.create_random_name(prefix='clibatchteststor', length=24)
+class BatchMgmtByosScenarioTests(ScenarioTest):
+
+    def __init__(self, method_name, *arg, **kwargs):
+        super().__init__(method_name, *arg, random_config_dir=True, **kwargs)
+    
+    @ResourceGroupPreparer(location='eastus')
+    def test_batch_byos_account_cmd(self):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
         kv_name = self.create_random_name('clibatchtestkv', 24)
 
-        SecretPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT,
-                                    'models._key_vault_management_client_enums#SecretPermissions')
-        KeyPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT,
-                                 'models._key_vault_management_client_enums#KeyPermissions')
-        ALL_SECRET_PERMISSIONS = ' '.join(
-            [perm.value for perm in SecretPermissions])
-        ALL_KEY_PERMISSIONS = ' '.join([perm.value for perm in KeyPermissions])
-
         self.kwargs.update({
-            'rg': resource_group,
-            'str_n': storage_name,
+            'rg': 'clitest.rg6rwx34m4wrz2tr6e52fj4kn6c24jepr5kkrp5kvwsajatmiiynj23s657xjqqubv3',
             'byos_n': account_name,
-            'byos_l': 'southindia',
+            'byos_l': 'eastus',
             'kv': kv_name,
             'obj_id': 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',  # object id for Microsoft Azure Batch
-            'perm_k': ALL_KEY_PERMISSIONS,
-            'perm_s': ALL_SECRET_PERMISSIONS
+            'perm_s': "get list set delete recover",
         })
 
         # test create keyvault for use with BYOS account
@@ -380,9 +373,7 @@ class BatchMgmtLiveScenarioTests(LiveScenarioTest):
                 self.check('length(properties.accessPolicies)', 1),
                 self.check('properties.sku.name', 'standard')])
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {obj_id} '
-                 '--key-permissions {perm_k} --secret-permissions {perm_s}')
-
-        time.sleep(100)
+                 '--secret-permissions {perm_s}')
 
         # test create account with BYOS
         self.cmd(
@@ -391,6 +382,23 @@ class BatchMgmtLiveScenarioTests(LiveScenarioTest):
                 self.check('name', '{byos_n}'),
                 self.check('location', '{byos_l}'),
                 self.check('resourceGroup', '{rg}')])
+        
+        # test for resource tags
+
+        self.cmd(
+            'batch account login -g {rg} -n {byos_n}'
+        )
+        
+        self.cmd('batch pool create --id xplatCreatedPool --vm-size "standard_d2s_v3" '
+                        '--image "canonical:0001-com-ubuntu-server-focal:20_04-lts" '
+                        '--node-agent-sku-id "batch.node.ubuntu 20.04" '
+                        '--resource-tags "dept=finance env=prod"')
+        
+        
+        self.cmd('batch pool show --pool-id xplatCreatedPool').assert_with_checks([
+            self.check('resourceTags.dept', 'finance'),
+            self.check('resourceTags.env', 'prod'),
+        ])
 
         # test batch account delete
         self.cmd('batch account delete -g {rg} -n {byos_n} --yes')

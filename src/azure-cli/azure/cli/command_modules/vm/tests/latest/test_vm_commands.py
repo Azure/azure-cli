@@ -194,7 +194,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
 
         # Expecting the one we just added
         self.kwargs['rg_caps'] = resource_group.upper()  # test the command handles name with casing diff.
-        self.cmd('vm list-ip-addresses --resource-group {rg_caps}', checks=[
+        self.cmd('vm list-ip-addresses --resource-group {rg_caps} -n {vm}', checks=[
             self.check('length(@)', 1),
             self.check('[0].virtualMachine.name', '{vm}'),
             self.check('[0].virtualMachine.resourceGroup', '{rg}'),
@@ -821,19 +821,26 @@ class TestSnapShotAccess(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_snapshot_access_')
     def test_snapshot_access(self, resource_group):
         self.kwargs.update({
-            'snapshot': 'snapshot'
+            'snapshot1': 'snapshot1',
+            'snapshot2': 'snapshot2',
         })
         
-        self.cmd('snapshot create -n {snapshot} -g {rg} --size-gb 1', checks=self.check('diskState', 'Unattached'))
-        self.cmd('snapshot grant-access --duration-in-seconds 600 -n {snapshot} -g {rg}')
-        self.cmd('snapshot show -n {snapshot} -g {rg}', checks=self.check('diskState', 'ActiveSAS'))
+        self.cmd('snapshot create -n {snapshot1} -g {rg} --size-gb 1', checks=self.check('diskState', 'Unattached'))
+        self.cmd('snapshot grant-access --duration-in-seconds 600 -n {snapshot1} -g {rg}')
+        self.cmd('snapshot show -n {snapshot1} -g {rg}', checks=self.check('diskState', 'ActiveSAS'))
         self.cmd('snapshot list -g {rg}',
                  checks=[
                      self.check('length(@)', '1'),
                      self.check('[0].diskState', 'ActiveSAS'),
                  ])
-        self.cmd('snapshot revoke-access -n {snapshot} -g {rg}')
-        self.cmd('snapshot show -n {snapshot} -g {rg}', checks=self.check('diskState', 'Unattached'))
+        self.cmd('snapshot revoke-access -n {snapshot1} -g {rg}')
+        self.cmd('snapshot show -n {snapshot1} -g {rg}', checks=self.check('diskState', 'Unattached'))
+
+        self.cmd('snapshot create -n {snapshot2} -g {rg} --size-gb 1', checks=self.check('diskState', 'Unattached'))
+        self.cmd('snapshot grant-access --duration-in-seconds 600 -n {snapshot2} -g {rg} --file-format VHDX')
+        self.cmd('snapshot show -n {snapshot2} -g {rg}', checks=self.check('diskState', 'ActiveSAS'))
+        self.cmd('snapshot revoke-access -n {snapshot2} -g {rg}')
+        self.cmd('snapshot show -n {snapshot2} -g {rg}', checks=self.check('diskState', 'Unattached'))
 
     @ResourceGroupPreparer(name_prefix='test_snapshot_create_with_source_blob_uri')
     def test_snapshot_create_with_source_blob_uri(self, resource_group):
@@ -3622,6 +3629,30 @@ class VMSSCreateOptions(ScenarioTest):
             checks=[
                 self.check('vmss.upgradePolicy.rollingUpgradePolicy.maxSurge', True)
             ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_with_auto_os_upgrade_', location='eastus2euap')
+    def test_vmss_with_auto_os_upgrade(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+            'image': 'MicrosoftWindowsServer:WindowsServer:2022-Datacenter:latest',
+            'admin_username': 'TestUser',
+            'admin_password': 'Test123456789#',
+            'sku': 'Standard_A1',
+            'lb': self.create_random_name('lb', 10),
+            'lbrule': 'lbrule',
+            'probe': self.create_random_name('probe', 15),
+        })
+
+        # set up a LB with the probe for Automatic upgrade
+        self.cmd('network lb create -g {rg} -n {lb}')
+        self.cmd('network lb probe create -g {rg} --lb-name {lb} -n {probe} --protocol Tcp --port 80')
+        self.cmd('network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
+
+        self.cmd('vmss create --debug -n {vmss} -g {rg} --image {image} --upgrade-policy-mode Automatic --enable-auto-os-upgrade --orchestration-mode Uniform --load-balancer {lb} --admin-username {admin_username} --admin-password {admin_password} --vm-sku {sku} --health-probe {probe}',
+                 checks=[
+                     self.check('vmss.upgradePolicy.automaticOSUpgradePolicy.enableAutomaticOSUpgrade', True),
+                     self.check('vmss.upgradePolicy.mode', 'Automatic'),
+                 ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk')
     def test_vmss_create_ephemeral_os_disk(self, resource_group):
@@ -9167,6 +9198,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vm1': 'vm1',
             'vm2': 'vm2',
+            'vm3': 'vm3',
         })
         self.cmd('vm create -g {rg} -n {vm1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
@@ -9177,6 +9209,14 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         # create with image whose hyperVGeneration is v2 and under features does not contains TrustedLaunch
         self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7_6-gen2:latest --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('securityProfile', 'None')
+        ])
+
+        # create VM with specifying security type Standard
+        # and image whose hyperVGeneration is v2 and under features contains TrustedLaunch
+        self.cmd('vm create -g {rg} -n {vm3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest '
+                 '--admin-username clitest1 --generate-ssh-key --security-type Standard --nsg-rule None')
+        self.cmd('vm show -g {rg} -n {vm3}', checks=[
             self.check('securityProfile', 'None')
         ])
 

@@ -232,7 +232,7 @@ def get_hyper_v_generation_from_vmss(cli_ctx, image_ref, location):  # pylint: d
 
 
 def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, access_level,
-                  secure_vm_guest_state_sas=None):
+                  secure_vm_guest_state_sas=None, file_format=None):
     AccessLevel, GrantAccessData = cmd.get_models('AccessLevel', 'GrantAccessData')
     client = _compute_client_factory(cmd.cli_ctx)
     op = client.disks if is_disk else client.snapshots
@@ -240,6 +240,8 @@ def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, 
                                         duration_in_seconds=duration_in_seconds)
     if secure_vm_guest_state_sas:
         grant_access_data.get_secure_vm_guest_state_sas = secure_vm_guest_state_sas
+    if file_format:
+        grant_access_data.file_format = file_format
 
     return op.begin_grant_access(resource_group_name, name, grant_access_data)
 
@@ -746,9 +748,10 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     return sdk_no_wait(no_wait, client.snapshots.begin_create_or_update, resource_group_name, snapshot_name, snapshot)
 
 
-def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, access_level=None):
+def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_seconds,
+                          access_level=None, file_format=None):
     return _grant_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, is_disk=False,
-                         access_level=access_level)
+                         access_level=access_level, file_format=file_format)
 
 
 def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryption_set=None,
@@ -3166,7 +3169,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
                 v_cpus_available=None, v_cpus_per_core=None, accept_term=None,
                 disable_integrity_monitoring=None,  # Unused
-                enable_integrity_monitoring=False,
+                enable_integrity_monitoring=False, enable_auto_os_upgrade=None,
                 os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
                 os_disk_delete_option=None, data_disk_delete_option=None, regular_priority_count=None,
                 regular_priority_percentage=None, disk_controller_type=None, nat_rule_name=None,
@@ -3476,8 +3479,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             os_disk_delete_option=os_disk_delete_option, regular_priority_count=regular_priority_count,
             regular_priority_percentage=regular_priority_percentage, disk_controller_type=disk_controller_type,
             enable_osimage_notification=enable_osimage_notification, max_surge=max_surge,
-            enable_hibernation=enable_hibernation, enable_proxy_agent=enable_proxy_agent,
-            proxy_agent_mode=proxy_agent_mode)
+            enable_hibernation=enable_hibernation, enable_auto_os_upgrade=enable_auto_os_upgrade,
+            enable_proxy_agent=enable_proxy_agent, proxy_agent_mode=proxy_agent_mode)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -5669,7 +5672,7 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
         for treat_as_failure in treat_deployment_as_failure:
             vmss.virtual_machine_profile.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = (treat_as_failure.lower() == 'true')
             index += 1
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update, resource_group_name, vmss_name, vmss)
 
 
 def list_vmss_applications(cmd, vmss_name, resource_group_name):

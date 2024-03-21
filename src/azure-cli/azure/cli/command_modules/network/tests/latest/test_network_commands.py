@@ -2613,7 +2613,17 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             'csr_grp2': 'REQUEST-913-SCANNER-DETECTION',
             'csr_grp3': 'REQUEST-931-APPLICATION-ATTACK-RFI'
         })
-        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+
+        # create a waf-policy with default type and version
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}', checks=[
+            self.check('name', '{waf}'),
+            self.check('managedRules.managedRuleSets[0].ruleSetType', 'Microsoft_DefaultRuleSet'),
+            self.check('managedRules.managedRuleSets[0].ruleSetVersion', '2.1'),
+        ])
+        self.cmd('network application-gateway waf-policy delete -g {rg} -n {waf}')
+
+        # create a waf-policy
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf} --version 3.0 --type OWASP')
 
         # case 1: Initialize(add) managed rule set
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
@@ -2723,7 +2733,6 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].state', 'Disabled'),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].action', 'AnomalyScoring')
         ])
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
     def test_network_app_gateway_waf_policy_with_version_and_type(self, resource_group):
@@ -5307,6 +5316,26 @@ class NetworkVnetGatewayMultiAuth(ScenarioTest):
                  '--radius-secret 111_aaa --radius-server 30.1.1.15',
                  checks=[self.check('length(vpnClientConfiguration.vpnAuthenticationTypes)', 3)])
 
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_allow_traffic')
+    def test_network_vnet_gateway_allow_traffic(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet',
+            'ip': 'pip',
+            'gw': 'gw',
+            'gw_sku': 'VpnGw2',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --public-ip-address {ip} --vnet {vnet} --sku {gw_sku} '
+                 '--gateway-type Vpn --vpn-type RouteBased --address-prefix 40.1.0.0/24 --client-protocol OpenVPN '
+                 '--allow-remote-vnet-traffic true --allow-vwan-traffic true',
+                 checks=[self.check('vnetGateway.allowRemoteVnetTraffic', True),
+                         self.check('vnetGateway.allowVirtualWanTraffic', True)])
+        self.cmd('network vnet-gateway update -g {rg} -n {gw} --allow-remote-vnet-traffic false --allow-vwan-traffic false',
+                 checks=[self.check('allowRemoteVnetTraffic', False),
+                         self.check('allowVirtualWanTraffic', False)])
+
 
 class NetworkVirtualRouter(ScenarioTest):
 
@@ -6755,9 +6784,21 @@ class NetworkVirtualApplianceConnectionScenarioTest(ScenarioTest):
         self.cmd('network virtual-appliance connection show -n {name} -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
             self.check('name', '{name}')
         ])
+
         self.cmd('network virtual-appliance connection list -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
             self.check('length(@)', 1)
         ])
+
+        self.cmd('network virtual-appliance connection update '
+                 '-n {name} '
+                 '-g {rg} '
+                 '--nva {nva_name} '
+                 '--labels [label1,label2] ')
+        
+        self.cmd('network virtual-appliance connection show -n {name} -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
+            self.check('length(properties.routingConfiguration.propagatedRouteTables.labels)', 2),
+            self.check('properties.routingConfiguration.propagatedRouteTables.labels[0]', 'label1')
+        ]) 
 
 class NetworkExtendedLocation(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_network_lb_edge_zone', location='eastus2euap')

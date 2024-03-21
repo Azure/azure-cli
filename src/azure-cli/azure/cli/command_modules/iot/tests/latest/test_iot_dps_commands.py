@@ -10,7 +10,7 @@ from azure.cli.command_modules.iot.tests.latest._test_utils import (
     _create_test_cert, _delete_test_cert, _create_verification_cert, _create_fake_chain_cert
 )
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.iot.tests.utils.recording_processors import KeyReplacer
+from azure.cli.command_modules.iot.tests.utils import KeyReplacer
 from azure.core.exceptions import HttpResponseError
 import random
 

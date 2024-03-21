@@ -72,6 +72,14 @@ class Create(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
+        _args_schema.allow_remote_vnet_traffic = AAZBoolArg(
+            options=["--allow-remote-vnet-traffic"],
+            help="Configure this gateway to accept traffic from other Azure Virtual Networks. This configuration does not support connectivity to Azure Virtual WAN.",
+        )
+        _args_schema.allow_vwan_traffic = AAZBoolArg(
+            options=["--allow-vwan-traffic"],
+            help="Configures this gateway to accept traffic from remote Virtual WAN networks.",
+        )
         _args_schema.max_scale_unit = AAZIntArg(
             options=["--max-scale-unit"],
             help="Maximum scale units for auto-scale configuration.",
@@ -518,6 +526,8 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("activeActive", AAZBoolType, ".active")
+                properties.set_prop("allowRemoteVnetTraffic", AAZBoolType, ".allow_remote_vnet_traffic")
+                properties.set_prop("allowVirtualWanTraffic", AAZBoolType, ".allow_vwan_traffic")
                 properties.set_prop("autoScaleConfiguration", AAZObjectType)
                 properties.set_prop("bgpSettings", AAZObjectType)
                 properties.set_prop("customRoutes", AAZObjectType)

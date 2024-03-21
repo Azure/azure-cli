@@ -42,6 +42,23 @@ DEFAULT_DB_NAME = 'flexibleserverdb'
 MINIMUM_IOPS = 300
 
 
+def flexible_server_advanced_threat_protection_update(cmd, client, resource_group_name, server_name, state):
+    '''
+    Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
+    '''
+    parameters = {
+        'state': state
+    }
+    return client.begin_update(resource_group_name, server_name, mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value, parameters)
+
+
+def flexible_server_advanced_threat_protection_show(cmd, client, resource_group_name, server_name):
+    '''
+    Gets an advanced threat protection setting.
+    '''
+    return client.get(resource_group_name, server_name, mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value)
+
+
 def flexible_server_update_get(client, resource_group_name, server_name):
     return client.get(resource_group_name, server_name)
 
