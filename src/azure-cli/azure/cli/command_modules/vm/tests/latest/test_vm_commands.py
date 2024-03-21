@@ -3630,6 +3630,30 @@ class VMSSCreateOptions(ScenarioTest):
                 self.check('vmss.upgradePolicy.rollingUpgradePolicy.maxSurge', True)
             ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_with_auto_os_upgrade_', location='eastus2euap')
+    def test_vmss_with_auto_os_upgrade(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+            'image': 'MicrosoftWindowsServer:WindowsServer:2022-Datacenter:latest',
+            'admin_username': 'TestUser',
+            'admin_password': 'Test123456789#',
+            'sku': 'Standard_A1',
+            'lb': self.create_random_name('lb', 10),
+            'lbrule': 'lbrule',
+            'probe': self.create_random_name('probe', 15),
+        })
+
+        # set up a LB with the probe for Automatic upgrade
+        self.cmd('network lb create -g {rg} -n {lb}')
+        self.cmd('network lb probe create -g {rg} --lb-name {lb} -n {probe} --protocol Tcp --port 80')
+        self.cmd('network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
+
+        self.cmd('vmss create --debug -n {vmss} -g {rg} --image {image} --upgrade-policy-mode Automatic --enable-auto-os-upgrade --orchestration-mode Uniform --load-balancer {lb} --admin-username {admin_username} --admin-password {admin_password} --vm-sku {sku} --health-probe {probe}',
+                 checks=[
+                     self.check('vmss.upgradePolicy.automaticOSUpgradePolicy.enableAutomaticOSUpgrade', True),
+                     self.check('vmss.upgradePolicy.mode', 'Automatic'),
+                 ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk')
     def test_vmss_create_ephemeral_os_disk(self, resource_group):
 

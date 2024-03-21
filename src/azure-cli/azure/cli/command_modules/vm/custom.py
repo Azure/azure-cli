@@ -3169,7 +3169,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
                 v_cpus_available=None, v_cpus_per_core=None, accept_term=None,
                 disable_integrity_monitoring=None,  # Unused
-                enable_integrity_monitoring=False,
+                enable_integrity_monitoring=False, enable_auto_os_upgrade=None,
                 os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
                 os_disk_delete_option=None, data_disk_delete_option=None, regular_priority_count=None,
                 regular_priority_percentage=None, disk_controller_type=None, nat_rule_name=None,
@@ -3479,8 +3479,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             os_disk_delete_option=os_disk_delete_option, regular_priority_count=regular_priority_count,
             regular_priority_percentage=regular_priority_percentage, disk_controller_type=disk_controller_type,
             enable_osimage_notification=enable_osimage_notification, max_surge=max_surge,
-            enable_hibernation=enable_hibernation, enable_proxy_agent=enable_proxy_agent,
-            proxy_agent_mode=proxy_agent_mode)
+            enable_hibernation=enable_hibernation, enable_auto_os_upgrade=enable_auto_os_upgrade,
+            enable_proxy_agent=enable_proxy_agent, proxy_agent_mode=proxy_agent_mode)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
