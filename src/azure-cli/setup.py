@@ -138,6 +138,7 @@ DEPENDENCIES = [
     'fabric~=3.2.2',
     'javaproperties~=0.5.1',
     'jsondiff~=2.0.0',
+    'microsoft-security-utilities~=1.0.0b1',
     'packaging>=20.9',
     'pycomposefile>=0.0.29',
     'PyGithub~=1.38',
