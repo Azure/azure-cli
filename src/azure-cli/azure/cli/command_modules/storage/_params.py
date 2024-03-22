@@ -1200,6 +1200,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob delete-batch') as c:
         c.ignore('source_container_name')
+        c.register_precondition_options()
         c.argument('source', options_list=('--source', '-s'))
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()),
                    help='Required if the blob has associated snapshots.')

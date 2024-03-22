@@ -765,7 +765,7 @@ def show_blob(cmd, client, container_name, blob_name, snapshot=None, lease_id=No
 
 def storage_blob_delete_batch(client, source, source_container_name, blobs=None, pattern=None, lease_id=None,
                               delete_snapshots=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
-                              if_none_match=None, timeout=None, dryrun=False):
+                              if_none_match=None, if_tags_match_condition=None, timeout=None, dryrun=False):
     container_client = client.get_container_client(source_container_name)
 
     from datetime import timezone
@@ -812,6 +812,7 @@ def storage_blob_delete_batch(client, source, source_container_name, blobs=None,
         results = container_client.delete_blobs(*source_blobs[i:i+256], delete_snapshots=delete_snapshots,
                                                 if_modified_since=if_modified_since,
                                                 if_unmodified_since=if_unmodified_since,
+                                                if_tags_match_condition=if_tags_match_condition,
                                                 timeout=timeout,
                                                 raise_on_any_failure=False)
         num_failures += len([res for res in results if res.status_code != 202])
