@@ -173,6 +173,10 @@ short-summary: Sets if SCM site is using the same restrictions as the main site.
 examples:
   - name: Enable SCM site to use same access restrictions as main site.
     text: az functionapp config access-restriction set -g ResourceGroup -n AppName --use-same-restrictions-for-scm-site true
+  - name: Set default action to Allow for main site.
+    text: az functionapp config access-restriction set -g ResourceGroup -n AppName --default-action Allow
+  - name: Set default action to Deny for scm site.
+    text: az functionapp config access-restriction set -g ResourceGroup -n AppName --scm-default-action Deny
 """
 
 helps['functionapp config access-restriction show'] = """
@@ -1102,10 +1106,14 @@ examples:
 
 helps['webapp config access-restriction set'] = """
 type: command
-short-summary: Sets if SCM site is using the same restrictions as the main site.
+short-summary: Sets if SCM site is using the same restrictions as the main site and default actions.
 examples:
   - name: Enable SCM site to use same access restrictions as main site.
     text: az webapp config access-restriction set -g ResourceGroup -n AppName --use-same-restrictions-for-scm-site true
+  - name: Set default action to Allow for main site.
+    text: az webapp config access-restriction set -g ResourceGroup -n AppName --default-action Allow
+  - name: Set default action to Deny for scm site.
+    text: az webapp config access-restriction set -g ResourceGroup -n AppName --scm-default-action Deny
 """
 
 helps['webapp config access-restriction show'] = """
