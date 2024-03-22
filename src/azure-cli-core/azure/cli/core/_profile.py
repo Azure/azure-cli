@@ -531,6 +531,9 @@ class Profile:
             except KeyError:
                 return subscription[_TENANT_ID]
 
+        def highlight_text(text, is_default):
+            return format_styled_text((Style.HIGHLIGHT, text)) if is_default else text
+
         for index, sub in enumerate(subscriptions_sorted, start=1):
             # There is no need to use int, as int requires parsing. str match is sufficient.
             index_str = str(index)  # '1', '2', ...
@@ -538,22 +541,19 @@ class Profile:
 
             # asterisk = format_styled_text((Style.WARNING, '*'))
             asterisk = ' *'
-            is_default_one = sub == active_one
+            is_default = sub is active_one
 
             # Trim subscription name if it is too long
             subscription_name = sub[_SUBSCRIPTION_NAME]
             length_limit = 40
             if len(subscription_name) > length_limit:
-                subscription_name = subscription_name[:length_limit-3] + '...'
-
-            def highlight_text(text):
-                return format_styled_text((Style.HIGHLIGHT, text)) if is_default_one else text
+                subscription_name = subscription_name[:length_limit - 3] + '...'
 
             row = {
-                'No': f'[{index_str}]' + (asterisk if is_default_one else ''),
-                'Subscription name': highlight_text(subscription_name),
-                'Subscription ID': highlight_text(sub[_SUBSCRIPTION_ID]),
-                'Tenant': highlight_text(get_tenant_string(sub))
+                'No': f'[{index_str}]' + (asterisk if is_default else ''),
+                'Subscription name': highlight_text(subscription_name, is_default),
+                'Subscription ID': highlight_text(sub[_SUBSCRIPTION_ID], is_default),
+                'Tenant': highlight_text(get_tenant_string(sub), is_default)
             }
             table_data.append(row)
 
@@ -584,8 +584,10 @@ class Profile:
 
             # Nothing is typed, keep current selection
             if select_index == '':
+                print()
                 return active_one
-            elif select_index in index_to_subscription_map:
+
+            if select_index in index_to_subscription_map:
                 active_one = index_to_subscription_map[select_index]
                 # Echo the selection
                 print()
@@ -594,9 +596,9 @@ class Profile:
                 print(f"Subscription: {active_one[_SUBSCRIPTION_NAME]} ({active_one[_SUBSCRIPTION_ID]})")
                 print()
                 return active_one
-            else:
-                logger.warning("Invalid selection.")
-                # Let retry
+
+            logger.warning("Invalid selection.")
+            # Let retry
 
     def is_tenant_level_account(self):
         return self.get_subscription()[_SUBSCRIPTION_NAME] == _TENANT_LEVEL_ACCOUNT_NAME
@@ -788,7 +790,7 @@ class Profile:
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
 
-    def _invoke_interactive_subscription_selection_demo(self):
+    def _invoke_interactive_subscription_selection_demo(self, with_tenant_domain):
         # Random order, as returned by REST API
         subscriptions = [
             # 2
@@ -833,8 +835,8 @@ class Profile:
                 "environmentName": "AzureCloud",
             }
         ]
-        selected = self._interactively_select_subscription(subscriptions, subscriptions[0])
-        return []
+        return self._interactively_select_subscription(
+            subscriptions if with_tenant_domain else subscriptions_no_tenant_domain, subscriptions[0])
 
 
 class MsiAccountTypes:

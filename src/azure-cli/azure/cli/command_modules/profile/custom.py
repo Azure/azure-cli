@@ -41,6 +41,7 @@ LOGIN_OUTPUT_WARNING = (
     "available subscriptions by default.\n"
 )
 
+
 def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
     from azure.cli.core.api import load_subscriptions
