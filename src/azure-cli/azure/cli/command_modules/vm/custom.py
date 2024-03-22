@@ -5517,17 +5517,25 @@ def get_gallery_instance(cmd, resource_group_name, gallery_name):
 
 
 def create_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, location=None,
-                                      tags=None, zones=None):
+                                      tags=None, zones=None, sharing_profile=None):
     CapacityReservationGroup = cmd.get_models('CapacityReservationGroup')
-    capacity_reservation_group = CapacityReservationGroup(location=location, tags=tags, zones=zones)
+    if sharing_profile is not None:
+        subscription_ids = [{'id': sub_id} for sub_id in sharing_profile]
+        sharing_profile = {'subscriptionIds': subscription_ids}
+    capacity_reservation_group = CapacityReservationGroup(location=location, tags=tags,
+                                                          zones=zones, sharing_profile=sharing_profile)
     return client.create_or_update(resource_group_name=resource_group_name,
                                    capacity_reservation_group_name=capacity_reservation_group_name,
                                    parameters=capacity_reservation_group)
 
 
-def update_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, tags=None):
+def update_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, tags=None,
+                                      sharing_profile=None):
     CapacityReservationGroupUpdate = cmd.get_models('CapacityReservationGroupUpdate')
-    capacity_reservation_group = CapacityReservationGroupUpdate(tags=tags)
+    if sharing_profile is not None:
+        subscription_ids = [{'id': sub_id} for sub_id in sharing_profile]
+        sharing_profile = {'subscriptionIds': subscription_ids}
+    capacity_reservation_group = CapacityReservationGroupUpdate(tags=tags, sharing_profile=sharing_profile)
     return client.update(resource_group_name=resource_group_name,
                          capacity_reservation_group_name=capacity_reservation_group_name,
                          parameters=capacity_reservation_group)
