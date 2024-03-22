@@ -117,9 +117,10 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if deployment_container_image_name and container_image_name:
-        raise MutuallyExclusiveArgumentError('usage error: --deployment-container-image-name | --container-image-name')
+        raise MutuallyExclusiveArgumentError('Cannot use both --deployment-container-image-name'
+                                             ' and --container-image-name')
     if container_registry_url and not container_image_name:
-        raise ArgumentUsageError("Please use --container-image-name to provide the image name")
+        raise ArgumentUsageError('Please specify both --container-registry-url and --container-image-name')
 
     if container_registry_url:
         container_registry_url = parse_container_registry_url(container_registry_url)
@@ -220,10 +221,14 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         if not validate_container_app_create_options(runtime, container_image_name,
                                                      multicontainer_config_type, multicontainer_config_file):
             if deployment_container_image_name:
-                raise ArgumentUsageError("usage error: --runtime | --deployment-container-image-name |"
-                                         " --multicontainer-config-type TYPE --multicontainer-config-file FILE")
-            raise ArgumentUsageError("usage error: --runtime | --container-image-name |"
-                                     " --multicontainer-config-type TYPE --multicontainer-config-file FILE")
+                raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
+                                         'and multicontainer-config-file FILE, '
+                                         'and only specify one out of --runtime, '
+                                         '--deployment-container-image-name and --multicontainer-config-type')
+            raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
+                                     'and multicontainer-config-file FILE, '
+                                     'and only specify one out of --runtime, '
+                                     '--container-image-name and --multicontainer-config-type')
         if startup_file:
             site_config.app_command_line = startup_file
 
@@ -2033,9 +2038,10 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
                                  "--container-registry-password, or --container-registry-user without argument "
                                  "--configuration-source")
     if deployment_container_image_name and container_image_name:
-        raise MutuallyExclusiveArgumentError('usage error: --deployment-container-image-name | --container-image-name')
+        raise MutuallyExclusiveArgumentError('Cannot use both --deployment-container-image-name'
+                                             ' and --container-image-name')
     if container_registry_url and not container_image_name:
-        raise ArgumentUsageError("Please use --container-image-name to provide the image name")
+        raise ArgumentUsageError('Please specify both --container-registry-url and --container-image-name')
 
     if container_registry_url:
         container_registry_url = parse_container_registry_url(container_registry_url)
