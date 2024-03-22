@@ -427,7 +427,6 @@ def _check_wincred(login_server):
             # Don't update config file or retry as this doesn't seem to be a wincred issue
             return False
 
-        import os
         content = {
             "auths": {
                 login_server: {}
