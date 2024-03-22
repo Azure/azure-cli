@@ -148,7 +148,7 @@ subscription than the app service environment, please use the resource ID for --
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
                                                                  scopes=['webapp', 'cupertino']))
         c.argument('startup_file', help="Linux only. The web's startup file")
-        c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from Docker Hub, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
+        c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from container registry, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
         c.argument('container_registry_url', options_list=['--container-registry-url'], help='the container registry server url')
         c.argument('container_image_name', options_list=['--container-image-name', '-c'],
                    help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
@@ -877,7 +877,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('name', arg_type=logicapp_name_arg_type)
 
     with self.argument_context('logicapp create') as c:
-        c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from Docker Hub, e.g. publisher/image-name:tag')
+        c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from container registry, e.g. publisher/image-name:tag')
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-d'], help='The container registry server username.')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'],
                    help='The container registry server password. Required for private registries.')
