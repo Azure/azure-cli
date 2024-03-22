@@ -691,20 +691,17 @@ def load_arguments(self, _):
 
     def add_deprecated_stack_delete_flags(ctx):
         ctx.argument(
-            'delete_resources', arg_type=get_three_state_flag(),
-            options_list=['--delete-resources', ctx.deprecate(
-                target='--delete-resources', redirect='--action-on-unmanage deleteResources')],
-            help='Flag to indicate delete rather than detach for the resources.')
+            'delete_resources', arg_type=get_three_state_flag(), options_list=['--delete-resources'],
+            help='Flag to indicate delete rather than detach for the resources.',
+            deprecate_info=ctx.deprecate(target='--delete-resources', redirect='--action-on-unmanage deleteResources'))
         ctx.argument(
-            'delete_resource_groups', arg_type=get_three_state_flag(),
-            options_list=['--delete-resource-groups', ctx.deprecate(
-                target='--delete-resource-groups', redirect='--action-on-unmanage deleteAll')],
-            help='Flag to indicate delete rather than detach for the resource groups.')
+            'delete_resource_groups', arg_type=get_three_state_flag(), options_list=['--delete-resource-groups'],
+            help='Flag to indicate delete rather than detach for the resource groups.',
+            deprecate_info=ctx.deprecate(target='--delete-resource-groups', redirect='--action-on-unmanage deleteAll'))
         ctx.argument(
-            'delete_all', arg_type=get_three_state_flag(),
-            options_list=['--delete-all',
-                          ctx.deprecate(target='--delete-all', redirect='--action-on-unmanage deleteAll')],
-            help='Flag to indicate delete rather than detach for the resources and resource groups.')
+            'delete_all', arg_type=get_three_state_flag(), options_list=['--delete-all'],
+            help='Flag to indicate delete rather than detach for the resources and resource groups.',
+            deprecate_info=ctx.deprecate(target='--delete-all', redirect='--action-on-unmanage deleteAll'))
 
     with self.argument_context('stack mg delete') as c:
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
