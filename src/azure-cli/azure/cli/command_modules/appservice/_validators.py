@@ -312,13 +312,13 @@ def _validate_service_tag_format(cmd, namespace):
         webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
         service_tag_full_list = ListServiceTags(cli_ctx=cmd.cli_ctx)(command_args={
             "location": webapp.location
-        })["values"]
+        })
         if service_tag_full_list is None:
             logger.warning('Not able to get full Service Tag list. Cannot validate Service Tag.')
             return
         for tag in input_tags:
             valid_tag = False
-            for tag_full_list in service_tag_full_list:
+            for tag_full_list in service_tag_full_list["values"]:
                 if tag.lower() == tag_full_list["name"].lower():
                     valid_tag = True
                     continue
