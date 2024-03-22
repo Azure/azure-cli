@@ -473,7 +473,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 table_transformer=transform_boolean_for_table)
         g.storage_custom_command('set-permission', 'set_container_permission')
         g.storage_command('show-permission', 'get_container_access_policy',
-                                transform=transform_container_permission_output)
+                          transform=transform_container_permission_output)
         g.storage_command_oauth('metadata update', 'set_container_metadata')
         g.storage_command_oauth('metadata show', 'get_container_properties',
                                 exception_handler=show_exception_handler,
