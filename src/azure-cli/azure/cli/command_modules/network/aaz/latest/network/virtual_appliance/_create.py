@@ -23,9 +23,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances/{}", "2023-11-01"],
         ]
     }
 
@@ -124,6 +124,16 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The delegation for the Virtual Appliance",
         )
+        _args_schema.internet_ingress_public_ips = AAZListArg(
+            options=["--internet-ingress-public-ips"],
+            arg_group="Properties",
+            help="List of Resource Uri of Public IPs for Internet Ingress Scenario.",
+        )
+        _args_schema.network_profile = AAZObjectArg(
+            options=["--network-profile"],
+            arg_group="Properties",
+            help="Network Profile containing configurations for Public and Private NIC.",
+        )
         _args_schema.asn = AAZIntArg(
             options=["--asn"],
             arg_group="Properties",
@@ -157,6 +167,46 @@ class Create(AAZCommand):
         delegation.service_name = AAZStrArg(
             options=["service-name"],
             help="The service name to which the NVA is delegated.",
+        )
+
+        internet_ingress_public_ips = cls._args_schema.internet_ingress_public_ips
+        internet_ingress_public_ips.Element = AAZObjectArg()
+
+        _element = cls._args_schema.internet_ingress_public_ips.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource Uri of Public Ip",
+        )
+
+        network_profile = cls._args_schema.network_profile
+        network_profile.network_interface_configurations = AAZListArg(
+            options=["network-interface-configurations"],
+        )
+
+        network_interface_configurations = cls._args_schema.network_profile.network_interface_configurations
+        network_interface_configurations.Element = AAZObjectArg()
+
+        _element = cls._args_schema.network_profile.network_interface_configurations.Element
+        _element.ip_configurations = AAZListArg(
+            options=["ip-configurations"],
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+            help="NIC type. This should be either PublicNic or PrivateNic.",
+            enum={"PrivateNic": "PrivateNic", "PublicNic": "PublicNic"},
+        )
+
+        ip_configurations = cls._args_schema.network_profile.network_interface_configurations.Element.ip_configurations
+        ip_configurations.Element = AAZObjectArg()
+
+        _element = cls._args_schema.network_profile.network_interface_configurations.Element.ip_configurations.Element
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="Name of the IP configuration.",
+        )
+        _element.primary = AAZBoolArg(
+            options=["primary"],
+            help="Whether or not this is primary IP configuration of the NIC.",
         )
 
         # define Arg Group "Sku"
@@ -269,7 +319,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -315,6 +365,8 @@ class Create(AAZCommand):
                 properties.set_prop("cloudInitConfiguration", AAZStrType, ".cloud_init_config")
                 properties.set_prop("cloudInitConfigurationBlobs", AAZListType, ".cloud_init_config_blobs")
                 properties.set_prop("delegation", AAZObjectType, ".delegation")
+                properties.set_prop("internetIngressPublicIps", AAZListType, ".internet_ingress_public_ips")
+                properties.set_prop("networkProfile", AAZObjectType, ".network_profile")
                 properties.set_prop("nvaSku", AAZObjectType)
                 properties.set_prop("virtualApplianceAsn", AAZIntType, ".asn")
                 properties.set_prop("virtualHub", AAZObjectType)
@@ -339,6 +391,44 @@ class Create(AAZCommand):
             delegation = _builder.get(".properties.delegation")
             if delegation is not None:
                 delegation.set_prop("serviceName", AAZStrType, ".service_name")
+
+            internet_ingress_public_ips = _builder.get(".properties.internetIngressPublicIps")
+            if internet_ingress_public_ips is not None:
+                internet_ingress_public_ips.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.internetIngressPublicIps[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+
+            network_profile = _builder.get(".properties.networkProfile")
+            if network_profile is not None:
+                network_profile.set_prop("networkInterfaceConfigurations", AAZListType, ".network_interface_configurations")
+
+            network_interface_configurations = _builder.get(".properties.networkProfile.networkInterfaceConfigurations")
+            if network_interface_configurations is not None:
+                network_interface_configurations.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.networkProfile.networkInterfaceConfigurations[]")
+            if _elements is not None:
+                _elements.set_prop("properties", AAZObjectType)
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            properties = _builder.get(".properties.networkProfile.networkInterfaceConfigurations[].properties")
+            if properties is not None:
+                properties.set_prop("ipConfigurations", AAZListType, ".ip_configurations")
+
+            ip_configurations = _builder.get(".properties.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations")
+            if ip_configurations is not None:
+                ip_configurations.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[]")
+            if _elements is not None:
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType)
+
+            properties = _builder.get(".properties.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties")
+            if properties is not None:
+                properties.set_prop("primary", AAZBoolType, ".primary")
 
             nva_sku = _builder.get(".properties.nvaSku")
             if nva_sku is not None:
@@ -444,6 +534,12 @@ class Create(AAZCommand):
                 serialized_name="inboundSecurityRules",
                 flags={"read_only": True},
             )
+            properties.internet_ingress_public_ips = AAZListType(
+                serialized_name="internetIngressPublicIps",
+            )
+            properties.network_profile = AAZObjectType(
+                serialized_name="networkProfile",
+            )
             properties.nva_sku = AAZObjectType(
                 serialized_name="nvaSku",
             )
@@ -505,6 +601,39 @@ class Create(AAZCommand):
             inbound_security_rules.Element = AAZObjectType()
             _CreateHelper._build_schema_sub_resource_read(inbound_security_rules.Element)
 
+            internet_ingress_public_ips = cls._schema_on_200_201.properties.internet_ingress_public_ips
+            internet_ingress_public_ips.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.internet_ingress_public_ips.Element
+            _element.id = AAZStrType()
+
+            network_profile = cls._schema_on_200_201.properties.network_profile
+            network_profile.network_interface_configurations = AAZListType(
+                serialized_name="networkInterfaceConfigurations",
+            )
+
+            network_interface_configurations = cls._schema_on_200_201.properties.network_profile.network_interface_configurations
+            network_interface_configurations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.network_profile.network_interface_configurations.Element
+            _element.properties = AAZObjectType()
+            _element.type = AAZStrType()
+
+            properties = cls._schema_on_200_201.properties.network_profile.network_interface_configurations.Element.properties
+            properties.ip_configurations = AAZListType(
+                serialized_name="ipConfigurations",
+            )
+
+            ip_configurations = cls._schema_on_200_201.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations
+            ip_configurations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType()
+
+            properties = cls._schema_on_200_201.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties
+            properties.primary = AAZBoolType()
+
             nva_sku = cls._schema_on_200_201.properties.nva_sku
             nva_sku.bundled_scale_unit = AAZStrType(
                 serialized_name="bundledScaleUnit",
@@ -540,6 +669,10 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
             _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.nic_type = AAZStrType(
+                serialized_name="nicType",
                 flags={"read_only": True},
             )
             _element.private_ip_address = AAZStrType(
