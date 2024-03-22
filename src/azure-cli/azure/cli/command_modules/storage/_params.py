@@ -1019,7 +1019,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(('High', 'Standard')), validator=blob_rehydrate_priority_validator,
                    is_preview=True, help="Indicate the priority with which to rehydrate an archived blob. "
                                          "The priority can be set on a blob only once, default value is Standard.")
-        c.extra('if_tags_match_condition', arg_group='Precondition',
+        c.argument('if_tags_match_condition', arg_group='Precondition', options_list=('--tags-condition'),
                 help="Specify a SQL where clause on blob tags to operate only on blob with a matching value. ")
 
     with self.argument_context('storage blob set-legal-hold') as c:
