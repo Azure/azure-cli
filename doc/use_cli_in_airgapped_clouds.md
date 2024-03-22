@@ -62,15 +62,15 @@ on Linux shells or
 ```powershell
 $Env:ARM_CLOUD_METADATA_URL = "https://example.url.com/metadata/endpoints?api-version=2019-05-01"
 ```
-on Windows Powershell.
+on Windows PowerShell.
 The content of the metadata URL should be similar to that of the public cloud metadata URL: https://management.azure.com/metadata/endpoints?api-version=2019-05-01.
 
 Then CLI will load the available clouds and the corresponding cloud endpoints from the URL. The first cloud in the available cloud list will be set as the active cloud by default if the public `AzureCloud` is (most likely) not available.
 
-If you are working with multiple clouds, you can learn more in [Work with multiple clouds](https://docs.microsoft.com/cli/azure/manage-clouds-azure-cli).
+If you are working with multiple clouds, you can learn more in [Work with multiple clouds](https://learn.microsoft.com/cli/azure/manage-clouds-azure-cli).
 
 ## Set CA bundle certificate
-Please follow the first solution in [Work behind a proxy](https://docs.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy) to set up the certificate in your airgapped cloud environment. For more details, you can also refer to the steps in the [guide](https://docs.microsoft.com/azure-stack/user/azure-stack-version-profiles-azurecli2) to set up CLI for Azure Stack Hub.
+Please follow the first solution in [Work behind a proxy](https://learn.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy) to set up the certificate in your airgapped cloud environment. For more details, you can also refer to the steps in the [guide](https://learn.microsoft.com/azure-stack/user/azure-stack-version-profiles-azurecli2) to set up CLI for Azure Stack Hub.
 
 ## Login with service principal
 Use the service principal that was granted permission to access a subscription in the airgapped cloud to login.

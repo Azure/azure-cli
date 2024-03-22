@@ -174,7 +174,7 @@ Examples
 
 The help that you author above will be available online as reference documentation.
 
-https://docs.microsoft.com/cli/azure/reference-index
+https://learn.microsoft.com/cli/azure/reference-index
 
 If you are not satisfied with the heading that is automatically provided, please create a PR to update the following file:
 

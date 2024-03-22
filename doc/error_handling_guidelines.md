@@ -101,13 +101,13 @@ Below are the specific DOs and DON'Ts when writing the error messages. PRs viola
 
 __DOs__
 - Use the capital letter ahead of an error message.
-- Provide actionable message with argument suggestion. (e.g, Instead of using `resource group is missing, please provide a resource group name`, use `resource group is missing, please provide a resource group name by --resource-group`)
+- Provide actionable message with argument suggestion. (e.g., Instead of using `resource group is missing, please provide a resource group name`, use `resource group is missing, please provide a resource group name by --resource-group`)
 
 __DON'Ts__
-- Do not control the style of an error message. (e.g, the unnecessary `'\n'` and the colorization.)
-- Do not include the error type info in an error message. (e.g, `usage error: --ids | --name [--resource-group]`)
-- Do not use a formula-like or a programming expression in the error message. (e.g, `Parameter 'resource_group_name' must conform to the following pattern: '^[-\\w\\._\\(\\)]+$'`)
-- Do not use ambiguous expressions which mean nothing to users. (e.g, `Something unexpected happens.`)
+- Do not control the style of an error message. (e.g., the unnecessary `'\n'` and the colorization.)
+- Do not include the error type info in an error message. (e.g., `usage error: --ids | --name [--resource-group]`)
+- Do not use a formula-like or a programming expression in the error message. (e.g., `Parameter 'resource_group_name' must conform to the following pattern: '^[-\\w\\._\\(\\)]+$'`)
+- Do not use ambiguous expressions which mean nothing to users. (e.g., `Something unexpected happens.`)
 
 
 ## Error Recommendation

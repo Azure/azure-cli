@@ -1,4 +1,4 @@
-The document provides instructions and guidelines on how to board param persist feature, prevoius name local context. The public feature name to end user is param persist. The usage is at [here](https://docs.microsoft.com/cli/azure/param-persist-howto). In implementation, it's referenced as local context. The 2 terms are equivalent in this doc.
+The document provides instructions and guidelines on how to board param persist feature, previous name local context. The public feature name to end user is param persist. The usage is at [here](https://learn.microsoft.com/cli/azure/azure-cli-configuration). In implementation, it's referenced as local context. The 2 terms are equivalent in this doc.
 
 ## Local context attribute
 
