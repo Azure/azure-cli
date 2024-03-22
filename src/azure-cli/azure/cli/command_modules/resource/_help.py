@@ -2889,7 +2889,7 @@ examples:
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None
   - name: Create a deployment stack from a local template, using deny settings.
-    text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --deny-settings-mode None
+    text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus
   - name: Create a deployment stack from a local template, apply deny settings to child scope.
     text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus
 """
@@ -2958,9 +2958,9 @@ examples:
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: az stack sub create --name StackName --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None
   - name: Create a deployment stack from a local template, using deny settings.
-    text: az stack sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --deny-settings-mode None
+    text: az stack sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus
   - name: Create a deployment stack from a local template, apply deny settings to child scopes.
-    text: az stack sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus --deny-settings-mode None
+    text: az stack sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus
 """
 
 helps['stack sub list'] = """
@@ -3025,7 +3025,7 @@ examples:
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: az stack group create --name StackName --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --resource-group ResourceGroup --deny-settings-mode None
   - name: Create a deployment stack from a local template, using deny settings.
-    text: az stack group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --deny-settings-mode None
+    text: az stack group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2"
   - name: Create a deployment stack from a local template, apply deny setting to child scopes.
     text: az stack group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes
 """
