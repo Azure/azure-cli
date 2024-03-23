@@ -124,8 +124,11 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The delegation for the Virtual Appliance",
         )
+
+        #Manually changed --internet-ingress-public-ips to --internet-ingress-ips to make it lint compliant.
+        #Will fix in Swagger in next release.
         _args_schema.internet_ingress_public_ips = AAZListArg(
-            options=["--internet-ingress-public-ips"],
+            options=["--internet-ingress-ips"],
             arg_group="Properties",
             help="List of Resource Uri of Public IPs for Internet Ingress Scenario.",
         )
