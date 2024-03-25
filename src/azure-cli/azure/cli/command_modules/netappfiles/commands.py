@@ -6,7 +6,6 @@
 # pylint: disable=line-too-long
 
 def load_command_table(self, _):
-
     with self.command_group('netappfiles account'):
         from .custom import AccountCreate, AccountUpdate
         self.command_table["netappfiles account create"] = AccountCreate(loader=self)
@@ -44,4 +43,6 @@ def load_command_table(self, _):
         self.command_table['netappfiles volume replication resume'] = ReplicationResume(loader=self)
 
     with self.command_group('netappfiles', is_preview=False):
+        from .custom import UpdateNetworkSiblingSet
+        self.command_table["netappfiles update-network-sibling-set"] = UpdateNetworkSiblingSet(loader=self)
         pass
