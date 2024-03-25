@@ -206,7 +206,7 @@ class PoolUpdate(_PoolUpdate):
 class VolumeCreate(_VolumeCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZIntArgFormat, AAZBoolArg
+        from azure.cli.core.aaz import AAZStrArg, AAZIntArgFormat, AAZBoolArg, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet = AAZStrArg(
             options=["--vnet"],
@@ -301,6 +301,9 @@ class VolumeCreate(_VolumeCreate):
             maximum=500,
             minimum=100
         )
+
+        # The API does only support setting Basic and Standard
+        args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=True)
 
         return args_schema
 
