@@ -303,7 +303,7 @@ class VolumeCreate(_VolumeCreate):
         )
 
         # The API does only support setting Basic and Standard
-        args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=True)
+        args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=False)
 
         return args_schema
 
