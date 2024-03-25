@@ -13,6 +13,7 @@ def get_amw_subscription(azure_monitor_workspace_resource_id):
     amw_subscription_id = azure_monitor_workspace_resource_id.split("/")[2]
     return amw_subscription_id
 
+
 def get_amw_region(cmd, azure_monitor_workspace_resource_id):
     # region of MAC can be different from region of RG so find the location of the azure_monitor_workspace_resource_id
     amw_subscription_id = get_amw_subscription(azure_monitor_workspace_resource_id)
