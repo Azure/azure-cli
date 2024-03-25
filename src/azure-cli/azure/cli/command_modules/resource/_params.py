@@ -730,7 +730,7 @@ def load_arguments(self, _):
         c.argument('yes', help='Do not prompt for confirmation')
 
     for scope in ['group', 'sub', 'mg']:
-        for action in ['create']:  # 'validate' will be added in a future release
+        for action in ['create', 'validate']:
             with self.argument_context(f'stack {scope} {action}') as c:
                 c.argument('name', arg_type=stacks_name_type)
 
