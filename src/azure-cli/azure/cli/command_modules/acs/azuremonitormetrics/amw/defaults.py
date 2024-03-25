@@ -15,8 +15,10 @@ def get_default_region(cmd, clusetr_region):
         raise "chinanorth3"
     if cloud_name.lower() == 'azureusgovernment':
         return "usgovvirginia"
-    if cloud_name.lower() == 'ussec' or cloud_name.lower() == 'usnat':
-        return clusetr_region
+    if cloud_name.lower() == 'ussec':
+        return "ussecwest"
+    if cloud_name.lower() == 'usnat':
+        return "usnatwest"
     return "eastus"
 
 
