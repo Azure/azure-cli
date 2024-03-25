@@ -70,8 +70,7 @@ def register_rps(cmd, subscription_id, rp_namespaces, user_agent):
                 rp_namespaces[namespace] = True
 
         for namespace, registered in rp_namespaces.items():
-            # if not registered:
-            if registered:
+            if not registered:
                 headers = ['User-Agent=azuremonitormetrics.register_{}_rp'.format(namespace.split('.')[1].lower())]
                 post_request(cmd, subscription_id, namespace, headers)
     except CLIError as e:
