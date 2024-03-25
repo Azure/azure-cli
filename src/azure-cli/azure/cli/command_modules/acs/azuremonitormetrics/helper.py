@@ -44,7 +44,6 @@ def rp_registrations(cmd, cluster_subscription_id, raw_parameters):
     print("current value of  subscription_id: ", subscription_id)
     if azure_monitor_workspace_resource_id and azure_monitor_workspace_resource_id != "":
         subscription_id = azure_monitor_workspace_resource_id.split("/")[2]
-    print("current value of  subscription_id after workspace param check: ", subscription_id)
     from azure.cli.core.util import send_raw_request
     # Get list of RP's for RP's subscription
     try:
