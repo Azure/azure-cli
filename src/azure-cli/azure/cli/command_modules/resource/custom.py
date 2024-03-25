@@ -2733,7 +2733,7 @@ def validate_deployment_stack_at_resource_group(
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     deployment_stack_model = _prepare_validate_stack_at_scope(
-        rcf=rcf, deployment_scope='resourceGroup', cmd=cmd, name=name, deny_settings_mode=deny_settings_mode,
+        rcf=rcf, deployment_scope='resourceGroup', cmd=cmd, deny_settings_mode=deny_settings_mode,
         action_on_unmanage=action_on_unmanage, delete_all=delete_all, delete_resource_groups=delete_resource_groups,
         delete_resources=delete_resources, template_file=template_file, template_spec=template_spec, template_uri=template_uri,
         query_string=query_string, parameters=parameters, description=description,
@@ -2754,7 +2754,7 @@ def validate_deployment_stack_at_subscription(
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     deployment_stack_model = _prepare_validate_stack_at_scope(
-        rcf=rcf, deployment_scope='subscription', cmd=cmd, name=name, location=location, deny_settings_mode=deny_settings_mode,
+        rcf=rcf, deployment_scope='subscription', cmd=cmd, location=location, deny_settings_mode=deny_settings_mode,
         action_on_unmanage=action_on_unmanage, delete_all=delete_all, delete_resource_groups=delete_resource_groups,
         delete_resources=delete_resources, deployment_resource_group=deployment_resource_group, template_file=template_file,
         template_spec=template_spec, template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
@@ -2774,7 +2774,7 @@ def validate_deployment_stack_at_management_group(
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     deployment_stack_model = _prepare_validate_stack_at_scope(
-        rcf=rcf, deployment_scope='managementGroup', cmd=cmd, name=name, location=location, deny_settings_mode=deny_settings_mode,
+        rcf=rcf, deployment_scope='managementGroup', cmd=cmd, location=location, deny_settings_mode=deny_settings_mode,
         action_on_unmanage=action_on_unmanage, delete_all=delete_all, delete_resource_groups=delete_resource_groups,
         delete_resources=delete_resources, deployment_subscription=deployment_subscription, template_file=template_file,
         template_spec=template_spec, template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
@@ -2787,8 +2787,8 @@ def validate_deployment_stack_at_management_group(
 
 
 def _prepare_validate_stack_at_scope(
-    rcf, deployment_scope, cmd, name, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False,
-    delete_resources=False,location=None, deployment_subscription=None, deployment_resource_group=None, template_file=None,
+    rcf, deployment_scope, cmd, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False,
+    delete_resources=False, location=None, deployment_subscription=None, deployment_resource_group=None, template_file=None,
     template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None,
     deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None
 ):
