@@ -37,12 +37,6 @@ NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
 def load_command_table(self, _):
 
     # region Command Types
-    network_dns_zone_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.dns.operations#ZonesOperations.{}',
-        client_factory=cf_dns_mgmt_zones,
-        resource_type=ResourceType.MGMT_NETWORK_DNS
-    )
-
     network_dns_record_set_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.dns.operations#RecordSetsOperations.{}',
         client_factory=cf_dns_mgmt_record_sets,
@@ -211,11 +205,12 @@ def load_command_table(self, _):
     from .operations.dns import DNSListReferences
     self.command_table["network dns list-references"] = DNSListReferences(loader=self)
 
-    with self.command_group('network dns zone', network_dns_zone_sdk) as g:
+    with self.command_group('network dns zone') as g:
+        from .custom import DNSZoneUpdate
+        self.command_table["network dns zone update"] = DNSZoneUpdate(loader=self)
         g.custom_command('import', 'import_zone')
         g.custom_command('export', 'export_zone')
         g.custom_command('create', 'create_dns_zone', table_transformer=transform_dns_zone_table_output)
-        g.generic_update_command('update', custom_func_name='update_dns_zone')
 
     supported_records = ['a', 'aaaa', 'ds', 'mx', 'ns', 'ptr', 'srv', 'tlsa', 'txt', 'caa']
     experimental_records = ['ds', 'tlsa']
