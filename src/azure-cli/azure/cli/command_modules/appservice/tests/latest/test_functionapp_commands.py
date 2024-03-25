@@ -15,7 +15,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists, JMESPathPatternCheck
-from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, ArgumentUsageError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import ValidationError, ArgumentUsageError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -27,6 +27,7 @@ WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
+FLEX_ASP_LOCATION_FUNCTIONAPP = 'eastus'
 WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP = 'chinaeast'
 
 
@@ -179,6 +180,9 @@ class FunctionAppReservedInstanceTest(ScenarioTest):
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        time.sleep(30)
+
         self.cmd('functionapp config set -g {} -n {} --prewarmed-instance-count 4'
                  .format(resource_group, functionapp_name)).assert_with_checks([
                      JMESPathCheck('preWarmedInstanceCount', 4)])
@@ -534,6 +538,8 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
                      JMESPathCheck('kind', 'functionapp,linux'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
+        time.sleep(30)
+
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node')])
 
@@ -713,6 +719,119 @@ class FunctionappDapr(LiveScenarioTest):
             JMESPathCheck('daprConfig.logLevel', 'warn'),
             JMESPathCheck('daprConfig.enableApiLogging', True)
         ])
+
+
+class FunctionAppFlex(LiveScenarioTest):
+    def test_functionapp_list_flexconsumption_locations(self):
+        locations = self.cmd('functionapp list-flexconsumption-locations').get_output_in_json()
+        self.assertTrue(len(locations) == 13)
+
+    def test_functionapp_list_flexconsumption_runtimes(self):
+        runtimes = self.cmd('functionapp list-flexconsumption-runtimes').get_output_in_json()
+        self.assertTrue(len(runtimes) == 7)
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_scale_config(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java --always-ready-instances http=10 --instance-memory 512 --maximum-instance-count 150'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+        self.assertTrue(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['maximumInstanceCount'] == 150)
+        self.assertTrue(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['instanceMemoryMB'] == 512)
+        self.assertTrue(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['alwaysReady'][0]['name'] == 'http')
+        self.assertTrue(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['alwaysReady'][0]['instanceCount'] == 10)
+        self.assertTrue(len(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['alwaysReady']) == 1)
+
+        scale_config = self.cmd('functionapp scale config set -g {} -n {} --maximum-instance-count 200 --instance-memory 2048 --trigger-type http --trigger-settings perInstanceConcurrency=5'
+                               .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue(scale_config['maximumInstanceCount'] == 200)
+        self.assertTrue(scale_config['instanceMemoryMB'] == 2048)
+        self.assertTrue(scale_config['triggers']['http']['perInstanceConcurrency'] == 5)
+
+        scale_config = self.cmd('functionapp scale config always-ready set -g {} -n {} --settings http=8 hello=15'
+                                .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue(scale_config['alwaysReady'][0]['name'] == 'http')
+        self.assertTrue(scale_config['alwaysReady'][0]['instanceCount'] == 8)
+        self.assertTrue(scale_config['alwaysReady'][1]['name'] == 'hello')
+        self.assertTrue(scale_config['alwaysReady'][1]['instanceCount'] == 15)
+        self.assertTrue(len(scale_config['alwaysReady']) == 2)
+
+        scale_config = self.cmd('functionapp scale config always-ready delete -g {} -n {} --setting-names http'
+                                .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue(scale_config['alwaysReady'][0]['name'] == 'hello')
+        self.assertTrue(scale_config['alwaysReady'][0]['instanceCount'] == 15)
+        self.assertTrue(len(scale_config['alwaysReady']) == 1)
+
+        scale_config = self.cmd('functionapp scale config show -g {} -n {}'
+                                .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue(scale_config['maximumInstanceCount'] == 200)
+        self.assertTrue(scale_config['instanceMemoryMB'] == 2048)
+        self.assertTrue(scale_config['triggers']['http']['perInstanceConcurrency'] == 5)
+        self.assertTrue(scale_config['alwaysReady'][0]['name'] == 'hello')
+        self.assertTrue(scale_config['alwaysReady'][0]['instanceCount'] == 15)
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_runtime_config(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.10'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+
+        self.assertTrue(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['maximumInstanceCount'] == 100)
+        self.assertTrue(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['instanceMemoryMB'] == 2048)
+        self.assertTrue(functionapp['properties']['functionAppConfig']['runtime']['name'] == 'python')
+        self.assertTrue(functionapp['properties']['functionAppConfig']['runtime']['version'] == '3.10')
+
+        self.cmd('functionapp runtime config set -g {} -n {} --runtime-version 3.11'
+                 .format(resource_group, functionapp_name))
+
+        runtime_config = self.cmd('functionapp runtime config show -g {} -n {}'
+                                  .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue(runtime_config['name'] == 'python')
+        self.assertTrue(runtime_config['version'] == '3.11')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_deployment_config(self, resource_group):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+        storage_name = self.create_random_name('funcstorage1', 24)
+        container_name = self.create_random_name('funccontainer', 24)
+        storage2_name = self.create_random_name('funcstorage2', 24)
+        storage_account = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'
+                                   .format(storage_name, resource_group, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
+        storage_account_blob_endpoint = storage_account['primaryEndpoints']['blob']
+        deployment_storage_account = self.cmd('storage account create -g {} -n {} -l {} --sku Standard_LRS'
+                                              .format(resource_group, storage2_name, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
+        deployment_account_blob_endpoint = deployment_storage_account['primaryEndpoints']['blob']
+        self.cmd('storage container create -g {} -n {} --account-name {} --public-access blob'
+                 .format(resource_group, container_name, storage2_name))
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java --deployment-storage-auth-type storageAccountConnectionString'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_name)).get_output_in_json()
+        self.assertTrue(functionapp['properties']['functionAppConfig']['deployment']['storage']['type'] == 'blobContainer')
+        self.assertTrue(functionapp['properties']['functionAppConfig']['deployment']['storage']['value'].startswith(storage_account_blob_endpoint))
+        self.assertTrue(functionapp['properties']['functionAppConfig']['deployment']['storage']['authentication']['type'] == 'StorageAccountConnectionString')
+        self.assertTrue(functionapp['properties']['functionAppConfig']['deployment']['storage']['authentication']['userAssignedIdentityResourceId'] is None)
+        self.assertTrue(functionapp['properties']['functionAppConfig']['deployment']['storage']['authentication']['storageAccountConnectionStringName'] == 'DEPLOYMENT_STORAGE_CONNECTION_STRING')
+        app_settings = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue('DEPLOYMENT_STORAGE_CONNECTION_STRING' in [kp['name'] for kp in app_settings])
+
+        self.cmd('functionapp deployment config set -g {} -n {} --deployment-storage-name {} --deployment-storage-container-name {}'
+                                     .format(resource_group, functionapp_name, storage2_name, container_name))
+
+        deployment_config = self.cmd('functionapp deployment config show -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue(deployment_config['storage']['type'] == 'blobContainer')
+        self.assertTrue(deployment_config['storage']['value'] == (deployment_account_blob_endpoint + container_name))
+        self.assertTrue(deployment_config['storage']['authentication']['type'] == 'StorageAccountConnectionString')
+        self.assertTrue(deployment_config['storage']['authentication']['userAssignedIdentityResourceId'] is None)
+        self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] == 'DEPLOYMENT_STORAGE_CONNECTION_STRING')
 
 
 class FunctionAppManagedEnvironment(ScenarioTest):
@@ -1127,6 +1246,8 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
                      JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
+        time.sleep(30)
+
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node')])
 
@@ -1143,11 +1264,13 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
                      JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
+        time.sleep(30)
+
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('javaVersion', '11')])
+            JMESPathCheck('javaVersion', '17')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1161,6 +1284,8 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        time.sleep(30)
 
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'powershell')])
@@ -1180,6 +1305,8 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        time.sleep(30)
 
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
@@ -1229,6 +1356,8 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
                      JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
+        time.sleep(30)
+
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck("[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4'),
                  JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'custom')])
@@ -1267,6 +1396,8 @@ class FunctionAppWithAppInsightsKey(ScenarioTest):
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        time.sleep(30)
 
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
             JMESPathCheck(
@@ -1348,6 +1479,8 @@ class FunctionAppWithDistributedTracing(ScenarioTest):
         self.cmd('functionapp create -g {} -n {} -c {} -s {} --runtime java --functions-version 4'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
 
+        time.sleep(30)
+
         app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
                                                                                     functionapp_name)).get_output_in_json()
         self.assertTrue('APPLICATIONINSIGHTS_ENABLE_AGENT' not in [
@@ -1368,6 +1501,8 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
                      JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
+        time.sleep(30)
+
         app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
                                                                                     functionapp_name)).get_output_in_json()
         self.assertTrue('APPLICATIONINSIGHTS_CONNECTION_STRING' in [
@@ -1387,6 +1522,8 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        time.sleep(30)
 
         app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
                                                                                     functionapp_name)).get_output_in_json()
@@ -1609,6 +1746,8 @@ class FunctionAppOnLinux(ScenarioTest):
                  .format(resource_group, functionapp, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account), checks=[
                      JMESPathCheck('name', functionapp)
                  ])
+
+        time.sleep(30)
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
             JMESPathCheck('linuxFxVersion', 'DOTNET|6.0')
@@ -1844,6 +1983,8 @@ class FunctionAppKeysTests(ScenarioTest):
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        time.sleep(30)
 
         self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'
                  .format(resource_group, functionapp_name, slot_name)).assert_with_checks([

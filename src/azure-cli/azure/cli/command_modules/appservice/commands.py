@@ -16,8 +16,8 @@ from ._validators import (validate_onedeploy_params, validate_staticsite_link_fu
                           validate_functionapp_on_containerapp_site_config_set,
                           validate_functionapp_on_containerapp_site_config_show,
                           validate_functionapp_on_containerapp_container_settings_delete,
-                          validate_functionapp_on_containerapp_update,
-                          validate_functionapp)
+                          validate_functionapp_on_containerapp_update, validate_functionapp_on_flex_plan,
+                          validate_functionapp, validate_is_flex_functionapp)
 
 
 def output_slots_in_table(slots):
@@ -318,6 +318,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_functionapp', exception_handler=ex_handler_factory(),
                          validator=validate_functionapp)
         g.custom_command('list-runtimes', 'list_function_app_runtimes')
+        g.custom_command('list-flexconsumption-runtimes', 'list_flexconsumption_runtimes')
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
@@ -325,6 +326,7 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_webapp')
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('list-consumption-locations', 'list_consumption_locations')
+        g.custom_command('list-flexconsumption-locations', 'list_flexconsumption_locations')
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
@@ -332,6 +334,10 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name="get_functionapp", setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
                                  custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk,
                                  validator=validate_functionapp_on_containerapp_update)
+
+    with self.command_group('functionapp deployment config') as g:
+        g.custom_command('set', 'update_deployment_configs', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_show_command('show', 'get_deployment_configs', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
 
     with self.command_group('functionapp config') as g:
         g.custom_command('set', 'update_site_configs_functionapp', validator=validate_functionapp_on_containerapp_site_config_set, exception_handler=ex_handler_factory())
@@ -341,6 +347,18 @@ def load_command_table(self, _):
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)
         g.custom_command('set', 'update_app_settings_functionapp', exception_handler=ex_handler_factory())
         g.custom_command('delete', 'delete_app_settings', exception_handler=ex_handler_factory())
+
+    with self.command_group('functionapp runtime config') as g:
+        g.custom_show_command('show', 'get_runtime_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_command('set', 'update_runtime_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+
+    with self.command_group('functionapp scale config') as g:
+        g.custom_show_command('show', 'get_scale_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_command('set', 'update_scale_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+
+    with self.command_group('functionapp scale config always-ready') as g:
+        g.custom_command('delete', 'delete_always_ready_settings', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_command('set', 'update_always_ready_settings', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
 
     with self.command_group('functionapp config hostname') as g:
         g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())
@@ -359,12 +377,12 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_managed_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
 
     with self.command_group('functionapp deployment source') as g:
-        g.custom_command('config-local-git', 'enable_local_git')
+        g.custom_command('config-local-git', 'enable_local_git', validator=validate_functionapp_on_flex_plan)
         g.custom_command('config-zip', 'enable_zip_deploy_functionapp')
-        g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory())
-        g.custom_command('sync', 'sync_site_repo', exception_handler=ex_handler_factory())
-        g.custom_show_command('show', 'show_source_control', exception_handler=ex_handler_factory())
-        g.custom_command('delete', 'delete_source_control', exception_handler=ex_handler_factory())
+        g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory(), validator=validate_functionapp_on_flex_plan)
+        g.custom_command('sync', 'sync_site_repo', exception_handler=ex_handler_factory(), validator=validate_functionapp_on_flex_plan)
+        g.custom_show_command('show', 'show_source_control', exception_handler=ex_handler_factory(), validator=validate_functionapp_on_flex_plan)
+        g.custom_command('delete', 'delete_source_control', exception_handler=ex_handler_factory(), validator=validate_functionapp_on_flex_plan)
         g.custom_command('update-token', 'update_git_token', exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp deployment user', webclient_sdk) as g:
@@ -372,8 +390,8 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_publishing_user')
 
     with self.command_group('functionapp deployment') as g:
-        g.custom_command('list-publishing-profiles', 'list_publish_profiles')
-        g.custom_command('list-publishing-credentials', 'list_publishing_credentials')
+        g.custom_command('list-publishing-profiles', 'list_publish_profiles', validator=validate_functionapp_on_flex_plan)
+        g.custom_command('list-publishing-credentials', 'list_publishing_credentials', validator=validate_functionapp_on_flex_plan)
 
     with self.command_group('functionapp cors') as g:
         g.custom_command('add', 'add_cors')
@@ -397,16 +415,16 @@ def load_command_table(self, _):
         g.custom_command('show-cd-url', 'show_container_cd_url')
 
     with self.command_group('functionapp config container') as g:
-        g.custom_command('set', 'update_container_settings_functionapp')
+        g.custom_command('set', 'update_container_settings_functionapp', validator=validate_functionapp_on_flex_plan)
         g.custom_command('delete', 'delete_container_settings', validator=validate_functionapp_on_containerapp_container_settings_delete)
-        g.custom_show_command('show', 'show_container_settings_functionapp')
+        g.custom_show_command('show', 'show_container_settings_functionapp', validator=validate_functionapp_on_flex_plan)
 
     with self.command_group('functionapp deployment slot') as g:
-        g.custom_command('list', 'list_slots', table_transformer=output_slots_in_table)
-        g.custom_command('delete', 'delete_slot')
-        g.custom_command('auto-swap', 'config_slot_auto_swap')
-        g.custom_command('swap', 'swap_slot', exception_handler=ex_handler_factory())
-        g.custom_command('create', 'create_functionapp_slot', exception_handler=ex_handler_factory())
+        g.custom_command('list', 'list_slots', table_transformer=output_slots_in_table, validator=validate_functionapp_on_flex_plan)
+        g.custom_command('delete', 'delete_slot', validator=validate_functionapp_on_flex_plan)
+        g.custom_command('auto-swap', 'config_slot_auto_swap', validator=validate_functionapp_on_flex_plan)
+        g.custom_command('swap', 'swap_slot', exception_handler=ex_handler_factory(), validator=validate_functionapp_on_flex_plan)
+        g.custom_command('create', 'create_functionapp_slot', exception_handler=ex_handler_factory(), validator=validate_functionapp_on_flex_plan)
 
     with self.command_group('functionapp keys') as g:
         g.custom_command('set', 'update_host_key')

@@ -1331,6 +1331,9 @@ examples:
     text: |
         az snapshot grant-access --duration-in-seconds 3600 --name MySnapshot --resource-group MyResourceGroup
     crafted: true
+  - name: Grant read access to a snapshot with specifying the file format.
+    text: |
+        az snapshot grant-access --duration-in-seconds 3600 --name MySnapshot --resource-group MyResourceGroup --file-format VHDX
 """
 
 helps['snapshot update'] = """

@@ -239,10 +239,19 @@ long-summary: >
 
 examples:
   - name: >
-      Trigger a Import from azure mysql single server.
+      Trigger an Import from azure mysql single server.
     text: >
         az mysql flexible-server import create --data-source-type mysql_single \\
           --data-source test-single-server --resource-group test-rg \\
+          --location northeurope --name testserver \\
+          --sku-name Standard_B1ms --tier Burstable --public-access 0.0.0.0 \\
+          --storage-size 32 --tags "key=value" --version 5.7 --high-availability ZoneRedundant \\
+          --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
+  - name: >
+      Trigger an Online Import from azure mysql single server.
+    text: >
+        az mysql flexible-server import create --data-source-type mysql_single \\
+          --data-source test-single-server --mode "Online" --resource-group test-rg \\
           --location northeurope --name testserver \\
           --sku-name Standard_B1ms --tier Burstable --public-access 0.0.0.0 \\
           --storage-size 32 --tags "key=value" --version 5.7 --high-availability ZoneRedundant \\
