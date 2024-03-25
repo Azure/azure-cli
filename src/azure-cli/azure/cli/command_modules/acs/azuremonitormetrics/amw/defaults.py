@@ -9,12 +9,14 @@ from azure.cli.command_modules.acs.azuremonitormetrics.responseparsers.amwlocati
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import RP_LOCATION_API
 
 
-def get_default_region(cmd):
+def get_default_region(cmd, clusetr_region):
     cloud_name = cmd.cli_ctx.cloud.name
     if cloud_name.lower() == 'azurechinacloud':
         raise "chinanorth3"
     if cloud_name.lower() == 'azureusgovernment':
         return "usgovvirginia"
+    if cloud_name.lower() == 'ussec' or cloud_name.lower() == 'usnat':
+        return clusetr_region
     return "eastus"
 
 
@@ -39,7 +41,7 @@ def get_default_mac_region(cmd, cluster_region, subscription):
     if len(supported_locations) > 0:
         return supported_locations[0]
     # default to public cloud
-    return get_default_region(cmd)
+    return get_default_region(cmd, cluster_region)
 
 
 def get_default_mac_name_and_region(cmd, cluster_region, subscription):
