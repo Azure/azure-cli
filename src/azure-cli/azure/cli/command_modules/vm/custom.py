@@ -4782,6 +4782,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         source = os_disk_image = data_disk_images = None
         if managed_image is not None:
             source = GalleryArtifactVersionFullSource(id=managed_image)
+        if virtual_machine is not None:
+            source = GalleryArtifactVersionFullSource(virtual_machine_id=virtual_machine)
         if os_snapshot is not None:
             os_disk_image = GalleryOSDiskImage(source=GalleryDiskImageSource(id=os_snapshot))
         if data_snapshot_luns and not data_snapshots:

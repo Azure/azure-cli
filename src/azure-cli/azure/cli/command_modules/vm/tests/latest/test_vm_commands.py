@@ -5802,7 +5802,8 @@ class VMGalleryImage(ScenarioTest):
             checks=[
                 self.check('location', resource_group_location),
                 self.check('name', self.kwargs['version1']),
-                self.check('provisioningState', 'Succeeded')
+                self.check('provisioningState', 'Succeeded'),
+                self.check('storageProfile.source.virtualMachineId', '{vm_id}')
             ]).get_output_in_json()['id']
 
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image2} '
@@ -6513,7 +6514,7 @@ class VMGalleryImage(ScenarioTest):
                      self.check('location', resource_group_location),
                      self.check('name', '{version}'),
                      self.check('provisioningState', 'Succeeded'),
-                     self.check('storageProfile.source.id', '{vm_id}'),
+                     self.check('storageProfile.source.virtualMachineId', '{vm_id}')
                  ])
         if self.is_live:
             time.sleep(30)
@@ -6529,7 +6530,7 @@ class VMGalleryImage(ScenarioTest):
                      self.check('location', resource_group_location),
                      self.check('name', '{version}'),
                      self.check('provisioningState', 'Succeeded'),
-                     self.check('storageProfile.source.id', '{vm_id}'),
+                     self.check('storageProfile.source.virtualMachineId', '{vm_id}'),
                  ])
         if self.is_live:
             time.sleep(30)
