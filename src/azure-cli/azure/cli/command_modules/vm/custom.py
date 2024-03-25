@@ -673,7 +673,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
                     public_network_access=None, accelerated_network=None, architecture=None,
-                    elastic_san_resource_id=None):
+                    elastic_san_resource_id=None, bandwidth_copy_speed=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -698,7 +698,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                                  image_reference=None,
                                  source_resource_id=source_disk or source_snapshot,
                                  storage_account_id=source_storage_account_id,
-                                 elastic_san_resource_id=elastic_san_resource_id)
+                                 elastic_san_resource_id=elastic_san_resource_id,
+                                 provisioned_bandwidth_copy_speed=bandwidth_copy_speed)
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')

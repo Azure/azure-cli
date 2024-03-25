@@ -240,6 +240,8 @@ def load_arguments(self, _):
         c.argument('elastic_san_resource_id', min_api='2023-04-02',
                    options_list=['--elastic-san-resource-id', '--elastic-san-id'],
                    help='This is the ARM id of the source elastic san volume snapshot.')
+        c.argument('bandwidth_copy_speed', min_api='2023-10-02',
+                   help='If this field is set on a snapshot and createOption is CopyStart, the snapshot will be copied at a quicker speed.', arg_type=get_enum_type(["None", "Enhanced"]))
     # endregion
 
     # region Images
