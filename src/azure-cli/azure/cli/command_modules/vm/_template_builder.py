@@ -1447,11 +1447,15 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
             }
         }
 
-    if security_posture_reference_id or security_posture_reference_exclude_extensions:
+    if security_posture_reference_id:
         virtual_machine_profile['securityPostureReference'] = {
             'id': security_posture_reference_id,
-            'excludeExtensions': security_posture_reference_exclude_extensions
         }
+
+    if security_posture_reference_exclude_extensions:
+        security_posture_reference = virtual_machine_profile.get('securityPostureReference', {})
+        security_posture_reference['excludeExtensions'] = security_posture_reference_exclude_extensions
+        virtual_machine_profile['securityPostureReference'] = security_posture_reference
 
     if virtual_machine_profile:
         vmss_properties['virtualMachineProfile'] = virtual_machine_profile
