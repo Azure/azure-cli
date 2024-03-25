@@ -4659,8 +4659,8 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None,
                          hyper_v_generation='V1', features=None, architecture=None):
     logger.warning(
-        "Please note that in the future, the default Hyper-V generation will be changed from V1 to V2 and "
-        "Security Type is set to “TrustedLaunchSuppoted” as the default behavior."
+        "Starting Build (May) 2024, \"az sig image-definition create\" command will use the new default values "
+        "Hyper-V Generation: V2 and SecurityType: TrustedLaunchSuppoted."
     )
 
     # pylint: disable=line-too-long
