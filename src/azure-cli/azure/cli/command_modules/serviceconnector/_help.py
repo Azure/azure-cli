@@ -12,7 +12,8 @@ from ._resource_config import (
     TARGET_RESOURCES,
     TARGET_RESOURCES_PARAMS,
     SUPPORTED_AUTH_TYPE,
-    LOCAL_CONNECTION_PARAMS
+    LOCAL_CONNECTION_PARAMS,
+    USER_IDENTITY_ID
 )
 
 from ._utils import should_load_source
@@ -53,7 +54,6 @@ def get_auth_info_params(auth_type):
         AUTH_TYPE.SystemIdentity: '--system-identity',
         AUTH_TYPE.ServicePrincipalSecret: '--service-principal client-id=XX object-id=XX secret=XX',
         AUTH_TYPE.UserIdentity: '--user-identity client-id=XX subs-id=XX',
-        AUTH_TYPE.WorkloadIdentity: '--workload-identity client-id=XX subs-id=XX',
         AUTH_TYPE.UserAccount: '--user-account',
     }
 
@@ -220,7 +220,10 @@ for source in SOURCE_RESOURCES:
 
         # auth info params
         auth_types = SUPPORTED_AUTH_TYPE.get(source).get(target)
-        auth_params = get_auth_info_params(auth_types[0])
+        if auth_types[0] == AUTH_TYPE.WorkloadIdentity:
+            auth_params = '--workload-identity {}'.format(USER_IDENTITY_ID)
+        else:
+            auth_params = get_auth_info_params(auth_types[0])
 
         # auth info params in help message
         secret_param = '''
@@ -273,12 +276,12 @@ for source in SOURCE_RESOURCES:
         ''' if AUTH_TYPE.UserIdentity in auth_types else ''
         workload_identity_param = '''
             - name: --workload-identity
-              short-summary: The Microsoft Entra Workload ID with AKS.
+              short-summary: The user-assigned managed identity used to create workload identity federation.
               long-summary: |
-                Usage: --workload-identity client-id=XX subs-id=XX
+                Usage: --workload-identity <user-identity-resource-id>
 
-                client-id      : Required. Client id of the workload identity, i.e., a user assigned identity.
-                subs-id        : Required. Subscription id of the workload identity, i.e., a user assigned identity.
+                user-identity-resource-id: Required. The resource id of the user assigned identity.
+                Please DO NOT use AKS control plane identity and kubelet identity which is not supported by federated identity credential.
         ''' if AUTH_TYPE.WorkloadIdentity in auth_types else ''
         service_principal_param = '''
             - name: --service-principal

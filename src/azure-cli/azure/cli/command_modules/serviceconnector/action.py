@@ -229,20 +229,21 @@ class AddServicePrincipalAuthInfo(argparse.Action):
 
 class AddWorkloadIdentityAuthInfo(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string, namespace.command)
+        action = self.get_action(values, option_string)
         # convert into user identity
         namespace.user_identity_auth_info = action
 
-    def get_action(self, values, option_string, command_name):  # pylint: disable=no-self-use
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:
             # --workload-identity <user-identity-resource-id>
             properties = defaultdict(list)
             if len(values) != 1:
-                raise ValidationError('Invalid number of values for --workload-identity <USER-IDENTITY-RESOURCE-ID>: expected 1, actual {}'.format(len(values)))
+                raise ValidationError(
+                    'Invalid number of values for --workload-identity <USER-IDENTITY-RESOURCE-ID>')
             properties['user-identity-resource-id'] = values[0]
         except ValueError:
             raise ValidationError('Usage error: {} [VALUE]'.format(option_string))
-        
+
         d = {}
         if 'user-identity-resource-id' in properties:
             from ._utils import run_cli_cmd
@@ -253,7 +254,8 @@ class AddWorkloadIdentityAuthInfo(argparse.Action):
             else:
                 raise ValidationError('Invalid user identity resource ID.')
         else:
-            raise ValidationError('Required values missing for parameter --workload-identity: user-identity-resource-id')
+            raise ValidationError('Required values missing for parameter --workload-identity: \
+                                  user-identity-resource-id')
 
         d['auth_type'] = 'userAssignedIdentity'
         return d
