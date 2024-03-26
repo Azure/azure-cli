@@ -16,6 +16,7 @@ from urllib.request import urlretrieve
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.commands.constants import OUTPUT_WITH_SECRET
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms import postgresql, mysql, mariadb
@@ -178,9 +179,7 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
     database_name = DEFAULT_DB_NAME
     create_database(cmd, resource_group_name, server_name, database_name, engine_name)
 
-    logger.warning('The output includes secrets that you must protect. Be sure that you do not include these secrets in your '
-                   'source control. Also verify that no secrets are present in the logs of your command or script. '
-                   'For additional information, see http://aka.ms/clisecrets.')
+    logger.warning(OUTPUT_WITH_SECRET)
 
     return form_response(server_result, administrator_login_password if administrator_login_password is not None else '*****',
                          host=host,

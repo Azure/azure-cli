@@ -16,6 +16,7 @@ from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.commands.constants import OUTPUT_WITH_SECRET
 from azure.cli.command_modules.mysql.random.generate import generate_username
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.cli.core.local_context import ALL
@@ -446,9 +447,7 @@ def flexible_server_create(cmd, client,
 
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
-    logger.warning('The output includes secrets that you must protect. Be sure that you do not include these secrets in your '
-                   'source control. Also verify that no secrets are present in the logs of your command or script. '
-                   'For additional information, see http://aka.ms/clisecrets.')
+    logger.warning(OUTPUT_WITH_SECRET)
 
     return _form_response(user, sku, loc, server_id, host, version,
                           administrator_login_password if administrator_login_password is not None else '*****',
@@ -658,9 +657,7 @@ def flexible_server_import_create(cmd, client,
 
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
-    logger.warning('The output includes secrets that you must protect. Be sure that you do not include these secrets in your '
-                   'source control. Also verify that no secrets are present in the logs of your command or script. '
-                   'For additional information, see http://aka.ms/clisecrets.')
+    logger.warning(OUTPUT_WITH_SECRET)
 
     return _form_response(user, sku, loc, server_id, host, version,
                           administrator_login_password if administrator_login_password is not None else '*****',
