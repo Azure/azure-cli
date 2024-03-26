@@ -11,7 +11,7 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError)
 from azure.mgmt.cdn.models import SkuName
 
 from collections import namedtuple
-
+from azure.core.exceptions import HttpResponseError
 
 class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
@@ -50,6 +50,35 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         rule_list_checks = [JMESPathCheck('length(@)', 0)]
         self.afd_rule_list_cmd(resource_group, rule_set_name, profile_name, checks=rule_list_checks)
+
+        rule_name = 'r0'
+        rule_checks = [JMESPathCheck('order', 1),
+                       JMESPathCheck('name', rule_name),
+                       JMESPathCheck('matchProcessingBehavior', "Stop"),
+                       JMESPathCheck('length(conditions)', 0),
+                       JMESPathCheck('length(actions)', 1),
+                       JMESPathCheck('actions[0].name', "RouteConfigurationOverride"),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.queryStringCachingBehavior', 'UseQueryString'),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.cacheBehavior', 'HonorOrigin'),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.isCompressionEnabled', 'Disabled'),
+                       JMESPathCheck('actions[0].parameters.originGroupOverride', None)]
+
+        self.afd_rule_add_cmd(resource_group,
+                              rule_set_name,
+                              rule_name,
+                              profile_name,
+                              options='--match-processing-behavior Stop --action-name RouteConfigurationOverride --enable-caching True --enable-compression False --query-string-caching-behavior UseQueryString --cache-behavior HonorOrigin --order 1')
+
+        self.afd_rule_show_cmd(resource_group,
+                               rule_set_name,
+                               rule_name,
+                               profile_name,
+                               checks=rule_checks)
+
+        self.afd_rule_delete_cmd(resource_group,
+                                 rule_set_name,
+                                 rule_name,
+                                 profile_name)
 
         rule_name = 'r1'
         rule_checks = [JMESPathCheck('order', 1),
@@ -396,7 +425,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
             if condition.Selector is not None:
                 options += f" --selector {condition.Selector}"
 
-            with self.assertRaises(InvalidArgumentValueError):
+            with self.assertRaises(HttpResponseError):
                 self.afd_rule_add_cmd(resource_group,
                                     rule_set_name,
                                     rule_name,
@@ -438,7 +467,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
             if condition.Selector is not None:
                 options += f" --selector {condition.Selector}"
 
-            with self.assertRaises(InvalidArgumentValueError):
+            with self.assertRaises(HttpResponseError):
                 self.afd_rule_add_cmd(resource_group,
                                     rule_set_name,
                                     rule_name,
@@ -534,7 +563,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                               profile_name,
                               options='--match-variable UrlFileExtension --operator Contains --match-values exe apk '
                                       '--action-name UrlRedirect --redirect-protocol Https --redirect-type Moved --order 2 '
-                                      '--custom-host "www.contoso.com" --custom-path "/path1" --custom-querystring "a=b" --custom-fragment fg1')
+                                      '--custom-hostname "www.contoso.com" --custom-path "/path1" --custom-querystring "a=b" --custom-fragment fg1')
         self.afd_rule_show_cmd(resource_group,
                                 rule_set_name,
                                 rule_name,

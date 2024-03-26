@@ -19,7 +19,7 @@ from azure.cli.command_modules.acs._consts import (
 )
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._roleassignments import add_role_assignment
-from azure.cli.core.azclierror import AzCLIError, ClientRequestError, CLIError, InvalidArgumentValueError
+from azure.cli.core.azclierror import AzCLIError, CLIError, InvalidArgumentValueError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import send_raw_request
 from azure.core.exceptions import HttpResponseError
@@ -163,12 +163,36 @@ AzureFairfaxRegionToOmsRegionMap = {
 }
 
 
+# mapping for azure us nat cloud
+AzureUSNatLocationToOmsRegionCodeMap = {
+    "usnatwest": "USNW",
+    "usnateast": "USNE",
+}
+
+AzureUSNatRegionToOmsRegionMap = {
+    "usnatwest": "usnatwest",
+    "usnateast": "usnateast",
+}
+
+# mapping for azure us sec cloud
+AzureUSSecLocationToOmsRegionCodeMap = {
+    "usseceast": "USSE",
+    "ussecwest": "USSW",
+}
+
+AzureUSSecRegionToOmsRegionMap = {
+    "usseceast": "usseceast",
+    "ussecwest": "ussecwest",
+}
+
+
 # pylint: disable=too-many-locals
 def ensure_default_log_analytics_workspace_for_monitoring(
     cmd, subscription_id, resource_group_name
 ):
     rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
     cloud_name = cmd.cli_ctx.cloud.name
+    workspace_region_code = "EUS"
 
     if cloud_name.lower() == "azurecloud":
         workspace_region = AzureCloudRegionToOmsRegionMap.get(
@@ -191,6 +215,21 @@ def ensure_default_log_analytics_workspace_for_monitoring(
         workspace_region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(
             workspace_region, "USGV"
         )
+    elif cloud_name.lower() == "usnat":
+        workspace_region = AzureUSNatRegionToOmsRegionMap.get(
+            rg_location, "usnatwest"
+        )
+        workspace_region_code = AzureUSNatLocationToOmsRegionCodeMap.get(
+            workspace_region, "USNW"
+        )
+    elif cloud_name.lower() == "ussec":
+        workspace_region = AzureUSSecRegionToOmsRegionMap.get(
+            rg_location, "ussecwest"
+        )
+        workspace_region_code = AzureUSSecLocationToOmsRegionCodeMap.get(
+            workspace_region, "USSW"
+        )
+
     else:
         logger.error(
             "AKS Monitoring addon not supported in cloud : %s", cloud_name
@@ -384,32 +423,6 @@ def ensure_container_insights_for_monitoring(
                     "name"
                 ]
 
-            # check if region supports DCRs and DCR-A
-            for _ in range(3):
-                try:
-                    feature_check_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                        f"/subscriptions/{cluster_subscription}/providers/Microsoft.Insights?api-version=2020-10-01"
-                    r = send_raw_request(cmd.cli_ctx, "GET", feature_check_url)
-                    error = None
-                    break
-                except AzCLIError as e:
-                    error = e
-            else:
-                raise error
-            json_response = json.loads(r.text)
-            for resource in json_response["resourceTypes"]:
-                if resource["resourceType"].lower() == "datacollectionrules":
-                    region_ids = map(
-                        lambda x: region_names_to_id[x], resource["locations"])
-                    if location not in region_ids:
-                        raise ClientRequestError(
-                            f"Data Collection Rules are not supported for LA workspace region {location}")
-                if resource["resourceType"].lower() == "datacollectionruleassociations":
-                    region_ids = map(
-                        lambda x: region_names_to_id[x], resource["locations"])
-                    if cluster_region not in region_ids:
-                        raise ClientRequestError(
-                            f"Data Collection Rule Associations are not supported for cluster region {cluster_region}")
             dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
                 f"{dcr_resource_id}?api-version=2022-06-01"
             # get existing tags on the container insights extension DCR if the customer added any
@@ -421,8 +434,16 @@ def ensure_container_insights_for_monitoring(
             if data_collection_settings is not None:
                 dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
                 validate_data_collection_settings(dataCollectionSettings)
+                dataCollectionSettings.setdefault("enableContainerLogV2", True)
                 extensionSettings["dataCollectionSettings"] = dataCollectionSettings
                 cistreams = dataCollectionSettings["streams"]
+            else:
+                # If data_collection_settings is None, set default dataCollectionSettings
+                dataCollectionSettings = {
+                    "enableContainerLogV2": True
+                }
+                extensionSettings["dataCollectionSettings"] = dataCollectionSettings
+
             # create the DCR
             dcr_creation_body_without_syslog = json.dumps(
                 {

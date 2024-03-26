@@ -783,6 +783,8 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         export_separator_features_file_path = os.path.join(TEST_DIR, 'export_separator_features.json')
         import_separator_features_file_path = os.path.join(TEST_DIR, 'import_separator_features.json')
         import_features_alt_syntax_file_path = os.path.join(TEST_DIR, 'import_features_alt_syntax.json')
+        import_features_random_conditions_file_path = os.path.join(TEST_DIR, 'import_features_random_conditions.json')
+        import_features_invalid_requirement_type_file_path = os.path.join(TEST_DIR, 'import_features_invalid_requirement_type.json')
 
         self.kwargs.update({
             'label': 'KeyValuesWithFeatures',
@@ -885,7 +887,31 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
+
+        # Support including all properties in the feature flag conditions
+        self.kwargs.update({
+            'imported_file_path': import_features_random_conditions_file_path,
+            'label': 'RandomConditionsTest',
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+        with open(import_features_random_conditions_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
         os.remove(exported_file_path)
+
+        self.kwargs.update({
+            'imported_file_path': import_features_invalid_requirement_type_file_path
+        })
+
+        # Invalid requirement type should fail import
+        with self.assertRaisesRegex(CLIError, "Feature 'Timestamp' must have an any/all requirement type"):
+            self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2008,19 +2034,23 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                          self.check('state', default_state),
                          self.check('conditions', default_conditions)])
 
-        # update an existing feature flag entry (we can only update description)
+        # update an existing feature flag entry
         updated_entry_description = "Beta Testing Feature Flag"
+        updated_requirement_type =  FeatureFlagConstants.REQUIREMENT_TYPE_ANY
+
         self.kwargs.update({
-            'description': updated_entry_description
+            'description': updated_entry_description,
+            'requirement_type': updated_requirement_type
         })
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --description "{description}" -y',
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --description "{description}" --requirement-type {requirement_type} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', entry_feature),
                          self.check('key', internal_feature_key),
                          self.check('description', updated_entry_description),
                          self.check('label', entry_label),
                          self.check('state', default_state),
-                         self.check('conditions', default_conditions)])
+                         self.check('conditions.client_filters', []),
+                         self.check('conditions.requirement_type', updated_requirement_type)])
 
         # add a new label - this should create a new KV in the config store
         updated_label = 'v2'
@@ -2491,8 +2521,8 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
                                          self.check('label', entry_label),
                                          self.check('state', default_state)]).get_output_in_json()
 
-        conditions = response_dict.get('conditions')
-        list_filters = conditions.get('client_filters')
+        conditions = response_dict.get(FeatureFlagConstants.CONDITIONS)
+        list_filters = conditions.get(FeatureFlagConstants.CLIENT_FILTERS)
         assert len(list_filters) == 3
 
         # Enable feature
@@ -2954,7 +2984,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
     def test_azconfig_snapshot_mgmt(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='SnapshotStore', length=24)
         snapshot_name = "TestSnapshot"
-        store_location = 'eastus2euap'
+        store_location = 'francecentral'
         sku = 'standard'
 
         self.kwargs.update({

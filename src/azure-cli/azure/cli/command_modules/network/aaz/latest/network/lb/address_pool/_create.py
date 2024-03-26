@@ -90,6 +90,7 @@ class Create(AAZCommand):
             options=["--sync-mode"],
             arg_group="Properties",
             help="Backend address synchronous mode for the backend pool",
+            is_preview=True,
             enum={"Automatic": "Automatic", "Manual": "Manual"},
         )
         _args_schema.tunnel_interfaces = AAZListArg(
@@ -150,25 +151,16 @@ class Create(AAZCommand):
             help="Traffic type of gateway load balancer tunnel interface.",
             enum={"External": "External", "Internal": "Internal", "None": "None"},
         )
-        return cls._args_schema
 
-    _args_sub_resource_create = None
+        # define Arg Group "VirtualNetwork"
 
-    @classmethod
-    def _build_args_sub_resource_create(cls, _schema):
-        if cls._args_sub_resource_create is not None:
-            _schema.id = cls._args_sub_resource_create.id
-            return
-
-        cls._args_sub_resource_create = AAZObjectArg()
-
-        sub_resource_create = cls._args_sub_resource_create
-        sub_resource_create.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
+        _args_schema = cls._args_schema
+        _args_schema.vnet_id = AAZStrArg(
+            options=["--vnet-id"],
+            arg_group="VirtualNetwork",
+            help="A reference to a virtual network.",
         )
-
-        _schema.id = cls._args_sub_resource_create.id
+        return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
@@ -290,6 +282,7 @@ class Create(AAZCommand):
                 properties.set_prop("location", AAZStrType, ".location")
                 properties.set_prop("syncMode", AAZStrType, ".sync_mode")
                 properties.set_prop("tunnelInterfaces", AAZListType, ".tunnel_interfaces")
+                properties.set_prop("virtualNetwork", AAZObjectType)
 
             load_balancer_backend_addresses = _builder.get(".properties.loadBalancerBackendAddresses")
             if load_balancer_backend_addresses is not None:
@@ -331,6 +324,10 @@ class Create(AAZCommand):
                 _elements.set_prop("protocol", AAZStrType, ".protocol")
                 _elements.set_prop("type", AAZStrType, ".type")
 
+            virtual_network = _builder.get(".properties.virtualNetwork")
+            if virtual_network is not None:
+                virtual_network.set_prop("id", AAZStrType, ".vnet_id")
+
             return self.serialize_content(_content_value)
 
         def on_200_201(self, session):
@@ -356,12 +353,6 @@ class Create(AAZCommand):
 
 class _CreateHelper:
     """Helper class for Create"""
-
-    @classmethod
-    def _build_schema_sub_resource_create(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("id", AAZStrType, ".id")
 
     _schema_application_security_group_read = None
 

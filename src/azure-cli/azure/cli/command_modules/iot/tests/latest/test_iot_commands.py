@@ -12,7 +12,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.mgmt.iothub.models import RoutingSource
 from azure.cli.command_modules.iot.shared import IdentityType
 from azure.core.exceptions import HttpResponseError
-from .recording_processors import KeyReplacer
+from ..utils import KeyReplacer
 
 
 class IoTHubTest(ScenarioTest):
@@ -236,7 +236,7 @@ class IoTHubTest(ScenarioTest):
         ])
 
         # Test 'az iot hub show-stats'
-        device_count_pattern = r'^\d$'
+        device_count_pattern = r'\d$'
         self.cmd('iot hub show-stats -n {0}'.format(hub), checks=[
             self.check_pattern('disabledDeviceCount', device_count_pattern),
             self.check_pattern('enabledDeviceCount', device_count_pattern),

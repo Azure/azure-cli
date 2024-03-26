@@ -112,7 +112,7 @@ class WebappBasicE2ETest(ScenarioTest):
         # show publish profile info
         result = self.cmd('webapp deployment list-publishing-profiles -g {} -n {}'.format(
             resource_group, webapp_name)).get_output_in_json()
-        self.assertTrue(result[1]['publishUrl'].startswith('ftp://'))
+        self.assertTrue(result[1]['publishUrl'].startswith('ftps://'))
         self.cmd('webapp stop -g {} -n {}'.format(resource_group, webapp_name))
         self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('state', 'Stopped'),
@@ -146,10 +146,10 @@ class WebappQuickCreateTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
-        self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
+        self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '~14'),
+            JMESPathCheck('[0].value', '~16'),
         ])
 
     @ResourceGroupPreparer(name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -160,14 +160,14 @@ class WebappQuickCreateTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|16LTS"'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
-        self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
+        self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '~14'),
+            JMESPathCheck('[0].value', '~16'),
         ])
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "dotnet:6"'.format(
             resource_group, webapp_name_2, plan)).get_output_in_json()
-        self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
+        self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_win_webapp_quick_create_cd(self, resource_group):
@@ -539,25 +539,25 @@ class AppServicePlanScenarioTest(ScenarioTest):
         self.cmd('appservice plan list -g {}'.format(resource_group),
                  checks=[JMESPathCheck('length(@)', 0)])
 
-    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(location="eastus")
     def test_zone_redundant_plan(self, resource_group):
         plan = self.create_random_name('plan', 24)
         self.cmd(
-            'appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
+            'appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan, "eastus"))
 
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('properties.zoneRedundant', True), JMESPathCheck('properties.numberOfWorkers', 3)])
 
         # test with unsupported SKU
         plan2 = self.create_random_name('plan', 24)
-        self.cmd('appservice plan create -g {} -n {} -l {} -z --sku FREE'.format(resource_group, plan2, LINUX_ASP_LOCATION_WEBAPP), expect_failure=True)
+        self.cmd('appservice plan create -g {} -n {} -l {} -z --sku FREE'.format(resource_group, plan2, "eastus"), expect_failure=True)
 
         # test with unsupported location
         self.cmd('appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan2, WINDOWS_ASP_LOCATION_WEBAPP), expect_failure=True)
 
         # ensure non zone redundant
         plan = self.create_random_name('plan', 24)
-        self.cmd('functionapp plan create -g {} -n {} -l {} --sku FREE'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
+        self.cmd('functionapp plan create -g {} -n {} -l {} --sku FREE'.format(resource_group, plan, "eastus"))
 
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[JMESPathCheck('properties.zoneRedundant', False)])
 
@@ -580,12 +580,14 @@ class WebappElasticScaleTest(ScenarioTest):
 
         self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
             JMESPathCheck("siteConfig.minimumElasticInstanceCount", 1),
-            JMESPathCheck("siteConfig.preWarmedInstanceCount", 1)
+            JMESPathCheck("siteConfig.preWarmedInstanceCount", 1),
+            JMESPathCheck("siteConfig.elasticWebAppScaleLimit", 0) # unenabled by default
         ])
-        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {} --prewarmed-instance-count {}".format(resource_group, app, 3, 5))
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {} --prewarmed-instance-count {} --elastic-web-app-scale-limit {}".format(resource_group, app, 3, 5, 8))
         self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
             JMESPathCheck("siteConfig.minimumElasticInstanceCount", 3),
-            JMESPathCheck("siteConfig.preWarmedInstanceCount", 5)
+            JMESPathCheck("siteConfig.preWarmedInstanceCount", 5),
+            JMESPathCheck("siteConfig.elasticWebAppScaleLimit", 8)
         ])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -632,13 +634,50 @@ class WebappElasticScaleTest(ScenarioTest):
             JMESPathCheck("properties.maximumElasticWorkerCount", 4)
         ])
 
-        # ensure we can't set the prewarmed instance count too high
+        # ensure we can't set the minimum elastic instance count too high
         self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 5), expect_failure=True)
 
-        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 4))
+        # also ensure we can't set the minimum elastic instance count above elastic scale limit for the web app (if set)
+        self.cmd("webapp update -g {} -n {} --elastic-web-app-scale-limit {}".format(resource_group, app, 2))
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 3), expect_failure=True)
 
+        # successful testing
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 2))
         self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
-            JMESPathCheck("siteConfig.minimumElasticInstanceCount", 4)
+            JMESPathCheck("siteConfig.minimumElasticInstanceCount", 2)
+        ])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_elastic_scale_elastic_web_app_scale_limit(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        app = self.create_random_name('app', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+
+        self.cmd("webapp create -g {} -n {} --plan {}".format(resource_group, app, plan))
+
+        # ensure we can't set this without the ASP having elastic scale enabled
+        self.cmd("webapp update -g {} -n {} --elastic-web-app-scale-limit {}".format(resource_group, app, 5), expect_failure=True)
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true --max-elastic-worker-count {}'.format(resource_group, plan, 4))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 4)
+        ])
+
+        # ensure we can't set the maximum scale instance count too high
+        self.cmd("webapp update -g {} -n {} --elastic-web-app-scale-limit {}".format(resource_group, app, 6), expect_failure=True)
+
+        # also ensure we can't set the maximum scale instance count too low
+        self.cmd("webapp update -g {} -n {} --elastic-web-app-scale-limit {}".format(resource_group, app, -3), expect_failure=True)
+
+        # ensure we can't set the max instance count lower than the min instance count
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 3))
+        self.cmd("webapp update -g {} -n {} --elastic-web-app-scale-limit {}".format(resource_group, app, 2), expect_failure=True)
+
+        # ensure we can properly set the max instance count
+        self.cmd("webapp update -g {} -n {} --elastic-web-app-scale-limit {}".format(resource_group, app, 4))
+        self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
+            JMESPathCheck("siteConfig.elasticWebAppScaleLimit", 4)
         ])
 
 class WebappConfigureTest(ScenarioTest):
@@ -735,7 +774,8 @@ class WebappConfigureTest(ScenarioTest):
         ])
         # add
         self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name name '
-                  '--share-name sharename --access-key key --mount-path /path/to/mount').format(resource_group, linux_webapp))
+                  '--share-name sharename --access-key key --mount-path /path/to/mount')
+                  .format(resource_group, linux_webapp)).assert_with_checks([(JMESPathCheck("[?name=='Id']|[0].value.accessKey", None))])
         self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck('length(@)', 1),
             JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
@@ -745,7 +785,7 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
         # update
         self.cmd('webapp config storage-account update -g {} -n {} --custom-id Id --mount-path /different/path'
-                 .format(resource_group, linux_webapp))
+                 .format(resource_group, linux_webapp)).assert_with_checks([(JMESPathCheck("[?name=='Id']|[0].value.accessKey", None))])
         self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("length(@)", 1),
             JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
@@ -763,7 +803,11 @@ class WebappConfigureTest(ScenarioTest):
 
         # site connection string tests
         self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 '
-                 '--slot-settings c3=conn3'.format(resource_group, linux_webapp))
+                 '--slot-settings c3=conn3'
+                 .format(resource_group, linux_webapp)).assert_with_checks([
+                     JMESPathCheck("[?name=='c1']|[0].value", None),
+                     JMESPathCheck("[?name=='c2']|[0].value", None)
+                     ])
         self.cmd('webapp config connection-string list -g {} -n {}'
                  .format(resource_group, linux_webapp)).assert_with_checks([
                      JMESPathCheck('length([])', 3),
@@ -773,7 +817,7 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck("[?name=='c2']|[0].slotSetting", False),
                      JMESPathCheck("[?name=='c3']|[0].slotSetting", True)])
         self.cmd('webapp config connection-string delete -g {} -n {} --setting-names c1 c3'
-                 .format(resource_group, linux_webapp))
+                 .format(resource_group, linux_webapp)).assert_with_checks([JMESPathCheck("[?name=='c2']|[0].value", None)])
         self.cmd('webapp config connection-string list -g {} -n {}'
                  .format(resource_group, linux_webapp)).assert_with_checks([
                      JMESPathCheck('length([])', 1),
@@ -783,7 +827,11 @@ class WebappConfigureTest(ScenarioTest):
         test_json = os.path.join(TEST_DIR, 'test.json')
         print(test_json)
         self.cmd('webapp config connection-string set -g {} -n {} --settings "@{}"'
-                 .format(resource_group, linux_webapp, test_json))
+                 .format(resource_group, linux_webapp, test_json)).assert_with_checks([
+                     JMESPathCheck("[?name=='c1']|[0].value", None),
+                     JMESPathCheck("[?name=='c2']|[0].value", None),
+                     JMESPathCheck("[?name=='c3']|[0].value", None),
+                     JMESPathCheck("[?name=='c4']|[0].value", None),])
         self.cmd('webapp config connection-string list -g {} -n {}'
                  .format(resource_group, linux_webapp)).assert_with_checks([
                      JMESPathCheck('length([])', 4),
@@ -1410,7 +1458,11 @@ class WebappSlotScenarioTest(ScenarioTest):
                      JMESPathCheck("[?name=='s3']|[0].value", None)
                      ])
 
-        self.cmd('webapp config connection-string set -g {} -n {} -t mysql --slot {} --settings c1=connection1 --slot-settings c2=connection2'.format(resource_group, webapp, slot2))
+        self.cmd('webapp config connection-string set -g {} -n {} -t mysql --slot {} --settings c1=connection1 --slot-settings c2=connection2'
+                 .format(resource_group, webapp, slot2)).assert_with_checks([
+                     JMESPathCheck("[?name=='c1']|[0].value", None),
+                     JMESPathCheck("[?name=='c2']|[0].value", None)
+                 ])
         # verify we can swap with non production slot
         self.cmd('webapp deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(
             resource_group, webapp, slot, slot2))
@@ -1927,6 +1979,44 @@ class WebappUpdateTest(ScenarioTest):
         ])
 
 
+class BasicAuthScenarioTest(LiveScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_update(self, resource_group):
+        webapp_name = self.create_random_name('webapp-basicAuth-test', 40)
+        plan_name = self.create_random_name('webapp-basicAuth-plan', 40)
+        self.cmd('appservice plan create -g {} -n {} --sku S1'
+                 .format(resource_group, plan_name))
+
+        namespace = 'Microsoft.Web'
+        resource_type = 'basicPublishingCredentialsPolicies'
+
+        # webapp create with basic_auth enabled
+        basic_auth = 'enabled'
+        self.cmd('webapp create -g {} -n {} --plan {} --basic-auth {}'
+                 .format(resource_group, webapp_name, plan_name, basic_auth))
+        self.cmd('resource show -g {} --name ftp --namespace {} --resource-type {} --parent sites/{}'
+                 .format(resource_group, namespace, resource_type, webapp_name)).assert_with_checks([
+                     JMESPathCheck('properties.allow', True)
+                 ])
+        self.cmd('resource show -g {} --name scm --namespace {} --resource-type {} --parent sites/{}'
+                 .format(resource_group, namespace, resource_type, webapp_name)).assert_with_checks([
+                     JMESPathCheck('properties.allow', True)
+                 ])
+
+        # webapp update with basic_auth enabled
+        basic_auth = 'disabled'
+        self.cmd('webapp update -g {} -n {} --basic-auth {}'
+                 .format(resource_group, webapp_name, basic_auth))
+        self.cmd('resource show -g {} --name ftp --namespace {} --resource-type {} --parent sites/{}'
+                 .format(resource_group, namespace, resource_type, webapp_name)).assert_with_checks([
+                     JMESPathCheck('properties.allow', False)
+                 ])
+        self.cmd('resource show -g {} --name scm --namespace {} --resource-type {} --parent sites/{}'
+                 .format(resource_group, namespace, resource_type, webapp_name)).assert_with_checks([
+                     JMESPathCheck('properties.allow', False)
+                 ])
+
+
 class WebappZipDeployScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_zipDeploy', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_deploy_zip(self, resource_group):
@@ -2195,6 +2285,48 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
             self.check('[0].roleDefinitionName', role)
         ])
 
+class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='webapp_hyperv_acr_use_identity',location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_hyperv_acr_use_identity(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-hyperv', length=24)
+        plan = self.create_random_name(prefix='plan-hyperv', length=24)
+
+        self.cmd('appservice plan create -g {} -n {} --hyper-v --sku P1V3'.format(resource_group, plan))
+
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-container-image-name "DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest" --assign-identity --acr-use-identity'
+                 .format(resource_group, webapp_name, plan), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('windowsFxVersion',
+                          "DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"),
+            JMESPathCheck('linuxFxVersion', ""),
+            JMESPathCheck('acrUseManagedIdentityCreds', True)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='webapp_linux_acr_use_identity',location=LINUX_ASP_LOCATION_WEBAPP)
+    def test_webapp_linux_acr_use_identity(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-linux', length=24)
+        plan = self.create_random_name(prefix='plan-linux', length=24)
+
+        self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|16-lts" --assign-identity --acr-use-identity'
+                 .format(resource_group, webapp_name, plan, TEST_REPO_URL), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('windowsFxVersion', None),
+            JMESPathCheck('linuxFxVersion', "NODE|16-lts"),
+            JMESPathCheck('acrUseManagedIdentityCreds', True)
+        ])
 
 class WebappNetworkConnectionTests(ScenarioTest):
     @AllowLargeResponse()
@@ -2688,11 +2820,97 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
         
         self.cmd(f'webapp deploy -g {resource_group} -n {webapp_name} --src-url {war_url} --type war').assert_with_checks([
-            JMESPathCheck('status', 4),
             JMESPathCheck('deployer', 'OneDeploy'),
             JMESPathCheck('message', 'OneDeploy'),
-            JMESPathCheck('complete', True)
         ])
+
+
+class TrackRuntimeStatusTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
+    def test_webapp_track_runtimestatus_runtimesucessful(self, resource_group):
+        webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
+        plan_name = self.create_random_name('webapp-runtimestatus-plan', 40)
+        war_file = os.path.join(TEST_DIR, 'data', 'sample.war')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+        self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --async --track-status'.format(resource_group, webapp_name, war_file)).assert_with_checks([
+            JMESPathCheck('resourceGroup', resource_group),
+            JMESPathCheck('properties.errors', None),
+            JMESPathCheck('properties.numberOfInstancesFailed', '0'),
+            JMESPathCheck('properties.numberOfInstancesInProgress', '0'),
+            JMESPathCheck('properties.numberOfInstancesSuccessful', '1'),
+            JMESPathCheck('properties.status', 'RuntimeSuccessful'),
+            JMESPathCheck('type', 'Microsoft.Web/sites/deploymentStatus'),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
+    def test_webapp_track_runtimestatus_buildfailed(self, resource_group):
+        webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
+        plan_name = self.create_random_name('webapp-runtimestatus-plan', 40)
+        zip_file = os.path.join(TEST_DIR, 'data', 'nodebuildfailed.zip')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
+        with self.assertRaisesRegexp(CLIError, "Deployment failed because the build process failed"):
+            self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async --track-status'.format(resource_group, webapp_name, zip_file))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
+    def test_webapp_track_runtimestatus_runtimefailed(self, resource_group):
+        webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
+        plan_name = self.create_random_name('webapp-runtimestatus-plan', 40)
+        zip_file = os.path.join(TEST_DIR, 'data', 'noderuntimefailed.zip')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
+        with self.assertRaisesRegexp(CLIError, "Deployment failed because the site failed to start within 10 mins."):
+            self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async --track-status'.format(resource_group, webapp_name, zip_file))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deployment_source_configzip_runtimestatus', location='eastus')
+    def test_webapp_deployment_source_track_runtimestatus_runtimesucessful(self, resource_group):
+        webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
+        plan_name = self.create_random_name('webapp-runtimestatus-plan', 40)
+        war_file = os.path.join(TEST_DIR, 'data', 'sample.war')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+        self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}" --track-status'.format(resource_group, webapp_name, war_file)).assert_with_checks([
+            JMESPathCheck('resourceGroup', resource_group),
+            JMESPathCheck('properties.errors', None),
+            JMESPathCheck('properties.numberOfInstancesFailed', '0'),
+            JMESPathCheck('properties.numberOfInstancesInProgress', '0'),
+            JMESPathCheck('properties.numberOfInstancesSuccessful', '1'),
+            JMESPathCheck('properties.status', 'RuntimeSuccessful'),
+            JMESPathCheck('type', 'Microsoft.Web/sites/deploymentStatus'),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deployment_source_configzip_runtimestatus', location='eastus')
+    def test_webapp_deployment_source_track_runtimestatus_buildfailed(self, resource_group):
+        webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
+        plan_name = self.create_random_name('webapp-runtimestatus-plan', 40)
+        zip_file = os.path.join(TEST_DIR, 'data', 'nodebuildfailed.zip')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
+        with self.assertRaisesRegexp(CLIError, "Deployment failed because the build process failed"):
+            self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}" --track-status'.format(resource_group, webapp_name, zip_file))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deployment_source_configzip_runtimestatus', location='eastus')
+    def test_webapp_deployment_source_track_runtimestatus_runtimefailed(self, resource_group):
+        webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
+        plan_name = self.create_random_name('webapp-runtimestatus-plan', 40)
+        zip_file = os.path.join(TEST_DIR, 'data', 'noderuntimefailed.zip')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
+        with self.assertRaisesRegexp(CLIError, "Deployment failed because the site failed to start within 10 mins."):
+            self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}" --track-status'.format(resource_group, webapp_name, zip_file))
 
 class DomainScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)

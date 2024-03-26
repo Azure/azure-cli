@@ -436,6 +436,37 @@ examples:
         az image builder optimizer show -n myTemplate -g myGroup --defer
 """
 
+helps['image builder error-handler'] = """
+type: group
+short-summary: Manage image builder template error handler.
+"""
+
+helps['image builder error-handler add'] = """
+type: command
+short-summary: Add error handler to an existing image builder template.
+long-summary: Must be used with --defer
+"""
+
+helps['image builder error-handler remove'] = """
+type: command
+short-summary: Remove error handler from an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Remove error handler from an existing image builder template.
+    text: |
+        az image builder error-handler remove -n myTemplate -g myGroup --defer
+"""
+
+helps['image builder error-handler show'] = """
+type: command
+short-summary: Show error handler of an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Show error handler of an existing image builder template.
+    text: |
+        az image builder error-handler show -n myTemplate -g myGroup --defer
+"""
+
 helps['image builder identity'] = """
 type: group
 short-summary: Manage identities of an image builder template.
@@ -1300,6 +1331,9 @@ examples:
     text: |
         az snapshot grant-access --duration-in-seconds 3600 --name MySnapshot --resource-group MyResourceGroup
     crafted: true
+  - name: Grant read access to a snapshot with specifying the file format.
+    text: |
+        az snapshot grant-access --duration-in-seconds 3600 --name MySnapshot --resource-group MyResourceGroup --file-format VHDX
 """
 
 helps['snapshot update'] = """
@@ -1541,7 +1575,7 @@ examples:
         az vm create -n MyVm -g MyResourceGroup --image Debian11 --vnet-name MyVnet --subnet subnet1 \\
             --availability-set MyAvailabilitySet --public-ip-address-dns-name MyUniqueDnsName \\
             --ssh-key-values @key-file
-  - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, two data disks (10GB and 20GB), and then generate ssh key pairs.
+  - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, two data disks (10GB and 20GB), and then generate RSA ssh key pairs.
     text: |
         az vm create -n MyVm -g MyResourceGroup --public-ip-address-dns-name MyUniqueDnsName \\
             --image Ubuntu2204 --data-disk-sizes-gb 10 20 --size Standard_DS2_v2 \\
@@ -2761,6 +2795,10 @@ examples:
   - name: Create a Windows VMSS with patch mode 'Manual' (Currently patch mode 'AutomaticByPlatform' is not supported during VMSS creation as health extension which is required for 'AutomaticByPlatform' mode cannot be set during VMSS creation).
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image Win2019Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible
+  - name: Create a VMSS with specifying the security posture to be used for all virtual machines in the scale set.
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version} --security-posture-reference-id /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{version} \\
+            --security-posture-reference-exclude-extensions "c:\\tmp\\exclude_extensions.json"
 """
 
 helps['vmss deallocate'] = """
@@ -3284,6 +3322,10 @@ examples:
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.imageReference.id=imageID
   - name: Update a Linux VMSS to patch mode 'AutomaticByPlatform'.
     text: az vmss update -n MyVmss -g MyResourceGroup --set virtualMachineProfile.osProfile.linuxConfiguration.patchSettings.patchMode=AutomaticByPlatform
+  - name: Update a VMSS with specifying the security posture to be used for all virtual machines in the scale set.
+    text: >
+        az vmss update -n MyVmss -g MyResourceGroup --security-posture-reference-id /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{version} \\
+            --security-posture-reference-exclude-extensions "c:\\tmp\\exclude_extensions.json"
 """
 
 helps['vmss update-instances'] = """

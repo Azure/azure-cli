@@ -15,8 +15,8 @@ class CdnAfdProfileScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         profile_name = self.create_random_name(prefix='profile', length=24)
 
-        tags = 'tag1=value1 tag2=value2'
-        self.afd_profile_create_cmd(resource_group, profile_name, tags=tags, options="--origin-response-timeout-seconds 100")
+        tags = '{{tag1:value1,tag2:value2}}'
+        self.afd_profile_create_cmd(resource_group, profile_name, tags=tags, options="--origin-response-timeout-seconds 100 --identity-type SystemAssigned")
 
         list_checks = [JMESPathCheck('length(@)', 1),
                        JMESPathCheck('@[0].location', "Global"),
@@ -31,6 +31,7 @@ class CdnAfdProfileScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                        JMESPathCheck('length(tags)', 2),
                        JMESPathCheck('tags.tag1', 'value1'),
                        JMESPathCheck('tags.tag2', 'value2'),
+                       JMESPathCheck('identity.type', 'SystemAssigned'),
                        JMESPathCheck('originResponseTimeoutSeconds', 100)]
         self.afd_profile_show_cmd(resource_group,
                                   profile_name,
@@ -43,7 +44,7 @@ class CdnAfdProfileScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('tags.tag3', 'value3'),
                          JMESPathCheck('tags.tag4', 'value4'),
                          JMESPathCheck('originResponseTimeoutSeconds', 100)]
-        tags = 'tag3=value3 tag4=value4'
+        tags = '{{tag3:value3,tag4:value4}}'
         self.afd_profile_update_cmd(resource_group,
                                     profile_name,
                                     tags=tags,
@@ -55,13 +56,28 @@ class CdnAfdProfileScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('tags.tag2', None),
                          JMESPathCheck('tags.tag3', 'value3'),
                          JMESPathCheck('tags.tag4', 'value4'),
+                         JMESPathCheck('identity.type', 'UserAssigned'),
                          JMESPathCheck('originResponseTimeoutSeconds', 30)]
         self.afd_profile_update_cmd(resource_group,
                                     profile_name,
-                                    options='--origin-response-timeout-seconds 30',
+                                    options='--origin-response-timeout-seconds 30 --identity-type UserAssigned --user-assigned-identities /subscriptions/27cafca8-b9a4-4264-b399-45d0c9cca1ab/resourcegroups/azsecpackautoconfigrg/providers/microsoft.managedidentity/userassignedidentities/azsecpackautoconfigua-westeurope',
                                     checks=update_checks)
 
-        usage_checks = [JMESPathCheck('length(@)', 6)]
+        update_checks = [JMESPathCheck('location', "Global"),
+                         JMESPathCheck('sku.name', 'Standard_AzureFrontDoor'),
+                         JMESPathCheck('tags.tag1', None),
+                         JMESPathCheck('tags.tag2', None),
+                         JMESPathCheck('tags.tag3', 'value3'),
+                         JMESPathCheck('tags.tag4', 'value4'),
+                         JMESPathCheck('identity.type', 'UserAssigned'),
+                         JMESPathCheck('length(identity.userAssignedIdentities)', 2),
+                         JMESPathCheck('originResponseTimeoutSeconds', 30)]
+        self.afd_profile_update_cmd(resource_group,
+                                    profile_name,
+                                    options='--identity-type UserAssigned --user-assigned-identities /subscriptions/27cafca8-b9a4-4264-b399-45d0c9cca1ab/resourcegroups/cdnrp-test-g-rg/providers/microsoft.managedidentity/userassignedidentities/cdnrptestaadidentity /subscriptions/27cafca8-b9a4-4264-b399-45d0c9cca1ab/resourcegroups/azsecpackautoconfigrg/providers/microsoft.managedidentity/userassignedidentities/azsecpackautoconfigua-westeurope',
+                                    checks=update_checks)
+
+        usage_checks = [JMESPathCheck('length(@)', 7)]
         self.cmd(f"afd profile usage -g {resource_group} --profile-name {profile_name}", checks=usage_checks)
 
         self.afd_profile_delete_cmd(resource_group, profile_name)

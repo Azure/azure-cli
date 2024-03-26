@@ -350,7 +350,7 @@ def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
         if not rp_client_sp_id:
             raise ResourceNotFoundError("RP service principal not found.")
     except GraphError as e:
-        logger.info(e.message)
+        logger.info(e)
 
     # Customers frequently remove the Cluster or RP's service principal permissions.
     # Attempt to fix this before performing any action against the cluster
@@ -555,9 +555,9 @@ def cluster_application_update(cli_ctx,
             raise ResourceNotFoundError("RP service principal not found.")
     except GraphError as e:
         if fail:
-            logger.error(e.message)
+            logger.error(e)
             raise
-        logger.info(e.message)
+        logger.info(e)
 
     # refresh_cluster_credentials refreshes cluster SP application.
     # At firsts it tries to re-use existing application and generate new password.
@@ -574,7 +574,7 @@ def cluster_application_update(cli_ctx,
             else:
                 client_secret = aad.add_password(app)
         except GraphError as e:
-            logger.error(e.message)
+            logger.error(e)
             raise
 
     # attempt to get/create SP if one was not found.
@@ -582,9 +582,9 @@ def cluster_application_update(cli_ctx,
         client_sp_id = aad.get_service_principal_id(client_id or oc.service_principal_profile.client_id)
     except GraphError as e:
         if fail:
-            logger.error(e.message)
+            logger.error(e)
             raise
-        logger.info(e.message)
+        logger.info(e)
 
     if fail and not client_sp_id:
         client_sp_id = aad.create_service_principal(client_id or oc.service_principal_profile.client_id)

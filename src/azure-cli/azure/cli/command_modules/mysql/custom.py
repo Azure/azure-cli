@@ -28,7 +28,8 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
     cf_mysql_firewall_rules
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
     replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
-    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, GITHUB_ACTION_PATH
+    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, \
+    ImportFromStorageProgressHook, OperationProgressBar, GITHUB_ACTION_PATH
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, \
@@ -40,6 +41,23 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
 RESOURCE_PROVIDER = 'Microsoft.DBforMySQL'
 DEFAULT_DB_NAME = 'flexibleserverdb'
 MINIMUM_IOPS = 300
+
+
+def flexible_server_advanced_threat_protection_update(cmd, client, resource_group_name, server_name, state):
+    '''
+    Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
+    '''
+    parameters = {
+        'state': state
+    }
+    return client.begin_update(resource_group_name, server_name, mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value, parameters)
+
+
+def flexible_server_advanced_threat_protection_show(cmd, client, resource_group_name, server_name):
+    '''
+    Gets an advanced threat protection setting.
+    '''
+    return client.get(resource_group_name, server_name, mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value)
 
 
 def flexible_server_update_get(client, resource_group_name, server_name):
@@ -476,39 +494,41 @@ def flexible_server_import_create(cmd, client,
     create_mode = 'Create'
     if data_source_type.lower() == 'mysql_single':
         if mode.lower() == 'offline':
-            # Generating source_server_id from data_source depending on whether it is a server_name or resource_id
-            if not is_valid_resource_id(data_source):
-                if len(data_source.split('/')) == 1:
-                    source_server_id = resource_id(
-                        subscription=get_subscription_id(cmd.cli_ctx),
-                        resource_group=resource_group_name,
-                        namespace=provider,
-                        type='servers',
-                        name=data_source)
-                else:
-                    raise ValidationError('The provided data-source {} is invalid.'.format(data_source))
-            else:
-                source_server_id = data_source
-
-            single_server_client = cf_mysql_servers(cli_ctx=cmd.cli_ctx, _=None)
             create_mode = 'Migrate'
-            # Mapping the single server configuration to flexible server configuration
-            (tier, sku_name, location, storage_gb, auto_grow, backup_retention,
-             geo_redundant_backup, version, tags, public_access, administrator_login) = map_single_server_configuration(single_server_client=single_server_client,
-                                                                                                                        source_server_id=source_server_id,
-                                                                                                                        tier=tier,
-                                                                                                                        sku_name=sku_name,
-                                                                                                                        location=location,
-                                                                                                                        storage_gb=storage_gb,
-                                                                                                                        auto_grow=auto_grow,
-                                                                                                                        backup_retention=backup_retention,
-                                                                                                                        geo_redundant_backup=geo_redundant_backup,
-                                                                                                                        version=version,
-                                                                                                                        tags=tags,
-                                                                                                                        public_access=public_access,
-                                                                                                                        subnet=subnet,
-                                                                                                                        administrator_login=administrator_login,
-                                                                                                                        administrator_login_password=administrator_login_password)
+        elif mode.lower() == 'online':
+            create_mode = 'OnlineMigrate'
+        # Generating source_server_id from data_source depending on whether it is a server_name or resource_id
+        if not is_valid_resource_id(data_source):
+            if len(data_source.split('/')) == 1:
+                source_server_id = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=resource_group_name,
+                    namespace=provider,
+                    type='servers',
+                    name=data_source)
+            else:
+                raise ValidationError('The provided data-source {} is invalid.'.format(data_source))
+        else:
+            source_server_id = data_source
+
+        single_server_client = cf_mysql_servers(cli_ctx=cmd.cli_ctx, _=None)
+        # Mapping the single server configuration to flexible server configuration
+        (tier, sku_name, location, storage_gb, auto_grow, backup_retention,
+            geo_redundant_backup, version, tags, public_access, administrator_login) = map_single_server_configuration(single_server_client=single_server_client,
+                                                                                                                       source_server_id=source_server_id,
+                                                                                                                       tier=tier,
+                                                                                                                       sku_name=sku_name,
+                                                                                                                       location=location,
+                                                                                                                       storage_gb=storage_gb,
+                                                                                                                       auto_grow=auto_grow,
+                                                                                                                       backup_retention=backup_retention,
+                                                                                                                       geo_redundant_backup=geo_redundant_backup,
+                                                                                                                       version=version,
+                                                                                                                       tags=tags,
+                                                                                                                       public_access=public_access,
+                                                                                                                       subnet=subnet,
+                                                                                                                       administrator_login=administrator_login,
+                                                                                                                       administrator_login_password=administrator_login_password)
     elif data_source_type.lower() == 'azure_blob':
         (tier, sku_name, storage_gb, auto_grow, backup_retention,
          geo_redundant_backup, version, administrator_login) = get_default_flex_configuration(tier=tier,
@@ -629,7 +649,8 @@ def flexible_server_import_create(cmd, client,
                                           availability_zone=zone,
                                           data_encryption=data_encryption,
                                           source_server_id=source_server_id,
-                                          import_source_properties=import_source_properties)
+                                          import_source_properties=import_source_properties,
+                                          data_source_type=data_source_type)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
@@ -1380,7 +1401,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
 
 
 def _import_create_server(db_context, cmd, resource_group_name, server_name, create_mode, source_server_id, tags, location, sku, administrator_login, administrator_login_password,
-                          storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, import_source_properties):
+                          storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, import_source_properties, data_source_type):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -1405,10 +1426,15 @@ def _import_create_server(db_context, cmd, resource_group_name, server_name, cre
         source_server_resource_id=source_server_id,
         create_mode=create_mode,
         import_source_properties=import_source_properties)
+    import_poller = server_client.begin_create(resource_group_name, server_name, parameters)
+    import_progress_bar = None
+    if data_source_type.lower() == "azure_blob":
+        import_progress_bar = OperationProgressBar(cmd.cli_ctx, import_poller, ImportFromStorageProgressHook())
 
     return resolve_poller(
-        server_client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
-        '{} Server Import Create'.format(logging_name))
+        import_poller, cmd.cli_ctx,
+        '{} Server Import Create'.format(logging_name),
+        progress_bar=import_progress_bar)
 
 
 def flexible_server_connection_string(

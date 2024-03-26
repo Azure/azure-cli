@@ -70,7 +70,6 @@ short-summary: Backfill Tenant Subscription Operations for Management Groups
 helps['account management-group tenant-backfill get'] = """
 type: command
 short-summary: Get the backfill status for a tenant.
-long-summary: Get the backfill status for a tenant.
 examples:
   - name: Get the backfill status for a tenant.
     text: >
@@ -80,7 +79,6 @@ examples:
 helps['account management-group tenant-backfill start'] = """
 type: command
 short-summary: Start backfilling subscriptions for a tenant.
-long-summary: Start backfilling subscriptions for a tenant.
 examples:
   - name: Start backfilling subscriptions for a tenant.
     text: >
@@ -90,7 +88,6 @@ examples:
 helps['account management-group check-name-availability'] = """
 type: command
 short-summary: Check if a Management Group Name is Valid.
-long-summary: Check if a Management Group Name is Valid.
 parameters:
   - name: --name -n
     type: string
@@ -104,7 +101,6 @@ examples:
 helps['account management-group create'] = """
 type: command
 short-summary: Create a new management group.
-long-summary: Create a new management group.
 parameters:
   - name: --name -n
     type: string
@@ -133,7 +129,6 @@ examples:
 helps['account management-group delete'] = """
 type: command
 short-summary: Delete an existing management group.
-long-summary: Delete an existing management group.
 parameters:
   - name: --name -n
     type: string
@@ -146,8 +141,7 @@ examples:
 
 helps['account management-group list'] = """
 type: command
-short-summary: List all management groups.
-long-summary: List of all management groups in the current tenant.
+short-summary: List all management groups in the current tenant.
 examples:
   - name: List all management groups
     text: >
@@ -156,8 +150,7 @@ examples:
 
 helps['account management-group show'] = """
 type: command
-short-summary: Get a specific management group.
-long-summary: Get the details of the management group.
+short-summary: Get the details of the management group.
 parameters:
   - name: --name -n
     type: string
@@ -188,7 +181,6 @@ short-summary: Subscription operations for Management Groups.
 helps['account management-group subscription add'] = """
 type: command
 short-summary: Add a subscription to a management group.
-long-summary: Add a subscription to a management group.
 parameters:
   - name: --name -n
     type: string
@@ -205,7 +197,6 @@ examples:
 helps['account management-group subscription show'] = """
 type: command
 short-summary: Show the details of a subscription under a known management group.
-long-summary: Show the details of a subscription under a known management group.
 parameters:
   - name: --name -n
     type: string
@@ -222,7 +213,6 @@ examples:
 helps['account management-group subscription show-sub-under-mg'] = """
 type: command
 short-summary: Get the subscription under a management group.
-long-summary: Get the subscription under a management group.
 parameters:
   - name: --name -n
     type: string
@@ -241,7 +231,6 @@ short-summary: Entity operations (Management Group and Subscriptions) for Manage
 helps['account management-group entities list'] = """
 type: command
 short-summary: List all entities for the authenticated user.
-long-summary: List all entities for the authenticated user.
 examples:
   - name: List all entities for the authenticated user.
     text: >
@@ -251,7 +240,6 @@ examples:
 helps['account management-group subscription remove'] = """
 type: command
 short-summary: Remove an existing subscription from a management group.
-long-summary: Remove an existing subscription from a management group.
 parameters:
   - name: --name -n
     type: string
@@ -268,7 +256,6 @@ examples:
 helps['account management-group update'] = """
 type: command
 short-summary: Update an existing management group.
-long-summary: Update an existing management group.
 parameters:
   - name: --name -n
     type: string
@@ -299,7 +286,6 @@ short-summary: Provide operations for hierarchy settings defined at the manageme
 helps['account management-group hierarchy-settings create'] = """
 type: command
 short-summary: Create hierarchy settings defined at the Management Group level.
-long-summary: Create hierarchy settings defined at the Management Group level.
 parameters:
   - name: --name -n
     type: string
@@ -328,7 +314,6 @@ examples:
 helps['account management-group hierarchy-settings list'] = """
 type: command
 short-summary: Get all the hierarchy settings defined at the Management Group level.
-long-summary: Get all the hierarchy settings defined at the Management Group level.
 parameters:
   - name: --name -n
     type: string
@@ -342,7 +327,6 @@ examples:
 helps['account management-group hierarchy-settings delete'] = """
 type: command
 short-summary: Delete the hierarchy settings defined at the Management Group level.
-long-summary: Delete the hierarchy settings defined at the Management Group level.
 parameters:
   - name: --name -n
     type: string
@@ -356,7 +340,6 @@ examples:
 helps['account management-group hierarchy-settings update'] = """
 type: command
 short-summary: Update the hierarchy settings defined at the Management Group level.
-long-summary: Update the hierarchy settings defined at the Management Group level.
 parameters:
   - name: --name -n
     type: string
@@ -2734,7 +2717,7 @@ helps['bicep'] = """
 type: group
 short-summary: Bicep CLI command group.
 long-summary: |
-  Bicep CLI command group. There are two configurations that can be set for the command group, including bicep.check_version and bicep.use_binary_from_path:
+  There are two configurations that can be set for the command group, including bicep.check_version and bicep.use_binary_from_path:
 
   [1] az config set bicep.check_version=True/False
       Turn on/off Bicep CLI version check when executing az bicep commands.
@@ -2854,6 +2837,8 @@ examples:
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag} --force"
   - name: Publish a bicep file with documentation uri.
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --documentationUri {documentationUri}
+  - name: Publish a bicep file with documentation uri and include source code
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --documentationUri {documentationUri} --with-source
 """
 
 helps['bicep restore'] = """
@@ -2893,18 +2878,18 @@ short-summary: Create or update a deployment stack at management group scope
 examples:
   - name: Create a deployment stack using template file.
     text: az stack mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --location westus2 --description description --deny-settings-mode None
-  - name: Create a deployment stack with parameter file and delete resources.
-    text: az stack mg create --name StackName --management-group-id myMg --delete-resources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None
-  - name: Create a deployment stack with template spec and delete resource groups
-    text: az stack mg create --name StackName --management-group-id myMg --delete-resource-groups --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None
-  - name: Create a deployment stack using bicep file and delete all resources.
-    text: az stack mg create --name StackName --management-group-id myMg --delete-all --template-file simple.bicep --location westus2 --description description --deny-settings-mode None
-  - name: Create a deployment stack using parameters from key/value pairs
+  - name: Create a deployment stack with parameter file and delete resources on unmanage.
+    text: az stack mg create --name StackName --management-group-id myMg --action-on-unmanage deleteResources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack with template spec.
+    text: az stack mg create --name StackName --management-group-id myMg --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack using bicep file and delete all resources on unmanage.
+    text: az stack mg create --name StackName --management-group-id myMg --action-on-unmanage deleteAll --template-file simple.bicep --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack using parameters from key/value pairs.
     text: az stack mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None
   - name: Create a deployment stack from a local template, using deny settings.
-    text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --deny-settings-mode None
+    text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus
   - name: Create a deployment stack from a local template, apply deny settings to child scope.
     text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus
 """
@@ -2958,24 +2943,24 @@ short-summary: Create or update a deployment stack at subscription scope
 examples:
   - name: Create a deployment stack using template file.
     text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus2 --description description --deny-settings-mode None
-  - name: Create a deployment stack with parameter file and delete resources.
-    text: az stack sub create --name StackName --delete-resources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None
-  - name: Create a deployment stack with template spec and delete resource groups
-    text: az stack sub create --name StackName --delete-resource-groups --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None
-  - name: Create a deployment stack using bicep file and delete all resources.
-    text: az stack sub create --name StackName --delete-all --template-file simple.bicep --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack with parameter file and delete resources on unmanage.
+    text: az stack sub create --name StackName --action-on-unmanage deleteResources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack with template spec.
+    text: az stack sub create --name StackName --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack using bicep file and delete all resources on unmanage.
+    text: az stack sub create --name StackName --action-on-unmanage deleteAll --template-file simple.bicep --location westus2 --description description --deny-settings-mode None
   - name: Create a deployment stack at a different subscription.
     text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus2 --description description --subscription subscriptionId --deny-settings-mode None
   - name: Create a deployment stack and deploy at the resource group scope.
     text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus --deployment-resource-group ResourceGroup --description description --deny-settings-mode None
-  - name: Create a deployment stack using parameters from key/value pairs
+  - name: Create a deployment stack using parameters from key/value pairs.
     text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: az stack sub create --name StackName --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None
   - name: Create a deployment stack from a local template, using deny settings.
-    text: az stack sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --deny-settings-mode None
+    text: az stack sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus
   - name: Create a deployment stack from a local template, apply deny settings to child scopes.
-    text: az stack sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus --deny-settings-mode None
+    text: az stack sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus
 """
 
 helps['stack sub list'] = """
@@ -3025,22 +3010,22 @@ helps['stack group create'] = """
 type: command
 short-summary: Create or update a deployment stack at resource group scope
 examples:
-  - name: Create a deployment stack using template file and delete resources.
-    text: az stack group create --name StackName --resource-group ResourceGroup --delete-resources --template-file simpleTemplate.json --description description --deny-settings-mode None
-  - name: Create a deployment stack with parameter file and delete resource groups.
-    text: az stack group create --name StackName --resource-group ResourceGroup --delete-resource-groups --template-file simpleTemplate.json --parameters simpleTemplateParams.json --description description --deny-settings-mode None
-  - name: Create a deployment stack with template spec and delete all resources
-    text: az stack group create --name StackName --resource-group ResourceGroup --delete-all --template-spec TemplateSpecResourceIDWithVersion --description description --deny-settings-mode None
+  - name: Create a deployment stack using template file and delete resources on unmanage.
+    text: az stack group create --name StackName --resource-group ResourceGroup --action-on-unmanage deleteResources --template-file simpleTemplate.json --description description --deny-settings-mode None
+  - name: Create a deployment stack with parameter file.
+    text: az stack group create --name StackName --resource-group ResourceGroup --template-file simpleTemplate.json --parameters simpleTemplateParams.json --description description --deny-settings-mode None
+  - name: Create a deployment stack with template spec and delete all resources on unmanage.
+    text: az stack group create --name StackName --resource-group ResourceGroup --action-on-unmanage deleteAll --template-spec TemplateSpecResourceIDWithVersion --description description --deny-settings-mode None
   - name: Create a deployment stack using bicep file.
     text: az stack group create --name StackName --resource-group ResourceGroup --template-file simple.bicep --description description --deny-settings-mode None
-  - name: Create a deployment stack at a different subscription
+  - name: Create a deployment stack at a different subscription.
     text: az stack group create --name StackName --resource-group ResourceGroup --template-file simpleTemplate.json --description description --subscription subscriptionId --deny-settings-mode None
-  - name: Create a deployment stack using parameters from key/value pairs
+  - name: Create a deployment stack using parameters from key/value pairs.
     text: az stack group create --name StackName --template-file simpleTemplate.json --resource-group ResourceGroup --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: az stack group create --name StackName --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --resource-group ResourceGroup --deny-settings-mode None
   - name: Create a deployment stack from a local template, using deny settings.
-    text: az stack group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --deny-settings-mode None
+    text: az stack group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2"
   - name: Create a deployment stack from a local template, apply deny setting to child scopes.
     text: az stack group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes
 """

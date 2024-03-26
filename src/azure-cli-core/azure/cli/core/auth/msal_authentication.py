@@ -135,8 +135,6 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
         logger.debug("ServicePrincipalCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
 
         scopes = list(scopes)
-        result = self.acquire_token_silent(scopes, None, **kwargs)
-        if not result:
-            result = self.acquire_token_for_client(scopes, **kwargs)
+        result = self.acquire_token_for_client(scopes, **kwargs)
         check_result(result)
         return build_sdk_access_token(result)

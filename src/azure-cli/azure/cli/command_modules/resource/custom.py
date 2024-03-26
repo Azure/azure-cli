@@ -17,13 +17,13 @@ import uuid
 import base64
 
 from urllib.request import urlopen
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.resource.resources.models import GenericResource, DeploymentMode
 
-from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError, ResourceNotFoundError
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, ResourceNotFoundError
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
@@ -35,6 +35,7 @@ from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
     _resource_links_client_factory, _resource_deploymentscripts_client_factory, _resource_deploymentstacks_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory, _resource_privatelinks_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
+from azure.cli.command_modules.resource.parameters import StacksActionOnUnmanage
 
 from azure.core.pipeline.policies import SansIOHTTPPolicy
 
@@ -72,7 +73,115 @@ def _build_resource_id(**kwargs):
         return None
 
 
-def _try_parse_key_value_object(template_param_defs, parameters, value):
+def _get_parameter_type(template_obj, schema_node, visited=None):
+    if schema_node is None:
+        return None
+
+    if 'type' in schema_node:
+        return schema_node['type']
+
+    if '$ref' not in schema_node:
+        return None
+
+    if visited is None:
+        visited = set()
+
+    pointer = schema_node['$ref']
+    if pointer in visited:
+        logger.warning("Cyclic type reference detected at '%s'", pointer)
+        return None
+    visited.add(pointer)
+
+    class _UninitalizedState:
+        def get(self, segment):
+            if segment == '#':
+                return _Initialized()
+
+            return _TerminalState()
+
+        def resolve(self):
+            return None
+
+    class _TerminalState:
+        def get(self, _):
+            return self
+
+        def resolve(self):
+            return None
+
+    class _Initialized:
+        def get(self, segment):
+            if segment in ['definitions', 'parameters', 'outputs'] and segment in template_obj:
+                return _InSchemaDictionary(template_obj[segment])
+
+            return _TerminalState()
+
+        def resolve(self):
+            return None
+
+    class _InSchemaDictionary:
+        def __init__(self, schema_dict):
+            self.schema_dict = schema_dict
+
+        def get(self, segment):
+            for key, value in self.schema_dict.items():
+                if key.lower() == segment:
+                    return _InSchemaNode(value)
+
+            return _TerminalState()
+
+        def resolve(self):
+            return None
+
+    class _InSchemaArray:
+        def __init__(self, schema_array):
+            self.schema_array = schema_array
+
+        def get(self, segment):
+            if segment.isdigit() and len(self.schema_array) > int(segment):
+                return _InSchemaNode(self.schema_array[int(segment)])
+
+            return _TerminalState()
+
+        def resolve(self):
+            return None
+
+    class _InSchemaNode:
+        def __init__(self, schema_node):
+            self.schema_node = schema_node
+
+        def get(self, segment):
+            property_value = None
+            for key, value in self.schema_node.items():
+                if key.lower() == segment:
+                    property_value = value
+                    break
+
+            if property_value is None:
+                return _TerminalState()
+
+            if segment == 'properties':
+                return _InSchemaDictionary(property_value)
+
+            if segment in ['items', 'additionalproperties']:
+                return _InSchemaNode(property_value)
+
+            if segment == 'prefixitems':
+                return _InSchemaArray(property_value)
+
+            return _TerminalState()
+
+        def resolve(self):
+            return self.schema_node
+
+    state = _UninitalizedState()
+    for segment in pointer.split('/'):
+        state = state.get(unquote(segment).replace('~1', '/').replace('~0', '~').lower())
+
+    return _get_parameter_type(template_obj, state.resolve(), visited)
+
+
+def _try_parse_key_value_object(parameters, template_obj, value):
     # support situation where empty JSON "{}" is provided
     if value == '{}' and not parameters:
         return True
@@ -82,11 +191,12 @@ def _try_parse_key_value_object(template_param_defs, parameters, value):
     except ValueError:
         return False
 
-    param = template_param_defs.get(key, None)
+    param = template_obj.get('parameters', {}).get(key, None)
     if param is None:
-        raise InvalidArgumentValueError("unrecognized template parameter '{}'. Allowed parameters: {}".format(key, ', '.join(sorted(template_param_defs.keys()))))
+        raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
+                       .format(key, ', '.join(sorted(template_obj.get('parameters', {}).keys()))))
 
-    param_type = param.get('type', None)
+    param_type = _get_parameter_type(template_obj, param)
     if param_type:
         param_type = param_type.lower()
     if param_type in ['object', 'array', 'secureobject']:
@@ -104,7 +214,7 @@ def _try_parse_key_value_object(template_param_defs, parameters, value):
     return True
 
 
-def _process_parameters(template_param_defs, parameter_lists):  # pylint: disable=too-many-statements
+def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-many-statements
 
     def _try_parse_json_object(value):
         try:
@@ -149,7 +259,7 @@ def _process_parameters(template_param_defs, parameter_lists):  # pylint: disabl
                 param_obj = _try_load_uri(item)
             if param_obj is not None:
                 parameters.update(param_obj)
-            elif not _try_parse_key_value_object(template_param_defs, parameters, item):
+            elif not _try_parse_key_value_object(parameters, template_obj, item):
                 raise CLIError('Unable to parse parameter: {}'.format(item))
 
     return parameters
@@ -344,9 +454,8 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     elif rollback_on_error:
         on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
 
-    template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
-    parameters = _process_parameters(template_param_defs, parameters) or {}
+    parameters = _process_parameters(template_obj, parameters) or {}
     parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
 
     parameters = json.loads(json.dumps(parameters))
@@ -410,24 +519,29 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
         # 'request_data' has been dumped into JSON string in set_json_body() when building HttpRequest in Python SDK.
         # In order to facilitate subsequent parsing, it is converted into a dict first
-        http_request.data = json.loads(request_data)
+        modified_data = json.loads(request_data)
 
-        if http_request.data.get('properties', {}).get('template'):
-            template = http_request.data["properties"]["template"]
-            del http_request.data["properties"]["template"]
+        if modified_data.get('properties', {}).get('template'):
+            template = modified_data["properties"]["template"]
+            del modified_data["properties"]["template"]
 
             # templateLink and template cannot exist at the same time in deployment_dry_run mode
-            if "templateLink" in http_request.data["properties"].keys():
-                del http_request.data["properties"]["templateLink"]
+            if "templateLink" in modified_data["properties"].keys():
+                del modified_data["properties"]["templateLink"]
 
             # The 'template' and other properties (such as 'parameters','mode'...) are spliced and encoded into the UTF-8 bytes as the request data
             # The format of the request data is: {"properties": {"parameters": {...}, "mode": "Incremental", template:{\r\n  "$schema": "...",\r\n  "contentVersion": "...",\r\n  "parameters": {...}}}
             # This is not an ordinary JSON format, but it is a JSONC format that service can deserialize
             # If not do this splicing, the request data generated by default serialization cannot be deserialized on the service side.
             # Because the service cannot deserialize the template element: "template": "{\r\n  \"$schema\": \"...\",\r\n  \"contentVersion\": \"...\",\r\n  \"parameters\": {...}}"
-            partial_request = json.dumps(http_request.data)
-            http_request.data = partial_request[:-2] + ", template:" + template + r"}}"
-            http_request.data = http_request.data.encode('utf-8')
+            partial_request = json.dumps(modified_data)
+            json_data = partial_request[:-2] + ", template:" + template + r"}}"
+            http_request.data = json_data.encode('utf-8')
+
+            # This caused a very difficult-to-debug issue, because AzCLI's debug logs are written before this transformation.
+            # This means the logs do not accurately represent the bytes being sent to the server.
+            # If you see "The request content was invalid and could not be deserialized" in the response, this might be something to investigate.
+            logger.debug("HTTP content is being overwritten to preserve template whitepace accurately. The request body logging may not accurately represent this.")
 
 
 # pylint: disable=unused-argument
@@ -954,7 +1068,7 @@ def _get_bicepparam_file_path(parameters):
     return bicepparam_file_path
 
 
-def _parse_bicepparam_inline_params(parameters, template_param_defs):
+def _parse_bicepparam_inline_params(parameters, template_obj):
     parsed_inline_params = {}
 
     for parameter_list in parameters:
@@ -962,7 +1076,7 @@ def _parse_bicepparam_inline_params(parameters, template_param_defs):
             if is_bicepparam_file(parameter_item):
                 continue
 
-            if not _try_parse_key_value_object(template_param_defs, parsed_inline_params, parameter_item):
+            if not _try_parse_key_value_object(parsed_inline_params, template_obj, parameter_item):
                 raise InvalidArgumentValueError(f"Unable to parse parameter: {parameter_item}. Only correctly formatted in-line parameters are allowed with a .bicepparam file")
 
     name_value_obj = {}
@@ -996,7 +1110,7 @@ def _build_bicepparam_file(cli_ctx, bicepparam_file, template_file, inline_param
 
 
 def _parse_bicepparam_file(cmd, template_file, parameters):
-    ensure_bicep_installation(cmd.cli_ctx)
+    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version_bicepparam_compilation = "0.14.85"
     if not bicep_version_greater_than_or_equal_to(minimum_supported_version_bicepparam_compilation):
@@ -1020,8 +1134,7 @@ def _parse_bicepparam_file(cmd, template_file, parameters):
         else:
             template_obj = _remove_comments_from_json(template_content)
 
-        template_param_defs = template_obj.get('parameters', {})
-        inline_params = _parse_bicepparam_inline_params(parameters, template_param_defs)
+        inline_params = _parse_bicepparam_inline_params(parameters, template_obj)
 
         # re-invoke build-params to process inline parameters
         template_content, template_spec_id, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, template_file, inline_params)
@@ -1089,13 +1202,12 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     elif rollback_on_error:
         on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
 
-    template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
 
     if _is_bicepparam_file_provided(parameters):
         parameters = json.loads(bicepparam_json_content).get('parameters', {})
     else:
-        parameters = _process_parameters(template_param_defs, parameters) or {}
+        parameters = _process_parameters(template_obj, parameters) or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
         parameters = json.loads(json.dumps(parameters))
 
@@ -1167,22 +1279,31 @@ def _prepare_stacks_excluded_principals(deny_settings_excluded_principals):
     return excluded_principals_array
 
 
-def _prepare_stacks_delete_detach_models(rcf, delete_all, delete_resource_groups, delete_resources):
+def _prepare_stacks_delete_detach_models(rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources):
+    if action_on_unmanage is not None and (delete_all or delete_resource_groups or delete_resources):
+        raise MutuallyExclusiveArgumentError(
+            "The --action-on-unmanage/--aou argument and the --delete-* options cannot be used together.",
+            "Try to use the '--action-on-unmanage <value>' argument only.")
+
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
     delete_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
 
-    delete_resources_enum = detach_model
-    delete_resource_groups_enum = detach_model
+    aou_resources_action_enum, aou_resource_groups_action_enum = detach_model, detach_model
 
+    if action_on_unmanage == StacksActionOnUnmanage.DELETE_RESOURCES:
+        aou_resources_action_enum = delete_model
+    elif action_on_unmanage == StacksActionOnUnmanage.DELETE_ALL:
+        aou_resources_action_enum, aou_resource_groups_action_enum = delete_model, delete_model
+
+    # The "delete_*" flags are deprecated in favor of "action_on_unmanage". The logic below will be removed later.
     if delete_all:
-        delete_resources_enum = delete_model
-        delete_resource_groups_enum = delete_model
+        aou_resources_action_enum, aou_resource_groups_action_enum = delete_model, delete_model
     if delete_resource_groups:
-        delete_resource_groups_enum = delete_model
+        aou_resource_groups_action_enum = delete_model
     if delete_resources:
-        delete_resources_enum = delete_model
+        aou_resources_action_enum = delete_model
 
-    return delete_resources_enum, delete_resource_groups_enum
+    return aou_resources_action_enum, aou_resource_groups_action_enum
 
 
 def _prepare_stacks_excluded_actions(deny_settings_excluded_actions):
@@ -1198,26 +1319,31 @@ def _prepare_stacks_excluded_actions(deny_settings_excluded_actions):
 
 def _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum):
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
-    delete_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
 
     if not yes:
         from knack.prompting import prompt_y_n
         build_confirmation_string = "The DeploymentStack {} you're trying to create already exists in the current subscription.\n".format(
             name)
         build_confirmation_string += "The following actions will be applied to any resources that are no longer managed by the deployment stack after the template is applied:\n"
-        # first case we have only detach
-        if delete_resources_enum == detach_model and delete_resource_groups_enum == detach_model:
-            build_confirmation_string += "\nDetach: resources and resource groups\n"
-        # second case we only have delete
-        elif delete_resources_enum == delete_model and delete_resource_groups_enum == delete_model:
-            build_confirmation_string += "\nDeleting: resources and resource groups\n"
+
+        detaching_entities = []
+        deleting_entities = []
+
+        if delete_resources_enum == detach_model:
+            detaching_entities.append("resources")
         else:
-            if delete_resources_enum == detach_model:
-                build_confirmation_string += "\nDetach: resources\n"
-                build_confirmation_string += "\nDeleting: resource groups\n"
-            else:
-                build_confirmation_string += "\nDetach: resource groups\n"
-                build_confirmation_string += "\nDeleting: resources\n"
+            deleting_entities.append("resources")
+
+        if delete_resource_groups_enum == detach_model:
+            detaching_entities.append("resource groups")
+        else:
+            deleting_entities.append("resource groups")
+
+        if len(detaching_entities) > 0:
+            build_confirmation_string += f"\nDetach: {', '.join(detaching_entities)}\n"
+        if len(deleting_entities) > 0:
+            build_confirmation_string += f"\nDeleting: {', '.join(deleting_entities)}\n"
+
         confirmation = prompt_y_n(build_confirmation_string + "\n")
         if not confirmation:
             return None
@@ -1284,13 +1410,12 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
         else:
             deployment_stack_model.template = json.load(open(template_file))
 
-    template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
 
     if _is_bicepparam_file_provided(parameters):
         parameters = json.loads(bicepparam_json_content).get('parameters', {})
     else:
-        parameters = _process_parameters(template_param_defs, parameters) or {}
+        parameters = _process_parameters(template_obj, parameters) or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, False)
         parameters = json.loads(json.dumps(parameters))
 
@@ -2362,11 +2487,16 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
     return rcf.template_specs.list_by_subscription()
 
 
-def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None, yes=False, no_wait=False):
+def create_deployment_stack_at_subscription(
+    cmd, name, location, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False, delete_resources=False,
+    deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None,
+    description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
+    deny_settings_apply_to_child_scopes=False, tags=None, yes=False, no_wait=False
+):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    delete_resources_enum, delete_resource_groups_enum = _prepare_stacks_delete_detach_models(
-        rcf, delete_all, delete_resource_groups, delete_resources)
+    aou_resources_action_enum, aou_resource_groups_action_enum = _prepare_stacks_delete_detach_models(
+        rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources)
     deny_settings_enum = _prepare_stacks_deny_settings(rcf, deny_settings_mode)
 
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
@@ -2386,28 +2516,30 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
             if get_subscription_response.location != location:
                 raise CLIError("Cannot change location of an already existing stack at subscription scope.")
             # bypass if yes flag is true
-            built_string = _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            built_string = _build_stacks_confirmation_string(
+                rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
         pass
 
-    if not deployment_resource_group:
-        deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx)
-    else:
-        deployment_scope = "/subscriptions/" + \
-            get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + deployment_resource_group
-
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
-        resources=delete_resources_enum, resource_groups=delete_resource_groups_enum)
+        resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
-        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deployment_scope=deployment_scope, deny_settings=deny_settings_model, tags=tags)
+        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model, tags=tags)
+
+    if deployment_resource_group:
+        deployment_stack_model.deployment_scope = "/subscriptions/" + \
+            get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + deployment_resource_group
+        deployment_scope = 'resourceGroup'
+    else:
+        deployment_scope = 'subscription'
 
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, rcf, 'subscription', deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+        cmd, rcf, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
     return sdk_no_wait(no_wait, rcf.deployment_stacks.begin_create_or_update_at_subscription, name, deployment_stack_model)
 
@@ -2426,27 +2558,20 @@ def list_deployment_stack_at_subscription(cmd):
     return rcf.deployment_stacks.list_at_subscription()
 
 
-def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):  # pylint: disable=redefined-builtin
+def delete_deployment_stack_at_subscription(
+    cmd, action_on_unmanage=None, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False
+):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
+
+    aou_resources_action_enum, aou_resource_groups_action_enum = _prepare_stacks_delete_detach_models(
+        rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources)
+
     delete_list = []
-
-    delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
-    delete_resource_groups_enum = rcf.deployment_stacks.models.UnmanageActionResourceGroupMode.Detach
-
-    if delete_all:
+    if aou_resources_action_enum == rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete:
         delete_list.append("resources")
+    if aou_resource_groups_action_enum == rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete:
         delete_list.append("resource groups")
-        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    if delete_resource_groups:
-        delete_list.append("resource groups")
-        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    if delete_resources:
-        delete_list.append("resources")
-        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
 
     # build confirmation string
     from knack.prompting import prompt_y_n
@@ -2457,7 +2582,7 @@ def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_reso
                 return None
         else:
             confirmation += " and the specified resources: "
-            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+            response = prompt_y_n(confirmation + ", ".join(delete_list) + '?')
             if not response:
                 return None
 
@@ -2474,7 +2599,7 @@ def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_reso
                 rcf.deployment_stacks.get_at_subscription(name)
         except:
             raise ResourceNotFoundError("DeploymentStack " + delete_name + " not found in the current subscription scope.")
-        return rcf.deployment_stacks.begin_delete_at_subscription(delete_name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum)
+        return rcf.deployment_stacks.begin_delete_at_subscription(delete_name, unmanage_action_resources=aou_resources_action_enum, unmanage_action_resource_groups=aou_resource_groups_action_enum)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
@@ -2487,11 +2612,16 @@ def export_template_deployment_stack_at_subscription(cmd, name=None, id=None):  
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id.")
 
 
-def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None, no_wait=False):
+def create_deployment_stack_at_resource_group(
+    cmd, name, resource_group, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False,
+    delete_resources=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None,
+    deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False,
+    tags=None, no_wait=False
+):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    delete_resources_enum, delete_resource_groups_enum = _prepare_stacks_delete_detach_models(
-        rcf, delete_all, delete_resource_groups, delete_resources)
+    aou_resources_action_enum, aou_resource_groups_action_enum = _prepare_stacks_delete_detach_models(
+        rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources)
     deny_settings_enum = _prepare_stacks_deny_settings(rcf, deny_settings_mode)
 
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
@@ -2509,14 +2639,15 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_se
     # build confirmation string
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
-            built_string = _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            built_string = _build_stacks_confirmation_string(
+                rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
         pass
 
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
-        resources=delete_resources_enum, resource_groups=delete_resource_groups_enum)
+        resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
@@ -2549,27 +2680,21 @@ def list_deployment_stack_at_resource_group(cmd, resource_group):
     raise InvalidArgumentValueError("Please enter the resource group")
 
 
-def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):  # pylint: disable=redefined-builtin
+def delete_deployment_stack_at_resource_group(
+    cmd, action_on_unmanage=None, name=None, resource_group=None, id=None, delete_resources=False, delete_resource_groups=False,
+    delete_all=False, yes=False
+):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
+
+    aou_resources_action_enum, aou_resource_groups_action_enum = _prepare_stacks_delete_detach_models(
+        rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources)
+
     delete_list = []
-
-    delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
-    delete_resource_groups_enum = rcf.deployment_stacks.models.UnmanageActionResourceGroupMode.Detach
-
-    if delete_all:
+    if aou_resources_action_enum == rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete:
         delete_list.append("resources")
+    if aou_resource_groups_action_enum == rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete:
         delete_list.append("resource groups")
-        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    if delete_resource_groups:
-        delete_list.append("resource groups")
-        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    if delete_resources:
-        delete_list.append("resources")
-        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
 
     # build confirmation string
     from knack.prompting import prompt_y_n
@@ -2580,7 +2705,7 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=Non
                 return None
         else:
             confirmation += " and the specified resources: "
-            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+            response = prompt_y_n(confirmation + ", ".join(delete_list) + '?')
             if not response:
                 return None
 
@@ -2589,7 +2714,7 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=Non
             rcf.deployment_stacks.get_at_resource_group(resource_group, name)
         except:
             raise ResourceNotFoundError("DeploymentStack " + name + " not found in the current resource group scope.")
-        return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, resource_group, name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum)
+        return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, resource_group, name, unmanage_action_resources=aou_resources_action_enum, unmanage_action_resource_groups=aou_resource_groups_action_enum)
     if id:
         stack_arr = id.split('/')
         if len(stack_arr) < 5:
@@ -2600,7 +2725,7 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=Non
             rcf.deployment_stacks.get_at_resource_group(stack_rg, name)
         except:
             raise ResourceNotFoundError("DeploymentStack " + name + " not found in the current resource group scope.")
-        return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, stack_rg, name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum)
+        return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, stack_rg, name, unmanage_action_resources=aou_resources_action_enum, unmanage_action_resource_groups=aou_resource_groups_action_enum)
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
 
@@ -2616,11 +2741,16 @@ def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
 
-def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, deny_settings_mode, deployment_subscription=None, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None, no_wait=False):
+def create_deployment_stack_at_management_group(
+    cmd, management_group_id, name, location, deny_settings_mode, action_on_unmanage=None, delete_all=None, delete_resources=False,
+    delete_resource_groups=False, deployment_subscription=None, template_file=None, template_spec=None, template_uri=None,
+    query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
+    deny_settings_apply_to_child_scopes=False, yes=False, tags=None, no_wait=False
+):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    delete_resources_enum, delete_resource_groups_enum = _prepare_stacks_delete_detach_models(
-        rcf, delete_all, delete_resource_groups, delete_resources)
+    aou_resources_action_enum, aou_resource_groups_action_enum = _prepare_stacks_delete_detach_models(
+        rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources)
     deny_settings_enum = _prepare_stacks_deny_settings(rcf, deny_settings_mode)
 
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
@@ -2637,27 +2767,28 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
     try:
         get_mg_response = rcf.deployment_stacks.get_at_management_group(management_group_id, name)
         if get_mg_response:
-            built_string = _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            built_string = _build_stacks_confirmation_string(rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
         pass
 
-    if not deployment_subscription:
-        deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx)
-    else:
-        deployment_scope = "/subscriptions/" + deployment_subscription
-
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
-        resources=delete_resources_enum, resource_groups=delete_resource_groups_enum)
+        resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
-        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deployment_scope=deployment_scope, deny_settings=deny_settings_model, tags=tags)
+        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model, tags=tags)
+
+    if deployment_subscription:
+        deployment_stack_model.deployment_scope = "/subscriptions/" + deployment_subscription
+        deployment_scope = 'subscription'
+    else:
+        deployment_scope = 'managementGroup'
 
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, rcf, 'managementGroup', deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+        cmd, rcf, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
     return sdk_no_wait(no_wait, rcf.deployment_stacks.begin_create_or_update_at_management_group, management_group_id, name, deployment_stack_model)
 
@@ -2676,27 +2807,21 @@ def list_deployment_stack_at_management_group(cmd, management_group_id):
     return rcf.deployment_stacks.list_at_management_group(management_group_id)
 
 
-def delete_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):  # pylint: disable=redefined-builtin
+def delete_deployment_stack_at_management_group(
+    cmd, management_group_id, action_on_unmanage=None, name=None, id=None, delete_resources=False, delete_resource_groups=False,
+    delete_all=False, yes=False
+):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
+
+    aou_resources_action_enum, aou_resource_groups_action_enum = _prepare_stacks_delete_detach_models(
+        rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources)
+
     delete_list = []
-
-    delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
-    delete_resource_groups_enum = rcf.deployment_stacks.models.UnmanageActionResourceGroupMode.Detach
-
-    if delete_all:
+    if aou_resources_action_enum == rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete:
         delete_list.append("resources")
+    if aou_resource_groups_action_enum == rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete:
         delete_list.append("resource groups")
-        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    if delete_resource_groups:
-        delete_list.append("resource groups")
-        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    if delete_resources:
-        delete_list.append("resources")
-        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
 
     # build confirmation string
     from knack.prompting import prompt_y_n
@@ -2707,7 +2832,7 @@ def delete_deployment_stack_at_management_group(cmd, management_group_id, name=N
                 return None
         else:
             confirmation += " and the specified resources: "
-            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+            response = prompt_y_n(confirmation + ", ".join(delete_list) + '?')
             if not response:
                 return None
 
@@ -2725,7 +2850,7 @@ def delete_deployment_stack_at_management_group(cmd, management_group_id, name=N
         except:
             raise ResourceNotFoundError("DeploymentStack " + delete_name +
                                         " not found in the current management group scope.")
-        return rcf.deployment_stacks.begin_delete_at_management_group(management_group_id, delete_name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum)
+        return rcf.deployment_stacks.begin_delete_at_management_group(management_group_id, delete_name, unmanage_action_resources=aou_resources_action_enum, unmanage_action_resource_groups=aou_resource_groups_action_enum)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
@@ -3698,7 +3823,7 @@ def _validate_lock_params_match_lock(
         _resource_namespace = resource.get('namespace', None)
         if _resource_group is None:
             return
-        if resource_group != _resource_group:
+        if resource_group and resource_group.lower() != _resource_group.lower():
             raise CLIError(
                 'Unexpected --resource-group for lock {}, expected {}'.format(
                     name, _resource_group))
@@ -4385,7 +4510,7 @@ def build_bicepparam_file(cmd, file, stdout=None, outdir=None, outfile=None, no_
 
 
 def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indent_kind=None, indent_size=None, insert_final_newline=None):
-    ensure_bicep_installation(cmd.cli_ctx)
+    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.12.1"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
@@ -4413,7 +4538,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         logger.error("az bicep format could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
-def publish_bicep_file(cmd, file, target, documentationUri=None, force=None):
+def publish_bicep_file(cmd, file, target, documentationUri=None, with_source=None, force=None):
     ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.4.1008"
@@ -4425,6 +4550,12 @@ def publish_bicep_file(cmd, file, target, documentationUri=None, force=None):
                 args += ["--documentationUri", documentationUri]
             else:
                 logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_documentationUri_parameter)
+        if with_source:
+            minimum_supported_version_for_publish_with_source = "0.23.1"
+            if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_publish_with_source):
+                args += ["--with-source"]
+            else:
+                logger.error("az bicep publish with --with-source/-s parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_publish_with_source)
         if force:
             minimum_supported_version_for_publish_force = "0.17.1"
             if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_publish_force):
@@ -4488,7 +4619,7 @@ def list_bicep_cli_versions(cmd):
 
 
 def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None, output_format=None, include_params=None):
-    ensure_bicep_installation(cmd.cli_ctx)
+    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.7.4"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
@@ -4515,7 +4646,7 @@ def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, 
 
 
 def lint_bicep_file(cmd, file, no_restore=None, diagnostics_format=None):
-    ensure_bicep_installation(cmd.cli_ctx)
+    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.7.4"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):

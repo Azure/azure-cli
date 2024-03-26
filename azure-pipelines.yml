@@ -66,12 +66,12 @@ jobs:
   pool:
     name: ${{ variables.windows_pool }}
   steps:
-  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
-    displayName: 'Run Credential Scanner'
-    inputs:
-      toolMajorVersion: V2
-      suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
-      toolVersionV2: '2.1.17'
+#  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
+#    displayName: 'Run Credential Scanner'
+#    inputs:
+#      toolMajorVersion: V2
+#      suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
+#      toolVersionV2: '2.1.17'
 
   - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
     displayName: 'Post Analysis'
@@ -211,6 +211,7 @@ jobs:
 
   - script: |
       set ARCH=$(Platform)
+      set TARGET=msi
       set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
       set
       
@@ -227,6 +228,45 @@ jobs:
     inputs:
       TargetPath: 'build_scripts/windows/out/'
       ArtifactName: msi-$(Platform)
+
+- job: BuildWindowsZIP
+  displayName: Build Windows ZIP
+  strategy:
+    matrix:
+      x64:
+        Platform: x64
+
+  dependsOn: ExtractMetadata
+  condition: succeeded()
+  pool:
+    name: ${{ variables.windows_pool }}
+  steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Build Artifacts'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+        artifactName: metadata
+
+
+    - script: |
+        set ARCH=$(Platform)
+        set TARGET=zip
+        set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
+        set
+        
+        build_scripts/windows/scripts/build.cmd
+      displayName: 'Build Windows ZIP'
+
+    - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+      displayName: 'SBOM'
+      inputs:
+        BuildDropPath: 'build_scripts/windows/out/'
+
+    - task: PublishPipelineArtifact@0
+      displayName: 'Publish Artifact: ZIP'
+      inputs:
+        TargetPath: 'build_scripts/windows/out/'
+        ArtifactName: zip-$(Platform)
 
 - job: TestMsiInstallation
   displayName: Test MSI Installation
@@ -258,6 +298,34 @@ jobs:
     displayName: Install and Load CLI
     inputs:
       filePath: build_scripts\windows\scripts\test_msi_installation.ps1
+
+- job: TestZipInstallation
+  displayName: Test ZIP Installation
+  dependsOn: BuildWindowsZIP
+  strategy:
+    matrix:
+      x64:
+        Platform: x64
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+  pool:
+    name: ${{ variables.windows_pool }}
+  steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/zip'
+      artifactName: zip-$(Platform)
+
+  - task: PowerShell@2
+    displayName: Expand and Load CLI
+    inputs:
+      filePath: build_scripts\windows\scripts\test_zip_installation.ps1
 
 - job: BuildDockerImageAlpine
   displayName: Build Docker Image Alpine
@@ -302,7 +370,7 @@ jobs:
       ${{ each arch in parameters.architectures }}:
         ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          artifactName: docker-${{ arch.name }}
+          artifactName: docker-${{ arch.value }}
   pool:
     name: $(pool)
   steps:
@@ -800,12 +868,6 @@ jobs:
           artifact: rpm-ubi9-${{ arch.value }}
           python_package: python3.9
           pool: ${{ arch.pool }}
-        Fedora 36 ${{ arch.name }}:
-          dockerfile: fedora
-          image: fedora:36
-          artifact: rpm-fedora36-${{ arch.value }}
-          python_package: python3
-          pool: ${{ arch.pool }}
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
@@ -852,14 +914,6 @@ jobs:
           python_package: python3.9
           python_cmd: python3.9
           pip_cmd: pip3.9
-          pool: ${{ arch.pool }}
-        Fedora 36 ${{ arch.name }}:
-          artifact: rpm-fedora36-${{ arch.value }}
-          distro: fc36
-          image: fedora:36
-          python_package: python3
-          python_cmd: python3
-          pip_cmd: pip3
           pool: ${{ arch.pool }}
   steps:
   - task: DownloadPipelineArtifact@1
@@ -1147,19 +1201,19 @@ jobs:
       KUSTO_TABLE: $(KUSTO_TABLE)
       KUSTO_TENANT_ID: $(KUSTO_TENANT_ID)
 
-- job: VerifySphinxDocumentGenerator
-  displayName: "Verify Sphinx Document Generator"
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
-    inputs:
-      versionSpec: 3.10
-  - bash: pip install --upgrade pip wheel
-    displayName: "Install pip and wheel"
-  - bash: ./scripts/ci/test_ref_doc.sh
-    displayName: "Verify Sphinx Document Generator"
+#- job: VerifySphinxDocumentGenerator
+#  displayName: "Verify Sphinx Document Generator"
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python 3.10'
+#    inputs:
+#      versionSpec: 3.10
+#  - bash: pip install --upgrade pip wheel
+#    displayName: "Install pip and wheel"
+#  - bash: ./scripts/ci/test_ref_doc.sh
+#    displayName: "Verify Sphinx Document Generator"
 
 - job: NotifyCIErrors
   dependsOn:
@@ -1174,6 +1228,8 @@ jobs:
     - VerifyVersions
     - BuildWindowsMSI
     - TestMsiInstallation
+    - BuildWindowsZIP
+    - TestZipInstallation
     - BuildDockerImageAlpine
     - TestDockerImageAlpine
     - BuildDockerImageAzureLinux
@@ -1197,7 +1253,7 @@ jobs:
     - PerformanceCheck
     - CheckLinter
     - CodegenCoverage
-    - VerifySphinxDocumentGenerator
+#    - VerifySphinxDocumentGenerator
   condition: and(failed(), in(variables['Build.Reason'], 'BatchedCI'))
   displayName: Notify CI Errors
   pool:

@@ -1467,7 +1467,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         self.kwargs.update({
             'vmss': 'vmss1',
             'ssh_key': TEST_SSH_KEY_PUB
-        })
+        }),
         self.cmd("vmss create -n {vmss} -g {rg} --image Debian11 --admin-username clittester --ssh-key-value '{ssh_key}' --app-gateway apt1 --instance-count 5",
                  checks=self.check('vmss.provisioningState', 'Succeeded'))
         # spot check it is using gateway

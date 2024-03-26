@@ -202,15 +202,15 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('length(properties.configuration.secrets)', 1),
         ])
 
-        # Update Container App with ACR
-        update_string = 'containerapp update -g {} -n {} --min-replicas 0 --max-replicas 1 --set-env-vars testenv=testing'.format(
+        # Update Container App with ACR, set --min-replicas 1
+        update_string = 'containerapp update -g {} -n {} --min-replicas 1 --max-replicas 1 --set-env-vars testenv=testing'.format(
             resource_group, containerapp_name)
         self.cmd(update_string, checks=[
             JMESPathCheck('name', containerapp_name),
             JMESPathCheck('properties.configuration.registries[0].server', registry_server),
             JMESPathCheck('properties.configuration.registries[0].username', registry_username),
             JMESPathCheck('length(properties.configuration.secrets)', 1),
-            JMESPathCheck('properties.template.scale.minReplicas', '0'),
+            JMESPathCheck('properties.template.scale.minReplicas', '1'),
             JMESPathCheck('properties.template.scale.maxReplicas', '1'),
             JMESPathCheck('length(properties.template.containers[0].env)', 1),
             JMESPathCheck('properties.template.containers[0].env[0].name', "testenv"),
@@ -233,7 +233,7 @@ class ContainerappScenarioTest(ScenarioTest):
             # Removing ACR password should fail since it is needed for ACR
             self.cmd('containerapp secret remove -g {} -n {} --secret-names {}'.format(resource_group, containerapp_name, secret_name))
 
-        # Update Container App with ACR
+        # Update Container App with ACR, --min-replicas 0
         update_string = 'containerapp update -g {} -n {} --min-replicas 0 --max-replicas 1 --replace-env-vars testenv=testing2'.format(
             resource_group, containerapp_name)
         self.cmd(update_string, checks=[
@@ -407,6 +407,7 @@ class ContainerappScenarioTest(ScenarioTest):
         self.cmd(f'containerapp env logs show -n {env_name} -g {env_rg} --tail 15 --follow false')
 
     @ResourceGroupPreparer(location="northeurope")
+    @AllowLargeResponse()
     def test_containerapp_registry_msi(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
