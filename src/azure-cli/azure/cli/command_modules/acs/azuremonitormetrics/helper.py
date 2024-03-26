@@ -89,7 +89,8 @@ def rp_registrations(cmd, cluster_subscription_id, raw_parameters):
     subscription_id = cluster_subscription_id
     azure_monitor_workspace_resource_id = raw_parameters.get("azure_monitor_workspace_resource_id")
     if azure_monitor_workspace_resource_id and azure_monitor_workspace_resource_id != "":
-        subscription_id = parse_resource_id(azure_monitor_workspace_resource_id)
+        parsed_dict = parse_resource_id(azure_monitor_workspace_resource_id)
+        subscription_id = parsed_dict["subscription"]
     monitor_workspace_rp_namespaces = {
         "microsoft.insights": False,
         "microsoft.alertsmanagement": False,
