@@ -728,7 +728,7 @@ class FunctionAppFlex(LiveScenarioTest):
 
     def test_functionapp_list_flexconsumption_runtimes(self):
         runtimes = self.cmd('functionapp list-flexconsumption-runtimes').get_output_in_json()
-        self.assertTrue(len(runtimes) == 7)
+        self.assertTrue(len(runtimes) == 8)
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -795,7 +795,6 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(runtime_config['name'] == 'python')
         self.assertTrue(runtime_config['version'] == '3.11')
 
-    @AllowLargeResponse()
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_flex_deployment_config(self, resource_group):
@@ -804,6 +803,7 @@ class FunctionAppFlex(LiveScenarioTest):
         storage_name = self.create_random_name('funcstorage1', 24)
         container_name = self.create_random_name('funccontainer', 24)
         storage2_name = self.create_random_name('funcstorage2', 24)
+        identity_name = self.create_random_name('id1', 8)
         storage_account = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'
                                    .format(storage_name, resource_group, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
         storage_account_blob_endpoint = storage_account['primaryEndpoints']['blob']
@@ -832,6 +832,19 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(deployment_config['storage']['authentication']['type'] == 'StorageAccountConnectionString')
         self.assertTrue(deployment_config['storage']['authentication']['userAssignedIdentityResourceId'] is None)
         self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] == 'DEPLOYMENT_STORAGE_CONNECTION_STRING')
+
+        deployment_config = self.cmd('functionapp deployment config set -g {} -n {} --deployment-storage-auth-type systemAssignedIdentity'
+                                     .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue(deployment_config['storage']['authentication']['type'] == 'SystemAssignedIdentity')
+        self.assertTrue(deployment_config['storage']['authentication']['userAssignedIdentityResourceId'] is None)
+        self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] is None)
+
+        identity = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name)).get_output_in_json()
+        deployment_config = self.cmd('functionapp deployment config set -g {} -n {} --deployment-storage-auth-type userAssignedIdentity --deployment-storage-auth-value {}'
+                                     .format(resource_group, functionapp_name, identity['id']))
+        self.assertTrue(deployment_config['storage']['authentication']['type'] == 'UserAssignedIdentity')
+        self.assertTrue(deployment_config['storage']['authentication']['userAssignedIdentityResourceId'] == identity['id'])
+        self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] is None)
 
 
 class FunctionAppManagedEnvironment(ScenarioTest):
