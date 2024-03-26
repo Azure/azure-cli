@@ -13,19 +13,6 @@ from azure.cli.command_modules.acs.azuremonitormetrics.constants import (
 )
 
 
-def get_subscription_id_from_resource_id(resource_id):
-    try:
-        if not isinstance(resource_id, str):
-            raise TypeError("Resource ID must be a string")
-        parts = resource_id.split("/")
-        if len(parts) < 3:
-            raise ValueError("Invalid resource ID format")
-        return parts[2]
-    except (TypeError, ValueError) as e:
-        print(f"Error: {e}")
-        return None
-
-
 def sanitize_resource_id(resource_id):
     resource_id = resource_id.strip()
     if not resource_id.startswith("/"):
