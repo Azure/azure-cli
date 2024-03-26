@@ -959,33 +959,25 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
 
 
 def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, minimum_elastic_instance_count=None,
-                  elastic_web_app_scale_limit=None, prewarmed_instance_count=None):
+                  prewarmed_instance_count=None):
     if 'function' in instance.kind:
         raise ValidationError("please use 'az functionapp update' to update this function app")
-    if minimum_elastic_instance_count or prewarmed_instance_count or elastic_web_app_scale_limit:
-        args = ["--minimum-elastic-instance-count", "--prewarmed-instance-count", "--elastic-web-app-scale-limit"]
+    if minimum_elastic_instance_count or prewarmed_instance_count:
+        args = ["--minimum-elastic-instance-count", "--prewarmed-instance-count"]
         plan = get_app_service_plan_from_webapp(cmd, instance)
         sku = _normalize_sku(plan.sku.name)
         if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUMV3"]:
             raise ValidationError("{} are only supported for elastic premium V2/V3 SKUs".format(str(args)))
         if not plan.elastic_scale_enabled:
             raise ValidationError("Elastic scale is not enabled on the App Service Plan. Please update the plan ")
-        if ((elastic_web_app_scale_limit or 0) < 0) or \
-                ((minimum_elastic_instance_count or 0) < 0) or \
-                ((prewarmed_instance_count or 0) < 0):
-            raise ValidationError("Value cannot be less than 0 for {}.".format(str(args)))
         if (minimum_elastic_instance_count or 0) > plan.maximum_elastic_worker_count:
             raise ValidationError("--minimum-elastic-instance-count: Minimum elastic instance count is greater than "
                                   "the app service plan's maximum Elastic worker count. "
-                                  "Please choose a lower count or update the plan's maximum.")
+                                  "Please choose a lower count or update the plan's maximum ")
         if (prewarmed_instance_count or 0) > plan.maximum_elastic_worker_count:
             raise ValidationError("--prewarmed-instance-count: Prewarmed instance count is greater than "
                                   "the app service plan's maximum Elastic worker count. "
-                                  "Please choose a lower count or update the plan's maximum.")
-        if (elastic_web_app_scale_limit or 0) > plan.maximum_elastic_worker_count:
-            raise ValidationError("--elastic-web-app-scale-limit: Elastic web app scale limit is greater than "
-                                  "the app service plan's maximum Elastic worker count. "
-                                  "Please choose a lower count or update the plan's maximum.")
+                                  "Please choose a lower count or update the plan's maximum ")
 
     if client_affinity_enabled is not None:
         instance.client_affinity_enabled = client_affinity_enabled == 'true'
@@ -1001,14 +993,6 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
 
     if prewarmed_instance_count is not None:
         instance.site_config.pre_warmed_instance_count = prewarmed_instance_count
-
-    if elastic_web_app_scale_limit is not None:
-        instance.site_config.elastic_web_app_scale_limit = elastic_web_app_scale_limit
-        minim = instance.site_config.minimum_elastic_instance_count
-        if minim and (elastic_web_app_scale_limit < minim):
-            raise ValidationError("--elastic-web-app-scale-limit: Elastic web app scale limit "
-                                  "cannot be less than minimum elastic instance count. "
-                                  "Please choose a higher count or update the minimum elastic instance count.")
 
     return instance
 

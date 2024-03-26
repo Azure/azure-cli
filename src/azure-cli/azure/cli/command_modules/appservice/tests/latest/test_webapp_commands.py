@@ -580,14 +580,12 @@ class WebappElasticScaleTest(ScenarioTest):
 
         self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
             JMESPathCheck("siteConfig.minimumElasticInstanceCount", 1),
-            JMESPathCheck("siteConfig.preWarmedInstanceCount", 1),
-            JMESPathCheck("siteConfig.elasticWebAppScaleLimit", 0) # unenabled by default
+            JMESPathCheck("siteConfig.preWarmedInstanceCount", 1)
         ])
-        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {} --prewarmed-instance-count {} --elastic-web-app-scale-limit {}".format(resource_group, app, 3, 5, 8))
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {} --prewarmed-instance-count {}".format(resource_group, app, 3, 5))
         self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
             JMESPathCheck("siteConfig.minimumElasticInstanceCount", 3),
-            JMESPathCheck("siteConfig.preWarmedInstanceCount", 5),
-            JMESPathCheck("siteConfig.elasticWebAppScaleLimit", 8)
+            JMESPathCheck("siteConfig.preWarmedInstanceCount", 5)
         ])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -634,50 +632,13 @@ class WebappElasticScaleTest(ScenarioTest):
             JMESPathCheck("properties.maximumElasticWorkerCount", 4)
         ])
 
-        # ensure we can't set the minimum elastic instance count too high
+        # ensure we can't set the prewarmed instance count too high
         self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 5), expect_failure=True)
 
-        # also ensure we can't set the minimum elastic instance count above elastic scale limit for the web app (if set)
-        self.cmd("webapp update -g {} -n {} --elastic-web-app-scale-limit {}".format(resource_group, app, 2))
-        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 3), expect_failure=True)
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 4))
 
-        # successful testing
-        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 2))
         self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
-            JMESPathCheck("siteConfig.minimumElasticInstanceCount", 2)
-        ])
-
-    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
-    def test_webapp_elastic_scale_elastic_web_app_scale_limit(self, resource_group):
-        plan = self.create_random_name('plan', 24)
-        app = self.create_random_name('app', 24)
-        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
-
-        self.cmd("webapp create -g {} -n {} --plan {}".format(resource_group, app, plan))
-
-        # ensure we can't set this without the ASP having elastic scale enabled
-        self.cmd("webapp update -g {} -n {} --elastic-web-app-scale-limit {}".format(resource_group, app, 5), expect_failure=True)
-
-        self.cmd('appservice plan update -g {} -n {} --elastic-scale true --max-elastic-worker-count {}'.format(resource_group, plan, 4))
-        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
-            JMESPathCheck("properties.elasticScaleEnabled", True),
-            JMESPathCheck("properties.maximumElasticWorkerCount", 4)
-        ])
-
-        # ensure we can't set the maximum scale instance count too high
-        self.cmd("webapp update -g {} -n {} --elastic-web-app-scale-limit {}".format(resource_group, app, 6), expect_failure=True)
-
-        # also ensure we can't set the maximum scale instance count too low
-        self.cmd("webapp update -g {} -n {} --elastic-web-app-scale-limit {}".format(resource_group, app, -3), expect_failure=True)
-
-        # ensure we can't set the max instance count lower than the min instance count
-        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 3))
-        self.cmd("webapp update -g {} -n {} --elastic-web-app-scale-limit {}".format(resource_group, app, 2), expect_failure=True)
-
-        # ensure we can properly set the max instance count
-        self.cmd("webapp update -g {} -n {} --elastic-web-app-scale-limit {}".format(resource_group, app, 4))
-        self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
-            JMESPathCheck("siteConfig.elasticWebAppScaleLimit", 4)
+            JMESPathCheck("siteConfig.minimumElasticInstanceCount", 4)
         ])
 
 class WebappConfigureTest(ScenarioTest):
