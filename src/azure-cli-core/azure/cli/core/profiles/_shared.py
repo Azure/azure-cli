@@ -164,7 +164,7 @@ AZURE_API_PROFILES = {
             'snapshots': '2023-10-02',
             'galleries': '2021-10-01',
             'gallery_images': '2021-10-01',
-            'gallery_image_versions': '2022-03-03',
+            'gallery_image_versions': '2023-07-03',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
