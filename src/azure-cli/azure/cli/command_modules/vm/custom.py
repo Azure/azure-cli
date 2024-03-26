@@ -4802,7 +4802,10 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             GalleryDiskImageSource = cmd.get_models('GalleryArtifactVersionSource')
 
         source = os_disk_image = data_disk_images = None
-        if managed_image is not None:
+        if virtual_machine is not None and cmd.supported_api_version(min_api='2023-07-03',
+                                                                     operation_group='gallery_image_versions'):
+            source = GalleryArtifactVersionFullSource(virtual_machine_id=virtual_machine)
+        elif managed_image is not None:
             source = GalleryArtifactVersionFullSource(id=managed_image)
         if os_snapshot is not None:
             os_disk_image = GalleryOSDiskImage(source=GalleryDiskImageSource(id=os_snapshot))
