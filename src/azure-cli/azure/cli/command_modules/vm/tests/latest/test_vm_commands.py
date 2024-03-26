@@ -9937,7 +9937,7 @@ class CapacityReservationScenarioTest(ScenarioTest):
             time.sleep(60)
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
 
-    @record_only()
+    @record_only()  # Some special subscriptions can test it.
     @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_sharing_profile', location='westEurope')
     def test_capacity_reservation_sharing_profile(self, resource_group):
 
