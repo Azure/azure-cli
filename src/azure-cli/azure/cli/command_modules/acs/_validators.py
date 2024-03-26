@@ -672,6 +672,16 @@ def sanitize_resource_id(resource_id):
 
 
 # pylint:disable=line-too-long
+def validate_azuremonitor_privatelinkscope_resourceid(namespace):
+    resource_id = namespace.azure_monitor_private_link_scope_resource_id
+    if resource_id is None:
+        return
+    resource_id = sanitize_resource_id(resource_id)
+    if (bool(re.match(r'/subscriptions/.*/resourcegroups/.*/providers/microsoft.insights/privatelinkscopes/.*', resource_id))) is False:
+        raise InvalidArgumentValueError("--azure-monitor-private-link-scope-resource-id  not in the correct format. It should match `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/microsoft.insights/privatelinkscopes/<resourceName>`")
+
+
+# pylint:disable=line-too-long
 def validate_azuremonitorworkspaceresourceid(namespace):
     resource_id = namespace.azure_monitor_workspace_resource_id
     if resource_id is None:

@@ -7695,6 +7695,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             create_dcr=False,
             create_dcra=True,
             enable_syslog=None,
+            azure_monitor_private_link_scope_resource_id=None,
         )
 
         dec_3 = AKSManagedClusterCreateDecorator(
@@ -10967,6 +10968,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             create_dcr=False,
             create_dcra=True,
             enable_syslog=None,
+            azure_monitor_private_link_scope_resource_id=None,
         )
 
         dec_3 = AKSManagedClusterUpdateDecorator(
@@ -11421,7 +11423,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 name="Base",
                 tier="Premium")
         premiumCluster = self.models.ManagedCluster(
-            location="test_location", 
+            location="test_location",
             support_plan=None,
             sku=premiumSKU,
         )
@@ -11469,7 +11471,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 name="Base",
                 tier="Premium")
         ltsCluster = self.models.ManagedCluster(
-            location="test_location", 
+            location="test_location",
             sku=premiumSKU,
             support_plan="AKSLongTermSupport",
         )
@@ -11500,7 +11502,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(nonLTSClusterCalculated, expectedNonLTSCluster)
 
         normalCluster = self.models.ManagedCluster(
-            location="test_location", 
+            location="test_location",
             sku=self.models.ManagedClusterSKU(
                 name="Base",
                 tier="Standard"),
