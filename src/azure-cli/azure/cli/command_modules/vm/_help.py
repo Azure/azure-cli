@@ -3324,7 +3324,7 @@ examples:
     text: az vmss update -n MyVmss -g MyResourceGroup --set virtualMachineProfile.osProfile.linuxConfiguration.patchSettings.patchMode=AutomaticByPlatform
   - name: Update a VMSS with specifying the security posture to be used for all virtual machines in the scale set.
     text: >
-        az vmss update -n MyVmss -g MyResourceGroup --security-posture-reference-id /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest \\
+        az vmss update -n MyVmss -g MyResourceGroup --security-posture-reference-id /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{version} \\
             --security-posture-reference-exclude-extensions "c:\\tmp\\exclude_extensions.json"
 """
 
