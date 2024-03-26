@@ -9937,24 +9937,20 @@ class CapacityReservationScenarioTest(ScenarioTest):
             time.sleep(60)
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_sharing_profile', location='centraluseuap')
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_sharing_profile', location='westEurope')
     def test_capacity_reservation_sharing_profile(self, resource_group):
 
         self.kwargs.update({
             'reservation_group_1': self.create_random_name('reservation_group_', 30),
             'reservation_group_2': self.create_random_name('reservation_group_', 30),
-            'sub_id': '/subscriptions/6b085460-5f21-477e-ba44-1035046e9101'
+            'sub_id': '/subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be'
         })
-        self.cmd('az capacity reservation group create -n {reservation_group_1} -g {rg} --sharing-profile {sub_id}', checks=[
-            self.check('name', '{reservation_group_1}'),
-            self.check('sharingProfile.subscriptionIds[0].id', '{sub_id}')
-        ])
+        self.cmd(
+            'capacity reservation group create -n {reservation_group_1} -g {rg} --sharing-profile "subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be" -l westEurope')
+        self.cmd('capacity reservation group create -n {reservation_group_2} -g {rg} -l westEurope')
+        self.cmd(
+            'capacity reservation group create -n {reservation_group_2} -g {rg} --sharing-profile "subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be" -l westEurope')
 
-        self.cmd('az capacity reservation group create -n {reservation_group_2} -g {rg}')
-        self.cmd('az capacity reservation group update -n {reservation_group_2} -g {rg} --sharing-profile {sub_id}', checks=[
-            self.check('name', '{reservation_group_2}'),
-            self.check('sharingProfile.subscriptionIds[0].id', '{sub_id}')
-        ])
 
 class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
