@@ -2459,7 +2459,7 @@ def create_deployment_stack_at_subscription(
     cmd, name, location, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False, delete_resources=False,
     deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None,
     description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
-    deny_settings_apply_to_child_scopes=False, tags=None, yes=False, no_wait=False
+    deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, tags=None, yes=False, no_wait=False
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -2497,6 +2497,7 @@ def create_deployment_stack_at_subscription(
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
+    # TODO(k.a): pass bypass sync error flag
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
         description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model, tags=tags)
 
@@ -2589,8 +2590,8 @@ def export_template_deployment_stack_at_subscription(cmd, name=None, id=None):  
 def create_deployment_stack_at_resource_group(
     cmd, name, resource_group, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False,
     delete_resources=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None,
-    deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False,
-    tags=None, no_wait=False
+    deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False,
+    bypass_stack_out_of_sync_error=False, yes=False, tags=None, no_wait=False
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -2626,6 +2627,7 @@ def create_deployment_stack_at_resource_group(
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
+    # TODO(k.a): pass bypass sync error flag
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
         description=description, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model, tags=tags)
 
@@ -2838,7 +2840,7 @@ def create_deployment_stack_at_management_group(
     cmd, management_group_id, name, location, deny_settings_mode, action_on_unmanage=None, delete_all=None, delete_resources=False,
     delete_resource_groups=False, deployment_subscription=None, template_file=None, template_spec=None, template_uri=None,
     query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
-    deny_settings_apply_to_child_scopes=False, yes=False, tags=None, no_wait=False
+    deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, yes=False, tags=None, no_wait=False
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -2873,8 +2875,10 @@ def create_deployment_stack_at_management_group(
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
+    # TODO(k.a): pass bypass sync error flag
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
-        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model, tags=tags)
+        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model,
+        tags=tags)
 
     if deployment_subscription:
         deployment_stack_model.deployment_scope = "/subscriptions/" + deployment_subscription

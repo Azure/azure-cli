@@ -111,6 +111,9 @@ def load_arguments(self, _):
     stacks_excluded_principals = CLIArgumentType(options_list=['--deny-settings-excluded-principals', '--ep'], help='List of AAD principal IDs excluded from the lock. Up to 5 principals are permitted.')
     stacks_excluded_actions = CLIArgumentType(options_list=['--deny-settings-excluded-actions', '--ea'], help="List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted.")
     stacks_apply_to_child_scopes = CLIArgumentType(options_list=['--deny-settings-apply-to-child-scopes', '--cs'], help='DenySettings will be applied to child scopes.')
+    stacks_bypass_stack_out_of_sync_error_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), options_list=['--bypass-stack-out-of-sync-error', '--bsoose'],
+        help='Flag to bypass service errors that indicate the stack resource list is not correctly synchronized.')
 
     bicep_file_type = CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(), type=file_type)
     bicep_force_type = CLIArgumentType(options_list=['--force'], action='store_true')
@@ -760,6 +763,7 @@ def load_arguments(self, _):
                 c.argument('tags', tags_type)
 
                 if action == 'create':
+                    c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
                     c.argument('yes', help='Do not prompt for confirmation')
 
     for scope in ['stack group show', 'stack group export']:
