@@ -78,6 +78,7 @@ def register_rps(cmd, subscription_id, rp_namespaces, user_agent):
 
 
 def rp_registrations(cmd, cluster_subscription_id, raw_parameters):
+    from msrestazure.tools import parse_resource_id
     cluster_rp_namespaces = {
         "microsoft.insights": False,
         "microsoft.alertsmanagement": False
@@ -88,7 +89,7 @@ def rp_registrations(cmd, cluster_subscription_id, raw_parameters):
     subscription_id = cluster_subscription_id
     azure_monitor_workspace_resource_id = raw_parameters.get("azure_monitor_workspace_resource_id")
     if azure_monitor_workspace_resource_id and azure_monitor_workspace_resource_id != "":
-        subscription_id = get_subscription_id_from_resource_id(azure_monitor_workspace_resource_id)
+        subscription_id = parse_resource_id(azure_monitor_workspace_resource_id)
     monitor_workspace_rp_namespaces = {
         "microsoft.insights": False,
         "microsoft.alertsmanagement": False,
