@@ -185,7 +185,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
                          self.check('vmExtensions[0].setupOrder[0]', 'BeforeSFRuntime')])
 
         self.cmd('az sf managed-node-type vm-extension update -g {rg} -c {cluster_name} -n pnt '
-                 ' --extension-name {extName} --publisher {publisher} --extension-type {extType} --type-handler-version {extVerUpdate} --auto-upgrade-minor-version --force-update-tag {force_update_tag}',
+                 ' --extension-name {extName} --type-handler-version {extVerUpdate} --auto-upgrade-minor-version --force-update-tag {force_update_tag} ',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('vmExtensions[0].typeHandlerVersion', '2.2'),
                          self.check('vmExtensions[0].autoUpgradeMinorVersion', True),
