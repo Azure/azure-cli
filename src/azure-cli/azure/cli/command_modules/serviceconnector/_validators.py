@@ -502,6 +502,7 @@ def get_missing_auth_args(cmd, namespace):
             setattr(namespace, 'user_identity_auth_info', {
                 'auth_type': 'userAssignedIdentity'
             })
+            logger.warning('Auth info is not specified, use secrets store csi driver as default: --enable-csi')
             return missing_args
 
     if source and target and not auth_param_exist:
