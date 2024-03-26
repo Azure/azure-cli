@@ -4658,6 +4658,11 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
                          disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None,
                          hyper_v_generation='V1', features=None, architecture=None):
+    logger.warning(
+        "Starting Build (May) 2024, \"az sig image-definition create\" command will use the new default values "
+        "Hyper-V Generation: V2 and SecurityType: TrustedLaunchSuppoted."
+    )
+
     # pylint: disable=line-too-long
     GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan, GalleryImageFeature = cmd.get_models(
         'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan', 'GalleryImageFeature')
