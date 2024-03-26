@@ -10,7 +10,8 @@ from .action import (
     AddUserAssignedIdentityAuthInfo,
     AddSystemAssignedIdentityAuthInfo,
     AddServicePrincipalAuthInfo,
-    AddUserAccountAuthInfo
+    AddUserAccountAuthInfo,
+    AddWorkloadIdentityAuthInfo
 )
 # pylint: disable=line-too-long
 
@@ -716,7 +717,7 @@ AUTH_TYPE_PARAMS = {
         'workload_identity_auth_info': {
             'options': ['--workload-identity'],
             'help': 'The workload identity auth info',
-            'action': AddUserAssignedIdentityAuthInfo
+            'action': AddWorkloadIdentityAuthInfo
         }
     },
     AUTH_TYPE.ServicePrincipalSecret: {

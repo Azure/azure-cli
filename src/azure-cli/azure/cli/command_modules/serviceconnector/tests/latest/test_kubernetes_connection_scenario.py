@@ -278,7 +278,8 @@ class KubernetesConnectionScenarioTest(ScenarioTest):
         self.cmd('aks connection delete --id {} --yes'.format(connection_id))
 
 
-    @record_only()
+    @live_only()
+    # "run_cli_cmd" could only work at live mode
     def test_kubernetes_storageblob_workload_identity_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -295,11 +296,15 @@ class KubernetesConnectionScenarioTest(ScenarioTest):
 
         # get user identity id
         user_identity_name = 'servicelinker-k8s-identity'
-        client_id = self.cmd('identity show -n {} -g {}'.format(user_identity_name, 'clitest')).get_output_in_json().get('clientId')
+        user_identity_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{}'.format(
+            self.kwargs['subscription'],
+            'clitest',
+            user_identity_name
+        )
 
         # create connection
         self.cmd('aks connection create storage-blob --connection {} --source-id {} --target-id {} '
-                 '--workload-identity client-id={} subs-id={} --client-type python'.format(name, source_id, target_id, client_id, self.kwargs['subscription']))
+                 '--workload-identity {} --client-type python'.format(name, source_id, target_id, user_identity_id))
 
         # list connection
         connections = self.cmd(
