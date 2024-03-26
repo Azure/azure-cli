@@ -9954,6 +9954,19 @@ class CapacityReservationScenarioTest(ScenarioTest):
             time.sleep(60)
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
 
+    @record_only()  # Some special subscriptions can test it.
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_sharing_profile', location='westEurope')
+    def test_capacity_reservation_sharing_profile(self, resource_group):
+
+        self.kwargs.update({
+            'reservation_group_1': self.create_random_name('reservation_group_', 30),
+            'reservation_group_2': self.create_random_name('reservation_group_', 30),
+            'sub_id': '/subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be'
+        })
+        self.cmd('capacity reservation group create -n {reservation_group_1} -g {rg} --sharing-profile "subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be" -l westEurope')
+        self.cmd('capacity reservation group create -n {reservation_group_2} -g {rg} -l westEurope')
+        self.cmd('capacity reservation group update -n {reservation_group_2} -g {rg} --sharing-profile "subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be"')
+
 
 class VMVMSSAddApplicationTestScenario(ScenarioTest):
 

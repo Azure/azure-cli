@@ -1595,6 +1595,7 @@ def load_arguments(self, _):
         c.argument('capacity_reservation_group_name', options_list=['--capacity-reservation-group', '-n'],
                    help='The name of the capacity reservation group.')
         c.argument('tags', tags_type)
+        c.argument('sharing_profile', nargs='+', help='Space-separated subscription resource IDs. Specify the settings to enable sharing across subscriptions for the capacity reservation group resource.')
 
     with self.argument_context('capacity reservation group create') as c:
         c.argument('zones', zones_type, help='Availability Zones to use for this capacity reservation group. If not provided, the group supports only regional resources in the region. If provided, enforces each capacity reservation in the group to be in one of the zones.')
