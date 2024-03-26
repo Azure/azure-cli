@@ -43,16 +43,18 @@ def _update_mapper(existing, new, keys):
         setattr(new, key, new_value if new_value is not None else existing_value)
     logger.debug("mapping done new is now: %s", new)
 
+
 # region NetworkSiblingset
 class UpdateNetworkSiblingSet(_UpdateNetworkSiblingSet):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZArgEnum
-        args_schema = super()._build_arguments_schema(*args, **kwargs)        
-        # # The API does only support setting Basic and Standard                
-        args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=False)        
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        # # The API does only support setting Basic and Standard
+        args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=False)
         return args_schema
 # endregion
+
 
 # region account
 class AccountCreate(_AccountCreate):

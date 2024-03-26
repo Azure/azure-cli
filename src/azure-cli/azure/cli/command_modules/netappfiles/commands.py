@@ -45,4 +45,3 @@ def load_command_table(self, _):
     with self.command_group('netappfiles', is_preview=False):
         from .custom import UpdateNetworkSiblingSet
         self.command_table["netappfiles update-network-sibling-set"] = UpdateNetworkSiblingSet(loader=self)
-        pass
