@@ -862,15 +862,6 @@ class TestSnapShotAccess(ScenarioTest):
             self.check('creationData.sourceUri', '{os_disk_vhd_uri}')
         ])
 
-    @ResourceGroupPreparer(name_prefix='test_snapshot_create_with_bandwidth_copy_speed', location="centraluseuap")
-    def test_snapshot_create_with_bandwidth_copy_speed(self, resource_group):
-        self.kwargs.update({
-            'snapshot': 'snapshot'
-        })
-
-        self.cmd('snapshot create -n {snapshot} -g {rg} --size-gb 1 --bandwidth-copy-speed Enhanced', checks=self.check('diskState', ''))
-        self.cmd('snapshot show -n {snapshot} -g {rg}', checks=self.check('diskState', 'ActiveSAS'))
-
 
 class VMAttachDisksOnCreate(ScenarioTest):
 
@@ -10289,9 +10280,9 @@ class DiskRPTestScenario(ScenarioTest):
             self.check('creationData.createOption', 'CopyStart')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_snapshot_with_enhance_speed1_', location='eastus2euap')
-    @ResourceGroupPreparer(name_prefix='cli_tests_napshot_with_enhance_speed2_', location='centraluseuap', key='rg2')
-    def test_snapshot_with_enhance_speed(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_snapshot_create_with_bandwidth_copy_speed1_', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='cli_test_snapshot_create_with_bandwidth_copy_speed2_', location='centraluseuap', key='rg2')
+    def test_snapshot_create_with_bandwidth_copy_speed(self, resource_group):
         self.kwargs.update({
             'disk': self.create_random_name('disk', 10),
             'snapshot': self.create_random_name('snap', 10),
