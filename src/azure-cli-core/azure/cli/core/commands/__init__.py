@@ -842,7 +842,7 @@ class AzCliCommandInvoker(CommandInvoker):
             if secret_property_names:
                 message = sensitive_data_detailed_warning_message.format(', '.join(secret_property_names))
             logger.warning(message)
-            set_secrets_detected(True)
+            set_secrets_detected(True, secret_property_names)
         except Exception:  # pylint: disable=broad-except
             # ignore all exceptions, as this is just a warning
             pass

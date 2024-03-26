@@ -620,6 +620,12 @@ def aks_create(
     ksm_metric_annotations_allow_list=None,
     grafana_resource_id=None,
     enable_windows_recording_rules=False,
+    # azure container storage
+    enable_azure_container_storage=None,
+    storage_pool_name=None,
+    storage_pool_size=None,
+    storage_pool_sku=None,
+    storage_pool_option=None,
     # misc
     yes=False,
     no_wait=False,
@@ -762,6 +768,14 @@ def aks_update(
     grafana_resource_id=None,
     enable_windows_recording_rules=False,
     disable_azure_monitor_metrics=False,
+    # azure container storage
+    enable_azure_container_storage=None,
+    disable_azure_container_storage=None,
+    storage_pool_name=None,
+    storage_pool_size=None,
+    storage_pool_sku=None,
+    storage_pool_option=None,
+    azure_container_storage_nodepools=None,
     # misc
     yes=False,
     no_wait=False,
