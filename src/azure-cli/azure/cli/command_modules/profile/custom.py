@@ -33,24 +33,34 @@ _CLOUD_CONSOLE_LOGIN_WARNING = ("Cloud Shell is automatically authenticated unde
 def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
     from azure.cli.core.api import load_subscriptions
+    from azure.cli.core._profile import load_env_var_subscription, env_var_auth_configured
 
     subscriptions = load_subscriptions(cmd.cli_ctx, all_clouds=all, refresh=refresh)
+
+    if subscriptions:
+        for sub in subscriptions:
+            sub['cloudName'] = sub.pop('environmentName', None)
+        if not all:
+            enabled_ones = [s for s in subscriptions if s.get('state') == 'Enabled']
+            if len(enabled_ones) != len(subscriptions):
+                logger.warning("A few accounts are skipped as they don't have 'Enabled' state. "
+                            "Use '--all' to display them.")
+                subscriptions = enabled_ones
+        return subscriptions
+
+    # If logged out, fetch subscription configured in environment variables
+    if env_var_auth_configured():
+        logger.warning("Fetching subscription configured in environment variables.")
+        subscriptions = [load_env_var_subscription()]
+        return subscriptions
+
     if not subscriptions:
         logger.warning('Please run "az login" to access your accounts.')
-    for sub in subscriptions:
-        sub['cloudName'] = sub.pop('environmentName', None)
-    if not all:
-        enabled_ones = [s for s in subscriptions if s.get('state') == 'Enabled']
-        if len(enabled_ones) != len(subscriptions):
-            logger.warning("A few accounts are skipped as they don't have 'Enabled' state. "
-                           "Use '--all' to display them.")
-            subscriptions = enabled_ones
-    return subscriptions
-
+    return []
 
 def show_subscription(cmd, subscription=None):
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    return profile.get_subscription(subscription)
+    return profile.get_subscription(subscription, allow_null_subscription=True)
 
 
 def get_access_token(cmd, subscription=None, resource=None, scopes=None, resource_type=None, tenant=None):
