@@ -9946,11 +9946,9 @@ class CapacityReservationScenarioTest(ScenarioTest):
             'reservation_group_2': self.create_random_name('reservation_group_', 30),
             'sub_id': '/subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be'
         })
-        self.cmd(
-            'capacity reservation group create -n {reservation_group_1} -g {rg} --sharing-profile "subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be" -l westEurope')
+        self.cmd('capacity reservation group create -n {reservation_group_1} -g {rg} --sharing-profile "subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be" -l westEurope')
         self.cmd('capacity reservation group create -n {reservation_group_2} -g {rg} -l westEurope')
-        self.cmd(
-            'capacity reservation group create -n {reservation_group_2} -g {rg} --sharing-profile "subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be" -l westEurope')
+        self.cmd('capacity reservation group create -n {reservation_group_2} -g {rg} --sharing-profile "subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be" -l westEurope')
 
 
 class VMVMSSAddApplicationTestScenario(ScenarioTest):
