@@ -1288,22 +1288,24 @@ def _prepare_stacks_delete_detach_models(rcf, action_on_unmanage, delete_all, de
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
     delete_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
 
-    aou_resources_action_enum, aou_resource_groups_action_enum = detach_model, detach_model
+    aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = detach_model, detach_model, detach_model
 
-    if action_on_unmanage == StacksActionOnUnmanage.DELETE_RESOURCES:
-        aou_resources_action_enum = delete_model
+    if action_on_unmanage == StacksActionOnUnmanage.DETACH_ALL:
+        aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = detach_model, detach_model, detach_model
+    elif action_on_unmanage == StacksActionOnUnmanage.DELETE_RESOURCES:
+        aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = delete_model, detach_model, detach_model
     elif action_on_unmanage == StacksActionOnUnmanage.DELETE_ALL:
-        aou_resources_action_enum, aou_resource_groups_action_enum = delete_model, delete_model
+        aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = delete_model, delete_model, delete_model
 
     # The "delete_*" flags are deprecated in favor of "action_on_unmanage". The logic below will be removed later.
     if delete_all:
-        aou_resources_action_enum, aou_resource_groups_action_enum = delete_model, delete_model
+        aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = delete_model, delete_model, delete_model
     if delete_resource_groups:
         aou_resource_groups_action_enum = delete_model
     if delete_resources:
         aou_resources_action_enum = delete_model
 
-    return aou_resources_action_enum, aou_resource_groups_action_enum
+    return aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum
 
 
 def _prepare_stacks_excluded_actions(deny_settings_excluded_actions):
@@ -1317,7 +1319,7 @@ def _prepare_stacks_excluded_actions(deny_settings_excluded_actions):
     return excluded_actions_array
 
 
-def _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum):
+def _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum, delete_management_groups_enum):
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
 
     if not yes:
@@ -1338,6 +1340,11 @@ def _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, del
             detaching_entities.append("resource groups")
         else:
             deleting_entities.append("resource groups")
+
+        if delete_management_groups_enum == detach_model:
+            detaching_entities.append("management groups")
+        else:
+            deleting_entities.append("management groups")
 
         if len(detaching_entities) > 0:
             build_confirmation_string += f"\nDetach: {', '.join(detaching_entities)}\n"
@@ -2491,11 +2498,11 @@ def create_deployment_stack_at_subscription(
     cmd, name, location, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False, delete_resources=False,
     deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None,
     description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
-    deny_settings_apply_to_child_scopes=False, tags=None, yes=False, no_wait=False
+    deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, tags=None, yes=False, no_wait=False
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    aou_resources_action_enum, aou_resource_groups_action_enum = _prepare_stacks_delete_detach_models(
+    aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = _prepare_stacks_delete_detach_models(
         rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources)
     deny_settings_enum = _prepare_stacks_deny_settings(rcf, deny_settings_mode)
 
@@ -2517,17 +2524,19 @@ def create_deployment_stack_at_subscription(
                 raise CLIError("Cannot change location of an already existing stack at subscription scope.")
             # bypass if yes flag is true
             built_string = _build_stacks_confirmation_string(
-                rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum)
+                rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
         pass
 
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
-        resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum)
+        resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum,
+        management_groups=aou_management_groups_action_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
+    # TODO(k.a): pass bypass sync error flag
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
         description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model, tags=tags)
 
@@ -2564,7 +2573,7 @@ def delete_deployment_stack_at_subscription(
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
 
-    aou_resources_action_enum, aou_resource_groups_action_enum = _prepare_stacks_delete_detach_models(
+    aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = _prepare_stacks_delete_detach_models(
         rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources)
 
     delete_list = []
@@ -2572,6 +2581,8 @@ def delete_deployment_stack_at_subscription(
         delete_list.append("resources")
     if aou_resource_groups_action_enum == rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete:
         delete_list.append("resource groups")
+    if aou_management_groups_action_enum == rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete:
+        delete_list.append("management groups")
 
     # build confirmation string
     from knack.prompting import prompt_y_n
@@ -2599,7 +2610,10 @@ def delete_deployment_stack_at_subscription(
                 rcf.deployment_stacks.get_at_subscription(name)
         except:
             raise ResourceNotFoundError("DeploymentStack " + delete_name + " not found in the current subscription scope.")
-        return rcf.deployment_stacks.begin_delete_at_subscription(delete_name, unmanage_action_resources=aou_resources_action_enum, unmanage_action_resource_groups=aou_resource_groups_action_enum)
+        return rcf.deployment_stacks.begin_delete_at_subscription(
+            delete_name, unmanage_action_resources=aou_resources_action_enum,
+            unmanage_action_resource_groups=aou_resource_groups_action_enum,
+            unmanage_action_management_groups=aou_management_groups_action_enum)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
@@ -2615,12 +2629,12 @@ def export_template_deployment_stack_at_subscription(cmd, name=None, id=None):  
 def create_deployment_stack_at_resource_group(
     cmd, name, resource_group, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False,
     delete_resources=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None,
-    deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False,
-    tags=None, no_wait=False
+    deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False,
+    bypass_stack_out_of_sync_error=False, yes=False, tags=None, no_wait=False
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    aou_resources_action_enum, aou_resource_groups_action_enum = _prepare_stacks_delete_detach_models(
+    aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = _prepare_stacks_delete_detach_models(
         rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources)
     deny_settings_enum = _prepare_stacks_deny_settings(rcf, deny_settings_mode)
 
@@ -2640,17 +2654,19 @@ def create_deployment_stack_at_resource_group(
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
             built_string = _build_stacks_confirmation_string(
-                rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum)
+                rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
         pass
 
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
-        resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum)
+        resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum,
+        management_groups=aou_management_groups_action_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
+    # TODO(k.a): pass bypass sync error flag
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
         description=description, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model, tags=tags)
 
@@ -2687,7 +2703,7 @@ def delete_deployment_stack_at_resource_group(
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
 
-    aou_resources_action_enum, aou_resource_groups_action_enum = _prepare_stacks_delete_detach_models(
+    aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = _prepare_stacks_delete_detach_models(
         rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources)
 
     delete_list = []
@@ -2695,6 +2711,8 @@ def delete_deployment_stack_at_resource_group(
         delete_list.append("resources")
     if aou_resource_groups_action_enum == rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete:
         delete_list.append("resource groups")
+    if aou_resource_groups_action_enum == rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete:
+        delete_list.append("management groups")
 
     # build confirmation string
     from knack.prompting import prompt_y_n
@@ -2714,7 +2732,10 @@ def delete_deployment_stack_at_resource_group(
             rcf.deployment_stacks.get_at_resource_group(resource_group, name)
         except:
             raise ResourceNotFoundError("DeploymentStack " + name + " not found in the current resource group scope.")
-        return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, resource_group, name, unmanage_action_resources=aou_resources_action_enum, unmanage_action_resource_groups=aou_resource_groups_action_enum)
+        return sdk_no_wait(
+            False, rcf.deployment_stacks.begin_delete_at_resource_group, resource_group, name,
+            unmanage_action_resources=aou_resources_action_enum, unmanage_action_resource_groups=aou_resource_groups_action_enum,
+            unmanage_action_management_groups=aou_management_groups_action_enum)
     if id:
         stack_arr = id.split('/')
         if len(stack_arr) < 5:
@@ -2725,7 +2746,10 @@ def delete_deployment_stack_at_resource_group(
             rcf.deployment_stacks.get_at_resource_group(stack_rg, name)
         except:
             raise ResourceNotFoundError("DeploymentStack " + name + " not found in the current resource group scope.")
-        return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, stack_rg, name, unmanage_action_resources=aou_resources_action_enum, unmanage_action_resource_groups=aou_resource_groups_action_enum)
+        return sdk_no_wait(
+            False, rcf.deployment_stacks.begin_delete_at_resource_group, stack_rg, name,
+            unmanage_action_resources=aou_resources_action_enum, unmanage_action_resource_groups=aou_resource_groups_action_enum,
+            unmanage_action_management_groups=aou_management_groups_action_enum)
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
 
@@ -2741,15 +2765,125 @@ def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
 
+def validate_deployment_stack_at_resource_group(
+    cmd, name, resource_group, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False,
+    delete_resources=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None,
+    deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None,
+    no_wait=False
+):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+
+    deployment_stack_model = _prepare_validate_stack_at_scope(
+        rcf=rcf, deployment_scope='resourceGroup', cmd=cmd, deny_settings_mode=deny_settings_mode,
+        action_on_unmanage=action_on_unmanage, delete_all=delete_all, delete_resource_groups=delete_resource_groups,
+        delete_resources=delete_resources, template_file=template_file, template_spec=template_spec, template_uri=template_uri,
+        query_string=query_string, parameters=parameters, description=description,
+        deny_settings_excluded_principals=deny_settings_excluded_principals, deny_settings_excluded_actions=deny_settings_excluded_actions,
+        deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes, tags=tags)
+
+    return sdk_no_wait(
+        no_wait, rcf.deployment_stacks.begin_preflight_validate_stack_at_resource_group, resource_group, name,
+        deployment_stack_model)
+
+
+def validate_deployment_stack_at_subscription(
+    cmd, name, location, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False,
+    delete_resources=False, deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None,
+    parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
+    deny_settings_apply_to_child_scopes=False, tags=None, no_wait=False
+):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+
+    deployment_stack_model = _prepare_validate_stack_at_scope(
+        rcf=rcf, deployment_scope='subscription', cmd=cmd, location=location, deny_settings_mode=deny_settings_mode,
+        action_on_unmanage=action_on_unmanage, delete_all=delete_all, delete_resource_groups=delete_resource_groups,
+        delete_resources=delete_resources, deployment_resource_group=deployment_resource_group, template_file=template_file,
+        template_spec=template_spec, template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
+        deny_settings_excluded_principals=deny_settings_excluded_principals, deny_settings_excluded_actions=deny_settings_excluded_actions,
+        deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes, tags=tags)
+
+    return sdk_no_wait(
+        no_wait, rcf.deployment_stacks.begin_preflight_validate_stack_at_subscription, name, deployment_stack_model)
+
+
+def validate_deployment_stack_at_management_group(
+    cmd, management_group_id, name, location, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False,
+    delete_resources=False, deployment_subscription=None, template_file=None, template_spec=None, template_uri=None, query_string=None,
+    parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
+    deny_settings_apply_to_child_scopes=False, tags=None, no_wait=False
+):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+
+    deployment_stack_model = _prepare_validate_stack_at_scope(
+        rcf=rcf, deployment_scope='managementGroup', cmd=cmd, location=location, deny_settings_mode=deny_settings_mode,
+        action_on_unmanage=action_on_unmanage, delete_all=delete_all, delete_resource_groups=delete_resource_groups,
+        delete_resources=delete_resources, deployment_subscription=deployment_subscription, template_file=template_file,
+        template_spec=template_spec, template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
+        deny_settings_excluded_principals=deny_settings_excluded_principals, deny_settings_excluded_actions=deny_settings_excluded_actions,
+        deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes, tags=tags)
+
+    return sdk_no_wait(
+        no_wait, rcf.deployment_stacks.begin_preflight_validate_stack_at_management_group, management_group_id, name,
+        deployment_stack_model)
+
+
+def _prepare_validate_stack_at_scope(
+    rcf, deployment_scope, cmd, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False,
+    delete_resources=False, location=None, deployment_subscription=None, deployment_resource_group=None, template_file=None,
+    template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None,
+    deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None
+):
+    aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = _prepare_stacks_delete_detach_models(
+        rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources)
+    deny_settings_enum = _prepare_stacks_deny_settings(rcf, deny_settings_mode)
+
+    excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
+    excluded_actions_array = _prepare_stacks_excluded_actions(deny_settings_excluded_actions)
+
+    tags = tags or { }
+
+    if query_string and not template_uri:
+        raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
+
+    if [template_file, template_spec, template_uri].count(None) < 2:
+        raise InvalidArgumentValueError(
+            "Please enter only one of the following: template file, template spec, or template url")
+
+    action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
+        resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum,
+        management_groups=aou_management_groups_action_enum)
+    apply_to_child_scopes = deny_settings_apply_to_child_scopes
+    deny_settings_model = rcf.deployment_stacks.models.DenySettings(
+        mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array,
+        apply_to_child_scopes=apply_to_child_scopes)
+    deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
+        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model,
+        tags=tags)
+
+    if deployment_scope == 'managementGroup' and deployment_subscription:
+        deployment_stack_model.deployment_scope = f"/subscriptions/{deployment_subscription}"
+        deployment_scope = 'subscription'
+    elif deployment_scope == 'subscription' and deployment_resource_group:
+        deployment_subscription_id = get_subscription_id(cmd.cli_ctx)
+
+        deployment_stack_model.deployment_scope = f"/subscriptions/{deployment_subscription_id}/resourceGroups/{deployment_resource_group}"
+        deployment_scope = 'resourceGroup'
+
+    deployment_stack_model = _prepare_stacks_templates_and_parameters(
+        cmd, rcf, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+
+    return deployment_stack_model
+
+
 def create_deployment_stack_at_management_group(
     cmd, management_group_id, name, location, deny_settings_mode, action_on_unmanage=None, delete_all=None, delete_resources=False,
     delete_resource_groups=False, deployment_subscription=None, template_file=None, template_spec=None, template_uri=None,
     query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
-    deny_settings_apply_to_child_scopes=False, yes=False, tags=None, no_wait=False
+    deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, yes=False, tags=None, no_wait=False
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    aou_resources_action_enum, aou_resource_groups_action_enum = _prepare_stacks_delete_detach_models(
+    aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = _prepare_stacks_delete_detach_models(
         rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources)
     deny_settings_enum = _prepare_stacks_deny_settings(rcf, deny_settings_mode)
 
@@ -2767,19 +2901,23 @@ def create_deployment_stack_at_management_group(
     try:
         get_mg_response = rcf.deployment_stacks.get_at_management_group(management_group_id, name)
         if get_mg_response:
-            built_string = _build_stacks_confirmation_string(rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum)
+            built_string = _build_stacks_confirmation_string(
+                rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
         pass
 
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
-        resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum)
+        resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum,
+        management_groups=aou_management_groups_action_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
+    # TODO(k.a): pass bypass sync error flag
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
-        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model, tags=tags)
+        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model,
+        tags=tags)
 
     if deployment_subscription:
         deployment_stack_model.deployment_scope = "/subscriptions/" + deployment_subscription
@@ -2814,7 +2952,7 @@ def delete_deployment_stack_at_management_group(
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
 
-    aou_resources_action_enum, aou_resource_groups_action_enum = _prepare_stacks_delete_detach_models(
+    aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = _prepare_stacks_delete_detach_models(
         rcf, action_on_unmanage, delete_all, delete_resource_groups, delete_resources)
 
     delete_list = []
@@ -2822,6 +2960,8 @@ def delete_deployment_stack_at_management_group(
         delete_list.append("resources")
     if aou_resource_groups_action_enum == rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete:
         delete_list.append("resource groups")
+    if aou_management_groups_action_enum == rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete:
+        delete_list.append("management groups")
 
     # build confirmation string
     from knack.prompting import prompt_y_n
@@ -2850,7 +2990,10 @@ def delete_deployment_stack_at_management_group(
         except:
             raise ResourceNotFoundError("DeploymentStack " + delete_name +
                                         " not found in the current management group scope.")
-        return rcf.deployment_stacks.begin_delete_at_management_group(management_group_id, delete_name, unmanage_action_resources=aou_resources_action_enum, unmanage_action_resource_groups=aou_resource_groups_action_enum)
+        return rcf.deployment_stacks.begin_delete_at_management_group(
+            management_group_id, delete_name, unmanage_action_resources=aou_resources_action_enum,
+            unmanage_action_resource_groups=aou_resource_groups_action_enum,
+            unmanage_action_management_groups=aou_management_groups_action_enum)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
