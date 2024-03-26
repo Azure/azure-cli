@@ -170,6 +170,11 @@ class Profile:
                 identity.login_with_service_principal(username, password, scopes=scopes)
 
         # We have finished login. Let's find all subscriptions.
+        if interactive:
+            message = ('Retrieving subscriptions for the selection...' if tenant else
+                       'Retrieving tenants and subscriptions for the selection...')
+            print(f"\n{message}")
+
         if user_identity:
             username = user_identity['username']
 
@@ -584,21 +589,22 @@ class Profile:
 
             # Nothing is typed, keep current selection
             if select_index == '':
-                print()
-                return active_one
+                break
 
             if select_index in index_to_subscription_map:
                 active_one = index_to_subscription_map[select_index]
-                # Echo the selection
-                print()
-                tenant_string = get_tenant_string(active_one)
-                print(f"Tenant: {tenant_string}")
-                print(f"Subscription: {active_one[_SUBSCRIPTION_NAME]} ({active_one[_SUBSCRIPTION_ID]})")
-                print()
-                return active_one
+                break
 
             logger.warning("Invalid selection.")
             # Let retry
+
+        # Echo the selection
+        tenant_string = get_tenant_string(active_one)
+        print()
+        print(f"Tenant: {tenant_string}")
+        print(f"Subscription: {active_one[_SUBSCRIPTION_NAME]} ({active_one[_SUBSCRIPTION_ID]})")
+        print()
+        return active_one
 
     def is_tenant_level_account(self):
         return self.get_subscription()[_SUBSCRIPTION_NAME] == _TENANT_LEVEL_ACCOUNT_NAME
@@ -835,8 +841,9 @@ class Profile:
                 "environmentName": "AzureCloud",
             }
         ]
-        return self._interactively_select_subscription(
+        self._interactively_select_subscription(
             subscriptions if with_tenant_domain else subscriptions_no_tenant_domain, subscriptions[0])
+        return []
 
 
 class MsiAccountTypes:
