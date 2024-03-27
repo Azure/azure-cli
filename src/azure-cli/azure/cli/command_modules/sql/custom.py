@@ -4062,6 +4062,7 @@ def server_create(
         external_admin_principal_type=None,
         external_admin_sid=None,
         external_admin_name=None,
+        retention_days=None
         **kwargs):
     '''
     Creates a server.
@@ -4081,6 +4082,9 @@ def server_create(
         kwargs['restrict_outbound_network_access'] = (
             ServerNetworkAccessFlag.ENABLED if restrict_outbound_network_access
             else ServerNetworkAccessFlag.DISABLED)
+        
+    if retention_days is not None:
+        kwargs['retention_days'] = retention_days
 
     kwargs['key_id'] = key_id
     kwargs['federated_client_id'] = federated_client_id
@@ -4157,7 +4161,8 @@ def server_update(
         key_id=None,
         federated_client_id=None,
         identity_type=None,
-        user_assigned_identity_id=None):
+        user_assigned_identity_id=None,
+        retention_days=None):
     '''
     Updates a server. Custom update function to apply parameters to instance.
     '''
@@ -4187,6 +4192,9 @@ def server_update(
         instance.public_network_access = (
             ServerNetworkAccessFlag.ENABLED if restrict_outbound_network_access
             else ServerNetworkAccessFlag.DISABLED)
+        
+    if retention_days is not None:
+        kwargs['retention_days'] = retention_days
 
     instance.primary_user_assigned_identity_id = (
         primary_user_assigned_identity_id or instance.primary_user_assigned_identity_id)
