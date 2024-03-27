@@ -271,3 +271,52 @@ def add_network_security_rule(cmd,
     except HttpResponseError as ex:
         logger.error("HttpResponseError: %s", ex)
         raise
+
+def update_network_security_rule(cmd,
+                              client,
+                              resource_group_name,
+                              cluster_name,
+                              name=None,
+                              access=None,
+                              description=None,
+                              direction=None,
+                              protocol=None,
+                              priority=None,
+                              source_port_ranges=None,
+                              dest_port_ranges=None,
+                              dest_addr_prefixes=None,
+                              source_addr_prefixes=None):
+    try:
+        cluster = client.managed_clusters.get(resource_group_name, cluster_name)
+
+        if cluster.network_security_rules is None:
+            cluster.network_security_rules = []
+
+        new_network_securityRule = NetworkSecurityRule(name=name,
+                                                        access=access,
+                                                        description=description,
+                                                        direction=direction,
+                                                        protocol='*' if protocol == 'any' else protocol,
+                                                        priority=priority,
+                                                        source_port_ranges=source_port_ranges,
+                                                        destination_port_ranges=dest_port_ranges,
+                                                        destination_address_prefixes=dest_addr_prefixes,
+                                                        source_address_prefixes=source_addr_prefixes)
+
+        cluster.network_security_rules.append(new_network_securityRule)
+
+        if not cluster.public_ip_prefix_id:
+                cluster.public_ip_prefix_id = None
+
+        if not cluster.public_i_pv6_prefix_id:
+                cluster.public_i_pv6_prefix_id = None
+
+        poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
+        return LongRunningOperation(cmd.cli_ctx)(poller)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
+        raise
+
+    def get_network_security_rule():
+
+    def remove_network_security_rule():
