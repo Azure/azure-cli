@@ -128,7 +128,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if container_registry_url:
         container_registry_url = parse_container_registry_url(container_registry_url)
     else:
-        container_registry_url = parse_deployment_container_image_name(deployment_container_image_name)
+        container_registry_url = parse_docker_image_name(deployment_container_image_name)
 
     if container_image_name:
         container_image_name = container_image_name if not container_registry_url else "{}/{}".format(
@@ -440,7 +440,7 @@ def parse_container_registry_url(container_registry_url):
     return "https://{}".format(hostname)
 
 
-def parse_deployment_container_image_name(deployment_container_image_name, environment=None):
+def parse_docker_image_name(deployment_container_image_name, environment=None):
     if not deployment_container_image_name:
         return None
     non_url = "/" not in deployment_container_image_name
@@ -2378,7 +2378,7 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     if container_registry_url:
         container_registry_url = parse_container_registry_url(container_registry_url)
     else:
-        container_registry_url = parse_deployment_container_image_name(deployment_container_image_name)
+        container_registry_url = parse_docker_image_name(deployment_container_image_name)
 
     if container_image_name:
         container_image_name = container_image_name if not container_registry_url else "{}/{}".format(
@@ -2435,7 +2435,7 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
         raise ArgumentUsageError("Cannot use image, password and username arguments without "
                                  "--configuration-source argument")
 
-    docker_registry_server_url = parse_deployment_container_image_name(image)
+    docker_registry_server_url = parse_docker_image_name(image)
 
     Site = cmd.get_models('Site')
     client = web_client_factory(cmd.cli_ctx)
@@ -4713,7 +4713,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if registry_server:
         docker_registry_server_url = registry_server
     else:
-        docker_registry_server_url = parse_deployment_container_image_name(image, environment)
+        docker_registry_server_url = parse_docker_image_name(image, environment)
 
     if is_linux and not runtime and (consumption_plan_location or not image):
         raise ArgumentUsageError(
