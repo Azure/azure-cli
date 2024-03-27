@@ -93,7 +93,7 @@ Release History
 * `az netappfiles update-network-sibling-set`: Add new command to update the network features of a network sibling set (#27951)
 * `az netappfiles quota-limit`: Add new command group to manage quota limits (#27951)
 * `az netappfiles volume populate-availability-zone`: Add new command to populate availability zone information for a volume (#27951)
-* `az netappfiles volume replication re-initialize`: Add new command to Re-establish a previously deleted replication between 2 volumes that have a common ad-hoc or policy-based snapshots (#27951)
+* `az netappfiles volume replication re-initialize`: Add new command to re-establish a previously deleted replication between 2 volumes that have a common ad-hoc or policy-based snapshots (#27951)
 
 **Network**
 
