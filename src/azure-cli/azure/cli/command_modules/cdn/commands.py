@@ -201,11 +201,17 @@ def load_command_table(self, _):
     from .custom.custom_afdx import AFDRuleCreate
     self.command_table['afd rule create'] = AFDRuleCreate(loader=self)
 
+    from .custom.custom_afdx import AFDRuleConditionShow
+    self.command_table['afd rule condition list'] = AFDRuleConditionShow(loader=self)
+
     from .custom.custom_afdx import AFDRuleconditionAdd
     self.command_table['afd rule condition add'] = AFDRuleconditionAdd(loader=self)
 
     from .custom.custom_afdx import AFDRuleconditionRemove
     self.command_table['afd rule condition remove'] = AFDRuleconditionRemove(loader=self)
+
+    from .custom.custom_afdx import AFDRuleActionShow
+    self.command_table['afd rule action list'] = AFDRuleActionShow(loader=self)
 
     from .custom.custom_afdx import AFDRuleActionCreate
     self.command_table['afd rule action add'] = AFDRuleActionCreate(loader=self)

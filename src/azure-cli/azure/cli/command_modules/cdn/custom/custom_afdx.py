@@ -1092,30 +1092,26 @@ class AFDRuleActionRemove(_AFDRuleUpdate):
         args.actions = actions
 
 
-def list_afd_rule_condition(cmd, resource_group_name,
-                            profile_name, rule_set_name,
-                            rule_name):
-    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'profile_name': profile_name,
-        'rule_set_name': rule_set_name,
-        'rule_name': rule_name
-    })
+class AFDRuleActionShow(_RuleShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
 
-    return existing['conditions']
+    def _output(self, *args, **kwargs):
+        existing = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return existing['actions']
 
 
-def list_afd_rule_action(cmd, resource_group_name,
-                         profile_name, rule_set_name,
-                         rule_name):
-    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'profile_name': profile_name,
-        'rule_set_name': rule_set_name,
-        'rule_name': rule_name
-    })
+class AFDRuleConditionShow(_RuleShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
 
-    return existing['actions']
+    def _output(self, *args, **kwargs):
+        existing = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return existing['conditions']
 
 
 class AFDSecretCreate(_AFDSecretCreate):
