@@ -90,14 +90,14 @@ Release History
 * `az netappfiles check-name-availability`: Add new command to check if a resource name is available (#27951)
 * `az netappfiles check-quota-availability`: Add new command to check if a quota is available (#27951)
 * `az netappfiles query-network-sibling-set`: Add new command to describe a network sibling set (#27951)
-* `az netappfiles update-network-sibling-set`: Add new command to Update the network features of a network sibling set (#27951)
-* `az netappfiles quota-limit`: Add new command group to mange quota limits (#27951)
+* `az netappfiles update-network-sibling-set`: Add new command to update the network features of a network sibling set (#27951)
+* `az netappfiles quota-limit`: Add new command group to manage quota limits (#27951)
 * `az netappfiles volume populate-availability-zone`: Add new command to populate availability zone information for a volume (#27951)
 * `az netappfiles volume replication re-initialize`: Add new command to Re-establish a previously deleted replication between 2 volumes that have a common ad-hoc or policy-based snapshots (#27951)
 
 **Network**
 
-* `az network virtual-appliance connection`: Add update commands for NVA connection (#28461)
+* `az network virtual-appliance connection`: Add update command for NVA connection (#28461)
 * `az network dns record-set`: Add `--traffic-management-profile` for TMLink recordset feature (#28516)
 * `az network application-gateway waf-policy`: Change default rule set from CRS3.0 to DRS2.1 (#28539)
 * `az network virtual-appliance`: Add `--internet-ingress-ips` and `--network-profile` (#28619)
