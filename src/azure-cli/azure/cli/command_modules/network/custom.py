@@ -61,7 +61,7 @@ from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condit
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
 from .aaz.latest.network.custom_ip.prefix import Update as _CustomIpPrefixUpdate
 from .aaz.latest.network.dns.record_set import List as _DNSRecordSetListByZone
-from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate, Update as _DNSZoneUpdate
+from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
     Update as _ExpressRouteGatewayUpdate
@@ -2487,15 +2487,6 @@ def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, 
         logger.info('Attempting to add delegation in the parent zone')
         add_dns_delegation(cmd, created_zone, parent_zone_name, resource_group_name, zone_name)
     return created_zone
-
-class DNSZoneUpdate(_DNSZoneUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
 
 def show_dns_soa_record_set(cmd, resource_group_name, zone_name, record_type):
     return DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={

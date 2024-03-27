@@ -206,8 +206,6 @@ def load_command_table(self, _):
     self.command_table["network dns list-references"] = DNSListReferences(loader=self)
 
     with self.command_group('network dns zone') as g:
-        from .custom import DNSZoneUpdate
-        self.command_table["network dns zone update"] = DNSZoneUpdate(loader=self)
         g.custom_command('import', 'import_zone')
         g.custom_command('export', 'export_zone')
         g.custom_command('create', 'create_dns_zone', table_transformer=transform_dns_zone_table_output)
