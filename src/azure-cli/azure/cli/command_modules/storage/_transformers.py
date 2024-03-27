@@ -501,3 +501,14 @@ def _decode_bytearray(result):
             result[k] = base64.urlsafe_b64encode(v).decode()
         elif isinstance(v, dict):
             _decode_bytearray(v)
+
+
+def transform_blobs_batch_output(result):
+    new_result = []
+    for res in result:
+        new_result.append({
+            "partial_blob_url": res.request.url.split('?')[0],
+            "status_code": res.status_code,
+            "reason": res.reason
+        })
+    return new_result
