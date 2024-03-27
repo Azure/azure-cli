@@ -327,13 +327,6 @@ class Update(AAZCommand):
             help="Specifies whether LDAP is enabled or not for a given NFS volume.",
             nullable=True,
         )
-        _args_schema.network_features = AAZStrArg(
-            options=["--network-features"],
-            arg_group="Properties",
-            help="Basic network, or Standard features available to the volume.",
-            nullable=True,
-            enum={"Basic": "Basic", "Basic_Standard": "Basic_Standard", "Standard": "Standard", "Standard_Basic": "Standard_Basic"},
-        )
         _args_schema.placement_rules = AAZListArg(
             options=["--placement-rules"],
             arg_group="Properties",
@@ -785,7 +778,6 @@ class Update(AAZCommand):
                 properties.set_prop("isRestoring", AAZBoolType, ".is_restoring")
                 properties.set_prop("keyVaultPrivateEndpointResourceId", AAZStrType, ".key_vault_private_endpoint_resource_id")
                 properties.set_prop("ldapEnabled", AAZBoolType, ".ldap_enabled")
-                properties.set_prop("networkFeatures", AAZStrType, ".network_features")
                 properties.set_prop("placementRules", AAZListType, ".placement_rules")
                 properties.set_prop("protocolTypes", AAZListType, ".protocol_types")
                 properties.set_prop("proximityPlacementGroup", AAZStrType, ".proximity_placement_group")

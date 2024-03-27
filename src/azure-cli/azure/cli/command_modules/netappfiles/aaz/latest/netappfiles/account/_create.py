@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2023-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2023-07-01"],
         ]
     }
 
@@ -134,6 +134,7 @@ class Create(AAZCommand):
 
         user_assigned_identities = cls._args_schema.user_assigned_identities
         user_assigned_identities.Element = AAZObjectArg(
+            nullable=True,
             blank={},
         )
 
@@ -387,7 +388,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2023-07-01",
                     required=True,
                 ),
             }
@@ -424,7 +425,7 @@ class Create(AAZCommand):
 
             user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
             if user_assigned_identities is not None:
-                user_assigned_identities.set_elements(AAZObjectType, ".")
+                user_assigned_identities.set_elements(AAZObjectType, ".", typ_kwargs={"nullable": True})
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -559,7 +560,9 @@ class Create(AAZCommand):
             )
 
             user_assigned_identities = cls._schema_on_200_201.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType()
+            user_assigned_identities.Element = AAZObjectType(
+                nullable=True,
+            )
 
             _element = cls._schema_on_200_201.identity.user_assigned_identities.Element
             _element.client_id = AAZStrType(

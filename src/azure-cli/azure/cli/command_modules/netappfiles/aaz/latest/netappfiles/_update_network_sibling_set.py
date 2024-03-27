@@ -18,12 +18,15 @@ class UpdateNetworkSiblingSet(AAZCommand):
     """Update the network features of a network sibling set
 
     Update the network features of the specified network sibling set
+
+    :example: Update Network sibling set
+        az -l westus2 --network-sibling-set-id {SIBLIING_SET_ID} --subnet-id {SUBNET_ID} --network-sibling-set-state-id {SIBLING_SET_STATE_ID} --network-features Standard
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2023-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/updatenetworksiblingset", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/updatenetworksiblingset", "2023-07-01"],
         ]
     }
 
@@ -55,7 +58,7 @@ class UpdateNetworkSiblingSet(AAZCommand):
         _args_schema.network_features = AAZStrArg(
             options=["--network-features"],
             arg_group="Body",
-            help="Network features available to the volume, some such",
+            help="Network features available to the volume",
             required=True,
             default="Basic",
             enum={"Basic": "Basic", "Basic_Standard": "Basic_Standard", "Standard": "Standard", "Standard_Basic": "Standard_Basic"},
@@ -162,7 +165,7 @@ class UpdateNetworkSiblingSet(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2023-07-01",
                     required=True,
                 ),
             }

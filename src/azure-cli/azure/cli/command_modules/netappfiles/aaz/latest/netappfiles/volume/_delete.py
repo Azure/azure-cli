@@ -22,9 +22,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01-preview",
+        "version": "2023-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2023-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2023-07-01"],
         ]
     }
 
@@ -80,7 +80,7 @@ class Delete(AAZCommand):
             ),
         )
         _args_schema.force_delete = AAZBoolArg(
-            options=["--force-delete"],
+            options=["--force", "--force-delete"],
             help="An option to force delete the volume. Will cleanup resources connected to the particular volume",
         )
         return cls._args_schema
@@ -173,7 +173,7 @@ class Delete(AAZCommand):
                     "forceDelete", self.ctx.args.force_delete,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01-preview",
+                    "api-version", "2023-07-01",
                     required=True,
                 ),
             }
