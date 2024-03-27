@@ -240,6 +240,7 @@ class WorkspaceTableSearchJobCancel(_WorkspaceTableSearchJobCancel):
     def pre_operations(self):
         args = self.ctx.args
         table_name = args.table_name.to_serialized_data()
+        
         if table_name and not table_name.endswith("_SRCH"):
             raise InvalidArgumentValueError('usage: The table name needs to end with _SRCH')
 
