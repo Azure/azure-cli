@@ -371,47 +371,6 @@ examples:
     crafted: true
 """
 
-helps['security contact'] = """
-type: group
-short-summary: View your security contacts.
-"""
-
-helps['security contact create'] = """
-type: command
-short-summary: Creates a security contact.
-examples:
-  - name: Creates a security contact.
-    text: >
-        az security contact create -n "default1" --email 'john@contoso.com' --phone '(214)275-4038' --alert-notifications 'on' --alerts-admins 'on'
-"""
-
-helps['security contact delete'] = """
-type: command
-short-summary: Deletes a security contact.
-examples:
-  - name: Deletes a security contact.
-    text: >
-        az security contact delete -n "default1"
-"""
-
-helps['security contact list'] = """
-type: command
-short-summary: List security contact.
-examples:
-  - name: Get security contacts.
-    text: >
-        az security contact list
-"""
-
-helps['security contact show'] = """
-type: command
-short-summary: Shows a security contact.
-examples:
-  - name: Get a security contact.
-    text: >
-        az security contact show -n "default1"
-"""
-
 helps['security discovered-security-solution'] = """
 type: group
 short-summary: View your discovered security solutions
@@ -538,38 +497,6 @@ examples:
   - name: Shows the Azure Defender plan for the subscription
     text: >
         az security pricing show -n VirtualMachines
-"""
-
-helps['security setting'] = """
-type: group
-short-summary: View your security settings.
-"""
-
-helps['security setting list'] = """
-type: command
-short-summary: List security settings.
-examples:
-  - name: Get security settings.
-    text: >
-        az security setting list
-"""
-
-helps['security setting show'] = """
-type: command
-short-summary: Shows a security setting.
-examples:
-  - name: Get a security setting.
-    text: >
-        az security setting show -n "MCAS"
-"""
-
-helps['security setting update'] = """
-type: command
-short-summary: Updates a security setting.
-examples:
-  - name: Update a security setting.
-    text: >
-        az security setting update -n "Sentinel" --enabled true
 """
 
 helps['security task'] = """

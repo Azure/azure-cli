@@ -11,6 +11,10 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "security security-connector devops azuredevopsorg project repo create",
+    is_preview=True,
+)
 class Create(AAZCommand):
     """Create a monitored Azure DevOps repository resource.
     """

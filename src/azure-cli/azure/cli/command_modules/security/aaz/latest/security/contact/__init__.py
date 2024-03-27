@@ -8,16 +8,9 @@
 # pylint: skip-file
 # flake8: noqa
 
-from azure.cli.core.aaz import *
-
-
-@register_command_group(
-    "security",
-)
-class __CMDGroup(AAZCommandGroup):
-    """Manage your security posture with Microsoft Defender for Cloud.
-    """
-    pass
-
-
-__all__ = ["__CMDGroup"]
+from .__cmd_group import *
+from ._create import *
+from ._delete import *
+from ._list import *
+from ._show import *
+from ._update import *
