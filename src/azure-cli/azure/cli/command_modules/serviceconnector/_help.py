@@ -12,8 +12,7 @@ from ._resource_config import (
     TARGET_RESOURCES,
     TARGET_RESOURCES_PARAMS,
     SUPPORTED_AUTH_TYPE,
-    LOCAL_CONNECTION_PARAMS,
-    USER_IDENTITY_ID
+    LOCAL_CONNECTION_PARAMS
 )
 
 from ._utils import should_load_source
@@ -221,7 +220,10 @@ for source in SOURCE_RESOURCES:
         # auth info params
         auth_types = SUPPORTED_AUTH_TYPE.get(source).get(target)
         if auth_types[0] == AUTH_TYPE.WorkloadIdentity:
-            auth_params = '--workload-identity {}'.format(USER_IDENTITY_ID)
+            if target is RESOURCE.KeyVault:
+                auth_params = '--enable-csi'
+            else:
+                auth_params = get_auth_info_params(AUTH_TYPE.SecretAuto)
         else:
             auth_params = get_auth_info_params(auth_types[0])
 
@@ -319,6 +321,18 @@ for source in SOURCE_RESOURCES:
             target_params=target_params,
             auth_params=auth_params,
             source_display_name=source_display_name) if source is RESOURCE.WebApp else ''
+
+        aks_keyvault_example = '''
+            - name: Create a connection between {source_display_name} and {target} using secret store csi driver
+              text: |-
+                     az {source} connection create {target} {source_params} --slot MySlot {target_params} --enable-csi
+        '''.format(
+            source=source.value,
+            target=target.value,
+            source_params=source_params,
+            target_params=target_params,
+            source_display_name=source_display_name
+        ) if source is RESOURCE.KubernetesCluster and target is RESOURCE.KeyVault else ''
 
         helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
           type: command

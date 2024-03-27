@@ -1147,6 +1147,3 @@ class OPT_OUT_OPTION(Enum):
     PUBLIC_NETWORK = 'publicnetwork'
     CONFIGURATION_INFO = 'configinfo'
     # AUTHENTICATION = 'auth'
-
-
-USER_IDENTITY_ID = "/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{user_identity_name}"
