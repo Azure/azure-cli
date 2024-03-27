@@ -8,14 +8,14 @@ Release History
 
 **ACR**
 
-* Fix #14768: `az acr login`: Add environment Variable for docker command (#28443)
+* Fix #14768: `az acr login`: Add environment variable for docker command (#28443)
 
 **ACS**
 
 * `az aks create`: Add flag `--enable-app-routing` to enable app routing (#28463)
-* `az aks approuting`: Add command group to handle enable|disable|update of the approuting addon (#28463)
-* `az aks approuting zone`: Add command group to handle add|delete|update|list actions of dns zone resources associated to the approuting addon (#28463)
-* `az aks create/update`: Introduce changes for Azure container storage in ACS cli (#28251)
+* `az aks approuting`: Add command group to handle enable/disable/update of the app routing addon (#28463)
+* `az aks approuting zone`: Add command group to handle add/delete/update/list actions of DNS zone resources associated to the approuting addon (#28463)
+* `az aks create/update`: Introduce changes for Azure container storage in ACS CLI (#28251)
 
 **AD**
 
@@ -32,7 +32,7 @@ Release History
 **App Config**
 
 * `az appconfig feature filter update`: GA command (#28459)
-* `az kv export`: GA parameter `--export-as-reference` (#28459)
+* `az appconfig kv export`: GA parameter `--export-as-reference` (#28459)
 
 **App Service**
 
