@@ -5528,6 +5528,16 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
+    def test_nullable_params_are_not_required(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'nullable_params_are_not_required/main.bicep').replace('\\', '\\\\'),
+        })
+
+        self.cmd('deployment sub create --location westus --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
     def test_management_group_level_deployment_with_bicep(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
