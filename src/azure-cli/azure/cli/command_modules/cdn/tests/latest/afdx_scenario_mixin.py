@@ -36,6 +36,10 @@ class CdnAfdScenarioMixin:
 
         return self.cmd(command, checks)
 
+    def afd_profile_log_scrubbing_show_cmd(self, group, name, checks=None):
+        command = 'afd profile log-scrubbing show -g {} --profile-name {}'.format(group, name)
+        return self.cmd(command, checks)
+
     def afd_profile_list_cmd(self, group, checks=None):
         command = 'afd profile list -g {}'.format(group)
         return self.cmd(command, checks)

@@ -167,6 +167,12 @@ def add_client_cert(cmd,
         if not cluster.public_i_pv6_prefix_id:
             cluster.public_i_pv6_prefix_id = None
 
+        if not cluster.public_ip_prefix_id:
+            cluster.public_ip_prefix_id = None
+
+        if not cluster.public_i_pv6_prefix_id:
+            cluster.public_i_pv6_prefix_id = None
+
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
     except HttpResponseError as ex:
