@@ -1108,6 +1108,9 @@ class AFDRuleActionShow(_RuleShow):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.actions._registered = False
+        args_schema.conditions._registered = False
+        args_schema._ids._registered = False
         return args_schema
 
     def _output(self, *args, **kwargs):
@@ -1119,6 +1122,9 @@ class AFDRuleConditionShow(_RuleShow):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.actions._registered = False
+        args_schema.conditions._registered = False
+        args_schema._ids._registered = False
         return args_schema
 
     def _output(self, *args, **kwargs):
