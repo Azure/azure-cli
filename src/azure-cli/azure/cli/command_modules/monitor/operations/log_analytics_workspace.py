@@ -217,6 +217,7 @@ class WorkspaceTableUpdate(_WorkspaceTableUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
+        
         if has_value(args.retention_in_days):
             retention_time = args.retention_in_days.to_serialized_data()
             if retention_time == -1 or (4 <= retention_time <= 730):
@@ -240,7 +241,7 @@ class WorkspaceTableSearchJobCancel(_WorkspaceTableSearchJobCancel):
     def pre_operations(self):
         args = self.ctx.args
         table_name = args.table_name.to_serialized_data()
-        
+
         if table_name and not table_name.endswith("_SRCH"):
             raise InvalidArgumentValueError('usage: The table name needs to end with _SRCH')
 
