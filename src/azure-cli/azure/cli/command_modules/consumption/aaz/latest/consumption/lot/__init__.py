@@ -8,3 +8,6 @@
 # pylint: skip-file
 # flake8: noqa
 
+from .__cmd_group import *
+from ._list import *
+from ._list_with_customer_id import *

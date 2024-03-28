@@ -21,3 +21,9 @@ def load_arguments(self, _):
         cb.argument('resource_groups', options_list='--resource-group-filter', nargs='+', help='Space-separated list of resource groups to filter on.')
         cb.argument('resources', options_list='--resource-filter', nargs='+', help='Space-separated list of resource instances to filter on.')
         cb.argument('meters', options_list='--meter-filter', nargs='+', help='Space-separated list of meters to filter on. Required if category is usage.')
+
+    with self.argument_context('consumption lot') as c:
+        c.argument('billing_account_id', help='Billing Account ID')
+        c.argument('billing_profile_id', help='Azure Billing Profile ID.')
+        c.argument('customer_id', help='Customer ID')
+        c.argument('filter', help='May be used to filter the lots by Status, Source etc. The filter supports \'eq\', \'lt\', \'gt\', \'le\', \'ge\', and \'and\'. Tag filter is a key value pair string where key and value is separated by a colon (:).')

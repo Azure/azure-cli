@@ -341,3 +341,19 @@ def cli_consumption_delete_budget(cmd, budget_name, resource_group_name=None):
         return DeleteWithRg(cli_ctx=cmd.cli_ctx)(command_args=args)
     from .aaz.latest.consumption.budget import Delete
     return Delete(cli_ctx=cmd.cli_ctx)(command_args=args)
+
+
+def cli_consumption_list_lot(cmd, billing_account_id, billing_profile_id=None, customer_id=None, filter=None):
+    args = {
+        "billing_account_id": billing_account_id,
+        "filters": filter,
+    }
+    if has_value(customer_id):
+        from .aaz.latest.consumption.lot import ListWithCustomerId
+        args['customer_id'] = customer_id
+        return ListWithCustomerId(cli_ctx=cmd.cli_ctx)(command_args=args)
+    if has_value(billing_profile_id):
+        args['billing_profile_id'] = billing_profile_id
+    from .aaz.latest.consumption.lot import List
+    return List(cli_ctx=cmd.cli_ctx)(command_args=args)
+
