@@ -6,8 +6,7 @@ from knack.arguments import CLIArgumentType
 
 from azure.mgmt.cdn.models import (QueryStringCachingBehavior, DeliveryRuleAction,
                                    ForwardingProtocol, DeliveryRuleCondition,
-                                   AfdQueryStringCachingBehavior, Transform,
-                                   MatchProcessingBehavior)
+                                   AfdQueryStringCachingBehavior, Transform)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import get_three_state_flag, get_enum_type
 from ._validators import (validate_origin)
@@ -17,7 +16,6 @@ from ._actions import (OriginType)
 # pylint:disable=too-many-statements
 def load_arguments(self, _):
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
-    rule_name_type = CLIArgumentType(options_list=('--rule-name'), metavar='RULE_NAME')
     profile_name_help = 'Name of the CDN profile which is unique within the resource group.'
 
     # Endpoint #
@@ -98,27 +96,6 @@ def load_arguments(self, _):
                    help='The secret version of the KeyVault certificate, If not specified, the "Latest" version will '
                         'always been used and the deployed certificate will be automatically rotated to the latest '
                         'version when a newer version of the certificate is available.')
-    # AFDX
-    # AFD Rules #
-    with self.argument_context('afd rule') as c:
-        c.argument('profile_name', help=profile_name_help, id_part='name')
-        c.argument('rule_set_name', id_part='child_name_1', help='Name of the rule set.')
-        configure_rule_parameters(c, True)
-        c.argument('rule_name', rule_name_type, id_part='child_name_2', help='Name of the rule.')
-        c.argument('match_processing_behavior',
-                   arg_type=get_enum_type(MatchProcessingBehavior),
-                   help='Indicate whether rules engine should continue to run the remaining rules or stop if matched.'
-                        ' Defaults to Continue.')
-
-    with self.argument_context('afd rule condition list') as c:
-        c.argument('profile_name', id_part=None)
-        c.argument('rule_set_name', id_part=None)
-        c.argument('rule_name', id_part=None)
-
-    with self.argument_context('afd rule action list') as c:
-        c.argument('profile_name', id_part=None)
-        c.argument('rule_set_name', id_part=None)
-        c.argument('rule_name', id_part=None)
 
 
 # pylint: disable=protected-access

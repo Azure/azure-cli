@@ -21,6 +21,7 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Show as
     Create as _AFDSecurityPolicyCreate, Update as _AFDSecurityPolicyUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDProfileShow, \
     Create as _AFDProfileCreate, Update as _AFDProfileUpdate
+from azure.cli.command_modules.cdn.aaz.latest.afd.profile.log_scrubbing import Show as _AFDProfileLogScrubbingShow
 from azure.cli.command_modules.cdn.aaz.latest.afd.endpoint import Show as _AFDEndpointShow, \
     Create as _AFDEndpointCreate, Update as _AFDEndpointUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin_group import Show as _AFDOriginGroupShow, \
@@ -210,6 +211,17 @@ class AFDProfileUpdate(_AFDProfileUpdate):
                 }
             else:
                 args.identity = None
+
+
+class AFDProfileLogScrubbingShow(_AFDProfileLogScrubbingShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        existing = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return existing['logScrubbing']
 
 
 class AFDEndpointCreate(_AFDEndpointCreate):
@@ -1092,30 +1104,32 @@ class AFDRuleActionRemove(_AFDRuleUpdate):
         args.actions = actions
 
 
-def list_afd_rule_condition(cmd, resource_group_name,
-                            profile_name, rule_set_name,
-                            rule_name):
-    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'profile_name': profile_name,
-        'rule_set_name': rule_set_name,
-        'rule_name': rule_name
-    })
+class AFDRuleActionShow(_RuleShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.actions._registered = False
+        args_schema.conditions._registered = False
+        args_schema.ids._registered = False
+        return args_schema
 
-    return existing['conditions']
+    def _output(self, *args, **kwargs):
+        existing = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return existing['actions']
 
 
-def list_afd_rule_action(cmd, resource_group_name,
-                         profile_name, rule_set_name,
-                         rule_name):
-    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'profile_name': profile_name,
-        'rule_set_name': rule_set_name,
-        'rule_name': rule_name
-    })
+class AFDRuleConditionShow(_RuleShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.actions._registered = False
+        args_schema.conditions._registered = False
+        args_schema.ids._registered = False
+        return args_schema
 
-    return existing['actions']
+    def _output(self, *args, **kwargs):
+        existing = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return existing['conditions']
 
 
 class AFDSecretCreate(_AFDSecretCreate):
