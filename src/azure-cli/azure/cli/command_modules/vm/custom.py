@@ -369,7 +369,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     if security_data_uri:
         option = getattr(DiskCreateOption, 'import_secure')
     elif source_blob_uri:
-        option = getattr(DiskCreateOption, 'import')
+        option = getattr(DiskCreateOption, 'import_enum')
     elif source_disk or source_snapshot:
         option = getattr(DiskCreateOption, 'copy')
     elif source_restore_point:
@@ -675,7 +675,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
                     public_network_access=None, accelerated_network=None, architecture=None,
-                    elastic_san_resource_id=None):
+                    elastic_san_resource_id=None, bandwidth_copy_speed=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -684,7 +684,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if source_blob_uri:
-        option = getattr(DiskCreateOption, 'import')
+        option = getattr(DiskCreateOption, 'import_enum')
     elif source_disk or source_snapshot:
         option = getattr(DiskCreateOption, 'copy')
         if cmd.supported_api_version(min_api='2021-04-01', operation_group='snapshots'):
@@ -700,7 +700,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                                  image_reference=None,
                                  source_resource_id=source_disk or source_snapshot,
                                  storage_account_id=source_storage_account_id,
-                                 elastic_san_resource_id=elastic_san_resource_id)
+                                 elastic_san_resource_id=elastic_san_resource_id,
+                                 provisioned_bandwidth_copy_speed=bandwidth_copy_speed)
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
@@ -3174,7 +3175,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 os_disk_delete_option=None, data_disk_delete_option=None, regular_priority_count=None,
                 regular_priority_percentage=None, disk_controller_type=None, nat_rule_name=None,
                 enable_osimage_notification=None, max_surge=None, disable_integrity_monitoring_autoupgrade=False,
-                enable_hibernation=None, enable_proxy_agent=None, proxy_agent_mode=None):
+                enable_hibernation=None, enable_proxy_agent=None, proxy_agent_mode=None,
+                security_posture_reference_id=None, security_posture_reference_exclude_extensions=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3480,7 +3482,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             regular_priority_percentage=regular_priority_percentage, disk_controller_type=disk_controller_type,
             enable_osimage_notification=enable_osimage_notification, max_surge=max_surge,
             enable_hibernation=enable_hibernation, enable_auto_os_upgrade=enable_auto_os_upgrade,
-            enable_proxy_agent=enable_proxy_agent, proxy_agent_mode=proxy_agent_mode)
+            enable_proxy_agent=enable_proxy_agent, proxy_agent_mode=proxy_agent_mode,
+            security_posture_reference_id=security_posture_reference_id,
+            security_posture_reference_exclude_extensions=security_posture_reference_exclude_extensions)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3907,7 +3911,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
                 regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
                 enable_osimage_notification=None, custom_data=None, enable_hibernation=None,
-                security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, **kwargs):
+                security_type=None, enable_proxy_agent=None, proxy_agent_mode=None,
+                security_posture_reference_id=None, security_posture_reference_exclude_extensions=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4123,6 +4128,19 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.additional_capabilities = AdditionalCapabilities(hibernation_enabled=enable_hibernation)
         else:
             vmss.additional_capabilities.hibernation_enabled = enable_hibernation
+
+    if security_posture_reference_id is not None or security_posture_reference_exclude_extensions is not None:
+        security_posture_reference = vmss.virtual_machine_profile.security_posture_reference
+        if security_posture_reference is None:
+            SecurityPostureReference = cmd.get_models('SecurityPostureReference')
+            security_posture_reference = SecurityPostureReference()
+
+        if security_posture_reference_id is not None:
+            security_posture_reference.id = security_posture_reference_id
+        if security_posture_reference_exclude_extensions is not None:
+            security_posture_reference.exclude_extensions = security_posture_reference_exclude_extensions
+
+        vmss.virtual_machine_profile.security_posture_reference = security_posture_reference
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
@@ -4658,6 +4676,11 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
                          disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None,
                          hyper_v_generation='V1', features=None, architecture=None):
+    logger.warning(
+        "Starting Build (May) 2024, \"az sig image-definition create\" command will use the new default values "
+        "Hyper-V Generation: V2 and SecurityType: TrustedLaunchSuppoted."
+    )
+
     # pylint: disable=line-too-long
     GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan, GalleryImageFeature = cmd.get_models(
         'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan', 'GalleryImageFeature')
@@ -4780,7 +4803,10 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             GalleryDiskImageSource = cmd.get_models('GalleryArtifactVersionSource')
 
         source = os_disk_image = data_disk_images = None
-        if managed_image is not None:
+        if virtual_machine is not None and cmd.supported_api_version(min_api='2023-07-03',
+                                                                     operation_group='gallery_image_versions'):
+            source = GalleryArtifactVersionFullSource(virtual_machine_id=virtual_machine)
+        elif managed_image is not None:
             source = GalleryArtifactVersionFullSource(id=managed_image)
         if os_snapshot is not None:
             os_disk_image = GalleryOSDiskImage(source=GalleryDiskImageSource(id=os_snapshot))
@@ -5517,17 +5543,25 @@ def get_gallery_instance(cmd, resource_group_name, gallery_name):
 
 
 def create_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, location=None,
-                                      tags=None, zones=None):
+                                      tags=None, zones=None, sharing_profile=None):
     CapacityReservationGroup = cmd.get_models('CapacityReservationGroup')
-    capacity_reservation_group = CapacityReservationGroup(location=location, tags=tags, zones=zones)
+    if sharing_profile is not None:
+        subscription_ids = [{'id': sub_id} for sub_id in sharing_profile]
+        sharing_profile = {'subscriptionIds': subscription_ids}
+    capacity_reservation_group = CapacityReservationGroup(location=location, tags=tags,
+                                                          zones=zones, sharing_profile=sharing_profile)
     return client.create_or_update(resource_group_name=resource_group_name,
                                    capacity_reservation_group_name=capacity_reservation_group_name,
                                    parameters=capacity_reservation_group)
 
 
-def update_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, tags=None):
+def update_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, tags=None,
+                                      sharing_profile=None):
     CapacityReservationGroupUpdate = cmd.get_models('CapacityReservationGroupUpdate')
-    capacity_reservation_group = CapacityReservationGroupUpdate(tags=tags)
+    if sharing_profile is not None:
+        subscription_ids = [{'id': sub_id} for sub_id in sharing_profile]
+        sharing_profile = {'subscriptionIds': subscription_ids}
+    capacity_reservation_group = CapacityReservationGroupUpdate(tags=tags, sharing_profile=sharing_profile)
     return client.update(resource_group_name=resource_group_name,
                          capacity_reservation_group_name=capacity_reservation_group_name,
                          parameters=capacity_reservation_group)
