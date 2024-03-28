@@ -10,8 +10,6 @@ from azure.cli.core.commands.arm import (
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import ResourceType
 
-from azure.cli.command_modules.network._client_factory import (
-    cf_dns_mgmt_record_sets, cf_dns_mgmt_zones)
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_zone_table_output, transform_public_ip_create_output,
@@ -35,15 +33,6 @@ NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
 
 # pylint: disable=too-many-locals, too-many-statements
 def load_command_table(self, _):
-
-    # region Command Types
-    network_dns_record_set_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.dns.operations#RecordSetsOperations.{}',
-        client_factory=cf_dns_mgmt_record_sets,
-        resource_type=ResourceType.MGMT_NETWORK_DNS
-    )
-    # endregion
-
     # region NetworkRoot
     with self.command_group('network'):
         from azure.cli.command_modules.network.custom import UsagesList
@@ -214,14 +203,14 @@ def load_command_table(self, _):
     experimental_records = ['ds', 'tlsa']
     for record in supported_records:
         is_experimental = record in experimental_records
-        with self.command_group('network dns record-set {}'.format(record), network_dns_record_set_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS, is_experimental=is_experimental) as g:
+        with self.command_group('network dns record-set {}'.format(record), is_experimental=is_experimental) as g:
             g.custom_command('add-record', 'add_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
             g.custom_command('remove-record', 'remove_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
 
-    with self.command_group('network dns record-set soa', network_dns_record_set_sdk) as g:
+    with self.command_group('network dns record-set soa') as g:
         g.custom_command('update', 'update_dns_soa_record', transform=transform_dns_record_set_output)
 
-    with self.command_group('network dns record-set cname', network_dns_record_set_sdk) as g:
+    with self.command_group('network dns record-set cname') as g:
         g.custom_command('set-record', 'add_dns_cname_record', transform=transform_dns_record_set_output)
         g.custom_command('remove-record', 'remove_dns_cname_record', transform=transform_dns_record_set_output)
 
