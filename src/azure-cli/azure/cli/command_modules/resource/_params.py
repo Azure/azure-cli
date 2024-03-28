@@ -124,7 +124,7 @@ def load_arguments(self, _):
     bicep_newline_type = CLIArgumentType(options_list=['--newline'], help="Set newline char. Valid values are ( Auto | LF | CRLF | CR ).")
     bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
                                                  arg_type=get_enum_type(
-                                                     ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64", "linux-arm64", "osx-arm64"]),
+                                                     ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64", "linux-arm64", "osx-arm64", "win-arm64"]),
                                                  help="The platform the Bicep CLI will be running on. Set this to skip automatic platform detection if it does not work properly.")
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''

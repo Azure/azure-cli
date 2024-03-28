@@ -109,6 +109,7 @@ def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None):
 
 def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, stdout=True):
     system = platform.system()
+    machine = platform.machine()
     installation_path = _get_bicep_installation_path(system)
 
     if os.path.isfile(installation_path):
@@ -132,9 +133,16 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
             else:
                 print("Installing Bicep CLI...")
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
-        request = urlopen(_get_bicep_download_url(system, release_tag, target_platform=target_platform))
+
+        download_url = _get_bicep_download_url(system, machine, release_tag, target_platform=target_platform)
+        request = urlopen(download_url)
         with open(installation_path, "wb") as f:
             f.write(request.read())
+
+        _logger.debug(
+            "Generated download URL %s. from system %s, machine %s, release tag %s and target platform %s.",
+            download_url, system, machine, release_tag, target_platform,
+        )
 
         os.chmod(installation_path, os.stat(installation_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
@@ -268,23 +276,38 @@ def _get_bicep_installed_version(bicep_executable_path):
     return _extract_version(installed_version_output)
 
 
-def _get_bicep_download_url(system, release_tag, target_platform=None):
+def _has_musl_binaries():
+    return os.path.exists("/lib/ld-musl-x86_64.so.1") and not os.path.exists("/lib/x86_64-linux-gnu/libc.so.6")
+
+
+def _get_bicep_download_url(system, machine, release_tag, target_platform=None):
     download_url = f"https://downloads.bicep.azure.com/{release_tag}/{{}}"
 
-    if target_platform:
-        executable_name = "bicep-win-x64.exe" if target_platform == "win-x64" else f"bicep-{target_platform}"
-        return download_url.format(executable_name)
+    if not target_platform:
+        if system == "Windows" and machine == "arm64":
+            target_platform = "win-arm64"
+        elif system == "Windows":
+            # default to x64
+            target_platform = "win-x64"
+        elif system == "Linux" and machine == "arm64":
+            target_platform = "linux-arm64"
+        elif system == "Linux" and _has_musl_binaries():
+            # check for alpine linux
+            target_platform = "linux-musl-x64"
+        elif system == "Linux":
+            # default to x64
+            target_platform = "linux-x64"
+        elif system == "Darwin" and machine == "arm64":
+            target_platform = "osx-arm64"
+        elif system == "Darwin":
+            # default to x64
+            target_platform = "osx-x64"
+        else:
+            raise ValidationError(f'The platform "{system}" with arch {machine} is not supported.')
 
-    if system == "Windows":
-        return download_url.format("bicep-win-x64.exe")
-    if system == "Linux":
-        if os.path.exists("/lib/ld-musl-x86_64.so.1") and not os.path.exists("/lib/x86_64-linux-gnu/libc.so.6"):
-            return download_url.format("bicep-linux-musl-x64")
-        return download_url.format("bicep-linux-x64")
-    if system == "Darwin":
-        return download_url.format("bicep-osx-x64")
-
-    raise ValidationError(f'The platform "{system}" is not supported.')
+    if target_platform.startswith("win-"):
+        return download_url.format(f"bicep-{target_platform}.exe")
+    return download_url.format(f"bicep-{target_platform}")
 
 
 def _get_bicep_installation_path(system):
