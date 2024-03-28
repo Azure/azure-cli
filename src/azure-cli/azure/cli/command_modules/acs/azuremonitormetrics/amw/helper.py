@@ -10,9 +10,10 @@ from azure.core.exceptions import HttpResponseError
 
 
 def get_amw_region(cmd, azure_monitor_workspace_resource_id):
+    from msrestazure.tools import parse_resource_id
     # region of MAC can be different from region of RG so find the location of the azure_monitor_workspace_resource_id
-    amw_subscription_id = azure_monitor_workspace_resource_id.split("/")[2]
-    resources = get_resources_client(cmd.cli_ctx, amw_subscription_id)
+    parsed_dict = parse_resource_id(azure_monitor_workspace_resource_id)
+    resources = get_resources_client(cmd.cli_ctx, parsed_dict["subscription"])
     try:
         resource = resources.get_by_id(
             azure_monitor_workspace_resource_id, MAC_API)
