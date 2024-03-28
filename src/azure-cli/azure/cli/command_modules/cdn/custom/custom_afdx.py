@@ -21,6 +21,7 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Show as
     Create as _AFDSecurityPolicyCreate, Update as _AFDSecurityPolicyUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDProfileShow, \
     Create as _AFDProfileCreate, Update as _AFDProfileUpdate
+from azure.cli.command_modules.cdn.aaz.latest.afd.profile.log_scrubbing import Show as _AFDProfileLogScrubbingShow
 from azure.cli.command_modules.cdn.aaz.latest.afd.endpoint import Show as _AFDEndpointShow, \
     Create as _AFDEndpointCreate, Update as _AFDEndpointUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin_group import Show as _AFDOriginGroupShow, \
@@ -210,6 +211,17 @@ class AFDProfileUpdate(_AFDProfileUpdate):
                 }
             else:
                 args.identity = None
+
+
+class AFDProfileLogScrubbingShow(_AFDProfileLogScrubbingShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        existing = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return existing['logScrubbing']
 
 
 class AFDEndpointCreate(_AFDEndpointCreate):
