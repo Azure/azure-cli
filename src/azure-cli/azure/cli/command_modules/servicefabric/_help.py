@@ -479,6 +479,34 @@ examples:
           --source-port-ranges 1-1000 --dest-port-ranges 1-65535 --source-addr-prefixes 167.220.242.0/27 167.220.0.0/23 131.107.132.16/28 167.220.81.128/26 --dest-addr-prefixes 194.69.104.0/25 194.69.119.64/26 167.220.249.128/26 255.255.255.255/32
 """
 
+helps['sf managed-cluster network-security-rule update'] = """
+type: command
+short-summary: Update a network security rule to a manged cluster.
+examples:
+  - name: Update network security rule.
+    text: >
+        az sf managed-cluster network-security-rule update -g testRG -c testCluster --name 'network security rule name' --access allow --description 'network security rule description' --direction inbound --protocol tcp --priority 1200 \
+          --source-port-ranges 1-1000 --dest-port-ranges 1-65535 --source-addr-prefixes 167.220.242.0/27 167.220.0.0/23 131.107.132.16/28 167.220.81.128/26 --dest-addr-prefixes 194.69.104.0/25 194.69.119.64/26 167.220.249.128/26 255.255.255.255/32
+"""
+
+helps['sf managed-cluster network-security-rule get'] = """
+type: command
+short-summary: Get a network security rule to a manged cluster.
+examples:
+  - name: Get network security rule.
+    text: >
+        az sf managed-cluster network-security-rule get -g testRG -c testCluster --name 'network security rule name'
+"""
+
+helps['sf managed-cluster network-security-rule add'] = """
+type: command
+short-summary: Delete a network security rule to a manged cluster.
+examples:
+  - name: Delete network security rule.
+    text: >
+        az sf managed-cluster network-security-rule delete -g testRG -c testCluster --name 'network security rule name'
+"""
+
 helps['sf managed-node-type'] = """
 type: group
 short-summary: Manage a node type of an Azure Service Fabric managed cluster.
