@@ -300,24 +300,6 @@ def load_arguments(self, _):
         c.argument('zone_name', name_arg_type)
         c.ignore('location')
 
-        c.argument('zone_type', help='Type of DNS zone to create.', deprecate_info=c.deprecate(hide=True), arg_type=get_enum_type(ZoneType))
-
-        c.argument('registration_vnets',
-                   arg_group='Private Zone',
-                   nargs='+',
-                   help='Space-separated names or IDs of virtual networks that register hostnames in this DNS zone. '
-                        'Number of private DNS zones with virtual network auto-registration enabled is 1. '
-                        'If you need to increase this limit, please contact Azure Support: '
-                        'https://docs.microsoft.com/en-us/azure/azure-subscription-service-limits',
-                   deprecate_info=c.deprecate(hide=True),
-                   validator=get_vnet_validator('registration_vnets'))
-        c.argument('resolution_vnets',
-                   arg_group='Private Zone',
-                   nargs='+',
-                   help='Space-separated names or IDs of virtual networks that resolve records in this DNS zone.',
-                   deprecate_info=c.deprecate(hide=True),
-                   validator=get_vnet_validator('resolution_vnets'))
-
     with self.argument_context('network dns zone import') as c:
         c.argument('file_name', options_list=['--file-name', '-f'], type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
 

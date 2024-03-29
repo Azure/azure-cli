@@ -2459,28 +2459,13 @@ def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
             print('Could not add delegation in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
 
 
-def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, tags=None,
-                    if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
-
-    resolution_vnets_dict = []
-    if resolution_vnets:
-        for resolution_vnet in resolution_vnets:
-            resolution_vnets_dict.append({"id": resolution_vnet.id})
-
-    registration_vnets_dict = []
-    if registration_vnets:
-        for registration_vnet in registration_vnets:
-            registration_vnets_dict.append({"id": registration_vnet.id})
-
+def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, tags=None, if_none_match=False):
     created_zone = _DNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "zone_name": zone_name,
         "if_none_match": '*' if if_none_match else None,
         "location": 'global',
-        "tags": tags,
-        "zone_type": zone_type,
-        "resolution_virtual_networks": resolution_vnets_dict if resolution_vnets else None,
-        "registration_virtual_networks": registration_vnets_dict if registration_vnets else None
+        "tags": tags
     })
 
     if cmd.supported_api_version(min_api='2016-04-01', resource_type=ResourceType.MGMT_NETWORK_DNS) and parent_zone_name is not None:
