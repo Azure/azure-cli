@@ -233,18 +233,18 @@ def add_vm_extension(cmd,
 
 
 def update_vm_extension(cmd,
-                     client,
-                     resource_group_name,
-                     cluster_name,
-                     node_type_name,
-                     extension_name,
-                     type_handler_version=None,
-                     force_update_tag=None,
-                     auto_upgrade_minor_version=None,
-                     setting=None,
-                     protected_settings=None,
-                     provision_after_extension=None,
-                     setup_order=None):
+                        client,
+                        resource_group_name,
+                        cluster_name,
+                        node_type_name,
+                        extension_name,
+                        type_handler_version=None,
+                        force_update_tag=None,
+                        auto_upgrade_minor_version=None,
+                        setting=None,
+                        protected_setting=None,
+                        provision_after_extension=None,
+                        setup_order=None):
     try:
         node_type: NodeType = client.node_types.get(resource_group_name, cluster_name, node_type_name)
         existing_extension = find_in_collection(node_type, 'vm_extensions', 'name', extension_name)
@@ -260,7 +260,7 @@ def update_vm_extension(cmd,
                                      force_update_tag=force_update_tag if force_update_tag is not None else existing_extension.force_update_tag,
                                      auto_upgrade_minor_version=auto_upgrade_minor_version if auto_upgrade_minor_version is not None else existing_extension.auto_upgrade_minor_version,
                                      settings=setting if setting is not None else existing_extension.settings,
-                                     protected_settings=protected_settings if protected_settings is not None else existing_extension.protected_settings,
+                                     protected_settings=protected_setting if protected_setting is not None else existing_extension.protected_settings,
                                      provision_after_extensions=provision_after_extension if provision_after_extension is not None else existing_extension.provision_after_extensions,
                                      setup_order=setup_order if setup_order is not None else existing_extension.setup_order)
 
