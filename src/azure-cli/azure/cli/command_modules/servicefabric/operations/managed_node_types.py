@@ -231,6 +231,7 @@ def add_vm_extension(cmd,
         logger.error("HttpResponseError: %s", ex)
         raise
 
+
 def update_vm_extension(cmd,
                      client,
                      resource_group_name,
@@ -247,11 +248,11 @@ def update_vm_extension(cmd,
     try:
         node_type: NodeType = client.node_types.get(resource_group_name, cluster_name, node_type_name)
         existing_extension = find_in_collection(node_type, 'vm_extensions', 'name', extension_name)
-        
+
         if existing_extension is None:
             logger.error('Extension %s does not exist.', extension_name)
             return None
-        
+
         newExtension = VMSSExtension(name=extension_name,
                                      publisher=existing_extension.publisher,
                                      type=existing_extension.type,
@@ -262,7 +263,7 @@ def update_vm_extension(cmd,
                                      protected_settings=protected_settings if protected_settings is not None else existing_extension.protected_settings,
                                      provision_after_extensions=provision_after_extension if provision_after_extension is not None else existing_extension.provision_after_extensions,
                                      setup_order=setup_order if setup_order is not None else existing_extension.setup_order)
-        
+
         update_in_collection(node_type, "vm_extensions", newExtension, 'name')
 
         poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
@@ -270,6 +271,7 @@ def update_vm_extension(cmd,
     except HttpResponseError as ex:
         logger.error("HttpResponseError: %s", ex)
         raise
+
 
 def delete_vm_extension(cmd,
                         client,
