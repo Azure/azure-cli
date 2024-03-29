@@ -51,9 +51,7 @@ def link_azure_monitor_profile_artifacts(
 
 # pylint: disable=line-too-long
 def unlink_azure_monitor_profile_artifacts(cmd, cluster_subscription, cluster_resource_group_name, cluster_name):
-    msg = "Executing this action will result in the removal of all custom resources for the `azmonitoring.coreos.com` custom resource defintion. Are you certain that you wish to proceed with this operation?"
-    if not prompt_y_n(msg, default="n"):
-        raise ClientError("Operation cancelled by user")
+    print("Executing this action will result in the removal of all custom resources for the `azmonitoring.coreos.com` custom resource defintion. Are you certain that you wish to proceed with this operation?")
     # Remove DC* if prometheus is enabled
     dc_objects_list = get_dc_objects_list(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
     delete_dc_objects_if_prometheus_enabled(cmd, dc_objects_list, cluster_subscription, cluster_resource_group_name, cluster_name)
