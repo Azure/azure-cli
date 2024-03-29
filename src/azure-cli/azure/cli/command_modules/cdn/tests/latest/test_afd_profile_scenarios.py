@@ -84,3 +84,31 @@ class CdnAfdProfileScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.afd_profile_list_cmd(resource_group, checks=list_checks)
+
+    @ResourceGroupPreparer()
+    def test_afd_profile_log_scrubbing(self, resource_group):
+        profile_name = self.create_random_name(prefix='profile', length=24)
+
+        self.afd_profile_create_cmd(resource_group, profile_name)
+        list_checks = [JMESPathCheck('length(@)', 1),
+                       JMESPathCheck('@[0].location', "Global"),
+                       JMESPathCheck('@[0].sku.name', 'Standard_AzureFrontDoor')]
+        self.afd_profile_list_cmd(resource_group, checks=list_checks)
+
+        checks = [JMESPathCheck('location', "Global"),
+                  JMESPathCheck('sku.name', 'Standard_AzureFrontDoor'),
+                  JMESPathCheck('length(logScrubbing.scrubbingRules)', 1)
+                  ]
+        self.afd_profile_update_cmd(resource_group, profile_name, options="--log-scrubbing \"{{scrubbing-rules:[{{match-variable:QueryStringArgNames,selector-match-operator:EqualsAny}}],state:Enabled}}\"",
+                                    checks=checks)
+        checks = [JMESPathCheck('location', "Global"),
+                  JMESPathCheck('sku.name', 'Standard_AzureFrontDoor'),
+                  JMESPathCheck('length(logScrubbing.scrubbingRules)', 2)
+                  ]
+        self.afd_profile_update_cmd(resource_group, profile_name, options="--log-scrubbing scrubbing-rules[1]=\"{{match-variable:RequestIPAddress,selector-match-operator:EqualsAny}}\"",
+                                    checks=checks)
+
+        checks = [JMESPathCheck('length(scrubbingRules)', 2)]
+        self.afd_profile_log_scrubbing_show_cmd(resource_group, profile_name,
+                                                checks=checks)
+        self.afd_profile_delete_cmd(resource_group, profile_name)

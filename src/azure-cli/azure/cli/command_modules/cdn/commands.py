@@ -7,7 +7,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands import CliCommandType
 
-from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_afd_rules)
+from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints)
 
 
 def _not_found(message):
@@ -34,7 +34,6 @@ _not_found_msg = "{}(s) not found. Please verify the resource(s), group or it's 
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
 def load_command_table(self, _):
-    rule_not_found_msg = _not_found_msg.format('Rule')
     cd_not_found_msg = _not_found_msg.format('Custom Domain')
     endpoint_not_found_msg = _not_found_msg.format('Endpoint')
 
@@ -42,12 +41,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.cdn.operations#EndpointsOperations.{}',
         client_factory=cf_endpoints,
         exception_handler=_not_found(endpoint_not_found_msg)
-    )
-
-    cdn_afd_rule_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#RulesOperations.{}',
-        client_factory=cf_afd_rules,
-        exception_handler=_not_found(rule_not_found_msg)
     )
 
     cdn_domain_sdk = CliCommandType(
@@ -146,19 +139,6 @@ def load_command_table(self, _):
     # from .custom.custom_cdn import CDNEndpointRuleActionRemove
     # self.command_table['cdn endpoint rule action remove'] = CDNEndpointRuleActionRemove(loader=self)
 
-    with self.command_group('afd', is_preview=True):
-        pass
-
-    with self.command_group('afd rule condition',
-                            cdn_afd_rule_sdk,
-                            custom_command_type=get_custom_sdk(cf_afd_rules, _not_found(rule_not_found_msg))) as g:
-        g.custom_command('list', 'list_afd_rule_condition')
-
-    with self.command_group('afd rule action',
-                            cdn_afd_rule_sdk,
-                            custom_command_type=get_custom_sdk(cf_afd_rules, _not_found(rule_not_found_msg))) as g:
-        g.custom_command('list', 'list_afd_rule_action')
-
     from .custom.custom_afdx import AFDCustomDomainCreate
     self.command_table['afd custom-domain create'] = AFDCustomDomainCreate(loader=self)
 
@@ -173,6 +153,9 @@ def load_command_table(self, _):
 
     from .custom.custom_afdx import AFDProfileUpdate
     self.command_table['afd profile update'] = AFDProfileUpdate(loader=self)
+
+    from .custom.custom_afdx import AFDProfileLogScrubbingShow
+    self.command_table['afd profile log-scrubbing show'] = AFDProfileLogScrubbingShow(loader=self)
 
     from .custom.custom_afdx import AFDEndpointCreate
     self.command_table['afd endpoint create'] = AFDEndpointCreate(loader=self)
@@ -201,11 +184,17 @@ def load_command_table(self, _):
     from .custom.custom_afdx import AFDRuleCreate
     self.command_table['afd rule create'] = AFDRuleCreate(loader=self)
 
+    from .custom.custom_afdx import AFDRuleConditionShow
+    self.command_table['afd rule condition list'] = AFDRuleConditionShow(loader=self)
+
     from .custom.custom_afdx import AFDRuleconditionAdd
     self.command_table['afd rule condition add'] = AFDRuleconditionAdd(loader=self)
 
     from .custom.custom_afdx import AFDRuleconditionRemove
     self.command_table['afd rule condition remove'] = AFDRuleconditionRemove(loader=self)
+
+    from .custom.custom_afdx import AFDRuleActionShow
+    self.command_table['afd rule action list'] = AFDRuleActionShow(loader=self)
 
     from .custom.custom_afdx import AFDRuleActionCreate
     self.command_table['afd rule action add'] = AFDRuleActionCreate(loader=self)
