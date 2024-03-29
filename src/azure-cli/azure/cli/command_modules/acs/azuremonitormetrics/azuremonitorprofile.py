@@ -18,7 +18,7 @@ from azure.cli.command_modules.acs.azuremonitormetrics.helper import (
 )
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.create import create_rules
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.delete import delete_rules
-from azure.cli.core.azclierror import ClientError, InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 
 # pylint: disable=line-too-long
