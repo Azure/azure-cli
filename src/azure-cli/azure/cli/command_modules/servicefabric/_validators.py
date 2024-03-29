@@ -120,7 +120,7 @@ def validate_create_managed_cluster(cmd, namespace):
             raise CLIError("--upgrade-cadence should only be used whe --upgrade-mode is set to 'Automatic'.")
 
 
-def validate_add_network_security_rule(cmd, namespace):
+def validate_network_security_rule(cmd, namespace):
     client = servicefabric_managed_client_factory(cmd.cli_ctx)
     cluster = _safe_get_resource(client.managed_clusters.get,
                                  (namespace.resource_group_name, namespace.cluster_name))
