@@ -19,7 +19,6 @@ from azure.cli.command_modules.acs.azuremonitormetrics.helper import (
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.create import create_rules
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.delete import delete_rules
 from azure.cli.core.azclierror import ClientError, InvalidArgumentValueError
-from knack.prompting import prompt_y_n
 
 
 # pylint: disable=line-too-long
