@@ -217,6 +217,12 @@ def delete_client_cert(cmd,
         if not cluster.public_i_pv6_prefix_id:
             cluster.public_i_pv6_prefix_id = None
 
+        if not cluster.public_ip_prefix_id:
+            cluster.public_ip_prefix_id = None
+
+        if not cluster.public_i_pv6_prefix_id:
+            cluster.public_i_pv6_prefix_id = None
+
         if cluster.clients is not None:
             initial_size = len(cluster.clients)
             if thumbprint is not None:
@@ -287,6 +293,12 @@ def add_network_security_rule(cmd,
                                                        source_address_prefixes=source_addr_prefixes)
 
         cluster.network_security_rules.append(new_network_securityRule)
+
+        if not cluster.public_ip_prefix_id:
+            cluster.public_ip_prefix_id = None
+
+        if not cluster.public_i_pv6_prefix_id:
+            cluster.public_i_pv6_prefix_id = None
 
         if not cluster.public_ip_prefix_id:
             cluster.public_ip_prefix_id = None

@@ -65,10 +65,12 @@ from .utils import (_normalize_sku,
                     is_linux_webapp,
                     _rename_server_farm_props,
                     _get_location_from_webapp,
+                    _normalize_flex_location,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
-                    app_service_plan_exists, is_centauri_functionapp, _remove_list_duplicates)
+                    app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp,
+                    _remove_list_duplicates, get_raw_functionapp)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -81,8 +83,9 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
-                         VERSION_2022_09_01,
-                         RUNTIME_STATUS_TEXT_MAP, LANGUAGE_EOL_DEPRECATION_NOTICES)
+                         VERSION_2022_09_01, FLEX_RUNTIMES, FLEX_SUBNET_DELEGATION, DEFAULT_INSTANCE_SIZE,
+                         RUNTIME_STATUS_TEXT_MAP, LANGUAGE_EOL_DEPRECATION_NOTICES,
+                         STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID, DEFAULT_MAXIMUM_INSTANCE_COUNT)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -589,7 +592,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
     return _redact_storage_accounts(result.properties)
 
 
-def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
+def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=None, timeout=None, slot=None):
     check_language_runtime(cmd, resource_group_name, name)
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
@@ -617,6 +620,11 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     if is_consumption and app.reserved:
         validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot)
 
+    if is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+        enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout, slot, build_remote)
+        response = check_flex_app_after_deployment(cmd, resource_group_name, name)
+        return response
+    build_remote = build_remote is True or build_remote == 'true'
     if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
     if build_remote and app.reserved:
@@ -629,6 +637,88 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
 
 def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=False):
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot, track_status)
+
+
+def check_flex_app_after_deployment(cmd, resource_group_name, name):
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+
+    logger.warning("Waiting for sync triggers...")
+    time.sleep(60)
+    logger.warning("Checking the health of the function app")
+
+    try:
+        host_url = _get_host_url(cmd, resource_group_name, name)
+    except ValueError:
+        raise ResourceNotFoundError('Failed to fetch host url for function app')
+
+    try:
+        master_key = list_host_keys(cmd, resource_group_name, name).master_key
+    except:
+        raise ResourceNotFoundError('Failed to fetch host key to check for function app status')
+
+    host_status_url = host_url + '/admin/host/status'
+    headers = {"x-functions-key": master_key}
+
+    total_trials = 15
+    num_trials = 0
+    while num_trials < total_trials:
+        time.sleep(2)
+        response = requests.get(host_status_url, headers=headers,
+                                verify=not should_disable_connection_verify())
+        if 200 <= response.status_code <= 299:
+            break
+
+    if response.status_code != 200:
+        raise CLIError("Deployment was successful but the app appears to be unhealthy. Please "
+                       "check the app logs.")
+    return "Deployment was successful."
+
+
+def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, slot=None, build_remote=None):
+    logger.warning("Getting scm site credentials for zip deployment")
+
+    try:
+        scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+    except ValueError:
+        raise ResourceNotFoundError('Failed to fetch scm url for function app')
+
+    runtime_config = get_runtime_config(cmd, resource_group_name, name)
+    runtime = runtime_config.get("name", "")
+    build_remote = build_remote or runtime == 'python'
+
+    zip_url = scm_url + '/api/publish?RemoteBuild={}&Deployer=az_cli'.format(build_remote)
+    deployment_status_url = scm_url + '/api/deployments/latest'
+
+    additional_headers = {"Content-Type": "application/zip", "Cache-Control": "no-cache"}
+    headers = get_scm_site_headers_flex(cmd.cli_ctx, additional_headers=additional_headers)
+
+    import os
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+    # Read file content
+
+    with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
+        zip_content = fs.read()
+        logger.warning("Starting zip deployment. This operation can take a while to complete ...")
+        res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
+        logger.warning("Deployment endpoint responded with status code %d", res.status_code)
+
+    # check the status of async deployment
+    if res.status_code == 202:
+        response = _check_zip_deployment_status_flex(cmd, resource_group_name, name, deployment_status_url,
+                                                     timeout)
+        return response
+
+    # check if there's an ongoing process
+    if res.status_code == 409:
+        raise UnclassifiedUserFault("There may be an ongoing deployment. Please track your deployment in {}"
+                                    .format(deployment_status_url))
+
+    # check if an error occured during deployment
+    if res.status_code:
+        raise AzureInternalError("An error occured during deployment. Status Code: {}, Details: {}"
+                                 .format(res.status_code, res.text))
 
 
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=False):
@@ -1029,6 +1119,8 @@ def list_function_app(cmd, resource_group_name=None):
 
 
 def show_functionapp(cmd, resource_group_name, name, slot=None):
+    if is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+        return get_raw_functionapp(cmd, resource_group_name, name)
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not app:
         raise ResourceNotFoundError("Unable to find resource'{}', in ResourceGroup '{}'.".format(name,
@@ -1298,6 +1390,10 @@ def list_function_app_runtimes(cmd, os_type=None):
     return {WINDOWS_OS_NAME: windows_stacks, LINUX_OS_NAME: linux_stacks}
 
 
+def list_flexconsumption_runtimes():
+    return FLEX_RUNTIMES
+
+
 def delete_logic_app(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'delete', slot)
 
@@ -1344,7 +1440,9 @@ def get_site_configs(cmd, resource_group_name, name, slot=None):
 def get_app_settings(cmd, resource_group_name, name, slot=None):
     result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
-    slot_app_setting_names = [] if is_centauri_functionapp(cmd, resource_group_name, name) \
+    is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+    slot_app_setting_names = [] if (is_centauri or is_flex) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name) \
         .app_setting_names
     return _build_app_settings_output(result.properties, slot_app_setting_names)
@@ -1491,10 +1589,115 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
     return b64encode(config_file_bytes).decode('utf-8')
 
 
+def get_deployment_configs(cmd, resource_group_name, name):
+    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
+        "deployment", {})
+
+
+def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable=too-many-branches
+                              deployment_storage_name=None,
+                              deployment_storage_container_name=None, deployment_storage_auth_type=None,
+                              deployment_storage_auth_value=None):
+
+    if (deployment_storage_name is not None) != (deployment_storage_container_name is not None):
+        raise ArgumentUsageError("Please provide both --deployment-storage-name and "
+                                 "--deployment-storage-container-name or neither.")
+
+    if deployment_storage_auth_type == 'UserAssignedIdentity' and not deployment_storage_auth_value:
+        raise ArgumentUsageError('--deployment-storage-auth-value is required when '
+                                 '--deployment-storage-auth-type is set to UserAssignedIdentity.')
+
+    if deployment_storage_auth_value and deployment_storage_auth_type == 'SystemAssignedIdentity':
+        raise ArgumentUsageError(
+            '--deployment-storage-auth-value is only a valid input when '
+            '--deployment-storage-auth-type is set to UserAssignedIdentity or StorageAccountConnectionString. '
+            'Please try again with --deployment-storage-auth-type set to UserAssignedIdentity or '
+            'StorageAccountConnectionString.'
+        )
+
+    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+
+    functionapp_deployment_storage = functionapp["properties"]["functionAppConfig"]["deployment"]["storage"]
+
+    deployment_storage = None
+
+    # Storage
+    deployment_config_storage_value = None
+    if deployment_storage_name is not None:
+        deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx,
+                                                                  resource_group_name,
+                                                                  deployment_storage_name)
+        _validate_and_get_deployment_storage_container(cmd, resource_group_name,
+                                                       deployment_storage_name,
+                                                       deployment_storage_container_name)
+        endpoints = deployment_storage.primary_endpoints
+        deployment_config_storage_value = getattr(endpoints, 'blob') + deployment_storage_container_name
+        functionapp_deployment_storage["value"] = deployment_config_storage_value
+    else:
+        existing_deployment_storage_name = urlparse(functionapp_deployment_storage["value"]).hostname.split(".")[0]
+        deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx,
+                                                                  resource_group_name,
+                                                                  existing_deployment_storage_name)
+
+    # Authentication
+    assign_identities = None
+    if deployment_storage_auth_type is not None:
+        deployment_storage_auth_config = functionapp_deployment_storage["authentication"]
+        deployment_storage_auth_config["type"] = deployment_storage_auth_type
+        if deployment_storage_auth_type == 'StorageAccountConnectionString':
+            deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
+            conn_string_app_setting = deployment_storage_auth_value or 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
+            update_app_settings(cmd, resource_group_name, name,
+                                ["{}={}".format(conn_string_app_setting, deployment_storage_conn_string)])
+            deployment_storage_auth_config["userAssignedIdentityResourceId"] = None
+            deployment_storage_auth_config["storageAccountConnectionStringName"] = \
+                conn_string_app_setting
+        elif deployment_storage_auth_type == 'SystemAssignedIdentity':
+            assign_identities = ['[system]']
+            deployment_storage_auth_config["userAssignedIdentityResourceId"] = None
+            deployment_storage_auth_config["storageAccountConnectionStringName"] = None
+        elif deployment_storage_auth_type == 'UserAssignedIdentity':
+            deployment_storage_user_assigned_identity = _get_or_create_user_assigned_identity(
+                cmd,
+                resource_group_name,
+                name,
+                deployment_storage_auth_value,
+                None)
+            deployment_storage_auth_config["userAssignedIdentityResourceId"] = \
+                deployment_storage_user_assigned_identity.id
+            deployment_storage_auth_config["storageAccountConnectionStringName"] = None
+            assign_identities = [deployment_storage_user_assigned_identity.id]
+        else:
+            raise ValidationError("Invalid value for --deployment-storage-auth-type. Please try "
+                                  "again with a valid value.")
+
+    functionapp["properties"]["functionAppConfig"]["deployment"]["storage"] = functionapp_deployment_storage
+
+    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+
+    if deployment_storage_auth_type == 'UserAssignedIdentity':
+        assign_identity(cmd, resource_group_name, name, assign_identities)
+        if not _has_deployment_storage_role_assignment_on_resource(
+                cmd.cli_ctx,
+                deployment_storage,
+                deployment_storage_user_assigned_identity.principal_id):
+            _assign_deployment_storage_managed_identity_role(cmd.cli_ctx, deployment_storage,
+                                                             deployment_storage_user_assigned_identity.principal_id)
+        else:
+            logger.warning("User assigned identity '%s' already has the role assignment on the storage account '%s'",
+                           deployment_storage_user_assigned_identity.principal_id, deployment_storage_name)
+    elif deployment_storage_auth_type == 'SystemAssignedIdentity':
+        assign_identity(cmd, resource_group_name, name, assign_identities, 'Storage Blob Data Contributor',
+                        None, deployment_storage.id)
+
+    return result.get("properties", {}).get("functionAppConfig", {}).get("deployment", {})
+
+
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
 # pylint: disable=unused-argument
-def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None, linux_fx_version=None,
+def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None, linux_fx_version=None,  # pylint: disable=too-many-statements,too-many-branches
                         windows_fx_version=None, pre_warmed_instance_count=None, php_version=None,
                         python_version=None, net_framework_version=None, power_shell_version=None,
                         java_version=None, java_container=None, java_container_version=None,
@@ -1592,11 +1795,140 @@ def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
             raise CLIError(ex)
 
 
+def update_flex_functionapp(cmd, resource_group_name, name, functionapp):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
+    url = url_base.format(subscription_id, resource_group_name, name, '2023-12-01')
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + url
+    body = json.dumps(functionapp)
+    response = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body)
+    return response.json()
+
+
+def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
+    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+
+    always_ready_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady", [])
+
+    updated_always_ready_config = [x for x in always_ready_config if x["name"] not in setting_names]
+
+    functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]["alwaysReady"] = updated_always_ready_config
+
+    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+
+    return result.get("properties", {}).get("functionAppConfig", {}).get(
+        "scaleAndConcurrency", {})
+
+
+def get_runtime_config(cmd, resource_group_name, name):
+    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+
+    return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
+        "runtime", {})
+
+
+def update_runtime_config(cmd, resource_group_name, name, runtime_version):
+    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+
+    runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, True)
+    runtime = runtime_info['app_runtime']
+    functionapp_version = runtime_info['functionapp_version']
+
+    runtimes = [r for r in FLEX_RUNTIMES if r['runtime'] == runtime]
+    lang = next((r for r in runtimes if r['version'] == runtime_version), None)
+    if lang is None:
+        supported_versions = list(map(lambda x: x['version'], runtimes))
+        raise ValidationError("Invalid version {0} for runtime {1} for function apps on the "
+                              "Flex Consumption plan. Supported version for runtime {1} is {2}."
+                              .format(runtime_version, runtime, supported_versions))
+
+    runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=True, windows=False)
+    matched_runtime = runtime_helper.resolve(runtime, runtime_version, functionapp_version, True)
+    version = matched_runtime.site_config_dict.linux_fx_version.split("|")[1]
+
+    functionapp["properties"]["functionAppConfig"]["runtime"]["version"] = version
+
+    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+
+    return result.get("properties", {}).get("functionAppConfig", {}).get(
+        "runtime", {})
+
+
+def update_always_ready_settings(cmd, resource_group_name, name, settings):
+    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+
+    always_ready_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady", [])
+
+    updated_always_ready_dict = _parse_key_value_pairs(settings)
+    updated_always_ready_config = []
+
+    for key, value in updated_always_ready_dict.items():
+        updated_always_ready_config.append(
+            {
+                "name": key,
+                "instanceCount": max(0, validate_and_convert_to_int(key, value))
+            }
+        )
+
+    for always_ready_setting in always_ready_config:
+        if always_ready_setting["name"] not in updated_always_ready_dict:
+            updated_always_ready_config.append(always_ready_setting)
+
+    functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]["alwaysReady"] = updated_always_ready_config
+
+    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+
+    return result.get("properties", {}).get("functionAppConfig", {}).get(
+        "scaleAndConcurrency", {})
+
+
+def get_scale_config(cmd, resource_group_name, name):
+    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+
+    return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
+        "scaleAndConcurrency", {})
+
+
+def update_scale_config(cmd, resource_group_name, name, maximum_instance_count=None,
+                        instance_memory=None, trigger_type=None, trigger_settings=None):
+    if (trigger_type is not None) != (trigger_settings is not None):
+        raise RequiredArgumentMissingError("usage error: --trigger-type must be used with parameter "
+                                           "--trigger-settings.")
+
+    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+
+    scale_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]
+
+    if maximum_instance_count:
+        scale_config["maximumInstanceCount"] = maximum_instance_count
+
+    if instance_memory:
+        scale_config["instanceMemoryMB"] = instance_memory
+
+    if trigger_type:
+        if not getattr(scale_config, 'triggers', None):
+            scale_config["triggers"] = {}
+        if not getattr(scale_config["triggers"], trigger_type, None):
+            scale_config["triggers"][trigger_type] = {}
+        triggers_dict = _parse_key_value_pairs(trigger_settings)
+        for key, value in triggers_dict.items():
+            scale_config["triggers"][trigger_type][key] = validate_and_convert_to_int(key, value)
+
+    functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"] = scale_config
+
+    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+
+    return result.get("properties", {}).get("functionAppConfig", {}).get(
+        "scaleAndConcurrency", {})
+
+
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
-    centauri_functionapp = is_centauri_functionapp(cmd, resource_group_name, name)
-    slot_cfg_names = {} if centauri_functionapp \
+    is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+    slot_cfg_names = {} if (is_centauri or is_flex) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name)
     is_slot_settings = False
 
@@ -1610,7 +1942,7 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
 # TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
-    if centauri_functionapp:
+    if is_centauri:
         update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
         result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     else:
@@ -2571,6 +2903,17 @@ def _get_scm_url(cmd, resource_group_name, name, slot=None):
     raise ResourceNotFoundError('Failed to retrieve Scm Uri')
 
 
+def _get_host_url(cmd, resource_group_name, name):
+    from azure.mgmt.web.models import HostType
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    for host in app.host_name_ssl_states or []:
+        if host.host_type == HostType.standard:
+            return "https://{}".format(host.name)
+
+    # this should not happen, but throw anyway
+    raise ResourceNotFoundError('Failed to retrieve Host Uri')
+
+
 def get_publishing_user(cmd):
     client = web_client_factory(cmd.cli_ctx)
     return client.get_publishing_user()
@@ -2958,7 +3301,9 @@ def basic_auth_supported(cli_ctx, name, resource_group_name, slot=None):
 def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, additional_headers=None):
     import urllib3
 
-    if basic_auth_supported(cli_ctx, name, resource_group_name, slot):
+    is_flex = is_flex_functionapp(cli_ctx, resource_group_name, name)
+
+    if not is_flex and basic_auth_supported(cli_ctx, name, resource_group_name, slot):
         logger.info("[AUTH]: basic")
         username, password = _get_site_credential(cli_ctx, resource_group_name, name, slot)
         headers = urllib3.util.make_headers(basic_auth=f"{username}:{password}")
@@ -2966,6 +3311,22 @@ def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, addition
         logger.info("[AUTH]: AAD")
         headers = urllib3.util.make_headers()
         headers["Authorization"] = f"Bearer {get_bearer_token(cli_ctx)}"
+    headers['User-Agent'] = get_az_user_agent()
+    headers['x-ms-client-request-id'] = cli_ctx.data['headers']['x-ms-client-request-id']
+    # allow setting Content-Type, Cache-Control, etc. headers
+    if additional_headers:
+        for k, v in additional_headers.items():
+            headers[k] = v
+
+    return headers
+
+
+def get_scm_site_headers_flex(cli_ctx, additional_headers=None):
+    import urllib3
+
+    logger.info("[AUTH]: AAD")
+    headers = urllib3.util.make_headers()
+    headers["Authorization"] = f"Bearer {get_bearer_token(cli_ctx)}"
     headers['User-Agent'] = get_az_user_agent()
     headers['x-ms-client-request-id'] = cli_ctx.data['headers']['x-ms-client-request-id']
     # allow setting Content-Type, Cache-Control, etc. headers
@@ -3686,6 +4047,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             old_to_new_version = {
                 "11": "11.0",
                 "8": "8.0",
+                "8.0": "8",
                 "7": "7.0",
                 "6.0": "6",
                 "1.8": "8.0",
@@ -3861,6 +4223,21 @@ def get_app_insights_connection_string(cli_ctx, resource_group, name):
     return appinsights.connection_string
 
 
+def create_flex_app_service_plan(cmd, resource_group_name, name, location):
+    SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
+    client = web_client_factory(cmd.cli_ctx)
+    sku_def = SkuDescription(tier="FlexConsumption", name="FC1", size="FC", family="FC")
+    plan_def = AppServicePlan(
+        location=location,
+        sku=sku_def,
+        reserved=True,
+        kind="functionapp",
+        name=name
+    )
+    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
+    return LongRunningOperation(cmd.cli_ctx)(poller)
+
+
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
                                         max_burst=None, location=None, tags=None, zone_redundant=False):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
@@ -4000,18 +4377,32 @@ def update_dapr_and_workload_config(cmd, resource_group_name, name, enabled=None
     update_functionapp_polling(cmd, resource_group_name, name, site)
 
 
+def is_exactly_one_true(*args):
+    found = False
+    for i in args:
+        if bool(i):
+            if found:
+                return False
+            found = True
+    return found
+
+
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
                        os_type=None, functions_version=None, runtime=None, runtime_version=None,
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
                        disable_app_insights=None, deployment_source_url=None,
-                       deployment_source_branch='master', deployment_local_git=None,
+                       deployment_source_branch=None, deployment_local_git=None,
                        registry_server=None, registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                        environment=None, min_replicas=None, max_replicas=None, workspace=None,
                        enable_dapr=False, dapr_app_id=None, dapr_app_port=None, dapr_http_max_request_size=None,
                        dapr_http_read_buffer_size=None, dapr_log_level=None, dapr_enable_api_logging=False,
-                       workload_profile_name=None, cpu=None, memory=None):
+                       workload_profile_name=None, cpu=None, memory=None,
+                       always_ready_instances=None, maximum_instance_count=None, instance_memory=None,
+                       flexconsumption_location=None, deployment_storage_name=None,
+                       deployment_storage_container_name=None, deployment_storage_auth_type=None,
+                       deployment_storage_auth_value=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 4.")
@@ -4023,9 +4414,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise RequiredArgumentMissingError("usage error: parameters --cpu, -memory, --workload-profile-name "
                                            "must be used with parameter --environment, please provide the "
                                            "name of the container app environment using --environment.")
-    if environment is None and bool(plan) == bool(consumption_plan_location):
+    if environment is None and not is_exactly_one_true(plan, consumption_plan_location, flexconsumption_location):
         raise MutuallyExclusiveArgumentError("usage error: You must specify one of these parameter "
-                                             "--plan NAME_OR_ID | --consumption-plan-location LOCATION")
+                                             "--plan NAME_OR_ID | --consumption-plan-location LOCATION |"
+                                             " --flexconsumption-location LOCATION")
+
     if ((min_replicas is not None or max_replicas is not None) and environment is None):
         raise RequiredArgumentMissingError("usage error: parameters --min-replicas and --max-replicas must be "
                                            "used with parameter --environment, please provide the name "
@@ -4048,6 +4441,50 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair, DaprConfig, ResourceConfig = cmd.get_models('SiteConfig', 'NameValuePair',
                                                                            'DaprConfig', 'ResourceConfig')
+
+    if flexconsumption_location is not None:
+        if image is not None:
+            raise ArgumentUsageError(
+                '--image is not a valid input for Azure Functions on the Flex Consumption plan. '
+                'Please try again without the --image parameter.')
+
+        if deployment_local_git is not None:
+            raise ArgumentUsageError(
+                '--deployment-local-git is not a valid input for Azure Functions on the Flex Consumption plan. '
+                'Please try again without the --deployment-local-git parameter.')
+
+        if deployment_source_url is not None:
+            raise ArgumentUsageError(
+                '--deployment-source-url is not a valid input for Azure Functions on the Flex Consumption plan. '
+                'Please try again without the --deployment-source-url parameter.')
+
+        if deployment_source_branch is not None:
+            raise ArgumentUsageError(
+                '--deployment-source-branch is not a valid input for Azure Functions on the Flex Consumption plan. '
+                'Please try again without the --deployment-source-branch parameter.')
+
+        if os_type and os_type.lower() != LINUX_OS_NAME:
+            raise ArgumentUsageError(
+                '--os-type windows is not a valid input for Azure Functions on the Flex Consumption plan. '
+                'Please try again without the --os-type parameter or set --os-type to be linux.'
+            )
+
+        flexconsumption_location = _normalize_flex_location(flexconsumption_location)
+
+    if (any([always_ready_instances, maximum_instance_count, instance_memory, deployment_storage_name,
+            deployment_storage_container_name, deployment_storage_auth_type, deployment_storage_auth_value]) and
+            flexconsumption_location is None):
+        raise RequiredArgumentMissingError("usage error: parameters --always-ready-instances, "
+                                           "--maximum-instance-count, --instance-memory, "
+                                           "--deployment-storage-name, --deployment-storage-container-name, "
+                                           "--deployment-storage-auth-type and --deployment-storage-auth-value "
+                                           "must be used with parameter --flexconsumption-location, please "
+                                           "provide the name of the flex plan location using "
+                                           "--flexconsumption-location.")
+
+    if flexconsumption_location is None:
+        deployment_source_branch = deployment_source_branch or 'master'
+
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
@@ -4061,6 +4498,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             else:
                 plan_info = client.app_service_plans.get(resource_group_name, plan)
             webapp_location = plan_info.location
+        elif flexconsumption_location:
+            webapp_location = flexconsumption_location
         else:
             webapp_location = consumption_plan_location
 
@@ -4075,7 +4514,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
-                               subnet_name=subnet_info["subnet_name"])
+                               subnet_name=subnet_info["subnet_name"],
+                               subnet_service_delegation=FLEX_SUBNET_DELEGATION if flexconsumption_location else None)
         subnet_resource_id = subnet_info["subnet_resource_id"]
         vnet_route_all_enabled = True
     else:
@@ -4113,6 +4553,88 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
 
+    elif flexconsumption_location:
+        locations = list_flexconsumption_locations(cmd)
+        location = next((loc for loc in locations if loc['name'].lower() == flexconsumption_location.lower()), None)
+        if location is None:
+            raise ValidationError("Location is invalid. Use: az functionapp list-flexconsumption-locations")
+        is_linux = True
+        # Following the same plan name format as the backend
+        plan_name = "{}FlexPlan".format(name)
+        plan_info = create_flex_app_service_plan(
+            cmd, resource_group_name, plan_name, flexconsumption_location)
+        functionapp_def.server_farm_id = plan_info.id
+        functionapp_def.location = flexconsumption_location
+
+        if not deployment_storage_name:
+            deployment_storage_name = storage_account
+        deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx, resource_group_name,
+                                                                  deployment_storage_name)
+
+        deployment_storage_container = _get_or_create_deployment_storage_container(cmd, resource_group_name, name,
+                                                                                   deployment_storage_name,
+                                                                                   deployment_storage_container_name)
+        deployment_storage_container_name = deployment_storage_container.name
+
+        endpoints = deployment_storage.primary_endpoints
+        deployment_config_storage_value = getattr(endpoints, 'blob') + deployment_storage_container_name
+
+        deployment_storage_auth_type = deployment_storage_auth_type or 'StorageAccountConnectionString'
+
+        if deployment_storage_auth_value and deployment_storage_auth_type == 'SystemAssignedIdentity':
+            raise ArgumentUsageError(
+                '--deployment-storage-auth-value is only a valid input when '
+                '--deployment-storage-auth-type is set to UserAssignedIdentity or StorageAccountConnectionString. '
+                'Please try again with --deployment-storage-auth-type set to UserAssignedIdentity or '
+                'StorageAccountConnectionString.'
+            )
+
+        function_app_config = {}
+        deployment_storage_auth_config = {
+            "type": deployment_storage_auth_type
+        }
+        function_app_config["deployment"] = {
+            "storage": {
+                "type": "blobContainer",
+                "value": deployment_config_storage_value,
+                "authentication": deployment_storage_auth_config
+            }
+        }
+
+        if deployment_storage_auth_type == 'UserAssignedIdentity':
+            deployment_storage_user_assigned_identity = _get_or_create_user_assigned_identity(
+                cmd,
+                resource_group_name,
+                name,
+                deployment_storage_auth_value,
+                flexconsumption_location)
+            deployment_storage_auth_value = deployment_storage_user_assigned_identity.id
+            deployment_storage_auth_config["userAssignedIdentityResourceId"] = deployment_storage_auth_value
+        elif deployment_storage_auth_type == 'StorageAccountConnectionString':
+            deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
+            conn_string_app_setting = deployment_storage_auth_value or 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
+            site_config.app_settings.append(NameValuePair(name=conn_string_app_setting,
+                                                          value=deployment_storage_conn_string))
+            deployment_storage_auth_value = conn_string_app_setting
+            deployment_storage_auth_config["storageAccountConnectionStringName"] = deployment_storage_auth_value
+
+        always_ready_dict = _parse_key_value_pairs(always_ready_instances)
+        always_ready_config = []
+
+        for key, value in always_ready_dict.items():
+            always_ready_config.append(
+                {
+                    "name": key,
+                    "instanceCount": max(0, validate_and_convert_to_int(key, value))
+                }
+            )
+
+        function_app_config["scaleAndConcurrency"] = {
+            "maximumInstanceCount": maximum_instance_count or DEFAULT_MAXIMUM_INSTANCE_COUNT,
+            "instanceMemoryMB": instance_memory or DEFAULT_INSTANCE_SIZE,
+            "alwaysReady": always_ready_config
+        }
+
     if environment is not None:
         if consumption_plan_location is not None:
             raise ArgumentUsageError(
@@ -4146,12 +4668,40 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if runtime is None and runtime_version is not None:
         raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
 
+    if flexconsumption_location:
+        runtimes = [r for r in FLEX_RUNTIMES if r['runtime'] == runtime]
+        if not runtimes:
+            supported_runtimes = set(map(lambda x: x['runtime'], FLEX_RUNTIMES))
+            raise ValidationError("Invalid runtime. Supported runtimes for function apps on Flex App Service "
+                                  "plans are {0}".format(list(supported_runtimes)))
+        if runtime_version is not None:
+            lang = next((r for r in runtimes if r['version'] == runtime_version), None)
+            if lang is None:
+                supported_versions = list(map(lambda x: x['version'], runtimes))
+                raise ValidationError("Invalid version {0} for runtime {1} for function apps on the Flex "
+                                      "Consumption plan. Supported version for runtime {1} is {2}."
+                                      .format(runtime_version, runtime, supported_versions))
+        else:
+            runtime_version = runtimes[0]['version']
+
     runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
     matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
                                              runtime_version, functions_version, is_linux)
 
-    site_config_dict = matched_runtime.site_config_dict
-    app_settings_dict = matched_runtime.app_settings_dict
+    if flexconsumption_location:
+        runtime = matched_runtime.name
+        version = matched_runtime.site_config_dict.linux_fx_version.split("|")[1]
+        runtime_config = {
+            "name": runtime,
+            "version": version
+        }
+        function_app_config["runtime"] = runtime_config
+
+    SiteConfigPropertiesDictionary = cmd.get_models('SiteConfigPropertiesDictionary')
+
+    site_config_dict = matched_runtime.site_config_dict if not flexconsumption_location \
+        else SiteConfigPropertiesDictionary()
+    app_settings_dict = matched_runtime.app_settings_dict if not flexconsumption_location else dict()
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
@@ -4185,7 +4735,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     elif is_linux:
         functionapp_def.kind = 'functionapp,linux'
         functionapp_def.reserved = True
-        is_consumption = consumption_plan_location is not None
+        is_consumption = consumption_plan_location is not None or flexconsumption_location is not None
         if not is_consumption:
             site_config.app_settings.append(NameValuePair(name='MACHINEKEY_DecryptionKey',
                                                           value=str(hexlify(urandom(32)).decode()).upper()))
@@ -4280,8 +4830,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                                   value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
 
-    # If plan is not consumption or elastic premium, we need to set always on
-    if consumption_plan_location is None and plan_info is not None and not is_plan_elastic_premium(cmd, plan_info):
+    # If plan is not flex, consumption or elastic premium, we need to set always on
+    if (flexconsumption_location is None and consumption_plan_location is None and plan_info is not None and
+            not is_plan_elastic_premium(cmd, plan_info)):
         site_config.always_on = True
 
     # If plan is elastic premium or consumption, we need these app settings
@@ -4305,8 +4856,21 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     elif not disable_app_insights and matched_runtime.app_insights:
         create_app_insights = True
 
-    poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
-    functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
+    if flexconsumption_location is not None:
+        site_config.net_framework_version = None
+        functionapp_def.reserved = None
+        functionapp_def.is_xenon = None
+        functionapp_def.enable_additional_properties_sending()
+        existing_properties = functionapp_def.serialize()["properties"]
+        functionapp_def.additional_properties["properties"] = existing_properties
+        functionapp_def.additional_properties["properties"]["functionAppConfig"] = function_app_config
+        functionapp_def.additional_properties["properties"]["sku"] = "FlexConsumption"
+        poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
+                                                        api_version='2023-12-01')
+        functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
+    else:
+        poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
+        functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if environment is not None:
         functionapp = client.web_apps.get(resource_group_name, name)
@@ -4337,10 +4901,33 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                               image, registry_username,
                                               registry_password)
 
+    if flexconsumption_location is not None:
+        if deployment_storage_auth_type == 'UserAssignedIdentity':
+            assign_identity(cmd, resource_group_name, name, [deployment_storage_auth_value])
+            if not _has_deployment_storage_role_assignment_on_resource(
+                    cmd.cli_ctx,
+                    deployment_storage,
+                    deployment_storage_user_assigned_identity.principal_id):
+                _assign_deployment_storage_managed_identity_role(
+                    cmd.cli_ctx,
+                    deployment_storage,
+                    deployment_storage_user_assigned_identity.principal_id)
+            else:
+                logger.warning("User assigned identity '%s' already has the role assignment on "
+                               "the storage account '%s'",
+                               deployment_storage_user_assigned_identity.principal_id, deployment_storage_name)
+
+        elif deployment_storage_auth_type == 'SystemAssignedIdentity':
+            assign_identity(cmd, resource_group_name, name, ['[system]'], 'Storage Blob Data Contributor',
+                            None, deployment_storage.id)
+
     if assign_identities is not None:
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,
                                    role, None, scope)
         functionapp.identity = identity
+
+    if flexconsumption_location is not None:
+        return get_raw_functionapp(cmd, resource_group_name, name)
 
     return functionapp
 
@@ -4503,6 +5090,158 @@ def _set_remote_or_local_git(cmd, webapp, resource_group_name, name, deployment_
         setattr(webapp, 'deploymentLocalGitUrl', local_git_info['url'])
 
 
+def _validate_and_get_deployment_storage(cli_ctx, resource_group_name, deployment_storage_name):
+    sa_resource_group = resource_group_name
+
+    if is_valid_resource_id(deployment_storage_name):
+        sa_resource_group = parse_resource_id(deployment_storage_name)['resource_group']
+        deployment_storage_name = parse_resource_id(deployment_storage_name)['name']
+
+    storage_client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
+    storage_properties = storage_client.storage_accounts.get_properties(sa_resource_group, deployment_storage_name)
+
+    endpoints = storage_properties.primary_endpoints
+    sku = storage_properties.sku.name
+    allowed_storage_types = ['Standard_GRS', 'Standard_RAGRS', 'Standard_LRS', 'Standard_ZRS', 'Premium_LRS',
+                             'Standard_GZRS']
+
+    if not getattr(endpoints, 'blob', None):
+        raise CLIError("Deployment storage account '{}' has no 'blob' endpoint. It must have blob endpoints "
+                       "enabled".format(deployment_storage_name))
+
+    if sku not in allowed_storage_types:
+        raise CLIError("Storage type {} is not allowed".format(sku))
+
+    return storage_properties
+
+
+def _normalize_functionapp_name(functionapp_name):
+    return re.sub(r"[^a-zA-Z0-9]", '', functionapp_name).lower()
+
+
+def _get_or_create_deployment_storage_container(cmd, resource_group_name, functionapp_name,
+                                                deployment_storage_name, deployment_storage_container_name):
+    storage_client = get_mgmt_service_client(cmd.cli_ctx, StorageManagementClient)
+    if deployment_storage_container_name:
+        storage_container = storage_client.blob_containers.get(resource_group_name, deployment_storage_name,
+                                                               deployment_storage_container_name)
+    else:
+        from random import randint
+        deployment_storage_container_name = "app-package-{}-{:07}".format(
+            _normalize_functionapp_name(functionapp_name)[:32], randint(0, 9999999))
+        logger.warning("Creating deployment storage account container '%s' ...", deployment_storage_container_name)
+
+        from azure.mgmt.storage.models import BlobContainer
+
+        storage_container = storage_client.blob_containers.create(resource_group_name,
+                                                                  deployment_storage_name,
+                                                                  deployment_storage_container_name,
+                                                                  BlobContainer())
+
+    return storage_container
+
+
+def _validate_and_get_deployment_storage_container(cmd, resource_group_name, deployment_storage_name,
+                                                   deployment_storage_container_name):
+    storage_client = get_mgmt_service_client(cmd.cli_ctx, StorageManagementClient)
+    return storage_client.blob_containers.get(resource_group_name, deployment_storage_name,
+                                              deployment_storage_container_name)
+
+
+def _get_or_create_user_assigned_identity(cmd, resource_group_name, functionapp_name, user_assigned_identity, location):
+    from azure.mgmt.msi import ManagedServiceIdentityClient
+    msi_client = get_mgmt_service_client(cmd.cli_ctx, ManagedServiceIdentityClient)
+    if user_assigned_identity:
+        if is_valid_resource_id(user_assigned_identity):
+            user_assigned_identity = parse_resource_id(user_assigned_identity)['name']
+        identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
+                                                           resource_name=user_assigned_identity)
+    else:
+        from random import randint
+        user_assigned_identity_name = "identity{}{:04}".format(
+            _normalize_functionapp_name(functionapp_name)[:10], randint(0, 9999))
+        logger.warning("Creating user assigned managed identity '%s' ...", user_assigned_identity_name)
+
+        from azure.mgmt.msi.models import Identity
+
+        identity = msi_client.user_assigned_identities.create_or_update(resource_group_name,
+                                                                        user_assigned_identity_name,
+                                                                        Identity(location=location))
+
+    return identity
+
+
+def _get_storage_connection_string(cli_ctx, deployment_storage_account):
+    resource_group_name = parse_resource_id(deployment_storage_account.id)['resource_group']
+    deployment_storage_name = deployment_storage_account.name
+    storage_client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
+    access_keys = storage_client.storage_accounts.list_keys(resource_group_name, deployment_storage_name)
+    try:
+        key = access_keys.keys[0].value
+    except AttributeError:
+        # Older API versions have a slightly different structure
+        key = access_keys.key1
+
+    endpoint_suffix = cli_ctx.cloud.suffixes.storage_endpoint
+    connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={};AccountName={};AccountKey={}'.format(
+        "https",
+        endpoint_suffix,
+        deployment_storage_name,
+        key)
+
+    return connection_string
+
+
+def _assign_deployment_storage_managed_identity_role(cli_ctx, deployment_storage_account, principal_id):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    sub_id = get_subscription_id(cli_ctx)
+    role_definition_id = "/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}".format(
+        sub_id, STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID)
+    auth_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION)
+    RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'RoleAssignmentCreateParameters',
+                                             mod='models', operation_group='role_assignments')
+    parameters = RoleAssignmentCreateParameters(role_definition_id=role_definition_id, principal_id=principal_id,
+                                                principal_type='ServicePrincipal')
+    auth_client.role_assignments.create(scope=deployment_storage_account.id,
+                                        role_assignment_name=str(uuid.uuid4()), parameters=parameters)
+
+
+def _has_deployment_storage_role_assignment_on_resource(cli_ctx, deployment_storage_account, principal_id):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    auth_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION)
+
+    sub_id = get_subscription_id(cli_ctx)
+    role_definition_id = "/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}".format(
+        sub_id, STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID)
+
+    list_for_scope = auth_client.role_assignments.list_for_scope(deployment_storage_account.id)
+    for assignment in list_for_scope:
+        if assignment.role_definition_id.lower() == role_definition_id.lower() and \
+                assignment.principal_id.lower() == principal_id.lower():
+            return True
+
+    return False
+
+
+def _parse_key_value_pairs(key_value_list):
+    key_value_list = key_value_list or []
+    result = {}
+    for kv in key_value_list:
+        try:
+            temp = shell_safe_json_parse(kv)
+            if isinstance(temp, list):
+                for t in temp:
+                    result[t['name']] = t['value']
+            else:
+                result.update(temp)
+        except CLIError:
+            name, value = kv.split('=', 1)
+            result[name] = value
+            result.update(result)
+    return result
+
+
 def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_account):
     sa_resource_group = resource_group_name
     if is_valid_resource_id(storage_account):
@@ -4546,6 +5285,50 @@ def list_consumption_locations(cmd):
     client = web_client_factory(cmd.cli_ctx)
     regions = client.list_geo_regions(sku='Dynamic')
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
+
+
+def list_flexconsumption_locations(cmd):
+    return [
+        {
+            "name": "eastus",
+        },
+        {
+            "name": "northeurope"
+        },
+        {
+            "name": "eastasia"
+        },
+        {
+            "name": "centralus"
+        },
+        {
+            "name": "uksouth"
+        },
+        {
+            "name": "eastus2"
+        },
+        {
+            "name": "eastus2euap"
+        },
+        {
+            "name": "australiaeast"
+        },
+        {
+            "name": "westus2"
+        },
+        {
+            "name": "westus3"
+        },
+        {
+            "name": "southcentralus"
+        },
+        {
+            "name": "swedencentral"
+        },
+        {
+            "name": "southeastasia"
+        }
+    ]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
@@ -4772,6 +5555,55 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
                           deployment_properties.get('numberOfInstancesFailed'))
         raise CLIError(error_text)
     return response_body
+
+
+def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url, timeout=None):
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+
+    headers = get_scm_site_headers_flex(cmd.cli_ctx)
+    total_trials = (int(timeout) // 2) if timeout else 450
+    num_trials = 0
+    # Indicates whether the status has been non empty in previous calls
+    has_response = False
+    while num_trials < total_trials:
+        time.sleep(1)
+        response = requests.get(deployment_status_url, headers=headers,
+                                verify=not should_disable_connection_verify())
+        try:
+            if (response.status_code == 404 or response.json().get('status') is None) and has_response:
+                raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.")
+            if (response.status_code != 404 and response.json().get('status') is not None) and not has_response:
+                has_response = True
+
+            res_dict = response.json()
+        except json.decoder.JSONDecodeError:
+            logger.warning("Deployment status endpoint %s returns malformed data. Retrying...", deployment_status_url)
+            res_dict = {}
+        finally:
+            num_trials = num_trials + 1
+
+        status = res_dict.get('status', 0)
+
+        if status == -1:
+            raise CLIError("Deployment was cancelled.")
+        if status == 3:
+            raise CLIError("Zip deployment failed. {}. These are the deployment logs: \n{}".format(
+                           res_dict, json.dumps(show_deployment_log(cmd, rg_name, name))))
+        if status == 4:
+            break
+        if status == 5:
+            raise CLIError("Deployment was cancelled and another deployment is in progress.")
+        if status == 6:
+            raise CLIError("Deployment was partially successful. These are the deployment logs:\n{}".format(
+                           json.dumps(show_deployment_log(cmd, rg_name, name))))
+        if 'progress' in res_dict:
+            logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
+    # if the deployment is taking longer than expected
+    if res_dict.get('status', 0) != 4:
+        raise CLIError("""Timeout reached by the command, however, the deployment operation
+                       is still on-going. Navigate to your scm site to check the deployment status""")
+    return res_dict
 
 
 def list_continuous_webjobs(cmd, resource_group_name, name, slot=None):
@@ -5118,6 +5950,7 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
 
     parsed_plan = parse_resource_id(app.server_farm_id)
     plan_info = client.app_service_plans.get(parsed_plan['resource_group'], parsed_plan["name"])
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     if skip_delegation_check:
         logger.warning('Skipping delegation check. Ensure that subnet is delegated to Microsoft.Web/serverFarms.'
@@ -5126,10 +5959,12 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
         _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
-                               subnet_name=subnet_info["subnet_name"])
+                               subnet_name=subnet_info["subnet_name"],
+                               subnet_service_delegation=FLEX_SUBNET_DELEGATION if is_flex else None)
 
     app.virtual_network_subnet_id = subnet_info["subnet_resource_id"]
     app.vnet_route_all_enabled = True
+    app.site_config.vnet_route_all_enabled = True
 
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
                             client=client, extra_parameter=app)
@@ -5143,8 +5978,12 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
     }
 
 
-def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vnet_name, subnet_name):
+def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vnet_name, subnet_name,
+                           subnet_service_delegation="Microsoft.Web/serverFarms"):
     from azure.cli.core.commands.client_factory import get_subscription_id
+
+    if subnet_service_delegation is None:
+        subnet_service_delegation = "Microsoft.Web/serverFarms"
 
     if get_subscription_id(cmd.cli_ctx).lower() != subnet_subscription_id.lower():
         logger.warning('Cannot validate subnet in other subscription for delegation to Microsoft.Web/serverFarms.'
@@ -5153,7 +5992,7 @@ def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vne
                        '--resource-group %s '
                        '--name %s '
                        '--vnet-name %s '
-                       '--delegations Microsoft.Web/serverFarms', vnet_resource_group, subnet_name, vnet_name)
+                       '--delegations %s', vnet_resource_group, subnet_name, vnet_name, subnet_service_delegation)
     else:
         subnetObj = SubnetShow(cli_ctx=cmd.cli_ctx)(command_args={
             "name": subnet_name,
@@ -5163,7 +6002,7 @@ def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vne
         delegations = subnetObj["delegations"]
         delegated = False
         for d in delegations:
-            if d["serviceName"].lower() == "microsoft.web/serverfarms".lower():
+            if d["serviceName"].lower() == subnet_service_delegation.lower():
                 delegated = True
 
         if not delegated:
@@ -5171,7 +6010,7 @@ def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vne
                 "name": subnet_name,
                 "vnet_name": vnet_name,
                 "resource_group": vnet_resource_group,
-                "delegated_services": [{"name": "delegation", "service_name": "Microsoft.Web/serverFarms"}]
+                "delegated_services": [{"name": "delegation", "service_name": subnet_service_delegation}]
             })
             LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -7006,6 +7845,12 @@ def _get_functionapp_runtime_info(cmd, resource_group, name, slot, is_linux):  #
         if 'name' in app_setting and app_setting['name'] == 'FUNCTIONS_EXTENSION_VERSION':
             functionapp_version = app_setting["value"]
             break
+
+    if is_flex_functionapp(cmd.cli_ctx, resource_group, name):
+        app_runtime_config = get_runtime_config(cmd, resource_group, name)
+        app_runtime = app_runtime_config.get("name", "")
+        app_runtime_version = app_runtime_config.get("version", "")
+        return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, None)
 
     if is_linux:
         app_metadata = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
