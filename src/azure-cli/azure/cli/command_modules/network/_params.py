@@ -40,9 +40,6 @@ from azure.cli.core.profiles import ResourceType
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
 def load_arguments(self, _):
-
-    ZoneType = self.get_models('ZoneType', resource_type=ResourceType.MGMT_NETWORK_DNS)
-
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     nic_type = CLIArgumentType(options_list='--nic-name', metavar='NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
     nsg_name_type = CLIArgumentType(options_list='--nsg-name', metavar='NAME', help='Name of the network security group.')

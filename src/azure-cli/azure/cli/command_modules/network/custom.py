@@ -2468,7 +2468,7 @@ def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, 
         "tags": tags
     })
 
-    if cmd.supported_api_version(min_api='2016-04-01', resource_type=ResourceType.MGMT_NETWORK_DNS) and parent_zone_name is not None:
+    if parent_zone_name is not None:
         logger.info('Attempting to add delegation in the parent zone')
         add_dns_delegation(cmd, created_zone, parent_zone_name, resource_group_name, zone_name)
     return created_zone
