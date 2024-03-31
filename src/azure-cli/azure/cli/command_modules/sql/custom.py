@@ -647,6 +647,7 @@ class SqlServerMinimalTlsVersionType(Enum):
     tls_1_0 = "1.0"
     tls_1_1 = "1.1"
     tls_1_2 = "1.2"
+    tls_1_3 = "1.3"
 
 
 class ResourceIdType(Enum):
@@ -4053,6 +4054,7 @@ def server_create(
         no_wait=False,
         enable_public_network=None,
         restrict_outbound_network_access=None,
+        minimal_tls_version=None,
         key_id=None,
         federated_client_id=None,
         user_assigned_identity_id=None,
@@ -4081,6 +4083,11 @@ def server_create(
         kwargs['restrict_outbound_network_access'] = (
             ServerNetworkAccessFlag.ENABLED if restrict_outbound_network_access
             else ServerNetworkAccessFlag.DISABLED)
+
+	if minimal_tls_version is not None:
+		kwargs['minimal_tls_version'] = minimal_tls_version
+	else:
+		kwargs['minimal_tls_version'] = SqlServerMinimalTlsVersionType.tls_1_2
 
     kwargs['key_id'] = key_id
     kwargs['federated_client_id'] = federated_client_id
@@ -4175,8 +4182,12 @@ def server_update(
     # Apply params to instance
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
-    instance.minimal_tls_version = (
-        minimal_tls_version or instance.minimal_tls_version)
+
+	if minimal_tls_version is not None:
+		instance.minimal_tls_version = minimal_tls_version
+    
+	#instance.minimal_tls_version = (
+    #    minimal_tls_version or instance.minimal_tls_version)
 
     if enable_public_network is not None:
         instance.public_network_access = (
