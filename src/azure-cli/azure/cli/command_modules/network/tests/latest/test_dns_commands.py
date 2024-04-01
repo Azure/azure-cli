@@ -405,6 +405,35 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns zone update -n {zone} -g {rg} --remove tags.tag1',
                  checks=self.check('tags.tag1', None))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_dns_zone_commands_with_dnssec_zone')
+    def test_dns_zone_commands_with_dnssec_zone(self, resource_group):
+        self.kwargs['zone'] = 'myzonex.com'
+
+        self.cmd('network dns zone create -n {zone} -g {rg}')
+        self.cmd('network dns dnssec-config create -g {rg} -z {zone}', checks=self.check('provisioningState', 'Succeeded'))
+
+        self.cmd('network dns zone create -n {zone} -g {rg} --tags "foo=bar"',
+                 checks=[
+                     self.check('tags.foo', 'bar'),
+                     self.check('length(signingKeys)', 2)
+                ])
+        self.cmd('network dns zone update -n {zone} -g {rg} --set tags.tag1=bar --set tags.tag2=foo',
+                 checks=[
+                     self.check('tags.tag1', 'bar'),
+                     self.check('tags.tag2', 'foo'),
+                     self.check('length(signingKeys)', 2)
+                ])
+        self.cmd('network dns zone update -n {zone} -g {rg} --remove tags.tag1',
+                 checks=[
+                     self.check('tags.tag1', None),
+                     self.check('tags.tag2', 'foo'),
+                     self.check('length(signingKeys)', 2)
+                ])
+        self.cmd('network dns zone show -n {zone} -g {rg}',
+                 checks=self.check('length(signingKeys)', 2))
+        self.cmd('network dns zone delete -g {rg} -n {zone} -y',
+                 checks=self.is_empty())
+
     @ResourceGroupPreparer(name_prefix='cli_test_dns_zone_update_if_match')
     def test_dns_zone_update_if_match(self, resource_group):
         self.kwargs['zone'] = 'myzonex.com'
