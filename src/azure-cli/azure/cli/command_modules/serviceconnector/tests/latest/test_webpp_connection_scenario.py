@@ -1624,3 +1624,59 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    def test_webapp_storage_blob_system_identity_opt_out_auth(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'wctest',
+            'site': 'servicelinker-storageblob-app',
+            'account': 'storagetestwc'
+        })     
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type dotnet --opt-out auth'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'dotnet')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # validate connection, auth should not be validated
+        self.cmd('webapp connection validate --id {}'.format(connection_id),
+                 checks= [
+                     self.check('length(@)', 3), # target existence, network and configinfo
+                 ])
+        # check system identity is not enabled
+        validate_result = self.cmd('webapp identity show -g {} -n {}'.format(self.kwargs['source_resource_group'],
+                                                                             self.kwargs['site']),
+                 ).output
+        self.assertEqual(validate_result, '')
+
+        # update connection
+        self.cmd('webapp connection update storage-blob --id {} '
+                 '--client-type python --opt-out auth'.format(connection_id))
+        # check system identity is not enabled
+        validate_result = self.cmd('webapp identity show -g {} -n {}'.format(self.kwargs['source_resource_group'],
+                                                                             self.kwargs['site']),
+                 ).output
+        self.assertEqual(validate_result, '')
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))

@@ -365,7 +365,7 @@ def get_object_id_of_current_user():
 
 def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
                              user_identity_auth_info, system_identity_auth_info,
-                             service_principal_auth_info_secret, new_addon, auth_action=None):
+                             service_principal_auth_info_secret, new_addon, auth_action=None, config_action=None):
     all_auth_info = []
     if secret_auth_info is not None:
         all_auth_info.append(secret_auth_info)
@@ -377,11 +377,15 @@ def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
         all_auth_info.append(system_identity_auth_info)
     if service_principal_auth_info_secret is not None:
         all_auth_info.append(service_principal_auth_info_secret)
+    if len(all_auth_info) == 0:
+        if auth_action == 'optOutAllAuth' and config_action == 'optOut':
+            return None
+        raise ValidationError('At least one auth info is needed')
     if not new_addon and len(all_auth_info) != 1:
         raise ValidationError('Only one auth info is needed')
     auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
     if auth_info is not None and auth_action is not None:
-        auth_info['auth_mode'] = auth_action
+        auth_info = dict(auth_info).update({'auth_mode': auth_action})
     return auth_info
 
 

@@ -310,10 +310,14 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       signalr=None,                                          # Resource.SignalR
                       appinsights=None,                                      # Resource.AppInsights
                       ):
-
+    auth_action = 'optOutAllAuth' if (opt_out_list is not None and
+                                      OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
+    config_action = 'optOut' if (opt_out_list is not None and
+                                 OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
-                                         system_identity_auth_info, service_principal_auth_info_secret, new_addon)
-    if is_passwordless_command(cmd, auth_info):
+                                         system_identity_auth_info, service_principal_auth_info_secret, new_addon,
+                                         auth_action, config_action)
+    if auth_info != None and is_passwordless_command(cmd, auth_info) and auth_action != 'optOutAllAuth':
         if _get_or_add_extension(cmd, PASSWORDLESS_EXTENSION_NAME, PASSWORDLESS_EXTENSION_MODULE, False):
             azext_custom = _get_azext_module(
                 PASSWORDLESS_EXTENSION_NAME, PASSWORDLESS_EXTENSION_MODULE)
@@ -389,9 +393,11 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
 
     auth_action = 'optOutAllAuth' if (opt_out_list is not None and
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
+    config_action = 'optOut' if (opt_out_list is not None and
+                                 OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
                                          system_identity_auth_info, service_principal_auth_info_secret, new_addon,
-                                         auth_action)
+                                         auth_action, config_action)
 
     if store_in_connection_string:
         if client_type == CLIENT_TYPE.Dotnet.value:
@@ -399,8 +405,6 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         else:
             logger.warning('client_type is not dotnet, ignore "--config-connstr"')
 
-    config_action = 'optOut' if (opt_out_list is not None and
-                                 OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
     public_network_action = 'optOut' if (opt_out_list is not None and
                                          OPT_OUT_OPTION.PUBLIC_NETWORK.value in opt_out_list) else None
 
@@ -433,7 +437,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id, scope)
-    elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
+    elif auth_info != None and auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
             and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use secret-name')
 
@@ -476,7 +480,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                                      'manually and then create the connection.'.format(str(e)))
 
     validate_service_state(parameters)
-    if enable_mi_for_db_linker:
+    if enable_mi_for_db_linker and auth_action != 'optOutAllAuth':
         new_auth_info = enable_mi_for_db_linker(
             cmd, source_id, target_id, auth_info, client_type, connection_name)
         parameters['auth_info'] = new_auth_info or parameters['auth_info']

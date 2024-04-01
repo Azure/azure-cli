@@ -432,7 +432,9 @@ def validate_opt_out_auth_and_config(namespace):
     '''Validate if config and auth are both opted out
     '''
     opt_out_list = namespace.opt_out_list
-    if OPT_OUT_OPTION.AUTHENTICATION in opt_out_list and OPT_OUT_OPTION.CONFIGURATION_INFO in opt_out_list:
+    if opt_out_list is not None and \
+            OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list and \
+            OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list:
         return True
     return False
 
@@ -632,9 +634,9 @@ def validate_update_params(cmd, namespace):
     missing_args = dict()
     if not validate_connection_id(namespace):
         missing_args.update(get_missing_source_args(cmd, namespace))
-    missing_args.update(get_missing_auth_args(cmd, namespace))
     if not validate_opt_out_auth_and_config(namespace):
-        missing_args.update(get_missing_connection_name(namespace))
+        missing_args.update(get_missing_auth_args(cmd, namespace))
+    missing_args.update(get_missing_connection_name(namespace))
     return missing_args
 
 
