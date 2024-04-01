@@ -156,7 +156,7 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2023-01-01',
         ResourceType.MGMT_NETWORK: '2022-01-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2022-11-01', {
+        ResourceType.MGMT_COMPUTE: SDKProfile('2023-09-01', {
             'resource_skus': '2019-04-01',
             'disks': '2023-04-02',
             'disk_encryption_sets': '2022-03-02',
@@ -168,7 +168,7 @@ AZURE_API_PROFILES = {
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
-            'virtual_machine_scale_sets': '2023-07-01',
+            'virtual_machine_scale_sets': '2023-09-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -194,7 +194,7 @@ AZURE_API_PROFILES = {
             'role_definitions': '2022-05-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2022-02-01-preview', {
+        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2023-11-01-preview', {
             'agent_pools': '2019-06-01-preview',
             'tasks': '2019-06-01-preview',
             'task_runs': '2019-06-01-preview',
@@ -261,7 +261,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2023-09-04',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-10-01'),
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2024-01-01'),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     },
     '2020-09-01-hybrid': {
@@ -441,6 +441,7 @@ AD_HOC_API_VERSIONS = {
         'VERSION_2020_11_01_PREVIEW': "2020-11-01-preview",
         'VERSION_2021_08_01_PREVIEW': "2021-08-01-preview",
         'VERSION_2022_02_01_PREVIEW': "2022-02-01-preview",
+        'VERSION_2023_11_01_PREVIEW': "2023-11-01-preview",
     },
     ResourceType.MGMT_CONTAINERSERVICE: {
         # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50

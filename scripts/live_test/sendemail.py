@@ -31,7 +31,7 @@ ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
 COMMIT_ID = sys.argv[1]
-ACCOUNT_KEY = os.environ.get('ACCOUNT_KEY')
+ACCOUNT_KEY = os.environ.get('ACCOUNT_KEY') # not used
 ARTIFACT_DIR = os.environ.get('ARTIFACTS_DIR')
 BUILD_ID = os.environ.get('BUILD_ID')
 EMAIL_ADDRESS = os.environ.get('EMAIL_ADDRESS')
@@ -372,7 +372,7 @@ def get_remaining_tests():
         with open('resource.html', 'w') as f:
             f.write(str(soup))
             logger.info('resource.html: ' + str(soup))
-        cmd = 'az storage blob upload -f resource.html -c {} -n resource.html --account-name clitestresultstac --account-key {}'.format(BUILD_ID, ACCOUNT_KEY)
+        cmd = 'az storage blob upload -f resource.html -c {} -n resource.html --account-name clitestresultstac --auth-mode login'.format(BUILD_ID)
         logger.info('Running: ' + cmd)
         os.system(cmd)
 
@@ -561,7 +561,7 @@ def upload_files(container):
     logger.info('Enter upload_files()')
 
     # Create container
-    cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {} --public-access container'.format(container, ACCOUNT_KEY)
+    cmd = 'az storage container create -n {} --account-name clitestresultstac --public-access container --auth-mode login'.format(container)
     os.system(cmd)
 
     # Upload files
@@ -569,7 +569,7 @@ def upload_files(container):
         for name in files:
             if name.endswith('html') or name.endswith('json'):
                 fullpath = os.path.join(root, name)
-                cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac --account-key {}'.format(fullpath, container, name, ACCOUNT_KEY)
+                cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac --auth-mode login'.format(fullpath, container, name)
                 os.system(cmd)
 
     logger.info('Exit upload_files()')

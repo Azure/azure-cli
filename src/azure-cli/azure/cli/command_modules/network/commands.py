@@ -673,12 +673,13 @@ def load_command_table(self, _):
 
     # region VirtualNetworkGateways
     with self.command_group('network vnet-gateway'):
-        from .custom import VnetGatewayCreate, VnetGatewayUpdate, VnetGatewayVpnConnectionsDisconnect, VNetGatewayShow
+        from .custom import VnetGatewayCreate, VnetGatewayUpdate, VnetGatewayVpnConnectionsDisconnect, VNetGatewayShow, VNetGatewayList
         from .aaz.latest.network.vnet_gateway import ListBgpPeerStatus, ListAdvertisedRoutes, ListLearnedRoutes
         self.command_table['network vnet-gateway create'] = VnetGatewayCreate(loader=self)
         self.command_table['network vnet-gateway update'] = VnetGatewayUpdate(loader=self)
         self.command_table['network vnet-gateway disconnect-vpn-connections'] = VnetGatewayVpnConnectionsDisconnect(loader=self)
         self.command_table["network vnet-gateway show"] = VNetGatewayShow(loader=self)
+        self.command_table["network vnet-gateway list"] = VNetGatewayList(loader=self)
         self.command_table['network vnet-gateway list-bgp-peer-status'] = ListBgpPeerStatus(loader=self, table_transformer=transform_vnet_gateway_bgp_peer_table)
         self.command_table['network vnet-gateway list-advertised-routes'] = ListAdvertisedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
         self.command_table['network vnet-gateway list-learned-routes'] = ListLearnedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)

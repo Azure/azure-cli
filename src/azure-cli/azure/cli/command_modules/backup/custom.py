@@ -8,6 +8,7 @@ import os
 from datetime import datetime, timedelta, timezone
 # pylint: disable=too-many-lines
 from knack.log import get_logger
+from knack.prompting import prompt_y_n
 from azure.mgmt.core.tools import is_valid_resource_id
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
@@ -47,73 +48,77 @@ import azure.cli.command_modules.backup.custom_help as cust_help
 logger = get_logger(__name__)
 
 # Mapping of workload type
-secondary_region_map = {"ussecwest": "usseceast",
-                        "usseceast": "ussecwest",
-                        "usnateast": "usnatwest",
-                        "usnatwest": "usnateast",
-                        "swedencentral": "swedensouth",
-                        "swedensouth": "swedencentral",
-                        "norwaywest": "norwayeast",
-                        "norwayeast": "norwaywest",
-                        "germanynorth": "germanywestcentral",
-                        "germanywestcentral": "germanynorth",
-                        "westus3": "eastus",
-                        "eastasia": "southeastasia",
-                        "southeastasia": "eastasia",
-                        "australiaeast": "australiasoutheast",
-                        "australiasoutheast": "australiaeast",
-                        "australiacentral": "australiacentral2",
-                        "australiacentral2": "australiacentral",
-                        "brazilsouth": "southcentralus",
-                        "brazilsoutheast": "brazilsouth",
-                        "canadacentral": "canadaeast",
-                        "canadaeast": "canadacentral",
-                        "chinanorth": "chinaeast",
-                        "chinaeast": "chinanorth",
-                        "chinanorth2": "chinaeast2",
-                        "chinaeast2": "chinanorth2",
-                        "chinanorth3": "chinaeast3",
-                        "chinaeast3": "chinanorth3",
-                        "northeurope": "westeurope",
-                        "westeurope": "northeurope",
-                        "francecentral": "francesouth",
-                        "francesouth": "francecentral",
-                        "germanycentral": "germanynortheast",
-                        "germanynortheast": "germanycentral",
-                        "centralindia": "southindia",
-                        "southindia": "centralindia",
-                        "westindia": "southindia",
-                        "japaneast": "japanwest",
-                        "japanwest": "japaneast",
-                        "koreacentral": "koreasouth",
-                        "koreasouth": "koreacentral",
-                        "eastus": "westus",
-                        "westus": "eastus",
-                        "eastus2": "centralus",
-                        "centralus": "eastus2",
-                        "northcentralus": "southcentralus",
-                        "southcentralus": "northcentralus",
-                        "westus2": "westcentralus",
-                        "westcentralus": "westus2",
-                        "centraluseuap": "eastus2euap",
-                        "eastus2euap": "centraluseuap",
-                        "southafricanorth": "southafricawest",
-                        "southafricawest": "southafricanorth",
-                        "switzerlandnorth": "switzerlandwest",
-                        "switzerlandwest": "switzerlandnorth",
-                        "ukwest": "uksouth",
-                        "uksouth": "ukwest",
-                        "uaenorth": "uaecentral",
-                        "uaecentral": "uaenorth",
-                        "usdodeast": "usdodcentral",
-                        "usdodcentral": "usdodeast",
-                        "usgovarizona": "usgovtexas",
-                        "usgovtexas": "usgovarizona",
-                        "usgoviowa": "usgovvirginia",
-                        "usgovvirginia": "usgovtexas",
-                        "malaysiasouth": "japanwest",
-                        "jioindiacentral": "jioindiawest",
-                        "jioindiawest": "jioindiacentral"}
+secondary_region_map = {
+    "australiacentral": "australiacentral2",
+    "australiacentral2": "australiacentral",
+    "australiaeast": "australiasoutheast",
+    "australiasoutheast": "australiaeast",
+    "brazilsouth": "southcentralus",
+    "brazilsoutheast": "brazilsouth",
+    "canadacentral": "canadaeast",
+    "canadaeast": "canadacentral",
+    "centralindia": "southindia",
+    "centralus": "eastus2",
+    "centraluseuap": "eastus2euap",
+    "chinaeast": "chinanorth",
+    "chinaeast2": "chinanorth2",
+    "chinaeast3": "chinanorth3",
+    "chinanorth": "chinaeast",
+    "chinanorth2": "chinaeast2",
+    "chinanorth3": "chinaeast3",
+    "eastasia": "southeastasia",
+    "eastus": "westus",
+    "eastus2": "centralus",
+    "eastus2euap": "centraluseuap",
+    "francecentral": "francesouth",
+    "francesouth": "francecentral",
+    "germanycentral": "germanynortheast",
+    "germanynorth": "germanywestcentral",
+    "germanynortheast": "germanycentral",
+    "germanywestcentral": "germanynorth",
+    "japaneast": "japanwest",
+    "japanwest": "japaneast",
+    "jioindiacentral": "jioindiawest",
+    "jioindiawest": "jioindiacentral",
+    "koreacentral": "koreasouth",
+    "koreasouth": "koreacentral",
+    "malaysiasouth": "japanwest",
+    "northcentralus": "southcentralus",
+    "northeurope": "westeurope",
+    "norwayeast": "norwaywest",
+    "norwaywest": "norwayeast",
+    "southafricanorth": "southafricawest",
+    "southafricawest": "southafricanorth",
+    "southcentralus": "northcentralus",
+    "southeastasia": "eastasia",
+    "southindia": "centralindia",
+    "swedencentral": "swedensouth",
+    "swedensouth": "swedencentral",
+    "switzerlandnorth": "switzerlandwest",
+    "switzerlandwest": "switzerlandnorth",
+    "taiwannorth": "taiwannorthwest",
+    "taiwannorthwest": "taiwannorth",
+    "uaecentral": "uaenorth",
+    "uaenorth": "uaecentral",
+    "uksouth": "ukwest",
+    "ukwest": "uksouth",
+    "usdodcentral": "usdodeast",
+    "usdodeast": "usdodcentral",
+    "usgovarizona": "usgovtexas",
+    "usgoviowa": "usgovvirginia",
+    "usgovtexas": "usgovarizona",
+    "usgovvirginia": "usgovtexas",
+    "usnateast": "usnatwest",
+    "usnatwest": "usnateast",
+    "usseceast": "ussecwest",
+    "ussecwest": "usseceast",
+    "westcentralus": "westus2",
+    "westeurope": "northeurope",
+    "westindia": "southindia",
+    "westus": "eastus",
+    "westus2": "westcentralus",
+    "westus3": "eastus"
+}
 
 fabric_name = "Azure"
 default_policy_name = "DefaultPolicy"
@@ -122,6 +127,12 @@ os_windows = 'Windows'
 os_linux = 'Linux'
 password_offset = 33
 password_length = 15
+vm_policy_type_map = {
+    'v2': 'enhanced',
+    'v1': 'standard'
+}
+enhanced_policy_type = "v2"
+standard_policy_type = "v1"
 # pylint: disable=too-many-function-args
 
 
@@ -169,9 +180,9 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
                        "to their default values. It is recommended to use az backup vault update instead.")
 
         # If the vault exists, we move to the update flow instead
-        update_vault(client, vault_name, resource_group_name, tags, public_network_access,
-                     immutability_state, cross_subscription_restore_state, classic_alerts,
-                     azure_monitor_alerts_for_job_failures)
+        return update_vault(client, vault_name, resource_group_name, tags, public_network_access,
+                            immutability_state, cross_subscription_restore_state, classic_alerts,
+                            azure_monitor_alerts_for_job_failures)
     except CoreResourceNotFoundError:
         vault_properties = VaultProperties()
 
@@ -979,7 +990,7 @@ def list_items(cmd, client, resource_group_name, vault_name, container_name=None
 
 
 def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id=None,
-                           is_critical_operation=False):
+                           is_critical_operation=False, yes=False):
     if item.properties.backup_management_type != policy.properties.backup_management_type:
         raise CLIError(
             """
@@ -1000,9 +1011,10 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     vm_item_properties.policy_id = policy.id
     vm_item_properties.source_resource_id = item.properties.source_resource_id
     vm_item = ProtectedItemResource(properties=vm_item_properties)
+    existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
+                                         item.properties.policy_name)
+
     if is_critical_operation:
-        existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
-                                             item.properties.policy_name)
         if cust_help.is_retention_duration_decreased(existing_policy, policy, "AzureIaasVM"):
             # update the payload with critical operation and add auxiliary header for cross tenant case
             if tenant_id is not None:
@@ -1010,6 +1022,22 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
                                                  aux_tenants=[tenant_id]).protected_items
             vm_item.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
                 cmd.cli_ctx, resource_group_name, vault_name, "updateProtection")]
+
+    # Raise warning for standard->enhanced policy
+    try:
+        existing_policy_type = existing_policy.properties.policy_type.lower()
+        new_policy_type = policy.properties.policy_type.lower()
+        if (not yes and
+                new_policy_type in vm_policy_type_map and vm_policy_type_map[new_policy_type] == 'enhanced' and
+                existing_policy_type in vm_policy_type_map and vm_policy_type_map[existing_policy_type] == 'standard'):
+            warning_prompt = ('Upgrading to enhanced policy can incur additional charges. Once upgraded to the enhanced '
+                              'policy, it is not possible to revert back to the standard policy. Do you want to continue?')
+            if not prompt_y_n(warning_prompt):
+                logger.warning('Cancelling policy update operation')
+                return None
+    except (AttributeError):
+        logger.warning("Unable to fetch policy type for either existing or new policy. Proceeding with update.")
+
     # Update policy
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, vm_item, cls=cust_help.get_pipeline_response)
@@ -1274,6 +1302,32 @@ def _get_alr_restore_mode(target_vm_name, target_vnet_name, target_vnet_resource
         """)
 
 
+def _set_edge_zones_trigger_restore_properties(cmd, trigger_restore_properties, restore_to_edge_zone, recovery_point,
+                                               target_subscription, use_secondary_region, restore_mode):
+    # TODO: As the subscription we currently use does not have access to Edge Zones, no tests have been written for
+    # this. We have manually validated it, but tests should be added to validate all (successful + exceptional)
+    # cases as soon as is viable.
+    if restore_to_edge_zone is not None and restore_to_edge_zone:
+        # If CSR or CRR, error
+        if target_subscription != get_subscription_id(cmd.cli_ctx) or use_secondary_region:
+            raise InvalidArgumentValueError("The restore-to-edge-zone parameter can't be used for cross region "
+                                            "or cross subscription restore")
+        if recovery_point.properties.extended_location is None \
+                or recovery_point.properties.extended_location.name is None \
+                or recovery_point.properties.extended_location.name == "":
+            raise InvalidArgumentValueError("Please make sure that the recovery point belongs to an edge zone VM "
+                                            "and contains extended location")
+        trigger_restore_properties.extended_location = recovery_point.properties.extended_location
+
+    if restore_mode == "OriginalLocation":
+        if recovery_point.properties.extended_location is not None \
+                and recovery_point.properties.extended_location.name is not None \
+                and recovery_point.properties.extended_location.name != "":
+            trigger_restore_properties.extended_location = recovery_point.properties.extended_location
+
+    return trigger_restore_properties
+
+
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
@@ -1282,7 +1336,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
                   mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
                   target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None,
-                  target_subscription_id=None, storage_account_resource_group=None):
+                  target_subscription_id=None, storage_account_resource_group=None, restore_to_edge_zone=None):
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     vault_location = vault.location
     vault_identity = vault.identity
@@ -1381,6 +1435,12 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                     target_vnet_resource_group, target_subnet_name, vault_name, resource_group_name,
                                     recovery_point, target_zone, target_rg_id, _source_resource_id, restore_mode,
                                     target_subscription, use_secondary_region)
+
+    # Edge zones-specific code. Not using existing set/get properties code as it is messy and prone to errors
+    trigger_restore_properties = _set_edge_zones_trigger_restore_properties(cmd, trigger_restore_properties,
+                                                                            restore_to_edge_zone,
+                                                                            recovery_point, target_subscription,
+                                                                            use_secondary_region, restore_mode)
 
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 

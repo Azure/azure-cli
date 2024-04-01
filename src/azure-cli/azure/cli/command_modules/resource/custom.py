@@ -1109,7 +1109,7 @@ def _build_bicepparam_file(cli_ctx, bicepparam_file, template_file, inline_param
 
 
 def _parse_bicepparam_file(cmd, template_file, parameters):
-    ensure_bicep_installation(cmd.cli_ctx)
+    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version_bicepparam_compilation = "0.14.85"
     if not bicep_version_greater_than_or_equal_to(minimum_supported_version_bicepparam_compilation):
@@ -3810,7 +3810,7 @@ def _validate_lock_params_match_lock(
         _resource_namespace = resource.get('namespace', None)
         if _resource_group is None:
             return
-        if resource_group != _resource_group:
+        if resource_group and resource_group.lower() != _resource_group.lower():
             raise CLIError(
                 'Unexpected --resource-group for lock {}, expected {}'.format(
                     name, _resource_group))
@@ -4497,7 +4497,7 @@ def build_bicepparam_file(cmd, file, stdout=None, outdir=None, outfile=None, no_
 
 
 def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indent_kind=None, indent_size=None, insert_final_newline=None):
-    ensure_bicep_installation(cmd.cli_ctx)
+    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.12.1"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
@@ -4606,7 +4606,7 @@ def list_bicep_cli_versions(cmd):
 
 
 def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None, output_format=None, include_params=None):
-    ensure_bicep_installation(cmd.cli_ctx)
+    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.7.4"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
@@ -4633,7 +4633,7 @@ def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, 
 
 
 def lint_bicep_file(cmd, file, no_restore=None, diagnostics_format=None):
-    ensure_bicep_installation(cmd.cli_ctx)
+    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.7.4"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
