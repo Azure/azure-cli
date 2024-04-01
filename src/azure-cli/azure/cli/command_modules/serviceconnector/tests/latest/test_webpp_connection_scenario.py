@@ -1478,7 +1478,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
     @live_only()
-    @unittest.skip('Need to install private SDK')
+    # app config connection is different every time
     def test_webapp_storageblob_store_in_app_config(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),

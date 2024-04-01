@@ -116,7 +116,7 @@ DEPENDENCIES = [
     'azure-mgmt-security==5.0.0',
     'azure-mgmt-servicebus~=8.2.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
-    'azure-mgmt-servicelinker==1.2.0b1',
+    'azure-mgmt-servicelinker==1.2.0b2',
     'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-signalr==2.0.0b1',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
