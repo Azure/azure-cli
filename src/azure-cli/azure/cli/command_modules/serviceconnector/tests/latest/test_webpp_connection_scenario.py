@@ -1626,7 +1626,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @live_only()
+    @live_only()
     # app config connection is different every time
     def test_webapp_storageblob_store_in_app_config(self):
         self.kwargs.update({
