@@ -4,9 +4,8 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-locals, too-many-statements too-many-boolean-expressions too-many-branches protected-access
 
-from azure.mgmt.cdn.models import (ForwardingProtocol, AfdQueryStringCachingBehavior, SkuName)
+from azure.mgmt.cdn.models import SkuName
 from azure.cli.core.aaz._base import has_value
-from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.command_modules.cdn.aaz.latest.afd.custom_domain import Create as _AFDCustomDomainCreate, \
@@ -22,11 +21,13 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Show as
     Create as _AFDSecurityPolicyCreate, Update as _AFDSecurityPolicyUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDProfileShow, \
     Create as _AFDProfileCreate, Update as _AFDProfileUpdate
+from azure.cli.command_modules.cdn.aaz.latest.afd.profile.log_scrubbing import Show as _AFDProfileLogScrubbingShow
 from azure.cli.command_modules.cdn.aaz.latest.afd.endpoint import Show as _AFDEndpointShow, \
     Create as _AFDEndpointCreate, Update as _AFDEndpointUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin_group import Show as _AFDOriginGroupShow, \
     Create as _AFDOriginGroupCreate, Update as _AFDOriginGroupUpdate
-from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZDateArg
+from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZTimeArg, AAZIntArg
+from knack.util import CLIError
 from knack.log import get_logger
 from .custom_rule_util import (create_condition, create_action,
                                create_conditions_from_existing, create_actions_from_existing)
@@ -125,18 +126,60 @@ class AFDProfileCreate(_AFDProfileCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.identity_type = AAZStrArg(
+            options=['--identity-type'],
+            help='Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).',
+            enum=['SystemAssigned', 'None', 'UserAssigned', 'SystemAssigned, UserAssigned'],
+        )
+        args_schema.user_assigned_identities = AAZListArg(
+            options=['--user-assigned-identities'],
+            help='The set of user assigned identities associated with the resource. '
+            'The userAssignedIdentities dictionary keys will be ARM resource ids in the form: '
+            '\'/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupName}}'
+            '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{{identityName}}. '
+            'The dictionary values can be empty objects ({{}}) in requests.',
+        )
+        args_schema.user_assigned_identities.Element = AAZStrArg()
         args_schema.location._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
         args.location = 'global'
+        user_assigned_identities = {}
+        for identity in args.user_assigned_identities:
+            user_assigned_identities[identity.to_serialized_data()] = {}
+        if args.identity_type == 'UserAssigned' or args.identity_type == 'SystemAssigned, UserAssigned':
+            args.identity = {
+                'type': args.identity_type,
+                'userAssignedIdentities': user_assigned_identities
+            }
+        elif args.identity_type == 'SystemAssigned':
+            args.identity = {
+                'type': args.identity_type
+            }
+        else:
+            args.identity = None
 
 
 class AFDProfileUpdate(_AFDProfileUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.identity_type = AAZStrArg(
+            options=['--identity-type'],
+            help='Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).',
+            enum=['SystemAssigned', 'None', 'UserAssigned', 'SystemAssigned, UserAssigned'],
+        )
+        args_schema.user_assigned_identities = AAZListArg(
+            options=['--user-assigned-identities'],
+            help='The set of user assigned identities associated with the resource. '
+            'The userAssignedIdentities dictionary keys will be ARM resource ids in the form: '
+            '\'/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupName}}'
+            '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{{identityName}}. '
+            'The dictionary values can be empty objects ({{}}) in requests.',
+        )
+        args_schema.user_assigned_identities.Element = AAZStrArg()
         args_schema.location._registered = False
         args_schema.sku._registered = False
         return args_schema
@@ -152,6 +195,33 @@ class AFDProfileUpdate(_AFDProfileUpdate):
             raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
         existing_location = None if 'location' not in existing else existing['location']
         args.location = existing_location
+
+        if has_value(args.identity_type):
+            user_assigned_identities = {}
+            for identity in args.user_assigned_identities:
+                user_assigned_identities[identity.to_serialized_data()] = {}
+            if args.identity_type == 'UserAssigned' or args.identity_type == 'SystemAssigned, UserAssigned':
+                args.identity = {
+                    'type': args.identity_type,
+                    'userAssignedIdentities': user_assigned_identities
+                }
+            elif args.identity_type == 'SystemAssigned':
+                args.identity = {
+                    'type': args.identity_type
+                }
+            else:
+                args.identity = None
+
+
+class AFDProfileLogScrubbingShow(_AFDProfileLogScrubbingShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        existing = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return existing['logScrubbing']
 
 
 class AFDEndpointCreate(_AFDEndpointCreate):
@@ -281,6 +351,10 @@ class AFDOriginCreate(_AFDOriginCreate):
                 'group_id': args.private_link_sub_resource_type
             }
         args.shared_private_link_resource = shared_private_link_resource
+        if not has_value(args.priority):
+            args.priority = 1
+        elif int(args.priority.to_serialized_data()) < 1 or int(args.priority.to_serialized_data()) > 1000:
+            raise CLIError('Priority must be between 1 and 1000')
 
 
 class AFDOriginUpdate(_AFDOriginUpdate):
@@ -365,7 +439,10 @@ class AFDOriginUpdate(_AFDOriginUpdate):
         args.https_port = args.https_port if args.https_port is not None else existing['httpsPort']
         args.origin_host_header = args.origin_host_header if args.origin_host_header is not None \
             else existing['originHostHeader']
-        args.priority = args.priority if args.priority is not None else existing['priority']
+        if has_value(args.priority) \
+                and (int(args.priority.to_serialized_data()) < 1 or int(args.priority.to_serialized_data()) > 1000):
+            raise CLIError('Priority must be between 1 and 1000')
+        args.priority = args.priority if has_value(args.priority) else existing['priority']
         args.weight = args.weight if args.weight is not None else existing['weight']
         args.enabled_state = args.enabled_state if args.enabled_state is not None else existing['enabledState']
         args.enforce_certificate_name_check = \
@@ -631,7 +708,7 @@ class AFDRuleCreate(_AFDRuleCreate):
             options=['--cache-behavior'],
             help='Caching behavior for the requests.',
         )
-        args_schema.cache_duration = AAZDateArg(
+        args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
             help='The duration for which the content needs to be cached. Allowed format is [d.]hh:mm:ss.',
         )
@@ -762,14 +839,14 @@ class AFDRuleCreate(_AFDRuleCreate):
         action = create_action(
             args.action_name, args.cache_behavior, args.cache_duration, args.header_action,
             args.header_name, args.header_value, None,
-            None if args.query_parameters is None else ','.join(args.query_parameters),
+            None if not has_value(args.query_parameters) else ','.join(args.query_parameters.to_serialized_data()),
             args.redirect_type, args.redirect_protocol, args.custom_hostname,
             args.custom_path, args.custom_querystring, args.custom_fragment, args.source_pattern,
             args.destination, args.preserve_unmatched_path,
             origin_group=args.origin_group,
             sub_id=self.ctx.subscription_id,
             enable_caching=args.enable_caching,
-            resource_group_name=args.resource_group,
+            resource_group=args.resource_group,
             profile_name=args.profile_name,
             enable_compression=args.enable_compression,
             query_string_caching_behavior=args.query_string_caching_behavior,
@@ -780,166 +857,279 @@ class AFDRuleCreate(_AFDRuleCreate):
         args.actions = actions
 
 
-def add_afd_rule_condition(cmd, resource_group_name, profile_name, rule_set_name,
-                           rule_name, match_variable, operator, match_values=None, selector=None,
-                           negate_condition=None, transforms=None):
+class AFDRuleconditionAdd(_AFDRuleUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.match_values = AAZListArg(
+            options=['--match-values'],
+            help='Match values of the match condition. e.g, space separated values \'GET\' \'HTTP\'.',
+        )
+        args_schema.match_values.Element = AAZStrArg()
+        args_schema.match_variable = AAZStrArg(
+            options=['--match-variable'],
+            help='Name of the match condition: '
+            'https://docs.microsoft.com/en-us/azure/frontdoor/rules-match-conditions.',
+            required=True,
+        )
+        args_schema.negate_condition = AAZBoolArg(
+            options=['--negate-condition'],
+            help='If true, negates the condition.',
+        )
+        args_schema.operator = AAZStrArg(
+            options=['--operator'],
+            help='Operator of the match condition.',
+            required=True,
+        )
+        args_schema.selector = AAZStrArg(
+            options=['--selector'],
+            help='Selector of the match condition.',
+        )
+        args_schema.transforms = AAZListArg(
+            options=['--transforms'],
+            help='Transform to apply before matching.',
+        )
+        args_schema.transforms.Element = AAZStrArg()
+        args_schema.actions._registered = False
+        args_schema.conditions._registered = False
+        return args_schema
 
-    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'profile_name': profile_name,
-        'rule_set_name': rule_set_name,
-        'rule_name': rule_name
-    })
-    condition = create_condition(match_variable, operator, match_values, selector, negate_condition, transforms)
-    conditions = create_conditions_from_existing(existing['conditions'])
-    conditions.append(condition)
-    existing_actions = create_actions_from_existing(existing['actions'])
+    def pre_operations(self):
+        args = self.ctx.args
 
-    return _AFDRuleUpdate(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'profile_name': profile_name,
-        'rule_set_name': rule_set_name,
-        'rule_name': rule_name,
-        'conditions': conditions,
-        'actions': existing_actions,
-        'match_processing_behavior': None
-        if 'matchProcessingBehavior' not in existing
-        else existing['matchProcessingBehavior'],
-        'order': None if 'order' not in existing else existing['order']
-    })
-
-
-def add_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name,
-                        rule_name, action_name, cache_behavior=None, cache_duration=None,
-                        header_action=None, header_name=None, header_value=None,
-                        query_parameters=None, redirect_type=None, redirect_protocol=None, custom_hostname=None,
-                        custom_path=None, custom_querystring=None, custom_fragment=None, source_pattern=None,
-                        destination=None, preserve_unmatched_path=None, origin_group=None,
-                        forwarding_protocol: ForwardingProtocol = None,
-                        query_string_caching_behavior: AfdQueryStringCachingBehavior = None,
-                        is_compression_enabled=None,
-                        enable_caching=None):
-    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'profile_name': profile_name,
-        'rule_set_name': rule_set_name,
-        'rule_name': rule_name
-    })
-    actions = create_actions_from_existing(existing['actions'])
-    existing_conditions = create_conditions_from_existing(existing['conditions'])
-
-    action = create_action(action_name, cache_behavior, cache_duration, header_action, header_name,
-                           header_value, None, None if query_parameters is None else ','.join(query_parameters),
-                           redirect_type, redirect_protocol, custom_hostname, custom_path, custom_querystring,
-                           custom_fragment, source_pattern, destination, preserve_unmatched_path,
-                           resource_group_name=resource_group_name,
-                           forwarding_protocol=forwarding_protocol,
-                           origin_group=origin_group, profile_name=profile_name,
-                           query_string_caching_behavior=query_string_caching_behavior,
-                           enable_compression=is_compression_enabled,
-                           enable_caching=enable_caching,
-                           sub_id=get_subscription_id(cmd.cli_ctx))
-    actions.append(action)
-
-    return _AFDRuleUpdate(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'profile_name': profile_name,
-        'rule_set_name': rule_set_name,
-        'rule_name': rule_name,
-        'conditions': existing_conditions,
-        'actions': actions,
-        'match_processing_behavior': None
-        if 'matchProcessingBehavior' not in existing
-        else existing['matchProcessingBehavior'],
-        'order': None if 'order' not in existing else existing['order']
-    })
+        existing = _RuleShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name,
+            'rule_set_name': args.rule_set_name,
+            'rule_name': args.rule_name
+        })
+        conditions = create_conditions_from_existing(existing['conditions'])
+        condition = create_condition(args.match_variable, args.operator,
+                                     args.match_values, args.selector, args.negate_condition, args.transforms)
+        if condition is not None:
+            conditions.append(condition)
+        args.conditions = conditions
 
 
-def remove_afd_rule_condition(cmd, resource_group_name, profile_name,
-                              rule_set_name, rule_name, index):
+class AFDRuleconditionRemove(_AFDRuleUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.index = AAZIntArg(
+            options=['--index'],
+            help='The index of the condition/action.',
+            required=True
+        )
+        args_schema.actions._registered = False
+        args_schema.conditions._registered = False
+        return args_schema
 
-    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'profile_name': profile_name,
-        'rule_set_name': rule_set_name,
-        'rule_name': rule_name
-    })
-    conditions = create_conditions_from_existing(existing['conditions'])
-    existing_actions = create_actions_from_existing(existing['actions'])
+    def pre_operations(self):
+        args = self.ctx.args
 
-    if len(conditions) > 1 and index < len(conditions):
-        conditions.pop(index)
-    else:
-        logger.warning('Invalid condition index found. This command will be skipped. Please check the rule.')
+        existing = _RuleShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name,
+            'rule_set_name': args.rule_set_name,
+            'rule_name': args.rule_name
+        })
+        conditions = create_conditions_from_existing(existing['conditions'])
 
-    return _AFDRuleUpdate(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'profile_name': profile_name,
-        'rule_set_name': rule_set_name,
-        'rule_name': rule_name,
-        'conditions': conditions,
-        'actions': existing_actions,
-        'match_processing_behavior': None
-        if 'matchProcessingBehavior' not in existing
-        else existing['matchProcessingBehavior'],
-        'order': None if 'order' not in existing else existing['order']
-    })
-
-
-def remove_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name, rule_name, index):
-
-    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'profile_name': profile_name,
-        'rule_set_name': rule_set_name,
-        'rule_name': rule_name
-    })
-
-    existing_conditions = create_conditions_from_existing(existing['conditions'])
-    actions = create_actions_from_existing(existing['actions'])
-    if len(actions) > 1 and index < len(actions):
-        actions.pop(index)
-    else:
-        logger.warning('Invalid condition index found. This command will be skipped. Please check the rule.')
-
-    return _AFDRuleUpdate(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'profile_name': profile_name,
-        'rule_set_name': rule_set_name,
-        'rule_name': rule_name,
-        'actions': actions,
-        'conditions': existing_conditions,
-        'match_processing_behavior': None
-        if 'matchProcessingBehavior' not in existing
-        else existing['matchProcessingBehavior'],
-        'order': None if 'order' not in existing else existing['order']
-    })
+        if len(conditions) > 1 and args.index < len(conditions):
+            conditions.pop(args.index.to_serialized_data())
+        else:
+            logger.warning('Invalid condition index found. This command will be skipped. Please check the rule.')
+        args.conditions = conditions
 
 
-def list_afd_rule_condition(cmd, resource_group_name,
-                            profile_name, rule_set_name,
-                            rule_name):
-    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'profile_name': profile_name,
-        'rule_set_name': rule_set_name,
-        'rule_name': rule_name
-    })
+class AFDRuleActionCreate(_AFDRuleUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.action_name = AAZStrArg(
+            options=['--action-name'],
+            help='The name of the action for the delivery rule: '
+            'https://docs.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions.',
+            required=True,
+        )
+        args_schema.cache_behavior = AAZStrArg(
+            options=['--cache-behavior'],
+            help='Caching behavior for the requests.',
+        )
+        args_schema.cache_duration = AAZTimeArg(
+            options=['--cache-duration'],
+            help='The duration for which the content needs to be cached. Allowed format is [d.]hh:mm:ss.',
+        )
+        args_schema.custom_fragment = AAZStrArg(
+            options=['--custom-fragment'],
+            help='Fragment to add to the redirect URL.',
+        )
+        args_schema.custom_hostname = AAZStrArg(
+            options=['--custom-hostname'],
+            help='Host to redirect. Leave empty to use the incoming host as the destination host.',
+        )
+        args_schema.custom_path = AAZStrArg(
+            options=['--custom-path'],
+            help='The full path to redirect. Path cannot be empty and must start with /.'
+            'Leave empty to use the incoming path as destination pat',
+        )
+        args_schema.custom_querystring = AAZStrArg(
+            options=['--custom-querystring'],
+            help='The set of query strings to be placed in the redirect URL.'
+            'leave empty to preserve the incoming query string.',
+        )
+        args_schema.destination = AAZStrArg(
+            options=['--destination'],
+            help='The destination path to be used in the rewrite.',
+        )
+        args_schema.enable_caching = AAZBoolArg(
+            options=['--enable-caching'],
+            help='Indicates whether to enable caching on the route.',
+        )
+        args_schema.enable_compression = AAZBoolArg(
+            options=['--enable-compression'],
+            help='Indicates whether content compression is enabled on AzureFrontDoor. Default value is false.'
+            'If compression is enabled, content will be served as compressed if user requests for a compressed version.'
+            'Content won\'t be compressed on AzureFrontDoor'
+            'when requested content is smaller than 1 byte or larger than 1 MB.',
+        )
+        args_schema.forwarding_protocol = AAZStrArg(
+            options=['--forwarding-protocol'],
+            help='Protocol this rule will use when forwarding traffic to backends.',
+        )
+        args_schema.header_action = AAZStrArg(
+            options=['--header-action'],
+            help='Header action for the requests.'
+        )
+        args_schema.header_name = AAZStrArg(
+            options=['--header-name'],
+            help='Name of the header to modify.'
+        )
+        args_schema.header_value = AAZStrArg(
+            options=['--header-value'],
+            help='Value of the header.',
+        )
+        args_schema.origin_group = AAZStrArg(
+            options=['--origin-group'],
+            help='Name or ID of the OriginGroup that would override the default OriginGroup.',
+        )
+        args_schema.preserve_unmatched_path = AAZBoolArg(
+            options=['--preserve-unmatched-path'],
+            help='If True, the remaining path after the source pattern will be appended to the new destination path.',
+        )
+        args_schema.query_parameters = AAZListArg(
+            options=['--query-parameters'],
+            help='Query parameters to include or exclude.',
+        )
+        args_schema.query_parameters.Element = AAZStrArg()
+        args_schema.query_string_caching_behavior = AAZStrArg(
+            options=['--query-string-caching-behavior'],
+            help='Defines how CDN caches requests that include query strings.'
+            'You can ignore any query strings when caching,'
+            'bypass caching to prevent requests that contain query strings from being cached,'
+            'or cache every request with a unique URL.',
+        )
+        args_schema.redirect_protocol = AAZStrArg(
+            options=['--redirect-protocol'],
+            help='Protocol to use for the redirect.',
+        )
+        args_schema.redirect_type = AAZStrArg(
+            options=['--redirect-type'],
+            help='The redirect type the rule will use when redirecting traffic.',
+        )
+        args_schema.source_pattern = AAZStrArg(
+            options=['--source-pattern'],
+            help='A request URI pattern that identifies the type of requests that may be rewritten.',
+        )
+        args_schema.actions._registered = False
+        args_schema.conditions._registered = False
+        return args_schema
 
-    return existing['conditions']
+    def pre_operations(self):
+        args = self.ctx.args
+        existing = _RuleShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name,
+            'rule_set_name': args.rule_set_name,
+            'rule_name': args.rule_name
+        })
+        actions = create_actions_from_existing(existing['actions'])
+        action = create_action(
+            args.action_name, args.cache_behavior, args.cache_duration, args.header_action,
+            args.header_name, args.header_value, None,
+            None if not has_value(args.query_parameters) else ','.join(args.query_parameters.to_serialized_data()),
+            args.redirect_type, args.redirect_protocol, args.custom_hostname,
+            args.custom_path, args.custom_querystring, args.custom_fragment, args.source_pattern,
+            args.destination, args.preserve_unmatched_path,
+            origin_group=args.origin_group,
+            sub_id=self.ctx.subscription_id,
+            enable_caching=args.enable_caching,
+            resource_group=args.resource_group,
+            profile_name=args.profile_name,
+            enable_compression=args.enable_compression,
+            query_string_caching_behavior=args.query_string_caching_behavior,
+            forwarding_protocol=args.forwarding_protocol,
+        )
+        if action is not None:
+            actions.append(action)
+        args.actions = actions
 
 
-def list_afd_rule_action(cmd, resource_group_name,
-                         profile_name, rule_set_name,
-                         rule_name):
-    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'profile_name': profile_name,
-        'rule_set_name': rule_set_name,
-        'rule_name': rule_name
-    })
+class AFDRuleActionRemove(_AFDRuleUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.index = AAZIntArg(
+            options=['--index'],
+            help='The index of the condition/action.',
+            required=True
+        )
+        args_schema.actions._registered = False
+        args_schema.conditions._registered = False
+        return args_schema
 
-    return existing['actions']
+    def pre_operations(self):
+        args = self.ctx.args
+        existing = _RuleShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name,
+            'rule_set_name': args.rule_set_name,
+            'rule_name': args.rule_name
+        })
+        actions = create_actions_from_existing(existing['actions'])
+        if len(actions) > 1 and args.index < len(actions):
+            actions.pop(args.index.to_serialized_data())
+        else:
+            logger.warning('Invalid condition index found. This command will be skipped. Please check the rule.')
+        args.actions = actions
+
+
+class AFDRuleActionShow(_RuleShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.actions._registered = False
+        args_schema.conditions._registered = False
+        args_schema.ids._registered = False
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        existing = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return existing['actions']
+
+
+class AFDRuleConditionShow(_RuleShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.actions._registered = False
+        args_schema.conditions._registered = False
+        args_schema.ids._registered = False
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        existing = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return existing['conditions']
 
 
 class AFDSecretCreate(_AFDSecretCreate):
