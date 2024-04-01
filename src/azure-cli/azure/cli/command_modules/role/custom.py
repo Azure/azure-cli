@@ -1917,17 +1917,14 @@ def list_groups(client, display_name=None, query_filter=None):
 
 
 def get_group(client, object_id):
-    """Get group information from the directory."""
     return client.group_get(object_id)
 
 
 def delete_group(client, object_id):
-    """Delete a group from the directory."""
     return client.group_delete(object_id)
 
 
 def get_group_member_groups(client, object_id, security_enabled_only=False):
-    """Get a collection of object IDs of groups of which the specified group is a member."""
     return _get_member_groups(client.group_get_member_groups, object_id, security_enabled_only)
 
 
@@ -1956,12 +1953,10 @@ def check_group_membership(client, group_id, member_object_id):
 
 
 def list_group_members(client, group_id):
-    """Get the members of a group."""
     return client.group_member_list(group_id)
 
 
 def add_group_member(client, group_id, member_object_id):
-    """Add a member to a group."""
     # API is not idempotent and fails with:
     #   One or more added object references already exist for the following modified properties: 'members'.
     # TODO: make it idempotent like add_group_owner
@@ -1970,7 +1965,6 @@ def add_group_member(client, group_id, member_object_id):
 
 
 def remove_group_member(client, group_id, member_object_id):
-    """Remove a member from a group."""
     return client.group_member_remove(group_id, member_object_id)
 
 

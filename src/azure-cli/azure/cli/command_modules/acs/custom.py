@@ -575,6 +575,7 @@ def aks_create(
     enable_sgxquotehelper=False,
     enable_secret_rotation=False,
     rotation_poll_interval=None,
+    enable_app_routing=False,
     # nodepool paramerters
     nodepool_name="nodepool1",
     node_vm_size=None,
@@ -618,6 +619,12 @@ def aks_create(
     ksm_metric_annotations_allow_list=None,
     grafana_resource_id=None,
     enable_windows_recording_rules=False,
+    # azure container storage
+    enable_azure_container_storage=None,
+    storage_pool_name=None,
+    storage_pool_size=None,
+    storage_pool_sku=None,
+    storage_pool_option=None,
     # misc
     yes=False,
     no_wait=False,
@@ -760,6 +767,14 @@ def aks_update(
     grafana_resource_id=None,
     enable_windows_recording_rules=False,
     disable_azure_monitor_metrics=False,
+    # azure container storage
+    enable_azure_container_storage=None,
+    disable_azure_container_storage=None,
+    storage_pool_name=None,
+    storage_pool_size=None,
+    storage_pool_sku=None,
+    storage_pool_option=None,
+    azure_container_storage_nodepools=None,
     # misc
     yes=False,
     no_wait=False,
@@ -2833,6 +2848,17 @@ def aks_mesh_get_revisions(
     return None
 
 
+def check_iterator(iterator):
+    import itertools
+    try:
+        first = next(iterator)
+    except StopIteration:   # iterator is empty
+        return True, iterator
+    except TypeError:       # iterator is not iterable, e.g. None
+        return True, iterator
+    return False, itertools.chain([first], iterator)
+
+
 def aks_mesh_get_upgrades(
         cmd,
         client,
@@ -2840,16 +2866,14 @@ def aks_mesh_get_upgrades(
         name
 ):
     upgradeProfiles = client.list_mesh_upgrade_profiles(resource_group_name, name)
-    # 'upgradeProfiles' is an ItemPaged object
-    upgrades = []
-    # Iterate over items within pages
-    for page in upgradeProfiles.by_page():
-        for item in page:
-            upgrades.append(item)
-
-    if upgrades:
-        return upgrades[0].properties
-
+    is_empty, upgradeProfiles = check_iterator(upgradeProfiles)
+    if is_empty:
+        logger.warning("No mesh upgrade profiles found for the cluster '%s' " +
+                       "in the resource group '%s'.", name, resource_group_name)
+        return None
+    upgrade = next(upgradeProfiles, None)
+    if upgrade:
+        return upgrade.properties
     return None
 
 
@@ -2928,6 +2952,169 @@ def _aks_mesh_update(
     try:
         mc = aks_update_decorator.fetch_mc()
         mc = aks_update_decorator.update_azure_service_mesh_profile(mc)
+    except DecoratorEarlyExitException:
+        return None
+
+    return aks_update_decorator.update_mc(mc)
+
+
+def aks_approuting_enable(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        enable_kv=False,
+        keyvault_id=None
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        enable_app_routing=True,
+        keyvault_id=keyvault_id,
+        enable_kv=enable_kv)
+
+
+def aks_approuting_disable(
+        cmd,
+        client,
+        resource_group_name,
+        name
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        enable_app_routing=False)
+
+
+def aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        keyvault_id=None,
+        enable_kv=False
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        keyvault_id=keyvault_id,
+        enable_kv=enable_kv)
+
+
+def aks_approuting_zone_add(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        dns_zone_resource_ids,
+        attach_zones=False
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        dns_zone_resource_ids=dns_zone_resource_ids,
+        add_dns_zone=True,
+        attach_zones=attach_zones)
+
+
+def aks_approuting_zone_delete(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        dns_zone_resource_ids
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        dns_zone_resource_ids=dns_zone_resource_ids,
+        delete_dns_zone=True)
+
+
+def aks_approuting_zone_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        dns_zone_resource_ids,
+        attach_zones=False
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        dns_zone_resource_ids=dns_zone_resource_ids,
+        update_dns_zone=True,
+        attach_zones=attach_zones)
+
+
+def aks_approuting_zone_list(
+        cmd,
+        client,
+        resource_group_name,
+        name
+):
+    from msrestazure.tools import parse_resource_id
+    mc = client.get(resource_group_name, name)
+
+    if mc.ingress_profile and mc.ingress_profile.web_app_routing and mc.ingress_profile.web_app_routing.enabled:
+        if mc.ingress_profile.web_app_routing.dns_zone_resource_ids:
+            dns_zone_resource_ids = mc.ingress_profile.web_app_routing.dns_zone_resource_ids
+            dns_zone_list = []
+            for dns_zone in dns_zone_resource_ids:
+                dns_zone_dict = {}
+                parsed_dns_zone = parse_resource_id(dns_zone)
+                dns_zone_dict['id'] = dns_zone
+                dns_zone_dict['subscription'] = parsed_dns_zone['subscription']
+                dns_zone_dict['resource_group'] = parsed_dns_zone['resource_group']
+                dns_zone_dict['name'] = parsed_dns_zone['name']
+                dns_zone_dict['type'] = parsed_dns_zone['type']
+                dns_zone_list.append(dns_zone_dict)
+            return dns_zone_list
+        raise CLIError('No dns zone attached to the cluster')
+    raise CLIError('App routing addon is not enabled')
+
+
+# pylint: disable=unused-argument
+def _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        enable_app_routing=None,
+        enable_kv=None,
+        keyvault_id=None,
+        add_dns_zone=None,
+        delete_dns_zone=None,
+        update_dns_zone=None,
+        dns_zone_resource_ids=None,
+        attach_zones=None
+):
+    from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterUpdateDecorator
+
+    raw_parameters = locals()
+
+    aks_update_decorator = AKSManagedClusterUpdateDecorator(
+        cmd=cmd,
+        client=client,
+        raw_parameters=raw_parameters,
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+    )
+
+    try:
+        mc = aks_update_decorator.fetch_mc()
+        mc = aks_update_decorator.update_app_routing_profile(mc)
     except DecoratorEarlyExitException:
         return None
 
