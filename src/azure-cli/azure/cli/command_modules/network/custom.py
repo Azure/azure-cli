@@ -2473,6 +2473,7 @@ def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, 
         add_dns_delegation(cmd, created_zone, parent_zone_name, resource_group_name, zone_name)
     return created_zone
 
+
 def show_dns_soa_record_set(cmd, resource_group_name, zone_name, record_type):
     return DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,

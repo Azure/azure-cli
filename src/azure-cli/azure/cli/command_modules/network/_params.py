@@ -35,7 +35,6 @@ from azure.cli.command_modules.network._actions import (
     TrustedClientCertificateCreate,
     SslProfilesCreate, AddMappingRequest, WAFRulesCreate)
 from azure.cli.command_modules.network.custom import RULESET_VERSION
-from azure.cli.core.profiles import ResourceType
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
