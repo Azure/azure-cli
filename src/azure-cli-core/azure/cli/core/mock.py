@@ -43,12 +43,10 @@ class DummyCli(AzCli):
                             shutil.copy(os.path.join(GLOBAL_CONFIG_DIR, file), config_dir)
                         except FileNotFoundError:
                             pass
-        else:
-            config_dir = GLOBAL_CONFIG_DIR
 
         super(DummyCli, self).__init__(
             cli_name='az',
-            config_dir=config_dir,
+            config_dir=GLOBAL_CONFIG_DIR,
             config_env_var_prefix=ENV_VAR_PREFIX,
             commands_loader_cls=commands_loader_cls or MainCommandsLoader,
             parser_cls=AzCliCommandParser,
