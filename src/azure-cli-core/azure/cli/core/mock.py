@@ -10,6 +10,7 @@ class DummyCli(AzCli):
     """A dummy CLI instance can be used to facilitate automation"""
     def __init__(self, commands_loader_cls=None, random_config_dir=False, **kwargs):
         import os
+        from unittest.mock import patch
 
         from azure.cli.core import MainCommandsLoader
         from azure.cli.core.commands import AzCliCommandInvoker
@@ -26,9 +27,10 @@ class DummyCli(AzCli):
 
         if random_config_dir:
             config_dir = os.path.join(GLOBAL_CONFIG_DIR, 'dummy_cli_config_dir', random_string())
-            # Knack prioritizes the AZURE_CONFIG_DIR env over the config_dir param, and other function may call
+            # Knack prioritizes the AZURE_CONFIG_DIR env over the config_dir param, and other functions may call
             # get_config_dir directly. We need to set the env to make sure the config_dir is used.
-            os.environ['AZURE_CONFIG_DIR'] = config_dir
+            self.env_patch = patch.dict('os.environ', {'AZURE_CONFIG_DIR': config_dir})
+            self.env_patch.start()
 
             # In recording mode, copy login credentials from global config dir to the dummy config dir
             if os.getenv(ENV_VAR_TEST_LIVE, '').lower() == 'true':
