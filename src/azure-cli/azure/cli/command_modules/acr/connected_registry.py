@@ -430,27 +430,6 @@ def _get_descendants(family_tree, parent_id):
 
 
 # region connected-registry install subgroup
-def acr_connected_registry_install_info(cmd,
-                                        client,
-                                        connected_registry_name,
-                                        registry_name,
-                                        parent_protocol,
-                                        resource_group_name=None):
-    return acr_connected_registry_get_settings(cmd, client, connected_registry_name, registry_name, parent_protocol,
-                                               None, False, resource_group_name)
-
-
-def acr_connected_registry_install_renew_credentials(cmd,
-                                                     client,
-                                                     connected_registry_name,
-                                                     registry_name,
-                                                     parent_protocol,
-                                                     yes=False,
-                                                     resource_group_name=None):
-    return acr_connected_registry_get_settings(cmd, client, connected_registry_name, registry_name, parent_protocol,
-                                               '1', yes, resource_group_name)
-
-
 def acr_connected_registry_get_settings(cmd,
                                         client,
                                         connected_registry_name,

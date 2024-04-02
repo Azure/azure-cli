@@ -1694,29 +1694,6 @@ examples:
 """
 
 # To be deprecated
-helps['acr connected-registry install'] = """
-type: group
-short-summary: Help to access the necessary information for installing a connected registry. Please see https://aka.ms/acr/connected-registry for more information.
-"""
-
-helps['acr connected-registry install info'] = """
-type: command
-short-summary: Retrieve information required to activate a connected registry.
-examples:
-  - name: Set http as the parent protocol, and prints the values required to activate a connected registry in json format
-    text: >
-        az acr connected-registry install info --registry mycloudregistry --name myconnectedregistry --parent-protocol http
-"""
-
-helps['acr connected-registry install renew-credentials'] = """
-type: command
-short-summary: Retrieve information required to activate a connected registry, and renews the sync token credentials.
-examples:
-  - name: Set http as the parent protocol, and prints the values in json format required to activate a connected registry and the newly generated sync token credentials.
-    text: >
-        az acr connected-registry install renew-credentials -r mycloudregistry -n myconnectedregistry --parent-protocol http
-"""
-
 helps['acr connected-registry repo'] = """
 type: command
 short-summary: Update all the necessary connected registry sync scope maps repository permissions.
