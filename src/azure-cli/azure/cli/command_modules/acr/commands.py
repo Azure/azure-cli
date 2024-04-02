@@ -443,8 +443,6 @@ def load_command_table(self, _):
                   table_transformer=connected_registry_list_output_format)
         g.command('list-client-tokens', 'acr_connected_registry_list_client_tokens',
                   table_transformer=token_output_format)
-        g.command('repo', 'acr_connected_registry_permissions_update',
-                  deprecate_info=self.deprecate(redirect='permissions update', hide=True))
 
     def _metadata_deprecate_message(self):
         msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
