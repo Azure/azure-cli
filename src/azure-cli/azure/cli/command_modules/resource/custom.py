@@ -1062,11 +1062,11 @@ def _parse_bicepparam_file(cmd, template_file, parameters):
     ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version_bicepparam_compilation = "0.14.85"
-    if not bicep_version_greater_than_or_equal_to(minimum_supported_version_bicepparam_compilation):
+    if not bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version_bicepparam_compilation):
         raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version_bicepparam_compilation} or later.")
 
     minimum_supported_version_supplemental_param = "0.22.6"
-    if len(parameters) > 1 and not bicep_version_greater_than_or_equal_to(minimum_supported_version_supplemental_param):
+    if len(parameters) > 1 and not bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version_supplemental_param):
         raise ArgumentUsageError(f"Current version of Bicep CLI does not support supplemental parameters with .bicepparam file. Please upgrade Bicep CLI to {minimum_supported_version_supplemental_param} or later.")
 
     bicepparam_file = _get_bicepparam_file_path(parameters)
@@ -1122,30 +1122,6 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     elif template_spec:
         template_link = TemplateLink(id=template_spec)
-    # TODO: colby
-    # The api-version for ResourceType.MGMT_RESOURCE_RESOURCES may get updated and point to another (newer) version of the api version for
-    #     # ResourceType.MGMT_RESOURCE_TEMPLATESPECS than our designated version. This ensures the api-version of all the rest requests for
-    #     # template_spec are consistent in the same profile:
-    #     api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
-    #     template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
-    # else:
-    #     if _is_bicepparam_file_provided(parameters):
-    #         ensure_bicep_installation(cli_ctx)
-
-    #         minimum_supported_version = "0.14.85"
-    #         if not bicep_version_greater_than_or_equal_to(cli_ctx, minimum_supported_version):
-    #             raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version} or later.")
-    #         if len(parameters) > 1:
-    #             raise ArgumentUsageError("Can not use --parameters argument more than once when using a .bicepparam file")
-    #         bicepparam_file = parameters[0][0]
-    #         if not is_bicep_file(template_file):
-    #             raise ArgumentUsageError("Only a .bicep template is allowed with a .bicepparam parameter file")
-
-    #         build_bicepparam_output = run_bicep_command(cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
-    #         build_bicepparam_output_json = json.loads(build_bicepparam_output)
-    #         template_content = build_bicepparam_output_json["templateJson"]
-    #         bicepparam_json_content = build_bicepparam_output_json["parametersJson"]
-
         template_obj = _load_template_spec_template(cmd, template_spec)
     elif _is_bicepparam_file_provided(parameters):
         template_content, template_spec_id, bicepparam_json_content = _parse_bicepparam_file(cmd, template_file, parameters)
@@ -1355,27 +1331,6 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
             deployment_stacks_template_link = DeploymentStacksTemplateLink(uri=t_uri)
         deployment_stack_model.template_link = deployment_stacks_template_link
         template_obj = _remove_comments_from_json(_urlretrieve(t_uri).decode('utf-8'), file_path=t_uri)
-    # TODO: colby
-    # else:
-    #     if _is_bicepparam_file_provided(parameters):
-    #         ensure_bicep_installation(cmd.cli_ctx)
-
-    #         minimum_supported_version = "0.14.85"
-    #         if not bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
-    #             raise ArgumentUsageError(
-    #                 "Unable to compile .bicepparam file with the current version of Bicep CLI. Please use az bicep upgrade to upgrade Bicep CLI.")
-    #         if len(parameters) > 1:
-    #             raise ArgumentUsageError(
-    #                 "Can not use --parameters argument more than once when using a .bicepparam file")
-    #         bicepparam_file = parameters[0][0]
-    #         if not is_bicep_file(template_file):
-    #             raise ArgumentUsageError("Only a .bicep template is allowed with a .bicepparam parameter file")
-
-    #         build_bicepparam_output = run_bicep_command(
-    #             cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
-    #         build_bicepparam_output_json = json.loads(build_bicepparam_output)
-    #         template_content = build_bicepparam_output_json["templateJson"]
-    #         bicepparam_json_content = build_bicepparam_output_json["parametersJson"]
     elif _is_bicepparam_file_provided(parameters):
         template_content, template_spec_id, bicepparam_json_content = _parse_bicepparam_file(cmd, template_file, parameters)
         if template_spec_id:
@@ -4546,7 +4501,7 @@ def publish_bicep_file(cmd, file, target, documentationUri=None, with_source=Non
                 logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_documentationUri_parameter)
         if with_source:
             minimum_supported_version_for_publish_with_source = "0.23.1"
-            if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_publish_with_source):
+            if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version_for_publish_with_source):
                 args += ["--with-source"]
             else:
                 logger.error("az bicep publish with --with-source/-s parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_publish_with_source)
@@ -4584,14 +4539,8 @@ def decompile_bicep_file(cmd, file, force=None):
 def decompileparams_bicep_file(cmd, file, bicep_file=None, outdir=None, outfile=None, stdout=None):
     ensure_bicep_installation(cmd.cli_ctx)
 
-    # TODO: colby
-    # minimum_supported_version = "0.7.4"
-    # if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
-    #     args = ["generate-params", file]
-    #     if no_restore:
-    #         args += ["--no-restore"]
     minimum_supported_version = "0.18.4"
-    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+    if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
         args = ["decompile-params", file]
         if bicep_file:
             args += ["--bicep-file", bicep_file]
@@ -4622,7 +4571,7 @@ def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, 
     ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.7.4"
-    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+    if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
         args = ["generate-params", file]
         if no_restore:
             args += ["--no-restore"]
@@ -4649,7 +4598,7 @@ def lint_bicep_file(cmd, file, no_restore=None, diagnostics_format=None):
     ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.7.4"
-    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+    if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
         args = ["lint", file]
         if no_restore:
             args += ["--no-restore"]
