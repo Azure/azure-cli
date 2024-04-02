@@ -10,6 +10,7 @@ class DummyCli(AzCli):
     """A dummy CLI instance can be used to facilitate automation"""
     def __init__(self, commands_loader_cls=None, random_config_dir=False, **kwargs):
         import os
+        from unittest.mock import patch
 
         from azure.cli.core import MainCommandsLoader
         from azure.cli.core.commands import AzCliCommandInvoker
@@ -41,16 +42,20 @@ class DummyCli(AzCli):
         else:
             config_dir = GLOBAL_CONFIG_DIR
 
-        super(DummyCli, self).__init__(
-            cli_name='az',
-            config_dir=config_dir,
-            config_env_var_prefix=ENV_VAR_PREFIX,
-            commands_loader_cls=commands_loader_cls or MainCommandsLoader,
-            parser_cls=AzCliCommandParser,
-            logging_cls=AzCliLogging,
-            output_cls=AzOutputProducer,
-            help_cls=AzCliHelp,
-            invocation_cls=AzCliCommandInvoker)
+        # Knack prioritizes the AZURE_CONFIG_DIR env over the config_dir param, we need to set the env var temporarily
+        # to make sure it uses the config_dir param
+        patch_env = {'AZURE_CONFIG_DIR': config_dir} if random_config_dir else {}
+        with patch.dict('os.environ', patch_env):
+            super(DummyCli, self).__init__(
+                cli_name='az',
+                config_dir=config_dir,
+                config_env_var_prefix=ENV_VAR_PREFIX,
+                commands_loader_cls=commands_loader_cls or MainCommandsLoader,
+                parser_cls=AzCliCommandParser,
+                logging_cls=AzCliLogging,
+                output_cls=AzOutputProducer,
+                help_cls=AzCliHelp,
+                invocation_cls=AzCliCommandInvoker)
 
         self.data['headers'] = {}  # the x-ms-client-request-id is generated before a command is to execute
         self.data['command'] = 'unknown'
