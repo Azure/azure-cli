@@ -22,9 +22,9 @@ class Migrate(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-12-01-preview",
+        "version": "2022-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}/tables/{}/migrate", "2021-12-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}/tables/{}/migrate", "2022-10-01"],
         ]
     }
 
@@ -51,11 +51,13 @@ class Migrate(AAZCommand):
             options=["--table-name"],
             help="The name of the table.",
             required=True,
+            id_part="child_name_1",
         )
         _args_schema.workspace_name = AAZStrArg(
             options=["--workspace-name"],
             help="The name of the workspace.",
             required=True,
+            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^[A-Za-z0-9][A-Za-z0-9-]+[A-Za-z0-9]$",
                 max_length=63,
@@ -69,11 +71,11 @@ class Migrate(AAZCommand):
         self.TablesMigrate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -91,7 +93,7 @@ class Migrate(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/tables/{tableName}/migrate",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/tables/{tableName}/migrate",
                 **self.url_parameters
             )
 
@@ -129,7 +131,7 @@ class Migrate(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-12-01-preview",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -137,6 +139,10 @@ class Migrate(AAZCommand):
 
         def on_200(self, session):
             pass
+
+
+class _MigrateHelper:
+    """Helper class for Migrate"""
 
 
 __all__ = ["Migrate"]

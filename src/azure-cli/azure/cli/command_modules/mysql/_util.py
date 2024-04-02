@@ -4,6 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel, raise-missing-from
+from enum import Enum
+import json
+import math
 import os
 import random
 import subprocess
@@ -19,17 +22,19 @@ from knack.prompting import prompt_pass, prompt_y_n, NoTTYException
 from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.commands.progress import IndeterminateProgressBar
 from azure.cli.core.util import CLIError
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
+from azure.core.rest import HttpRequest
 from azure.cli.core.commands import LongRunningOperation, AzArgumentContext, _is_poller
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, AuthenticationError
 from azure.cli.command_modules.role.custom import create_service_principal_for_rbac
 from azure.mgmt.rdbms import mysql_flexibleservers, postgresql_flexibleservers
 from azure.mgmt.resource.resources.models import ResourceGroup
-from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities
+from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, get_mysql_flexible_management_client
 from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tags
-
+from urllib.parse import urlencode, urlparse, parse_qsl
 
 logger = get_logger(__name__)
 
@@ -105,9 +110,9 @@ def retryable_method(retries=3, interval_sec=5, exception_type=Exception, condit
     return decorate
 
 
-def resolve_poller(result, cli_ctx, name):
+def resolve_poller(result, cli_ctx, name, progress_bar=None):
     if _is_poller(result):
-        return LongRunningOperation(cli_ctx, 'Starting {}'.format(name))(result)
+        return LongRunningOperation(cli_ctx, 'Starting {}'.format(name), progress_bar=progress_bar)(result)
     return result
 
 
@@ -115,15 +120,6 @@ def create_random_resource_name(prefix='azure', length=15):
     append_length = length - len(prefix)
     digits = [str(random.randrange(10)) for i in range(append_length)]
     return prefix + ''.join(digits)
-
-
-def get_location_from_resource_group(cmd, resource_group_name, location):
-    if location is None:
-        resource_group_client = resource_client_factory(cmd.cli_ctx).resource_groups
-        resource_group = resource_group_client.get(resource_group_name=resource_group_name)
-        location = resource_group.location
-
-    return location
 
 
 def generate_missing_parameters(cmd, location, resource_group_name, server_name):
@@ -516,8 +512,8 @@ def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byo
             identities[backup_byok_identity] = {}
 
         if db_engine == 'mysql':
-            identity = mysql_flexibleservers.models.Identity(user_assigned_identities=identities,
-                                                             type="UserAssigned")
+            identity = mysql_flexibleservers.models.MySQLServerIdentity(user_assigned_identities=identities,
+                                                                        type="UserAssigned")
 
             data_encryption = mysql_flexibleservers.models.DataEncryption(
                 primary_user_assigned_identity_id=byok_identity,
@@ -557,3 +553,135 @@ def get_tenant_id():
     profile = Profile()
     sub = profile.get_subscription()
     return sub['tenantId']
+
+
+def get_single_to_flex_sku_mapping(source_single_server_sku, tier, sku_name):
+    single_to_flex_sku_mapping = {"Basic": {1: "Standard_B1ms", 2: "Standard_B2ms"},
+                                  "GeneralPurpose": {2: "Standard_D2ds_v4", 4: "Standard_D4ds_v4", 8: "Standard_D8ds_v4", 16: "Standard_D16ds_v4", 32: "Standard_D32ds_v4", 64: "Standard_D64ds_v4"},
+                                  "MemoryOptimized": {2: "Standard_E2ds_v4", 4: "Standard_E4ds_v4", 8: "Standard_E8ds_v4", 16: "Standard_E16ds_v4", 32: "Standard_E32ds_v4"}}
+    if not tier:
+        single_server_tier = source_single_server_sku.tier
+        if single_server_tier == 'Basic':
+            tier = 'Burstable'
+        else:
+            tier = single_server_tier
+    if not sku_name:
+        if tier == 'Burstable':
+            sku_name = single_to_flex_sku_mapping.get('Basic').get(source_single_server_sku.capacity)
+        else:
+            sku_name = single_to_flex_sku_mapping.get(tier).get(source_single_server_sku.capacity)
+    return tier, sku_name
+
+
+def get_firewall_rules_from_paged_response(firewall_rules):
+    return list(firewall_rules) if isinstance(firewall_rules, ItemPaged) else firewall_rules
+
+
+def get_current_utc_time():
+    return datetime.utcnow().replace(tzinfo=dt.timezone.utc)
+
+
+class ImportFromStorageState(Enum):
+    PROVISIONING = "Provisioning Server"
+    IMPORTING = "Importing"
+    DEFAULT = "Running"
+
+
+class ImportFromStorageProgressHook:
+
+    def __init__(self):
+        self._import_started = False
+        self._import_state = ImportFromStorageState.DEFAULT
+        self._import_estimated_completion_time = None
+
+    def update_progress(self, operation_progress_response):
+        if operation_progress_response is not None:
+            try:
+                jsonresp = json.loads(operation_progress_response.text())
+                self._update_import_from_storage_progress_status(jsonresp)
+            except Exception:  # pylint: disable=broad-except
+                pass
+
+    def get_progress_message(self):
+        msg = self._import_state.value
+        if self._import_estimated_completion_time is not None:
+            msg = msg + " " + self._get_eta_time_duration_in_user_readable_string()
+        elif self._import_state == ImportFromStorageState.IMPORTING:
+            msg = msg + " " + "Preparing (This might take few minutes)"
+        return msg
+
+    def _get_eta_time_duration_in_user_readable_string(self):
+        time_remaining = datetime.fromisoformat(self._import_estimated_completion_time) - get_current_utc_time()
+        msg = " ETA : "
+        if time_remaining.total_seconds() < 60:
+            return msg + "Few seconds remaining"
+        days = time_remaining.days
+        hours, remainder = divmod(time_remaining.seconds, 3600)
+        minutes = math.ceil(remainder / 60.0)
+        if days > 0:
+            msg = msg + str(days) + " days "
+        if hours > 0:
+            msg = msg + str(hours) + " hours "
+        if minutes > 0:
+            msg = msg + str(minutes) + " minutes "
+        return msg + " remaining"
+
+    def _update_import_from_storage_progress_status(self, progress_resp_json):
+        if "status" in progress_resp_json:
+            progress_status = progress_resp_json["status"]
+            previous_import_state = self._import_state
+
+            # Updating the import state
+            if progress_status == "Importing":
+                self._import_started = True
+                self._import_state = ImportFromStorageState.IMPORTING
+            elif progress_status == "InProgress" and self._import_started is False:
+                self._import_state = ImportFromStorageState.PROVISIONING
+            else:
+                self._import_state = ImportFromStorageState.DEFAULT
+
+            # Updating the estimated completion time
+            is_state_same = self._import_state == previous_import_state
+            if is_state_same is False:
+                self._import_estimated_completion_time = None
+            if "properties" in progress_resp_json and "estimatedCompletionTime" in progress_resp_json["properties"]:
+                self._import_estimated_completion_time = str(progress_resp_json["properties"]["estimatedCompletionTime"])
+
+
+class OperationProgressBar(IndeterminateProgressBar):
+
+    """ Define progress bar update view for operation progress """
+    def __init__(self, cli_ctx, poller, operation_progress_hook, progress_message_update_interval_in_sec=60.0):
+        self._poller = poller
+        self._operation_progress_hook = operation_progress_hook
+        self._operation_progress_request = self._get_operation_progress_request()
+        self._client = get_mysql_flexible_management_client(cli_ctx)
+        self._progress_message_update_interval_in_sec = progress_message_update_interval_in_sec
+        self._progress_message_last_updated = None
+        super().__init__(cli_ctx)
+
+    def update_progress(self):
+        self._safe_update_progress_message()
+        super().update_progress()
+
+    def _safe_update_progress_message(self):
+        try:
+            if self._should_update_progress_message():
+                operation_progress_resp = self._client._send_request(self._operation_progress_request)
+                self._operation_progress_hook.update_progress(operation_progress_resp)
+                self.message = self._operation_progress_hook.get_progress_message()
+                self._progress_message_last_updated = get_current_utc_time()
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+    def _should_update_progress_message(self):
+        return (self._progress_message_last_updated is None) or ((get_current_utc_time() - self._progress_message_last_updated).total_seconds() > self._progress_message_update_interval_in_sec)
+
+    def _get_operation_progress_request(self):
+        location_url = self._poller._polling_method._initial_response.http_response.headers["Location"]
+        operation_progress_url = location_url.replace('operationResults', 'operationProgress')
+        operation_progress_url_parsed = urlparse(operation_progress_url)
+        query_params = dict(parse_qsl(operation_progress_url_parsed.query))
+        query_params['api-version'] = "2023-12-01-preview"
+        updated_operation_progress_url = operation_progress_url_parsed._replace(query=urlencode(query_params)).geturl()
+        return HttpRequest('GET', updated_operation_progress_url)

@@ -27,12 +27,17 @@ from azure.cli.command_modules.resource.custom import (
     deploy_arm_template_at_management_group,
     deploy_arm_template_at_tenant_scope,
     format_bicep_file,
+    publish_bicep_file,
 )
+
+from azure.cli.command_modules.resource._bicep import (run_bicep_command)
 
 from azure.cli.core.mock import DummyCli
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles._shared import ResourceType
+
+from azure.cli.testsdk import live_only
 
 cli_ctx = DummyCli()
 loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
@@ -251,7 +256,6 @@ class TestCustom(unittest.TestCase):
         parameters_path = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
 
         template = get_file_json(template_path, preserve_order=True)
-        template_param_defs = template.get('parameters', {})
 
         # test different ways of passing in parameters
         tests = [
@@ -291,7 +295,60 @@ class TestCustom(unittest.TestCase):
 
         for i, test in enumerate(tests):
             parameter_list = test['parameter_list']
-            result_parameters = _process_parameters(template_param_defs, parameter_list)
+            result_parameters = _process_parameters(template, parameter_list)
+            self.assertEqual(result_parameters, test['expected'], i)
+
+    def test_deployment_parameters_with_type_references(self):
+
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_path = os.path.join(curr_dir, 'param-validation-template-$ref-indirection.json').replace('\\', '\\\\')
+        parameters_path = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
+
+        template = get_file_json(template_path, preserve_order=True)
+
+        # test different ways of passing in parameters
+        tests = [
+            {  # empty JSON works
+                "parameter_list": [["{}"]],
+                "expected": {},
+            },
+            {  # empty parameters works
+                "parameter_list": [],
+                "expected": {},
+            },
+            {  # loading from file
+                "parameter_list": [[parameters_path]],
+                "expected": {"stringParam": {"value": "foo"}, "intParam": {"value": 10}, "madeupParam": {"value": "bar"}},
+            },
+            {  # KEY=VALUE syntax with extra equal sign
+                "parameter_list": [['stringParam=foo=bar']],
+                "expected": {"stringParam": {"value": "foo=bar"}},
+            },
+            {  # raw JSON (same as @file)
+                "parameter_list": [['{\"stringParam\": {\"value\": \"foo\"}}']],
+                "expected": {"stringParam": {"value": "foo"}},
+            },
+            {  # multiple KEY=VALUE
+                "parameter_list": [['stringParam=foo', 'intParam=3']],
+                "expected": {"stringParam": {"value": "foo"}, "intParam": {"value": 3}},
+            },
+            {  # KEY=VALUE where last in wins
+                "parameter_list": [['stringParam=foo', 'stringParam=bar']],
+                "expected": {"stringParam": {"value": "bar"}},
+            },
+            {  # file loading overriden by KEY=VALUE
+                "parameter_list": [[parameters_path], ['stringParam=bar']],
+                "expected": {"stringParam": {"value": "bar"}, "intParam": {"value": 10}, "madeupParam": {"value": "bar"}},
+            },
+            {
+                "parameter_list": [['boolParam=true', 'tupleParam=[21]']],
+                "expected": {"boolParam": {"value": True}, "tupleParam": {"value": [21]}},
+            }
+        ]
+
+        for i, test in enumerate(tests):
+            parameter_list = test['parameter_list']
+            result_parameters = _process_parameters(template, parameter_list)
             self.assertEqual(result_parameters, test['expected'], i)
 
     def test_deployment_missing_values(self):
@@ -305,7 +362,7 @@ class TestCustom(unittest.TestCase):
         template_param_defs = template.get('parameters', {})
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters = _process_parameters(template_param_defs, parameter_list)
+        result_parameters = _process_parameters(template, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         # ensure that parameters with default values are not considered missing
@@ -325,10 +382,9 @@ class TestCustom(unittest.TestCase):
         parameters_with_reference_path = os.path.join(curr_dir, 'param-validation-ref-params.json').replace('\\', '\\\\')
 
         template = get_file_json(template_path, preserve_order=True)
-        template_param_defs = template.get('parameters', {})
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters = _process_parameters(template_param_defs, parameter_list)
+        result_parameters = _process_parameters(template, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         param_file_order = ["[u'secureParam', u'boolParam', u'enumParam', u'arrayParam', u'objectParam']",
@@ -339,15 +395,15 @@ class TestCustom(unittest.TestCase):
     def test_deployment_prompt_alphabetical_order(self):
         # check that params are prompted for in alphabetical order when the file is loaded with preserve_order=False
         curr_dir = os.path.dirname(os.path.realpath(__file__))
+
         template_path = os.path.join(curr_dir, 'param-validation-template.json').replace('\\', '\\\\')
         parameters_path = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
         parameters_with_reference_path = os.path.join(curr_dir, 'param-validation-ref-params.json').replace('\\', '\\\\')
 
         template = get_file_json(template_path, preserve_order=False)
-        template_param_defs = template.get('parameters', {})
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters = _process_parameters(template_param_defs, parameter_list)
+        result_parameters = _process_parameters(template, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         param_alpha_order = ["[u'arrayParam', u'boolParam', u'enumParam', u'objectParam', u'secureParam']",
@@ -361,6 +417,67 @@ class TestCustom(unittest.TestCase):
         self.assertEqual(_is_bicepparam_file_provided([['test.json']]), False)
         self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam']]), True)
         self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam'], ['test.json'],  ['{ \"foo\": { \"value\": \"bar\" } }']]), True)
+
+    @live_only()
+    def test_bicep_generate_params_defaults(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bicep_file = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["generate-params", bicep_file])
+        is_generated_params_file_exists = os.path.exists(json_file)
+        self.assertTrue(is_generated_params_file_exists)
+
+    @live_only()
+    def test_bicep_generate_params_output_format(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bicep_file = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["generate-params", bicep_file, "--output-format", "json"])
+        is_generated_params_file_exists = os.path.exists(json_file)
+        self.assertTrue(is_generated_params_file_exists)
+
+    @live_only()
+    def test_bicep_generate_params_include_params(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bicep_file = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["generate-params", bicep_file, "--include-params", "all"])
+        is_generated_params_file_exists = os.path.exists(json_file)
+        self.assertTrue(is_generated_params_file_exists)
+
+    @live_only()
+    def test_bicep_lint_defaults(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        param_file = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["lint", param_file])
+
+        self.assertTrue(param_file)
+
+    @live_only()
+    def test_bicep_build_params_defaults(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        param_file = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'sample_params.json').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["build-params", param_file])
+        is_generated_params_file_exists = os.path.exists(json_file)
+
+        self.assertTrue(is_generated_params_file_exists)
+
+    @live_only()
+    def test_bicep_decompile_params_defaults(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        param_file = os.path.join(curr_dir, 'param-validation-params.bicepparam').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["decompile-params", json_file, "--force"])
+        is_generated_params_file_exists = os.path.exists(param_file)
+
+        self.assertTrue(is_generated_params_file_exists)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
     @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_resource_group_core", autospec=True)
@@ -555,8 +672,47 @@ class TestFormatBicepFile(unittest.TestCase):
         format_bicep_file(cmd, file_path, stdout=stdout)
 
         # Assert.
-        mock_bicep_version_greater_than_or_equal_to.assert_called_once_with(cmd.cli_ctx, "0.12.1")
-        mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ["format", file_path, "--stdout"])        
         
+        # TODO: colby
+        # mock_bicep_version_greater_than_or_equal_to.assert_called_once_with(cmd.cli_ctx, "0.12.1")
+        # mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ["format", file_path, "--stdout"])        
+
+        mock_bicep_version_greater_than_or_equal_to.assert_called_once_with("0.12.1")
+        mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ["format", file_path, "--stdout"])
+
+class TestPublishWithSource(unittest.TestCase):
+    @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to", return_value=True)
+    @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command", return_value="formatted content")
+    def test_publish_withsource(self, mock_run_bicep_command, mock_bicep_version_greater_than_or_equal_to):
+        # Arrange.
+        file_path = "path/to/file.bicep"
+        target = "br:contoso.azurecr.io/bicep/mymodule:v1"
+
+        # Act.
+        publish_bicep_file(cmd, file_path, target, documentationUri=None, with_source=None)
+
+        # Assert.
+        mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
+            mock.call("0.4.1008"), # Min version for 'bicep publish'
+        ])
+        mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ['publish', file_path, '--target', 'br:contoso.azurecr.io/bicep/mymodule:v1'])
+
+    @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to", return_value=True)
+    @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command", return_value="formatted content")
+    def test_publish_without_source(self, mock_run_bicep_command, mock_bicep_version_greater_than_or_equal_to):
+        # Arrange.
+        file_path = "path/to/file.bicep"
+        target = "br:contoso.azurecr.io/bicep/mymodule:v1"
+
+        # Act.
+        publish_bicep_file(cmd, file_path, target, documentationUri=None, with_source=True)
+
+        # Assert.
+        mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
+            mock.call("0.4.1008"), # Min version for 'bicep publish'
+            mock.call("0.23.1") # Min version for 'bicep publish --with-source'
+        ])
+        mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ['publish', file_path, '--target', 'br:contoso.azurecr.io/bicep/mymodule:v1', '--with-source'])
+
 if __name__ == '__main__':
     unittest.main()

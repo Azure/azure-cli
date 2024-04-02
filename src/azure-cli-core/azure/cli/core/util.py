@@ -655,14 +655,8 @@ def in_cloud_console():
 
 def get_arg_list(op):
     import inspect
-
-    try:
-        # only supported in python3 - falling back to argspec if not available
-        sig = inspect.signature(op)
-        return sig.parameters
-    except AttributeError:
-        sig = inspect.getargspec(op)  # pylint: disable=deprecated-method
-        return sig.args
+    sig = inspect.signature(op)
+    return sig.parameters
 
 
 def is_track2(client_class):
@@ -903,6 +897,9 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     if 'User-Agent' in headers:
         agents.append(headers['User-Agent'])
     headers['User-Agent'] = ' '.join(agents)
+
+    from azure.cli.core.telemetry import set_user_agent
+    set_user_agent(headers['User-Agent'])
 
     if generated_client_request_id_name:
         headers[generated_client_request_id_name] = str(uuid.uuid4())

@@ -27,21 +27,6 @@ def decimal_type(string):
         raise ValueError("the value passed cannot be converted to decimal")
 
 
-def validate_both_start_end_dates(namespace):
-    """Validates the existence of both start and end dates in the parameter or neither"""
-    if bool(namespace.start_date) != bool(namespace.end_date):
-        raise CLIError("usage error: Both --start-date and --end-date need to be supplied or neither.")
-
-
-def validate_reservation_summary(namespace):
-    """lowercase the data grain for comparison"""
-    data_grain = namespace.grain.lower()
-    if data_grain not in ('daily', 'monthly'):
-        raise CLIError("usage error: --grain  can be either daily or monthly.")
-    if data_grain == 'daily' and (not namespace.start_date or not namespace.end_date):
-        raise CLIError("usage error: Both --start-date and --end-date need to be supplied for daily grain.")
-
-
 def validate_budget_parameters(namespace):
     if namespace.amount < 0:
         raise CLIError("usage error: --amount must be greater than 0")

@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
-
+from azure.cli.core.aaz import has_value
 logger = get_logger(__name__)
 
 
@@ -557,6 +557,52 @@ AUTOSCALE_TIMEZONES = [
 ]
 
 
+def get_autoscale_default_profile(autoscale_settings):
+    import json
+
+    def _validate_default_profile(default_profile, profile):
+        if profile["capacity"]["default"] != default_profile["capacity"]["default"] or \
+                profile["capacity"]["minimum"] != default_profile["capacity"]["minimum"] \
+                or profile["capacity"]["maximum"] != default_profile["capacity"]["maximum"]:
+            from knack.util import CLIError
+            raise CLIError('unable to resolve default profile.')
+
+    recurring_profiles = [x for x in autoscale_settings.properties.profiles if has_value(x.recurrence)]
+    default_profiles = [x for x in autoscale_settings.properties.profiles
+                        if not has_value(x.recurrence) and not has_value(x.fixed_date)]
+
+    # find the default profile and ensure that if there are multiple, they are consistent
+    default_profile = default_profiles[0].to_serialized_data() if default_profiles else None
+
+    for p in default_profiles:
+        p_serialized = p.to_serialized_data()
+        _validate_default_profile(default_profile, p_serialized)
+
+    for profile in recurring_profiles:
+        # portal creates extra default profiles with JSON names...
+        # trying to stay compatible with that
+        try:
+            # portal-created "default" or end time
+            json_name = json.loads(profile.name.to_serialized_data())
+            _ = json_name['for']
+            profile_serialized = profile.to_serialized_data()
+            if not default_profile:
+                # choose this as default if it is the first
+
+                default_profile = {
+                    "name": 'default',
+                    "capacity": profile_serialized["capacity"],
+                    "rules": profile_serialized["rules"]
+                }
+            else:
+                # otherwise ensure it is consistent with the one chosen earlier
+                _validate_default_profile(default_profile, profile_serialized)
+        except ValueError:
+            pass
+
+    return default_profile
+
+
 def build_autoscale_profile(autoscale_settings):
     """ Builds up a logical model of the autoscale weekly schedule. This then has to later be
         translated into objects that work with the Monitor autoscale API. """
@@ -630,11 +676,86 @@ def build_autoscale_profile(autoscale_settings):
     return default_profile, profile_schedule
 
 
-def validate_autoscale_profile(schedule, start, end, recurrence):
+def build_autoscale_profile_dict(autoscale_settings):
+    """ Builds up a logical model of the autoscale weekly schedule. This then has to later be
+        translated into objects that work with the Monitor autoscale API. """
+    from datetime import time
+    import json
+
+    def _validate_default_profile(default_profile, profile):
+        if profile["capacity"]["default"] != default_profile["capacity"]["default"] or \
+                profile["capacity"]["minimum"] != default_profile["capacity"]["minimum"] or \
+                profile["capacity"]["maximum"] != default_profile["capacity"]["maximum"]:
+            from knack.util import CLIError
+            raise CLIError('unable to resolve default profile.')
+
+    recurring_profiles = [x for x in autoscale_settings["profiles"] if x.get("recurrence", None)]
+    default_profiles = [x for x in autoscale_settings["profiles"] if not x.get("recurrence",
+                                                                               None) and not x.get("fixed_date", None)]
+
+    profile_schedule = {
+    }
+
+    # find the default profile and ensure that if there are multiple, they are consistent
+    default_profile = default_profiles[0] if default_profiles else None
+    for p in default_profiles:
+        _validate_default_profile(default_profile, p)
+
+    for profile in recurring_profiles:
+        # portal creates extra default profiles with JSON names...
+        # trying to stay compatible with that
+        try:
+            # portal-created "default" or end time
+            json_name = json.loads(profile["name"])
+            sched_name = json_name['for']
+            end_time = time(hour=profile["recurrence"]["schedule"]["hours"][0],
+                            minute=profile["recurrence"]["schedule"]["minutes"][0])
+
+            if not default_profile:
+                # choose this as default if it is the first
+                default_profile = {
+                    "name": 'default',
+                    "capacity": profile["capacity"],
+                    "rules": profile["rules"]
+                }
+            else:
+                # otherwise ensure it is consistent with the one chosen earlier
+                _validate_default_profile(default_profile, profile)
+
+            for day in profile["recurrence"]["schedule"]["days"]:
+                if day not in profile_schedule:
+                    profile_schedule[day] = {}
+                if sched_name in profile_schedule[day]:
+                    profile_schedule[day][sched_name]['end'] = end_time
+                else:
+                    profile_schedule[day][sched_name] = {'end': end_time}
+        except ValueError:
+            # start time
+            sched_name = profile["name"]
+            start_time = time(hour=profile["recurrence"]["schedule"]["hours"][0],
+                              minute=profile["recurrence"]["schedule"]["minutes"][0])
+            for day in profile["recurrence"]["schedule"]["days"]:
+                if day not in profile_schedule:
+                    profile_schedule[day] = {}
+                if sched_name in profile_schedule[day]:
+                    profile_schedule[day][sched_name]['start'] = start_time
+                    profile_schedule[day][sched_name]['capacity'] = profile["capacity"]
+                    profile_schedule[day][sched_name]['rules'] = profile["rules"]
+                else:
+                    profile_schedule[day][sched_name] = {
+                        'start': start_time,
+                        'capacity': profile["capacity"],
+                        'rules': profile["rules"]
+                    }
+
+    return default_profile, profile_schedule
+
+
+def validate_autoscale_profile_dict(schedule, start, end, recurrence):
     """ Check whether the proposed schedule conflicts with existing schedules. If so,
         issue a warning. """
     # pylint: disable=cell-var-from-loop
-    for day in recurrence.schedule.days:
+    for day in recurrence["schedule"]["days"]:
         if day not in schedule:
             schedule[day] = {}
 

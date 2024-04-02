@@ -14,9 +14,5 @@ def invoices_mgmt_client_factory(cli_ctx, kwargs):
     return cf_billing(cli_ctx, **kwargs).invoices
 
 
-def billing_periods_mgmt_client_factory(cli_ctx, kwargs):
-    return cf_billing(cli_ctx, **kwargs).billing_periods
-
-
 def enrollment_accounts_mgmt_client_factory(cli_ctx, kwargs):
     return cf_billing(cli_ctx, **kwargs).enrollment_accounts

@@ -791,7 +791,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The destination storage account name or resource Id. Apply --account-name value as '
                    'destination account when there is no destination account provided in --policy and '
                    '--destination-account.')
-        c.argument('properties', or_policy_type)
+        c.argument('properties', or_policy_type, validator=validate_or_policy)
         c.argument('prefix_match', prefix_math_type)
         c.argument('min_creation_time', min_creation_time_type)
 
@@ -804,9 +804,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='The source storage container name. Required when no --policy provided.')
             c.argument('destination_container', options_list=['--destination-container', '--dcont'],
                        help='The destination storage container name. Required when no --policy provided.')
-
-    with self.argument_context('storage account or-policy create') as c:
-        c.argument('properties', or_policy_type, validator=validate_or_policy)
 
     with self.argument_context('storage account or-policy rule') as c:
         c.argument('policy_id', policy_id_type)
@@ -1066,7 +1063,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('length', type=int, help='Number of bytes to read from the stream. This is optional, but should be '
                                             'supplied for optimal performance. Cooperate with --data.', is_preview=True,
                    min_api='2019-02-02')
-        c.argument('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags", is_preview=True,
+        c.argument('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags",
                    help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
                         'operation will overwrite the existing data. If set to False, the operation will fail with '
                         'ResourceExistsError. The exception to the above is with Append blob types: if set to False and the '
@@ -1103,20 +1100,24 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         c.argument('source', options_list=('--source', '-s'))
         c.argument('destination', options_list=('--destination', '-d'))
-        c.argument('max_connections', type=int,
+        c.argument('max_connections', type=int, arg_group="Additional Flags",
                    help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
         c.argument('maxsize_condition', arg_group='Content Control')
         c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group='Content Control')
-        c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()))
-        c.extra('no_progress', progress_type, validator=add_progress_callback)
-        c.extra('tier', tier_type, is_preview=True, validator=blob_tier_validator_track2)
-        c.extra('overwrite', arg_type=get_three_state_flag(), is_preview=True,
+        c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()),
+                   arg_group="Additional Flags")
+        c.extra('no_progress', progress_type, validator=add_progress_callback, arg_group="Additional Flags")
+        c.extra('tier', tier_type, is_preview=True, validator=blob_tier_validator_track2, arg_group="Additional Flags")
+        c.extra('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags",
                 help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
                      'operation will overwrite the existing data. If set to False, the operation will fail with '
                      'ResourceExistsError. The exception to the above is with Append blob types: if set to False and the '
                      'data already exists, an error will not be raised and the data will be appended to the existing '
                      'blob. If set overwrite=True, then the existing append blob will be deleted, and a new one created. '
                      'Defaults to False.')
+        c.extra('tags', arg_type=tags_type, arg_group="Additional Flags")
+        c.argument('metadata', arg_group="Additional Flags")
+        c.argument('timeout', arg_group="Additional Flags")
 
     with self.argument_context('storage blob download', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         c.register_blob_arguments_track2()
@@ -1354,11 +1355,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source_sas')
         c.argument('source_container')
         c.argument('source_share')
-
-        c.extra('tier', tier_type)
+        c.extra('rehydrate_priority', rehydrate_priority_type, arg_group=None)
+        c.extra('tier', tier_type, arg_group=None)
         c.extra('destination_blob_type', arg_type=get_enum_type(['Detect', 'BlockBlob', 'PageBlob', 'AppendBlob']),
                 help='Defines the type of blob at the destination. '
-                     'Value of "Detect" determines the type based on source blob type.')
+                     'Value of "Detect" determines the type based on source blob type.', arg_group=None)
 
     with self.argument_context('storage blob incremental-copy start') as c:
         from azure.cli.command_modules.storage._validators import process_blob_source_uri
@@ -1693,28 +1694,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                    resource_type=ResourceType.MGMT_STORAGE) as c:
             from ._validators import validate_container_nfsv3_squash
             t_root_squash = self.get_models('RootSquashType', resource_type=ResourceType.MGMT_STORAGE)
-            c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
-                       arg_group='Encryption Policy', min_api='2019-06-01',
-                       help='Default the container to use specified encryption scope for all writes.')
-            c.argument('deny_encryption_scope_override',
-                       options_list=['--deny-encryption-scope-override', '--deny-override'],
-                       arg_type=get_three_state_flag(), arg_group='Encryption Policy', min_api='2019-06-01',
-                       help='Block override of encryption scope from the container default.')
             c.extra('root_squash', arg_type=get_enum_type(t_root_squash), min_api='2021-06-01',
                     help='Enable NFSv3 squash on blob container.', validator=validate_container_nfsv3_squash)
             c.ignore('enable_nfs_v3_root_squash')
             c.ignore('enable_nfs_v3_all_squash')
 
-    with self.argument_context('storage container-rm update', resource_type=ResourceType.MGMT_STORAGE) as c:
+    with self.argument_context('storage container-rm create', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
                    arg_group='Encryption Policy', min_api='2019-06-01',
-                   help='Default the container to use specified encryption scope for all writes.',
-                   deprecate_info=c.deprecate(hide=True, target='--default-encryption-scope', expiration="2.54"))
+                   help='Default the container to use specified encryption scope for all writes.')
         c.argument('deny_encryption_scope_override',
                    options_list=['--deny-encryption-scope-override', '--deny-override'],
                    arg_type=get_three_state_flag(), arg_group='Encryption Policy', min_api='2019-06-01',
-                   help='Block override of encryption scope from the container default.',
-                   deprecate_info=c.deprecate(hide=True, target='--deny-encryption-scope-override', expiration="2.54"))
+                   help='Block override of encryption scope from the container default.')
 
     with self.argument_context('storage container-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', storage_account_type, id_part=None)
@@ -2680,3 +2672,26 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                          'sub-entities of the directory. Continuation token will only be returned when '
                          '--continue-on-failure is True in case of user errors. If not set the default value is False '
                          'for this.')
+
+    for cmd in ['list-handle', 'close-handle']:
+        with self.argument_context('storage share ' + cmd) as c:
+            c.extra('disallow_trailing_dot', arg_type=get_three_state_flag(), default=False,
+                    help="If true, the trailing dot will be trimmed from the target URI. Default to False")
+
+    for cmd in ['create', 'delete', 'show', 'exists', 'metadata show', 'metadata update', 'list']:
+        with self.argument_context('storage directory ' + cmd) as c:
+            c.extra('disallow_trailing_dot', arg_type=get_three_state_flag(), default=False,
+                    help="If true, the trailing dot will be trimmed from the target URI. Default to False")
+
+    for cmd in ['list', 'delete', 'delete-batch', 'resize', 'url', 'generate-sas', 'show', 'update',
+                'exists', 'metadata show', 'metadata update', 'copy start', 'copy cancel', 'copy start-batch',
+                'upload', 'upload-batch', 'download', 'download-batch']:
+        with self.argument_context('storage file ' + cmd) as c:
+            c.extra('disallow_trailing_dot', arg_type=get_three_state_flag(), default=False,
+                    help="If true, the trailing dot will be trimmed from the target URI. Default to False")
+
+    for cmd in ['start', 'start-batch']:
+        with self.argument_context('storage file copy ' + cmd) as c:
+            c.extra('disallow_source_trailing_dot', arg_type=get_three_state_flag(), default=False,
+                    options_list=["--disallow-source-trailing-dot", "--disallow-src-trailing"],
+                    help="If true, the trailing dot will be trimmed from the source URI. Default to False")
