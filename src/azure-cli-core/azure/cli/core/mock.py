@@ -29,7 +29,7 @@ class DummyCli(AzCli):
             config_dir = os.path.join(GLOBAL_CONFIG_DIR, 'dummy_cli_config_dir', random_string())
             # Knack prioritizes the AZURE_CONFIG_DIR env over the config_dir param, and other functions may call
             # get_config_dir directly. We need to set the env to make sure the config_dir is used.
-            self.env_patch = patch.dict('os.environ', {'AZURE_CONFIG_DIR': config_dir})
+            self.env_patch = patch.dict(os.environ, {'AZURE_CONFIG_DIR': config_dir})
             self.env_patch.start()
 
             # In recording mode, copy login credentials from global config dir to the dummy config dir
