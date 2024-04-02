@@ -442,7 +442,6 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         raise ValidationError('--vault-id must be provided to use secret-name')
 
     if app_config_id:
-        client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_app_config_connection_if_not_exist
         create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id, scope)
 
