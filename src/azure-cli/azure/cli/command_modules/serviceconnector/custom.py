@@ -725,7 +725,6 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
         raise ValidationError('--vault-id must be provided to use secret-name')
 
     if app_config_id:
-        client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_app_config_connection_if_not_exist
         create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id, scope)
 
@@ -1058,7 +1057,6 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
 
     if app_config_id:
-        client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_app_config_connection_if_not_exist
         create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id, scope)
     config_action = 'optOut' if (opt_out_list is not None and
@@ -1188,7 +1186,6 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             customized_keys = customized_keys or server_linker.get('configurationInfo').get('customizedKeys')
 
         if app_config_id:
-            client = set_user_token_header(client, cmd.cli_ctx)
             from ._utils import create_app_config_connection_if_not_exist
             create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id)
 
@@ -1236,7 +1233,6 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             customized_keys = customized_keys or schema_linker.get('configurationInfo').get('customizedKeys')
 
         if app_config_id:
-            client = set_user_token_header(client, cmd.cli_ctx)
             from ._utils import create_app_config_connection_if_not_exist
             create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id)
 
