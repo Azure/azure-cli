@@ -20,7 +20,8 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import AzureVMAppConta
     AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, \
     AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem, MoveRPAcrossTiersRequest, \
     RecoveryPointRehydrationInfo, AzureWorkloadSAPHanaRestoreWithRehydrateRequest, \
-    AzureWorkloadSQLRestoreWithRehydrateRequest, ProtectionState
+    AzureWorkloadSQLRestoreWithRehydrateRequest, ProtectionState, SnapshotRestoreParameters, \
+    UserAssignedManagedIdentityDetails, UserAssignedIdentityProperties
 
 from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrossRegionRestoreRequest
 
@@ -39,6 +40,7 @@ from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumen
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType
 
 
 fabric_name = "Azure"
@@ -640,6 +642,8 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     alternate_directory_paths = recovery_config_object['alternate_directory_paths']
     recovery_mode = recovery_config_object['recovery_mode']
     filepath = recovery_config_object['filepath']
+    attach_and_mount = recovery_config_object['attach_and_mount']
+    identity_arm_id = recovery_config_object['identity_arm_id']
 
     item = common.show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name,
                             container_uri, item_uri, "AzureWorkload")
@@ -715,6 +719,34 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         setattr(trigger_restore_properties, 'should_use_alternate_target_location', True)
         setattr(trigger_restore_properties, 'is_non_recoverable', False)
 
+    if recovery_mode == 'SnapshotAttachAndRecover':
+        trigger_restore_properties.recovery_mode = recovery_mode
+
+        target_resource_group_name = container_id.split('/')[4]
+
+        snapshot_restore_parameters = SnapshotRestoreParameters(skip_attach_and_mount=(not attach_and_mount),
+                                                                log_point_in_time_for_db_recovery='')
+
+        # Fetching UAMI details
+        rg_name = identity_arm_id.split('/')[-5]
+        id_name = identity_arm_id.split('/')[-1]
+        sub_name = identity_arm_id.split('/')[-7]
+        identity_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_MSI,
+                                                  subscription_id=sub_name).user_assigned_identities
+        identity_details = identity_client.get(resource_group_name=rg_name, resource_name=id_name)
+        user_assigned_identity_properties = UserAssignedIdentityProperties(
+            client_id=identity_details.client_id,
+            principal_id=identity_details.principal_id
+        )
+        user_assigned_managed_identity_details = UserAssignedManagedIdentityDetails(
+            identity_arm_id=identity_arm_id,
+            user_assigned_identity_properties=user_assigned_identity_properties
+        )
+        
+        setattr(trigger_restore_properties, 'snapshot_restore_parameters', snapshot_restore_parameters)
+        setattr(trigger_restore_properties, 'target_resource_group_name', target_resource_group_name)
+        setattr(trigger_restore_properties, 'user_assigned_managed_identity_details', user_assigned_managed_identity_details)
+
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
     if use_secondary_region:
@@ -746,7 +778,8 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
 
 def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name, item_name,
                          rp_name, target_item, target_item_name, log_point_in_time, from_full_rp_name,
-                         filepath, target_container, target_resource_group, target_vault_name, target_subscription):
+                         filepath, target_container, target_resource_group, target_vault_name, target_subscription,
+                         workload_type, attach_and_mount, identity_arm_id):
     if log_point_in_time is not None:
         datetime_type(log_point_in_time)
 
@@ -834,6 +867,8 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     if restore_mode == 'RestoreAsFiles':
         recovery_mode = 'FileRecovery'
         container_id = target_container.id
+    if workload_type == 'SAPHanaDBInstance':
+        recovery_mode = 'SnapshotAttachAndRecover'
 
     return {
         'restore_mode': restore_mode_map[restore_mode],
@@ -848,7 +883,9 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'container_id': container_id,
         'recovery_mode': recovery_mode,
         'filepath': filepath,
-        'alternate_directory_paths': alternate_directory_paths}
+        'alternate_directory_paths': alternate_directory_paths,
+        'attach_and_mount': attach_and_mount,
+        'identity_arm_id': identity_arm_id}
 
 
 def _fetch_nodes_list_and_auto_protection_policy(cmd, paged_items, resource_group_name, vault_name,
