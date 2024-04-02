@@ -29,6 +29,8 @@ from distutils.version import StrictVersion  # pylint: disable=deprecated-module
 from urllib.error import URLError
 from urllib.request import urlopen
 from azure.cli.command_modules.acs.maintenanceconfiguration import aks_maintenanceconfiguration_update_internal
+import datetime
+from dateutil.parser import parse
 
 import colorama
 import requests
@@ -60,9 +62,12 @@ from azure.cli.command_modules.acs._consts import (
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
     DecoratorEarlyExitException,
+    CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START,
+    CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE,
+    CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
 )
 
-from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.addonconfiguration import (
@@ -88,6 +93,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import in_cloud_console, sdk_no_wait
+from azure.core.exceptions import ResourceNotFoundError as ResourceNotFoundErrorAzCore
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
@@ -498,6 +504,7 @@ def aks_create(
     load_balancer_outbound_ip_prefixes=None,
     load_balancer_outbound_ports=None,
     load_balancer_idle_timeout=None,
+    load_balancer_backend_pool_type=None,
     nat_gateway_managed_outbound_ip_count=None,
     nat_gateway_idle_timeout=None,
     outbound_type=None,
@@ -568,6 +575,7 @@ def aks_create(
     enable_sgxquotehelper=False,
     enable_secret_rotation=False,
     rotation_poll_interval=None,
+    enable_app_routing=False,
     # nodepool paramerters
     nodepool_name="nodepool1",
     node_vm_size=None,
@@ -584,6 +592,8 @@ def aks_create(
     nodepool_tags=None,
     nodepool_labels=None,
     nodepool_taints=None,
+    nodepool_allowed_host_ports=None,
+    nodepool_asg_ids=None,
     node_osdisk_type=None,
     node_osdisk_size=None,
     vm_set_type=None,
@@ -597,7 +607,11 @@ def aks_create(
     kubelet_config=None,
     linux_os_config=None,
     host_group_id=None,
+    crg_id=None,
     gpu_instance_profile=None,
+    # azure service mesh
+    enable_azure_service_mesh=None,
+    revision=None,
     # azure monitor profile
     enable_azure_monitor_metrics=False,
     azure_monitor_workspace_resource_id=None,
@@ -609,6 +623,7 @@ def aks_create(
     yes=False,
     no_wait=False,
     aks_custom_headers=None,
+    node_public_ip_tags=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -653,6 +668,7 @@ def aks_update(
     tags=None,
     disable_local_accounts=False,
     enable_local_accounts=False,
+    network_plugin=None,
     network_plugin_mode=None,
     network_dataplane=None,
     network_policy=None,
@@ -663,6 +679,7 @@ def aks_update(
     load_balancer_outbound_ip_prefixes=None,
     load_balancer_outbound_ports=None,
     load_balancer_idle_timeout=None,
+    load_balancer_backend_pool_type=None,
     nat_gateway_managed_outbound_ip_count=None,
     nat_gateway_idle_timeout=None,
     outbound_type=None,
@@ -778,6 +795,9 @@ def aks_upgrade(cmd,
                 control_plane_only=False,
                 node_image_only=False,
                 no_wait=False,
+                enable_force_upgrade=False,
+                disable_force_upgrade=False,
+                upgrade_override_until=None,
                 yes=False):
     msg = 'Kubernetes may be unavailable during cluster upgrades.\n Are you sure you want to perform this operation?'
     if not yes and not prompt_y_n(msg, default="n"):
@@ -812,6 +832,13 @@ def aks_upgrade(cmd,
                                                    resource_group_name, name, agent_pool_profile.name)
         mc = client.get(resource_group_name, name)
         return _remove_nulls([mc])[0]
+
+    instance = _update_upgrade_settings(
+        cmd,
+        instance,
+        enable_force_upgrade=enable_force_upgrade,
+        disable_force_upgrade=disable_force_upgrade,
+        upgrade_override_until=upgrade_override_until)
 
     if instance.kubernetes_version == kubernetes_version or kubernetes_version == '':
         # don't prompt here because there is another prompt below?
@@ -858,6 +885,57 @@ def aks_upgrade(cmd,
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
+def _update_upgrade_settings(cmd, instance,
+                             enable_force_upgrade=False,
+                             disable_force_upgrade=False,
+                             upgrade_override_until=None):
+    existing_until = None
+    if instance.upgrade_settings is not None and instance.upgrade_settings.override_settings is not None and instance.upgrade_settings.override_settings.until is not None:
+        existing_until = instance.upgrade_settings.override_settings.until
+
+    force_upgrade = None
+    if enable_force_upgrade is False and disable_force_upgrade is False:
+        force_upgrade = None
+    elif enable_force_upgrade is not None:
+        force_upgrade = enable_force_upgrade
+    elif disable_force_upgrade is not None:
+        force_upgrade = not disable_force_upgrade
+
+    ClusterUpgradeSettings = cmd.get_models(
+        "ClusterUpgradeSettings",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
+
+    UpgradeOverrideSettings = cmd.get_models(
+        "UpgradeOverrideSettings",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
+
+    if force_upgrade is not None or upgrade_override_until is not None:
+        if instance.upgrade_settings is None:
+            instance.upgrade_settings = ClusterUpgradeSettings()
+        if instance.upgrade_settings.override_settings is None:
+            instance.upgrade_settings.override_settings = UpgradeOverrideSettings()
+        # sets force_upgrade
+        if force_upgrade is not None:
+            instance.upgrade_settings.override_settings.force_upgrade = force_upgrade
+        # sets until
+        if upgrade_override_until is not None:
+            try:
+                instance.upgrade_settings.override_settings.until = parse(upgrade_override_until)
+            except Exception:  # pylint: disable=broad-except
+                raise InvalidArgumentValueError(
+                    f"{upgrade_override_until} is not a valid datatime format."
+                )
+        elif force_upgrade:
+            default_extended_until = datetime.datetime.utcnow() + datetime.timedelta(days=3)
+            if existing_until is None or existing_until.timestamp() < default_extended_until.timestamp():
+                instance.upgrade_settings.override_settings.until = default_extended_until
+    return instance
+
+
 def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name,
                                            snapshot_id=None):
     headers = {}
@@ -896,6 +974,16 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
 def aks_show(cmd, client, resource_group_name, name):
     mc = client.get(resource_group_name, name)
     return _remove_nulls([mc])[0]
+
+
+def aks_stop(cmd, client, resource_group_name, name, no_wait=False):
+    instance = client.get(resource_group_name, name)
+    # print warning when stopping a private link cluster
+    if check_is_private_link_cluster(instance):
+        logger.warning('Your private cluster apiserver IP might get changed when it\'s stopped and started.\n'
+                       'Any user provisioned private endpoints linked to this private cluster will need to be deleted and created again. '
+                       'Any user managed DNS record also needs to be updated with the new IP.')
+    return sdk_no_wait(no_wait, client.begin_stop, resource_group_name, name)
 
 
 def aks_list(cmd, client, resource_group_name=None):
@@ -2179,6 +2267,7 @@ def aks_agentpool_add(
     node_osdisk_size=None,
     max_surge=None,
     drain_timeout=None,
+    node_soak_duration=None,
     mode=CONST_NODEPOOL_MODE_USER,
     scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
     max_pods=None,
@@ -2192,7 +2281,11 @@ def aks_agentpool_add(
     no_wait=False,
     aks_custom_headers=None,
     host_group_id=None,
+    crg_id=None,
     gpu_instance_profile=None,
+    allowed_host_ports=None,
+    asg_ids=None,
+    node_public_ip_tags=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2233,10 +2326,13 @@ def aks_agentpool_update(
     node_taints=None,
     max_surge=None,
     drain_timeout=None,
+    node_soak_duration=None,
     mode=None,
     scale_down_mode=None,
     no_wait=False,
     aks_custom_headers=None,
+    allowed_host_ports=None,
+    asg_ids=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2271,6 +2367,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           node_image_only=False,
                           max_surge=None,
                           drain_timeout=None,
+                          node_soak_duration=None,
                           snapshot_id=None,
                           no_wait=False,
                           aks_custom_headers=None,
@@ -2288,11 +2385,11 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         )
 
     # Note: we exclude this option because node image upgrade can't accept nodepool put fields like max surge
-    if (max_surge or drain_timeout) and node_image_only:
+    if (max_surge or drain_timeout or node_soak_duration) and node_image_only:
         raise MutuallyExclusiveArgumentError(
-            'Conflicting flags. Unable to specify max-surge/drain-timeout with node-image-only.'
-            'If you want to use max-surge/drain-timeout with a node image upgrade, please first '
-            'update max-surge/drain-timeout using "az aks nodepool update --max-surge/--drain-timeout".'
+            'Conflicting flags. Unable to specify max-surge/drain-timeout/node-soak-duration with node-image-only.'
+            'If you want to use max-surge/drain-timeout/node-soak-duration with a node image upgrade, please first '
+            'update max-surge/drain-timeout/node-soak-duration using "az aks nodepool update --max-surge/--drain-timeout/--node-soak-duration".'
         )
 
     if node_image_only:
@@ -2341,6 +2438,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         instance.upgrade_settings.max_surge = max_surge
     if drain_timeout:
         instance.upgrade_settings.drain_timeout_in_minutes = drain_timeout
+    if node_soak_duration:
+        instance.upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
 
     # custom headers
     aks_custom_headers = extract_comma_separated_string(
@@ -2592,3 +2691,417 @@ def aks_nodepool_snapshot_list(cmd, client, resource_group_name=None):  # pylint
 
 def aks_rotate_service_account_signing_keys(cmd, client, resource_group_name, name, no_wait=True):
     return sdk_no_wait(no_wait, client.begin_rotate_service_account_signing_keys, resource_group_name, name)
+
+
+def aks_trustedaccess_role_list(cmd, client, location):  # pylint: disable=unused-argument
+    return client.list(location)
+
+
+def aks_trustedaccess_role_binding_list(cmd, client, resource_group_name, cluster_name):   # pylint: disable=unused-argument
+    return client.list(resource_group_name, cluster_name)
+
+
+def aks_trustedaccess_role_binding_get(cmd, client, resource_group_name, cluster_name, role_binding_name):
+    return client.get(resource_group_name, cluster_name, role_binding_name)
+
+
+def aks_trustedaccess_role_binding_create(cmd, client, resource_group_name, cluster_name, role_binding_name,
+                                          source_resource_id, roles):
+    TrustedAccessRoleBinding = cmd.get_models(
+        "TrustedAccessRoleBinding",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="trusted_access_role_bindings",
+    )
+    existedBinding = None
+    try:
+        existedBinding = client.get(resource_group_name, cluster_name, role_binding_name)
+    except ResourceNotFoundErrorAzCore:
+        pass
+
+    if existedBinding:
+        raise InvalidArgumentValueError("TrustedAccess RoleBinding " + role_binding_name + " already existed, please use 'az aks trustedaccess rolebinding update' command to update!")
+
+    roleList = roles.split(',')
+    roleBinding = TrustedAccessRoleBinding(source_resource_id=source_resource_id, roles=roleList)
+    return client.begin_create_or_update(resource_group_name, cluster_name, role_binding_name, roleBinding)
+
+
+def aks_trustedaccess_role_binding_update(cmd, client, resource_group_name, cluster_name, role_binding_name, roles):
+    TrustedAccessRoleBinding = cmd.get_models(
+        "TrustedAccessRoleBinding",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="trusted_access_role_bindings",
+    )
+    existedBinding = client.get(resource_group_name, cluster_name, role_binding_name)
+
+    roleList = roles.split(',')
+    roleBinding = TrustedAccessRoleBinding(source_resource_id=existedBinding.source_resource_id, roles=roleList)
+    return client.begin_create_or_update(resource_group_name, cluster_name, role_binding_name, roleBinding)
+
+
+def aks_trustedaccess_role_binding_delete(cmd, client, resource_group_name, cluster_name, role_binding_name):
+    return client.begin_delete(resource_group_name, cluster_name, role_binding_name)
+
+
+def aks_mesh_enable(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        revision=None,
+        key_vault_id=None,
+        ca_cert_object_name=None,
+        ca_key_object_name=None,
+        root_cert_object_name=None,
+        cert_chain_object_name=None
+):
+    instance = client.get(resource_group_name, name)
+    addon_profiles = instance.addon_profiles
+    if key_vault_id is not None and ca_cert_object_name is not None and ca_key_object_name is not None and root_cert_object_name is not None and cert_chain_object_name is not None:
+        if not addon_profiles or not addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME] or not addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME].enabled:
+            raise CLIError('AzureKeyvaultSecretsProvider addon is required for Azure Service Mesh plugin certificate authority feature.')
+
+    return _aks_mesh_update(cmd,
+                            client,
+                            resource_group_name,
+                            name,
+                            key_vault_id,
+                            ca_cert_object_name,
+                            ca_key_object_name,
+                            root_cert_object_name,
+                            cert_chain_object_name,
+                            revision=revision,
+                            enable_azure_service_mesh=True)
+
+
+def aks_mesh_disable(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+):
+    return _aks_mesh_update(cmd, client, resource_group_name, name, disable_azure_service_mesh=True)
+
+
+def aks_mesh_enable_ingress_gateway(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        ingress_gateway_type,
+):
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        enable_ingress_gateway=True,
+        ingress_gateway_type=ingress_gateway_type)
+
+
+def aks_mesh_disable_ingress_gateway(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        ingress_gateway_type,
+):
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        disable_ingress_gateway=True,
+        ingress_gateway_type=ingress_gateway_type)
+
+
+def aks_mesh_get_revisions(
+        cmd,
+        client,
+        location
+):
+    revisonProfiles = client.list_mesh_revision_profiles(location)
+    # 'revisonProfiles' is an ItemPaged object
+    revisions = []
+    # Iterate over items within pages
+    for page in revisonProfiles.by_page():
+        for item in page:
+            revisions.append(item)
+
+    if revisions:
+        return revisions[0].properties
+
+    return None
+
+
+def check_iterator(iterator):
+    import itertools
+    try:
+        first = next(iterator)
+    except StopIteration:   # iterator is empty
+        return True, iterator
+    except TypeError:       # iterator is not iterable, e.g. None
+        return True, iterator
+    return False, itertools.chain([first], iterator)
+
+
+def aks_mesh_get_upgrades(
+        cmd,
+        client,
+        resource_group_name,
+        name
+):
+    upgradeProfiles = client.list_mesh_upgrade_profiles(resource_group_name, name)
+    is_empty, upgradeProfiles = check_iterator(upgradeProfiles)
+    if is_empty:
+        logger.warning("No mesh upgrade profiles found for the cluster '%s' " +
+                       "in the resource group '%s'.", name, resource_group_name)
+        return None
+    upgrade = next(upgradeProfiles, None)
+    if upgrade:
+        return upgrade.properties
+    return None
+
+
+def aks_mesh_upgrade_start(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        revision
+):
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        revision=revision,
+        mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START)
+
+
+def aks_mesh_upgrade_complete(
+        cmd,
+        client,
+        resource_group_name,
+        name):
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE)
+
+
+def aks_mesh_upgrade_rollback(
+        cmd,
+        client,
+        resource_group_name,
+        name
+):
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK)
+
+
+def _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        key_vault_id=None,
+        ca_cert_object_name=None,
+        ca_key_object_name=None,
+        root_cert_object_name=None,
+        cert_chain_object_name=None,
+        enable_azure_service_mesh=None,
+        disable_azure_service_mesh=None,
+        enable_ingress_gateway=None,
+        disable_ingress_gateway=None,
+        ingress_gateway_type=None,
+        revision=None,
+        mesh_upgrade_command=None,
+):
+    raw_parameters = locals()
+
+    from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterUpdateDecorator
+
+    aks_update_decorator = AKSManagedClusterUpdateDecorator(
+        cmd=cmd,
+        client=client,
+        raw_parameters=raw_parameters,
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+    )
+
+    try:
+        mc = aks_update_decorator.fetch_mc()
+        mc = aks_update_decorator.update_azure_service_mesh_profile(mc)
+    except DecoratorEarlyExitException:
+        return None
+
+    return aks_update_decorator.update_mc(mc)
+
+
+def aks_approuting_enable(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        enable_kv=False,
+        keyvault_id=None
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        enable_app_routing=True,
+        keyvault_id=keyvault_id,
+        enable_kv=enable_kv)
+
+
+def aks_approuting_disable(
+        cmd,
+        client,
+        resource_group_name,
+        name
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        enable_app_routing=False)
+
+
+def aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        keyvault_id=None,
+        enable_kv=False
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        keyvault_id=keyvault_id,
+        enable_kv=enable_kv)
+
+
+def aks_approuting_zone_add(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        dns_zone_resource_ids,
+        attach_zones=False
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        dns_zone_resource_ids=dns_zone_resource_ids,
+        add_dns_zone=True,
+        attach_zones=attach_zones)
+
+
+def aks_approuting_zone_delete(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        dns_zone_resource_ids
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        dns_zone_resource_ids=dns_zone_resource_ids,
+        delete_dns_zone=True)
+
+
+def aks_approuting_zone_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        dns_zone_resource_ids,
+        attach_zones=False
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        dns_zone_resource_ids=dns_zone_resource_ids,
+        update_dns_zone=True,
+        attach_zones=attach_zones)
+
+
+def aks_approuting_zone_list(
+        cmd,
+        client,
+        resource_group_name,
+        name
+):
+    from msrestazure.tools import parse_resource_id
+    mc = client.get(resource_group_name, name)
+
+    if mc.ingress_profile and mc.ingress_profile.web_app_routing and mc.ingress_profile.web_app_routing.enabled:
+        if mc.ingress_profile.web_app_routing.dns_zone_resource_ids:
+            dns_zone_resource_ids = mc.ingress_profile.web_app_routing.dns_zone_resource_ids
+            dns_zone_list = []
+            for dns_zone in dns_zone_resource_ids:
+                dns_zone_dict = {}
+                parsed_dns_zone = parse_resource_id(dns_zone)
+                dns_zone_dict['id'] = dns_zone
+                dns_zone_dict['subscription'] = parsed_dns_zone['subscription']
+                dns_zone_dict['resource_group'] = parsed_dns_zone['resource_group']
+                dns_zone_dict['name'] = parsed_dns_zone['name']
+                dns_zone_dict['type'] = parsed_dns_zone['type']
+                dns_zone_list.append(dns_zone_dict)
+            return dns_zone_list
+        raise CLIError('No dns zone attached to the cluster')
+    raise CLIError('App routing addon is not enabled')
+
+
+# pylint: disable=unused-argument
+def _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        enable_app_routing=None,
+        enable_kv=None,
+        keyvault_id=None,
+        add_dns_zone=None,
+        delete_dns_zone=None,
+        update_dns_zone=None,
+        dns_zone_resource_ids=None,
+        attach_zones=None
+):
+    from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterUpdateDecorator
+
+    raw_parameters = locals()
+
+    aks_update_decorator = AKSManagedClusterUpdateDecorator(
+        cmd=cmd,
+        client=client,
+        raw_parameters=raw_parameters,
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+    )
+
+    try:
+        mc = aks_update_decorator.fetch_mc()
+        mc = aks_update_decorator.update_app_routing_profile(mc)
+    except DecoratorEarlyExitException:
+        return None
+
+    return aks_update_decorator.update_mc(mc)

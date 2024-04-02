@@ -208,7 +208,7 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item_name, 
 
 
 def update_policy_for_item(cmd, client, resource_group_name, vault_name, container_name, item_name, policy_name,
-                           workload_type=None, backup_management_type=None, tenant_id=None):
+                           workload_type=None, backup_management_type=None, tenant_id=None, yes=None):
 
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
@@ -226,7 +226,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, contain
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id,
-                                             is_critical_operation)
+                                             is_critical_operation, yes)
 
     if item.properties.backup_management_type.lower() == "azurestorage":
         return custom_afs.update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id,
@@ -420,7 +420,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
                   mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
                   target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None,
-                  target_subscription_id=None, storage_account_resource_group=None):
+                  target_subscription_id=None, storage_account_resource_group=None, restore_to_edge_zone=None):
 
     if rehydration_duration < 10 or rehydration_duration > 30:
         raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30 (both inclusive).')
@@ -437,7 +437,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                 rehydration_duration, rehydration_priority, disk_encryption_set_id,
                                 mi_system_assigned, mi_user_assigned, target_zone, restore_mode, target_vm_name,
                                 target_vnet_name, target_vnet_resource_group, target_subnet_name,
-                                target_subscription_id, storage_account_resource_group)
+                                target_subscription_id, storage_account_resource_group, restore_to_edge_zone)
 
 
 def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, policy_name, storage_account,

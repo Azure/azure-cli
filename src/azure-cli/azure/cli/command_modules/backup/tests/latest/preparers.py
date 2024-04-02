@@ -595,17 +595,27 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
                        'decorator @AFSPolicyPreparer in front of this Item preparer.'
             raise CliTestError(template)
 
+    def _delete_lock(self, lock):
+        lock_id = lock["id"]
+        try:
+            command_string = 'az lock delete --ids {}'.format(lock_id)
+            execute(self.cli_ctx, command_string)
+        except Exception:
+            raise CliTestError('Unable to delete the lock with ID {}, please delete it manually'.format(lock_id))
+
     def _cleanup(self, resource_group, storage_account, vault, afs):
         # Need to remove any resource locks on the Storage Account, and also manually delete the item
         command_string = 'az lock list -g {}'.format(resource_group)
         list_of_locks = execute(self.cli_ctx, command_string).get_output_in_json()
         for lock in list_of_locks:
-            lock_id = lock["id"]
-            try:
-                command_string = 'az lock delete --ids {}'.format(lock_id)
-                execute(self.cli_ctx, command_string)
-            except Exception:
-                raise CliTestError('Unable to delete the lock with ID {}, please delete it manually'.format(lock_id))
+            self._delete_lock(lock)
+        
+        # Cleaning up Storage account locks
+        command_string = 'az lock list -g {} --resource-name {} --resource-type {}'.format(
+            resource_group, storage_account, 'Microsoft.Storage/storageAccounts')
+        list_of_locks = execute(self.cli_ctx, command_string).get_output_in_json()
+        for lock in list_of_locks:
+            self._delete_lock(lock)
 
         command_string = 'az backup protection disable'
         command_string += ' -g {} -v {} --container-name {} --item-name {}'

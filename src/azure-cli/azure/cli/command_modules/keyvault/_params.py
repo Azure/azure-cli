@@ -14,7 +14,7 @@ from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list, resource_group_name_type, tags_type, file_type, get_three_state_flag,
     get_enum_type)
 from azure.cli.core.util import get_json_object
-from azure.cli.core.profiles import ResourceType, get_api_version
+from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.keyvault._completers import (
     get_keyvault_name_completion_list, get_keyvault_version_completion_list)
@@ -29,6 +29,7 @@ from azure.cli.command_modules.keyvault._validators import (
     validate_vault_name_and_hsm_name, set_vault_base_url, validate_keyvault_resource_id,
     process_hsm_name, KeyEncryptionDataType, process_key_release_policy, process_certificate_policy,
     process_certificate_import)
+from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_profile
 
 # CUSTOM CHOICE LISTS
 
@@ -166,9 +167,9 @@ def load_arguments(self, _):
         c.argument('retention_days', validator=validate_retention_days_on_creation,
                    help='Soft delete data retention days. It accepts >=7 and <=90. '
                         'Defaults to 90 for keyvault creation. Required for MHSM creation')
-        c.argument('user_identities', options_list=['--mi-user-assigned'], nargs='*', is_preview=True,
+        c.argument('user_identities', options_list=['--mi-user-assigned'], nargs='*',
                    min_api='2023-07-01', resource_type=ResourceType.MGMT_KEYVAULT, operation_group="managed_hsms",
-                   help="[HSM Only]Enable user-assigned managed identities for managed HSM. "
+                   help="[HSM Only] Enable user-assigned managed identities for managed HSM. "
                         "Accept space-separated list of identity resource IDs.")
 
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
@@ -190,7 +191,7 @@ def load_arguments(self, _):
                    help='--secondary-locations extends/contracts an HSM pool to listed regions. The primary location '
                         'where the resource was originally created CANNOT be removed.')
         c.argument('user_identities', options_list=['--mi-user-assigned'],
-                   nargs='*', min_api='2023-07-01', is_preview=True,
+                   nargs='*', min_api='2023-07-01',
                    help="Enable user-assigned managed identities for managed HSM. "
                         "Accept space-separated list of identity resource IDs.")
 
@@ -634,7 +635,7 @@ def load_arguments(self, _):
         with self.argument_context('keyvault {} start'.format(command_group)) as c:
             c.argument('token', options_list=['--storage-container-SAS-token', '-t'],
                        help='The SAS token pointing to an Azure Blob storage container')
-            c.argument('use_managed_identity', arg_type=get_three_state_flag(), is_preview=True,
+            c.argument('use_managed_identity', arg_type=get_three_state_flag(),
                        help='If True, Managed HSM will use the configured user-assigned managed identity to '
                             'authenticate with Azure Storage. Otherwise, a `sas_token` has to be specified.')
 
@@ -682,10 +683,7 @@ def load_arguments(self, _):
                 type=get_json_object, validator=process_certificate_policy)
         c.extra('tags', tags_type)
 
-    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)). \
-        replace('.', '_').replace('-', '_')
-
-    if data_api_version != "2016_10_01":
+    if not is_azure_stack_profile(self):
         for cmd in ['list', 'list-deleted']:
             with self.argument_context('keyvault certificate {}'.format(cmd)) as c:
                 c.extra('include_pending', arg_type=get_three_state_flag(),

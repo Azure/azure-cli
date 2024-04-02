@@ -354,7 +354,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
                         public_network_access=None, accelerated_network=None, architecture=None,
                         data_access_auth_mode=None, gallery_image_reference_type=None, security_data_uri=None,
-                        upload_type=None, secure_vm_disk_encryption_set=None, performance_plus=None):
+                        upload_type=None, secure_vm_disk_encryption_set=None, performance_plus=None,
+                        optimized_for_frequent_attach=None):
 
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -525,6 +526,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             disk.supported_capabilities.architecture = architecture
     if data_access_auth_mode is not None:
         disk.data_access_auth_mode = data_access_auth_mode
+    if optimized_for_frequent_attach is not None:
+        disk.optimized_for_frequent_attach = optimized_for_frequent_attach
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -669,7 +672,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
-                    public_network_access=None, accelerated_network=None, architecture=None):
+                    public_network_access=None, accelerated_network=None, architecture=None,
+                    elastic_san_resource_id=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -685,13 +689,16 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
             option = getattr(DiskCreateOption, 'copy_start') if copy_start else getattr(DiskCreateOption, 'copy')
     elif for_upload:
         option = getattr(DiskCreateOption, 'upload')
+    elif elastic_san_resource_id:
+        option = getattr(DiskCreateOption, 'copy_from_san_snapshot')
     else:
         option = getattr(DiskCreateOption, 'empty')
 
     creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
                                  image_reference=None,
                                  source_resource_id=source_disk or source_snapshot,
-                                 storage_account_id=source_storage_account_id)
+                                 storage_account_id=source_storage_account_id,
+                                 elastic_san_resource_id=elastic_san_resource_id)
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
@@ -886,7 +893,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               disable_integrity_monitoring=None,  # Unused
               enable_integrity_monitoring=False,
               os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
-              disk_controller_type=None, disable_integrity_monitoring_autoupgrade=False):
+              disk_controller_type=None, disable_integrity_monitoring_autoupgrade=False, enable_proxy_agent=None,
+              proxy_agent_mode=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1107,7 +1115,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         enable_hibernation=enable_hibernation, v_cpus_available=v_cpus_available, v_cpus_per_core=v_cpus_per_core,
         os_disk_security_encryption_type=os_disk_security_encryption_type,
         os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
-        disk_controller_type=disk_controller_type)
+        disk_controller_type=disk_controller_type, enable_proxy_agent=enable_proxy_agent,
+        proxy_agent_mode=proxy_agent_mode)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1602,7 +1611,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
               dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
               enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
-              security_type=None, **kwargs):
+              security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
@@ -1714,6 +1723,19 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
         vm.security_profile.uefi_settings = UefiSettings(secure_boot_enabled=enable_secure_boot,
                                                          v_tpm_enabled=enable_vtpm)
+
+    if enable_proxy_agent is not None or proxy_agent_mode is not None:
+        ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
+        if vm.security_profile is None:
+            vm.security_profile = SecurityProfile()
+            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(enabled=enable_proxy_agent,
+                                                                          mode=proxy_agent_mode)
+        elif vm.security_profile.proxy_agent_settings is None:
+            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(enabled=enable_proxy_agent,
+                                                                          mode=proxy_agent_mode)
+        else:
+            vm.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
+            vm.security_profile.proxy_agent_settings.mode = proxy_agent_mode
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
@@ -2806,7 +2828,7 @@ def _get_vault_id_from_name(cli_ctx, client, vault_name):
 
 
 def get_vm_format_secret(cmd, secrets, certificate_store=None, keyvault=None, resource_group_name=None):
-    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1 import KeyVaultId
+    from azure.keyvault.secrets._shared import parse_key_vault_id
     import re
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     grouped_secrets = {}
@@ -2817,8 +2839,8 @@ def get_vm_format_secret(cmd, secrets, certificate_store=None, keyvault=None, re
 
     # group secrets by source vault
     for secret in merged_secrets:
-        parsed = KeyVaultId.parse_secret_id(secret)
-        match = re.search('://(.+?)\\.', parsed.vault)
+        parsed = parse_key_vault_id(secret)
+        match = re.search('://(.+?)\\.', parsed.vault_url)
         vault_name = match.group(1)
         if vault_name not in grouped_secrets:
             grouped_secrets[vault_name] = {
@@ -3149,7 +3171,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 os_disk_delete_option=None, data_disk_delete_option=None, regular_priority_count=None,
                 regular_priority_percentage=None, disk_controller_type=None, nat_rule_name=None,
                 enable_osimage_notification=None, max_surge=None, disable_integrity_monitoring_autoupgrade=False,
-                enable_hibernation=None):
+                enable_hibernation=None, enable_proxy_agent=None, proxy_agent_mode=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3454,7 +3476,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             os_disk_delete_option=os_disk_delete_option, regular_priority_count=regular_priority_count,
             regular_priority_percentage=regular_priority_percentage, disk_controller_type=disk_controller_type,
             enable_osimage_notification=enable_osimage_notification, max_surge=max_surge,
-            enable_hibernation=enable_hibernation)
+            enable_hibernation=enable_hibernation, enable_proxy_agent=enable_proxy_agent,
+            proxy_agent_mode=proxy_agent_mode)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3881,7 +3904,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
                 regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
                 enable_osimage_notification=None, custom_data=None, enable_hibernation=None,
-                security_type=None, **kwargs):
+                security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4014,6 +4037,20 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 'secureBootEnabled': enable_secure_boot,
                 'vTpmEnabled': enable_vtpm
             }}
+
+    if enable_proxy_agent is not None or proxy_agent_mode is not None:
+        SecurityProfile = cmd.get_models('SecurityProfile')
+        ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
+        if vmss.virtual_machine_profile.security_profile is None:
+            vmss.virtual_machine_profile.security_profile = SecurityProfile()
+            vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
+                enabled=enable_proxy_agent, mode=proxy_agent_mode)
+        elif vmss.virtual_machine_profile.security_profile.proxy_agent_settings is None:
+            vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
+                enabled=enable_proxy_agent, mode=proxy_agent_mode)
+        else:
+            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
+            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.mode = proxy_agent_mode
 
     if regular_priority_count is not None or regular_priority_percentage is not None:
         if vmss.orchestration_mode != 'Flexible':
@@ -4567,6 +4604,11 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
             gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
         else:
             gallery.soft_delete_policy = {'is_soft_delete_enabled': soft_delete}
+    else:
+        # This is a workaround to solve historical legacy issues,
+        # send None to the service will let service not modify this property.
+        # We can delete this logic when the service no longer checks AFEC in the future.
+        gallery.soft_delete_policy = None
 
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -5046,7 +5088,6 @@ def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_
 
 def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_query, timespan=None):
     """Executes a query against the Log Analytics workspace linked with a vm."""
-    from azure.loganalytics.models import QueryBody
     vm = get_vm(cmd, resource_group_name, vm_name)
     workspace = None
     extension_resources = vm.resources or []
@@ -5056,7 +5097,7 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
     if workspace is None:
         raise CLIError('Cannot find the corresponding log analytics workspace. '
                        'Please check the status of log analytics workpsace.')
-    return client.query(workspace, QueryBody(query=analytics_query, timespan=timespan))
+    return client.query_workspace(workspace, analytics_query, timespan=timespan)
 
 
 def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name, workspace_name):
@@ -5628,7 +5669,7 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
         for treat_as_failure in treat_deployment_as_failure:
             vmss.virtual_machine_profile.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = (treat_as_failure.lower() == 'true')
             index += 1
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update, resource_group_name, vmss_name, vmss)
 
 
 def list_vmss_applications(cmd, vmss_name, resource_group_name):

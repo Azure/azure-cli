@@ -12,6 +12,33 @@ type: group
 short-summary: Manage Azure Database for MySQL Flexible Servers.
 """
 
+helps['mysql flexible-server advanced-threat-protection-setting'] = """
+type: group
+short-summary: Manage the server's advanced threat protection setting.
+"""
+
+helps['mysql flexible-server advanced-threat-protection-setting show'] = """
+type: command
+short-summary: Get the server's advanced threat protection setting.
+examples:
+  - name: Get the advanced threat protection setting.
+    text: az mysql flexible-server advanced-threat-protection-setting show -g mygroup -n myserver
+"""
+
+helps['mysql flexible-server advanced-threat-protection-setting update'] = """
+type: command
+short-summary: Update the server's advanced threat protection setting.
+parameters:
+  - name: --state
+    type: string
+    short-summary: 'State of the advanced threat protection setting'
+examples:
+  - name: Enable the advanced threat protection setting.
+    text: az mysql flexible-server advanced-threat-protection-setting update -g mygroup -n myserver --state Enabled
+  - name: Disable the advanced threat protection setting.
+    text: az mysql flexible-server advanced-threat-protection-setting update -g mygroup -n myserver --state Disabled
+"""
+
 helps['mysql flexible-server create'] = """
 type: command
 short-summary: Create a MySQL flexible server.
@@ -198,7 +225,7 @@ long-summary: >
 
     To Migrate a Azure MySQL single server to Azure MySQL Flexible server. For more information for network configuration, see
 
-    - Migrate Azure Database for MySQL - Single Server to Flexible Server using Azure MySQL Import CLI
+    - Migrate Azure Database for MySQL - Single Server to Flexible Server using Azure Database for MySQL Import CLI
 
     https://learn.microsoft.com/en-us/azure/mysql/migrate/migrate-single-flexible-mysql-import-cli
 

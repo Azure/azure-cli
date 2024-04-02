@@ -96,7 +96,7 @@ from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdat
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
 from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
 from .aaz.latest.network.vnet_gateway import Create as _VnetGatewayCreate, Update as _VnetGatewayUpdate, \
-    DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect, Show as _VNetGatewayShow
+    DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect, Show as _VNetGatewayShow, List as _VNetGatewayList
 from .aaz.latest.network.vnet_gateway.aad import Assign as _VnetGatewayAadAssign
 from .aaz.latest.network.vnet_gateway.ipsec_policy import Add as _VnetGatewayIpsecPolicyAdd
 from .aaz.latest.network.vnet_gateway.nat_rule import Add as _VnetGatewayNatRuleAdd, List as _VnetGatewayNatRuleShow, \
@@ -136,10 +136,18 @@ from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetA
                              RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)
-RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
+RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "2.1": "2.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
 
 remove_basic_option_msg = "It's recommended to create with `%s`. " \
                           "Please be aware that Basic option will be removed in the future."
+
+subnet_disable_ple_msg = ("`--disable-private-endpoint-network-policies` will be deprecated in the future, if you wanna"
+                          "disable network policy for private endpoint, please use "
+                          "`--private-endpoint-network-policies Disabled` instead.")
+
+subnet_disable_pls_msg = ("`--disable-private-link-service-network-policies` will be deprecated in the future, if you "
+                          "wanna disable network policy for private link service, please use "
+                          "`--private-link-service-network-policies Disabled` instead.")
 
 
 # region Utility methods
@@ -176,6 +184,14 @@ def _get_default_value(balancer, property_name, option_name, return_name):
 # pylint: disable=too-many-statements
 def _is_v2_sku(sku):
     return 'v2' in sku
+
+
+def _add_aux_subscription(aux_subscriptions, added_resource_id):
+    if added_resource_id and is_valid_resource_id(added_resource_id):
+        res_parts = parse_resource_id(added_resource_id)
+        aux_sub = res_parts['subscription']
+        if aux_sub and aux_sub not in aux_subscriptions:
+            aux_subscriptions.append(aux_sub)
 
 
 def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
@@ -1896,14 +1912,14 @@ class WAFCreate(_WAFCreate):
         args_schema.rule_set_type = AAZStrArg(
             options=["--type"],
             help="Type of the web application firewall rule set.",
-            default="OWASP",
-            enum={"Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet", "OWASP": "OWASP"},
+            default="Microsoft_DefaultRuleSet",
+            enum={"Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet", "Microsoft_DefaultRuleSet": "Microsoft_DefaultRuleSet", "OWASP": "OWASP"},
         )
         args_schema.rule_set_version = AAZStrArg(
             options=["--version"],
             help="Version of the web application firewall rule set type. "
                  "0.1 and 1.0 are used for Microsoft_BotManagerRuleSet",
-            default="3.0",
+            default="2.1",
             enum=RULESET_VERSION
         )
         return args_schema
@@ -3937,6 +3953,13 @@ class PrivateEndpointConnectionUpdate(_PrivateEndpointConnectionUpdate):
 
 
 # region LoadBalancers
+def _get_lb_create_aux_subscriptions(public_ip_address, subnet):
+    aux_subscriptions = []
+    _add_aux_subscription(aux_subscriptions, public_ip_address)
+    _add_aux_subscription(aux_subscriptions, subnet)
+    return aux_subscriptions
+
+
 def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=None, tags=None,
                          backend_pool_name=None, frontend_ip_name='LoadBalancerFrontEnd',
                          private_ip_address=None, public_ip_address=None,
@@ -3952,6 +3975,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         build_load_balancer_resource, build_public_ip_resource, build_vnet_resource)
 
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    aux_subscriptions = _get_lb_create_aux_subscriptions(public_ip_address, subnet)
 
     if public_ip_address is None:
         logger.warning(
@@ -3960,7 +3984,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         )
 
     if sku.lower() == "basic":
-        logger.warning(remove_basic_option_msg, "--sku standard", "LB SKU")
+        logger.warning(remove_basic_option_msg, "--sku standard")
 
     tags = tags or {}
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
@@ -4016,7 +4040,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
 
     # deploy ARM template
     deployment_name = 'lb_deploy_' + random_string(32)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     deployment = Deployment(properties=properties)
@@ -5155,7 +5179,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         zone = pip_obj['zones'] if 'zones' in pip_obj else None
 
     if sku.lower() == "basic":
-        logger.warning(remove_basic_option_msg, "--sku standard", "Public IP SKU")
+        logger.warning(remove_basic_option_msg, "--sku standard")
 
     if not allocation_method:
         if sku and sku.lower() == 'standard':
@@ -5263,7 +5287,7 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        args.sku = {'name': 'Standard'}
+        args.sku = 'Standard'
         if has_value(args.edge_zone):
             args.type = 'EdgeZone'
         if has_value(args.ip_tags):
@@ -5547,8 +5571,7 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         # add ple/pls arguments
         args_schema.disable_private_endpoint_network_policies = AAZStrArg(
             options=["--disable-private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet.",
-            nullable=True,
+            help="Disable private endpoint network policies on the subnet. Please note that it will be replaced by `--private-endpoint-network-policies` soon.",
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
                 "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
@@ -5557,8 +5580,7 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         )
         args_schema.disable_private_link_service_network_policies = AAZStrArg(
             options=["--disable-private-link-service-network-policies"],
-            help="Disable private link service network policies on the subnet.",
-            nullable=True,
+            help="Disable private link service network policies on the subnet. Please note that it will be replaced by `--private-link-service-network-policies` soon.",
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
                 "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
@@ -5581,8 +5603,6 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         args_schema.policies._registered = False
         args_schema.endpoints._registered = False
         args_schema.delegated_services._registered = False
-        args_schema.private_endpoint_network_policies._registered = False
-        args_schema.private_link_service_network_policies._registered = False
         args_schema.address_prefix._registered = False
         return args_schema
 
@@ -5618,8 +5638,10 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         )
         # use string instead of bool
         if has_value(args.disable_private_endpoint_network_policies):
+            logger.warning(subnet_disable_ple_msg)
             args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
         if has_value(args.disable_private_link_service_network_policies):
+            logger.warning(subnet_disable_pls_msg)
             args.private_link_service_network_policies = args.disable_private_link_service_network_policies
 
 
@@ -5661,7 +5683,7 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         # add ple/pls arguments
         args_schema.disable_private_endpoint_network_policies = AAZStrArg(
             options=["--disable-private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet.",
+            help="Disable private endpoint network policies on the subnet. Please note that it will be replaced by `--private-endpoint-network-policies` soon.",
             nullable=True,
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
@@ -5671,7 +5693,7 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         )
         args_schema.disable_private_link_service_network_policies = AAZStrArg(
             options=["--disable-private-link-service-network-policies"],
-            help="Disable private link service network policies on the subnet.",
+            help="Disable private link service network policies on the subnet. Please note that it will be replaced by `--private-link-service-network-policies` soon.",
             nullable=True,
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
@@ -5684,8 +5706,6 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         args_schema.delegated_services._registered = False
         args_schema.endpoints._registered = False
         args_schema.policies._registered = False
-        args_schema.private_endpoint_network_policies._registered = False
-        args_schema.private_link_service_network_policies._registered = False
         # handle detach logic
         args_schema.nat_gateway._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
@@ -5733,8 +5753,10 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         )
         # use string instead of bool
         if has_value(args.disable_private_endpoint_network_policies):
+            logger.warning(subnet_disable_ple_msg)
             args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
         if has_value(args.disable_private_link_service_network_policies):
+            logger.warning(subnet_disable_pls_msg)
             args.private_link_service_network_policies = args.disable_private_link_service_network_policies
 
     def post_instance_update(self, instance):
@@ -6079,6 +6101,25 @@ class VNetGatewayShow(_VNetGatewayShow):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
 
         return result
+
+
+class VNetGatewayList(_VNetGatewayList):
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+
+        # resolve flatten conflict
+        # when the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        for item in self.ctx.vars.instance.value:
+            props = item.properties
+            if has_value(props.nat_rules):
+                for rule in props.nat_rules:
+                    if has_value(rule.properties) and has_value(rule.properties.type):
+                        rule.properties.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+
+        return result, next_link
 
 
 def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
