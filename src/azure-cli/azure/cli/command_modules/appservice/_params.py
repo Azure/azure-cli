@@ -149,10 +149,10 @@ subscription than the app service environment, please use the resource ID for --
                                                                  scopes=['webapp', 'cupertino']))
         c.argument('startup_file', help="Linux only. The web's startup file")
         c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from container registry, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
-        c.argument('container_registry_url', options_list=['--container-registry-url'], help='the container registry server url')
+        c.argument('container_registry_url', options_list=['--container-registry-url'], help='The container registry server url')
         c.argument('container_image_name', options_list=['--container-image-name', '-c'],
-                   help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
-        c.argument('container_registry_user', options_list=['--container-registry-user', '-s', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')], help='the container registry server username')
+                   help='The container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
+        c.argument('container_registry_user', options_list=['--container-registry-user', '-s', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')], help='The container registry server username')
         c.argument('container_registry_password', options_list=['--container-registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--container-registry-password')], help='The container registry server password. Required for private registries.')
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
@@ -384,16 +384,16 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp config container') as c:
         c.argument('container_registry_url',
                    options_list=['--container-registry-url', '-r', c.deprecate(target='--docker-registry-server-url', redirect='--container-registry-url')],
-                   help='the container registry server url')
+                   help='The container registry server url')
         c.argument('container_image_name',
                    options_list=['--container-image-name', '-c', '-i', c.deprecate(target='--docker-custom-image-name', redirect='--container-image-name')],
-                   help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
+                   help='The container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
         c.argument('container_registry_user',
                    options_list=['--container-registry-user', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')],
-                   help='the container registry server username')
+                   help='The container registry server username')
         c.argument('container_registry_password',
                    options_list=['--container-registry-password', '-p', c.deprecate(target='--docker-registry-server-password', redirect='--container-registry-password')],
-                   help='the container registry server password')
+                   help='The container registry server password')
         c.ignore('min_replicas')
         c.ignore('max_replicas')
 
@@ -461,10 +461,10 @@ subscription than the app service environment, please use the resource ID for --
                    help="source slot to clone configurations from. Use web app's name to refer to the production slot")
         c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
                    help='Container image name, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
-        c.argument('container_registry_url', options_list=['--container-registry-url', '-r'], help='the container registry server url')
+        c.argument('container_registry_url', options_list=['--container-registry-url', '-r'], help='The container registry server url')
         c.argument('container_image_name', options_list=['--container-image-name', '-c'],
-                   help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
-        c.argument('container_registry_user', options_list=['--container-registry-user', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')], help='the container registry server username')
+                   help='The container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
+        c.argument('container_registry_user', options_list=['--container-registry-user', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')], help='The container registry server username')
         c.argument('container_registry_password', options_list=['--container-registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--container-registry-password')],
                    help='The container registry server password')
     with self.argument_context('webapp deployment slot swap') as c:

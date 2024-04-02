@@ -225,11 +225,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                                      multicontainer_config_type, multicontainer_config_file):
             if deployment_container_image_name:
                 raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
-                                         'and multicontainer-config-file FILE, '
+                                         'and --multicontainer-config-file FILE, '
                                          'and only specify one out of --runtime, '
                                          '--deployment-container-image-name and --multicontainer-config-type')
             raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
-                                     'and multicontainer-config-file FILE, '
+                                     'and --multicontainer-config-file FILE, '
                                      'and only specify one out of --runtime, '
                                      '--container-image-name and --multicontainer-config-type')
         if startup_file:
