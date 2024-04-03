@@ -8279,7 +8279,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
     def test_aks_create_with_azurekeyvaultkms_public_key_vault(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         kv_name = self.create_random_name('cliakstestkv', 16)
@@ -8366,7 +8366,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
     def test_aks_update_with_azurekeyvaultkms_public_key_vault(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         kv_name = self.create_random_name('cliakstestkv', 16)
@@ -8440,7 +8440,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap', preserve_default_location=True)
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus', preserve_default_location=True)
     def test_aks_create_with_azurekeyvaultkms_private_key_vault(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         kv_name = self.create_random_name('cliakstestkv', 16)
