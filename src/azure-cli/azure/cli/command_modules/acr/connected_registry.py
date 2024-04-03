@@ -25,6 +25,7 @@ from ._utils import (
 )
 from .custom import acr_update_custom
 
+
 class ConnectedRegistryModes(Enum):
     READONLY = 'readonly'
     READWRITE = 'readwrite'
@@ -146,6 +147,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
 
 def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
                                   client,
+                                  instance,
                                   registry_name,
                                   connected_registry_name,
                                   add_client_token_list=None,
@@ -164,7 +166,7 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
     current_connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
 
-    # Add or remove from the current client token id list
+    # create add client token set and remove client token set
     if add_client_token_list is not None:
         for i, client_token_name in enumerate(add_client_token_list):
             add_client_token_list[i] = build_token_id(
@@ -179,61 +181,76 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
         remove_client_token_set = set(remove_client_token_list)
     else:
         remove_client_token_set = set()
-
+    # check for interesaction between add and remove.
     duplicate_client_token = set.intersection(add_client_token_set, remove_client_token_set)
     if duplicate_client_token:
         errors = sorted(map(lambda action: action[action.rfind('/') + 1:], duplicate_client_token))
         raise CLIError(
             'Update ambiguity. Duplicate client token ids were provided with ' +
             '--add-client-tokens and --remove-client-tokens arguments.\n{}'.format(errors))
-
+    # get updated client token list
     current_client_token_set = set(current_connected_registry.client_token_ids) \
         if current_connected_registry.client_token_ids else set()
     client_token_set = current_client_token_set.union(add_client_token_set).difference(remove_client_token_set)
-
     client_token_list = list(client_token_set) if client_token_set != current_client_token_set else None
+    # update client token properties
+    instance.client_token_ids = client_token_list
 
-    # Add or remove from the current notifications list
+    # create add notifications set and remove notifications set
     add_notifications_set = set(list(add_notifications)) \
         if add_notifications else set()
-
     remove_notifications_set = set(list(remove_notifications)) \
         if remove_notifications else set()
-
+    # check for interesaction between add and remove.
     duplicate_notifications = set.intersection(add_notifications_set, remove_notifications_set)
     if duplicate_notifications:
         errors = sorted(duplicate_notifications)
         raise ArgumentUsageError(
             'Update ambiguity. Duplicate notifications list were provided with ' +
             '--add-notifications and --remove-notifications arguments.\n{}'.format(errors))
-
+    # get updated notifications list
     current_notifications_set = set(current_connected_registry.notifications_list) \
         if current_connected_registry.notifications_list else set()
     notifications_set = current_notifications_set.union(add_notifications_set).difference(remove_notifications_set)
-
     notifications_list = list(notifications_set) if notifications_set != current_notifications_set else None
+    # update notifications properties
+    instance.notifications_list = notifications_list
 
-    ConnectedRegistryUpdateParameters, SyncUpdateProperties, LoggingProperties = cmd.get_models(
-        'ConnectedRegistryUpdateParameters', 'SyncUpdateProperties', 'LoggingProperties')
-    connected_registry_update_parameters = ConnectedRegistryUpdateParameters(
-        sync_properties=SyncUpdateProperties(
+    # update sync properties and logging properties
+    SyncUpdateProperties, LoggingProperties = cmd.get_models('SyncUpdateProperties', 'LoggingProperties')
+    if bool(sync_schedule) or bool(sync_window) or bool(sync_message_ttl):
+        instance.sync_properties = SyncUpdateProperties(
             schedule=sync_schedule,
             message_ttl=sync_message_ttl,
             sync_window=sync_window
-        ),
-        logging=LoggingProperties(
+        )
+    if bool(log_level) or bool(sync_audit_logs_enabled):
+        instance.logging = LoggingProperties(
             log_level=log_level,
             audit_log_status=sync_audit_logs_enabled
-        ),
-        client_token_ids=client_token_list,
-        notifications_list=notifications_list
-    )
+        )
+    return instance
 
+
+def acr_connected_registry_update_get(cmd):
+    """Returns an empty RegistryUpdateParameters object.
+    """
+    ConnectedRegistryUpdateParameters = cmd.get_models('ConnectedRegistryUpdateParameters')
+    return ConnectedRegistryUpdateParameters()
+
+
+def acr_connected_registry_update_set(cmd,
+                                      client,
+                                      registry_name,
+                                      connected_registry_name,
+                                      resource_group_name=None,
+                                      parameters=None):
+    _, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
     try:
         return client.begin_update(resource_group_name=resource_group_name,
                                    registry_name=registry_name,
                                    connected_registry_name=connected_registry_name,
-                                   connected_registry_update_parameters=connected_registry_update_parameters)
+                                   connected_registry_update_parameters=parameters)
     except ValidationError as e:
         raise CLIError(e)
 

@@ -432,6 +432,12 @@ def load_command_table(self, _):
     with self.command_group('acr connected-registry', acr_connected_registry_util, is_preview=True) as g:
         g.command('create', 'acr_connected_registry_create')
         g.command('update', 'acr_connected_registry_update')
+        g.generic_update_command('update',
+                            getter_name='acr_connected_registry_update_get',
+                            setter_name='acr_connected_registry_update_set',
+                            custom_func_name='acr_connected_registry_update',
+                            custom_func_type=acr_connected_registry_util,
+                            client_factory=cf_acr_connected_registries)
         g.command('delete', 'acr_connected_registry_delete')
         g.show_command('show', 'acr_connected_registry_show')
         g.command('deactivate', 'acr_connected_registry_deactivate')
