@@ -428,7 +428,6 @@ def check_language_runtime(cmd, resource_group_name, name):
                 runtime_helper.resolve(runtime, runtime_version, functions_version, is_linux)
             else:
                 location = app.location
-                logger.warning("Checking runtime stack for function app '%s' in location '%s'", name, location)
                 runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime, runtime_version)
                 runtime_helper.resolve(runtime, runtime_version)
         except ValidationError as e:
@@ -1862,8 +1861,8 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
             functionapp["properties"]["functionAppConfig"]["runtime"] = {}
 
     runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, True)
+    functionapp_version = runtime_info['functionapp_version']
     runtime = runtime_info['app_runtime']
-
     runtimes = [r for r in FLEX_RUNTIMES if r['runtime'] == runtime]
     lang = next((r for r in runtimes if r['version'] == runtime_version), None)
     if lang is None:
@@ -1873,11 +1872,8 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
                               .format(runtime_version, runtime, supported_versions))
     
     location = functionapp["location"]
-    logger.warning("location: %s", location)
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime, runtime_version)
     matched_runtime = runtime_helper.resolve(runtime, runtime_version)
-    logger.warning("matched_runtime: %s", matched_runtime)
-    logger.warning("matched_runtime.version: %s", matched_runtime.version)
     version = matched_runtime.version
 
     functionapp["properties"]["functionAppConfig"]["runtime"]["version"] = version
@@ -4030,24 +4026,14 @@ class _FlexFunctionAppStackRuntimeHelper:
 
     @property
     def stacks(self):
-        logger.warning("Getting function app stacks for runtime %s", self._runtime)
         self._load_stacks()
         return self._stacks
 
     def get_flex_raw_function_app_stacks(self, cmd, location, runtime):
         stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?api-version=2020-10-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}'
         request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + stacks_api_url.format(location, runtime)
-        logger.warning("Request URL (Actual): %s", request_url)
-        
-        logger.warning("Getting function app stacks for runtime %s", runtime)
-        logger.warning("Request URL: %s", request_url)
-        
         response = send_raw_request(cmd.cli_ctx, "GET", request_url)
         return response.json()['value']
-
-        # temporary use of constant since the changes are not available yet
-        # from ._constants import SAMPLE
-        # return json.loads(SAMPLE)['value']
 
     def _parse_raw_stacks(self, stacks):
         runtime_to_version = {}
@@ -4096,13 +4082,10 @@ class _FlexFunctionAppStackRuntimeHelper:
         if self._stacks:
             return
         stacks = self.get_flex_raw_function_app_stacks(self._cmd, self._location, self._runtime)
-        logger.warning("\r\r\r\n\n\n\n Raw stacks: %s :EndOfMessage \r\r\r\r\n\n\n\n", stacks)
         self._parse_raw_stacks(stacks)
 
     def resolve(self, runtime, version=None):
         runtimes = self.stacks
-        logger.warning("Runtimes: %s", runtimes)
-        logger.debug("Runtimes: %s", runtimes)
         if not runtimes:
             raise ValidationError("Runtime {} not supported for function apps on the Flex Consumption plan".format(runtime))
         if version is None:
@@ -4696,10 +4679,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     elif flexconsumption_location:
         locations = list_flexconsumption_locations(cmd)
-        logger.debug("Flex consumption locations: %s", locations)
         location = next((loc for loc in locations if loc['name'].lower() == flexconsumption_location.lower()), None)
-        #if location is None:
-        #    raise ValidationError("Location is invalid. Use: az functionapp list-flexconsumption-locations")
+        if location is None:
+            raise ValidationError("Location is invalid. Use: az functionapp list-flexconsumption-locations")
         is_linux = True
         # Following the same plan name format as the backend
         plan_name = "{}FlexPlan".format(name)
@@ -4794,7 +4776,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if flexconsumption_location:
         runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, flexconsumption_location, runtime, runtime_version)
         matched_runtime = runtime_helper.resolve(runtime, runtime_version)
-        logger.warning("Matched runtime: %s", json.dumps(matched_runtime.__dict__))
     else:
         runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
         matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
@@ -4988,7 +4969,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.net_framework_version = None
         functionapp_def.reserved = None
         functionapp_def.is_xenon = None
-        
         functionapp_def.enable_additional_properties_sending()
         existing_properties = functionapp_def.serialize()["properties"]
         functionapp_def.additional_properties["properties"] = existing_properties
