@@ -4008,7 +4008,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
 class _FlexFunctionAppStackRuntimeHelper:
     class Runtime:
-        def __init__(self, name, version, app_insights=False, default=False, sku=None, end_of_life_date=None, runtime_info=None):
+        def __init__(self, name, version, app_insights=False, default=False, sku=None, end_of_life_date=None, runtime_info=None, github_actions_properties=None):
             self.name = name
             self.version = version
             self.app_insights = app_insights
@@ -4016,6 +4016,12 @@ class _FlexFunctionAppStackRuntimeHelper:
             self.sku = sku
             self.end_of_life_date = end_of_life_date
             self.runtime_info = runtime_info
+            self.github_actions_properties = github_actions_properties
+    
+    class GithubActionsProperties:
+        def __init__(self, is_supported, supported_version):
+            self.is_supported = is_supported
+            self.supported_version = supported_version
 
     def __init__(self, cmd, location, runtime, runtime_version=None):
         self._cmd = cmd
@@ -4045,6 +4051,7 @@ class _FlexFunctionAppStackRuntimeHelper:
                     runtime_name = (runtime_settings['appSettingsDictionary']['FUNCTIONS_WORKER_RUNTIME'] or
                                     runtime['name'])
                     skus = runtime_settings['Sku']
+                    github_actions_settings = runtime_settings['gitHubActionSettings']
                     if skus is None:
                         continue
                     
@@ -4053,12 +4060,19 @@ class _FlexFunctionAppStackRuntimeHelper:
                             continue
                         
                         function_app_config = sku['functionAppConfigProperties']
+                        
+                        github_actions_properties = {
+                            'is_supported': github_actions_settings.get('isSupported', False),
+                            'supported_version': github_actions_settings['supportedVersion'],
+                        }
+                        
                         runtime_version_properties = {
                             'isDefault': runtime_settings.get('isDefault', False),
                             'sku': sku,
                             'applicationInsights': runtime_settings['appInsightsSettings']['isSupported'],
                             'endOfLifeDate': runtime_settings['endOfLifeDate'],
-                            'runtime_info': function_app_config
+                            'runtime_info': function_app_config,
+                            'github_actions_properties': self.GithubActionsProperties(**github_actions_properties)
                         }
 
                         runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
@@ -4076,7 +4090,8 @@ class _FlexFunctionAppStackRuntimeHelper:
                             default=version_properties['isDefault'],
                             sku=version_properties['sku'],
                             end_of_life_date=version_properties['endOfLifeDate'],
-                            runtime_info=version_properties['runtime_info'])
+                            runtime_info=version_properties['runtime_info'],
+                            github_actions_properties=version_properties['github_actions_properties'])
 
     def _load_stacks(self):
         if self._stacks:
@@ -7866,6 +7881,7 @@ def _get_functionapp_runtime_version(cmd, location, name, resource_group, runtim
             error_message += e.error_msg[index:].lower()
             raise ValidationError(error_message)
         raise e
+    
     if not matched_runtime:
         return None
     if matched_runtime.github_actions_properties:
