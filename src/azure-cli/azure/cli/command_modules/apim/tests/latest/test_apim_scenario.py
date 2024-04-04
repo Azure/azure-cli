@@ -193,6 +193,11 @@ class ApimScenarioTest(ScenarioTest):
             self.check('serviceUrl', '{service_url}')
         ])
 
+        # # export api
+        # self.cmd(
+        #     'apim api export -g "{rg}" --service-name "{service_name}" --api-id "{api_id2}" --format "OpenApiJsonUrl"',
+        #     checks=[self.check('name', "{api_id2}")])
+
         # update api
         self.cmd(
             'apim api update -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --description "{description}" --protocols {protocol} --subscription-key-header-name "{subscription_key_header_name}" --subscription-key-query-param-name "{subscription_key_query_param_name}"',
@@ -567,6 +572,72 @@ class ApimScenarioTest(ScenarioTest):
         final_count = len(self.cmd('apim list -g {rg}').get_output_in_json())
         self.assertEqual(final_count, service_count - 1)
 
+
+    @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
+    @StorageAccountPreparer(parameter_name='storage_account_for_backup')
+    @AllowLargeResponse()
+    def test_apim_export_api(self, resource_group, resource_group_location):
+        service_name = self.create_random_name('cli-test-apim-export-api-', 50)
+
+        service_name = self.create_random_name('cli-test-apim-service-', 35)
+        resource_group = self.create_random_name('cli-test-apim-service-rg', 35)
+
+        # try to use the injected location, but if the location is not known
+        # fall back to west us, otherwise we can't validate since the sdk returns displayName
+        if resource_group_location not in KNOWN_LOCS.keys():
+            resource_group_location = 'westus'
+
+        self.kwargs.update({
+            'service_name': service_name,
+            'rg': resource_group,
+            'rg_loc': resource_group_location,
+            'rg_loc_displayName': KNOWN_LOCS.get(resource_group_location),
+            'notification_sender_email': 'notifications@contoso.com',
+            'publisher_email': 'publisher@contoso.com',
+            'publisher_name': 'Contoso',
+            'sku_name': 'Consumption',
+            'skucapacity': 1,
+            'enable_managed_identity': True,
+            'tag': "foo=boo",
+            'path': 'test',
+            'api_id': '48242ec7f53745de9cbb800757a4204a',
+            'api_version': 'v1',
+            'specification_url': 'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.json',
+            'specification_format': 'OpenApi',
+            'vs_id': 'MyVSId',
+            'subscription_key_header_name': 'header',
+            'subscription_key_query_param_name': 'query'
+        })
+
+        self.cmd('group create -l {rg_loc} -n {rg}')
+
+        self.cmd('apim check-name -n {service_name} -o json',
+                 checks=[self.check('nameAvailable', True)])
+
+        self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-managed-identity {enable_managed_identity}',
+                 checks=[self.check('name', '{service_name}'),
+                         self.check('location', '{rg_loc_displayName}'),
+                         self.check('sku.name', '{sku_name}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('identity.type', 'SystemAssigned'),
+                         self.check('publisherName', '{publisher_name}'),
+                         self.check('publisherEmail', '{publisher_email}')])
+
+        # import api
+        self.cmd(
+            'apim api import -g "{rg}" --service-name "{service_name}" --path "{path}" --api-id "{api_id}" --specification-url "{specification_url}" --specification-format "{specification_format}" --display-name "Swagger Petstore"',
+            checks=[self.check('displayName', 'Swagger Petstore'),
+                    self.check('path', '{path}')])
+
+        # export api
+        self.cmd(
+            'apim api export -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --export-format "OpenApiJsonUrl"',
+            checks=[self.check('name', "{api_id}")])
+
+        # service delete command
+        self.cmd('apim delete -g {rg} -n {service_name} -y')
+
+
     @ResourceGroupPreparer(name_prefix='cli_test_apim_deletedservice-', parameter_name_for_location='resource_group_location')
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
     @AllowLargeResponse()
@@ -606,10 +677,6 @@ class ApimScenarioTest(ScenarioTest):
                          self.check('identity.type', 'SystemAssigned'),
                          self.check('publisherName', '{publisher_name}'),
                          self.check('publisherEmail', '{publisher_email}')])
-
-        self.cmd('apim check-name -n {service_name}',
-            checks=[self.check('nameAvailable', True),
-                    self.check('reason', 'Valid')])    
 
         # wait for creation
         self.cmd('apim wait -g {rg} -n {service_name} --created', checks=[self.is_empty()])

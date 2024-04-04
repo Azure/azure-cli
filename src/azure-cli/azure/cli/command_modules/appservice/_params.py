@@ -38,6 +38,7 @@ ASE_LOADBALANCER_MODES = ['Internal', 'External']
 ASE_KINDS = ['ASEv2', 'ASEv3']
 ASE_OS_PREFERENCE_TYPES = ['Windows', 'Linux']
 PUBLIC_NETWORK_ACCESS_MODES = ['Enabled', 'Disabled']
+BASIC_AUTH_TYPES = ['Enabled', 'Disabled']
 DAPR_LOG_LEVELS = ['debug', 'error', 'info', 'warn']
 
 
@@ -121,7 +122,7 @@ subscription than the app service environment, please use the resource ID for --
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
-        c.argument('hyper_v', action='store_true', required=False, help='Host web app on Windows container')
+        c.argument('hyper_v', action='store_true', required=False, help='Host Windows Container Web App on Hyper-V worker.')
         c.argument('per_site_scaling', action='store_true', required=False, help='Enable per-app scaling at the '
                                                                                  'App Service plan level to allow for '
                                                                                  'scaling an app independently from '
@@ -147,8 +148,12 @@ subscription than the app service environment, please use the resource ID for --
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
                                                                  scopes=['webapp', 'cupertino']))
         c.argument('startup_file', help="Linux only. The web's startup file")
-        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-s'], help='the container registry server username')
-        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'], help='The container registry server password. Required for private registries.')
+        c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from container registry, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
+        c.argument('container_registry_url', options_list=['--container-registry-url'], help='The container registry server url')
+        c.argument('container_image_name', options_list=['--container-image-name', '-c'],
+                   help='The container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
+        c.argument('container_registry_user', options_list=['--container-registry-user', '-s', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')], help='The container registry server username')
+        c.argument('container_registry_password', options_list=['--container-registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--container-registry-password')], help='The container registry server password. Required for private registries.')
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
         c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\"."
@@ -161,6 +166,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
         c.argument('public_network_access', help="Enable or disable public access to the web app", arg_type=get_enum_type(PUBLIC_NETWORK_ACCESS_MODES))
         c.argument('acr_use_identity', action='store_true', help="Enable or disable pull image from acr use managed identity")
+        c.argument('basic_auth', help='Enable or disable basic auth.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
         c.ignore('language')
         c.ignore('using_webapp_up')
 
@@ -214,6 +220,7 @@ subscription than the app service environment, please use the resource ID for --
                    arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
         c.argument('minimum_elastic_instance_count', options_list=["--minimum-elastic-instance-count", "-i"], type=int, is_preview=True, help="Minimum number of instances. App must be in an elastic scale App Service Plan.")
         c.argument('prewarmed_instance_count', options_list=["--prewarmed-instance-count", "-w"], type=int, is_preview=True, help="Number of preWarmed instances. App must be in an elastic scale App Service Plan.")
+        c.argument('basic_auth', help='Enable or disable basic auth.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
@@ -231,11 +238,6 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
     with self.argument_context('webapp webjob triggered list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
-
-    for scope in ['webapp', 'logicapp']:
-        with self.argument_context(scope + ' create') as c:
-            c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
-                       help='Container image name from Docker Hub, e.g. publisher/image-name:tag')
 
     for scope in ['webapp', 'functionapp', 'logicapp']:
         with self.argument_context(scope + ' create') as c:
@@ -384,14 +386,18 @@ subscription than the app service environment, please use the resource ID for --
                        arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('webapp config container') as c:
-        c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
-                   help='the container registry server url')
-        c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'],
-                   help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
-        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'],
-                   help='the container registry server username')
-        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'],
-                   help='the container registry server password')
+        c.argument('container_registry_url',
+                   options_list=['--container-registry-url', '-r', c.deprecate(target='--docker-registry-server-url', redirect='--container-registry-url')],
+                   help='The container registry server url')
+        c.argument('container_image_name',
+                   options_list=['--container-image-name', '-c', '-i', c.deprecate(target='--docker-custom-image-name', redirect='--container-image-name')],
+                   help='The container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
+        c.argument('container_registry_user',
+                   options_list=['--container-registry-user', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')],
+                   help='The container registry server username')
+        c.argument('container_registry_password',
+                   options_list=['--container-registry-password', '-p', c.deprecate(target='--docker-registry-server-password', redirect='--container-registry-password')],
+                   help='The container registry server password')
         c.ignore('min_replicas')
         c.ignore('max_replicas')
 
@@ -418,7 +424,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('memory', help="Required momory from 1.0 to 4.0 ending with ""Gi"" e.g. 1.0Gi, ", is_preview=True)
 
     with self.argument_context('functionapp runtime config') as c:
-        c.argument('runtime_version', help='The version of the functions runtime stack. Use "az functionapp list-runtimes" to check supported runtimes and versions', is_preview=True)
+        c.argument('runtime_version', help='The version of the functions runtime stack. Use "az functionapp list-flexconsumption-runtimes" to check supported runtimes and versions', is_preview=True)
 
     with self.argument_context('functionapp scale config') as c:
         c.argument('maximum_instance_count', type=int, help="The maximum number of instances.", is_preview=True)
@@ -458,10 +464,13 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('configuration_source',
                    help="source slot to clone configurations from. Use web app's name to refer to the production slot")
         c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
-                   help='Container image name, e.g. publisher/image-name:tag')
-        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'],
+                   help='Container image name, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
+        c.argument('container_registry_url', options_list=['--container-registry-url', '-r'], help='The container registry server url')
+        c.argument('container_image_name', options_list=['--container-image-name', '-c'],
+                   help='The container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
+        c.argument('container_registry_user', options_list=['--container-registry-user', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')], help='The container registry server username')
+        c.argument('container_registry_password', options_list=['--container-registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--container-registry-password')],
                    help='The container registry server password')
-        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
     with self.argument_context('webapp deployment slot swap') as c:
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
@@ -711,6 +720,7 @@ subscription than the app service environment, please use the resource ID for --
                    default=False, action='store_true')
         c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
         c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku [I1v2, I2v2, I3v2]')
+        c.argument('basic_auth', help='Enable or disable basic auth.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
         c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
                    arg_type=get_three_state_flag())
 
@@ -796,13 +806,17 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('deployment_storage_name', options_list=['--deployment-storage-name', '--dsn'], help="The deployment storage account name.", is_preview=True)
         c.argument('deployment_storage_container_name', options_list=['--deployment-storage-container-name', '--dscn'], help="The deployment storage account container name.", is_preview=True)
         c.argument('deployment_storage_auth_type', options_list=['--deployment-storage-auth-type', '--dsat'], arg_type=get_enum_type(DEPLOYMENT_STORAGE_AUTH_TYPES), help="The deployment storage account authentication type.", is_preview=True)
-        c.argument('deployment_storage_auth_value', options_list=['--deployment-storage-auth-value', '--dsav'], help="The deployment storage account authentication value. This is only applicable for the user-assigned managed identity authentication type.", is_preview=True)
+        c.argument('deployment_storage_auth_value', options_list=['--deployment-storage-auth-value', '--dsav'], help="The deployment storage account authentication value. For the user-assigned managed identity authentication type, "
+                   "this should be the user assigned identity resource id. For the storage account connection string authentication type, this should be the name of the app setting that will contain the storage account connection "
+                   "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.", is_preview=True)
 
     with self.argument_context('functionapp deployment config set') as c:
         c.argument('deployment_storage_name', options_list=['--deployment-storage-name', '--dsn'], help="The deployment storage account name.", is_preview=True)
         c.argument('deployment_storage_container_name', options_list=['--deployment-storage-container-name', '--dscn'], help="The deployment storage account container name.", is_preview=True)
         c.argument('deployment_storage_auth_type', options_list=['--deployment-storage-auth-type', '--dsat'], arg_type=get_enum_type(DEPLOYMENT_STORAGE_AUTH_TYPES), help="The deployment storage account authentication type.", is_preview=True)
-        c.argument('deployment_storage_auth_value', options_list=['--deployment-storage-auth-value', '--dsav'], help="The deployment storage account authentication value. This is only applicable for the user-assigned managed identity authentication type.", is_preview=True)
+        c.argument('deployment_storage_auth_value', options_list=['--deployment-storage-auth-value', '--dsav'], help="The deployment storage account authentication value. For the user-assigned managed identity authentication type, "
+                   "this should be the user assigned identity resource id. For the storage account connection string authentication type, this should be the name of the app setting that will contain the storage account connection "
+                   "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.", is_preview=True)
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
@@ -867,6 +881,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('name', arg_type=logicapp_name_arg_type)
 
     with self.argument_context('logicapp create') as c:
+        c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from container registry, e.g. publisher/image-name:tag')
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-d'], help='The container registry server username.')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'],
                    help='The container registry server password. Required for private registries.')

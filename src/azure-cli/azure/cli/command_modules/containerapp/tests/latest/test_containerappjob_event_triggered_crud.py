@@ -75,6 +75,55 @@ class ContainerAppJobsEventTriggeredCRUDOperationsTest(ScenarioTest):
             JMESPathCheck('properties.template.containers[0].resources.memory', "1Gi"),
         ])
 
+        # wait for 60s for the job to be provisioned
+        jobProvisioning = True
+        timeout = time.time() + 60*1   # 1 minutes from now
+        while(jobProvisioning):
+            jobProvisioning = self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job)).get_output_in_json()['properties']['provisioningState'] != "Succeeded"
+            if(time.time() > timeout):
+                break
+
+        # update scale rules for event triggered job
+        # scenario 1: update existing scale rule
+        self.cmd("az containerapp job update --resource-group {} --name {} --scale-rule-name 'queue' --scale-rule-type 'azure-queue' --scale-rule-metadata 'accountName=containerappextension' 'queueName=testeventdrivenjobs' 'queueLength=2' 'connectionFromEnv=AZURE_STORAGE_CONNECTION_STRING' --scale-rule-auth 'connection=connection-string-secret'".format(resource_group, job))
+
+        # verify the updated Container App Job resource
+        self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job), checks=[
+            JMESPathCheck('name', job),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].metadata.queueLength', "2"),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.pollingInterval', 60),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 0),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 9),
+        ])
+
+        # check length of scale rules
+        scale_rules_length = len(self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job)).get_output_in_json()['properties']['configuration']['eventTriggerConfig']['scale']['rules'])
+        self.assertTrue(scale_rules_length == 1)
+
+        # wait for 60s for the job to be provisioned
+        jobProvisioning = True
+        timeout = time.time() + 60*1   # 1 minutes from now
+        while(jobProvisioning):
+            jobProvisioning = self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job)).get_output_in_json()['properties']['provisioningState'] != "Succeeded"
+            if(time.time() > timeout):
+                break
+
+        # scenario 2: add new scale rule
+        self.cmd("az containerapp job update --resource-group {} --name {} --min-executions 1 --max-executions 5 --polling-interval 30 --scale-rule-name 'queue2' --scale-rule-type 'azure-queue' --scale-rule-metadata 'accountName=containerappextension' 'queueName=testeventdrivenjobs' 'queueLength=3' 'connectionFromEnv=AZURE_STORAGE_CONNECTION_STRING' --scale-rule-auth 'connection=connection-string-secret'".format(resource_group, job))
+
+        # verify the updated Container App Job resource
+        self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job), checks=[
+            JMESPathCheck('name', job),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[1].metadata.queueLength', "3"),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.pollingInterval', 30),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 1),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 5),
+        ])
+
+        # check length of scale rules
+        scale_rules_length = len(self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job)).get_output_in_json()['properties']['configuration']['eventTriggerConfig']['scale']['rules'])
+        self.assertTrue(scale_rules_length == 2)
+
         # delete the Container App Job resource
         self.cmd("az containerapp job delete --resource-group {} --name {} --yes".format(resource_group, job))
 

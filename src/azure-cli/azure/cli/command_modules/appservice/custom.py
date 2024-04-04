@@ -23,7 +23,8 @@ from functools import reduce
 import invoke
 from nacl import encoding, public
 
-import OpenSSL.crypto
+from cryptography.hazmat.primitives.serialization import pkcs12
+from cryptography.hazmat.primitives import hashes
 from fabric import Connection
 
 from knack.prompting import prompt_pass, NoTTYException, prompt_y_n
@@ -83,9 +84,9 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
-                         VERSION_2022_09_01, FLEX_RUNTIMES, FLEX_SUBNET_DELEGATION,
+                         VERSION_2022_09_01, FLEX_RUNTIMES, FLEX_SUBNET_DELEGATION, DEFAULT_INSTANCE_SIZE,
                          RUNTIME_STATUS_TEXT_MAP, LANGUAGE_EOL_DEPRECATION_NOTICES,
-                         STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID)
+                         STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID, DEFAULT_MAXIMUM_INSTANCE_COUNT)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -106,11 +107,12 @@ logger = get_logger(__name__)
 
 def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements,too-many-branches
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
-                  deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
+                  deployment_local_git=None, container_registry_password=None, container_registry_user=None,
+                  container_registry_url=None, container_image_name=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
-                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, public_network_access=None,
-                  acr_use_identity=False):
+                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
+                  public_network_access=None, acr_use_identity=False, basic_auth=""):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -118,8 +120,23 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
+    if deployment_container_image_name and container_image_name:
+        raise MutuallyExclusiveArgumentError('Cannot use both --deployment-container-image-name'
+                                             ' and --container-image-name')
+    if container_registry_url and not container_image_name:
+        raise ArgumentUsageError('Please specify both --container-registry-url and --container-image-name')
 
-    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+    if container_registry_url:
+        container_registry_url = parse_container_registry_url(container_registry_url)
+    else:
+        container_registry_url = parse_docker_image_name(deployment_container_image_name)
+
+    if container_image_name:
+        container_image_name = container_image_name if not container_registry_url else "{}/{}".format(
+            urlparse(container_registry_url).hostname,
+            container_image_name[1:] if container_image_name.startswith('/') else container_image_name)
+    if deployment_container_image_name:
+        container_image_name = deployment_container_image_name
 
     client = web_client_factory(cmd.cli_ctx)
     plan_info = None
@@ -205,10 +222,17 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     current_stack = None
     if is_linux:
-        if not validate_container_app_create_options(runtime, deployment_container_image_name,
+        if not validate_container_app_create_options(runtime, container_image_name,
                                                      multicontainer_config_type, multicontainer_config_file):
-            raise ArgumentUsageError("usage error: --runtime | --deployment-container-image-name |"
-                                     " --multicontainer-config-type TYPE --multicontainer-config-file FILE")
+            if deployment_container_image_name:
+                raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
+                                         'and --multicontainer-config-file FILE, '
+                                         'and only specify one out of --runtime, '
+                                         '--deployment-container-image-name and --multicontainer-config-type')
+            raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
+                                     'and --multicontainer-config-file FILE, '
+                                     'and only specify one out of --runtime, '
+                                     '--container-image-name and --multicontainer-config-type')
         if startup_file:
             site_config.app_command_line = startup_file
 
@@ -218,8 +242,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                 raise ValidationError("Linux Runtime '{}' is not supported."
                                       "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
             helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
-        elif deployment_container_image_name:
-            site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
+        elif container_image_name:
+            site_config.linux_fx_version = _format_fx_version(container_image_name)
             if name_validation.name_available:
                 site_config.app_settings.append(NameValuePair(name="WEBSITES_ENABLE_APP_SERVICE_STORAGE",
                                                               value="false"))
@@ -228,20 +252,22 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             site_config.linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
 
     elif plan_info.is_xenon:  # windows container webapp
-        if deployment_container_image_name:
-            site_config.windows_fx_version = _format_fx_version(deployment_container_image_name)
+        if container_image_name:
+            site_config.windows_fx_version = _format_fx_version(container_image_name)
         # set the needed app settings for container image validation
         if name_validation.name_available:
             site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_USERNAME",
-                                                          value=docker_registry_server_user))
+                                                          value=container_registry_user))
             site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_PASSWORD",
-                                                          value=docker_registry_server_password))
+                                                          value=container_registry_password))
             site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_URL",
-                                                          value=docker_registry_server_url))
+                                                          value=container_registry_url))
 
     elif runtime:  # windows webapp with runtime specified
-        if any([startup_file, deployment_container_image_name, multicontainer_config_file, multicontainer_config_type]):
+        if any([startup_file, deployment_container_image_name, container_image_name, multicontainer_config_file,
+                multicontainer_config_type]):
             raise ArgumentUsageError("usage error: --startup-file or --deployment-container-image-name or "
+                                     "--container-image-name or "
                                      "--multicontainer-config-type and --multicontainer-config-file is "
                                      "only appliable on linux webapp")
         match = helper.resolve(runtime, linux=is_linux)
@@ -285,17 +311,30 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name)
 
-    if deployment_container_image_name:
+    if container_image_name:
         logger.info("Updating container settings")
-        update_container_settings(cmd, resource_group_name, name, docker_registry_server_url,
-                                  deployment_container_image_name, docker_registry_server_user,
-                                  docker_registry_server_password=docker_registry_server_password)
+        update_container_settings(cmd, resource_group_name, name, container_registry_url,
+                                  container_image_name, container_registry_user,
+                                  container_registry_password=container_registry_password)
 
     if assign_identities is not None:
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,
                                    role, None, scope)
         webapp.identity = identity
+
+    _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth.lower())
     return webapp
+
+
+def _enable_basic_auth(cmd, app_name, slot_name, resource_group, enabled):
+    if not enabled or enabled == "":
+        return
+    CsmPublishingCredentialsPoliciesEntity = cmd.get_models("CsmPublishingCredentialsPoliciesEntity")
+    csmPublishingCredentialsPoliciesEntity = CsmPublishingCredentialsPoliciesEntity(allow=enabled == "enabled")
+    _generic_site_operation(cmd.cli_ctx, resource_group, app_name,
+                            'update_ftp_allowed', slot_name, csmPublishingCredentialsPoliciesEntity)
+    _generic_site_operation(cmd.cli_ctx, resource_group, app_name,
+                            'update_scm_allowed', slot_name, csmPublishingCredentialsPoliciesEntity)
 
 
 def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, webapp_location, vnet_sub_id=None):
@@ -387,12 +426,20 @@ def get_managed_environment(cmd, resource_group_name, environment_name):
         raise ResourceNotFoundError(error_message, recommendation_message)
 
 
-def validate_container_app_create_options(runtime=None, deployment_container_image_name=None,
+def validate_container_app_create_options(runtime=None, container_image_name=None,
                                           multicontainer_config_type=None, multicontainer_config_file=None):
     if bool(multicontainer_config_type) != bool(multicontainer_config_file):
         return False
-    opts = [runtime, deployment_container_image_name, multicontainer_config_type]
+    opts = [runtime, container_image_name, multicontainer_config_type]
     return len([x for x in opts if x]) == 1  # you can only specify one out the combinations
+
+
+def parse_container_registry_url(container_registry_url):
+    parsed_url = urlparse(container_registry_url)
+    if parsed_url.scheme:
+        return "{}://{}".format(parsed_url.scheme, parsed_url.hostname)
+    hostname = urlparse("https://{}".format(container_registry_url)).hostname
+    return "https://{}".format(hostname)
 
 
 def parse_docker_image_name(deployment_container_image_name, environment=None):
@@ -939,7 +986,7 @@ def get_webapp(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
 
-def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=None,  # pylint: disable=unused-argument
+def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=None, basic_auth="",  # pylint: disable=unused-argument
                skip_custom_domain_verification=None, force_dns_registration=None, ttl_in_seconds=None, **kwargs):  # pylint: disable=unused-argument
     instance = kwargs['parameters']
     client = web_client_factory(cmd.cli_ctx)
@@ -947,6 +994,8 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
     kwargs = dict(resource_group_name=resource_group_name, name=name, site_envelope=instance)
     if slot:
         kwargs['slot'] = slot
+
+    _enable_basic_auth(cmd, name, slot, resource_group_name, basic_auth.lower())
 
     return updater(**kwargs)
 
@@ -1386,6 +1435,9 @@ def list_flex_function_app_runtimes(cmd, location, runtime):
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
     return { 'flex': runtime_helper.stacks}
 
+def list_flexconsumption_runtimes():
+    return FLEX_RUNTIMES
+
 
 def delete_logic_app(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'delete', slot)
@@ -1601,58 +1653,37 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
         raise ArgumentUsageError('--deployment-storage-auth-value is required when '
                                  '--deployment-storage-auth-type is set to UserAssignedIdentity.')
 
-    if deployment_storage_auth_value and deployment_storage_auth_type != 'UserAssignedIdentity':
+    if deployment_storage_auth_value and deployment_storage_auth_type == 'SystemAssignedIdentity':
         raise ArgumentUsageError(
             '--deployment-storage-auth-value is only a valid input when '
-            '--deployment-storage-auth-type is set to UserAssignedIdentity. '
-            'Please try again with --deployment-storage-auth-type set to UserAssignedIdentity.'
+            '--deployment-storage-auth-type is set to UserAssignedIdentity or StorageAccountConnectionString. '
+            'Please try again with --deployment-storage-auth-type set to UserAssignedIdentity or '
+            'StorageAccountConnectionString.'
         )
 
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
-
-    # TODO: see if this is actually necessary and remove it otherwise
-    if 'functionAppConfig' not in functionapp["properties"]:
-        functionapp["properties"]["functionAppConfig"] = {}
-        if 'deployment' not in functionapp["properties"]["functionAppConfig"]:
-            functionapp["properties"]["functionAppConfig"]["deployment"] = {
-                "storage": {
-                    "type": "blobContainer"
-                }
-            }
 
     functionapp_deployment_storage = functionapp["properties"]["functionAppConfig"]["deployment"]["storage"]
 
     deployment_storage = None
 
-    if (functionapp_deployment_storage["value"] is None):
-        if deployment_storage_name is None:
-            raise ValidationError("Please provide a values for --deployment-storage-name and "
-                                  "--deployment-storage-container-name as function app deployment "
-                                  "storage value is not set.")
-
-    if ("authentication" not in functionapp_deployment_storage or
-            functionapp_deployment_storage["authentication"] is None):
-        if deployment_storage_auth_type is None:
-            raise ValidationError("Please provide a value for --deployment-storage-auth-type as "
-                                  "function app deployment storage authentication type is not set.")
-        functionapp_deployment_storage["authentication"] = {"type": "SystemAssignedIdentity",
-                                                            "userAssignedIdentityResourceId": None,
-                                                            "storageAccountConnectionStringName": None}
-
     # Storage
     deployment_config_storage_value = None
-    if (deployment_storage_name is not None):
+    if deployment_storage_name is not None:
         deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx,
                                                                   resource_group_name,
                                                                   deployment_storage_name)
-        deployment_storage_container = _get_deployment_storage_container(cmd,
-                                                                         resource_group_name,
-                                                                         deployment_storage_name,
-                                                                         deployment_storage_container_name)
-        deployment_storage_container_name = deployment_storage_container.name
+        _validate_and_get_deployment_storage_container(cmd, resource_group_name,
+                                                       deployment_storage_name,
+                                                       deployment_storage_container_name)
         endpoints = deployment_storage.primary_endpoints
         deployment_config_storage_value = getattr(endpoints, 'blob') + deployment_storage_container_name
         functionapp_deployment_storage["value"] = deployment_config_storage_value
+    else:
+        existing_deployment_storage_name = urlparse(functionapp_deployment_storage["value"]).hostname.split(".")[0]
+        deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx,
+                                                                  resource_group_name,
+                                                                  existing_deployment_storage_name)
 
     # Authentication
     assign_identities = None
@@ -1661,11 +1692,12 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
         deployment_storage_auth_config["type"] = deployment_storage_auth_type
         if deployment_storage_auth_type == 'StorageAccountConnectionString':
             deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
+            conn_string_app_setting = deployment_storage_auth_value or 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
             update_app_settings(cmd, resource_group_name, name,
-                                ["DEPLOYMENT_STORAGE_CONNECTION_STRING={}".format(deployment_storage_conn_string)])
+                                ["{}={}".format(conn_string_app_setting, deployment_storage_conn_string)])
             deployment_storage_auth_config["userAssignedIdentityResourceId"] = None
             deployment_storage_auth_config["storageAccountConnectionStringName"] = \
-                "DEPLOYMENT_STORAGE_CONNECTION_STRING"
+                conn_string_app_setting
         elif deployment_storage_auth_type == 'SystemAssignedIdentity':
             assign_identities = ['[system]']
             deployment_storage_auth_config["userAssignedIdentityResourceId"] = None
@@ -1684,12 +1716,11 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
         else:
             raise ValidationError("Invalid value for --deployment-storage-auth-type. Please try "
                                   "again with a valid value.")
+
     functionapp["properties"]["functionAppConfig"]["deployment"]["storage"] = functionapp_deployment_storage
 
     result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
 
-    client = web_client_factory(cmd.cli_ctx)
-    functionapp = client.web_apps.get(resource_group_name, name)
     if deployment_storage_auth_type == 'UserAssignedIdentity':
         assign_identity(cmd, resource_group_name, name, assign_identities)
         if not _has_deployment_storage_role_assignment_on_resource(
@@ -1705,11 +1736,7 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
         assign_identity(cmd, resource_group_name, name, assign_identities, 'Storage Blob Data Contributor',
                         None, deployment_storage.id)
 
-    poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp)
-    functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
-    return result.get("properties", {}).get("functionAppConfig", {}).get(
-        "deployment", {})
-
+    return result.get("properties", {}).get("functionAppConfig", {}).get("deployment", {})
 
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
@@ -1826,12 +1853,6 @@ def update_flex_functionapp(cmd, resource_group_name, name, functionapp):
 def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
 
-    # TODO: see if this is actually necessary and remove it otherwise
-    if 'functionAppConfig' not in functionapp["properties"]:
-        functionapp["properties"]["functionAppConfig"] = {}
-        if 'scaleAndConcurrency' not in functionapp["properties"]["functionAppConfig"]:
-            functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"] = {}
-
     always_ready_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady", [])
 
     updated_always_ready_config = [x for x in always_ready_config if x["name"] not in setting_names]
@@ -1854,15 +1875,10 @@ def get_runtime_config(cmd, resource_group_name, name):
 def update_runtime_config(cmd, resource_group_name, name, runtime_version):
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
 
-    # TODO: remove it later
-    if 'functionAppConfig' not in functionapp["properties"]:
-        functionapp["properties"]["functionAppConfig"] = {}
-        if 'runtime' not in functionapp["properties"]["functionAppConfig"]:
-            functionapp["properties"]["functionAppConfig"]["runtime"] = {}
-
     runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, True)
-    functionapp_version = runtime_info['functionapp_version']
     runtime = runtime_info['app_runtime']
+    functionapp_version = runtime_info['functionapp_version']
+
     runtimes = [r for r in FLEX_RUNTIMES if r['runtime'] == runtime]
     lang = next((r for r in runtimes if r['version'] == runtime_version), None)
     if lang is None:
@@ -1870,11 +1886,10 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
         raise ValidationError("Invalid version {0} for runtime {1} for function apps on the "
                               "Flex Consumption plan. Supported version for runtime {1} is {2}."
                               .format(runtime_version, runtime, supported_versions))
-    
-    location = functionapp["location"]
-    runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime, runtime_version)
-    matched_runtime = runtime_helper.resolve(runtime, runtime_version)
-    version = matched_runtime.version
+
+    runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=True, windows=False)
+    matched_runtime = runtime_helper.resolve(runtime, runtime_version, functionapp_version, True)
+    version = matched_runtime.site_config_dict.linux_fx_version.split("|")[1]
 
     functionapp["properties"]["functionAppConfig"]["runtime"]["version"] = version
 
@@ -1886,12 +1901,6 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
 
 def update_always_ready_settings(cmd, resource_group_name, name, settings):
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
-
-    # TODO: see if this is actually necessary and remove it otherwise
-    if 'functionAppConfig' not in functionapp["properties"]:
-        functionapp["properties"]["functionAppConfig"] = {}
-        if 'scaleAndConcurrency' not in functionapp["properties"]["functionAppConfig"]:
-            functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"] = {}
 
     always_ready_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady", [])
 
@@ -1933,12 +1942,6 @@ def update_scale_config(cmd, resource_group_name, name, maximum_instance_count=N
 
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
 
-    # TODO: see if this is actually necessary and remove it otherwise
-    if 'functionAppConfig' not in functionapp["properties"]:
-        functionapp["properties"]["functionAppConfig"] = {}
-        if 'scaleAndConcurrency' not in functionapp["properties"]["functionAppConfig"]:
-            functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"] = {}
-
     scale_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]
 
     if maximum_instance_count:
@@ -1962,7 +1965,6 @@ def update_scale_config(cmd, resource_group_name, name, maximum_instance_count=N
 
     return result.get("properties", {}).get("functionAppConfig", {}).get(
         "scaleAndConcurrency", {})
-
 
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
@@ -2155,37 +2157,37 @@ CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SER
 APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 
 
-def update_container_settings(cmd, resource_group_name, name, docker_registry_server_url=None,
-                              docker_custom_image_name=None, docker_registry_server_user=None,
-                              websites_enable_app_service_storage=None, docker_registry_server_password=None,
+def update_container_settings(cmd, resource_group_name, name, container_registry_url=None,
+                              container_image_name=None, container_registry_user=None,
+                              websites_enable_app_service_storage=None, container_registry_password=None,
                               multicontainer_config_type=None, multicontainer_config_file=None,
                               slot=None, min_replicas=None, max_replicas=None):
     settings = []
-    if docker_registry_server_url is not None:
-        settings.append('DOCKER_REGISTRY_SERVER_URL=' + docker_registry_server_url)
+    if container_registry_url is not None:
+        settings.append('DOCKER_REGISTRY_SERVER_URL=' + container_registry_url)
 
-    if (not docker_registry_server_user and not docker_registry_server_password and
-            docker_registry_server_url and '.azurecr.io' in docker_registry_server_url):
+    if (not container_registry_user and not container_registry_password and
+            container_registry_url and '.azurecr.io' in container_registry_url):
         logger.warning('No credential was provided to access Azure Container Registry. Trying to look up...')
-        parsed = urlparse(docker_registry_server_url)
+        parsed = urlparse(container_registry_url)
         registry_name = (parsed.netloc if parsed.scheme else parsed.path).split('.')[0]
         try:
-            docker_registry_server_user, docker_registry_server_password = _get_acr_cred(cmd.cli_ctx, registry_name)
+            container_registry_user, container_registry_password = _get_acr_cred(cmd.cli_ctx, registry_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.warning("Retrieving credentials failed with an exception:'%s'", ex)  # consider throw if needed
 
-    if docker_registry_server_user is not None:
-        settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + docker_registry_server_user)
-    if docker_registry_server_password is not None:
-        settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
+    if container_registry_user is not None:
+        settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + container_registry_user)
+    if container_registry_password is not None:
+        settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + container_registry_password)
     if websites_enable_app_service_storage:
         settings.append('WEBSITES_ENABLE_APP_SERVICE_STORAGE=' + websites_enable_app_service_storage)
 
-    if docker_registry_server_user or docker_registry_server_password or docker_registry_server_url or websites_enable_app_service_storage:  # pylint: disable=line-too-long
+    if container_registry_user or container_registry_password or container_registry_url or websites_enable_app_service_storage:  # pylint: disable=line-too-long
         update_app_settings(cmd, resource_group_name, name, settings, slot)
     settings = get_app_settings(cmd, resource_group_name, name, slot)
-    if docker_custom_image_name is not None:
-        _add_fx_version(cmd, resource_group_name, name, docker_custom_image_name, slot)
+    if container_image_name is not None:
+        _add_fx_version(cmd, resource_group_name, name, container_image_name, slot)
 
     if multicontainer_config_file and multicontainer_config_type:
         encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
@@ -2364,15 +2366,36 @@ def _resolve_hostname_through_dns(hostname):
 
 
 def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None,
-                       deployment_container_image_name=None, docker_registry_server_password=None,
-                       docker_registry_server_user=None):
-    container_args = deployment_container_image_name or docker_registry_server_password or docker_registry_server_user
+                       deployment_container_image_name=None,
+                       container_registry_url=None, container_image_name=None,
+                       container_registry_password=None, container_registry_user=None):
+    container_args = (deployment_container_image_name or container_registry_password or container_registry_user) or (
+        container_registry_password or container_registry_user or container_image_name)
     if container_args and not configuration_source:
-        raise ArgumentUsageError("Cannot use arguments --deployment-container_image_name, "
-                                 "--docker-registry-server_password, or --docker-registry-server-user without argument "
+        if deployment_container_image_name:
+            raise ArgumentUsageError("Cannot use arguments --deployment-container-image-name, "
+                                     "--container-registry-password, or --container-registry-user without argument "
+                                     "--configuration-source")
+        raise ArgumentUsageError("Cannot use arguments --container-image-name, "
+                                 "--container-registry-password, or --container-registry-user without argument "
                                  "--configuration-source")
+    if deployment_container_image_name and container_image_name:
+        raise MutuallyExclusiveArgumentError('Cannot use both --deployment-container-image-name'
+                                             ' and --container-image-name')
+    if container_registry_url and not container_image_name:
+        raise ArgumentUsageError('Please specify both --container-registry-url and --container-image-name')
 
-    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+    if container_registry_url:
+        container_registry_url = parse_container_registry_url(container_registry_url)
+    else:
+        container_registry_url = parse_docker_image_name(deployment_container_image_name)
+
+    if container_image_name:
+        container_image_name = container_image_name if not container_registry_url else "{}/{}".format(
+            urlparse(container_registry_url).hostname,
+            container_image_name[1:] if container_image_name.startswith('/') else container_image_name)
+    if deployment_container_image_name:
+        container_image_name = deployment_container_image_name
 
     Site, SiteConfig, NameValuePair = cmd.get_models('Site', 'SiteConfig', 'NameValuePair')
     client = web_client_factory(cmd.cli_ctx)
@@ -2406,9 +2429,9 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
 
     if configuration_source:
         update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source,
-                                              deployment_container_image_name, docker_registry_server_password,
-                                              docker_registry_server_user,
-                                              docker_registry_server_url=docker_registry_server_url)
+                                              container_image_name, container_registry_password,
+                                              container_registry_user,
+                                              container_registry_url=container_registry_url)
 
     result.name = result.name.split('/')[-1]
     return result
@@ -2439,7 +2462,7 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
         update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source,
                                               image, registry_password,
                                               registry_username,
-                                              docker_registry_server_url=docker_registry_server_url)
+                                              container_registry_url=docker_registry_server_url)
 
     result.name = result.name.split('/')[-1]
     return result
@@ -2467,8 +2490,8 @@ def _set_site_config_storage_keys(cmd, site_config):
 
 
 def update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source=None,
-                                          deployment_container_image_name=None, docker_registry_server_password=None,
-                                          docker_registry_server_user=None, docker_registry_server_url=None):
+                                          container_image_name=None, container_registry_password=None,
+                                          container_registry_user=None, container_registry_url=None):
 
     clone_from_prod = configuration_source.lower() == webapp.lower()
     site_config = get_site_configs(cmd, resource_group_name, webapp,
@@ -2504,12 +2527,12 @@ def update_slot_configuration_from_source(cmd, client, resource_group_name, weba
                                 'update_connection_strings',
                                 connection_strings, slot, client)
 
-    if deployment_container_image_name or docker_registry_server_password or docker_registry_server_user:
+    if container_image_name or container_registry_password or container_registry_user:
         update_container_settings(cmd, resource_group_name, webapp,
-                                  docker_custom_image_name=deployment_container_image_name, slot=slot,
-                                  docker_registry_server_user=docker_registry_server_user,
-                                  docker_registry_server_password=docker_registry_server_password,
-                                  docker_registry_server_url=docker_registry_server_url)
+                                  container_image_name=container_image_name, slot=slot,
+                                  container_registry_user=container_registry_user,
+                                  container_registry_password=container_registry_password,
+                                  container_registry_url=container_registry_url)
 
 
 def config_source_control(cmd, resource_group_name, name, repo_url, repository_type='git', branch=None,  # pylint: disable=too-many-locals
@@ -3427,8 +3450,8 @@ def upload_ssl_cert(cmd, resource_group_name,
 
     try:
         thumb_print = _get_cert(certificate_password, certificate_file)
-    except OpenSSL.crypto.Error as e:
-        raise UnclassifiedUserFault(f"Failed to get the certificate's thrumbprint with error: '{e}'. "
+    except Exception as e:
+        raise UnclassifiedUserFault(f"Failed to get the certificate's thumbprint with error: '{e}'. "
                                     "Please double check the certificate password.") from e
     if certificate_name:
         cert_name = certificate_name
@@ -3446,10 +3469,11 @@ def _generate_cert_name(thumb_print, hosting_environment, location, resource_gro
 
 def _get_cert(certificate_password, certificate_file):
     ''' Decrypts the .pfx file '''
-    p12 = OpenSSL.crypto.load_pkcs12(open(certificate_file, 'rb').read(), certificate_password)
-    cert = p12.get_certificate()
-    digest_algorithm = 'sha1'
-    thumbprint = cert.digest(digest_algorithm).decode("utf-8").replace(':', '')
+    cert_password_bytes = certificate_password.encode('utf-8') if certificate_password else None
+    with open(certificate_file, 'rb') as f:
+        p12 = pkcs12.load_pkcs12(f.read(), cert_password_bytes)
+    cert = p12.cert.certificate
+    thumbprint = cert.fingerprint(hashes.SHA1()).hex().upper()
     return thumbprint
 
 
@@ -4211,6 +4235,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             old_to_new_version = {
                 "11": "11.0",
                 "8": "8.0",
+                "8.0": "8",
                 "7": "7.0",
                 "6.0": "6",
                 "1.8": "8.0",
@@ -4460,12 +4485,12 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
     updated_functionapp = json.dumps(
         {
             "properties": {
-                "daprConfig": {
+                "daprConfig": {"enabled": False} if functionapp.dapr_config is None else {
                     "enabled": functionapp.dapr_config.enabled,
                     "appId": functionapp.dapr_config.app_id,
                     "appPort": functionapp.dapr_config.app_port,
-                    "httpReadBufferSize": functionapp.dapr_config.http_read_buffer_size,
-                    "httpMaxRequestSize": functionapp.dapr_config.http_max_request_size,
+                    "httpReadBufferSize": functionapp.dapr_config.http_read_buffer_size or 4,
+                    "httpMaxRequestSize": functionapp.dapr_config.http_max_request_size or 4,
                     "logLevel": functionapp.dapr_config.log_level,
                     "enableApiLogging": functionapp.dapr_config.enable_api_logging
                 },
@@ -4498,19 +4523,37 @@ def update_dapr_and_workload_config(cmd, resource_group_name, name, enabled=None
                                     enable_api_logging=None, workload_profile_name=None, cpu=None, memory=None):
     site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
     DaprConfig = cmd.get_models('DaprConfig')
-    if site.dapr_config is None:
-        site.dapr_config = DaprConfig()
 
-    import inspect
-    frame = inspect.currentframe()
-    bool_flags = ['enabled', 'enable_api_logging']
-    int_flags = ['app_port', 'http_max_request_size', 'http_read_buffer_size']
-    args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
-    for arg in args[3:10]:
-        if arg in int_flags and values[arg] is not None:
-            values[arg] = validate_and_convert_to_int(arg, values[arg])
-        if values.get(arg, None):
-            setattr(site.dapr_config, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
+    if enabled is None:
+        if site.dapr_config and site.dapr_config.enabled is False:
+            site.dapr_config = None
+    elif enabled == "false":
+        site.dapr_config = None
+    elif enabled == "true":
+        if site.dapr_config is None:
+            site.dapr_config = DaprConfig()
+            site.dapr_config.enabled = True
+        elif site.dapr_config and site.dapr_config.enabled is False:
+            site.dapr_config.enabled = True
+
+    if any([app_id, app_port, http_max_request_size, http_read_buffer_size, log_level, enable_api_logging]) \
+            and site.dapr_config is None:
+        raise ArgumentUsageError("usage error: parameters --dapr-app-id, "
+                                 "--dapr-app-port, --dapr-http-max-request-size, "
+                                 "--dapr-http-read-buffer-size, --dapr-log-level and "
+                                 "--dapr-enable-api-logging must be used with parameter --enable-dapr true.")
+
+    if site.dapr_config is not None:
+        import inspect
+        frame = inspect.currentframe()
+        bool_flags = ['enabled', 'enable_api_logging']
+        int_flags = ['app_port', 'http_max_request_size', 'http_read_buffer_size']
+        args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
+        for arg in args[3:10]:
+            if arg in int_flags and values[arg] is not None:
+                values[arg] = validate_and_convert_to_int(arg, values[arg])
+            if values.get(arg, None):
+                setattr(site.dapr_config, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     if cpu is not None and memory is not None:
         setattr(site.resource_config, 'cpu', cpu)
@@ -4552,6 +4595,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 4.")
         functions_version = '4'
+    enable_dapr = (enable_dapr == "true")
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if any([cpu, memory, workload_profile_name]) and environment is None:
@@ -4575,6 +4619,13 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                            "dapr-enable-api-logging must be used with parameter --environment,"
                                            "please provide the name of the container app environment using "
                                            "--environment.")
+    if any([dapr_app_id, dapr_app_port, dapr_http_max_request_size, dapr_http_read_buffer_size,
+            dapr_log_level, dapr_enable_api_logging]) and not enable_dapr:
+        raise ArgumentUsageError("usage error: parameters --dapr-app-id, "
+                                 "--dapr-app-port, --dapr-http-max-request-size, "
+                                 "--dapr-http-read-buffer-size, --dapr-log-level and "
+                                 "dapr-enable-api-logging must be used with parameter --enable-dapr true.")
+
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair, DaprConfig, ResourceConfig = cmd.get_models('SiteConfig', 'NameValuePair',
                                                                            'DaprConfig', 'ResourceConfig')
@@ -4627,8 +4678,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     site_config = SiteConfig(app_settings=[])
     client = web_client_factory(cmd.cli_ctx)
 
-    dapr_config = DaprConfig()
-
     if vnet or subnet:
         if plan:
             if is_valid_resource_id(plan):
@@ -4661,7 +4710,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         subnet_resource_id = None
         vnet_route_all_enabled = None
 
-    functionapp_def = Site(location=None, site_config=site_config, dapr_config=dapr_config, tags=tags,
+    functionapp_def = Site(location=None, site_config=site_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
                            vnet_route_all_enabled=vnet_route_all_enabled)
 
@@ -4718,13 +4767,14 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         endpoints = deployment_storage.primary_endpoints
         deployment_config_storage_value = getattr(endpoints, 'blob') + deployment_storage_container_name
 
-        deployment_storage_auth_type = deployment_storage_auth_type or 'SystemAssignedIdentity'
+        deployment_storage_auth_type = deployment_storage_auth_type or 'StorageAccountConnectionString'
 
-        if deployment_storage_auth_value and deployment_storage_auth_type != 'UserAssignedIdentity':
+        if deployment_storage_auth_value and deployment_storage_auth_type == 'SystemAssignedIdentity':
             raise ArgumentUsageError(
-                '--deployment-storage-auth-value is only a valid input for --deployment-storage-auth-type '
-                'set to UserAssignedIdentity. Please try again with --deployment-storage-auth-type set to '
-                'UserAssignedIdentity.'
+                '--deployment-storage-auth-value is only a valid input when '
+                '--deployment-storage-auth-type is set to UserAssignedIdentity or StorageAccountConnectionString. '
+                'Please try again with --deployment-storage-auth-type set to UserAssignedIdentity or '
+                'StorageAccountConnectionString.'
             )
 
         function_app_config = {}
@@ -4750,10 +4800,28 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             deployment_storage_auth_config["userAssignedIdentityResourceId"] = deployment_storage_auth_value
         elif deployment_storage_auth_type == 'StorageAccountConnectionString':
             deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
-            site_config.app_settings.append(NameValuePair(name='DEPLOYMENT_STORAGE_CONNECTION_STRING',
+            conn_string_app_setting = deployment_storage_auth_value or 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
+            site_config.app_settings.append(NameValuePair(name=conn_string_app_setting,
                                                           value=deployment_storage_conn_string))
-            deployment_storage_auth_value = 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
+            deployment_storage_auth_value = conn_string_app_setting
             deployment_storage_auth_config["storageAccountConnectionStringName"] = deployment_storage_auth_value
+
+        always_ready_dict = _parse_key_value_pairs(always_ready_instances)
+        always_ready_config = []
+
+        for key, value in always_ready_dict.items():
+            always_ready_config.append(
+                {
+                    "name": key,
+                    "instanceCount": max(0, validate_and_convert_to_int(key, value))
+                }
+            )
+
+        function_app_config["scaleAndConcurrency"] = {
+            "maximumInstanceCount": maximum_instance_count or DEFAULT_MAXIMUM_INSTANCE_COUNT,
+            "instanceMemoryMB": instance_memory or DEFAULT_INSTANCE_SIZE,
+            "alwaysReady": always_ready_config
+        }
 
     if environment is not None:
         if consumption_plan_location is not None:
@@ -4928,13 +4996,16 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if enable_dapr:
             logger.warning("Please note while using Dapr Extension for Azure Functions, app port is "
                            "mandatory when using Dapr triggers and should be empty when using only Dapr bindings.")
+            dapr_enable_api_logging = (dapr_enable_api_logging == "true")
+            dapr_config = DaprConfig()
             dapr_config.enabled = True
             dapr_config.app_id = dapr_app_id
             dapr_config.app_port = dapr_app_port
-            dapr_config.http_max_request_size = dapr_http_max_request_size
-            dapr_config.http_read_buffer_size = dapr_http_read_buffer_size
+            dapr_config.http_max_request_size = dapr_http_max_request_size or 4
+            dapr_config.http_read_buffer_size = dapr_http_read_buffer_size or 4
             dapr_config.log_level = dapr_log_level
             dapr_config.enable_api_logging = dapr_enable_api_logging
+            functionapp_def.dapr_config = dapr_config
 
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
         location = managed_environment.location
@@ -4988,7 +5059,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         existing_properties = functionapp_def.serialize()["properties"]
         functionapp_def.additional_properties["properties"] = existing_properties
         functionapp_def.additional_properties["properties"]["functionAppConfig"] = function_app_config
-        functionapp_def.additional_properties["properties"]["SKU"] = "FlexConsumption"
+        functionapp_def.additional_properties["properties"]["sku"] = "FlexConsumption"
         poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
                                                         api_version='2023-12-01')
         functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -5252,8 +5323,8 @@ def _get_or_create_deployment_storage_container(cmd, resource_group_name, functi
                                                                deployment_storage_container_name)
     else:
         from random import randint
-        deployment_storage_container_name = "released-package{}{:07}".format(
-            _normalize_functionapp_name(functionapp_name)[:30], randint(0, 9999999))
+        deployment_storage_container_name = "app-package-{}-{:07}".format(
+            _normalize_functionapp_name(functionapp_name)[:32], randint(0, 9999999))
         logger.warning("Creating deployment storage account container '%s' ...", deployment_storage_container_name)
 
         from azure.mgmt.storage.models import BlobContainer
@@ -5263,12 +5334,11 @@ def _get_or_create_deployment_storage_container(cmd, resource_group_name, functi
                                                                   deployment_storage_container_name,
                                                                   BlobContainer())
 
-    logger.warning(storage_container)
     return storage_container
 
 
-def _get_deployment_storage_container(cmd, resource_group_name, deployment_storage_name,
-                                      deployment_storage_container_name):
+def _validate_and_get_deployment_storage_container(cmd, resource_group_name, deployment_storage_name,
+                                                   deployment_storage_container_name):
     storage_client = get_mgmt_service_client(cmd.cli_ctx, StorageManagementClient)
     return storage_client.blob_containers.get(resource_group_name, deployment_storage_name,
                                               deployment_storage_container_name)
@@ -5658,7 +5728,7 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
     # Indicates whether the status has been non empty in previous calls
     has_response = False
     while num_trials < total_trials:
-        time.sleep(2)
+        time.sleep(1)
         response = requests.get(deployment_status_url, headers=headers,
                                 verify=not should_disable_connection_verify())
         try:
@@ -6183,7 +6253,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
-              app_service_environment=None, track_status=False):
+              app_service_environment=None, track_status=False, basic_auth=""):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -6353,6 +6423,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
             if match:
                 _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_config, runtime_version)
         create_json['runtime_version'] = runtime_version
+
+    _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth.lower())
+
     # Zip contents & Deploy
     logger.warning("Creating zip with contents of dir %s ...", src_dir)
     # zip contents & deploy

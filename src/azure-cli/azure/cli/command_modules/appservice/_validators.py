@@ -18,7 +18,7 @@ from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
 from .utils import (_normalize_sku, get_sku_tier, get_resource_name_and_group,
                     get_resource_if_exists, is_functionapp, is_logicapp, is_webapp, is_centauri_functionapp,
-                    _normalize_location_for_vnet_integration)
+                    _normalize_location)
 
 from .aaz.latest.network import ListServiceTags
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
