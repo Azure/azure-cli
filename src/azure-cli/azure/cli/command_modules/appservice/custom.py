@@ -1435,9 +1435,6 @@ def list_flex_function_app_runtimes(cmd, location, runtime):
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
     return { 'flex': runtime_helper.stacks}
 
-def list_flexconsumption_runtimes():
-    return FLEX_RUNTIMES
-
 
 def delete_logic_app(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'delete', slot)
@@ -1877,7 +1874,6 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
 
     runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, True)
     runtime = runtime_info['app_runtime']
-    functionapp_version = runtime_info['functionapp_version']
 
     runtimes = [r for r in FLEX_RUNTIMES if r['runtime'] == runtime]
     lang = next((r for r in runtimes if r['version'] == runtime_version), None)
@@ -1887,9 +1883,10 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
                               "Flex Consumption plan. Supported version for runtime {1} is {2}."
                               .format(runtime_version, runtime, supported_versions))
 
-    runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=True, windows=False)
-    matched_runtime = runtime_helper.resolve(runtime, runtime_version, functionapp_version, True)
-    version = matched_runtime.site_config_dict.linux_fx_version.split("|")[1]
+    location = functionapp["location"]
+    runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime, runtime_version)
+    matched_runtime = runtime_helper.resolve(runtime, runtime_version)
+    version = matched_runtime.version
 
     functionapp["properties"]["functionAppConfig"]["runtime"]["version"] = version
 
@@ -4032,7 +4029,8 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
 class _FlexFunctionAppStackRuntimeHelper:
     class Runtime:
-        def __init__(self, name, version, app_insights=False, default=False, sku=None, end_of_life_date=None, runtime_info=None, github_actions_properties=None):
+        def __init__(self, name, version, app_insights=False, default=False, sku=None, 
+                     end_of_life_date=None, runtime_info=None, github_actions_properties=None):
             self.name = name
             self.version = version
             self.app_insights = app_insights
@@ -4074,6 +4072,7 @@ class _FlexFunctionAppStackRuntimeHelper:
                     runtime_settings = minor_version['stackSettings']['linuxRuntimeSettings']
                     runtime_name = (runtime_settings['appSettingsDictionary']['FUNCTIONS_WORKER_RUNTIME'] or
                                     runtime['name'])
+
                     skus = runtime_settings['Sku']
                     github_actions_settings = runtime_settings['gitHubActionSettings']
                     if skus is None:
@@ -4118,6 +4117,7 @@ class _FlexFunctionAppStackRuntimeHelper:
                             github_actions_properties=version_properties['github_actions_properties'])
 
     def _load_stacks(self):
+        logger.warning("Loading Stacks for Function Apps on the Flex Consumption plan..")
         if self._stacks:
             return
         stacks = self.get_flex_raw_function_app_stacks(self._cmd, self._location, self._runtime)

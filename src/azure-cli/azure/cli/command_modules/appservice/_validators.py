@@ -258,8 +258,8 @@ def validate_add_vnet(cmd, namespace):
 
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
-    webapp_loc = _normalize_location_for_vnet_integration(cmd, webapp.location)
-    vnet_loc = _normalize_location_for_vnet_integration(cmd, vnet_loc)
+    webapp_loc = _normalize_location(cmd, webapp.location)
+    vnet_loc = _normalize_location(cmd, vnet_loc)
 
     if vnet_loc != webapp_loc:
         raise ValidationError("The app and the vnet resources are in different locations. "
