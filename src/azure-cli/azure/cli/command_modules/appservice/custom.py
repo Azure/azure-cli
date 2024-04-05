@@ -84,9 +84,9 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
-                         VERSION_2022_09_01, FLEX_RUNTIMES, FLEX_SUBNET_DELEGATION, DEFAULT_INSTANCE_SIZE,
+                         VERSION_2022_09_01, FLEX_RUNTIMES, FLEX_SUBNET_DELEGATION,
                          RUNTIME_STATUS_TEXT_MAP, LANGUAGE_EOL_DEPRECATION_NOTICES,
-                         STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID, DEFAULT_MAXIMUM_INSTANCE_COUNT)
+                         STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -351,8 +351,8 @@ def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, w
 
     cmd.cli_ctx.data['subscription_id'] = current_sub_id
 
-    vnet_location = _normalize_location_for_vnet_integration(cmd, vnet_location)
-    asp_location = _normalize_location_for_vnet_integration(cmd, webapp_location)
+    vnet_location = _normalize_location(cmd, vnet_location)
+    asp_location = _normalize_location(cmd, webapp_location)
 
     if vnet_location != asp_location:
         raise ArgumentUsageError("Unable to create webapp: vnet and App Service Plan must be in the same location. "
@@ -462,7 +462,6 @@ def check_language_runtime(cmd, resource_group_name, name):
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     is_linux = app.reserved
-    
     if is_functionapp(app):
         is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
         runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, is_linux)
@@ -1426,10 +1425,10 @@ def list_function_app_runtimes(cmd, os_type=None):
     linux_stacks = [r.to_dict() for r in runtime_helper.stacks if r.linux]
     windows_stacks = [r.to_dict() for r in runtime_helper.stacks if not r.linux]
     if linux and not windows:
-        return {LINUX_OS_NAME: linux_stacks, 'flex': FLEX_RUNTIMES}
+        return linux_stacks
     if windows and not linux:
         return windows_stacks
-    return {WINDOWS_OS_NAME: windows_stacks, LINUX_OS_NAME: linux_stacks, 'flex': FLEX_RUNTIMES}
+    return {WINDOWS_OS_NAME: windows_stacks, LINUX_OS_NAME: linux_stacks}
 
 def list_flex_function_app_runtimes(cmd, location, runtime):
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
@@ -1735,6 +1734,7 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
 
     return result.get("properties", {}).get("functionAppConfig", {}).get("deployment", {})
 
+
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
 # pylint: disable=unused-argument
@@ -1962,6 +1962,7 @@ def update_scale_config(cmd, resource_group_name, name, maximum_instance_count=N
 
     return result.get("properties", {}).get("functionAppConfig", {}).get(
         "scaleAndConcurrency", {})
+
 
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
@@ -4805,23 +4806,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                                           value=deployment_storage_conn_string))
             deployment_storage_auth_value = conn_string_app_setting
             deployment_storage_auth_config["storageAccountConnectionStringName"] = deployment_storage_auth_value
-
-        always_ready_dict = _parse_key_value_pairs(always_ready_instances)
-        always_ready_config = []
-
-        for key, value in always_ready_dict.items():
-            always_ready_config.append(
-                {
-                    "name": key,
-                    "instanceCount": max(0, validate_and_convert_to_int(key, value))
-                }
-            )
-
-        function_app_config["scaleAndConcurrency"] = {
-            "maximumInstanceCount": maximum_instance_count or DEFAULT_MAXIMUM_INSTANCE_COUNT,
-            "instanceMemoryMB": instance_memory or DEFAULT_INSTANCE_SIZE,
-            "alwaysReady": always_ready_config
-        }
 
     if environment is not None:
         if consumption_plan_location is not None:
