@@ -225,11 +225,6 @@ def _normalize_location(cmd, location):
     return location
 
 
-def _normalize_location_for_vnet_integration(cmd, location):
-    location = _normalize_location(cmd, location)
-    return location.replace("(stage)", "").replace("stage", "")
-
-
 def _remove_list_duplicates(webapp):
     outbound_ips = webapp.possible_outbound_ip_addresses.split(',')
     outbound_ips_list = list(dict.fromkeys(outbound_ips))
