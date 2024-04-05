@@ -48,8 +48,8 @@ class Create(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.network_virtual_appliance_name = AAZStrArg(
-            options=["--network-virtual-appliance-name"],
+        _args_schema.nva_name = AAZStrArg(
+            options=["--nva-name"],
             help="The name of the Network Virtual Appliance.",
             required=True,
         )
@@ -190,7 +190,7 @@ class Create(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "networkVirtualApplianceName", self.ctx.args.network_virtual_appliance_name,
+                    "networkVirtualApplianceName", self.ctx.args.nva_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
