@@ -216,6 +216,61 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @BatchAccountPreparer()
+    def test_batch_pool_upgradePolicy_cmd(
+            self,
+            resource_group,
+            batch_account_name):
+        endpoint = self.get_account_endpoint(
+            batch_account_name,
+            resource_group).replace("https://", "")
+        key = self.get_account_key(
+            batch_account_name,
+            resource_group)
+        
+        self.kwargs.update({
+            'p_id': 'xplatCreatedPool',
+            'acc_n': batch_account_name,
+            'acc_k': key,
+            'acc_u': endpoint
+        })
+
+        self.batch_cmd('batch pool create --id {p_id} --vm-size "standard_d4s_v3" '
+                        '--image "MicrosoftWindowsServer:WindowsServer:2016-datacenter-smalldisk" '
+                        '--node-agent-sku-id "batch.node.windows amd64" '
+                        '--target-dedicated-nodes 2 '
+                        '--mode "automatic" '
+                        '--disable-automatic-rollback true '
+                        '--enable-automatic-os-upgrade true '
+                        '--os-rolling-upgrade-deferral true '
+                        '--use-rolling-upgrade-policy true '
+                        '--enable-cross-zone-upgrade true '
+                        '--max-batch-instance-percent 20 '
+                        '--max-unhealthy-instance-percent 20 '
+                        '--max-unhealthy-upgraded-instance-percent 20 '
+                        '--pause-time-between-batches "PT0S" '
+                        '--prioritize-unhealthy-instances true '
+                        '--rollback-failed-instances-on-policy-breach true ')
+        
+        res = self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()
+        print(res)
+
+        self.assertTrue(res['upgradePolicy']['mode'])
+        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['disableAutomaticRollback'])
+        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['enableAutomaticOsUpgrade'])
+        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['osRollingUpgradeDeferral'])
+        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['useRollingUpgradePolicy'])
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['enableCrossZoneUpgrade'])
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['maxBatchInstancePercent'])
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['maxUnhealthyInstancePercent'])
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['maxUnhealthyUpgradedInstancePercent'])
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['pauseTimeBetweenBatches'])
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['prioritizeUnhealthyInstances'])
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['rollbackFailedInstancesOnPolicyBreach'])
+
+        self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
+
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer()
     def test_batch_pool_enableAcceleratedNetworking_cmd(
             self,
             resource_group,
