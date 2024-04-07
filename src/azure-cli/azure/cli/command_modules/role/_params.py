@@ -103,7 +103,7 @@ def load_arguments(self, _):
                         "can be assigned to users, groups, or service principals associated with other applications. " +
                         JSON_PROPERTY_HELP)
         c.argument('optional_claims', arg_group='JSON property', type=validate_file_or_dict,
-                   help="Application developers can configure optional claims in their Azure AD applications to "
+                   help="Application developers can configure optional claims in their Microsoft Entra applications to "
                         "specify the claims that are sent to their application by the Microsoft security token "
                         "service. For more information, see https://docs.microsoft.com/azure/active-directory/develop"
                         "/active-directory-optional-claims. " + JSON_PROPERTY_HELP)
@@ -249,10 +249,11 @@ def load_arguments(self, _):
                    help='If the user must change her password on the next login.')
 
     with self.argument_context('ad user create') as c:
-        c.argument('immutable_id', help="This must be specified if you are using a federated domain for "
-                                        "the user's userPrincipalName (UPN) property when creating a new user account."
-                                        " It is used to associate an on-premises Active Directory user account with "
-                                        "their Azure AD user object.")
+        c.argument('immutable_id',
+                   help="This property is used to associate an on-premises Active Directory user account to their "
+                        "Microsoft Entra user object. This property must be specified when creating a new user account "
+                        "in the Graph if you're using a federated domain for the user's userPrincipalName (UPN) "
+                        "property. NOTE: The $ and _ characters can't be used when specifying this property.")
         c.argument('user_principal_name',
                    help="The user principal name (someuser@contoso.com). It must contain one of the verified domains "
                         "for the tenant.")
@@ -341,7 +342,7 @@ def load_arguments(self, _):
             foreign_group = "ForeignGroup"
 
         c.argument('assignee_principal_type', min_api='2018-09-01-preview', arg_type=get_enum_type(PrincipalType),
-                   help='use with --assignee-object-id to avoid errors caused by propagation latency in AAD Graph')
+                   help='use with --assignee-object-id to avoid errors caused by propagation latency in Microsoft Graph')
 
     with self.argument_context('role assignment update') as c:
         c.argument('role_assignment',
