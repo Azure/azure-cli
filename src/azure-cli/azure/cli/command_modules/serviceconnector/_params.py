@@ -187,7 +187,7 @@ def add_new_addon_argument(context, source, target):
         context.ignore('new_addon')
 
 
-def add_secret_store_argument(context, source):
+def add_secret_store_argument(context, source=""):
     if source == RESOURCE.KubernetesCluster:
         context.ignore('key_vault_id')
     else:
