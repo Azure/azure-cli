@@ -228,19 +228,34 @@ for source in SOURCE_RESOURCES:
             auth_params = get_auth_info_params(auth_types[0])
 
         # auth info params in help message
-        secret_param = '''
-            - name: --secret
-              short-summary: The secret auth info
-              long-summary: |
-                Usage: --secret name=XX secret=XX
-                       --secret name=XX secret-uri=XX
-                       --secret name=XX secret-name=XX
+        secret_param = ''
+        if AUTH_TYPE.Secret in auth_types:
+            if source.value != RESOURCE.KubernetesCluster.value:
+                secret_param = '''
+                    - name: --secret
+                      short-summary: The secret auth info
+                      long-summary: |
+                        Usage: --secret name=XX secret=XX
+                               --secret name=XX secret-uri=XX
+                               --secret name=XX secret-name=XX
 
-                name    : Required. Username or account name for secret auth.
-                secret  : One of <secret, secret-uri, secret-name> is required. Password or account key for secret auth.
-                secret-uri  : One of <secret, secret-uri, secret-name> is required. Keyvault secret uri which stores password.
-                secret-name : One of <secret, secret-uri, secret-name> is required. Keyvault secret name which stores password. It's for AKS only.
-        ''' if AUTH_TYPE.Secret in auth_types else ''
+                        name    : Required. Username or account name for secret auth.
+                        secret  : One of <secret, secret-uri, secret-name> is required. Password or account key for secret auth.
+                        secret-uri  : One of <secret, secret-uri, secret-name> is required. Keyvault secret uri which stores password.
+                        secret-name : One of <secret, secret-uri, secret-name> is required. Keyvault secret name which stores password. It's for AKS only.
+                '''
+            else:
+                secret_param = '''
+                    - name: --secret
+                      short-summary: The secret auth info
+                      long-summary: |
+                        Usage: --secret name=XX secret=XX
+                               --secret name=XX secret-name=XX
+
+                        name    : Required. Username or account name for secret auth.
+                        secret  : One of <secret, secret-uri, secret-name> is required. Password or account key for secret auth.
+                        secret-name : One of <secret, secret-uri, secret-name> is required. Keyvault secret name which stores password. It's for AKS only.
+                '''
         secret_auto_param = '''
             - name: --secret
               short-summary: The secret auth info
@@ -325,7 +340,7 @@ for source in SOURCE_RESOURCES:
         aks_keyvault_example = '''
             - name: Create a connection between {source_display_name} and {target} using secret store csi driver
               text: |-
-                     az {source} connection create {target} {source_params} --slot MySlot {target_params} --enable-csi
+                     az {source} connection create {target} {source_params} {target_params} --enable-csi
         '''.format(
             source=source.value,
             target=target.value,

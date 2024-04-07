@@ -24,12 +24,17 @@ class AddCustomizedKeys(argparse.Action):
             raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
 
 
+def is_k8s_source(command_name):
+    source_name = command_name.split(' ')[0]
+    return source_name.lower() == "aks"
+
+
 class AddSecretAuthInfo(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string)
+        action = self.get_action(values, option_string, namespace.command)
         namespace.secret_auth_info = action
 
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+    def get_action(self, values, option_string, command_name):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
@@ -49,6 +54,8 @@ class AddSecretAuthInfo(argparse.Action):
                     'value': v[0]
                 }
             elif kl == 'secret-uri':
+                if is_k8s_source(command_name):
+                    raise ValidationError('Service Connector does not support secrets from Key Vault for AKS.')
                 d['secret_info'] = {
                     'secret_type': 'keyVaultSecretUri',
                     'value': v[0]

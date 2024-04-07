@@ -337,7 +337,7 @@ class KubernetesConnectionScenarioTest(ScenarioTest):
         self.cmd('aks connection delete --id {} --yes'.format(connection_id))
 
 
-    @live_only()
+    @unittest.skip("secret store not supported.")
     # key vault connection name differs every run
     def test_kubernetes_storageblob_secretstore_e2e(self):
         self.kwargs.update({
