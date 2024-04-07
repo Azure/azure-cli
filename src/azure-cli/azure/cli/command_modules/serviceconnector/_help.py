@@ -232,30 +232,30 @@ for source in SOURCE_RESOURCES:
         if AUTH_TYPE.Secret in auth_types:
             if source.value != RESOURCE.KubernetesCluster.value:
                 secret_param = '''
-                    - name: --secret
-                      short-summary: The secret auth info
-                      long-summary: |
-                        Usage: --secret name=XX secret=XX
-                               --secret name=XX secret-uri=XX
-                               --secret name=XX secret-name=XX
+            - name: --secret
+              short-summary: The secret auth info
+              long-summary: |
+                Usage: --secret name=XX secret=XX
+                       --secret name=XX secret-uri=XX
+                       --secret name=XX secret-name=XX
 
-                        name    : Required. Username or account name for secret auth.
-                        secret  : One of <secret, secret-uri, secret-name> is required. Password or account key for secret auth.
-                        secret-uri  : One of <secret, secret-uri, secret-name> is required. Keyvault secret uri which stores password.
-                        secret-name : One of <secret, secret-uri, secret-name> is required. Keyvault secret name which stores password. It's for AKS only.
-                '''
+                name    : Required. Username or account name for secret auth.
+                secret  : One of <secret, secret-uri, secret-name> is required. Password or account key for secret auth.
+                secret-uri  : One of <secret, secret-uri, secret-name> is required. Keyvault secret uri which stores password.
+                secret-name : One of <secret, secret-uri, secret-name> is required. Keyvault secret name which stores password. It's for AKS only.
+        '''
             else:
                 secret_param = '''
-                    - name: --secret
-                      short-summary: The secret auth info
-                      long-summary: |
-                        Usage: --secret name=XX secret=XX
-                               --secret name=XX secret-name=XX
+            - name: --secret
+              short-summary: The secret auth info
+              long-summary: |
+                Usage: --secret name=XX secret=XX
+                       --secret name=XX secret-name=XX
 
-                        name    : Required. Username or account name for secret auth.
-                        secret  : One of <secret, secret-uri, secret-name> is required. Password or account key for secret auth.
-                        secret-name : One of <secret, secret-uri, secret-name> is required. Keyvault secret name which stores password. It's for AKS only.
-                '''
+                name    : Required. Username or account name for secret auth.
+                secret  : One of <secret, secret-uri, secret-name> is required. Password or account key for secret auth.
+                secret-name : One of <secret, secret-uri, secret-name> is required. Keyvault secret name which stores password. It's for AKS only.
+        '''
         secret_auto_param = '''
             - name: --secret
               short-summary: The secret auth info
