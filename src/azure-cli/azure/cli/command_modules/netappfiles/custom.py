@@ -912,7 +912,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             log_backup_size = None
         kv_private_endpoint_id = args.key_vault_private_endpoint_resource_id.to_serialized_data()
         ppg = args.proximity_placement_group.to_serialized_data()
-        
+
         if has_value(args.zones):
             zones = args.zones.to_serialized_data()
         else:
