@@ -3,6 +3,9 @@ name: Block PR merging on "do-not-merge" label
 on:
   pull_request_target:
     types: [labeled, unlabeled]
+    branches:
+      - main
+      - release
 
 jobs:
   block-merge:
