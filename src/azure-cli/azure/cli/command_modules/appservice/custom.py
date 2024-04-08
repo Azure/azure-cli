@@ -1098,8 +1098,8 @@ def get_functionapp(cmd, resource_group_name, name, slot=None):
     return function_app
 
 
-def list_webapp(cmd, resource_group_name=None):
-    full_list = _list_app(cmd.cli_ctx, resource_group_name)
+def list_webapp(cmd, resource_group_name=None, show_details=False):
+    full_list = _list_app(cmd.cli_ctx, resource_group_name, show_details=show_details)
     # ignore apps with kind==null & not functions apps
     return list(filter(lambda x: x.kind is not None and "function" not in x.kind.lower(), full_list))
 
@@ -1180,7 +1180,7 @@ def show_app(cmd, resource_group_name, name, slot=None):
     return app
 
 
-def _list_app(cli_ctx, resource_group_name=None):
+def _list_app(cli_ctx, resource_group_name=None, show_details=False):
     client = web_client_factory(cli_ctx)
     if resource_group_name:
         result = list(client.web_apps.list_by_resource_group(resource_group_name))
@@ -1188,6 +1188,9 @@ def _list_app(cli_ctx, resource_group_name=None):
         result = list(client.web_apps.list())
     for webapp in result:
         _rename_server_farm_props(webapp)
+        if show_details:
+            webapp.site_config = _generic_site_operation(
+                cli_ctx, resource_group_name, webapp.name, 'get_configuration')
     return result
 
 

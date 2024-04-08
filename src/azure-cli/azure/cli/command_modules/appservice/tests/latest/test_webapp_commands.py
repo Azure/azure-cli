@@ -2990,6 +2990,25 @@ class WebappSlotTest(ScenarioTest):
             JMESPathCheck(f"siteConfig.azureStorageAccounts.{store_id}.type", store_type),
         ])
 
+class WebappStackTest(ScenarioTest):
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_list_show_details(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-list-show-details', length=40)
+        webapp_plan = self.create_random_name(prefix='webapp-list-show-details-plan', length=40)
+
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, webapp_plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp_name, webapp_plan, 'java:17:TOMCAT:10.0'),
+            checks=[
+                JMESPathCheck('name', webapp_name),
+        ])
+        self.cmd('webapp list -g {} --show-details'.format(resource_group), checks=[
+            JMESPathCheck('length([])', 1),
+            JMESPathCheck('[0].name', webapp_name),
+            JMESPathCheck('[0].siteConfig.javaVersion', '17'),
+            JMESPathCheck('[0].siteConfig.javaContainer', 'TOMCAT'),
+            JMESPathCheck('[0].siteConfig.javaContainerVersion', '10.0'),
+        ])
 
 if __name__ == '__main__':
     unittest.main()
