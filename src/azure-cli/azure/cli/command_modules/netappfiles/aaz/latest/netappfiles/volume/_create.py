@@ -492,6 +492,7 @@ class Create(AAZCommand):
             options=["--remote-path"],
             arg_group="Replication",
             help="The full path to a volume that is to be migrated into ANF. Required for Migration volumes",
+            is_preview=True,
         )
         _args_schema.remote_volume_region = AAZStrArg(
             options=["--remote-volume-region"],
@@ -518,7 +519,7 @@ class Create(AAZCommand):
         )
         remote_path.server_name = AAZStrArg(
             options=["server-name"],
-            help="The name of a server on the Ontap Host",
+            help="The name of a server on the ONTAP Host",
             required=True,
         )
         remote_path.volume_name = AAZStrArg(
