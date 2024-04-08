@@ -5353,9 +5353,6 @@ def list_flexconsumption_locations(cmd):
             "name": "eastasia"
         },
         {
-            "name": "centralus"
-        },
-        {
             "name": "uksouth"
         },
         {
