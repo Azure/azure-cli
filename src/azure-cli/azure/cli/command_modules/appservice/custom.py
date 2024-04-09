@@ -66,7 +66,6 @@ from .utils import (_normalize_sku,
                     _rename_server_farm_props,
                     _get_location_from_webapp,
                     _normalize_flex_location,
-                    _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
                     app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp,
@@ -4810,8 +4809,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     for app_setting, value in app_settings_dict.items():
         site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
 
-    site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
-                                                  value=_get_extension_version_functionapp(functions_version)))
+    if flexconsumption_location is None:
+        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
+                                                      value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
 
     # If plan is not flex, consumption or elastic premium, we need to set always on
@@ -4836,7 +4836,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                                       value=app_insights_conn_string))
     elif disable_app_insights or not matched_runtime.app_insights:
         # set up dashboard if no app insights
-        site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
+        if flexconsumption_location is None:
+            site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     elif not disable_app_insights and matched_runtime.app_insights:
         create_app_insights = True
 
@@ -4877,8 +4878,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         except Exception:  # pylint: disable=broad-except
             logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
                            'Please use the Azure Portal to create and configure the Application Insights, if needed.')
-            update_app_settings(cmd, functionapp.resource_group, functionapp.name,
-                                ['AzureWebJobsDashboard={}'.format(con_string)])
+            if flexconsumption_location is None:
+                update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                                    ['AzureWebJobsDashboard={}'.format(con_string)])
 
     if image and environment is None:
         update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
