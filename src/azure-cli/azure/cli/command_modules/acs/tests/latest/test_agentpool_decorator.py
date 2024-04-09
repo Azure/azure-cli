@@ -421,7 +421,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # if --node-vm-size is not specified, but --sku automatic is explicitly specified
         ctx_5 = AKSAgentPoolContext(
             self.cmd,
-            AKSAgentPoolParamDict({"sku": "automatic", "os_type": "LINUX"}),
+            AKSAgentPoolParamDict({"sku": "automatic", "os_type": "Linux"}),
             self.models,
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
