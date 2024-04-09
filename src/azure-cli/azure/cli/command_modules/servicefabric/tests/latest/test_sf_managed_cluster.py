@@ -92,8 +92,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'loc': 'eastasia',
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
-            'vm_password': self.create_random_name('Pass@', 9),
-            'update_type': "ByUpgradeDomain"
+            'vm_password': self.create_random_name('Pass@', 9)
         })
 
         self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --sku Standard --upgrade-mode Automatic --upgrade-cadence Wave1',
@@ -124,7 +123,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         timeout = time.time() + 300
         while True:
             try:
-                self.cmd('az sf managed-node-type node restart -g {rg} -c {cluster_name} -n snt --node-name snt_0 snt_1 --update-type {update_type}')
+                self.cmd('az sf managed-node-type node restart -g {rg} -c {cluster_name} -n snt --node-name snt_0 snt_1')
                 break
             except HttpResponseError:
                 if time.time() > timeout:
@@ -134,7 +133,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
 
         self.cmd('az sf managed-node-type node delete -g {rg} -c {cluster_name} -n snt --node-name snt_1')
 
-        self.cmd('az sf managed-node-type node reimage -g {rg} -c {cluster_name} -n snt --node-name snt_3 --update-type {update_type}')
+        self.cmd('az sf managed-node-type node reimage -g {rg} -c {cluster_name} -n snt --node-name snt_3')
 
         self.cmd('az sf managed-node-type delete -g {rg} -c {cluster_name} -n snt')
 
@@ -145,6 +144,49 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.cmd('az sf managed-node-type list -g {rg} -c {cluster_name}',
                  checks=[self.check('length(@)', 1)])
 
+        self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
+
+        # SystemExit 3 'not found'
+        with self.assertRaisesRegex(SystemExit, '3'):
+            self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
+            
+    @ResourceGroupPreparer()
+    def test_node_type_operation_2(self):
+        self.kwargs.update({
+            'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
+            'loc': 'eastasia',
+            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'vm_password': self.create_random_name('Pass@', 9)
+        })
+
+        self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --sku Standard --upgrade-mode Automatic --upgrade-cadence Wave1',
+                 checks=[self.check('provisioningState', 'Succeeded'),
+                         self.check('clusterState', 'WaitingForNodes'),
+                         self.check('clusterUpgradeMode', 'Automatic'),
+                         self.check('clusterUpgradeCadence', 'Wave1')])
+
+        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary --disk-type Premium_LRS --vm-size Standard_DS2',
+                 checks=[self.check('provisioningState', 'Succeeded'),
+                         self.check('dataDiskType', 'Premium_LRS'),
+                         self.check('isStateless ', False)])
+        
+        self.cmd('az sf managed-node-type list -g {rg} -c {cluster_name}',
+                 checks=[self.check('length(@)', 1)])
+                    
+        # first operation with retry in case nodes take some time to be ready
+        timeout = time.time() + 300
+        while True:
+            try:
+                self.cmd('az sf managed-node-type node restart -g {rg} -c {cluster_name} -n pnt --node-name pnt_0 pnt_1 --update-type ByUpgradeDomain ')
+                break
+            except HttpResponseError:
+                if time.time() > timeout:
+                    raise
+                if self.in_recording or self.is_live:
+                    time.sleep(60)
+
+        self.cmd('az sf managed-node-type node reimage -g {rg} -c {cluster_name} -n pnt --node-name pnt_0 pnt_1 --update-type ByUpgradeDomain ')
+        
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
 
         # SystemExit 3 'not found'
