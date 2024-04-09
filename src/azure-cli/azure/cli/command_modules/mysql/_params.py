@@ -284,8 +284,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
     mode_arg_type = CLIArgumentType(
         options_list=['--mode'],
-        arg_type=get_enum_type(['Offline']),
-        help='Mode of import. Enum values: [Offline]. Default is Offline. '
+        arg_type=get_enum_type(['Offline', 'Online']),
+        help='Mode of import. Enum values: [Offline, Online]. Default is Offline. '
     )
 
     with self.argument_context('mysql flexible-server') as c:

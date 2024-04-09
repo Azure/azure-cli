@@ -29,6 +29,3 @@ from .custom import create_origin_group       # pylint: disable=unused-import
 from .custom import update_origin_group       # pylint: disable=unused-import
 from .custom import check_name_availability   # pylint: disable=unused-import
 from .custom import validate_custom_domain    # pylint: disable=unused-import
-
-from .custom_afdx import list_afd_rule_action                         # pylint: disable=unused-import
-from .custom_afdx import list_afd_rule_condition                      # pylint: disable=unused-import

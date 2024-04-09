@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2023-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2023-07-01"],
         ]
     }
 
@@ -111,10 +111,12 @@ class Create(AAZCommand):
         _element = cls._args_schema.global_placement_rules.Element
         _element.key = AAZStrArg(
             options=["key"],
+            help="Key for an application specific parameter for the placement of volumes in the volume group",
             required=True,
         )
         _element.value = AAZStrArg(
             options=["value"],
+            help="Value for an application specific parameter for the placement of volumes in the volume group",
             required=True,
         )
 
@@ -164,7 +166,7 @@ class Create(AAZCommand):
             options=["coolness-period"],
             help="Specifies the number of days after which data that is not accessed by clients will be tiered.",
             fmt=AAZIntArgFormat(
-                maximum=63,
+                maximum=183,
                 minimum=7,
             ),
         )
@@ -604,7 +606,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2023-07-01",
                     required=True,
                 ),
             }
@@ -818,9 +820,6 @@ class Create(AAZCommand):
             )
             group_meta_data.application_type = AAZStrType(
                 serialized_name="applicationType",
-            )
-            group_meta_data.deployment_spec_id = AAZStrType(
-                serialized_name="deploymentSpecId",
             )
             group_meta_data.global_placement_rules = AAZListType(
                 serialized_name="globalPlacementRules",
