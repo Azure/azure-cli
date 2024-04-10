@@ -4916,8 +4916,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     for app_setting, value in app_settings_dict.items():
         site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
 
-    site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
-                                                  value=_get_extension_version_functionapp(functions_version)))
+    if flexconsumption_location is None:
+        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
+                                                      value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
 
     # If plan is not flex, consumption or elastic premium, we need to set always on
@@ -7940,7 +7941,7 @@ def _get_functionapp_runtime_info(cmd, resource_group, name, slot, is_linux):  #
         app_runtime_config = get_runtime_config(cmd, resource_group, name)
         app_runtime = app_runtime_config.get("name", "")
         app_runtime_version = app_runtime_config.get("version", "")
-        return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, None)
+        return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, "~4", None)
 
     if is_linux:
         app_metadata = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
