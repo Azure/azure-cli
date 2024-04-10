@@ -1431,7 +1431,7 @@ def list_function_app_runtimes(cmd, os_type=None):
 
 def list_flex_function_app_runtimes(cmd, location, runtime):
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
-    return { 'flex': runtime_helper.stacks}
+    return runtime_helper.stacks
 
 
 def delete_logic_app(cmd, resource_group_name, name, slot=None):
@@ -4030,14 +4030,13 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 class _FlexFunctionAppStackRuntimeHelper:
     class Runtime:
         def __init__(self, name, version, app_insights=False, default=False, sku=None, 
-                     end_of_life_date=None, runtime_info=None, github_actions_properties=None):
+                     end_of_life_date=None, github_actions_properties=None):
             self.name = name
             self.version = version
             self.app_insights = app_insights
             self.default = default
             self.sku = sku
             self.end_of_life_date = end_of_life_date
-            self.runtime_info = runtime_info
             self.github_actions_properties = github_actions_properties
     
     class GithubActionsProperties:
@@ -4113,11 +4112,9 @@ class _FlexFunctionAppStackRuntimeHelper:
                             default=version_properties['isDefault'],
                             sku=version_properties['sku'],
                             end_of_life_date=version_properties['endOfLifeDate'],
-                            runtime_info=version_properties['runtime_info'],
                             github_actions_properties=version_properties['github_actions_properties'])
 
     def _load_stacks(self):
-        logger.warning("Loading Stacks for Function Apps on the Flex Consumption plan..")
         if self._stacks:
             return
         stacks = self.get_flex_raw_function_app_stacks(self._cmd, self._location, self._runtime)
@@ -5222,8 +5219,7 @@ def try_create_application_insights(cmd, functionapp):
 
     ai_resource_group_name = functionapp.resource_group
     ai_name = functionapp.name
-    # Temporary change for testing
-    ai_location = functionapp.location.replace("(stage)", "").replace("stage", "")
+    ai_location = functionapp.location
 
     app_insights_client = get_mgmt_service_client(cmd.cli_ctx, ApplicationInsightsManagementClient)
     ai_properties = {
