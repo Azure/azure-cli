@@ -4068,37 +4068,39 @@ class _FlexFunctionAppStackRuntimeHelper:
             for major_version in runtime['properties']['majorVersions']:
                 for minor_version in major_version['minorVersions']:
                     runtime_version = minor_version['value']
-                    runtime_settings = minor_version['stackSettings']['linuxRuntimeSettings']
-                    runtime_name = (runtime_settings['appSettingsDictionary']['FUNCTIONS_WORKER_RUNTIME'] or
-                                    runtime['name'])
+                    if (minor_version['stackSettings'].get('linuxRuntimeSettings') is not None):
+                        runtime_settings = minor_version['stackSettings']['linuxRuntimeSettings']
+                        runtime_name = (runtime_settings['appSettingsDictionary']['FUNCTIONS_WORKER_RUNTIME'] or
+                                        runtime['name'])
 
-                    skus = runtime_settings['Sku']
-                    github_actions_settings = runtime_settings['gitHubActionSettings']
-                    if skus is None:
-                        continue
-                    
-                    for sku in skus:
-                        if sku['skuCode'] != 'FC1':
+                        skus = runtime_settings['Sku']
+                        github_actions_settings = runtime_settings['gitHubActionSettings']
+                        if skus is None:
                             continue
                         
-                        function_app_config = sku['functionAppConfigProperties']
-                        
-                        github_actions_properties = {
-                            'is_supported': github_actions_settings.get('isSupported', False),
-                            'supported_version': github_actions_settings['supportedVersion'],
-                        }
-                        
-                        runtime_version_properties = {
-                            'isDefault': runtime_settings.get('isDefault', False),
-                            'sku': sku,
-                            'applicationInsights': runtime_settings['appInsightsSettings']['isSupported'],
-                            'endOfLifeDate': runtime_settings['endOfLifeDate'],
-                            'runtime_info': function_app_config,
-                            'github_actions_properties': self.GithubActionsProperties(**github_actions_properties)
-                        }
+                        for sku in skus:
+                            if sku['skuCode'] != 'FC1':
+                                continue
+                            
+                            function_app_config = sku['functionAppConfigProperties']
+                            
+                            logger.warning("Function app config: %s", github_actions_settings)
+                            github_actions_properties = {
+                                'is_supported': github_actions_settings.get('isSupported', False),
+                                'supported_version': github_actions_settings.get('supportedVersion', None)
+                            }
+                            
+                            runtime_version_properties = {
+                                'isDefault': runtime_settings.get('isDefault', False),
+                                'sku': sku,
+                                'applicationInsights': runtime_settings['appInsightsSettings']['isSupported'],
+                                'endOfLifeDate': runtime_settings['endOfLifeDate'],
+                                'runtime_info': function_app_config,
+                                'github_actions_properties': self.GithubActionsProperties(**github_actions_properties)
+                            }
 
-                        runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
-                        runtime_to_version[runtime_name][runtime_version] = runtime_version_properties
+                            runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
+                            runtime_to_version[runtime_name][runtime_version] = runtime_version_properties
 
         for runtime_name, versions in runtime_to_version.items():
             for version_name, version_properties in versions.items():
