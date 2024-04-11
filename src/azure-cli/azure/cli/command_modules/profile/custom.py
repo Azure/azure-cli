@@ -32,7 +32,7 @@ _CLOUD_CONSOLE_LOGIN_WARNING = ("Cloud Shell is automatically authenticated unde
 
 LOGIN_ANNOUNCEMENT = (
     "[Announcements]\n"
-    "Share your feedback regarding your expereince with `az login` at https://aka.ms/azloginfeedback\n\n"
+    "Share your feedback regarding your experience with `az login` at https://aka.ms/azloginfeedback\n\n"
     "If you encounter any problem, please open an issue at https://aka.ms/azclibug\n"
 )
 
