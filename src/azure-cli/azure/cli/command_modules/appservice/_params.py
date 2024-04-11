@@ -183,7 +183,7 @@ subscription than the app service environment, please use the resource ID for --
 
     with self.argument_context('functionapp list-runtimes') as c:
         c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
-        
+
     with self.argument_context('functionapp list-flexconsumption-runtimes') as c:
         c.argument('location', help="limit the output to just the runtimes available in the specified location")
         c.argument('runtime', help="limit the output to just the specified runtime")
