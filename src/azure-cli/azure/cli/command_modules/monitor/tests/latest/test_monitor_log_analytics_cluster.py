@@ -9,7 +9,7 @@ from azure.cli.testsdk import ScenarioTest, record_only, ResourceGroupPreparer
 
 class TestClusterScenarios(ScenarioTest):
 
-    @unittest.skip('service not ready')
+    # @unittest.skip('service not ready')
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_log_analytics_cluster_c', parameter_name='rg1', key='rg1', location='centralus')
     def test_monitor_log_analytics_cluster_default(self, rg1):
         new_cluster_name = self.create_random_name('clitest-cluster-', 20)
@@ -58,7 +58,6 @@ class TestClusterScenarios(ScenarioTest):
             self.check('length(@)', 0)
         ])
 
-    @unittest.skip('service not ready')
     @record_only()
     def test_monitor_log_analytics_cluster_update_key(self):
         new_key_name = 'log-analytics-cluster'
