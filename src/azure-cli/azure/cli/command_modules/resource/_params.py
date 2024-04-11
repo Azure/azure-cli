@@ -118,10 +118,11 @@ def load_arguments(self, _):
     bicep_outdir_type = CLIArgumentType(options_list=['--outdir'], completer=DirectoriesCompleter(), help="When set, saves the output at the specified directory.")
     bicep_outfile_type = CLIArgumentType(options_list=['--outfile'], completer=FilesCompleter(), help="When set, saves the output as the specified file path.")
     bicep_stdout_type = CLIArgumentType(options_list=['--stdout'], action='store_true', help="When set, prints all output to stdout instead of corresponding files.")
-    bicep_indentkind_type = CLIArgumentType(options_list=['--indent-kind'], help="Set indentation kind. Valid values are ( Space | Tab ).")
-    bicep_indentsize_type = CLIArgumentType(options_list=['--indent-size'], help="Number of spaces to indent with (Only valid with --indent-kind set to Space).")
-    bicep_insertfinalnewline_type = CLIArgumentType(options_list=['--insert-final-newline'], action='store_true', help="Insert a final newline.")
+    bicep_indent_kind_type = CLIArgumentType(options_list=['--indent-kind'], arg_type=get_enum_type(["Space", "Tab"]), help="Set indentation kind.")
+    bicep_indent_size_type = CLIArgumentType(options_list=['--indent-size'], help="Number of spaces to indent with (Only valid with --indent-kind set to Space).")
+    bicep_insert_final_newline_type = CLIArgumentType(options_list=['--insert-final-newline'], action='store_true', help="Insert a final newline.")
     bicep_newline_type = CLIArgumentType(options_list=['--newline'], help="Set newline char. Valid values are ( Auto | LF | CRLF | CR ).")
+    bicep_newline_kind_type = CLIArgumentType(options_list=['--newline-kind'], arg_type=get_enum_type(["LF", "CRLF", "CR"]), help="Set line ending characters.")
     bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
                                                  arg_type=get_enum_type(
                                                      ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64", "linux-arm64", "osx-arm64"]),
@@ -800,10 +801,11 @@ def load_arguments(self, _):
         c.argument('outdir', arg_type=bicep_outdir_type)
         c.argument('outfile', arg_type=bicep_outfile_type)
         c.argument('stdout', arg_type=bicep_stdout_type)
-        c.argument('indent_kind', arg_type=bicep_indentkind_type)
-        c.argument('indent_size', arg_type=bicep_indentsize_type)
-        c.argument('insert_final_newline', arg_type=bicep_insertfinalnewline_type)
-        c.argument('newline', arg_type=bicep_newline_type)
+        c.argument('indent_kind', arg_type=bicep_indent_kind_type)
+        c.argument('indent_size', arg_type=bicep_indent_size_type)
+        c.argument('insert_final_newline', arg_type=bicep_insert_final_newline_type)
+        c.argument('newline', arg_type=bicep_newline_type, deprecate_info=c.deprecate(target='--newline', redirect='--newline-kind'))
+        c.argument('newline_kind', arg_type=bicep_newline_kind_type)
 
     with self.argument_context('bicep decompile') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the ARM template to decompile in the file system.")
@@ -823,10 +825,9 @@ def load_arguments(self, _):
 
     with self.argument_context('bicep publish') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep module file to publish in the file system.")
-        c.argument('target', arg_type=CLIArgumentType(options_list=['--target', '-t'],
-                                                      help="The target location where the Bicep module will be published."))
-        c.argument('documentationUri', arg_type=CLIArgumentType(options_list=['--documentationUri', '-d'],
-                                                                help="The documentation uri of the Bicep module."))
+        c.argument('target', arg_type=CLIArgumentType(options_list=['--target', '-t'], help="The target location where the Bicep module will be published."))
+        c.argument('documentationUri', arg_type=CLIArgumentType(options_list=['--documentationUri'], help="The documentation uri of the Bicep module."), deprecate_info=c.deprecate(target='--documentationUri', redirect='--documentation-uri'))
+        c.argument('documentation-uri', arg_type=CLIArgumentType(options_list=['--documentation-uri', '-d'], help="The documentation uri of the Bicep module."))
         c.argument('with_source', options_list=['--with-source'], action='store_true', help="Publish source code with the module.", is_preview=True)
         c.argument('force', arg_type=bicep_force_type, help="Allow overwriting an existing Bicep module version.")
 
