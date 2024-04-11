@@ -4975,7 +4975,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if create_app_insights:
         try:
             try_create_workspace_based_application_insights(cmd, functionapp, workspace)
-            if should_enable_distributed_tracing(consumption_plan_location, flexconsumption_location, matched_runtime, image):
+            if should_enable_distributed_tracing(consumption_plan_location,
+                                                 flexconsumption_location,
+                                                 matched_runtime,
+                                                 image):
                 update_app_settings(cmd, functionapp.resource_group, functionapp.name,
                                     ["APPLICATIONINSIGHTS_ENABLE_AGENT=true"])
 
