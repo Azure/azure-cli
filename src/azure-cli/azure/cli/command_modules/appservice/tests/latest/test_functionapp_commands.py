@@ -31,7 +31,7 @@ FLEX_ASP_LOCATION_FUNCTIONAPP = 'eastus'
 WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP = 'chinaeast'
 
 
-class FunctionappACRScenarioTest(ScenarioTest):
+class FunctionappACRScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     @StorageAccountPreparer()
     @AllowLargeResponse()
@@ -80,7 +80,7 @@ class FunctionappACRScenarioTest(ScenarioTest):
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
 
-class FunctionAppCreateUsingACR(ScenarioTest):
+class FunctionAppCreateUsingACR(LiveScenarioTest):
     @ResourceGroupPreparer(location='brazilsouth')
     @StorageAccountPreparer(name_prefix='clitestacr')
     @AllowLargeResponse()
@@ -131,7 +131,7 @@ class FunctionAppCreateUsingACR(ScenarioTest):
         self.assertNotIn('FUNCTIONS_WORKER_RUNTIME', all_settings)
 
 
-class FunctionappACRDeploymentScenarioTest(ScenarioTest):
+class FunctionappACRDeploymentScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(location='brazilsouth')
     @StorageAccountPreparer(name_prefix='clitestacrdeploy')
     def test_acr_deployment_function_app(self, resource_group, storage_account):
@@ -1500,7 +1500,7 @@ class FunctionAppWithDistributedTracing(ScenarioTest):
                         kp['name'] for kp in app_set])
 
 
-class FunctionAppWithAppInsightsDefault(ScenarioTest):
+class FunctionAppWithAppInsightsDefault(LiveScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_with_default_app_insights(self, resource_group, storage_account):
@@ -1521,6 +1521,7 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
         self.assertTrue('APPLICATIONINSIGHTS_CONNECTION_STRING' in [
                         kp['name'] for kp in app_set])
 
+class FunctionAppWithNoAppInsightsDefault(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_with_no_default_app_insights(self, resource_group, storage_account):
@@ -1867,6 +1868,7 @@ class FunctionAppSlotTests(ScenarioTest):
         ])
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
+class FunctionAppSlotTests(LiveScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_slot_swap(self, resource_group, storage_account):
