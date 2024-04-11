@@ -112,7 +112,7 @@ def load_arguments(self, _):
     stacks_excluded_actions = CLIArgumentType(options_list=['--deny-settings-excluded-actions', '--ea'], help="List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted.")
     stacks_apply_to_child_scopes = CLIArgumentType(options_list=['--deny-settings-apply-to-child-scopes', '--cs'], help='DenySettings will be applied to child scopes.')
     stacks_bypass_stack_out_of_sync_error_type = CLIArgumentType(
-        arg_type=get_three_state_flag(), options_list=['--bypass-stack-out-of-sync-error', '--bsoose'],
+        arg_type=get_three_state_flag(), options_list=['--bypass-stack-out-of-sync-error', '--bse'],
         help='Flag to bypass service errors that indicate the stack resource list is not correctly synchronized.')
 
     bicep_file_type = CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(), type=file_type)
