@@ -631,6 +631,7 @@ def validate_migration_runtime_server(migrationInstanceResourceId):
     if "Microsoft.DBforPostgreSQL/flexibleServers" not in migrationInstanceResourceId:
         raise ValidationError("Migration runtime resource ID provided should be Flexible server.")
 
+
 def validate_private_dns_zone(db_context, server_name, private_dns_zone, private_dns_zone_suffix):
     cmd = db_context.cmd
     if db_context.command_group == 'postgres':
