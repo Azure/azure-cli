@@ -55,14 +55,16 @@ class AddSecretAuthInfo(argparse.Action):
                 }
             elif kl == 'secret-uri':
                 if is_k8s_source(command_name):
-                    raise ValidationError('Service Connector does not support secrets from Key Vault for AKS.')
+                    raise ValidationError('`secret-uri` not supported. ' +
+                                          'Service Connector does not support secrets from Key Vault for AKS.')
                 d['secret_info'] = {
                     'secret_type': 'keyVaultSecretUri',
                     'value': v[0]
                 }
             elif kl == 'secret-name':
                 if is_k8s_source(command_name):
-                    raise ValidationError('Service Connector does not support secrets from Key Vault for AKS.')
+                    raise ValidationError('`secret-name` not supported. ' +
+                                          'Service Connector does not support secrets from Key Vault for AKS.')
                 d['secret_info'] = {
                     'secret_type': 'keyVaultSecretReference',
                     'name': v[0]
