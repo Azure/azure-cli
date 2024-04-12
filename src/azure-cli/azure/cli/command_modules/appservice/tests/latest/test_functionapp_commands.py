@@ -724,7 +724,7 @@ class FunctionappDapr(LiveScenarioTest):
 class FunctionAppFlex(LiveScenarioTest):
     def test_functionapp_list_flexconsumption_locations(self):
         locations = self.cmd('functionapp list-flexconsumption-locations').get_output_in_json()
-        self.assertTrue(len(locations) == 13)
+        self.assertTrue(len(locations) == 12)
 
     def test_functionapp_list_flexconsumption_runtimes(self):
         runtimes = self.cmd('functionapp list-flexconsumption-runtimes').get_output_in_json()

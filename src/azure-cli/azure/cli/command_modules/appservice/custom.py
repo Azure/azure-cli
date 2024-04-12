@@ -5378,47 +5378,12 @@ def list_consumption_locations(cmd):
 
 
 def list_flexconsumption_locations(cmd):
-    return [
-        {
-            "name": "eastus",
-        },
-        {
-            "name": "northeurope"
-        },
-        {
-            "name": "eastasia"
-        },
-        {
-            "name": "centralus"
-        },
-        {
-            "name": "uksouth"
-        },
-        {
-            "name": "eastus2"
-        },
-        {
-            "name": "eastus2euap"
-        },
-        {
-            "name": "australiaeast"
-        },
-        {
-            "name": "westus2"
-        },
-        {
-            "name": "westus3"
-        },
-        {
-            "name": "southcentralus"
-        },
-        {
-            "name": "swedencentral"
-        },
-        {
-            "name": "southeastasia"
-        }
-    ]
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    sub_id = get_subscription_id(cmd.cli_ctx)
+    geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2022-03-01'
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + geo_regions_api.format(sub_id)
+    regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
+    return [{'name': x['name'].lower().replace(' ', '')} for x in regions]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
