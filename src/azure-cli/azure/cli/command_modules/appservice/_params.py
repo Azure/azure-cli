@@ -347,6 +347,8 @@ subscription than the app service environment, please use the resource ID for --
                        help="Number of pre-warmed instances a function app has")
             if scope == 'webapp':
                 c.ignore('reserved_instance_count')
+                c.argument('runtime', help="canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\"."
+                                           "Use `az webapp list-runtimes` for available list")
             c.argument('java_version',
                        help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
             c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
