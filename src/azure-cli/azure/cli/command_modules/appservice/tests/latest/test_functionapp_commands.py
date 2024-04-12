@@ -27,7 +27,7 @@ WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
-FLEX_ASP_LOCATION_FUNCTIONAPP = 'eastus'
+FLEX_ASP_LOCATION_FUNCTIONAPP = 'eastasia'
 WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP = 'chinaeast'
 
 
@@ -796,7 +796,6 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(runtime_config['version'] == '3.11')
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
     def test_functionapp_flex_deployment_config(self, resource_group):
         functionapp_name = self.create_random_name(
             'functionapp', 40)
@@ -810,7 +809,7 @@ class FunctionAppFlex(LiveScenarioTest):
         deployment_storage_account = self.cmd('storage account create -g {} -n {} -l {} --sku Standard_LRS'
                                               .format(resource_group, storage2_name, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
         deployment_account_blob_endpoint = deployment_storage_account['primaryEndpoints']['blob']
-        self.cmd('storage container create -g {} -n {} --account-name {} --public-access blob'
+        self.cmd('storage container create -g {} -n {} --account-name {}'
                  .format(resource_group, container_name, storage2_name))
 
         functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java --deployment-storage-auth-type storageAccountConnectionString'
@@ -841,10 +840,30 @@ class FunctionAppFlex(LiveScenarioTest):
 
         identity = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name)).get_output_in_json()
         deployment_config = self.cmd('functionapp deployment config set -g {} -n {} --deployment-storage-auth-type userAssignedIdentity --deployment-storage-auth-value {}'
-                                     .format(resource_group, functionapp_name, identity['id']))
+                                     .format(resource_group, functionapp_name, identity['id'])).get_output_in_json()
         self.assertTrue(deployment_config['storage']['authentication']['type'] == 'UserAssignedIdentity')
         self.assertTrue(deployment_config['storage']['authentication']['userAssignedIdentityResourceId'] == identity['id'])
         self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] is None)
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_vnet_integration(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java'
+                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account, vnet_name, subnet_name))
+
+        self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
+            resource_group, functionapp_name, vnet_name, subnet_name))
+
+        result = self.cmd('provider show -n Microsoft.App').get_output_in_json()
+        self.assertTrue(result['registrationState'] == 'Registered')
 
 
 class FunctionAppManagedEnvironment(ScenarioTest):
