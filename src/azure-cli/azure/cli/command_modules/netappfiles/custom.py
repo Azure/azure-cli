@@ -11,6 +11,7 @@ from knack.log import get_logger
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.aaz import has_value, AAZJsonSelector
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from .aaz.latest.netappfiles import UpdateNetworkSiblingSet as _UpdateNetworkSiblingSet
 from .aaz.latest.netappfiles.account import Create as _AccountCreate, Update as _AccountUpdate
 from .aaz.latest.netappfiles.account.ad import Add as _ActiveDirectoryAdd, List as _ActiveDirectoryList, Update as _ActiveDirectoryUpdate
 from .aaz.latest.netappfiles.volume import Create as _VolumeCreate, Update as _VolumeUpdate, BreakFileLocks as _BreakFileLocks
@@ -41,6 +42,18 @@ def _update_mapper(existing, new, keys):
         logger.debug("ANF LOG: update mapper => setting:%s old:%s new:%s", key, existing_value, new_value)
         setattr(new, key, new_value if new_value is not None else existing_value)
     logger.debug("mapping done new is now: %s", new)
+
+
+# region NetworkSiblingset
+class UpdateNetworkSiblingSet(_UpdateNetworkSiblingSet):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZArgEnum
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        # # The API does only support setting Basic and Standard
+        args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=False)
+        return args_schema
+# endregion
 
 
 # region account
@@ -206,7 +219,7 @@ class PoolUpdate(_PoolUpdate):
 class VolumeCreate(_VolumeCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZIntArgFormat, AAZBoolArg
+        from azure.cli.core.aaz import AAZStrArg, AAZIntArgFormat, AAZBoolArg, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet = AAZStrArg(
             options=["--vnet"],
@@ -301,6 +314,9 @@ class VolumeCreate(_VolumeCreate):
             maximum=500,
             minimum=100
         )
+
+        # The API does only support setting Basic and Standard
+        args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=False)
 
         return args_schema
 

@@ -966,7 +966,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         os_disk_secure_vm_disk_encryption_set=None, os_disk_delete_option=None,
                         regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
                         enable_osimage_notification=None, max_surge=None, enable_hibernation=None,
-                        enable_proxy_agent=None, proxy_agent_mode=None):
+                        enable_auto_os_upgrade=None, enable_proxy_agent=None, proxy_agent_mode=None,
+                        security_posture_reference_id=None, security_posture_reference_exclude_extensions=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1307,6 +1308,16 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
         if not rolling_upgrade_policy:
             del rolling_upgrade_policy
+    if upgrade_policy_mode and cmd.supported_api_version(min_api='2018-10-01',
+                                                         operation_group='virtual_machine_scale_sets'):
+        vmss_properties['upgradePolicy']['automaticOSUpgradePolicy'] = {}
+        automatic_os_upgrade_policy = vmss_properties['upgradePolicy']['automaticOSUpgradePolicy']
+
+        if enable_auto_os_upgrade is not None:
+            automatic_os_upgrade_policy['enableAutomaticOSUpgrade'] = enable_auto_os_upgrade
+
+        if not automatic_os_upgrade_policy:
+            del automatic_os_upgrade_policy
 
     if enable_spot_restore and cmd.supported_api_version(min_api='2021-04-01',
                                                          operation_group='virtual_machine_scale_sets'):
@@ -1435,6 +1446,16 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                 'id': capacity_reservation_group
             }
         }
+
+    if security_posture_reference_id:
+        virtual_machine_profile['securityPostureReference'] = {
+            'id': security_posture_reference_id,
+        }
+
+    if security_posture_reference_exclude_extensions:
+        security_posture_reference = virtual_machine_profile.get('securityPostureReference', {})
+        security_posture_reference['excludeExtensions'] = security_posture_reference_exclude_extensions
+        virtual_machine_profile['securityPostureReference'] = security_posture_reference
 
     if virtual_machine_profile:
         vmss_properties['virtualMachineProfile'] = virtual_machine_profile
