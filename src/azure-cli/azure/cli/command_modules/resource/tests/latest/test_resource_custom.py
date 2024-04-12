@@ -672,7 +672,11 @@ class TestFormatBicepFile(unittest.TestCase):
         format_bicep_file(cmd, file_path, stdout=stdout)
 
         # Assert.
-        mock_bicep_version_greater_than_or_equal_to.assert_called_once_with("0.12.1")
+        mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
+            mock.call("0.12.1"),
+            mock.call("0.26.54"),
+        ])
+        mock_bicep_version_greater_than_or_equal_to.assert_called_once_with("")
         mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ["format", file_path, "--stdout"])
 
 class TestPublishWithSource(unittest.TestCase):
@@ -705,6 +709,7 @@ class TestPublishWithSource(unittest.TestCase):
         # Assert.
         mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
             mock.call("0.4.1008"), # Min version for 'bicep publish'
+            mock.call('0.26.54'),
             mock.call("0.23.1") # Min version for 'bicep publish --with-source'
         ])
         mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ['publish', file_path, '--target', 'br:contoso.azurecr.io/bicep/mymodule:v1', '--with-source'])
