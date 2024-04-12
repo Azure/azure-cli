@@ -38,7 +38,9 @@ from ._utils import (
     get_local_conn_auth_info,
     _get_azext_module,
     _get_or_add_extension,
-    springboot_migration_warning
+    springboot_migration_warning,
+    get_auth_type_for_update,
+    get_secret_type_for_update
 )
 from ._credential_free import is_passwordless_command
 # pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test,too-many-statements,too-many-locals
@@ -289,6 +291,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       target_resource_group=None, target_id=None,
                       secret_auth_info=None, secret_auth_info_auto=None,
                       user_identity_auth_info=None, system_identity_auth_info=None,
+                      workload_identity_auth_info=None,                     # only used as arg
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
                       app_config_id=None,                                    # configuration store
@@ -625,6 +628,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
                       source_resource_group=None, source_id=None, indentifier=None,
                       secret_auth_info=None, secret_auth_info_auto=None,
                       user_identity_auth_info=None, system_identity_auth_info=None,
+                      workload_identity_auth_info=None,
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
                       app_config_id=None,
@@ -720,8 +724,8 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id, scope)
-    elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
-            and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
+    elif get_auth_type_for_update(auth_info) == 'secret' and \
+            get_secret_type_for_update(auth_info) == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use secret-name')
 
     if app_config_id:
@@ -744,8 +748,8 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
 
     # migration warning for Spring Azure Cloud
     if client_type == CLIENT_TYPE.SpringBoot.value and target_type == RESOURCE.CosmosSql:
-        isSecretType = (auth_info['auth_type'] == AUTH_TYPE.SecretAuto.value or
-                        auth_info['auth_type'] == AUTH_TYPE.Secret.value)
+        isSecretType = (get_auth_type_for_update(auth_info) == AUTH_TYPE.SecretAuto.value or
+                        get_auth_type_for_update(auth_info) == AUTH_TYPE.Secret.value)
         logger.warning(springboot_migration_warning(require_update=False,
                                                     check_version=(not isSecretType),
                                                     both_version=isSecretType))
