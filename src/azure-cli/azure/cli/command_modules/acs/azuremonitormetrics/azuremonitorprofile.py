@@ -19,6 +19,10 @@ from azure.cli.command_modules.acs.azuremonitormetrics.helper import (
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.create import create_rules
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.delete import delete_rules
 from azure.cli.core.azclierror import InvalidArgumentValueError
+from knack.log import get_logger
+
+
+logger = get_logger(__name__)
 
 
 # pylint: disable=line-too-long
@@ -50,6 +54,7 @@ def link_azure_monitor_profile_artifacts(
 
 # pylint: disable=line-too-long
 def unlink_azure_monitor_profile_artifacts(cmd, cluster_subscription, cluster_resource_group_name, cluster_name):
+    logger.warning("Deleting all custom resources for the `azmonitoring.coreos.com` custom resource defintion created by the Managed Prometheus addon")
     # Remove DC* if prometheus is enabled
     dc_objects_list = get_dc_objects_list(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
     delete_dc_objects_if_prometheus_enabled(cmd, dc_objects_list, cluster_subscription, cluster_resource_group_name, cluster_name)
@@ -88,7 +93,7 @@ def ensure_azure_monitor_profile_prerequisites(
         if create_flow is False:
             check_azuremonitormetrics_profile(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
         # Do RP registrations if required
-        rp_registrations(cmd, cluster_subscription)
+        rp_registrations(cmd, cluster_subscription, raw_parameters)
         link_azure_monitor_profile_artifacts(
             cmd,
             cluster_subscription,
