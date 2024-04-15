@@ -2743,7 +2743,7 @@ def validate_deployment_stack_at_resource_group(
         deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes, tags=tags)
 
     return sdk_no_wait(
-        no_wait, rcf.deployment_stacks.begin_preflight_validate_stack_at_resource_group, resource_group, name,
+        no_wait, rcf.deployment_stacks.begin_validate_stack_at_resource_group, resource_group, name,
         deployment_stack_model)
 
 
@@ -2764,7 +2764,7 @@ def validate_deployment_stack_at_subscription(
         deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes, tags=tags)
 
     return sdk_no_wait(
-        no_wait, rcf.deployment_stacks.begin_preflight_validate_stack_at_subscription, name, deployment_stack_model)
+        no_wait, rcf.deployment_stacks.begin_validate_stack_at_subscription, name, deployment_stack_model)
 
 
 def validate_deployment_stack_at_management_group(
@@ -2784,7 +2784,7 @@ def validate_deployment_stack_at_management_group(
         deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes, tags=tags)
 
     return sdk_no_wait(
-        no_wait, rcf.deployment_stacks.begin_preflight_validate_stack_at_management_group, management_group_id, name,
+        no_wait, rcf.deployment_stacks.begin_validate_stack_at_management_group, management_group_id, name,
         deployment_stack_model)
 
 
