@@ -166,7 +166,6 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'extVerUpdate': '2.2',
             'kv_name': key_vault,
             'cert_name': self.create_random_name('sfrp-cli-', 24),
-            'setup_order': 'BeforeSFRuntime',
             'force_update_tag': 'updateTag',
             'provision_after_extension': 'csetest'
         })
@@ -180,7 +179,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
 
         # add extension
         self.cmd('az sf managed-node-type vm-extension add -g {rg} -c {cluster_name} -n pnt '
-                 ' --extension-name {extName} --publisher {publisher} --extension-type {extType} --type-handler-version {extVer} --auto-upgrade-minor-version --setup-order {setup_order}',
+                 ' --extension-name {extName} --publisher {publisher} --extension-type {extType} --type-handler-version {extVer} --auto-upgrade-minor-version --setup-order BeforeSFRuntime',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('vmExtensions[0].setupOrder[0]', 'BeforeSFRuntime')])
 

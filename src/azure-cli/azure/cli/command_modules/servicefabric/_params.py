@@ -27,7 +27,8 @@ from azure.mgmt.servicefabricmanagedclusters.models import (FailureAction,
                                                             ServiceKind,
                                                             DiskType,
                                                             ClusterUpgradeMode,
-                                                            ClusterUpgradeCadence)
+                                                            ClusterUpgradeCadence,
+                                                            VmssExtensionSetupOrder)
 from knack.arguments import CLIArgumentType
 
 
@@ -345,7 +346,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('setting', help='Json formatted public settings for the extension.')
         c.argument('protected_setting', help='The extension can contain either protectedSettings or protectedSettingsFromKeyVault or no protected settings at all.')
         c.argument('provision_after_extension', nargs='+', options_list=['--provision-after-extension', '--provision-after'], help='Collection of extension names after which this extension needs to be provisioned.')
-        c.argument('setup_order', nargs='+', help='Indicates the setup order for the extension.')
+        c.argument('setup_order', arg_type=get_enum_type(VmssExtensionSetupOrder), nargs='+', help='Indicates the setup order for the extension.')
 
     with self.argument_context('sf managed-node-type vm-secret') as c:
         c.argument('source_vault_id', help='Key Vault resource id containing the certificates.')
