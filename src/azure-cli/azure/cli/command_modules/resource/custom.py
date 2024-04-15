@@ -2491,7 +2491,7 @@ def create_deployment_stack_at_subscription(
     except:  # pylint: disable=bare-except
         pass
 
-    action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
+    action_on_unmanage_model = rcf.deployment_stacks.models.ActionOnUnmanage(
         resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum,
         management_groups=aou_management_groups_action_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
@@ -2621,7 +2621,7 @@ def create_deployment_stack_at_resource_group(
     except:  # pylint: disable=bare-except
         pass
 
-    action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
+    action_on_unmanage_model = rcf.deployment_stacks.models.ActionOnUnmanage(
         resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum,
         management_groups=aou_management_groups_action_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
@@ -2810,7 +2810,7 @@ def _prepare_validate_stack_at_scope(
         raise InvalidArgumentValueError(
             "Please enter only one of the following: template file, template spec, or template url")
 
-    action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
+    action_on_unmanage_model = rcf.deployment_stacks.models.ActionOnUnmanage(
         resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum,
         management_groups=aou_management_groups_action_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
@@ -2869,7 +2869,7 @@ def create_deployment_stack_at_management_group(
     except:  # pylint: disable=bare-except
         pass
 
-    action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
+    action_on_unmanage_model = rcf.deployment_stacks.models.ActionOnUnmanage(
         resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum,
         management_groups=aou_management_groups_action_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
