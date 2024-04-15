@@ -4184,7 +4184,7 @@ def server_update(
     #if minimal_tls_version is not None:
 	#    instance.minimal_tls_version = minimal_tls_version
     
-	instance.minimal_tls_version = (
+    instance.minimal_tls_version = (
        minimal_tls_version or instance.minimal_tls_version)
 
     if enable_public_network is not None:
