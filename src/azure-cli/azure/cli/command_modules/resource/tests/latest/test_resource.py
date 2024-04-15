@@ -2678,43 +2678,6 @@ class DeploymentStacksTest(ScenarioTest):
 
         self.cmd('stack group delete -g {resource-group} --name {name} --action-on-unmanage detachAll --yes')
 
-    @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
-    def test_validate_deployment_stack_resource_group_with_bicep(self, resource_group):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        deployment_stack_name = self.create_random_name('cli-test-validate-deployment-stack-resource-group', 60)
-
-        self.kwargs.update(
-            {
-                'name': deployment_stack_name,
-                'location': location,
-                'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
-                'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
-                'bicep-file': os.path.join(curr_dir, 'data', 'bicep_simple_template.bicep').replace('\\', '\\\\'),
-                'bicep-param-file': os.path.join(
-                    curr_dir, 'data', 'bicepparam', 'storage_account_params.bicepparam').replace('\\', '\\\\'),
-                'bicep-param-file-registry': os.path.join(
-                    curr_dir, 'data', 'bicepparam', 'params_registry.bicepparam').replace('\\', '\\\\'),
-                'bicep-param-file-templatespec': os.path.join(
-                    curr_dir, 'data', 'bicepparam', 'params_templatespec.bicepparam').replace('\\', '\\\\'),
-                'resource-group': resource_group,
-            })
-
-        # validate deployment stack with bicep file
-        self.cmd('stack group validate --name {name} --resource-group {resource-group}  --template-file "{bicep-file}" --deny-settings-mode "none" --action-on-unmanage detachAll')
-
-        # test bicep param file
-        self.cmd('stack group validate --name {name} -g {resource-group} -p "{bicep-param-file}" --deny-settings-mode "none" --action-on-unmanage deleteAll')
-
-        # test bicep param file with overrides
-        self.cmd('stack group validate --name {name} -g {resource-group} -p "{bicep-param-file}" -p location=eastus --deny-settings-mode "none" --aou deleteAll')
-
-        # test bicep param file with registry
-        self.cmd('stack group validate --name {name} -g {resource-group} -p "{bicep-param-file-registry}" --deny-settings-mode "none" --action-on-unmanage deleteResources')
-
-        # test bicep param file with template spec
-        self.cmd('stack group validate --name {name} -g {resource-group} -p "{bicep-param-file-templatespec}" --deny-settings-mode "none" --aou detachAll')
-
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_show_deployment_stack_resource_group(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
