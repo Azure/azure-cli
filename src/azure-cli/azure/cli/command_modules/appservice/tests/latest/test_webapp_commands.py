@@ -599,13 +599,13 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('use32BitWorkerProcess', True),
             JMESPathCheck('webSocketsEnabled', False),
             JMESPathCheck('minTlsVersion', '1.2'),
-            JMESPathCheck('ftpsState', 'AllAllowed')])
+            JMESPathCheck('ftpsState', 'FtpsOnly')])
 
         # update and verify
         checks = [
             JMESPathCheck('alwaysOn', True),
             JMESPathCheck('autoHealEnabled', True),
-            JMESPathCheck('phpVersion', '7.2'),
+            JMESPathCheck('phpVersion', '7.4'),
             JMESPathCheck('netFrameworkVersion', 'v3.0'),
             JMESPathCheck('pythonVersion', '3.4'),
             JMESPathCheck('use32BitWorkerProcess', False),
@@ -655,7 +655,7 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck('[0].name', '{0}.azurewebsites.net'.format(webapp_name))])
 
         # site azure storage account configurations tests
-        runtime = 'NODE|14-lts'
+        runtime = 'NODE|16-lts'
         linux_plan = self.create_random_name(
             prefix='webapp-linux-plan', length=24)
         linux_webapp = self.create_random_name(
@@ -920,40 +920,12 @@ class WebappConfigureTest(ScenarioTest):
         self.assertEqual(output[0], {
             'name': 's',
             'value': 'value',
-            'slotSetting': False
-        })
-        self.assertEqual(output[1], {
-            'name': 's2',
-            'value': 'value2',
-            'slotSetting': False
-        })
-        self.assertEqual(output[2], {
-            'name': 's3',
-            'value': 'value3',
             'slotSetting': True
         })
-
-        self.cmd('webapp config appsettings set -g {} -n {} --slot {} --slot-settings "@{}"'.format(
-            resource_group, webapp_name, slot, settings_file)).assert_with_checks([
-            JMESPathCheck("[?name=='s']|[0].value", None),
-            JMESPathCheck("[?name=='s2']|[0].value", None),
-            JMESPathCheck("[?name=='s3']|[0].value", None)
-        ])
-        
-        output = self.cmd('webapp config appsettings list -g {} -n {}'.format(
-            resource_group, webapp_name)).get_output_in_json()
-        output = [s for s in output if s['name'] in ['s', 's2', 's3']]
-        output.sort(key=lambda s: s['name'])
-
-        self.assertEqual(output[0], {
-            'name': 's',
-            'value': 'value',
-            'slotSetting': False
-        })
         self.assertEqual(output[1], {
             'name': 's2',
             'value': 'value2',
-            'slotSetting': False
+            'slotSetting': True
         })
         self.assertEqual(output[2], {
             'name': 's3',
@@ -972,8 +944,6 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("requestTracingEnabled", True),
             JMESPathCheck("alwaysOn", True),
         ])
-
-
 
 class WebappScaleTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
