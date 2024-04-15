@@ -2729,8 +2729,7 @@ def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_
 def validate_deployment_stack_at_resource_group(
     cmd, name, resource_group, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False,
     delete_resources=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None,
-    deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None,
-    no_wait=False
+    deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -2742,16 +2741,27 @@ def validate_deployment_stack_at_resource_group(
         deny_settings_excluded_principals=deny_settings_excluded_principals, deny_settings_excluded_actions=deny_settings_excluded_actions,
         deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes, tags=tags)
 
-    return sdk_no_wait(
-        no_wait, rcf.deployment_stacks.begin_validate_stack_at_resource_group, resource_group, name,
-        deployment_stack_model)
+    from azure.core.exceptions import HttpResponseError
+    try:
+        validation_poller = rcf.deployment_stacks.begin_validate_stack_at_resource_group(resource_group, name, deployment_stack_model)
+    except HttpResponseError as err:
+        err_message = _build_http_response_error_message(err)
+        raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+
+    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+    if validation_result and validation_result.error:
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise_subdivision_deployment_error(err_message)
+
+    return validation_result
 
 
 def validate_deployment_stack_at_subscription(
     cmd, name, location, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False,
     delete_resources=False, deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None,
     parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
-    deny_settings_apply_to_child_scopes=False, tags=None, no_wait=False
+    deny_settings_apply_to_child_scopes=False, tags=None
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -2763,15 +2773,27 @@ def validate_deployment_stack_at_subscription(
         deny_settings_excluded_principals=deny_settings_excluded_principals, deny_settings_excluded_actions=deny_settings_excluded_actions,
         deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes, tags=tags)
 
-    return sdk_no_wait(
-        no_wait, rcf.deployment_stacks.begin_validate_stack_at_subscription, name, deployment_stack_model)
+    from azure.core.exceptions import HttpResponseError
+    try:
+        validation_poller = rcf.deployment_stacks.begin_validate_stack_at_subscription(name, deployment_stack_model)
+    except HttpResponseError as err:
+        err_message = _build_http_response_error_message(err)
+        raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+
+    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+    if validation_result and validation_result.error:
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise_subdivision_deployment_error(err_message)
+
+    return validation_result
 
 
 def validate_deployment_stack_at_management_group(
     cmd, management_group_id, name, location, deny_settings_mode, action_on_unmanage=None, delete_all=False, delete_resource_groups=False,
     delete_resources=False, deployment_subscription=None, template_file=None, template_spec=None, template_uri=None, query_string=None,
     parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
-    deny_settings_apply_to_child_scopes=False, tags=None, no_wait=False
+    deny_settings_apply_to_child_scopes=False, tags=None
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -2783,9 +2805,20 @@ def validate_deployment_stack_at_management_group(
         deny_settings_excluded_principals=deny_settings_excluded_principals, deny_settings_excluded_actions=deny_settings_excluded_actions,
         deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes, tags=tags)
 
-    return sdk_no_wait(
-        no_wait, rcf.deployment_stacks.begin_validate_stack_at_management_group, management_group_id, name,
-        deployment_stack_model)
+    from azure.core.exceptions import HttpResponseError
+    try:
+        validation_poller = rcf.deployment_stacks.begin_validate_stack_at_management_group(management_group_id, name, deployment_stack_model)
+    except HttpResponseError as err:
+        err_message = _build_http_response_error_message(err)
+        raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+
+    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+    if validation_result and validation_result.error:
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise_subdivision_deployment_error(err_message)
+
+    return validation_result
 
 
 def _prepare_validate_stack_at_scope(
