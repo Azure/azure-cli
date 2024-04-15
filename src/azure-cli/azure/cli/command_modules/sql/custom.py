@@ -4084,9 +4084,7 @@ def server_create(
             ServerNetworkAccessFlag.ENABLED if restrict_outbound_network_access
             else ServerNetworkAccessFlag.DISABLED)
 
-    if minimal_tls_version is not None:
-	    kwargs['minimal_tls_version'] = minimal_tls_version
-    else:
+    if minimal_tls_version is None:
 	    kwargs['minimal_tls_version'] = SqlServerMinimalTlsVersionType.tls_1_2
 
     kwargs['key_id'] = key_id
@@ -4183,11 +4181,11 @@ def server_update(
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
 
-    if minimal_tls_version is not None:
-	    instance.minimal_tls_version = minimal_tls_version
+    #if minimal_tls_version is not None:
+	#    instance.minimal_tls_version = minimal_tls_version
     
-	#instance.minimal_tls_version = (
-    #    minimal_tls_version or instance.minimal_tls_version)
+	instance.minimal_tls_version = (
+       minimal_tls_version or instance.minimal_tls_version)
 
     if enable_public_network is not None:
         instance.public_network_access = (
