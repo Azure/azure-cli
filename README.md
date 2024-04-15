@@ -43,7 +43,7 @@ Here are a few features and concepts that can help you get the most out of the A
 
 ![Azure CLI Highlight Reel](doc/assets/AzBlogAnimation4.gif)
 
-The following examples are showing using the `--output table` format, you can change your default using the `az configure` command.
+The following examples are showing using the `--output table` format, you can change your default using the `az config` command.
 
 #### Tab completion
 
