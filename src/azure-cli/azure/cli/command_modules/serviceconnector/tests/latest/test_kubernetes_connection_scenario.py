@@ -5,26 +5,27 @@
 # --------------------------------------------------------------------------
 
 import unittest
+
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.testsdk import (
     ScenarioTest,
-    record_only
+    record_only,
+    live_only
 )
 from azure.cli.command_modules.serviceconnector._resource_config import (
     RESOURCE,
     SOURCE_RESOURCES,
     TARGET_RESOURCES
 )
-from ._test_utils import CredentialReplacer
+from ._test_utils import CredentialReplacer, ConfigCredentialReplacer
 
 
-@unittest.skip('Hide until AKS support is ready.')
 class KubernetesConnectionScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
         super(KubernetesConnectionScenarioTest, self).__init__(
             method_name,
-            recording_processors=[CredentialReplacer()]
+            recording_processors=[CredentialReplacer(), ConfigCredentialReplacer()]
         )
 
     @record_only()
@@ -61,7 +62,10 @@ class KubernetesConnectionScenarioTest(ScenarioTest):
 
         # update connection
         self.cmd('aks connection update keyvault --id {} --client-type dotnet --enable-csi'.format(connection_id),
-                 checks = [ self.check('clientType', 'dotnet') ])
+                 checks = [ 
+                    self.check('clientType', 'dotnet'),
+                    self.check('authInfo.authType', 'userAssignedIdentity'), 
+                ])
 
         # list configuration
         self.cmd('aks connection list-configuration --id {}'.format(connection_id))
@@ -162,7 +166,10 @@ class KubernetesConnectionScenarioTest(ScenarioTest):
 
         # update connection
         self.cmd('aks connection update storage-blob --id {} --client-type dotnet'.format(connection_id),
-                 checks = [ self.check('clientType', 'dotnet') ])
+                 checks = [ 
+                     self.check('clientType', 'dotnet'),
+                     self.check('authInfo.authType', 'secret')
+                ])
 
         # list configuration
         self.cmd('aks connection list-configuration --id {}'.format(connection_id))
@@ -269,3 +276,122 @@ class KubernetesConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('aks connection delete --id {} --yes'.format(connection_id))
+
+
+    @live_only()
+    # "run_cli_cmd" could only work at live mode
+    def test_kubernetes_storageblob_workload_identity_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'cluster': 'servicelinker-storage-cluster',
+            'account': 'servicelinkerstorage'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.KubernetesCluster).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+
+        # get user identity id
+        user_identity_name = 'servicelinker-k8s-identity'
+        user_identity_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{}'.format(
+            self.kwargs['subscription'],
+            'clitest',
+            user_identity_name
+        )
+
+        # create connection
+        self.cmd('aks connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--workload-identity {} --client-type python'.format(name, source_id, target_id, user_identity_id))
+
+        # list connection
+        connections = self.cmd(
+            'aks connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'userAssignedIdentity'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('aks connection update storage-blob --id {} --client-type dotnet'.format(connection_id),
+                 checks = [
+                    self.check('clientType', 'dotnet'),
+                    self.check('authInfo.authType', 'userAssignedIdentity')
+                ])
+
+        # list configuration
+        self.cmd('aks connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('aks connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('aks connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('aks connection delete --id {} --yes'.format(connection_id))
+
+
+    @unittest.skip("secret store not supported.")
+    # key vault connection name differs every run
+    def test_kubernetes_storageblob_secretstore_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'cluster': 'servicelinker-storage-cluster',
+            'account': 'servicelinkerstorage',
+            'vault': 'servicelinker-test-kv',
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.KubernetesCluster).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+        keyvault_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
+
+        # create connection
+        self.cmd('aks connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type python --vault-id {}'.format(name, source_id, target_id, keyvault_id))
+
+        # list connection
+        connections = self.cmd(
+            'aks connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 2),
+                self.check('[0].authInfo.authType', 'userAssignedIdentity'),
+                self.check('[0].targetService.resourceProperties.type', 'KeyVault'),
+                self.check('[0].targetService.resourceProperties.connectAsKubernetesCsiDriver', True),
+                self.check('[1].authInfo.authType', 'secret'),
+                self.check('[1].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        storage_connection_id = connections[1].get('id')
+
+        # list configuration
+        self.cmd(
+            'aks connection list-configuration --id {}'.format(storage_connection_id),
+            checks = [
+                self.check('configurations[0].name', 'AZURE_STORAGEBLOB_CONNECTIONSTRING'),
+                self.check('configurations[0].description', 'Key vault secret.')
+            ]    
+        )
+
+        # update connection
+        self.cmd('aks connection update storage-blob --id {} --client-type dotnet'.format(storage_connection_id),
+                 checks = [
+                     self.check('clientType', 'dotnet'),
+                     self.check('authInfo.authType', 'secret')
+                ])
+
+        # validate connection
+        self.cmd('aks connection validate --id {}'.format(storage_connection_id))
+
+        # delete connections
+        for connection in connections:
+            self.cmd('aks connection delete --id {} --yes'.format(connection.get('id')))
