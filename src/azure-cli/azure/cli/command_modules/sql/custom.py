@@ -4180,9 +4180,6 @@ def server_update(
     # Apply params to instance
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
-
-    #if minimal_tls_version is not None:
-	#    instance.minimal_tls_version = minimal_tls_version
     
     instance.minimal_tls_version = (
        minimal_tls_version or instance.minimal_tls_version)
