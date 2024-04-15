@@ -2678,7 +2678,7 @@ examples:
 
 helps['vm user update'] = """
 type: command
-short-summary: Update a user account.
+short-summary: Update a user account for VM. You can use it to update password or ssh key value for VM user.
 long-summary: >
     This command uses VMAccessForLinux 1.5 for Linux operating system and VMAccessAgent 2.4 for Window operating system.
 parameters:
