@@ -97,13 +97,16 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
                  checks=[self.check('access', 'deny'),
                          self.check('direction', 'outbound'),
                          self.check('priority', 1100)])
+
+        self.cmd('az sf managed-cluster network-security-rule list -g {rg} -c {cluster_name}',
+                checks=[self.check('length(@)', 1)])
         
         self.cmd('az sf managed-cluster network-security-rule delete -g {rg} -c {cluster_name} --name {name}',
-                 checks=[self.check('provisioningState', 'Succeeded')])
+                checks=[self.check('provisioningState', 'Succeeded')])
         
         self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}',
-                 checks=[self.check('clusterState', 'Ready'),
-                 self.check('length(networkSecurityRules)', 0)])
+                checks=[self.check('clusterState', 'Ready'),
+                        self.check('length(networkSecurityRules)', 0)])
 
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
 

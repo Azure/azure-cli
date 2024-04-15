@@ -466,12 +466,12 @@ examples:
 
 helps['sf managed-cluster network-security-rule'] = """
 type: group
-short-summary: network security rule of a manged cluster.
+short-summary: network security rule of a managed cluster.
 """
 
 helps['sf managed-cluster network-security-rule add'] = """
 type: command
-short-summary: Add a network security rule to a manged cluster.
+short-summary: Add a network security rule to a managed cluster.
 examples:
   - name: Add network security rule.
     text: >
@@ -481,7 +481,7 @@ examples:
 
 helps['sf managed-cluster network-security-rule update'] = """
 type: command
-short-summary: Update a network security rule to a manged cluster.
+short-summary: Update a network security rule to a managed cluster.
 examples:
   - name: Update network security rule.
     text: >
@@ -491,16 +491,16 @@ examples:
 
 helps['sf managed-cluster network-security-rule get'] = """
 type: command
-short-summary: Get a network security rule to a manged cluster.
+short-summary: Get a network security rule to a managed cluster.
 examples:
   - name: Get network security rule.
     text: >
         az sf managed-cluster network-security-rule get -g testRG -c testCluster --name 'network security rule name'
 """
 
-helps['sf managed-cluster network-security-rule add'] = """
+helps['sf managed-cluster network-security-rule delete'] = """
 type: command
-short-summary: Delete a network security rule to a manged cluster.
+short-summary: Delete a network security rule to a managed cluster.
 examples:
   - name: Delete network security rule.
     text: >

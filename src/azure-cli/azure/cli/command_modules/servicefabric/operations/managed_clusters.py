@@ -340,13 +340,24 @@ def get_network_security_rule(client,
         nsg = find_in_collection(cluster, 'network_security_rules', 'name', name)
         
         if nsg is None:
-            return cluster.network_security_rules
+            raise 'NSG with name {} not found'.format(name)
         
         return nsg
     
     except HttpResponseError as ex:
         logger.error("HttpResponseError: %s", ex)
-        raise   
+        raise  
+
+def list_network_security_rules(client,
+                            resource_group_name,
+                            cluster_name):
+    try:
+        cluster = client.managed_clusters.get(resource_group_name, cluster_name)
+        return cluster.network_security_rules
+    
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
+        raise  
     
 def delete_network_security_rule(cmd,
                        client,
@@ -370,6 +381,9 @@ def delete_network_security_rule(cmd,
             if initial_size > len(cluster.network_security_rules):
                 poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
                 return LongRunningOperation(cmd.cli_ctx)(poller)
+            else:
+                raise 'NSG with name {} not found'.format(name)
+
         return cluster
     except HttpResponseError as ex:
         logger.error("HttpResponseError: %s", ex)
