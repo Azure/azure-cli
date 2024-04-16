@@ -52,7 +52,7 @@ DEPENDENCIES = [
     'humanfriendly~=10.0',
     'jmespath',
     'knack~=0.11.0',
-    'msal-extensions~=1.0.0',
+    'msal-extensions==1.2.0b1',
     'msal[broker]==1.28.0',
     'msrestazure~=0.6.4',
     'packaging>=20.9',
