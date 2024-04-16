@@ -320,7 +320,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
                                          system_identity_auth_info, service_principal_auth_info_secret, new_addon,
                                          auth_action, config_action)
-    if auth_info != None and is_passwordless_command(cmd, auth_info) and auth_action != 'optOutAllAuth':
+    if auth_info is not None and is_passwordless_command(cmd, auth_info) and auth_action != 'optOutAllAuth':
         if _get_or_add_extension(cmd, PASSWORDLESS_EXTENSION_NAME, PASSWORDLESS_EXTENSION_MODULE, False):
             azext_custom = _get_azext_module(
                 PASSWORDLESS_EXTENSION_NAME, PASSWORDLESS_EXTENSION_MODULE)
@@ -408,9 +408,6 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         else:
             logger.warning('client_type is not dotnet, ignore "--config-connstr"')
 
-
-    config_action = 'optOut' if (opt_out_list is not None and
-                                 OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
     public_network_action = 'optOut' if (opt_out_list is not None and
                                          OPT_OUT_OPTION.PUBLIC_NETWORK.value in opt_out_list) else None
 
@@ -443,7 +440,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id, scope)
-    elif auth_info != None and auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
+    elif auth_info is not None and auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
             and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use secret-name')
 
@@ -663,7 +660,8 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
     if len(all_auth_info) == 1:
         auth_info = all_auth_info[0]
     # when user doesn't provide auth info and linker is not secret-with-username type
-    elif not all_auth_info and (linker.get('authInfo').get('authType') != 'secret' or
+    elif not all_auth_info and (linker.get('authInfo') is None or
+                                linker.get('authInfo').get('authType') != 'secret' or
                                 not linker.get('authInfo').get('name')):
         auth_info = linker.get('authInfo')
     else:
@@ -675,8 +673,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
             'Either client type or auth info should be specified to update')
     auth_action = 'optOutAllAuth' if (opt_out_list is not None and
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
-    if auth_action is not None:
-        auth_info["auth_mode"] = auth_action
+    auth_info["auth_mode"] = auth_action
 
     if linker.get('secretStore') and linker.get('secretStore').get('keyVaultId'):
         key_vault_id = key_vault_id or linker.get('secretStore').get('keyVaultId')
@@ -1060,7 +1057,6 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                                          OPT_OUT_OPTION.PUBLIC_NETWORK.value in opt_out_list) else None
     auth_action = 'optOutAllAuth' if (opt_out_list is not None and
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
-
 
     # create bootstrap-server
     parameters = {
