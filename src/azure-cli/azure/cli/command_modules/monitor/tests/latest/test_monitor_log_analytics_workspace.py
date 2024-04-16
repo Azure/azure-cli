@@ -68,21 +68,17 @@ class TestLogProfileScenarios(ScenarioTest):
             'name': workspace_name
         })
 
-        self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --quota 1 --level 100 --sku CapacityReservation", checks=[
+        self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --quota 1 --sku PerGB2018", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'CapacityReservation'),
-            self.check('sku.capacityReservationLevel', 100),
+            self.check('sku.name', 'PerGB2018'),
             self.check('workspaceCapping.dailyQuotaGb', 1.0)
         ])
 
-        import time
-        time.sleep(60)
-
-        self.cmd("monitor log-analytics workspace update -g {rg} -n {name} --quota 2 --level 200 --sku Standard", checks=[
+        self.cmd("monitor log-analytics workspace update -g {rg} -n {name} --quota 2 --level 100 --sku CapacityReservation", checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('sku.capacityReservationLevel', 200),
-            self.check('sku.name', 'Standard'),
+            self.check('sku.name', 'CapacityReservation'),
+            self.check('sku.capacityReservationLevel', 100),
             self.check('workspaceCapping.dailyQuotaGb', 2.0)
         ])
 

@@ -217,7 +217,6 @@ class WorkspaceTableUpdate(_WorkspaceTableUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        
         if has_value(args.retention_in_days):
             retention_time = args.retention_in_days.to_serialized_data()
             if retention_time == -1 or (4 <= retention_time <= 730):
@@ -287,7 +286,6 @@ def create_log_analytics_workspace_table_search_job(cmd, resource_group_name, wo
                                                     search_query, start_search_time, end_search_time,
                                                     retention_in_days=None, total_retention_in_days=None, limit=None,
                                                     no_wait=False):
-
     return WorkspaceTableCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "table_name": table_name,
