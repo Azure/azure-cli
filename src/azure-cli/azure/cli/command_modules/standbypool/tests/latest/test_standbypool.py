@@ -7,10 +7,14 @@
 
 from azure.cli.testsdk import *
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-import json
- 
+import os
+
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+
+
 class StandbypoolScenario(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name = "test-cli-rg", location="eastus")
+
+    @ResourceGroupPreparer(location="eastus")
     @AllowLargeResponse()
     def test_standby_virtual_machine_pool_scenarios(self):
         self.kwargs.update({
@@ -27,7 +31,7 @@ class StandbypoolScenario(ScenarioTest):
         })
         self.cmd(
             'az network vnet create --name {vnet_name} --resource-group {rg} '
-            '--location {location} --address-prefix "10.0.echo 0.0/16" --subnet-name {subnet_name} --subnet-prefix "10.0.2.0/24"'
+            '--location {location} --address-prefix "10.0.0.0/16" --subnet-name {subnet_name} --subnet-prefix "10.0.2.0/24"'
         )
 
         self.cmd(
@@ -43,8 +47,8 @@ class StandbypoolScenario(ScenarioTest):
 
         # Create
         self.cmd(
-            'az standby-pool standby-virtual-machine-pool create --resource-group {rg} --name {standby_pool_name} '
-            '--max-ready-capacity {maxReadyCapacity} --virtual-machine-state {virtual_machine_state} --attached-virtual-machine-scale-set-id ' + vmssId,
+            'az standby-vm-pool create --resource-group {rg} --name {standby_pool_name} '
+            '--max-ready-capacity {maxReadyCapacity} --vm-state {virtual_machine_state} --vmss-id ' + vmssId,
             checks=[
                 JMESPathCheck('name', self.kwargs.get('standby_pool_name', '')),
                 JMESPathCheck('provisioningState', 'Succeeded'),
@@ -53,7 +57,7 @@ class StandbypoolScenario(ScenarioTest):
 
         # show
         standbyVMPool = self.cmd(
-            'az standby-pool standby-virtual-machine-pool show --resource-group {rg} --name {standby_pool_name}',
+            'az standby-vm-pool show --resource-group {rg} --name {standby_pool_name}',
             checks=[
                 JMESPathCheck('name', self.kwargs.get('standby_pool_name', '')),
                 JMESPathCheck('virtualMachineState', self.kwargs.get('virtual_machine_state', '')),
@@ -64,30 +68,32 @@ class StandbypoolScenario(ScenarioTest):
 
         # list by resource group
         list_by_rg = self.cmd(
-            'az standby-pool standby-virtual-machine-pool list --resource-group {rg}'
+            'az standby-vm-pool list --resource-group {rg}'
         ).get_output_in_json()
         assert(len(list_by_rg) > 0)
 
         # list by subscription
         list_by_sub = self.cmd(
-            'az standby-pool standby-virtual-machine-pool list'
+            'az standby-vm-pool list'
         ).get_output_in_json()
         assert(len(list_by_sub) > 0)
 
 
         # delete
         self.cmd(
-            'az standby-pool standby-virtual-machine-pool delete --resource-group {rg} --name {standby_pool_name} -y'
+            'az standby-vm-pool delete --resource-group {rg} --name {standby_pool_name} -y'
         )
 
-    @ResourceGroupPreparer(parameter_name = "test-cli-rg", location="eastus")
+    @ResourceGroupPreparer(location="eastus")
     @AllowLargeResponse()
     def test_standby_container_group_pool_scenarios(self):
         self.kwargs.update({
             "vnet_name": 'myTestVnet',
             "subnet_name": "myTestSubnet",
             "location": "eastus",
-            "standby_pool_name": "testCGPool",
+            "standby_pool_name": "cgname",
+            "container_profile_name":  "testCGP",
+            'template': os.path.join(TEST_DIR, 'CreateContainerGroupProfileTemplate.json')
         })
         self.cmd(
             'az network vnet create --name {vnet_name} --resource-group {rg} '
@@ -97,14 +103,18 @@ class StandbypoolScenario(ScenarioTest):
             'az network vnet subnet show --resource-group {rg} --name {subnet_name} --vnet-name {vnet_name}'
         ).get_output_in_json()
         subnetId = subnet["id"]
+        self.cmd(
+            'az deployment group create --resource-group {rg} --name {container_profile_name} '
+            '--template-file "{template}" '
+        )
 
         # create
         self.cmd(
-            'az standby-pool standby-container-group-pool create '
-            '--resource-group {rg} --standby-container-group-pool-name {standby_pool_name} '
-            '--id subscriptions/8cf6c1b6-c80f-437c-87ad-45fbaff54f73/resourceGroups/{rg}/providers/Microsoft.ContainerInstance/containerGroupProfiles/testCG '
-            '--revision 1 '
-            '--subnet-ids [0].id=' + subnetId+ ' '
+            'az standby-container-group-pool create '
+            '--resource-group {rg} --name {standby_pool_name} '
+            '--container-profile-id subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/{rg}/providers/Microsoft.ContainerInstance/containerGroupProfiles/{container_profile_name} '
+            '--profile-revision 1 '
+            '--subnet-ids [0].id=' + subnetId + ' '
             '--max-ready-capacity 1 --location {location}',
             checks=[
                 JMESPathCheck('name', self.kwargs.get('standby_pool_name', '')),
@@ -114,7 +124,7 @@ class StandbypoolScenario(ScenarioTest):
 
         # show
         standbyPool = self.cmd(
-            'az standby-pool standby-container-group-pool show --resource-group {rg} --name {standby_pool_name}',
+            'az standby-container-group-pool show --resource-group {rg} --name {standby_pool_name}',
             checks=[
                 JMESPathCheck('name', self.kwargs.get('standby_pool_name', '')),
                 JMESPathCheck('provisioningState', 'Succeeded'),
@@ -123,17 +133,17 @@ class StandbypoolScenario(ScenarioTest):
 
         # list by resource group
         list_by_rg = self.cmd(
-            'az standby-pool standby-container-group-pool list --resource-group {rg}'
+            'az standby-container-group-pool list --resource-group {rg}'
         ).get_output_in_json()
         assert(len(list_by_rg) > 0)
 
         # list by subscription
         list_by_sub = self.cmd(
-            'az standby-pool  standby-container-group-pool list'
+            'az sstandby-container-group-pool list'
         ).get_output_in_json()
         assert(len(list_by_rg) > 0)
 
         # delete
         self.cmd(
-            'az standby-pool standby-container-group-pool delete --resource-group {rg} --name {standby_pool_name} -y'
+            'az standby-container-group-pool delete --resource-group {rg} --name {standby_pool_name} -y'
         )
