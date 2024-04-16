@@ -1,0 +1,111 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "containerGroupProfileName": {
+      "type": "string",
+      "defaultValue": "testCGP",
+      "metadata": {
+        "description": "Name of the Container Group Profile"
+      }
+    },
+    "containerName": {
+      "type": "string",
+      "defaultValue": "testcg",
+      "metadata": {
+        "description": "Name of the Container"
+      }
+    },
+    "image": {
+      "type": "string",
+      "defaultValue": "mcr.microsoft.com/azuredocs/aci-helloworld:latest",
+      "metadata": {
+        "description": "Container image"
+      }
+    },
+    "cpu": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Number of CPU cores"
+      }
+    },
+    "memoryInGB": {
+      "type": "string",
+      "defaultValue": "1.5",
+      "metadata": {
+        "description": "Memory In GB"
+      }
+    },
+    "osType": {
+      "type": "string",
+      "defaultValue": "Linux",
+      "metadata": {
+        "description": "OS Type"
+      }
+    },
+    "port": {
+      "type": "int",
+      "defaultValue": 8000,
+      "metadata": {
+        "description": "Open Port"
+      }
+    },
+    "sku": {
+      "type": "string",
+      "defaultValue": "Standard",
+      "metadata": {
+        "description": "SKU type"
+      }
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ContainerInstance/containerGroupProfiles",
+      "apiVersion": "2023-05-15-preview",
+      "name": "[parameters('containerGroupProfileName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "containers": [
+          {
+            "name": "[parameters('containerName')]",
+            "properties": {
+              "command": [],
+              "environmentVariables": [],
+              "image": "[parameters('image')]",
+              "ports": [ { "port": "[parameters('port')]" } ],
+              "resources": {
+                "requests": {
+                  "cpu": "[parameters('cpu')]",
+                  "memoryInGB": "[parameters('memoryInGB')]"
+                }
+              }
+            }
+          }
+        ],
+        "imageRegistryCredentials": [],
+        "ipAddress": {
+          "ports": [
+            {
+              "protocol": "TCP",
+              "port": "[parameters('port')]"
+            }
+          ],
+          "type": "Public"
+        },
+        "osType": "[parameters('osType')]",
+        "sku": "[parameters('sku')]"
+      }
+    }
+  ],
+  "outputs": {}
+}
