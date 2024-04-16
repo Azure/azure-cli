@@ -3476,15 +3476,6 @@ examples:
     text: az capacity reservation group show -n ReservationGroupName -g MyResourceGroup --instance-view
 """
 
-helps['capacity reservation group list'] = """
-type: command
-short-summary: List the capacity reservation groups.
-examples:
-  - name: List the capacity reservation groups.
-    text: az capacity reservation group list -g MyResourceGroup
-  - name: List the capacity reservation groups containing VM instances and VMSS instance which are associated to capacity reservation group
-    text: az capacity reservation group list -g MyResourceGroup --vm-instance --vmss-instance
-"""
 
 helps['capacity reservation create'] = """
 type: command
