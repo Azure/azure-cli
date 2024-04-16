@@ -605,6 +605,48 @@ class ContainerappIngressTests(ScenarioTest):
         self.cmd('containerapp ingress access-restriction list -g {} -n {}'.format(resource_group, ca_name), checks=[
             JMESPathCheck('length(@)', 0),
         ])
+        # test update ip restriction with yaml without rule name
+        containerapp_yaml_text = f"""
+    properties:
+        configuration:
+            ingress:
+              ipSecurityRestrictions:
+              - action: Allow
+                description: test
+                ipAddressRange: 1.0.0.0/23
+              - action: Allow
+                description: test
+                ipAddressRange: 1.0.0.0/23
+    """
+        containerapp_file_name = f"{self._testMethodName}_containerapp.yml"
+
+        write_test_file(containerapp_file_name, containerapp_yaml_text)
+        self.cmd(f'containerapp update -n {ca_name} -g {resource_group} --yaml {containerapp_file_name}', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck('length(properties.configuration.ingress.ipSecurityRestrictions)', 2),
+            JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].name", None),
+            JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].description", "test"),
+            JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].ipAddressRange", "1.0.0.0/23"),
+            JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[1].name", None),
+            JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[1].description", "test"),
+            JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[1].ipAddressRange", "1.0.0.0/23"),
+        ])
+
+        self.cmd(
+            'containerapp ingress access-restriction set -g {} -n {} --rule-name name2 --ip-address 192.168.1.1/8 --description "Description here." --action Allow'.format(
+                resource_group, ca_name), checks=[
+                JMESPathCheck("[0].name", None),
+                JMESPathCheck("[0].description", "test"),
+                JMESPathCheck("[0].ipAddressRange", "1.0.0.0/23"),
+                JMESPathCheck("[1].name", None),
+                JMESPathCheck("[1].description", "test"),
+                JMESPathCheck("[1].ipAddressRange", "1.0.0.0/23"),
+                JMESPathCheck('[2].name', "name2"),
+                JMESPathCheck('[2].description', "Description here."),
+                JMESPathCheck('[2].ipAddressRange', "192.168.1.1/8"),
+                JMESPathCheck('[2].action', "Allow"),
+            ])
+        clean_up_test_file(containerapp_file_name)
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
