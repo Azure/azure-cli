@@ -42,14 +42,15 @@ setup() {
     set -v
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get install --assume-yes --no-install-recommends apt-transport-https ca-certificates curl gnupg2 lsb-release
+    apt-get install --assume-yes --no-install-recommends apt-transport-https ca-certificates curl gnupg lsb-release
     set +v
 
     assert_consent "Add Microsoft as a trusted package signer?" ${global_consent}
     set -v
     mkdir -p /etc/apt/keyrings
-    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc |\
+    curl -sLS https://packages.microsoft.com/keys/microsoft.asc |
       gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg
+    chmod go+r /etc/apt/keyrings/microsoft.gpg
     set +v
 
     assert_consent "Add the Azure CLI Repository to your apt sources?" ${global_consent}
@@ -58,8 +59,8 @@ setup() {
     if [[ -z $DIST_CODE ]]; then
         CLI_REPO=$(lsb_release -cs)
         shopt -s nocasematch
-        ERROR_MSG="Unable to find a package for your system. Please check if an existing package in https://packages.microsoft.com/repos/azure-cli/dists/ can be used in your system and install with the dist name: 'curl -fsSL https://aka.ms/InstallAzureCLIDeb | sudo DIST_CODE=<dist_code_name> bash'"
-        if [[ ! $(curl -fsSL https://packages.microsoft.com/repos/azure-cli/dists/) =~ $CLI_REPO ]]; then
+        ERROR_MSG="Unable to find a package for your system. Please check if an existing package in https://packages.microsoft.com/repos/azure-cli/dists/ can be used in your system and install with the dist name: 'curl -sL https://aka.ms/InstallAzureCLIDeb | sudo DIST_CODE=<dist_code_name> bash'"
+        if [[ ! $(curl -sL https://packages.microsoft.com/repos/azure-cli/dists/) =~ $CLI_REPO ]]; then
             DIST=$(lsb_release -is)
             if [[ $DIST =~ "Ubuntu" ]]; then
                 CLI_REPO="jammy"
@@ -78,7 +79,7 @@ setup() {
         fi
     else
         CLI_REPO=$DIST_CODE
-        if [[ ! $(curl -fsSL https://packages.microsoft.com/repos/azure-cli/dists/) =~ $CLI_REPO ]]; then
+        if [[ ! $(curl -sL https://packages.microsoft.com/repos/azure-cli/dists/) =~ $CLI_REPO ]]; then
             echo "Unable to find an azure-cli package with DIST_CODE=$CLI_REPO in https://packages.microsoft.com/repos/azure-cli/dists/."
             exit 1
         fi
