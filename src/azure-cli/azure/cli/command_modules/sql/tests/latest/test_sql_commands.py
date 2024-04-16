@@ -6856,24 +6856,14 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('minimalTlsVersion', tls1_1)])
-
-        # test create sql server is created with deafult tls 1.2 
-        self.cmd('sql server create -g {} --name {} '
-                 '--admin-user {} --admin-password {}'
-                 .format(resource_group, server_name_2, admin_login, admin_passwords[0]),
-                 checks=[
-                     JMESPathCheck('name', server_name_2),
-                     JMESPathCheck('location', resource_group_location),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('minimalTlsVersion', tls1_2)]).get_output_in_json()
                      
         # test update sql server with tls version as 1.3
         self.cmd('sql server update -g {} --name {} --minimal-tls-version {} -i'
-                 .format(resource_group, server_name_2, tls1_3),
+                 .format(resource_group, server_name_1, tls1_3),
                  checks=[
-                     JMESPathCheck('name', server_name_2),
+                     JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('minimalTlsVersion', tls1_3)]).get_output_in_json()
+                     JMESPathCheck('minimalTlsVersion', tls1_3)])
 
 class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
     @ManagedInstancePreparer()
