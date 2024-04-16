@@ -194,7 +194,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert backup_policy['tags']['Tag1'] == 'Value2'
 
 
-    @unittest.skip('(servicedeployment) Backups has been deprecated, new backup API is in 2023-05-01-preview -> netappfiles-preview extension')
+    # @unittest.skip('(servicedeployment) Backups has been deprecated, new backup API is in 2023-05-01-preview -> netappfiles-preview extension')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_', additional_tags={'owner': 'cli_test'})
     def test_assign_backup_policy_to_volume(self):
         # create account
