@@ -386,8 +386,8 @@ class _UpdateHelper:
             serialized_name="containerGroupProfile",
             flags={"required": True},
         )
-        container_group_properties.subnet_id = AAZStrType(
-            serialized_name="subnetId",
+        container_group_properties.subnet_ids = AAZListType(
+            serialized_name="subnetIds",
         )
 
         container_group_profile = _schema_standby_container_group_pool_resource_read.properties.container_group_properties.container_group_profile
@@ -395,6 +395,14 @@ class _UpdateHelper:
             flags={"required": True},
         )
         container_group_profile.revision = AAZIntType()
+
+        subnet_ids = cls._schema_on_200_201.properties.container_group_properties.subnet_ids
+        subnet_ids.Element = AAZObjectType()
+
+        _element = cls._schema_on_200_201.properties.container_group_properties.subnet_ids.Element
+        _element.id = AAZStrType(
+            flags={"required": True},
+        )
 
         elasticity_profile = _schema_standby_container_group_pool_resource_read.properties.elasticity_profile
         elasticity_profile.max_ready_capacity = AAZIntType(

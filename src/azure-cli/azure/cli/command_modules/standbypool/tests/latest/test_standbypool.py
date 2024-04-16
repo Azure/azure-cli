@@ -115,7 +115,9 @@ class StandbypoolScenario(ScenarioTest):
             '--container-profile-id subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/{rg}/providers/Microsoft.ContainerInstance/containerGroupProfiles/{container_profile_name} '
             '--profile-revision 1 '
             '--subnet-ids [0].id=' + subnetId + ' '
-            '--max-ready-capacity 1 --location {location}',
+            '--refill-policy always '
+            '--max-ready-capacity 1 '
+            '--location {location}',
             checks=[
                 JMESPathCheck('name', self.kwargs.get('standby_pool_name', '')),
                 JMESPathCheck('provisioningState', 'Succeeded'),

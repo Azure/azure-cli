@@ -47,7 +47,6 @@ class Delete(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group",
             required=True,
         )
         _args_schema.name = AAZStrArg(

@@ -18,10 +18,10 @@ class Create(AAZCommand):
     """Create a standby container pool
 
     :example: Create Standby Container Pool
-        az standby-container-group-pool create --resource-group myrg --name mypool --subscriptionId 461fa159-654a-415f-853a-40b801021944 --container-profile-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/myrg/providers/Microsoft.ContainerInstance/containerGroupProfiles/mycg --profile-revision 1 --subnet-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/ru-cli-test-standbypool/providers/Microsoft.Network/virtualNetworks/ru-cli-test-standbypool-vnet/subnets/testSubnet --max-ready-capacity 1 --refill-policy always --location eastus
+        az standby-container-group-pool create --resource-group myrg --name mypool --subscriptionId 461fa159-654a-415f-853a-40b801021944 --container-profile-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/myrg/providers/Microsoft.ContainerInstance/containerGroupProfiles/mycg --profile-revision 1 --subnet-ids [0].id=/subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/ru-cli-test-standbypool/providers/Microsoft.Network/virtualNetworks/ru-cli-test-standbypool-vnet/subnets/testSubnet --max-ready-capacity 1 --refill-policy always --location eastus
 
     :example: Create with subscription and resource group set with context
-        az standby-container-pool create --name mypool --container-profile-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/myrg/providers/Microsoft.ContainerInstance/containerGroupProfiles/mycg --profile-revision 1 --subnet-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/ru-cli-test-standbypool/providers/Microsoft.Network/virtualNetworks/ru-cli-test-standbypool-vnet/subnets/testSubnet --max-ready-capacity 1 --refill-policy always --location eastus
+        az standby-container-group-pool create --name mypool --container-profile-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/myrg/providers/Microsoft.ContainerInstance/containerGroupProfiles/mycg --profile-revision 1 --subnet-ids [0].id=/subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/ru-cli-test-standbypool/providers/Microsoft.Network/virtualNetworks/ru-cli-test-standbypool-vnet/subnets/testSubnet --max-ready-capacity 1 --refill-policy always --location eastus
     """
 
     _aaz_info = {
@@ -49,7 +49,6 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group",
             required=True,
         )
         _args_schema.name = AAZStrArg(
@@ -78,10 +77,20 @@ class Create(AAZCommand):
         # define Arg Group "ContainerGroupProperties"
 
         _args_schema = cls._args_schema
-        _args_schema.subnet_id = AAZResourceIdArg(
-            options=["--subnet-id"],
+        _args_schema.subnet_ids = AAZListArg(
+            options=["--subnet-ids"],
             arg_group="ContainerGroupProperties",
-            help="Specifies subnet Id for container group profile.",
+            help="Specifies subnet Ids for container group.",
+        )
+
+        subnet_ids = cls._args_schema.subnet_ids
+        subnet_ids.Element = AAZObjectArg()
+
+        _element = cls._args_schema.subnet_ids.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            help="Specifies ARM resource id of the subnet.",
+            required=True,
         )
 
         # define Arg Group "ElasticityProfile"
@@ -242,12 +251,20 @@ class Create(AAZCommand):
             container_group_properties = _builder.get(".properties.containerGroupProperties")
             if container_group_properties is not None:
                 container_group_properties.set_prop("containerGroupProfile", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
-                container_group_properties.set_prop("subnetId", AAZStrType, ".subnet_id")
+                container_group_properties.set_prop("subnetIds", AAZListType, ".subnet_ids")
 
             container_group_profile = _builder.get(".properties.containerGroupProperties.containerGroupProfile")
             if container_group_profile is not None:
                 container_group_profile.set_prop("id", AAZStrType, ".container_profile_id", typ_kwargs={"flags": {"required": True}})
                 container_group_profile.set_prop("revision", AAZIntType, ".profile_revision")
+
+            subnet_ids = _builder.get(".properties.containerGroupProperties.subnetIds")
+            if subnet_ids is not None:
+                subnet_ids.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.containerGroupProperties.subnetIds[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id", typ_kwargs={"flags": {"required": True}})
 
             elasticity_profile = _builder.get(".properties.elasticityProfile")
             if elasticity_profile is not None:
@@ -318,8 +335,8 @@ class Create(AAZCommand):
                 serialized_name="containerGroupProfile",
                 flags={"required": True},
             )
-            container_group_properties.subnet_id = AAZStrType(
-                serialized_name="subnetId",
+            container_group_properties.subnet_ids = AAZListType(
+                serialized_name="subnetIds",
             )
 
             container_group_profile = cls._schema_on_200_201.properties.container_group_properties.container_group_profile
@@ -327,6 +344,14 @@ class Create(AAZCommand):
                 flags={"required": True},
             )
             container_group_profile.revision = AAZIntType()
+
+            subnet_ids = cls._schema_on_200_201.properties.container_group_properties.subnet_ids
+            subnet_ids.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.container_group_properties.subnet_ids.Element
+            _element.id = AAZStrType(
+                flags={"required": True},
+            )
 
             elasticity_profile = cls._schema_on_200_201.properties.elasticity_profile
             elasticity_profile.max_ready_capacity = AAZIntType(
