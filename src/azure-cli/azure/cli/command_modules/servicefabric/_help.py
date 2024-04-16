@@ -578,7 +578,6 @@ short-summary: Add an extension to the node type.
 examples:
   - name: Add bg extension.
     text: >
-        az sf managed-node-type vm-extension add -g testRG -c testCluster -n snt --extension-name csetest --publisher Microsoft.Compute --extension-type BGInfo --type-handler-version 2.1 --auto-upgrade-minor-version
         az sf managed-node-type vm-extension add -g testRG -c testCluster -n snt --extension-name  MyCustomScriptExtension --publisher Microsoft.Compute --extension-type CustomScriptExtension --type-handler-version 1.10 --auto-upgrade-minor-version --setup-order BeforeSFRuntime --provision-after-extension ServiceFabricMCNodeVmExt
 """
 
