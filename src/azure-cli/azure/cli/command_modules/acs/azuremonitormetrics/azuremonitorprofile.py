@@ -93,7 +93,7 @@ def ensure_azure_monitor_profile_prerequisites(
         if create_flow is False:
             check_azuremonitormetrics_profile(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
         # Do RP registrations if required
-        rp_registrations(cmd, cluster_subscription)
+        rp_registrations(cmd, cluster_subscription, raw_parameters)
         link_azure_monitor_profile_artifacts(
             cmd,
             cluster_subscription,

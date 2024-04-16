@@ -249,7 +249,7 @@ class Create(AAZCommand):
         _args_schema.backup_id = AAZStrArg(
             options=["--backup-id"],
             arg_group="Properties",
-            help="UUID v4 or resource identifier used to identify the Backup.",
+            help="Resource identifier used to identify the Backup.",
             nullable=True,
         )
         _args_schema.capacity_pool_resource_id = AAZStrArg(
@@ -412,7 +412,7 @@ class Create(AAZCommand):
         _args_schema.snapshot_id = AAZStrArg(
             options=["--snapshot-id"],
             arg_group="Properties",
-            help="UUID v4 or resource identifier used to identify the Snapshot.",
+            help="Resource identifier used to identify the Snapshot.",
             nullable=True,
         )
         _args_schema.subnet_id = AAZStrArg(
