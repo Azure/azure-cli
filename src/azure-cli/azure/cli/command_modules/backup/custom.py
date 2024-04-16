@@ -226,10 +226,20 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
 
 
 def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts, existing_vault=None):
-    monitoring_settings = MonitoringSettings()
+    # Update scenario
     if existing_vault is not None:
         monitoring_settings = existing_vault.properties.monitoring_settings
+        
+        if azure_monitor_alerts_for_job_failures is not None:
+            monitoring_settings.azure_monitor_alert_settings.alerts_for_all_job_failures = \
+                cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures)
 
+        if classic_alerts is not None:
+            monitoring_settings.classic_alert_settings.alerts_for_critical_operations = \
+                cust_help.transform_enable_parameters(classic_alerts)
+
+    # Create scenario
+    monitoring_settings = MonitoringSettings()
     if azure_monitor_alerts_for_job_failures is not None:
         monitoring_settings.azure_monitor_alert_settings = AzureMonitorAlertSettings(
             alerts_for_all_job_failures=cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures))
