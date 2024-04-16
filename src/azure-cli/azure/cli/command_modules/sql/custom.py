@@ -4050,11 +4050,11 @@ def server_create(
         client,
         resource_group_name,
         server_name,
+        minimal_tls_version=None,
         assign_identity=False,
         no_wait=False,
         enable_public_network=None,
         restrict_outbound_network_access=None,
-        minimal_tls_version=None,
         key_id=None,
         federated_client_id=None,
         user_assigned_identity_id=None,
@@ -4063,7 +4063,7 @@ def server_create(
         enable_ad_only_auth=False,
         external_admin_principal_type=None,
         external_admin_sid=None,
-        external_admin_name=None,
+        external_admin_name=None,	
         **kwargs):
     '''
     Creates a server.
@@ -4084,7 +4084,9 @@ def server_create(
             ServerNetworkAccessFlag.ENABLED if restrict_outbound_network_access
             else ServerNetworkAccessFlag.DISABLED)
 
-    if minimal_tls_version is None:
+    if minimal_tls_version is not None:
+	    kwargs['minimal_tls_version'] = minimal_tls_version
+    else:
         kwargs['minimal_tls_version'] = SqlServerMinimalTlsVersionType.tls_1_2
 
     kwargs['key_id'] = key_id

@@ -1858,7 +1858,8 @@ def load_arguments(self, _):
             c, 'parameters', Server, [
                 'administrator_login',
                 'administrator_login_password',
-                'location'
+                'location',
+                'minimal_tls_version'
             ])
 
         c.argument('administrator_login',
@@ -1888,11 +1889,6 @@ def load_arguments(self, _):
         c.argument('external_admin_principal_type',
                    options_list=['--external-admin-principal-type'],
                    help='User, Group or Application')
-
-        c.argument('minimal_tls_version',
-		           options_list=['--minimal-tls-version'],
-				   arg_type=get_enum_type(SqlServerMinimalTlsVersionType),
-                   help='The minimal TLS version enforced by the sql server for inbound connections.')
 
     with self.argument_context('sql server update') as c:
         c.argument('administrator_login_password',
