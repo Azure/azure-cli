@@ -149,7 +149,7 @@ def validate_allow_insecure(namespace):
 
 
 def _ping_containerapp_if_need(cmd, app) -> (bool, str):
-    # if container app has no ingress or is internal, no need to ping
+    # if container app has no ingress or is internal, not need to ping
     if safe_get(app, "properties", "configuration", "ingress") is None or safe_get(app, "properties", "configuration", "ingress", "external") is False:
         return False, None
 
@@ -157,7 +157,7 @@ def _ping_containerapp_if_need(cmd, app) -> (bool, str):
     env_name = parsed_env['name']
     env_rg = parsed_env['resource_group']
     env = ManagedEnvironmentClient.show(cmd, env_rg, env_name)
-    # if environment is internal, no need to ping
+    # if environment is internal, not need to ping
     if safe_get(env, "properties", "vnetConfiguration", "internal") is True:
         return False, None
 
