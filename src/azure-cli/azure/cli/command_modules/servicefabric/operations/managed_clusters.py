@@ -279,19 +279,19 @@ def add_network_security_rule(cmd,
 
 
 def update_network_security_rule(cmd,
-                                client,
-                                resource_group_name,
-                                cluster_name,
-                                name,
-                                access=None,
-                                description=None,
-                                direction=None,
-                                protocol=None,
-                                priority=None,
-                                source_port_ranges=None,
-                                dest_port_ranges=None,
-                                dest_addr_prefixes=None,
-                                source_addr_prefixes=None):
+                                 client,
+                                 resource_group_name,
+                                 cluster_name,
+                                 name,
+                                 access=None,
+                                 description=None,
+                                 direction=None,
+                                 protocol=None,
+                                 priority=None,
+                                 source_port_ranges=None,
+                                 dest_port_ranges=None,
+                                 dest_addr_prefixes=None,
+                                 source_addr_prefixes=None):
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
 
@@ -308,24 +308,24 @@ def update_network_security_rule(cmd,
             protocol_val = existing_nsg.protocol
 
         updated_network_securityRule = NetworkSecurityRule(name=name,
-                                                            access=access if access is not None else existing_nsg.access,
-                                                            description=description if description is not None else existing_nsg.description,
-                                                            direction=direction if direction is not None else existing_nsg.direction,
-                                                            protocol=protocol_val,
-                                                            priority=priority if priority is not None else existing_nsg.priority,
-                                                            source_port_ranges=source_port_ranges if source_port_ranges is not None else existing_nsg.source_port_ranges,
-                                                            destination_port_ranges=dest_port_ranges if dest_port_ranges is not None else existing_nsg.destination_port_ranges,
-                                                            destination_address_prefixes=dest_addr_prefixes if dest_addr_prefixes is not None else existing_nsg.destination_address_prefixes,
-                                                            source_address_prefixes=source_addr_prefixes if source_addr_prefixes is not None else existing_nsg.source_address_prefixes)
+                                                           access=access if access is not None else existing_nsg.access,
+                                                           description=description if description is not None else existing_nsg.description,
+                                                           direction=direction if direction is not None else existing_nsg.direction,
+                                                           protocol=protocol_val,
+                                                           priority=priority if priority is not None else existing_nsg.priority,
+                                                           source_port_ranges=source_port_ranges if source_port_ranges is not None else existing_nsg.source_port_ranges,
+                                                           destination_port_ranges=dest_port_ranges if dest_port_ranges is not None else existing_nsg.destination_port_ranges,
+                                                           destination_address_prefixes=dest_addr_prefixes if dest_addr_prefixes is not None else existing_nsg.destination_address_prefixes,
+                                                           source_address_prefixes=source_addr_prefixes if source_addr_prefixes is not None else existing_nsg.source_address_prefixes)
 
         if not cluster.public_ip_prefix_id:
             cluster.public_ip_prefix_id = None
 
         if not cluster.public_i_pv6_prefix_id:
             cluster.public_i_pv6_prefix_id = None
-                
+
         update_in_collection(cluster, 'network_security_rules', updated_network_securityRule, 'name')
-        
+
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
     except HttpResponseError as ex:
@@ -334,9 +334,9 @@ def update_network_security_rule(cmd,
 
 
 def get_network_security_rule(client,
-                                resource_group_name,
-                                cluster_name,
-                                name):
+                              resource_group_name,
+                              cluster_name,
+                              name):
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
         nsg = find_in_collection(cluster, 'network_security_rules', 'name', name)
@@ -357,17 +357,17 @@ def list_network_security_rules(client,
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
         return cluster.network_security_rules
-    
+
     except HttpResponseError as ex:
         logger.error("HttpResponseError: %s", ex)
-        raise  
+        raise
 
 
 def delete_network_security_rule(cmd,
-                                client,
-                                resource_group_name,
-                                cluster_name,
-                                name):
+                                 client,
+                                 resource_group_name,
+                                 cluster_name,
+                                 name):
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
 
