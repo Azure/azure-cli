@@ -504,7 +504,7 @@ short-summary: list of network security rules in a cluster.
 examples:
   - name: list network security rules.
     text: >
-        az sf managed-cluster network-security-rule list -g testRG -c testCluster'
+        az sf managed-cluster network-security-rule list -g testRG -c testCluster
 """
 
 helps['sf managed-cluster network-security-rule delete'] = """
