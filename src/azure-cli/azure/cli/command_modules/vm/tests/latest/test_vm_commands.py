@@ -9971,7 +9971,7 @@ class CapacityReservationScenarioTest(ScenarioTest):
         self.cmd('capacity reservation group create -n {reservation_group_2} -g {rg} -l westEurope')
         self.cmd('capacity reservation group update -n {reservation_group_2} -g {rg} --sharing-profile "subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be"')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_sharing_profile', location='westEurope')
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_query_params', location='westEurope')
     def test_capacity_reservation_list_query_params(self, resource_group):
 
         self.kwargs.update({
