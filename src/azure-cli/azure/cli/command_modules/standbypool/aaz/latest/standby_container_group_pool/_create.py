@@ -18,10 +18,10 @@ class Create(AAZCommand):
     """Create a standby container pool
 
     :example: Create Standby Container Pool
-        az standby-container-group-pool create --resource-group myrg --name mypool --subscriptionId 461fa159-654a-415f-853a-40b801021944 --container-profile-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/myrg/providers/Microsoft.ContainerInstance/containerGroupProfiles/mycg --revision 1 --subnet-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/ru-cli-test-standbypool/providers/Microsoft.Network/virtualNetworks/ru-cli-test-standbypool-vnet/subnets/testSubnet --max-ready-capacity 1 --refill-policy always --location eastus
+        az standby-container-group-pool create --resource-group myrg --name mypool --subscriptionId 461fa159-654a-415f-853a-40b801021944 --container-profile-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/myrg/providers/Microsoft.ContainerInstance/containerGroupProfiles/mycg --profile-revision 1 --subnet-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/ru-cli-test-standbypool/providers/Microsoft.Network/virtualNetworks/ru-cli-test-standbypool-vnet/subnets/testSubnet --max-ready-capacity 1 --refill-policy always --location eastus
 
     :example: Create with subscription and resource group set with context
-        az standby-container-pool create --name mypool --container-profile-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/myrg/providers/Microsoft.ContainerInstance/containerGroupProfiles/mycg --revision 1 --subnet-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/ru-cli-test-standbypool/providers/Microsoft.Network/virtualNetworks/ru-cli-test-standbypool-vnet/subnets/testSubnet --max-ready-capacity 1 --refill-policy always --location eastus
+        az standby-container-pool create --name mypool --container-profile-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/myrg/providers/Microsoft.ContainerInstance/containerGroupProfiles/mycg --profile-revision 1 --subnet-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/ru-cli-test-standbypool/providers/Microsoft.Network/virtualNetworks/ru-cli-test-standbypool-vnet/subnets/testSubnet --max-ready-capacity 1 --refill-policy always --location eastus
     """
 
     _aaz_info = {
@@ -69,8 +69,8 @@ class Create(AAZCommand):
             arg_group="ContainerGroupProfile",
             help="Specifies container group profile id of standby container pool.",
         )
-        _args_schema.container_profile_revision = AAZIntArg(
-            options=["--container-profile-revision"],
+        _args_schema._profile_revision = AAZIntArg(
+            options=["--profile-revision"],
             arg_group="ContainerGroupProfile",
             help="Specifies revision of container group profile.",
         )
@@ -247,7 +247,7 @@ class Create(AAZCommand):
             container_group_profile = _builder.get(".properties.containerGroupProperties.containerGroupProfile")
             if container_group_profile is not None:
                 container_group_profile.set_prop("id", AAZStrType, ".container_profile_id", typ_kwargs={"flags": {"required": True}})
-                container_group_profile.set_prop("revision", AAZIntType, ".container_profile_revision")
+                container_group_profile.set_prop("revision", AAZIntType, ".profile_revision")
 
             elasticity_profile = _builder.get(".properties.elasticityProfile")
             if elasticity_profile is not None:
