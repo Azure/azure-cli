@@ -4182,7 +4182,7 @@ def server_update(
         administrator_login_password or instance.administrator_login_password)
 
     instance.minimal_tls_version = (
-	    minimal_tls_version or instance.minimal_tls_version)
+        minimal_tls_version or instance.minimal_tls_version)
 
     if enable_public_network is not None:
         instance.public_network_access = (
