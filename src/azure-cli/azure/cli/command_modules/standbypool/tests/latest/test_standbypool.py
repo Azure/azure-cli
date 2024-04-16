@@ -110,7 +110,7 @@ class StandbypoolScenario(ScenarioTest):
 
         # create
         self.cmd(
-            'az standby-container-group-pool create '
+            'standby-container-group-pool create '
             '--resource-group {rg} --name {standby_pool_name} '
             '--container-profile-id subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/{rg}/providers/Microsoft.ContainerInstance/containerGroupProfiles/{container_profile_name} '
             '--profile-revision 1 '
@@ -124,7 +124,7 @@ class StandbypoolScenario(ScenarioTest):
 
         # show
         standbyPool = self.cmd(
-            'az standby-container-group-pool show --resource-group {rg} --name {standby_pool_name}',
+            'standby-container-group-pool show --resource-group {rg} --name {standby_pool_name}',
             checks=[
                 JMESPathCheck('name', self.kwargs.get('standby_pool_name', '')),
                 JMESPathCheck('provisioningState', 'Succeeded'),
@@ -133,17 +133,17 @@ class StandbypoolScenario(ScenarioTest):
 
         # list by resource group
         list_by_rg = self.cmd(
-            'az standby-container-group-pool list --resource-group {rg}'
+            'standby-container-group-pool list --resource-group {rg}'
         ).get_output_in_json()
         assert(len(list_by_rg) > 0)
 
         # list by subscription
         list_by_sub = self.cmd(
-            'az sstandby-container-group-pool list'
+            'standby-container-group-pool list'
         ).get_output_in_json()
         assert(len(list_by_rg) > 0)
 
         # delete
         self.cmd(
-            'az standby-container-group-pool delete --resource-group {rg} --name {standby_pool_name} -y'
+            'standby-container-group-pool delete --resource-group {rg} --name {standby_pool_name} -y'
         )
