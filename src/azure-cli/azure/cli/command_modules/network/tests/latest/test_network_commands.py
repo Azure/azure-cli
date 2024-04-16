@@ -5685,7 +5685,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('az network vnet create -g {rg} -n {vnet} -l westus --address-prefixes 10.0.0.0/16')
         self.cmd('az network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefixes 10.0.0.0/16 --default-outbound false --sharing-scope Tenant')
         self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet} -n {subnet}',
-                 checks=self.check('serviceEndpoints', ''))
+                 checks=self.check('properties.sharingScope', 'Tenant'))
 
 
 class NetworkActiveActiveCrossPremiseScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
