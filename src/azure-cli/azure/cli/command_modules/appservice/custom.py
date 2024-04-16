@@ -4624,6 +4624,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if runtime is not None:
         runtime = runtime.lower()
 
+    is_storage_container_created = False
+    is_user_assigned_identity_created = False
+
     if consumption_plan_location:
         locations = list_consumption_locations(cmd)
         location = next((loc for loc in locations if loc['name'].lower() == consumption_plan_location.lower()), None)
@@ -4654,7 +4657,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             raise ValidationError("Location is invalid. Use: az functionapp list-flexconsumption-locations")
         is_linux = True
         # Following the same plan name format as the backend
-        plan_name = "{}FlexPlan".format(name)
+        plan_name = generatePlanName(resource_group_name)
         plan_info = create_flex_app_service_plan(
             cmd, resource_group_name, plan_name, flexconsumption_location)
         functionapp_def.server_farm_id = plan_info.id
@@ -4668,6 +4671,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         deployment_storage_container = _get_or_create_deployment_storage_container(cmd, resource_group_name, name,
                                                                                    deployment_storage_name,
                                                                                    deployment_storage_container_name)
+        if deployment_storage_container_name is None:
+            is_storage_container_created = True
         deployment_storage_container_name = deployment_storage_container.name
 
         endpoints = deployment_storage.primary_endpoints
@@ -4702,6 +4707,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 name,
                 deployment_storage_auth_value,
                 flexconsumption_location)
+            if deployment_storage_auth_value is None:
+                is_user_assigned_identity_created = True
             deployment_storage_auth_value = deployment_storage_user_assigned_identity.id
             deployment_storage_auth_config["userAssignedIdentityResourceId"] = deployment_storage_auth_value
         elif deployment_storage_auth_type == 'StorageAccountConnectionString':
@@ -4957,9 +4964,18 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.additional_properties["properties"] = existing_properties
         functionapp_def.additional_properties["properties"]["functionAppConfig"] = function_app_config
         functionapp_def.additional_properties["properties"]["sku"] = "FlexConsumption"
-        poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
-                                                        api_version='2023-12-01')
-        functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
+        try:
+            poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
+                                                            api_version='2023-12-01')
+            functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
+        except Exception as ex:  # pylint: disable=broad-except
+            client.app_service_plans.delete(resource_group_name, plan_name)
+            if is_storage_container_created:
+                delete_storage_container(cmd, resource_group_name, deployment_storage_name,
+                                         deployment_storage_container_name)
+            if is_user_assigned_identity_created:
+                delete_user_assigned_identity(cmd, resource_group_name, deployment_storage_user_assigned_identity.name)
+            raise ex
     else:
         poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
         functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -5075,6 +5091,13 @@ def _get_runtime_version_functionapp(version_string, is_linux):
         return float(version_string)
     except ValueError:
         return 0
+
+
+def generatePlanName(resource_group_name):
+    suffix = "-" + str(uuid.uuid4())[:4]
+    alphanumeric_resource_group_name = re.sub(r"[^a-zA-Z0-9]", '', resource_group_name)
+    first_part = 'ASP-{}'.format(alphanumeric_resource_group_name)[:35]
+    return '{}{}'.format(first_part, suffix)
 
 
 def _get_content_share_name(app_name):
@@ -5210,6 +5233,17 @@ def _validate_and_get_deployment_storage(cli_ctx, resource_group_name, deploymen
 
 def _normalize_functionapp_name(functionapp_name):
     return re.sub(r"[^a-zA-Z0-9]", '', functionapp_name).lower()
+
+
+def delete_storage_container(cmd, resource_group_name, storage_name, container_name):
+    storage_client = get_mgmt_service_client(cmd.cli_ctx, StorageManagementClient)
+    storage_client.blob_containers.delete(resource_group_name, storage_name, container_name)
+
+
+def delete_user_assigned_identity(cmd, resource_group_name, identity_name):
+    from azure.mgmt.msi import ManagedServiceIdentityClient
+    msi_client = get_mgmt_service_client(cmd.cli_ctx, ManagedServiceIdentityClient)
+    msi_client.user_assigned_identities.delete(resource_group_name, identity_name)
 
 
 def _get_or_create_deployment_storage_container(cmd, resource_group_name, functionapp_name,
