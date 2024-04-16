@@ -61,7 +61,7 @@ class TestClusterScenarios(ScenarioTest):
     @record_only()
     def test_monitor_log_analytics_cluster_update_key(self):
         new_key_name = 'log-analytics-cluster'
-        new_key_version = '903ca0dc34b44f0789e35488eaffc9f5'
+        new_key_version = '5f37dcb0f24642c3ab800ab845acde4f'
         self.kwargs.update({
             'rg': 'azure-cli-test-scus',
             'key_name': new_key_name,
