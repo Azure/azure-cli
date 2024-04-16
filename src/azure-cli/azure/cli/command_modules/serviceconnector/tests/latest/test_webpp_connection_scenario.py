@@ -1624,3 +1624,55 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @live_only()
+    # app config connection is different every time
+    def test_webapp_storageblob_store_in_app_config(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'clitest',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-config-store-app-euap',
+            'account': 'servicelinkerstorage',
+            'config_store': 'servicelinker-appconfig-ref',
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+        appconfig_id = TARGET_RESOURCES.get(RESOURCE.AppConfig).format(**self.kwargs)
+
+        # create connection
+        conn_id = self.cmd(
+            'webapp connection create storage-blob '
+            '--connection {} --source-id {} --target-id {} '
+            '--secret --client-type python '
+            '--appconfig-id {}'.format(name, source_id, target_id, appconfig_id)
+        ).get_output_in_json().get('id')
+
+        self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 2),
+            ]
+        )
+
+        self.cmd(
+            'webapp connection show --id {}'.format(conn_id),
+            checks = [
+                self.check('configurationInfo.configurationStore.appConfigurationId', appconfig_id)
+            ]
+        )
+
+        configurations = self.cmd(
+            'webapp connection list-configuration --id {}'.format(conn_id)
+        ).get_output_in_json().get('configurations')
+
+        # update connection
+        self.cmd('webapp connection update storage-blob --id {} '
+                 '--secret --client-type dotnet --appconfig-id {}'.format(conn_id, appconfig_id))
+
+        for conn in self.cmd('webapp connection list --source-id {}'.format(source_id)).get_output_in_json():
+            self.cmd('webapp connection delete --id {} --yes'.format(conn.get('id')))
