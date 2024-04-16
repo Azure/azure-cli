@@ -18,7 +18,7 @@ class Show(AAZCommand):
     """Get a standby container pool
 
     :example: Show a standby container pool
-        az standby-container-pool show --subscription 461fa159-654a-415f-853a-40b801021944 --resource-group myrg --name mypool
+        az standby-container-group-pool show --subscription 461fa159-654a-415f-853a-40b801021944 --resource-group myrg --name mypool
     """
 
     _aaz_info = {

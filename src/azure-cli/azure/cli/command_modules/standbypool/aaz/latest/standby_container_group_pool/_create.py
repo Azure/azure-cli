@@ -18,10 +18,10 @@ class Create(AAZCommand):
     """Create a standby container pool
 
     :example: Create Standby Container Pool
-        az standby-container-pool create --resource-group myrg --name mypool --subscriptionId 461fa159-654a-415f-853a-40b801021944 --container-profile-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/myrg/providers/Microsoft.ContainerInstance/containerGroupProfiles/mycg --revision 1 --subnet-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/ru-cli-test-standbypool/providers/Microsoft.Network/virtualNetworks/ru-cli-test-standbypool-vnet/subnets/testSubnet --max-ready-capacity 1 --location eastus
+        az standby-container-group-pool create --resource-group myrg --name mypool --subscriptionId 461fa159-654a-415f-853a-40b801021944 --container-profile-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/myrg/providers/Microsoft.ContainerInstance/containerGroupProfiles/mycg --revision 1 --subnet-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/ru-cli-test-standbypool/providers/Microsoft.Network/virtualNetworks/ru-cli-test-standbypool-vnet/subnets/testSubnet --max-ready-capacity 1 --refill-policy always --location eastus
 
     :example: Create with subscription and resource group set with context
-        az standby-container-pool create --name mypool --container-profile-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/myrg/providers/Microsoft.ContainerInstance/containerGroupProfiles/mycg --revision 1 --subnet-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/ru-cli-test-standbypool/providers/Microsoft.Network/virtualNetworks/ru-cli-test-standbypool-vnet/subnets/testSubnet --max-ready-capacity 1 --location eastus
+        az standby-container-pool create --name mypool --container-profile-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/myrg/providers/Microsoft.ContainerInstance/containerGroupProfiles/mycg --revision 1 --subnet-id /subscriptions/461fa159-654a-415f-853a-40b801021944/resourceGroups/ru-cli-test-standbypool/providers/Microsoft.Network/virtualNetworks/ru-cli-test-standbypool-vnet/subnets/testSubnet --max-ready-capacity 1 --refill-policy always --location eastus
     """
 
     _aaz_info = {

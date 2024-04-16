@@ -18,10 +18,10 @@ class List(AAZCommand):
     """List standby container pools by subscription or by resource group
 
     :example: List by subscription id
-        az standby-container-pool list --subscription 461fa159-654a-415f-853a-40b801021944
+        az standby-container-group-pool list --subscription 461fa159-654a-415f-853a-40b801021944
 
     :example: List by resource group
-        az standby-container-pool list --subscription 461fa159-654a-415f-853a-40b801021944 --resource-group myrg
+        az standby-container-group-pool list --subscription 461fa159-654a-415f-853a-40b801021944 --resource-group myrg
     """
 
     _aaz_info = {

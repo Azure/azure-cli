@@ -19,7 +19,7 @@ class Delete(AAZCommand):
     """Delete a standby container pool
 
     :example: Delete standby container pool
-        az standby-container-pool delete --name mypool --subscription 461fa159-654a-415f-853a-40b801021944 --resource-group
+        az standby-container-group-pool delete --name mypool --subscription 461fa159-654a-415f-853a-40b801021944 --resource-group
     """
 
     _aaz_info = {
