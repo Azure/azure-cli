@@ -385,8 +385,8 @@ def delete_network_security_rule(cmd,
             if initial_size > len(cluster.network_security_rules):
                 poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
                 return LongRunningOperation(cmd.cli_ctx)(poller)
-            else:
-                raise 'NSG with name {} not found'.format(name)
+            
+            raise 'NSG with name {} not found'.format(name)
 
         return cluster
     except HttpResponseError as ex:
