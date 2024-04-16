@@ -12,6 +12,7 @@ from knack.prompting import prompt_y_n
 from azure.mgmt.core.tools import is_valid_resource_id
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+from azure.mgmt.recoveryservices import RecoveryServicesClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType
 
@@ -137,9 +138,9 @@ standard_policy_type = "v1"
 
 
 # pylint: disable=line-too-long
-def update_vault(client, vault_name, resource_group_name, tags=None,
+def update_vault(cmd, client, vault_name, resource_group_name, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
-                 classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
+                 classic_alerts=None, azure_monitor_alerts_for_job_failures=None, tenant_id=None):
     try:
         existing_vault = client.get(resource_group_name, vault_name)
     except CoreResourceNotFoundError:
@@ -164,6 +165,21 @@ def update_vault(client, vault_name, resource_group_name, tags=None,
 
     if tags is not None:
         patchvault.tags = tags
+
+    # If immutability settings have been switched from Unlocked to Disabled, then we have an issue with it.
+    # Also need to figure out how to deal with both soft delete and immutability getting weakened but not today.
+    resource_guard_used = False
+
+    if cust_help.is_immutability_weakened(existing_vault, patchvault):
+        if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
+                                                vault_name, operation_name="disableImmutability"):
+            resource_guard_used = True
+            patchvault.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "disableImmutability")]
+
+    if resource_guard_used and tenant_id is not None:
+        client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesClient,
+                                         aux_tenants=[tenant_id]).vaults
 
     return client.begin_update(resource_group_name, vault_name, patchvault)
 
@@ -219,7 +235,8 @@ def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classi
             alerts_for_all_job_failures=cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures))
     if classic_alerts is not None:
         monitoring_settings.classic_alert_settings = ClassicAlertSettings(
-            alerts_for_critical_operations=cust_help.transform_enable_parameters(classic_alerts))
+            alerts_for_critical_operations=cust_help.transform_enable_parameters(classic_alerts),
+            email_notifications_for_site_recovery="Enabled") # Not processing this yet but we need in new SDK
 
     return monitoring_settings
 

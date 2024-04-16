@@ -141,6 +141,14 @@ def get_resource_guard_operation_request(cli_ctx, resource_group_name, vault_nam
     return operation_request
 
 
+def is_immutability_weakened(existing_vault, patchvault):
+    if existing_vault.properties.security_settings.immutability_settings is not None:
+        if existing_vault.properties.security_settings.immutability_settings.state == "Unlocked":
+            if patchvault.properties.security_settings.immutability_settings.state == "Disabled":
+                return True
+    return False
+
+
 def is_retention_duration_decreased(old_policy, new_policy, backup_management_type):
     if backup_management_type == "AzureIaasVM":
         if old_policy.properties.instant_rp_retention_range_in_days is not None:
