@@ -6865,7 +6865,7 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('minimalTlsVersion', tls1_3)])
 
-        # test create sql server is created with deafult tls 1.2 when minimalTlsVersion is not passed exlicitly
+        # test create sql server is created with default tls 1.2 when minimalTlsVersion is not passed explicitly
         self.cmd('sql server create -g {} --name {} '
                  '--admin-user {} --admin-password {}'
                  .format(resource_group, server_name_2, admin_login, admin_passwords[0]),
