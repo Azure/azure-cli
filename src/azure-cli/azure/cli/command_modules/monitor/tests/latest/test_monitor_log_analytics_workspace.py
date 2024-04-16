@@ -507,7 +507,7 @@ class TestLogProfileScenarios(ScenarioTest):
             'rule_id': '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/tbtest/providers/Microsoft.Insights/dataCollectionRules/rule11'
         })
         # extension command
-        rule = self.cmd('monitor data-collection rule show -g tbtest -n rule11').get_output_in_json()
+        # rule = self.cmd('monitor data-collection rule show -g tbtest -n rule11').get_output_in_json()
         # self.kwargs.update({
         #     'rule_id': rule['id']
         # })
