@@ -579,7 +579,7 @@ examples:
   - name: Add bg extension.
     text: >
         az sf managed-node-type vm-extension add -g testRG -c testCluster -n snt --extension-name csetest --publisher Microsoft.Compute --extension-type BGInfo --type-handler-version 2.1 --auto-upgrade-minor-version
-        az sf managed-node-type vm-extension add -g testRG -c testCluster -n snt --extension-name  MyCustomScriptExtension --publisher Microsoft.Compute --extension-type CustomScriptExtension --type-handler-version 1.10 --auto-upgrade-minor-version --SetupOrder BeforeSFRuntime --provision-after-extension ServiceFabricMCNodeVmExt
+        az sf managed-node-type vm-extension add -g testRG -c testCluster -n snt --extension-name  MyCustomScriptExtension --publisher Microsoft.Compute --extension-type CustomScriptExtension --type-handler-version 1.10 --auto-upgrade-minor-version --Setup-order BeforeSFRuntime --provision-after-extension ServiceFabricMCNodeVmExt
 """
 
 helps['sf managed-node-type vm-extension update'] = """
@@ -588,7 +588,7 @@ short-summary: update existing vm extension on the node type.
 examples:
   - name: update extension.
     text: >
-        az sf managed-node-type vm-extension update -g testrg -c testcluster -n pnt --extension-name testextension --type-handler-version 2.1 --auto-upgrade-minor-version --force-update-tag forced-update --SetupOrder BeforeSFRuntime --provision-after-extension ServiceFabricMCNodeVmExt
+        az sf managed-node-type vm-extension update -g testrg -c testcluster -n pnt --extension-name testextension --type-handler-version 2.1 --auto-upgrade-minor-version --force-update-tag forced-update --Setup-order BeforeSFRuntime --provision-after-extension ServiceFabricMCNodeVmExt
 """
 
 helps['sf managed-node-type vm-extension delete'] = """
