@@ -498,6 +498,15 @@ examples:
         az sf managed-cluster network-security-rule get -g testRG -c testCluster --name 'network security rule name'
 """
 
+helps['sf managed-cluster network-security-rule list'] = """
+type: command
+short-summary: list of network security rules in a cluster.
+examples:
+  - name: list network security rules.
+    text: >
+        az sf managed-cluster network-security-rule list -g testRG -c testCluster --name'
+"""
+
 helps['sf managed-cluster network-security-rule delete'] = """
 type: command
 short-summary: Delete a network security rule to a managed cluster.
