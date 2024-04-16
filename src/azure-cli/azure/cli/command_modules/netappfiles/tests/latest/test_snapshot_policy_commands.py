@@ -92,7 +92,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         snapshot_policy = self.cmd("az netappfiles snapshot policy show -g {rg} -a %s --snapshot-policy-name %s" %
                                    (account_name, snapshot_policy_name)).get_output_in_json()
         assert snapshot_policy['tags']['Tag1'] == 'Value1'
-        
+
         # validate snapshot policy exist via list
         snapshot_policy_list = self.cmd("az netappfiles snapshot policy list -g {rg} -a '%s'" %
                                         account_name).get_output_in_json()
@@ -179,8 +179,10 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         snapshot_policy_name = self.create_random_name(prefix='cli-sn-pol-', length=16)
         hourly_snapshots = 1
         hourly_minute = 10
-        self.cmd("az netappfiles snapshot policy create -g {rg} -a %s --snapshot-policy-name %s -l %s -u %s --hourly-minute %s" %
-                 (account_name, snapshot_policy_name, LOCATION, hourly_snapshots, hourly_minute)).get_output_in_json()
+        daily_minute = 20
+        daily_hour = 2
+        self.cmd("az netappfiles snapshot policy create -g {rg} -a %s --snapshot-policy-name %s -l %s -u %s --hourly-minute %s --daily-minute %s --daily-hour %s" %
+                 (account_name, snapshot_policy_name, LOCATION, hourly_snapshots, hourly_minute, daily_minute, daily_hour)).get_output_in_json()
 
         # get snapshot policy by name and validate
         snapshot_policy = self.cmd("az netappfiles snapshot policy show -g {rg} -a %s --snapshot-policy-name %s" %
@@ -227,7 +229,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
                   hourly_minute, daily_minute, weekly_minute, monthly_minute, daily_hour, weekly_hour,
                   monthly_hour, weekly_day, monthly_days_of_month, enabled, tags)).get_output_in_json()
         assert snapshot_policy['tags']['Tag1'] == 'Value1'
-        
+
         #validate created
         snapshot_policy = self.cmd("az netappfiles snapshot policy show -g {rg} -a %s --snapshot-policy-name %s" %
                             (account_name, snapshot_policy_name)).get_output_in_json()
@@ -256,7 +258,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
                   daily_snapshots_to_keep, weekly_snapshots_to_keep, monthly_snapshots_to_keep,
                   hourly_minute, daily_minute, weekly_minute, monthly_minute, daily_hour, weekly_hour,
                   monthly_hour, weekly_day, monthly_days_of_month, enabled, tags)).get_output_in_json()
-        assert snapshot_policy['tags']['Tag1'] == 'Value2'
+        # assert snapshot_policy['tags']['Tag1'] == 'Value2'
 
         # get updated snapshot policy and validate update
         snapshot_policy = self.cmd("az netappfiles snapshot policy show -g {rg} -a %s --snapshot-policy-name %s" %
@@ -276,12 +278,12 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         assert snapshot_policy['monthlySchedule']['hour'] == monthly_hour
         assert snapshot_policy['monthlySchedule']['daysOfMonth'] == monthly_days_of_month
         assert snapshot_policy['enabled'] == enabled
-
+        assert snapshot_policy['tags']['Tag1'] == 'Value2'
         #validate created
         snapshot_policy = self.cmd("az netappfiles snapshot policy show -g {rg} -a %s --snapshot-policy-name %s" %
                             (account_name, snapshot_policy_name)).get_output_in_json()
         assert snapshot_policy['tags']['Tag1'] == 'Value2'
-    
+
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_', additional_tags={'owner': 'cli_test'})
     def test_snapshot_policy_list_volumes(self):

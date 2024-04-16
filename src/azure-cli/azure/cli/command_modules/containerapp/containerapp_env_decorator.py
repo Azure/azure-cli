@@ -63,6 +63,9 @@ class ContainerAppEnvDecorator(BaseResource):
     def get_argument_instrumentation_key(self):
         return self.get_param("instrumentation_key")
 
+    def get_argument_dapr_connection_string(self):
+        return self.get_param("dapr_connection_string")
+
     def get_argument_infrastructure_subnet_resource_id(self):
         return self.get_param("infrastructure_subnet_resource_id")
 
@@ -180,6 +183,9 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
 
         if self.get_argument_instrumentation_key() is not None:
             self.managed_env_def["properties"]["daprAIInstrumentationKey"] = self.get_argument_instrumentation_key()
+
+        if self.get_argument_dapr_connection_string() is not None:
+            self.managed_env_def["properties"]["daprAIConnectionString"] = self.get_argument_dapr_connection_string()
 
         # Vnet
         self.set_up_vnet_configuration()

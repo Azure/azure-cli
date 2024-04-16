@@ -51,6 +51,35 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         rule_list_checks = [JMESPathCheck('length(@)', 0)]
         self.afd_rule_list_cmd(resource_group, rule_set_name, profile_name, checks=rule_list_checks)
 
+        rule_name = 'r0'
+        rule_checks = [JMESPathCheck('order', 1),
+                       JMESPathCheck('name', rule_name),
+                       JMESPathCheck('matchProcessingBehavior', "Stop"),
+                       JMESPathCheck('length(conditions)', 0),
+                       JMESPathCheck('length(actions)', 1),
+                       JMESPathCheck('actions[0].name', "RouteConfigurationOverride"),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.queryStringCachingBehavior', 'UseQueryString'),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.cacheBehavior', 'HonorOrigin'),
+                       JMESPathCheck('actions[0].parameters.cacheConfiguration.isCompressionEnabled', 'Disabled'),
+                       JMESPathCheck('actions[0].parameters.originGroupOverride', None)]
+
+        self.afd_rule_add_cmd(resource_group,
+                              rule_set_name,
+                              rule_name,
+                              profile_name,
+                              options='--match-processing-behavior Stop --action-name RouteConfigurationOverride --enable-caching True --enable-compression False --query-string-caching-behavior UseQueryString --cache-behavior HonorOrigin --order 1')
+
+        self.afd_rule_show_cmd(resource_group,
+                               rule_set_name,
+                               rule_name,
+                               profile_name,
+                               checks=rule_checks)
+
+        self.afd_rule_delete_cmd(resource_group,
+                                 rule_set_name,
+                                 rule_name,
+                                 profile_name)
+
         rule_name = 'r1'
         rule_checks = [JMESPathCheck('order', 1),
                        JMESPathCheck('name', rule_name),
@@ -237,7 +266,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                        JMESPathCheck('actions[1].name', "RouteConfigurationOverride"),
                        JMESPathCheck('actions[1].parameters.cacheConfiguration.queryStringCachingBehavior', 'IncludeSpecifiedQueryStrings'),
                        JMESPathCheck('actions[1].parameters.cacheConfiguration.cacheBehavior', 'OverrideAlways'),
-                       JMESPathCheck('actions[1].parameters.cacheConfiguration.cacheDuration', '1.00:00:00'),
+                       JMESPathCheck('actions[1].parameters.cacheConfiguration.cacheDuration', '01:00:00'),
                        JMESPathCheck('actions[1].parameters.cacheConfiguration.isCompressionEnabled', 'Enabled'),
                        JMESPathCheck('actions[1].parameters.originGroupOverride.originGroup.id', origin_group_id, False),
                        JMESPathCheck('actions[1].parameters.originGroupOverride.forwardingProtocol', "MatchRequest"),
@@ -251,7 +280,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                      options='--action-name "RouteConfigurationOverride" '
                                              f'--origin-group {origin_group_name} --forwarding-protocol MatchRequest '
                                              '--enable-compression True --enable-caching True '
-                                             '--cache-behavior OverrideAlways --cache-duration 1.00:00:00 '
+                                             '--cache-behavior OverrideAlways --cache-duration 01:00:00 '
                                              '--query-string-caching-behavior IncludeSpecifiedQueryStrings '
                                              '--query-parameters x y z')
 

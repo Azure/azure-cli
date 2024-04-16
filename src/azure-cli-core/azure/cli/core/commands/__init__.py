@@ -675,6 +675,9 @@ class AzCliCommandInvoker(CommandInvoker):
         event_data = {'result': results}
         self.cli_ctx.raise_event(EVENT_INVOKER_FILTER_RESULT, event_data=event_data)
 
+        if not self.data['output'] or self.data['output'] != 'none':
+            self._resolve_output_sensitive_data_warning(cmd, event_data['result'])
+
         # save to local context if it is turned on after command executed successfully
         if self.cli_ctx.local_context.is_on and command and command in self.commands_loader.command_table and \
                 command in self.parser.subparser_map and self.parser.subparser_map[command].specified_arguments:
@@ -711,7 +714,6 @@ class AzCliCommandInvoker(CommandInvoker):
                 result = list(result)
 
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
-            self._resolve_output_sensitive_data_warning(cmd_copy, result)
 
             event_data = {'result': result}
             cmd_copy.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
@@ -840,7 +842,7 @@ class AzCliCommandInvoker(CommandInvoker):
             if secret_property_names:
                 message = sensitive_data_detailed_warning_message.format(', '.join(secret_property_names))
             logger.warning(message)
-            set_secrets_detected(True)
+            set_secrets_detected(True, secret_property_names)
         except Exception:  # pylint: disable=broad-except
             # ignore all exceptions, as this is just a warning
             pass

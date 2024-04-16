@@ -161,10 +161,10 @@ AZURE_API_PROFILES = {
             'disks': '2023-04-02',
             'disk_encryption_sets': '2022-03-02',
             'disk_accesses': '2020-05-01',
-            'snapshots': '2023-04-02',
+            'snapshots': '2023-10-02',
             'galleries': '2021-10-01',
             'gallery_images': '2021-10-01',
-            'gallery_image_versions': '2022-03-03',
+            'gallery_image_versions': '2023-07-03',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
@@ -194,7 +194,7 @@ AZURE_API_PROFILES = {
             'role_definitions': '2022-05-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2022-02-01-preview', {
+        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2023-11-01-preview', {
             'agent_pools': '2019-06-01-preview',
             'tasks': '2019-06-01-preview',
             'task_runs': '2019-06-01-preview',
@@ -441,6 +441,7 @@ AD_HOC_API_VERSIONS = {
         'VERSION_2020_11_01_PREVIEW': "2020-11-01-preview",
         'VERSION_2021_08_01_PREVIEW': "2021-08-01-preview",
         'VERSION_2022_02_01_PREVIEW': "2022-02-01-preview",
+        'VERSION_2023_11_01_PREVIEW': "2023-11-01-preview",
     },
     ResourceType.MGMT_CONTAINERSERVICE: {
         # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50

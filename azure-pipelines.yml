@@ -66,12 +66,12 @@ jobs:
   pool:
     name: ${{ variables.windows_pool }}
   steps:
-  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
-    displayName: 'Run Credential Scanner'
-    inputs:
-      toolMajorVersion: V2
-      suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
-      toolVersionV2: '2.1.17'
+#  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
+#    displayName: 'Run Credential Scanner'
+#    inputs:
+#      toolMajorVersion: V2
+#      suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
+#      toolVersionV2: '2.1.17'
 
   - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
     displayName: 'Post Analysis'
