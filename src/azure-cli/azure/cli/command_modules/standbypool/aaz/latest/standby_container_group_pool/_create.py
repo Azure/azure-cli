@@ -69,7 +69,7 @@ class Create(AAZCommand):
             arg_group="ContainerGroupProfile",
             help="Specifies container group profile id of standby container pool.",
         )
-        _args_schema._profile_revision = AAZIntArg(
+        _args_schema.profile_revision = AAZIntArg(
             options=["--profile-revision"],
             arg_group="ContainerGroupProfile",
             help="Specifies revision of container group profile.",
