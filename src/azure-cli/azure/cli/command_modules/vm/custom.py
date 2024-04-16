@@ -3912,7 +3912,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
                 enable_osimage_notification=None, custom_data=None, enable_hibernation=None,
                 security_type=None, enable_proxy_agent=None, proxy_agent_mode=None,
-                security_posture_reference_id=None, security_posture_reference_exclude_extensions=None, **kwargs):
+                security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
+                max_surge=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4080,7 +4081,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if max_batch_instance_percent is not None or max_unhealthy_instance_percent is not None \
             or max_unhealthy_upgraded_instance_percent is not None or pause_time_between_batches is not None \
-            or enable_cross_zone_upgrade is not None or prioritize_unhealthy_instances is not None:
+            or enable_cross_zone_upgrade is not None or prioritize_unhealthy_instances is not None \
+            or max_surge is not None:
         if vmss.upgrade_policy is None:
             vmss.upgrade_policy = {'rolling_upgrade_policy': None}
         if vmss.upgrade_policy.rolling_upgrade_policy is None:
@@ -4090,7 +4092,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 'maxUnhealthyUpgradedInstancePercent': max_unhealthy_upgraded_instance_percent,
                 'pauseTimeBetweenBatches': pause_time_between_batches,
                 'enableCrossZoneUpgrade': enable_cross_zone_upgrade,
-                'prioritizeUnhealthyInstances': prioritize_unhealthy_instances
+                'prioritizeUnhealthyInstances': prioritize_unhealthy_instances,
+                'maxSurge': max_surge
             }
         else:
             vmss.upgrade_policy.rolling_upgrade_policy.max_batch_instance_percent = max_batch_instance_percent
@@ -4100,6 +4103,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.upgrade_policy.rolling_upgrade_policy.pause_time_between_batches = pause_time_between_batches
             vmss.upgrade_policy.rolling_upgrade_policy.enable_cross_zone_upgrade = enable_cross_zone_upgrade
             vmss.upgrade_policy.rolling_upgrade_policy.prioritize_unhealthy_instances = prioritize_unhealthy_instances
+            vmss.upgrade_policy.rolling_upgrade_policy.max_surge = max_surge
 
     if vm_sku is not None:
         if vmss.sku.name == vm_sku:

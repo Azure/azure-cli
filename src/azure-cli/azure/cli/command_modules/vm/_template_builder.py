@@ -1319,6 +1319,35 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         if not automatic_os_upgrade_policy:
             del automatic_os_upgrade_policy
 
+    if upgrade_policy_mode.lower() == 'rolling' and orchestration_mode.lower() == 'uniform' and \
+            cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
+        if os_type.lower() == 'linux':
+            from azure.cli.command_modules.vm._vmss_application_health import application_health_setting_for_linux
+            application_health_data = application_health_setting_for_linux
+            health_extension_name = 'ApplicationHealthLinux'
+        else:
+            from azure.cli.command_modules.vm._vmss_application_health import application_health_setting_for_windows
+            application_health_data = application_health_setting_for_windows
+            health_extension_name = 'ApplicationHealthWindows'
+        health_extension = [{
+            "name": health_extension_name,
+            "properties": {
+                "publisher": "Microsoft.ManagedServices",
+                "type": health_extension_name,
+                "typeHandlerVersion": "1.0",
+                "autoUpgradeMinorVersion": True,
+                "settings": {
+                    "port": 80,
+                    "protocol": "http",
+                    "requestPath": "/"
+                }
+            }
+        }]
+        virtual_machine_profile['extensionProfile'] = {
+            'extensions': health_extension
+        }
+        os_profile['customData'] = b64encode(application_health_data)
+
     if enable_spot_restore and cmd.supported_api_version(min_api='2021-04-01',
                                                          operation_group='virtual_machine_scale_sets'):
         vmss_properties['spotRestorePolicy'] = {}
