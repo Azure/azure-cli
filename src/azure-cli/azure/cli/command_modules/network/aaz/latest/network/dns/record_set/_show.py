@@ -237,6 +237,11 @@ class Show(AAZCommand):
             properties.target_resource = AAZObjectType(
                 serialized_name="targetResource",
             )
+            _ShowHelper._build_schema_sub_resource_read(properties.target_resource)
+            properties.traffic_management_profile = AAZObjectType(
+                serialized_name="trafficManagementProfile",
+            )
+            _ShowHelper._build_schema_sub_resource_read(properties.traffic_management_profile)
 
             aaaa_records = cls._schema_on_200.properties.aaaa_records
             aaaa_records.Element = AAZObjectType()
@@ -364,14 +369,26 @@ class Show(AAZCommand):
             metadata = cls._schema_on_200.properties.metadata
             metadata.Element = AAZStrType()
 
-            target_resource = cls._schema_on_200.properties.target_resource
-            target_resource.id = AAZStrType()
-
             return cls._schema_on_200
 
 
 class _ShowHelper:
     """Helper class for Show"""
+
+    _schema_sub_resource_read = None
+
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
+
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
+
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
+
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Show"]

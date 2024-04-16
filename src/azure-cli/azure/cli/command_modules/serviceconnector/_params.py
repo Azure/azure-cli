@@ -187,9 +187,12 @@ def add_new_addon_argument(context, source, target):
         context.ignore('new_addon')
 
 
-def add_secret_store_argument(context):
-    context.argument('key_vault_id', options_list=[
-        '--vault-id'], help='The id of key vault to store secret value')
+def add_secret_store_argument(context, source=""):
+    if source == RESOURCE.KubernetesCluster:
+        context.ignore('key_vault_id')
+    else:
+        context.argument('key_vault_id', options_list=[
+            '--vault-id'], help='The id of key vault to store secret value')
 
 
 def add_vnet_block(context, target):
@@ -241,9 +244,10 @@ def add_opt_out_argument(context):
     context.argument('opt_out_list', options_list=['--opt-out'],
                      default=None, nargs='+',
                      arg_type=get_enum_type(OPT_OUT_OPTION),
-                     help='Whether to disable configuration steps. '
-                     'Add config to disbale configuration changes on source. '
-                     'Add public-network to disable public network access configuration.'
+                     help='Whether to disable some configuration steps. '
+                     'Use configinfo to disbale configuration information changes on source. '
+                     'Use publicnetwork to disable public network access configuration.'
+                     'Use auth to skip auth configuration such as enabling anged identity and granting RBAC roles.'
                      )
 
 
@@ -285,7 +289,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_target_resource_block(c, target)
                 add_auth_block(c, source, target)
                 add_new_addon_argument(c, source, target)
-                add_secret_store_argument(c)
+                add_secret_store_argument(c, source)
                 add_vnet_block(c, target)
                 add_connection_string_argument(c, source, target)
                 add_customized_keys_argument(c)
@@ -295,7 +299,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_connection_name_argument(c, source)
                 add_source_resource_block(c, source)
                 add_auth_block(c, source, target)
-                add_secret_store_argument(c)
+                add_secret_store_argument(c, source)
                 add_vnet_block(c, target)
                 add_connection_string_argument(c, source, target)
                 add_customized_keys_argument(c)
@@ -307,14 +311,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             add_client_type_argument(c, source, target)
             add_source_resource_block(c, source, enable_id=False)
             add_confluent_kafka_argument(c)
-            add_secret_store_argument(c)
+            add_secret_store_argument(c, source)
             add_customized_keys_argument(c)
             add_opt_out_argument(c)
         with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
             add_client_type_argument(c, source, target)
             add_source_resource_block(c, source, enable_id=False)
             add_confluent_kafka_argument(c)
-            add_secret_store_argument(c)
+            add_secret_store_argument(c, source)
             add_customized_keys_argument(c)
             add_opt_out_argument(c)
 
@@ -351,14 +355,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             add_target_resource_block(c, target)
             add_auth_block(c, source, target)
             add_new_addon_argument(c, source, target)
-            add_secret_store_argument(c)
+            add_secret_store_argument(c, source)
             add_vnet_block(c, target)
             add_local_connection_block(c)
             add_customized_keys_argument(c)
         with self.argument_context('connection update {}'.format(target.value)) as c:
             add_client_type_argument(c, source, target)
             add_auth_block(c, source, target)
-            add_secret_store_argument(c)
+            add_secret_store_argument(c, source)
             add_vnet_block(c, target)
             add_local_connection_block(c)
             add_customized_keys_argument(c)
@@ -368,13 +372,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('connection create {}'.format(target.value)) as c:
         add_client_type_argument(c, source, target)
         add_confluent_kafka_argument(c)
-        add_secret_store_argument(c)
+        add_secret_store_argument(c, source)
         add_local_connection_block(c, show_id=False)
         add_customized_keys_argument(c)
     with self.argument_context('connection update {}'.format(target.value)) as c:
         add_client_type_argument(c, source, target)
         add_confluent_kafka_argument(c)
-        add_secret_store_argument(c)
+        add_secret_store_argument(c, source)
         add_local_connection_block(c, show_id=False)
         add_customized_keys_argument(c)
     with self.argument_context('connection preview-configuration {}'.format(target.value)) as c:

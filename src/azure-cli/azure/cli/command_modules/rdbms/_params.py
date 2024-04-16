@@ -422,7 +422,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         )
 
         pg_version_upgrade_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['12', '13', '14', '15']),
+            arg_type=get_enum_type(['12', '13', '14', '15', '16']),
             options_list=['--version', '-v'],
             help='Server major version.'
         )
@@ -828,9 +828,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             if command_group == 'mysql':
                 c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
                            help='Determines the public access. ')
-
-        with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
-            c.argument('server_name', arg_type=server_name_arg_type)
 
         with self.argument_context('{} flexible-server replica promote'.format(command_group)) as c:
             c.argument('server_name', arg_type=server_name_arg_type)

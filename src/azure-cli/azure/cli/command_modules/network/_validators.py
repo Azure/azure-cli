@@ -867,7 +867,7 @@ def process_private_link_resource_id_argument(cmd, namespace):
 
     from msrestazure.tools import is_valid_resource_id, parse_resource_id
     if not is_valid_resource_id(namespace.id):
-        raise CLIError("Resource ID is not invalid. Please check it.")
+        raise CLIError("Resource ID is invalid. Please check it.")
     split_resource_id = parse_resource_id(namespace.id)
     cmd.cli_ctx.data['subscription_id'] = split_resource_id['subscription']
     namespace.resource_group_name = split_resource_id['resource_group']

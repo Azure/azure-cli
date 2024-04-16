@@ -13,13 +13,13 @@ from knack.log import get_logger
 
 from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError, ResourceNotFoundError)
 from azure.cli.core.commands.parameters import get_subscription_locations
-from azure.cli.core.util import should_disable_connection_verify
+from azure.cli.core.util import should_disable_connection_verify, send_raw_request
 from azure.cli.core.commands.client_factory import get_subscription_id
 
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._client_factory import web_client_factory
-from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND
+from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND, LINUXAPP_KIND
 
 logger = get_logger(__name__)
 
@@ -167,6 +167,16 @@ def is_centauri_functionapp(cmd, resource_group, name):
     return functionapp.managed_environment_id is not None
 
 
+def is_flex_functionapp(cli_ctx, resource_group, name):
+    client = web_client_factory(cli_ctx)
+    app = client.web_apps.get(resource_group, name)
+    if app.server_farm_id is None:
+        return False
+    parse_plan_id = parse_resource_id(app.server_farm_id)
+    plan_info = client.app_service_plans.get(parse_plan_id['resource_group'], parse_plan_id['name'])
+    return plan_info.sku.tier.lower() == 'flexconsumption'
+
+
 def _list_app(cli_ctx, resource_group_name=None):
     client = web_client_factory(cli_ctx)
     if resource_group_name:
@@ -185,11 +195,24 @@ def _rename_server_farm_props(webapp):
     return webapp
 
 
+def get_raw_functionapp(cmd, resource_group_name, name):
+    site_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, '2023-12-01')
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
+    response = send_raw_request(cmd.cli_ctx, "GET", request_url)
+    return response.json()
+
+
 def _get_location_from_webapp(client, resource_group_name, webapp):
     webapp = client.web_apps.get(resource_group_name, webapp)
     if not webapp:
         raise ResourceNotFoundError("'{}' app doesn't exist".format(webapp))
     return webapp.location
+
+
+def _normalize_flex_location(location):
+    return location.lower().replace(" ", "")
 
 
 # can't just normalize locations with location.lower().replace(" ", "") because of UAE/UK regions
@@ -304,3 +327,9 @@ def is_webapp(app):
     if app is None or app.kind is None:
         return False
     return not is_logicapp(app) and not is_functionapp(app) and "app" in app.kind
+
+
+def is_linux_webapp(app):
+    if not is_webapp(app):
+        return False
+    return LINUXAPP_KIND in app.kind

@@ -128,7 +128,7 @@ parameters:
     short-summary: Enable managed AAD feature for cluster.
   - name: --aad-admin-group-object-ids
     type: string
-    short-summary: Comma seperated list of aad group object IDs that will be set as cluster admin.
+    short-summary: Comma-separated list of aad group object IDs that will be set as cluster admin.
   - name: --aad-client-app-id
     type: string
     short-summary: The ID of an Azure Active Directory client application of type "Native". This application is for user login via kubectl.
@@ -279,15 +279,15 @@ parameters:
     long-summary: This range must not overlap with any Subnet IP ranges. For example, 10.0.0.0/16.
   - name: --service-cidrs
     type: string
-    short-summary: A comma separated list of CIDR notation IP ranges from which to assign service cluster IPs.
+    short-summary: A comma-separated list of CIDR notation IP ranges from which to assign service cluster IPs.
     long-summary: Each range must not overlap with any Subnet IP ranges. For example, "10.0.0.0/16,2001:abcd::/108".
   - name: --pod-cidrs
     type: string
-    short-summary: A comma separated list of CIDR notation IP ranges from which to assign pod IPs when kubenet is used.
+    short-summary: A comma-separated list of CIDR notation IP ranges from which to assign pod IPs when kubenet is used.
     long-summary: Each range must not overlap with any Subnet IP ranges. For example, "172.244.0.0/16,fd0:abcd::/64".
   - name: --ip-families
     type: string
-    short-summary: A comma separated list of IP versions to use for cluster networking.
+    short-summary: A comma-separated list of IP versions to use for cluster networking.
     long-summary: Each IP version should be in the format IPvN. For example, IPv4.
   - name: --vnet-subnet-id
     type: string
@@ -340,7 +340,7 @@ parameters:
     short-summary: Disable public fqdn feature for private cluster.
   - name: --api-server-authorized-ip-ranges
     type: string
-    short-summary: Comma seperated list of authorized apiserver IP ranges. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
+    short-summary: Comma-separated list of authorized apiserver IP ranges. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
   - name: --enable-managed-identity
     type: bool
     short-summary: Using a system assigned managed identity to manage cluster resource group.
@@ -528,6 +528,15 @@ parameters:
   - name: --crg-id
     type: string
     short-summary: The crg id used to associate the new cluster with the existed Capacity Reservation Group resource.
+  - name: --enable-asm --enable-azure-service-mesh
+    type: bool
+    short-summary: Enable Azure Service Mesh addon.
+  - name: --enable-app-routing
+    type: bool
+    short-summary: Enable Application Routing addon.
+  - name: --revision
+    type: string
+    short-summary: Azure Service Mesh revision to install.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -604,6 +613,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-vpa
   - name: create a kubernetes cluster with a Capacity Reservation Group(CRG) ID.
     text: az aks create -g MyResourceGroup -n MyMC --kubernetes-version 1.20.9 --node-vm-size VMSize --assign-identity "subscriptions/SubID/resourceGroups/RGName/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID" --enable-managed-identity --crg-id "subscriptions/SubID/resourceGroups/RGName/providers/Microsoft.ContainerService/CapacityReservationGroups/MyCRGID"
+  - name: Create a kubernetes cluster with Azure Service Mesh enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-service-mesh
 """
 
 helps['aks update'] = """
@@ -710,13 +721,13 @@ parameters:
     short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
   - name: --api-server-authorized-ip-ranges
     type: string
-    short-summary: Comma seperated list of authorized apiserver IP ranges. Set to "" to allow all traffic on a previously restricted cluster. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
+    short-summary: Comma-separated list of authorized apiserver IP ranges. Set to "" to allow all traffic on a previously restricted cluster. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
   - name: --enable-aad
     type: bool
     short-summary: Enable managed AAD feature for cluster.
   - name: --aad-admin-group-object-ids
     type: string
-    short-summary: Comma seperated list of aad group object IDs that will be set as cluster admin.
+    short-summary: Comma-separated list of aad group object IDs that will be set as cluster admin.
   - name: --aad-tenant-id
     type: string
     short-summary: The ID of an Azure Active Directory tenant.
@@ -1515,6 +1526,9 @@ parameters:
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
+  - name: --node-soak-duration
+    type: int
+    short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
   - name: --enable-encryption-at-host
     type: bool
     short-summary: Enable EncryptionAtHost, default value is false.
@@ -1639,6 +1653,9 @@ parameters:
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
+  - name: --node-soak-duration
+    type: int
+    short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool. Pass the empty string `""` to remove all taints.
@@ -1681,6 +1698,9 @@ parameters:
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how long to wait for all pods to be evicted
+  - name: --node-soak-duration
+    type: int
+    short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to upgrade this nodepool.
@@ -1827,6 +1847,17 @@ parameters:
   - name: --node-image-only
     type: bool
     short-summary: Only upgrade node image for agent pools.
+  - name: --enable-force-upgrade
+    type: bool
+    short-summary: Enable forceUpgrade cluster upgrade settings override.
+  - name: --disable-force-upgrade
+    type: bool
+    short-summary: Disable forceUpgrade cluster upgrade settings override.
+  - name: --upgrade-override-until
+    type: string
+    short-summary: Until when the cluster upgradeSettings overrides are effective.
+    long-summary: It needs to be in a valid date-time format that's within the next 30 days. For example, 2023-04-01T13:00:00Z. Note that if --force-upgrade is set to true and --upgrade-override-until is not set, by default it will be set to 3 days from now.
+
 examples:
   - name: Upgrade a managed Kubernetes cluster to a newer version. (autogenerated)
     text: az aks upgrade --kubernetes-version 1.12.6 --name MyManagedCluster --resource-group MyResourceGroup
@@ -2072,7 +2103,7 @@ helps['aks trustedaccess rolebinding create'] = """
         - name: --roles
           type: string
           short-summary: Specify the comma-separated roles.
-        - name: --source-resource-id -r
+        - name: --source-resource-id
           type: string
           short-summary: Specify the source resource id of the binding.
 
@@ -2100,4 +2131,220 @@ helps['aks trustedaccess rolebinding delete'] = """
         - name: --name -n
           type: string
           short-summary: Specify the role binding name.
+"""
+
+helps['aks mesh'] = """
+    type: group
+    short-summary: Commands to manage Azure Service Mesh.
+    long-summary: A group of commands to manage Azure Service Mesh in given cluster.
+"""
+
+helps['aks mesh enable'] = """
+    type: command
+    short-summary: Enable Azure Service Mesh.
+    long-summary: This command enables Azure Service Mesh in given cluster.
+    parameters:
+      - name: --revision
+        type: string
+        short-summary: Azure Service Mesh revision to install.
+      - name: --key-vault-id
+        type: string
+        short-summary: The Azure Keyvault id with plugin CA info.
+      - name: --ca-cert-object-name
+        type: string
+        short-summary: Intermediate cert object name in the Azure Keyvault.
+      - name: --ca-key-object-name
+        type: string
+        short-summary: Intermediate key object name in the Azure Keyvault.
+      - name: --cert-chain-object-name
+        type: string
+        short-summary: Cert chain object name in the Azure Keyvault.
+      - name: --root-cert-object-name
+        type: string
+        short-summary: Root cert object name in the Azure Keyvault.
+    examples:
+      - name: Enable Azure Service Mesh with selfsigned CA.
+        text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster
+      - name: Enable Azure Service Mesh with plugin CA.
+        text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster --key-vault-id /subscriptions/00000/resourceGroups/foo/providers/Microsoft.KeyVault/vaults/foo --ca-cert-object-name my-ca-cert --ca-key-object-name my-ca-key --cert-chain-object-name my-cert-chain --root-cert-object-name my-root-cert
+"""
+
+helps['aks mesh disable'] = """
+    type: command
+    short-summary: Disable Azure Service Mesh.
+    long-summary: This command disables Azure Service Mesh in given cluster.
+"""
+
+helps['aks mesh enable-ingress-gateway'] = """
+    type: command
+    short-summary: Enable an Azure Service Mesh ingress gateway.
+    long-summary: This command enables an Azure Service Mesh ingress gateway in given cluster.
+    parameters:
+      - name: --ingress-gateway-type
+        type: string
+        short-summary: Specify the type of ingress gateway.
+        long-summary: Allowed values are "External" which is backed by a load balancer with an external IP address; "Internal" which is backed by a load balancer with an internal IP address.
+    examples:
+      - name: Enable an internal ingress gateway.
+        text: az aks mesh enable-ingress-gateway --resource-group MyResourceGroup --name MyManagedCluster --ingress-gateway-type Internal
+"""
+
+helps['aks mesh disable-ingress-gateway'] = """
+    type: command
+    short-summary: Disable an Azure Service Mesh ingress gateway.
+    long-summary: This command disables an Azure Service Mesh ingress gateway in given cluster.
+    parameters:
+      - name: --ingress-gateway-type
+        type: string
+        short-summary: Specify the type of ingress gateway.
+        long-summary: Allowed values are "External" which is backed by a load balancer with an external IP address, "Internal" which is backed by a load balancer with an internal IP address.
+    examples:
+      - name: Disable an internal ingress gateway.
+        text: az aks mesh disable-ingress-gateway --resource-group MyResourceGroup --name MyManagedCluster --ingress-gateway-type Internal
+"""
+
+helps['aks mesh get-revisions'] = """
+    type: command
+    short-summary: Discover available Azure Service Mesh revisions and their compatibility.
+    long-summary: This command lists available Azure Service Mesh revisions and their compatibility information for the given location.
+    examples:
+      - name: Discover Azure Service Mesh revisions.
+        text: az aks mesh get-revisions --location westus2
+        crafted: true
+"""
+
+helps['aks mesh get-upgrades'] = """
+    type: command
+    short-summary: Discover available Azure Service Mesh upgrades.
+    long-summary: This command lists available Azure Service Mesh upgrades for the mesh revision installed on the cluster.
+    examples:
+      - name: Discover Azure Service Mesh upgrades.
+        text: az aks mesh get-upgrades --resource-group MyResourceGroup --name MyManagedCluster
+"""
+
+helps['aks mesh upgrade start'] = """
+    type: command
+    short-summary: Initiate Azure Service Mesh upgrade.
+    long-summary: This command initiates upgrade of Azure Service Mesh to the specified revision.
+    parameters:
+      - name: --revision
+        type: string
+        short-summary: Azure Service Mesh revision to upgrade to.
+    examples:
+      - name: Initiate Azure Service Mesh upgrade.
+        text: az aks mesh upgrade start --resource-group MyResourceGroup --name MyManagedCluster --revision asm-1-18
+"""
+
+helps['aks mesh upgrade'] = """
+    type: group
+    short-summary: Commands to manage the upgrades for Azure Service Mesh.
+    long-summary: A group of commands to manage the upgrades for Azure Service Mesh in given cluster.
+"""
+
+helps['aks mesh upgrade complete'] = """
+    type: command
+    short-summary: Complete Azure Service Mesh upgrade.
+    long-summary: This command completes Azure Service Mesh canary upgrade by removing the previous revision.
+    examples:
+      - name: Complete Azure Service Mesh upgrade.
+        text: az aks mesh upgrade complete --resource-group MyResourceGroup --name MyManagedCluster
+"""
+
+helps['aks mesh upgrade rollback'] = """
+    type: command
+    short-summary: Rollback Azure Service Mesh upgrade.
+    long-summary: This command rolls back Azure Service Mesh upgrade to the previous stable revision.
+    examples:
+      - name: Rollback Azure Service Mesh upgrade.
+        text: az aks mesh upgrade rollback --resource-group MyResourceGroup --name MyManagedCluster
+"""
+
+helps['aks approuting'] = """
+    type: group
+    short-summary: Commands to manage App Routing aadon.
+    long-summary: A group of commands to manage App Routing in given cluster.
+"""
+
+helps['aks approuting enable'] = """
+    type: command
+    short-summary: Enable App Routing.
+    long-summary: This command enables App Routing in given cluster.
+    parameters:
+      - name: --enable-kv
+        type: bool
+        short-summary: Enable the keyvault secrets provider.
+        long-summary: This optional flag enables the keyvault-secrets-provider addon in given cluster. This is required for most App Routing use-cases.
+      - name: --attach-kv
+        type: string
+        short-summary: Attach a keyvault id to access secrets and certificates.
+        long-summary: This optional flag attaches a keyvault id to access secrets and certificates.
+"""
+
+helps['aks approuting disable'] = """
+    type: command
+    short-summary: Disable App Routing addon.
+    long-summary: This command disables App Routing in given cluster.
+"""
+
+helps['aks approuting update'] = """
+    type: command
+    short-summary: Update App Routing addon.
+    long-summary: This command is used to update keyvault id in App Routing addon.
+    parameters:
+      - name: --attach-kv
+        type: string
+        short-summary: Attach a keyvault id to access secrets and certificates.
+        long-summary: This optional flag attaches a keyvault id to access secrets and certificates.
+      - name: --enable-kv
+        type: bool
+        short-summary: Enable the keyvault secrets provider addon.
+        long-summary: This optional flag enables the keyvault-secrets-provider addon in given cluster. This is required for most App Routing use-cases.
+"""
+
+helps['aks approuting zone'] = """
+    type: group
+    short-summary: Commands to manage App Routing DNS Zones.
+    long-summary: A group of commands to manage App Routing DNS zones in given cluster.
+"""
+
+helps['aks approuting zone add'] = """
+    type: command
+    short-summary: Add DNS Zone(s) to App Routing.
+    long-summary: This command adds multiple DNS zone resource IDs to App Routing.
+    parameters:
+      - name: --ids
+        type: string
+        short-summary: Comma-separated list of DNS zone resource IDs to add to App Routing.
+      - name: --attach-zones
+        type: bool
+        short-summary: Grant DNS zone Contributor permissions on all zone IDs specified in --ids.
+"""
+
+helps['aks approuting zone delete'] = """
+    type: command
+    short-summary: Delete DNS Zone(s) from App Routing.
+    long-summary: This command deletes DNS zone resource IDs from App Routing in given cluster.
+    parameters:
+      - name: --ids
+        type: string
+        short-summary: Comma-separated list of DNS zone resource IDs to delete from App Routing.
+"""
+
+helps['aks approuting zone update'] = """
+    type: command
+    short-summary: Replace DNS Zone(s) in App Routing.
+    long-summary: This command replaces the DNS zone resource IDs used in App Routing.
+    parameters:
+      - name: --ids
+        type: string
+        short-summary: Comma-separated list of DNS zone resource IDs to replace in App Routing.
+      - name: --attach-zones
+        type: bool
+        short-summary: Grant DNS zone Contributor permissions on all zone IDs specified in --ids.
+"""
+
+helps['aks approuting zone list'] = """
+    type: command
+    short-summary: List DNS Zone IDs in App Routing.
+    long-summary: This command lists the DNS zone resources used in App Routing.
 """

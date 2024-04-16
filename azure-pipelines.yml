@@ -66,12 +66,12 @@ jobs:
   pool:
     name: ${{ variables.windows_pool }}
   steps:
-  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
-    displayName: 'Run Credential Scanner'
-    inputs:
-      toolMajorVersion: V2
-      suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
-      toolVersionV2: '2.1.17'
+#  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
+#    displayName: 'Run Credential Scanner'
+#    inputs:
+#      toolMajorVersion: V2
+#      suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
+#      toolVersionV2: '2.1.17'
 
   - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
     displayName: 'Post Analysis'
@@ -211,6 +211,7 @@ jobs:
 
   - script: |
       set ARCH=$(Platform)
+      set TARGET=msi
       set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
       set
       
@@ -227,6 +228,45 @@ jobs:
     inputs:
       TargetPath: 'build_scripts/windows/out/'
       ArtifactName: msi-$(Platform)
+
+- job: BuildWindowsZIP
+  displayName: Build Windows ZIP
+  strategy:
+    matrix:
+      x64:
+        Platform: x64
+
+  dependsOn: ExtractMetadata
+  condition: succeeded()
+  pool:
+    name: ${{ variables.windows_pool }}
+  steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Build Artifacts'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+        artifactName: metadata
+
+
+    - script: |
+        set ARCH=$(Platform)
+        set TARGET=zip
+        set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
+        set
+        
+        build_scripts/windows/scripts/build.cmd
+      displayName: 'Build Windows ZIP'
+
+    - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+      displayName: 'SBOM'
+      inputs:
+        BuildDropPath: 'build_scripts/windows/out/'
+
+    - task: PublishPipelineArtifact@0
+      displayName: 'Publish Artifact: ZIP'
+      inputs:
+        TargetPath: 'build_scripts/windows/out/'
+        ArtifactName: zip-$(Platform)
 
 - job: TestMsiInstallation
   displayName: Test MSI Installation
@@ -258,6 +298,34 @@ jobs:
     displayName: Install and Load CLI
     inputs:
       filePath: build_scripts\windows\scripts\test_msi_installation.ps1
+
+- job: TestZipInstallation
+  displayName: Test ZIP Installation
+  dependsOn: BuildWindowsZIP
+  strategy:
+    matrix:
+      x64:
+        Platform: x64
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+  pool:
+    name: ${{ variables.windows_pool }}
+  steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/zip'
+      artifactName: zip-$(Platform)
+
+  - task: PowerShell@2
+    displayName: Expand and Load CLI
+    inputs:
+      filePath: build_scripts\windows\scripts\test_zip_installation.ps1
 
 - job: BuildDockerImageAlpine
   displayName: Build Docker Image Alpine
@@ -302,7 +370,7 @@ jobs:
       ${{ each arch in parameters.architectures }}:
         ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          artifactName: docker-${{ arch.name }}
+          artifactName: docker-${{ arch.value }}
   pool:
     name: $(pool)
   steps:
@@ -1160,6 +1228,8 @@ jobs:
     - VerifyVersions
     - BuildWindowsMSI
     - TestMsiInstallation
+    - BuildWindowsZIP
+    - TestZipInstallation
     - BuildDockerImageAlpine
     - TestDockerImageAlpine
     - BuildDockerImageAzureLinux

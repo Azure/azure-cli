@@ -175,11 +175,14 @@ class ResourceId(str):
         return str.__new__(cls, val)
 
 
-def resource_exists(cli_ctx, resource_group, name, namespace, type, **_):  # pylint: disable=redefined-builtin
+def resource_exists(cli_ctx, subscription, resource_group, name, namespace, type,
+                    **_):  # pylint: disable=redefined-builtin
     ''' Checks if the given resource exists. '''
     odata_filter = "resourceGroup eq '{}' and name eq '{}'" \
         " and resourceType eq '{}/{}'".format(resource_group, name, namespace, type)
-    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources
+    # Support cross subscription resource existence check
+    client = get_mgmt_service_client(
+        cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, subscription_id=subscription).resources
     existing = len(list(client.list(filter=odata_filter))) == 1
     return existing
 
@@ -386,9 +389,9 @@ def register_global_subscription_argument(cli_ctx):
     cli_ctx.register_event(EVENT_INVOKER_PRE_LOAD_ARGUMENTS, add_subscription_parameter)
 
 
-add_usage = '--add property.listProperty <key=value, string or JSON string>'
-set_usage = '--set property1.property2=<value>'
-remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
+add_usage = '`--add property.listProperty <key=value, string or JSON string>`'
+set_usage = '`--set property1.property2=<value>`'
+remove_usage = '`--remove property.list <indexToRemove>` OR `--remove propertyToRemove`'
 
 
 def _get_operations_tmpl(cmd, custom_command=False):

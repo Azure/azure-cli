@@ -1288,7 +1288,18 @@ class ContainerappScaleTests(ScenarioTest):
             JMESPathCheck("properties.template.scale.rules[0].custom.auth[1].secretRef", "app-key"),
 
         ])
-        revisions_list = self.cmd('containerapp revision list -g {} -n {}'.format(resource_group, app)).get_output_in_json()
+        revisions_list = self.cmd('containerapp revision list -g {} -n {}'.format(resource_group, app), checks=[
+            JMESPathCheck('length(@)', 2),
+            JMESPathCheck("[1].properties.template.scale.rules[0].name", "my-datadog-rule"),
+            JMESPathCheck("[1].properties.template.scale.rules[0].custom.type", "datadog"),
+            JMESPathCheck("[1].properties.template.scale.rules[0].custom.metadata.queryValue", "7"),
+            JMESPathCheck("[1].properties.template.scale.rules[0].custom.metadata.age", "120"),
+            JMESPathCheck("[1].properties.template.scale.rules[0].custom.metadata.metricUnavailableValue", "0"),
+            JMESPathCheck("[1].properties.template.scale.rules[0].custom.auth[0].triggerParameter", "apiKey"),
+            JMESPathCheck("[1].properties.template.scale.rules[0].custom.auth[0].secretRef", "api-key"),
+            JMESPathCheck("[1].properties.template.scale.rules[0].custom.auth[1].triggerParameter", "appKey"),
+            JMESPathCheck("[1].properties.template.scale.rules[0].custom.auth[1].secretRef", "app-key"),
+        ]).get_output_in_json()
 
         self.cmd(f'containerapp revision show -g {resource_group} -n {app} --revision {revisions_list[0]["name"]}', expect_failure=False)
         self.cmd(f'containerapp revision restart -g {resource_group} -n {app} --revision {revisions_list[0]["name"]}', expect_failure=False)
@@ -1297,6 +1308,18 @@ class ContainerappScaleTests(ScenarioTest):
 
         restart_result = self.cmd(f'containerapp revision restart -g {resource_group} -n {app} --revision {revisions_list[0]["name"]}', expect_failure=False).get_output_in_json()
         self.assertTrue(restart_result == "Restart succeeded")
+
+        self.cmd(f'containerapp revision copy -g {resource_group} -n {app} --from-revision {revisions_list[1]["name"]} --scale-rule-name my-datadog-rule2 --scale-rule-type datadog --scale-rule-metadata "queryValue=7" "age=120" "metricUnavailableValue=0"  --scale-rule-auth "apiKey=api-key" "appKey=app-key"', checks=[
+            JMESPathCheck("properties.template.scale.rules[0].name", "my-datadog-rule2"),
+            JMESPathCheck("properties.template.scale.rules[0].custom.type", "datadog"),
+            JMESPathCheck("properties.template.scale.rules[0].custom.metadata.queryValue", "7"),
+            JMESPathCheck("properties.template.scale.rules[0].custom.metadata.age", "120"),
+            JMESPathCheck("properties.template.scale.rules[0].custom.metadata.metricUnavailableValue", "0"),
+            JMESPathCheck("properties.template.scale.rules[0].custom.auth[0].triggerParameter", "apiKey"),
+            JMESPathCheck("properties.template.scale.rules[0].custom.auth[0].secretRef", "api-key"),
+            JMESPathCheck("properties.template.scale.rules[0].custom.auth[1].triggerParameter", "appKey"),
+            JMESPathCheck("properties.template.scale.rules[0].custom.auth[1].secretRef", "app-key"),
+        ])
 
         replica_list = self.cmd(f'containerapp replica list -g {resource_group} -n {app} --revision {revisions_list[0]["name"]}', expect_failure=False).get_output_in_json()
         self.cmd(f'containerapp replica show -g {resource_group} --name {app} --revision {revisions_list[0]["name"]} --replica {replica_list[0]["name"]}', expect_failure=False).get_output_in_json()
@@ -1309,6 +1332,31 @@ class ContainerappScaleTests(ScenarioTest):
         self.cmd(f'containerapp env show --resource-group {env_rg} --name {env_name}', expect_failure=False, checks=[
             JMESPathCheck("name", env_name),
         ])
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="westeurope")
+    def test_containerapp_replica_commands(self, resource_group):
+        self.cmd(f'configure --defaults location={TEST_LOCATION}')
+
+        app_name = self.create_random_name(prefix='aca', length=24)
+        replica_count = 3
+
+        env = prepare_containerapp_env_for_app_e2e_tests(self)
+
+        self.cmd(f'containerapp create -g {resource_group} -n {app_name} --environment {env} --ingress external --target-port 80 --min-replicas {replica_count}', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.template.scale.minReplicas", 3)
+        ]).get_output_in_json()
+
+        self.cmd(f'containerapp replica list -g {resource_group} -n {app_name}', checks=[
+            JMESPathCheck('length(@)', replica_count),
+        ])
+        self.cmd(f'containerapp update -g {resource_group} -n {app_name} --min-replicas 0', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.template.scale.minReplicas", 0)
+        ])
+
+        self.cmd(f'containerapp delete -g {resource_group} -n {app_name} --yes')
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
@@ -1437,7 +1485,7 @@ class ContainerappScaleTests(ScenarioTest):
                               cpu: 0.5
                               memory: 1Gi
                         scale:
-                          minReplicas: 1
+                          minReplicas: 0
                           maxReplicas: 3
                           rules: []
                     """
@@ -1454,7 +1502,7 @@ class ContainerappScaleTests(ScenarioTest):
             JMESPathCheck("properties.environmentId", containerapp_env["id"]),
             JMESPathCheck("properties.template.revisionSuffix", "myrevision2"),
             JMESPathCheck("properties.template.containers[0].name", "nginx"),
-            JMESPathCheck("properties.template.scale.minReplicas", 1),
+            JMESPathCheck("properties.template.scale.minReplicas", 0),
             JMESPathCheck("properties.template.scale.maxReplicas", 3),
             JMESPathCheck("properties.template.scale.rules", None)
         ])

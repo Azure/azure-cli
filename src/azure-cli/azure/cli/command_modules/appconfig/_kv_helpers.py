@@ -18,7 +18,7 @@ import yaml
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
+from azure.keyvault.secrets._shared import parse_key_vault_id
 from azure.appconfiguration import ResourceReadOnlyError, ConfigurationSetting
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
@@ -314,12 +314,6 @@ def __read_kv_from_config_store(azconfig_client,
     elif top is None:
         top = 100
 
-    if cli_ctx:
-        from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-        keyvault_client = keyvault_data_plane_factory(cli_ctx)
-    else:
-        keyvault_client = None
-
     for setting in configsetting_iterable:
         kv = convert_configurationsetting_to_keyvalue(setting)
 
@@ -333,8 +327,8 @@ def __read_kv_from_config_store(azconfig_client,
 
             if kv.content_type and kv.value:
                 # resolve key vault reference
-                if keyvault_client and __is_key_vault_ref(kv):
-                    __resolve_secret(keyvault_client, kv)
+                if cli_ctx and __is_key_vault_ref(kv):
+                    __resolve_secret(cli_ctx, kv)
 
         # trim unwanted fields from kv object instead of leaving them as null.
         if fields:
@@ -437,7 +431,7 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
                             secret_identifier = "https://{0}.vault.azure.net/secrets/{1}/{2}".format(vault_name, secret_name, secret_version)
                         try:
                             # this throws an exception for invalid format of secret identifier
-                            KeyVaultIdentifier(uri=secret_identifier)
+                            parse_key_vault_id(source_id=secret_identifier)
                             kv = KeyValue(key=key,
                                           value=json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':')),
                                           tags=tags,
@@ -816,15 +810,16 @@ def __compact_key_values(key_values):
     return compacted
 
 
-def __resolve_secret(keyvault_client, keyvault_reference):
-    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import SecretId
+def __resolve_secret(cli_ctx, keyvault_reference):
     try:
         secret_id = json.loads(keyvault_reference.value)["uri"]
-        kv_identifier = SecretId(uri=secret_id)
+        kv_identifier = parse_key_vault_id(source_id=secret_id)
+        from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_secret_client
+        command_args = {'vault_base_url': kv_identifier.vault_url}
+        keyvault_client = data_plane_azure_keyvault_secret_client(cli_ctx, command_args)
 
-        secret = keyvault_client.get_secret(vault_base_url=kv_identifier.vault,
-                                            secret_name=kv_identifier.name,
-                                            secret_version=kv_identifier.version)
+        secret = keyvault_client.get_secret(name=kv_identifier.name,
+                                            version=kv_identifier.version)
         keyvault_reference.value = secret.value
         return keyvault_reference
     except (TypeError, ValueError):
@@ -890,7 +885,7 @@ def __validate_import_keyvault_ref(kv):
             # URL with a valid scheme and netloc is a valid url, but keyvault ref has path as well, so validate it
             if parsed_url.scheme and parsed_url.netloc and parsed_url.path:
                 try:
-                    KeyVaultIdentifier(uri=value['uri'])
+                    parse_key_vault_id(source_id=value['uri'])
                     return True
                 except Exception:  # pylint: disable=broad-except
                     pass

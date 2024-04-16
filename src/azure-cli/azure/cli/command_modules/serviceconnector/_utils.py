@@ -249,22 +249,22 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
 
 
 def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_connections):
+    if source_name == RESOURCE.WebApp:
+        return get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_connections)
+
+    if source_name == RESOURCE.ContainerApp:
+        return get_auth_if_no_valid_key_vault_connection_for_containerapp(key_vault_connections)
+
+    # any connection with csi enabled is a valid connection
+    if source_name == RESOURCE.KubernetesCluster:
+        for connection in key_vault_connections:
+            if connection.get('targetService', dict()).get(
+                    'resourceProperties', dict()).get('connectAsKubernetesCsiDriver'):
+                return
+        return {'authType': 'userAssignedIdentity'}
+
+    # other source types
     if key_vault_connections:
-        if source_name == RESOURCE.WebApp:
-            return get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_connections)
-
-        if source_name == RESOURCE.ContainerApp:
-            return get_auth_if_no_valid_key_vault_connection_for_containerapp(key_vault_connections)
-
-        # any connection with csi enabled is a valid connection
-        if source_name == RESOURCE.KubernetesCluster:
-            for connection in key_vault_connections:
-                if connection.get('target_service', dict()).get(
-                        'resource_properties', dict()).get('connect_as_kubernetes_csi_driver'):
-                    return
-            return {'authType': 'userAssignedIdentity'}
-
-        # other source types
         logger.warning('key vault reference connection: %s',
                        key_vault_connections[0].get('id'))
         return
@@ -480,3 +480,19 @@ Learn more at https://spring.io/projects/spring-cloud-azure#overview"
         warning_message += both_version_message
 
     return warning_message
+
+
+# LinkerResource Model is converted into dict in update flow,
+# which conflicts with the default behavior of creation wrt the key name format.
+def get_auth_type_for_update(authInfo):
+    if 'auth_type' in authInfo:
+        return authInfo['auth_type']
+    return authInfo['authType']
+
+
+def get_secret_type_for_update(authInfo):
+    if 'secret_info' in authInfo:
+        return authInfo['secret_info']['secret_type']
+    if 'secretInfo' in authInfo:
+        return authInfo['secretInfo']['secretType']
+    return ''

@@ -22,10 +22,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-03-01",
+        "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/virtualmachinescalesets", "2023-03-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets", "2023-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/virtualmachinescalesets", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets", "2023-09-01"],
         ]
     }
 
@@ -116,7 +116,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-03-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -160,6 +160,9 @@ class List(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
             _element.extended_location = AAZObjectType(
                 serialized_name="extendedLocation",
             )
@@ -258,6 +261,9 @@ class List(AAZCommand):
                 serialized_name="proximityPlacementGroup",
             )
             _ListHelper._build_schema_sub_resource_read(properties.proximity_placement_group)
+            properties.resiliency_policy = AAZObjectType(
+                serialized_name="resiliencyPolicy",
+            )
             properties.scale_in_policy = AAZObjectType(
                 serialized_name="scaleInPolicy",
             )
@@ -310,6 +316,20 @@ class List(AAZCommand):
                 serialized_name="regularPriorityPercentageAboveBase",
             )
 
+            resiliency_policy = cls._schema_on_200.value.Element.properties.resiliency_policy
+            resiliency_policy.resilient_vm_creation_policy = AAZObjectType(
+                serialized_name="resilientVMCreationPolicy",
+            )
+            resiliency_policy.resilient_vm_deletion_policy = AAZObjectType(
+                serialized_name="resilientVMDeletionPolicy",
+            )
+
+            resilient_vm_creation_policy = cls._schema_on_200.value.Element.properties.resiliency_policy.resilient_vm_creation_policy
+            resilient_vm_creation_policy.enabled = AAZBoolType()
+
+            resilient_vm_deletion_policy = cls._schema_on_200.value.Element.properties.resiliency_policy.resilient_vm_deletion_policy
+            resilient_vm_deletion_policy.enabled = AAZBoolType()
+
             scale_in_policy = cls._schema_on_200.value.Element.properties.scale_in_policy
             scale_in_policy.force_deletion = AAZBoolType(
                 serialized_name="forceDeletion",
@@ -340,6 +360,9 @@ class List(AAZCommand):
             )
             automatic_os_upgrade_policy.enable_automatic_os_upgrade = AAZBoolType(
                 serialized_name="enableAutomaticOSUpgrade",
+            )
+            automatic_os_upgrade_policy.os_rolling_upgrade_deferral = AAZBoolType(
+                serialized_name="osRollingUpgradeDeferral",
             )
             automatic_os_upgrade_policy.use_rolling_upgrade_policy = AAZBoolType(
                 serialized_name="useRollingUpgradePolicy",
@@ -417,6 +440,10 @@ class List(AAZCommand):
             )
             virtual_machine_profile.storage_profile = AAZObjectType(
                 serialized_name="storageProfile",
+            )
+            virtual_machine_profile.time_created = AAZStrType(
+                serialized_name="timeCreated",
+                flags={"read_only": True},
             )
             virtual_machine_profile.user_data = AAZStrType(
                 serialized_name="userData",
@@ -500,6 +527,9 @@ class List(AAZCommand):
             properties.force_update_tag = AAZStrType(
                 serialized_name="forceUpdateTag",
             )
+            properties.protected_settings = AAZObjectType(
+                serialized_name="protectedSettings",
+            )
             properties.protected_settings_from_key_vault = AAZObjectType(
                 serialized_name="protectedSettingsFromKeyVault",
             )
@@ -512,6 +542,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             properties.publisher = AAZStrType()
+            properties.settings = AAZObjectType()
             properties.suppress_failures = AAZBoolType(
                 serialized_name="suppressFailures",
             )
@@ -560,6 +591,12 @@ class List(AAZCommand):
             )
 
             properties = cls._schema_on_200.value.Element.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties
+            properties.auxiliary_mode = AAZStrType(
+                serialized_name="auxiliaryMode",
+            )
+            properties.auxiliary_sku = AAZStrType(
+                serialized_name="auxiliarySku",
+            )
             properties.delete_option = AAZStrType(
                 serialized_name="deleteOption",
             )
@@ -680,6 +717,9 @@ class List(AAZCommand):
             dns_settings.domain_name_label = AAZStrType(
                 serialized_name="domainNameLabel",
                 flags={"required": True},
+            )
+            dns_settings.domain_name_label_scope = AAZStrType(
+                serialized_name="domainNameLabelScope",
             )
 
             ip_tags = cls._schema_on_200.value.Element.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties.ip_tags
@@ -924,6 +964,9 @@ class List(AAZCommand):
             properties.instance_view = AAZObjectType(
                 serialized_name="instanceView",
             )
+            properties.protected_settings = AAZObjectType(
+                serialized_name="protectedSettings",
+            )
             properties.protected_settings_from_key_vault = AAZObjectType(
                 serialized_name="protectedSettingsFromKeyVault",
             )
@@ -936,6 +979,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             properties.publisher = AAZStrType()
+            properties.settings = AAZObjectType()
             properties.suppress_failures = AAZBoolType(
                 serialized_name="suppressFailures",
             )
@@ -971,12 +1015,30 @@ class List(AAZCommand):
             security_profile.encryption_at_host = AAZBoolType(
                 serialized_name="encryptionAtHost",
             )
+            security_profile.encryption_identity = AAZObjectType(
+                serialized_name="encryptionIdentity",
+            )
+            security_profile.proxy_agent_settings = AAZObjectType(
+                serialized_name="proxyAgentSettings",
+            )
             security_profile.security_type = AAZStrType(
                 serialized_name="securityType",
             )
             security_profile.uefi_settings = AAZObjectType(
                 serialized_name="uefiSettings",
             )
+
+            encryption_identity = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_profile.encryption_identity
+            encryption_identity.user_assigned_identity_resource_id = AAZStrType(
+                serialized_name="userAssignedIdentityResourceId",
+            )
+
+            proxy_agent_settings = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_profile.proxy_agent_settings
+            proxy_agent_settings.enabled = AAZBoolType()
+            proxy_agent_settings.key_incarnation_id = AAZIntType(
+                serialized_name="keyIncarnationId",
+            )
+            proxy_agent_settings.mode = AAZStrType()
 
             uefi_settings = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_profile.uefi_settings
             uefi_settings.secure_boot_enabled = AAZBoolType(
@@ -1147,7 +1209,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-03-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -1191,6 +1253,9 @@ class List(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
             _element.extended_location = AAZObjectType(
                 serialized_name="extendedLocation",
             )
@@ -1289,6 +1354,9 @@ class List(AAZCommand):
                 serialized_name="proximityPlacementGroup",
             )
             _ListHelper._build_schema_sub_resource_read(properties.proximity_placement_group)
+            properties.resiliency_policy = AAZObjectType(
+                serialized_name="resiliencyPolicy",
+            )
             properties.scale_in_policy = AAZObjectType(
                 serialized_name="scaleInPolicy",
             )
@@ -1341,6 +1409,20 @@ class List(AAZCommand):
                 serialized_name="regularPriorityPercentageAboveBase",
             )
 
+            resiliency_policy = cls._schema_on_200.value.Element.properties.resiliency_policy
+            resiliency_policy.resilient_vm_creation_policy = AAZObjectType(
+                serialized_name="resilientVMCreationPolicy",
+            )
+            resiliency_policy.resilient_vm_deletion_policy = AAZObjectType(
+                serialized_name="resilientVMDeletionPolicy",
+            )
+
+            resilient_vm_creation_policy = cls._schema_on_200.value.Element.properties.resiliency_policy.resilient_vm_creation_policy
+            resilient_vm_creation_policy.enabled = AAZBoolType()
+
+            resilient_vm_deletion_policy = cls._schema_on_200.value.Element.properties.resiliency_policy.resilient_vm_deletion_policy
+            resilient_vm_deletion_policy.enabled = AAZBoolType()
+
             scale_in_policy = cls._schema_on_200.value.Element.properties.scale_in_policy
             scale_in_policy.force_deletion = AAZBoolType(
                 serialized_name="forceDeletion",
@@ -1371,6 +1453,9 @@ class List(AAZCommand):
             )
             automatic_os_upgrade_policy.enable_automatic_os_upgrade = AAZBoolType(
                 serialized_name="enableAutomaticOSUpgrade",
+            )
+            automatic_os_upgrade_policy.os_rolling_upgrade_deferral = AAZBoolType(
+                serialized_name="osRollingUpgradeDeferral",
             )
             automatic_os_upgrade_policy.use_rolling_upgrade_policy = AAZBoolType(
                 serialized_name="useRollingUpgradePolicy",
@@ -1448,6 +1533,10 @@ class List(AAZCommand):
             )
             virtual_machine_profile.storage_profile = AAZObjectType(
                 serialized_name="storageProfile",
+            )
+            virtual_machine_profile.time_created = AAZStrType(
+                serialized_name="timeCreated",
+                flags={"read_only": True},
             )
             virtual_machine_profile.user_data = AAZStrType(
                 serialized_name="userData",
@@ -1531,6 +1620,9 @@ class List(AAZCommand):
             properties.force_update_tag = AAZStrType(
                 serialized_name="forceUpdateTag",
             )
+            properties.protected_settings = AAZObjectType(
+                serialized_name="protectedSettings",
+            )
             properties.protected_settings_from_key_vault = AAZObjectType(
                 serialized_name="protectedSettingsFromKeyVault",
             )
@@ -1543,6 +1635,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             properties.publisher = AAZStrType()
+            properties.settings = AAZObjectType()
             properties.suppress_failures = AAZBoolType(
                 serialized_name="suppressFailures",
             )
@@ -1591,6 +1684,12 @@ class List(AAZCommand):
             )
 
             properties = cls._schema_on_200.value.Element.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties
+            properties.auxiliary_mode = AAZStrType(
+                serialized_name="auxiliaryMode",
+            )
+            properties.auxiliary_sku = AAZStrType(
+                serialized_name="auxiliarySku",
+            )
             properties.delete_option = AAZStrType(
                 serialized_name="deleteOption",
             )
@@ -1711,6 +1810,9 @@ class List(AAZCommand):
             dns_settings.domain_name_label = AAZStrType(
                 serialized_name="domainNameLabel",
                 flags={"required": True},
+            )
+            dns_settings.domain_name_label_scope = AAZStrType(
+                serialized_name="domainNameLabelScope",
             )
 
             ip_tags = cls._schema_on_200.value.Element.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties.ip_tags
@@ -1955,6 +2057,9 @@ class List(AAZCommand):
             properties.instance_view = AAZObjectType(
                 serialized_name="instanceView",
             )
+            properties.protected_settings = AAZObjectType(
+                serialized_name="protectedSettings",
+            )
             properties.protected_settings_from_key_vault = AAZObjectType(
                 serialized_name="protectedSettingsFromKeyVault",
             )
@@ -1967,6 +2072,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             properties.publisher = AAZStrType()
+            properties.settings = AAZObjectType()
             properties.suppress_failures = AAZBoolType(
                 serialized_name="suppressFailures",
             )
@@ -2002,12 +2108,30 @@ class List(AAZCommand):
             security_profile.encryption_at_host = AAZBoolType(
                 serialized_name="encryptionAtHost",
             )
+            security_profile.encryption_identity = AAZObjectType(
+                serialized_name="encryptionIdentity",
+            )
+            security_profile.proxy_agent_settings = AAZObjectType(
+                serialized_name="proxyAgentSettings",
+            )
             security_profile.security_type = AAZStrType(
                 serialized_name="securityType",
             )
             security_profile.uefi_settings = AAZObjectType(
                 serialized_name="uefiSettings",
             )
+
+            encryption_identity = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_profile.encryption_identity
+            encryption_identity.user_assigned_identity_resource_id = AAZStrType(
+                serialized_name="userAssignedIdentityResourceId",
+            )
+
+            proxy_agent_settings = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_profile.proxy_agent_settings
+            proxy_agent_settings.enabled = AAZBoolType()
+            proxy_agent_settings.key_incarnation_id = AAZIntType(
+                serialized_name="keyIncarnationId",
+            )
+            proxy_agent_settings.mode = AAZStrType()
 
             uefi_settings = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_profile.uefi_settings
             uefi_settings.secure_boot_enabled = AAZBoolType(

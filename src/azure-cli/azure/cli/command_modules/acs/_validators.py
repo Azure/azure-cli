@@ -786,3 +786,14 @@ def validate_application_security_groups(namespace):
     for asg in asg_ids:
         if not is_valid_resource_id(asg):
             raise InvalidArgumentValueError(asg + " is not a valid Azure resource ID.")
+
+
+def validate_azure_service_mesh_revision(namespace):
+    """Validates the user provided revision parameter for azure service mesh commands."""
+    if namespace.revision is None:
+        return
+    revision = namespace.revision
+    asm_revision_regex = re.compile(r'^asm-\d+-\d+$')
+    found = asm_revision_regex.findall(revision)
+    if not found:
+        raise InvalidArgumentValueError(f"Revision {revision} is not supported by the service mesh add-on.")

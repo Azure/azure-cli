@@ -15,7 +15,7 @@ LINUX_OS_NAME = "linux"
 WINDOWS_OS_NAME = "windows"
 STATIC_RUNTIME_NAME = "static"  # not an official supported runtime but used for CLI logic
 LINUX_SKU_DEFAULT = "P1V2"
-FUNCTIONS_VERSIONS = ['2', '3', '4']
+FUNCTIONS_VERSIONS = ['4']
 LOGICAPPS_NODE_RUNTIME_VERSIONS = ['~14', '~16', '~18']
 FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX = r"^.*\|(.*)$"
 FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX = r"^~(.*)$"
@@ -33,6 +33,7 @@ GITHUB_OAUTH_SCOPES = [
 ]
 LOGICAPP_KIND = "workflowapp"
 FUNCTIONAPP_KIND = "functionapp"
+LINUXAPP_KIND = "linux"
 DOTNET_REFERENCES_DIR_IN_ZIP = ".az-references"
 
 
@@ -109,3 +110,74 @@ RUNTIME_STATUS_TEXT_MAP = {
     "RuntimeSuccessful": "Site started successfully.",
     "RuntimeFailed": "Site failed to start."
 }
+
+LANGUAGE_EOL_DEPRECATION_NOTICES = {
+    "dotnet|3.1": "https://azure.microsoft.com/en-us/updates/extended-support-for-"
+                  "microsoft-net-core-31-will-end-on-3-december-2022/",
+    "dotnet|6": "https://azure.microsoft.com/en-us/updates/dotnet6support/",
+    "dotnet-isolated|6": "https://azure.microsoft.com/en-us/updates/dotnet6support/",
+    "dotnet-isolated|7": "https://azure.microsoft.com/en-us/updates/dotnet7support/",
+    "python|3.6": "https://azure.microsoft.com/en-us/updates/azure-functions-support-"
+                  "for-python-36-is-ending-on-30-september-2022/",
+    "python|3.7": "https://azure.microsoft.com/en-us/updates/community-support-for-"
+                  "python-37-is-ending-on-27-june-2023/",
+    "python|3.8": "https://azure.microsoft.com/en-us/updates/azure-functions-support-"
+                  "for-python-38-is-ending-on-14-october-2023-6/",
+    "powershell|6.2": "https://azure.microsoft.com/en-us/updates/azure-functions-support-"
+                      "for-powershell-6-is-ending-on-30-september-2022/",
+    "node|6": "https://azure.microsoft.com/en-us/updates/azure-functions-support-for-"
+              "node-6-is-ending-on-28-february-2022/",
+    "node|8": "https://azure.microsoft.com/en-us/updates/azure-functions-support-for-"
+              "node-8-is-ending-on-28-february-2022/",
+    "node|10": "https://azure.microsoft.com/en-us/updates/azure-functions-support-"
+               "for-node-10-is-ending-on-30-september-2022/",
+    "node|12": "https://azure.microsoft.com/en-us/updates/node12/",
+    "node|14": "https://azure.microsoft.com/en-us/updates/community-support-for-node-"
+               "14-lts-is-ending-on-30-april-2023/",
+    "node|16": "https://azure.microsoft.com/en-us/updates/node16support/"
+}
+
+FLEX_RUNTIMES = [
+    {
+        'runtime': 'dotnet-isolated',
+        'version': '8.0'
+    },
+    {
+        'runtime': 'java',
+        'version': '17'
+    },
+    {
+        'runtime': 'java',
+        'version': '11'
+    },
+    {
+        'runtime': 'node',
+        'version': '20'
+    },
+    {
+        'runtime': 'node',
+        'version': '18'
+    },
+    {
+        'runtime': 'python',
+        'version': '3.11'
+    },
+    {
+        'runtime': 'python',
+        'version': '3.10'
+    },
+    {
+        'runtime': 'powershell',
+        'version': '7.2'
+    }
+]
+
+FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
+
+DEFAULT_INSTANCE_SIZE = 2048
+
+DEFAULT_MAXIMUM_INSTANCE_COUNT = 100
+
+DEPLOYMENT_STORAGE_AUTH_TYPES = ['SystemAssignedIdentity', 'UserAssignedIdentity', 'StorageAccountConnectionString']
+
+STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'

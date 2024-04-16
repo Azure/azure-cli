@@ -55,7 +55,7 @@ class AzureNetAppFilesVolumeQuotaRuleServiceScenarioTest(ScenarioTest):
             self.check('quotaSizeInKiBs', '{size}')
         ])
         # Update quota rule
-        self.cmd("az netappfiles volume quota-rule update -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} --quota-rule-name {qr_name} --quota-size {size2} --quota-type {type}")
+        self.cmd("az netappfiles volume quota-rule update -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} --quota-rule-name {qr_name} --quota-size {size2} ")
         # Get quota rule
         self.cmd("az netappfiles volume quota-rule show -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} --quota-rule-name {qr_name}", checks=[            
             self.check('quotaSizeInKiBs', '{size2}'),

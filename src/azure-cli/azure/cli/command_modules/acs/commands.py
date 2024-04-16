@@ -21,6 +21,8 @@ from azure.cli.command_modules.acs._format import (
     aks_show_table_format,
     aks_upgrades_table_format,
     aks_versions_table_format,
+    aks_mesh_revisions_table_format,
+    aks_mesh_upgrades_table_format,
 )
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import ResourceType
@@ -187,3 +189,61 @@ def load_command_table(self, _):
         g.custom_command('create', 'aks_trustedaccess_role_binding_create')
         g.custom_command('update', 'aks_trustedaccess_role_binding_update')
         g.custom_command('delete', 'aks_trustedaccess_role_binding_delete', confirmation=True)
+
+    # AKS mesh commands
+    with self.command_group('aks mesh', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command(
+            'enable',
+            'aks_mesh_enable',
+            supports_no_wait=True)
+        g.custom_command(
+            "disable",
+            "aks_mesh_disable",
+            supports_no_wait=True,
+            confirmation="Existing Azure Service Mesh Profile values will be reset.\n" +
+            "Are you sure you want to perform this operation?")
+        g.custom_command(
+            'enable-ingress-gateway',
+            'aks_mesh_enable_ingress_gateway',
+            supports_no_wait=True)
+        g.custom_command(
+            'disable-ingress-gateway',
+            'aks_mesh_disable_ingress_gateway',
+            supports_no_wait=True,
+            confirmation=True)
+        g.custom_command(
+            'get-revisions',
+            'aks_mesh_get_revisions',
+            table_transformer=aks_mesh_revisions_table_format)
+        g.custom_command(
+            'get-upgrades',
+            'aks_mesh_get_upgrades',
+            table_transformer=aks_mesh_upgrades_table_format)
+
+    # AKS mesh upgrade commands
+    with self.command_group('aks mesh upgrade', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command(
+            'start',
+            'aks_mesh_upgrade_start',
+            supports_no_wait=True)
+        g.custom_command(
+            'complete',
+            'aks_mesh_upgrade_complete',
+            supports_no_wait=True)
+        g.custom_command(
+            'rollback',
+            'aks_mesh_upgrade_rollback',
+            supports_no_wait=True)
+
+    # AKS approuting commands
+    with self.command_group('aks approuting', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command('enable', 'aks_approuting_enable')
+        g.custom_command('disable', 'aks_approuting_disable', confirmation=True)
+        g.custom_command('update', 'aks_approuting_update')
+
+    # AKS approuting dns-zone commands
+    with self.command_group('aks approuting zone', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command('add', 'aks_approuting_zone_add')
+        g.custom_command('delete', 'aks_approuting_zone_delete', confirmation=True)
+        g.custom_command('update', 'aks_approuting_zone_update')
+        g.custom_command('list', 'aks_approuting_zone_list')
