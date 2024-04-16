@@ -177,7 +177,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         timeout = time.time() + 300
         while True:
             try:
-                self.cmd('az sf managed-node-type node restart -g {rg} -c {cluster_name} -n pnt --node-name pnt_0 pnt_1 --update-type ByUpgradeDomain ')
+                self.cmd('az sf managed-node-type node restart -g {rg} -c {cluster_name} -n pnt --node-name pnt_0 pnt_1 --update-type BY_UPGRADE_DOMAIN ')
                 break
             except HttpResponseError:
                 if time.time() > timeout:
@@ -185,7 +185,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
                 if self.in_recording or self.is_live:
                     time.sleep(60)
 
-        self.cmd('az sf managed-node-type node reimage -g {rg} -c {cluster_name} -n pnt --node-name pnt_0 pnt_1 --update-type ByUpgradeDomain ')
+        self.cmd('az sf managed-node-type node reimage -g {rg} -c {cluster_name} -n pnt --node-name pnt_0 pnt_1 --update-type BY_UPGRADE_DOMAIN ')
         
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
 

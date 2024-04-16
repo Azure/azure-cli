@@ -142,7 +142,7 @@ def reimage_node(cmd,
                  cluster_name,
                  node_type_name,
                  node_name,
-                 update_type="DEFAULT",
+                 update_type=None,
                  force=False):
     try:
         nodes = [node_name] if isinstance(node_name, str) else node_name
