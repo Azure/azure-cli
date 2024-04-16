@@ -333,6 +333,50 @@ def get_auth_if_no_valid_key_vault_connection_for_containerapp(key_vault_connect
     return {'authType': auth_type}
 
 
+def create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id,
+                                              scope=None):  # Resource.ContainerApp
+    from ._validators import get_source_resource_name
+
+    logger.warning('looking for valid app configuration connections')
+    for connection in client.list(resource_uri=source_id):
+        connection = todict(connection)
+        if connection.get('targetService', dict()).get('id') == app_config_id:
+            logger.warning('Valid app configuration connection found.')
+            return
+
+    logger.warning('no valid app configuration connection found. Creating with system identity...')
+
+    from ._resource_config import (
+        CLIENT_TYPE
+    )
+
+    connection_name = generate_random_string(prefix='appconfig_')
+    parameters = {
+        'target_service': {
+            "type": "AzureResource",
+            "id": app_config_id
+        },
+        'auth_info': {
+            'authType': 'systemAssignedIdentity'
+        },
+        # Container App container name
+        'scope': scope,
+        'client_type': CLIENT_TYPE.Blank,
+    }
+
+    source_name = get_source_resource_name(cmd)
+    if source_name == RESOURCE.KubernetesCluster:
+        parameters['target_service']['resource_properties'] = {
+            'type': 'KeyVault',
+            'connect_as_kubernetes_csi_driver': True,
+        }
+
+    return auto_register(client.begin_create_or_update,
+                         resource_uri=source_id,
+                         linker_name=connection_name,
+                         parameters=parameters)
+
+
 def is_packaged_installed(package_name):
     import pkg_resources
     installed_packages = pkg_resources.working_set

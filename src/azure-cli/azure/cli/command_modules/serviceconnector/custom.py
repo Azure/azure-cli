@@ -294,6 +294,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       workload_identity_auth_info=None,                     # only used as arg
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
+                      app_config_id=None,                                    # configuration store
                       service_endpoint=None,
                       private_endpoint=None,
                       store_in_connection_string=False,
@@ -337,7 +338,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                                       new_addon, no_wait,
                                                       cluster, scope, enable_csi,
                                                       customized_keys=customized_keys,
-                                                      opt_out_list=opt_out_list)
+                                                      opt_out_list=opt_out_list,
+                                                      app_config_id=app_config_id)
         raise CLIInternalError("Fail to install `serviceconnector-passwordless` extension. Please manually install it"
                                " with `az extension add --name serviceconnector-passwordless --upgrade`"
                                " and rerun the command")
@@ -356,6 +358,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                   cluster, scope, enable_csi,
                                   customized_keys=customized_keys,
                                   opt_out_list=opt_out_list,
+                                  app_config_id=app_config_id
                                   )
 
 
@@ -387,6 +390,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            enable_mi_for_db_linker=None,
                            customized_keys=None,
                            opt_out_list=None,
+                           app_config_id=None,
                            **kwargs,
                            ):
     if not source_id:
@@ -424,6 +428,9 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         'scope': scope,
         'configurationInfo': {
             'customizedKeys': customized_keys,
+            'configurationStore': {
+                'appConfigurationId': app_config_id,
+            },
             'action': config_action
         },
         'publicNetworkSolution': {
@@ -443,6 +450,10 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     elif auth_info is not None and auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
             and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use secret-name')
+
+    if app_config_id:
+        from ._utils import create_app_config_connection_if_not_exist
+        create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id, scope)
 
     if service_endpoint:
         client = set_user_token_header(client, cmd.cli_ctx)
@@ -627,6 +638,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
                       workload_identity_auth_info=None,
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
+                      app_config_id=None,
                       service_endpoint=None,
                       private_endpoint=None,
                       store_in_connection_string=False,
@@ -704,6 +716,9 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
         'scope': scope or linker.get('scope'),
         'configurationInfo': {
             'customizedKeys': customized_keys,
+            'configurationStore': {
+                'appConfigurationId': app_config_id
+            },
             'action': config_action
         },
         'publicNetworkSolution': {
@@ -723,6 +738,10 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
     elif get_auth_type_for_update(auth_info) == 'secret' and \
             get_secret_type_for_update(auth_info) == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use secret-name')
+
+    if app_config_id:
+        from ._utils import create_app_config_connection_if_not_exist
+        create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id, scope)
 
     parameters['v_net_solution'] = linker.get('vNetSolution')
     if service_endpoint:
@@ -1028,6 +1047,7 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                             schema_key,
                             schema_secret,
                             key_vault_id=None,
+                            app_config_id=None,
                             connection_name=None,
                             client_type=None,
                             source_resource_group=None,
@@ -1051,6 +1071,9 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
         from ._utils import create_key_vault_reference_connection_if_not_exist
         create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
 
+    if app_config_id:
+        from ._utils import create_app_config_connection_if_not_exist
+        create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id, scope)
     config_action = 'optOut' if (opt_out_list is not None and
                                  OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
     public_network_action = 'optOut' if (opt_out_list is not None and
@@ -1080,6 +1103,9 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
         'scope': scope,
         'configurationInfo': {
             'customizedKeys': customized_keys,
+            'configurationStore': {
+                'appConfigurationId': app_config_id,
+            },
             'action': config_action
         },
         'publicNetworkSolution': {
@@ -1115,6 +1141,9 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
         'client_type': client_type,
         'scope': scope,
         'configurationInfo': {
+            'configurationStore': {
+                'appConfigurationId': app_config_id,
+            },
             'action': config_action
         }
     }
@@ -1141,6 +1170,7 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                             schema_key=None,
                             schema_secret=None,
                             key_vault_id=None,
+                            app_config_id=None,
                             client_type=None,
                             source_resource_group=None,
                             source_id=None,
@@ -1176,6 +1206,10 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
         if server_linker.get('configurationInfo') and server_linker.get('configurationInfo').get('customizedKeys'):
             customized_keys = customized_keys or server_linker.get('configurationInfo').get('customizedKeys')
 
+        if app_config_id:
+            from ._utils import create_app_config_connection_if_not_exist
+            create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id)
+
         parameters = {
             'targetService': server_linker.get('targetService'),
             'auth_info': {
@@ -1192,6 +1226,9 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             'scope': server_linker.get('scope'),
             'configurationInfo': {
                 'customizedKeys': customized_keys,
+                'configurationStore': {
+                    'appConfigurationId': app_config_id,
+                },
                 'action': config_action,
             },
         }
@@ -1217,6 +1254,10 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
         if schema_linker.get('configurationInfo') and schema_linker.get('configurationInfo').get('customizedKeys'):
             customized_keys = customized_keys or schema_linker.get('configurationInfo').get('customizedKeys')
 
+        if app_config_id:
+            from ._utils import create_app_config_connection_if_not_exist
+            create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id)
+
         parameters = {
             'targetService': schema_linker.get('targetService'),
             'auth_info': {
@@ -1231,6 +1272,9 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             'client_type': client_type or schema_linker.get('clientType'),
             'configurationInfo': {
                 'customizedKeys': customized_keys,
+                'configurationStore': {
+                    'appConfigurationId': app_config_id,
+                },
                 'action': config_action
             },
             'publicNetworkSolution': {
