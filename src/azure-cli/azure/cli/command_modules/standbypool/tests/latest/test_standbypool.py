@@ -47,7 +47,7 @@ class StandbypoolScenario(ScenarioTest):
 
         # Create
         self.cmd(
-            'az standby-vm-pool create --resource-group {rg} --name {standby_pool_name} '
+            'standby-vm-pool create --resource-group {rg} --name {standby_pool_name} '
             '--max-ready-capacity {maxReadyCapacity} --vm-state {virtual_machine_state} --vmss-id ' + vmssId,
             checks=[
                 JMESPathCheck('name', self.kwargs.get('standby_pool_name', '')),
@@ -57,7 +57,7 @@ class StandbypoolScenario(ScenarioTest):
 
         # show
         standbyVMPool = self.cmd(
-            'az standby-vm-pool show --resource-group {rg} --name {standby_pool_name}',
+            'standby-vm-pool show --resource-group {rg} --name {standby_pool_name}',
             checks=[
                 JMESPathCheck('name', self.kwargs.get('standby_pool_name', '')),
                 JMESPathCheck('virtualMachineState', self.kwargs.get('virtual_machine_state', '')),
@@ -68,20 +68,20 @@ class StandbypoolScenario(ScenarioTest):
 
         # list by resource group
         list_by_rg = self.cmd(
-            'az standby-vm-pool list --resource-group {rg}'
+            'standby-vm-pool list --resource-group {rg}'
         ).get_output_in_json()
         assert(len(list_by_rg) > 0)
 
         # list by subscription
         list_by_sub = self.cmd(
-            'az standby-vm-pool list'
+            'standby-vm-pool list'
         ).get_output_in_json()
         assert(len(list_by_sub) > 0)
 
 
         # delete
         self.cmd(
-            'az standby-vm-pool delete --resource-group {rg} --name {standby_pool_name} -y'
+            'standby-vm-pool delete --resource-group {rg} --name {standby_pool_name} -y'
         )
 
     @ResourceGroupPreparer(location="eastus")
