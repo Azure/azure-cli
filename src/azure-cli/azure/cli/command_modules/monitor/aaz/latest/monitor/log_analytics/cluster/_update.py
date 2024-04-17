@@ -24,9 +24,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-06-01",
+        "version": "2022-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2021-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2022-10-01"],
         ]
     }
 
@@ -58,16 +58,6 @@ class Update(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            help="Resource tags.",
-            nullable=True,
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg(
-            nullable=True,
-        )
 
         # define Arg Group "Identity"
 
@@ -76,7 +66,7 @@ class Update(AAZCommand):
             options=["--identity-type"],
             arg_group="Identity",
             help="Type of managed service identity.",
-            enum={"None": "None", "SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned"},
+            enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned,UserAssigned": "SystemAssigned,UserAssigned", "UserAssigned": "UserAssigned"},
         )
         _args_schema.user_assigned = AAZDictArg(
             options=["--user-assigned"],
@@ -119,6 +109,21 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        # define Arg Group "Parameters"
+
+        _args_schema = cls._args_schema
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            arg_group="Parameters",
+            help="Resource tags.",
+            nullable=True,
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
+
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
@@ -138,7 +143,7 @@ class Update(AAZCommand):
             arg_group="Sku",
             help="The capacity of the SKU. It can be decreased only after 31 days.",
             nullable=True,
-            enum={"1000": 1000, "2000": 2000, "500": 500, "5000": 5000},
+            enum={"100": 100, "1000": 1000, "10000": 10000, "200": 200, "2000": 2000, "25000": 25000, "300": 300, "400": 400, "500": 500, "5000": 5000, "50000": 50000},
         )
         return cls._args_schema
 
@@ -152,19 +157,19 @@ class Update(AAZCommand):
         yield self.ClustersCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def pre_instance_update(self, instance):
         pass
 
-    # @register_callback
+    @register_callback
     def post_instance_update(self, instance):
         pass
 
@@ -220,7 +225,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-06-01",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -251,7 +256,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_cluster_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_cluster_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -319,7 +324,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-06-01",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -362,7 +367,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_cluster_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_cluster_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -389,7 +394,7 @@ class Update(AAZCommand):
 
             user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
             if user_assigned_identities is not None:
-                user_assigned_identities.set_elements(AAZObjectType, ".")
+                user_assigned_identities.set_elements(AAZObjectType, ".", typ_kwargs={"nullable": True})
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -422,169 +427,174 @@ class Update(AAZCommand):
             )
 
 
-_schema_cluster_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_cluster_read = None
 
-def _build_schema_cluster_read(_schema):
-    global _schema_cluster_read
-    if _schema_cluster_read is not None:
-        _schema.id = _schema_cluster_read.id
-        _schema.identity = _schema_cluster_read.identity
-        _schema.location = _schema_cluster_read.location
-        _schema.name = _schema_cluster_read.name
-        _schema.properties = _schema_cluster_read.properties
-        _schema.sku = _schema_cluster_read.sku
-        _schema.tags = _schema_cluster_read.tags
-        _schema.type = _schema_cluster_read.type
-        return
+    @classmethod
+    def _build_schema_cluster_read(cls, _schema):
+        if cls._schema_cluster_read is not None:
+            _schema.id = cls._schema_cluster_read.id
+            _schema.identity = cls._schema_cluster_read.identity
+            _schema.location = cls._schema_cluster_read.location
+            _schema.name = cls._schema_cluster_read.name
+            _schema.properties = cls._schema_cluster_read.properties
+            _schema.sku = cls._schema_cluster_read.sku
+            _schema.tags = cls._schema_cluster_read.tags
+            _schema.type = cls._schema_cluster_read.type
+            return
 
-    _schema_cluster_read = AAZObjectType()
+        cls._schema_cluster_read = _schema_cluster_read = AAZObjectType()
 
-    cluster_read = _schema_cluster_read
-    cluster_read.id = AAZStrType(
-        flags={"read_only": True},
-    )
-    cluster_read.identity = AAZObjectType()
-    cluster_read.location = AAZStrType(
-        flags={"required": True},
-    )
-    cluster_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    cluster_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    cluster_read.sku = AAZObjectType()
-    cluster_read.tags = AAZDictType()
-    cluster_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        cluster_read = _schema_cluster_read
+        cluster_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        cluster_read.identity = AAZObjectType()
+        cluster_read.location = AAZStrType(
+            flags={"required": True},
+        )
+        cluster_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        cluster_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        cluster_read.sku = AAZObjectType()
+        cluster_read.tags = AAZDictType()
+        cluster_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    identity = _schema_cluster_read.identity
-    identity.principal_id = AAZStrType(
-        serialized_name="principalId",
-        flags={"read_only": True},
-    )
-    identity.tenant_id = AAZStrType(
-        serialized_name="tenantId",
-        flags={"read_only": True},
-    )
-    identity.type = AAZStrType(
-        flags={"required": True},
-    )
-    identity.user_assigned_identities = AAZDictType(
-        serialized_name="userAssignedIdentities",
-    )
+        identity = _schema_cluster_read.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType(
+            flags={"required": True},
+        )
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
 
-    user_assigned_identities = _schema_cluster_read.identity.user_assigned_identities
-    user_assigned_identities.Element = AAZObjectType()
+        user_assigned_identities = _schema_cluster_read.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType(
+            nullable=True,
+        )
 
-    _element = _schema_cluster_read.identity.user_assigned_identities.Element
-    _element.client_id = AAZStrType(
-        serialized_name="clientId",
-        flags={"read_only": True},
-    )
-    _element.principal_id = AAZStrType(
-        serialized_name="principalId",
-        flags={"read_only": True},
-    )
+        _element = _schema_cluster_read.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
 
-    properties = _schema_cluster_read.properties
-    properties.associated_workspaces = AAZListType(
-        serialized_name="associatedWorkspaces",
-        flags={"read_only": True},
-    )
-    properties.billing_type = AAZStrType(
-        serialized_name="billingType",
-    )
-    properties.capacity_reservation_properties = AAZObjectType(
-        serialized_name="capacityReservationProperties",
-    )
-    properties.cluster_id = AAZStrType(
-        serialized_name="clusterId",
-        flags={"read_only": True},
-    )
-    properties.created_date = AAZStrType(
-        serialized_name="createdDate",
-        flags={"read_only": True},
-    )
-    properties.is_availability_zones_enabled = AAZBoolType(
-        serialized_name="isAvailabilityZonesEnabled",
-    )
-    properties.key_vault_properties = AAZObjectType(
-        serialized_name="keyVaultProperties",
-    )
-    properties.last_modified_date = AAZStrType(
-        serialized_name="lastModifiedDate",
-        flags={"read_only": True},
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
+        properties = _schema_cluster_read.properties
+        properties.associated_workspaces = AAZListType(
+            serialized_name="associatedWorkspaces",
+            flags={"read_only": True},
+        )
+        properties.billing_type = AAZStrType(
+            serialized_name="billingType",
+        )
+        properties.capacity_reservation_properties = AAZObjectType(
+            serialized_name="capacityReservationProperties",
+        )
+        properties.cluster_id = AAZStrType(
+            serialized_name="clusterId",
+            flags={"read_only": True},
+        )
+        properties.created_date = AAZStrType(
+            serialized_name="createdDate",
+            flags={"read_only": True},
+        )
+        properties.is_availability_zones_enabled = AAZBoolType(
+            serialized_name="isAvailabilityZonesEnabled",
+        )
+        properties.is_double_encryption_enabled = AAZBoolType(
+            serialized_name="isDoubleEncryptionEnabled",
+        )
+        properties.key_vault_properties = AAZObjectType(
+            serialized_name="keyVaultProperties",
+        )
+        properties.last_modified_date = AAZStrType(
+            serialized_name="lastModifiedDate",
+            flags={"read_only": True},
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
 
-    associated_workspaces = _schema_cluster_read.properties.associated_workspaces
-    associated_workspaces.Element = AAZObjectType(
-        flags={"read_only": True},
-    )
+        associated_workspaces = _schema_cluster_read.properties.associated_workspaces
+        associated_workspaces.Element = AAZObjectType()
 
-    _element = _schema_cluster_read.properties.associated_workspaces.Element
-    _element.associate_date = AAZStrType(
-        serialized_name="associateDate",
-        flags={"read_only": True},
-    )
-    _element.resource_id = AAZStrType(
-        serialized_name="resourceId",
-        flags={"read_only": True},
-    )
-    _element.workspace_id = AAZStrType(
-        serialized_name="workspaceId",
-        flags={"read_only": True},
-    )
-    _element.workspace_name = AAZStrType(
-        serialized_name="workspaceName",
-        flags={"read_only": True},
-    )
+        _element = _schema_cluster_read.properties.associated_workspaces.Element
+        _element.associate_date = AAZStrType(
+            serialized_name="associateDate",
+            flags={"read_only": True},
+        )
+        _element.resource_id = AAZStrType(
+            serialized_name="resourceId",
+            flags={"read_only": True},
+        )
+        _element.workspace_id = AAZStrType(
+            serialized_name="workspaceId",
+            flags={"read_only": True},
+        )
+        _element.workspace_name = AAZStrType(
+            serialized_name="workspaceName",
+            flags={"read_only": True},
+        )
 
-    capacity_reservation_properties = _schema_cluster_read.properties.capacity_reservation_properties
-    capacity_reservation_properties.last_sku_update = AAZStrType(
-        serialized_name="lastSkuUpdate",
-        flags={"read_only": True},
-    )
-    capacity_reservation_properties.min_capacity = AAZIntType(
-        serialized_name="minCapacity",
-        flags={"read_only": True},
-    )
+        capacity_reservation_properties = _schema_cluster_read.properties.capacity_reservation_properties
+        capacity_reservation_properties.last_sku_update = AAZStrType(
+            serialized_name="lastSkuUpdate",
+            flags={"read_only": True},
+        )
+        capacity_reservation_properties.min_capacity = AAZIntType(
+            serialized_name="minCapacity",
+            flags={"read_only": True},
+        )
 
-    key_vault_properties = _schema_cluster_read.properties.key_vault_properties
-    key_vault_properties.key_name = AAZStrType(
-        serialized_name="keyName",
-    )
-    key_vault_properties.key_rsa_size = AAZIntType(
-        serialized_name="keyRsaSize",
-    )
-    key_vault_properties.key_vault_uri = AAZStrType(
-        serialized_name="keyVaultUri",
-    )
-    key_vault_properties.key_version = AAZStrType(
-        serialized_name="keyVersion",
-    )
+        key_vault_properties = _schema_cluster_read.properties.key_vault_properties
+        key_vault_properties.key_name = AAZStrType(
+            serialized_name="keyName",
+        )
+        key_vault_properties.key_rsa_size = AAZIntType(
+            serialized_name="keyRsaSize",
+        )
+        key_vault_properties.key_vault_uri = AAZStrType(
+            serialized_name="keyVaultUri",
+        )
+        key_vault_properties.key_version = AAZStrType(
+            serialized_name="keyVersion",
+        )
 
-    sku = _schema_cluster_read.sku
-    sku.capacity = AAZIntType()
-    sku.name = AAZStrType()
+        sku = _schema_cluster_read.sku
+        sku.capacity = AAZIntType()
+        sku.name = AAZStrType()
 
-    tags = _schema_cluster_read.tags
-    tags.Element = AAZStrType()
+        tags = _schema_cluster_read.tags
+        tags.Element = AAZStrType()
 
-    _schema.id = _schema_cluster_read.id
-    _schema.identity = _schema_cluster_read.identity
-    _schema.location = _schema_cluster_read.location
-    _schema.name = _schema_cluster_read.name
-    _schema.properties = _schema_cluster_read.properties
-    _schema.sku = _schema_cluster_read.sku
-    _schema.tags = _schema_cluster_read.tags
-    _schema.type = _schema_cluster_read.type
+        _schema.id = cls._schema_cluster_read.id
+        _schema.identity = cls._schema_cluster_read.identity
+        _schema.location = cls._schema_cluster_read.location
+        _schema.name = cls._schema_cluster_read.name
+        _schema.properties = cls._schema_cluster_read.properties
+        _schema.sku = cls._schema_cluster_read.sku
+        _schema.tags = cls._schema_cluster_read.tags
+        _schema.type = cls._schema_cluster_read.type
 
 
 __all__ = ["Update"]

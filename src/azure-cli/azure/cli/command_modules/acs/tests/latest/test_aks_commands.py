@@ -319,7 +319,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.exists('fqdn'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('networkProfile.loadBalancerSku', 'standard'),
             self.check('apiServerAccessProfile.enablePrivateCluster', True),
             self.check('networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists('networkProfile.loadBalancerProfile.effectiveOutboundIPs')
@@ -435,7 +435,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('networkProfile.loadBalancerSku', 'standard'),
             self.check('apiServerAccessProfile.enablePrivateCluster', None),
             self.check('apiServerAccessProfile.authorizedIpRanges', ['1.2.3.4/32']),
             self.check('networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
@@ -1261,7 +1261,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'AvailabilitySet'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Basic'),
+            self.check('networkProfile.loadBalancerSku', 'basic'),
         ])
 
         # get-credentials
@@ -1335,7 +1335,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('networkProfile.loadBalancerSku', 'standard'),
             self.check(
                 'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
@@ -1426,7 +1426,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('networkProfile.loadBalancerSku', 'standard'),
             self.check(
                 'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
@@ -1542,7 +1542,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('networkProfile.loadBalancerSku', 'standard'),
             self.exists('networkProfile.loadBalancerProfile'),
             self.exists('networkProfile.loadBalancerProfile.outboundIPs'),
             self.exists(
@@ -1649,7 +1649,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('networkProfile.loadBalancerSku', 'standard'),
             self.exists('networkProfile.loadBalancerProfile'),
             self.exists(
                 'networkProfile.loadBalancerProfile.outboundIpPrefixes'),
@@ -3820,7 +3820,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'AvailabilitySet'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Basic'),
+            self.check('networkProfile.loadBalancerSku', 'basic'),
         ])
 
         # get-credentials
@@ -3890,7 +3890,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('networkProfile.loadBalancerSku', 'standard'),
             self.check(
                 'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
@@ -3977,7 +3977,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('networkProfile.loadBalancerSku', 'standard'),
             self.check(
                 'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
@@ -4089,7 +4089,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('networkProfile.loadBalancerSku', 'standard'),
             self.exists('networkProfile.loadBalancerProfile'),
             self.exists('networkProfile.loadBalancerProfile.outboundIPs'),
             self.exists(
@@ -4192,7 +4192,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('networkProfile.loadBalancerSku', 'standard'),
             self.exists('networkProfile.loadBalancerProfile'),
             self.exists(
                 'networkProfile.loadBalancerProfile.outboundIpPrefixes'),
@@ -8279,7 +8279,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
     def test_aks_create_with_azurekeyvaultkms_public_key_vault(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         kv_name = self.create_random_name('cliakstestkv', 16)
@@ -8366,7 +8366,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
     def test_aks_update_with_azurekeyvaultkms_public_key_vault(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         kv_name = self.create_random_name('cliakstestkv', 16)
@@ -8440,7 +8440,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap', preserve_default_location=True)
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
     def test_aks_create_with_azurekeyvaultkms_private_key_vault(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         kv_name = self.create_random_name('cliakstestkv', 16)
@@ -8560,7 +8560,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap', preserve_default_location=True)
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
     def test_aks_update_with_azurekeyvaultkms_private_key_vault(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         kv_name = self.create_random_name('cliakstestkv', 16)
@@ -8653,7 +8653,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap', preserve_default_location=True)
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
     def test_aks_create_with_azurekeyvaultkms_private_cluster_v1_private_key_vault(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         kv_name = self.create_random_name('cliakstestkv', 16)
@@ -8895,7 +8895,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
     def test_aks_disable_azurekeyvaultkms(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         kv_name = self.create_random_name('cliakstestkv', 16)

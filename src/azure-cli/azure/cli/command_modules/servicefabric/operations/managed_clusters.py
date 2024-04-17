@@ -125,6 +125,12 @@ def update_cluster(cmd,
         if tags is not None:
             cluster.tags = tags
 
+        if not cluster.public_ip_prefix_id:
+            cluster.public_ip_prefix_id = None
+
+        if not cluster.public_i_pv6_prefix_id:
+            cluster.public_i_pv6_prefix_id = None
+
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
     except HttpResponseError as ex:
@@ -155,6 +161,12 @@ def add_client_cert(cmd,
         else:
             raise CLIError("Thumbprint and Common name are empty")
 
+        if not cluster.public_ip_prefix_id:
+            cluster.public_ip_prefix_id = None
+
+        if not cluster.public_i_pv6_prefix_id:
+            cluster.public_i_pv6_prefix_id = None
+
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
     except HttpResponseError as ex:
@@ -170,6 +182,12 @@ def delete_client_cert(cmd,
                        common_name=None):
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
+
+        if not cluster.public_ip_prefix_id:
+            cluster.public_ip_prefix_id = None
+
+        if not cluster.public_i_pv6_prefix_id:
+            cluster.public_i_pv6_prefix_id = None
 
         if cluster.clients is not None:
             initial_size = len(cluster.clients)
@@ -241,6 +259,12 @@ def add_network_security_rule(cmd,
                                                        source_address_prefixes=source_addr_prefixes)
 
         cluster.network_security_rules.append(new_network_securityRule)
+
+        if not cluster.public_ip_prefix_id:
+            cluster.public_ip_prefix_id = None
+
+        if not cluster.public_i_pv6_prefix_id:
+            cluster.public_i_pv6_prefix_id = None
 
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
