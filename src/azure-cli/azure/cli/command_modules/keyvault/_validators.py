@@ -266,14 +266,23 @@ def validate_key_type(ns):
     setattr(ns, 'kty', kty)
 
 
-def _fetch_default_cvm_policy():
+def _fetch_default_cvm_policy(cli_ctx):
     try:
-        import requests
-        import json
-        policy = requests.get(default_cvm_policy_url)
-        return json.loads(policy.content)
+        from azure.cli.core.util import send_raw_request
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        _endpoint = cli_ctx.cloud.endpoints.resource_manager
+        if _endpoint.endswith('/'):
+            _endpoint = _endpoint[:-1]
+        default_cvm_policy_url = f"{_endpoint}/subscriptions/{get_subscription_id(cli_ctx)}/providers/Microsoft.Attestation/Locations/East US/defaultProvider?api-version=2020-10-01"
+        response = send_raw_request(cli_ctx, 'get', default_cvm_policy_url)
+        logger.warning(f"Fetched default cvm policy from {default_cvm_policy_url}:\n {response}")
+        return response.json()
+        # import requests
+        # import json
+        # policy = requests.get(default_cvm_policy_url)
+        # return json.loads(policy.content)
     except Exception:  # pylint: disable=broad-except
-        logger.debug("Fail to fetch default cvm policy from %s,use local cvm policy as fallback",
+        logger.debug("Fail to fetch default cvm policy from %s, use local cvm policy as fallback",
                      default_cvm_policy_url)
     return fallback_cvm_policy
 
@@ -301,7 +310,7 @@ def process_key_release_policy(cmd, ns):
     KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     if default_cvm_policy:
-        policy = _fetch_default_cvm_policy()
+        policy = _fetch_default_cvm_policy(cmd.cli_ctx)
         ns.release_policy = KeyReleasePolicy(encoded_policy=json.dumps(policy).encode('utf-8'),
                                              immutable=immutable)
         return
