@@ -3167,9 +3167,9 @@ class DeploymentStacksTest(ScenarioTest):
                 'name': deployment_stack_name,
                 'resource-group': resource_group,
                 'location': location,
-                'template-file': os.path.join(curr_dir, 'template_validate.json').replace('\\', '\\\\'),
-                'parameter-file': os.path.join(curr_dir, 'template_validate_parameters_valid.json').replace('\\', '\\\\'),
-                'parameter-file-invalid': os.path.join(curr_dir, 'template_validate_parameters_invalid.json').replace('\\', '\\\\')
+                'template-file': os.path.join(curr_dir, 'template_rg_validate.json').replace('\\', '\\\\'),
+                'parameter-file': os.path.join(curr_dir, 'template_rg_validate_parameters_valid.json').replace('\\', '\\\\'),
+                'parameter-file-invalid': os.path.join(curr_dir, 'template_rg_validate_parameters_invalid.json').replace('\\', '\\\\')
             })
 
         # validate deployment stack with template file and parameter file: success
@@ -3182,6 +3182,31 @@ class DeploymentStacksTest(ScenarioTest):
         with self.assertRaises(CLIError) as err:
             self.cmd(
                 'stack group validate --name {name} --resource-group {resource-group} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file-invalid}" --aou detachAll')
+            self.assertTrue("Deployment template validation failed" in str(err.exception))
+
+    def test_validate_deployment_stack_subscription(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-validate-deployment-stack-subscription', 60)
+
+        self.kwargs.update(
+            {
+                'name': deployment_stack_name,
+                'location': location,
+                'template-file': os.path.join(curr_dir, 'template_sub_validate.json').replace('\\', '\\\\'),
+                'parameter-file': os.path.join(curr_dir, 'template_sub_validate_parameters_valid.json').replace('\\', '\\\\'),
+                'parameter-file-invalid': os.path.join(curr_dir, 'template_sub_validate_parameters_invalid.json').replace('\\', '\\\\')
+            })
+
+        # validate deployment stack with template file and parameter file: success
+        self.cmd(
+            'stack sub validate --name {name} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --description "stack deployment" --aou detachAll',
+            checks=self.check_pattern(
+                'properties.validatedResources[0].id', r'^/subscriptions/.*/resourceGroups/[^/]+$'))
+
+        # validate deployment stack with template file and parameter file: failure due to parameter constraint
+        with self.assertRaises(CLIError) as err:
+            self.cmd(
+                'stack sub validate --name {name} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file-invalid}" --aou deleteResources')
             self.assertTrue("Deployment template validation failed" in str(err.exception))
 
 
