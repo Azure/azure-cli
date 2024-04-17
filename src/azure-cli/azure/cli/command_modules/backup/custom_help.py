@@ -149,7 +149,96 @@ def is_immutability_weakened(existing_vault, patchvault):
     return False
 
 
+def is_rpo_increased(old_policy, new_policy, backup_management_type):
+    return calculate_rpo(new_policy, backup_management_type) > calculate_rpo(old_policy, backup_management_type)
+
+
+def calculate_rpo(policy, backup_management_type):
+    rpo_time = 0
+
+    if backup_management_type == "AzureIaasVM":
+        schedule_policy = policy.properties.schedule_policy
+        if schedule_policy.schedule_run_frequency == 'Hourly':
+            if schedule_policy.hourly_schedule.schedule_window_duration == 24:
+                rpo_time = schedule_policy.hourly_schedule.interval
+            else:
+                rpo_time = 24 - schedule_policy.hourly_schedule.schedule_window_duration
+
+        if schedule_policy.schedule_run_frequency == "Daily":
+            rpo_time = 24
+
+        if schedule_policy.schedule_run_frequency == "Weekly":
+            rpo_time = calculate_weekly_rpo(schedule_policy.weekly_schedule.schedule_run_days)
+
+    if backup_management_type == "AzureStorage":
+        schedule_policy = policy.properties.schedule_policy
+        if schedule_policy.schedule_run_frequency == 'Hourly':
+            if schedule_policy.hourly_schedule.schedule_window_duration <= schedule_policy.hourly_schedule.interval:
+                rpo_time = 24
+            else:
+                number_of_rps = (schedule_policy.hourly_schedule.schedule_window_duration //
+                                 schedule_policy.hourly_schedule.interval) + 1
+                rpo_time = 24 - (schedule_policy.hourly_schedule.interval * (number_of_rps - 1))
+
+        if schedule_policy.schedule_run_frequency == "Daily":
+            rpo_time = 24
+
+    if backup_management_type == "AzureWorkload":
+        log_policy = get_sub_protection_policy(policy, "Log")
+        full_policy = get_sub_protection_policy(policy, "Full")
+        differential_policy = get_sub_protection_policy(policy, "Differential")
+        incremental_policy = get_sub_protection_policy(policy, "Incremental")
+
+        if log_policy is not None:
+            rpo_time = log_policy.schedule_policy.schedule_frequency_in_mins / 60
+
+        elif full_policy.schedule_policy.schedule_run_frequency == "Daily":
+            rpo_time = 24
+
+        else: # weekly policy
+            combined_schedule = []
+            if full_policy.retention_policy.weekly_schedule is not None:
+                combined_schedule.append(full_policy.retention_policy.weekly_schedule.days_of_the_week)
+            if differential_policy is not None:
+                combined_schedule.append(differential_policy.schedule_policy.schedule_run_days)
+            if incremental_policy is not None:
+                combined_schedule.append(incremental_policy.schedule_policy.schedule_run_days)
+            rpo_time = calculate_weekly_rpo(combined_schedule)
+
+    return rpo_time
+
+def calculate_weekly_rpo(schedule_run_days):
+    week_map = {
+        'sunday': 0,
+        'monday': 1,
+        'tuesday': 2,
+        'wednesday': 3,
+        'thursday': 4,
+        'friday': 5,
+        'saturday': 6
+    }
+    week_mask = [False]*7
+    for day in schedule_run_days and day.lower() in week_map:
+        week_mask[int(week_map[day.lower()])] = True
+    week_circular_mask = week_mask * 2
+
+    last_active_index = None
+    largest_gap = 0
+    gap = 0
+    for index, backup_scheduled in enumerate(week_circular_mask):
+        if backup_scheduled:
+            if last_active_index is not None:
+                gap = index - last_active_index
+                if gap > largest_gap:
+                    largest_gap = gap
+            last_active_index = index
+
+    return largest_gap * 24
+
+
 def is_retention_duration_decreased(old_policy, new_policy, backup_management_type):
+    if is_rpo_increased(old_policy, new_policy, backup_management_type):
+        return True
     if backup_management_type == "AzureIaasVM":
         if old_policy.properties.instant_rp_retention_range_in_days is not None:
             if (new_policy.properties.instant_rp_retention_range_in_days is None or
