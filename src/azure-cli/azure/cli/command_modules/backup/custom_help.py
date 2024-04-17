@@ -46,8 +46,8 @@ operation_name_map = {"deleteProtection": rsc_type + "/backupFabrics/protectionC
                       "deleteRGMapping": rsc_type + "/backupResourceGuardProxies/delete",
                       "getSecurityPIN": rsc_type + "/backupSecurityPIN/action",
                       "disableSoftDelete": rsc_type + "/backupconfig/write",
-                      "disableImmutability": rsc_type + "/write#reduceImmutabilityState",
-                      "suspendBackup": rsc_type + "/backupFabrics/protectionContainers/protectedItems/write#stopProtectionWithRetainData"}
+                      "RecoveryServicesDisableImmutability": rsc_type + "/write#reduceImmutabilityState",
+                      "RecoveryServicesStopProtection": rsc_type + "/backupFabrics/protectionContainers/protectedItems/write#stopProtectionWithRetainData"}
 
 # Client Utilities
 

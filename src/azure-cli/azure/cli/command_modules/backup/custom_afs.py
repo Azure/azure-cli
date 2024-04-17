@@ -312,17 +312,17 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
     afs_item_properties.source_resource_id = item.properties.source_resource_id
     afs_item = ProtectedItemResource(properties=afs_item_properties)
 
-    # ResourceGuard scenario: if we are suspending backup and there is MUA setup for the scenario,
+    # ResourceGuard scenario: if we are stopping backup and there is MUA setup for the scenario,
     # we want to set the appropriate parameters.
-    if afs_item.properties.protection_state == ProtectionState.backups_suspended:
+    if afs_item.properties.protection_state == ProtectionState.protection_stopped:
         if helper.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
-                                             vault_name, "suspendBackup"):
+                                             vault_name, "RecoveryServicesStopProtection"):
             # Cross Tenant scenario
             if tenant_id is not None:
                 client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
                                                  aux_tenants=[tenant_id]).protected_item
             afs_item.properties.resource_guard_operation_requests = [helper.get_resource_guard_operation_request(
-                cmd.cli_ctx, resource_group_name, vault_name, "suspendBackup")]
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesStopProtection")]
 
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, afs_item, cls=helper.get_pipeline_response)

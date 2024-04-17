@@ -172,10 +172,10 @@ def update_vault(cmd, client, vault_name, resource_group_name, tags=None,
 
     if cust_help.is_immutability_weakened(existing_vault, patchvault):
         if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
-                                                vault_name, operation_name="disableImmutability"):
+                                                vault_name, operation_name="RecoveryServicesDisableImmutability"):
             resource_guard_used = True
             patchvault.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
-                cmd.cli_ctx, resource_group_name, vault_name, "disableImmutability")]
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesDisableImmutability")]
 
     if resource_guard_used and tenant_id is not None:
         client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesClient,
@@ -1551,17 +1551,17 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
     # because the parameter=variable format breaks linting.
     vm_item = _get_disable_protection_request(item, False, retain_recovery_points_as_per_policy)
 
-    # ResourceGuard scenario: if we are suspending backup and there is MUA setup for the scenario,
+    # ResourceGuard scenario: if we are stopping backup and there is MUA setup for the scenario,
     # we want to set the appropriate parameters.
-    if vm_item.properties.protection_state == ProtectionState.backups_suspended:
+    if vm_item.properties.protection_state == ProtectionState.protection_stopped:
         if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
-                                                vault_name, "suspendBackup"):
+                                                vault_name, "RecoveryServicesStopProtection"):
             # Cross Tenant scenario
             if tenant_id is not None:
                 client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
                                                  aux_tenants=[tenant_id]).protected_item
             vm_item.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
-                cmd.cli_ctx, resource_group_name, vault_name, "suspendBackup")]
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesStopProtection")]
 
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, vm_item, cls=cust_help.get_pipeline_response)

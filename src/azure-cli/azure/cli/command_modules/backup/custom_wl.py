@@ -525,17 +525,17 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
     properties.policy_id = ''
     param = ProtectedItemResource(properties=properties)
 
-    # ResourceGuard scenario: if we are suspending backup and there is MUA setup for the scenario,
+    # ResourceGuard scenario: if we are stopping backup and there is MUA setup for the scenario,
     # we want to set the appropriate parameters.
-    if param.properties.protection_state == ProtectionState.backups_suspended:
+    if param.properties.protection_state == ProtectionState.protection_stopped:
         if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
-                                                vault_name, "suspendBackup"):
+                                                vault_name, "RecoveryServicesStopProtection"):
             # Cross Tenant scenario
             if tenant_id is not None:
                 client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
                                                  aux_tenants=[tenant_id]).protected_item
             param.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
-                cmd.cli_ctx, resource_group_name, vault_name, "suspendBackup")]
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesStopProtection")]
 
     # Trigger disable protection and wait for completion
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
