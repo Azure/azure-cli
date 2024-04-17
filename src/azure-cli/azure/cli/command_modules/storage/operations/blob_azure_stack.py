@@ -494,11 +494,12 @@ def show_blob(cmd, client, container_name, blob_name, snapshot=None, lease_id=No
         if blob.properties.blob_type == cmd.get_models('blob.models#_BlobTypes').PageBlob:
             page_ranges = client.get_page_ranges(
                 container_name, blob_name, snapshot=snapshot, lease_id=lease_id, if_modified_since=if_modified_since,
-                if_unmodified_since=if_unmodified_since, if_match=if_match, if_none_match=if_none_match, timeout=timeout)
+                if_unmodified_since=if_unmodified_since, if_match=if_match, if_none_match=if_none_match,
+                timeout=timeout)
 
         blob.properties.page_ranges = page_ranges
     except HttpResponseError as ex:
-        logger.warning(f"GetPageRanges failed with status code:{ex.status_code}, message: {ex.message}")
+        logger.warning("GetPageRanges failed with status code: %d, message: %s", ex.status_code, ex.message)
 
     return blob
 
@@ -664,7 +665,7 @@ def show_blob_v2(cmd, client, container_name, blob_name, snapshot=None, lease_id
 
         blob.page_ranges = page_ranges
     except HttpResponseError as ex:
-        logger.warning(f"GetPageRanges failed with status code:{ex.status_code}, message: {ex.message}")
+        logger.warning("GetPageRanges failed with status code: %d, message: %s", ex.status_code, ex.message)
 
     return blob
 
