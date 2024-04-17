@@ -4063,7 +4063,7 @@ def server_create(
         enable_ad_only_auth=False,
         external_admin_principal_type=None,
         external_admin_sid=None,
-        external_admin_name=None,	
+        external_admin_name=None,
         **kwargs):
     '''
     Creates a server.
@@ -4085,7 +4085,7 @@ def server_create(
             else ServerNetworkAccessFlag.DISABLED)
 
     if minimal_tls_version is not None:
-	    kwargs['minimal_tls_version'] = minimal_tls_version
+        kwargs['minimal_tls_version'] = minimal_tls_version
     else:
         kwargs['minimal_tls_version'] = SqlServerMinimalTlsVersionType.tls_1_2
 
