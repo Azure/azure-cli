@@ -353,6 +353,9 @@ def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, w
     vnet_location = _normalize_location(cmd, vnet_location)
     asp_location = _normalize_location(cmd, webapp_location)
 
+    logger.warning("VNet location: %s", vnet_location)
+    logger.warning("asp_location: %s", asp_location)
+
     if vnet_location != asp_location:
         raise ArgumentUsageError("Unable to create webapp: vnet and App Service Plan must be in the same location. "
                                  "vnet location: {}. Plan location: {}.".format(vnet_location, asp_location))
@@ -4484,10 +4487,22 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
         name,
         client.DEFAULT_API_VERSION
     )
+
     url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
+
+    resrouce_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}'.format(
+        sub_id,
+        resource_group_name,
+        name,
+    )
 
     updated_functionapp = json.dumps(
         {
+            "id": resrouce_id,
+            "name": name,
+            "type": "Microsoft.Web/sites",
+            "kind": "functionapp,linux,container,azurecontainerapps",
+            "location": functionapp.location,
             "properties": {
                 "daprConfig": {"enabled": False} if functionapp.dapr_config is None else {
                     "enabled": functionapp.dapr_config.enabled,
@@ -4506,6 +4521,10 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
             }
         }
     )
+
+    logger.warning("Updating function app %s with the following properties: %s", name, updated_functionapp)
+    logger.warning("url: %s", url)
+
     response = send_raw_request(cmd.cli_ctx, method='PATCH', url=url, body=updated_functionapp)
     poll_url = response.headers.get('location', "")
     if response.status_code == 202 and poll_url:
@@ -4699,6 +4718,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                        resource_group_name=resource_group_name,
                                        subnet=subnet,
                                        vnet=vnet)
+
         _validate_vnet_integration_location(cmd=cmd, webapp_location=webapp_location,
                                             subnet_resource_group=subnet_info["resource_group_name"],
                                             vnet_name=subnet_info["vnet_name"],
@@ -4844,6 +4864,21 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
 
     if flexconsumption_location:
+        runtimes = [r for r in FLEX_RUNTIMES if r['runtime'] == runtime]
+        if not runtimes:
+            supported_runtimes = set(map(lambda x: x['runtime'], FLEX_RUNTIMES))
+            raise ValidationError("Invalid runtime. Supported runtimes for function apps on Flex App Service "
+                                  "plans are {0}".format(list(supported_runtimes)))
+        if runtime_version is not None:
+            lang = next((r for r in runtimes if r['version'] == runtime_version), None)
+            if lang is None:
+                supported_versions = list(map(lambda x: x['version'], runtimes))
+                raise ValidationError("Invalid version {0} for runtime {1} for function apps on the Flex "
+                                      "Consumption plan. Supported version for runtime {1} is {2}."
+                                      .format(runtime_version, runtime, supported_versions))
+        else:
+            runtime_version = runtimes[0]['version']
+
         runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, flexconsumption_location, runtime, runtime_version)
         matched_runtime = runtime_helper.resolve(runtime, runtime_version)
     else:
@@ -5470,12 +5505,47 @@ def list_consumption_locations(cmd):
 
 
 def list_flexconsumption_locations(cmd):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    sub_id = get_subscription_id(cmd.cli_ctx)
-    geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2022-03-01'
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + geo_regions_api.format(sub_id)
-    regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
-    return [{'name': x['name'].lower().replace(' ', '')} for x in regions]
+    return [
+        {
+            "name": "eastus",
+        },
+        {
+            "name": "northeurope"
+        },
+        {
+            "name": "eastasia"
+        },
+        {
+            "name": "centralus"
+        },
+        {
+            "name": "uksouth"
+        },
+        {
+            "name": "eastus2"
+        },
+        {
+            "name": "eastus2euap"
+        },
+        {
+            "name": "australiaeast"
+        },
+        {
+            "name": "westus2"
+        },
+        {
+            "name": "westus3"
+        },
+        {
+            "name": "southcentralus"
+        },
+        {
+            "name": "swedencentral"
+        },
+        {
+            "name": "southeastasia"
+        }
+    ]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):

@@ -44,7 +44,7 @@ class FunctionappACRScenarioTest(ScenarioTest):
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(
             resource_group, acr_registry_name))
         self.cmd(
-            'appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
+            'appservice plan create -g {} -n {} --sku P1V3 --is-linux' .format(resource_group, plan))
         self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 4 --runtime {}'.format(
             resource_group, functionapp, storage_account, plan, runtime))
         creds = self.cmd('acr credential show -n {} -g {}'.format(
@@ -97,7 +97,7 @@ class FunctionAppCreateUsingACR(ScenarioTest):
         username = acr_creds['username']
         password = acr_creds['passwords'][0]['value']
         self.cmd(
-            'functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan))
+            'functionapp plan create -g {} -n {} --sku P1V3 --is-linux'.format(resource_group, plan))
         self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 4 --runtime {}'
                  ' --deployment-container-image-name {}.azurecr.io/image-name:latest --docker-registry-server-user {}'
                  ' --docker-registry-server-password {}'.format(resource_group, functionapp, storage_account, plan, runtime,
@@ -131,7 +131,7 @@ class FunctionAppCreateUsingACR(ScenarioTest):
         self.assertNotIn('FUNCTIONS_WORKER_RUNTIME', all_settings)
 
 
-class FunctionappACRDeploymentScenarioTest(ScenarioTest):
+class FunctionappACRDeploymentScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(location='brazilsouth')
     @StorageAccountPreparer(name_prefix='clitestacrdeploy')
     def test_acr_deployment_function_app(self, resource_group, storage_account):
@@ -143,7 +143,7 @@ class FunctionappACRDeploymentScenarioTest(ScenarioTest):
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(
             resource_group, acr_registry_name))
         self.cmd(
-            'appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
+            'appservice plan create -g {} -n {} --sku P1V3 --is-linux' .format(resource_group, plan))
         self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 4 --runtime {}'.format(
             resource_group, functionapp, storage_account, plan, runtime))
         creds = self.cmd('acr credential show -g {} -n {}'.format(
@@ -457,11 +457,10 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
 
 class FunctionWorkloadProfile(ScenarioTest):
     @AllowLargeResponse(8192)
-    @ResourceGroupPreparer(location="westus")
+    @ResourceGroupPreparer(location='northeurope')
     @StorageAccountPreparer()
     def test_functionapp_workloadprofiles(self, resource_group, storage_account):
         
-        location = "NorthCentralUS(Stage)"
         functionapp_name = self.create_random_name(
             'functionapp', 32)
         managed_environment_name = self.create_random_name(
@@ -475,10 +474,9 @@ class FunctionWorkloadProfile(ScenarioTest):
             'wlp', 15
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location {} --enable-workload-profiles  --logs-destination none'.format(
+        self.cmd('containerapp env create --name {} --resource-group {} --location northeurope --enable-workload-profiles  --logs-destination none'.format(
             managed_environment_name,
             resource_group,
-            location,
         ))
         
         self.cmd('containerapp env workload-profile add --name {} --resource-group {} --workload-profile-type D4 -w {} --min-nodes 3 --max-nodes 6'.format(
@@ -492,7 +490,8 @@ class FunctionWorkloadProfile(ScenarioTest):
             resource_group,
             workload_profile_name_2
         ))
-
+        
+        time.sleep(260)
         self.cmd('functionapp create -g {} -n {} -s {} --functions-version 4 --runtime dotnet-isolated --environment {} --workload-profile-name {} --cpu 1.0 --memory 1.0Gi'.format(
             resource_group,
             functionapp_name,
@@ -517,6 +516,7 @@ class FunctionWorkloadProfile(ScenarioTest):
             workload_profile_name_2
         ))
 
+        time.sleep(1200)
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
             JMESPathCheck('resourceConfig.cpu', 0.75),
             JMESPathCheck('resourceConfig.memory', '2Gi'),
@@ -1668,9 +1668,9 @@ class FunctionAppOnLinux(ScenarioTest):
         plan = self.create_random_name(prefix='funcapplinplan', length=24)
         functionapp = self.create_random_name(
             prefix='functionapp-linux', length=24)
-        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan), checks=[
+        self.cmd('functionapp plan create -g {} -n {} --sku P1V3 --is-linux'.format(resource_group, plan), checks=[
             JMESPathCheck('reserved', True),
-            JMESPathCheck('sku.name', 'S1'),
+            JMESPathCheck('sku.name', 'P1v3'),
         ])
 
         self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime python --runtime-version 4.8'
@@ -1836,8 +1836,8 @@ class FunctionAppServicePlanLinux(ScenarioTest):
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_app_service_plan_linux(self, resource_group):
         plan = self.create_random_name(prefix='funcappplan', length=24)
-        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
-            JMESPathCheck('sku.name', 'S1'),
+        self.cmd('functionapp plan create -g {} -n {} --sku P1V3 --is-linux' .format(resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'P1v3'),
             JMESPathCheck('kind', 'linux')
         ])
 
@@ -2412,7 +2412,7 @@ class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
         self.cmd('functionapp delete -n {functionapp_name}')
         self.cmd('functionapp plan delete -n {plan_name} -y')
 
-class FunctionappIdentityTest(ScenarioTest):
+class FunctionappIdentityTest(LiveScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2456,7 +2456,7 @@ class FunctionappIdentityTest(ScenarioTest):
         msi_result = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name), checks=[
             self.check('name', identity_name)]).get_output_in_json()
         self.cmd(
-            'functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+            'functionapp plan create -g {} -n {} --sku P1V3'.format(resource_group, plan_name))
         self.cmd(
             'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan_name, storage_account))
 
@@ -2491,7 +2491,7 @@ class FunctionappIdentityTest(ScenarioTest):
         msi2_result = self.cmd('identity create -g {} -n {}'.format(
             resource_group, identity2_name)).get_output_in_json()
         self.cmd(
-            'functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+            'functionapp plan create -g {} -n {} --sku P1V3'.format(resource_group, plan_name))
         self.cmd(
             'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan_name, storage_account))
 
