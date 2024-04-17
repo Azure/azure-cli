@@ -12,11 +12,11 @@ interactions:
       - keep-alive
       ParameterSetName:
       - --name --location --template-file --deny-settings-mode --deployment-resource-group
-        --yes
+        --action-on-unmanage --yes
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.11.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2022-08-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2024-03-01
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The resource ''cli-test-create-deployment-stack-subscription000002''
@@ -29,143 +29,37 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Oct 2023 02:11:18 GMT
+      - Wed, 17 Apr 2024 16:18:31 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-failure-cause:
       - gateway
+      x-msedge-ref:
+      - 'Ref A: 18EA697212BF4113A0D5E1E7CAE8CEAA Ref B: BN1AA2051012023 Ref C: 2024-04-17T16:18:32Z'
     status:
       code: 404
       message: Not Found
 - request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.31.0
-    method: GET
-    uri: https://aka.ms/BicepLatestRelease
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - max-age=0, no-cache, no-store
-      connection:
-      - keep-alive
-      content-length:
-      - '0'
-      date:
-      - Fri, 27 Oct 2023 02:11:20 GMT
-      expires:
-      - Fri, 27 Oct 2023 02:11:20 GMT
-      location:
-      - https://downloads.bicep.azure.com/releases/latest
-      pragma:
-      - no-cache
-      request-context:
-      - appId=cid-v1:7d63747b-487e-492a-872d-762362f77974
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000 ; includeSubDomains
-      x-response-cache-status:
-      - 'True'
-    status:
-      code: 301
-      message: Moved Permanently
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.31.0
-    method: GET
-    uri: https://downloads.bicep.azure.com/releases/latest
-  response:
-    body:
-      string: '{"url":"https://api.github.com/repos/Azure/bicep/releases/123560692","assets_url":"https://api.github.com/repos/Azure/bicep/releases/123560692/assets","upload_url":"https://uploads.github.com/repos/Azure/bicep/releases/123560692/assets{?name,label}","html_url":"https://github.com/Azure/bicep/releases/tag/v0.22.6","id":123560692,"author":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"node_id":"RE_kwDOD7S9ks4HXWL0","tag_name":"v0.22.6","target_commitish":"main","name":"v0.22.6","draft":false,"prerelease":false,"created_at":"2023-10-04T20:02:56Z","published_at":"2023-10-04T23:30:22Z","assets":[{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129068533","id":129068533,"node_id":"RA_kwDOD7S9ks4HsW31","name":"Azure.Bicep.CommandLine.linux-arm64.0.22.6.nupkg","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":31339629,"download_count":8,"created_at":"2023-10-04T22:12:26Z","updated_at":"2023-10-04T22:12:35Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/Azure.Bicep.CommandLine.linux-arm64.0.22.6.nupkg"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129068472","id":129068472,"node_id":"RA_kwDOD7S9ks4HsW24","name":"Azure.Bicep.CommandLine.linux-x64.0.22.6.nupkg","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":31740800,"download_count":5,"created_at":"2023-10-04T22:12:04Z","updated_at":"2023-10-04T22:12:14Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/Azure.Bicep.CommandLine.linux-x64.0.22.6.nupkg"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129068665","id":129068665,"node_id":"RA_kwDOD7S9ks4HsW55","name":"Azure.Bicep.CommandLine.osx-arm64.0.22.6.nupkg","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":31678250,"download_count":4,"created_at":"2023-10-04T22:13:05Z","updated_at":"2023-10-04T22:13:18Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/Azure.Bicep.CommandLine.osx-arm64.0.22.6.nupkg"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129068588","id":129068588,"node_id":"RA_kwDOD7S9ks4HsW4s","name":"Azure.Bicep.CommandLine.osx-x64.0.22.6.nupkg","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":32115692,"download_count":6,"created_at":"2023-10-04T22:12:47Z","updated_at":"2023-10-04T22:12:53Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/Azure.Bicep.CommandLine.osx-x64.0.22.6.nupkg"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129068423","id":129068423,"node_id":"RA_kwDOD7S9ks4HsW2H","name":"Azure.Bicep.CommandLine.win-arm64.0.22.6.nupkg","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":33497529,"download_count":7,"created_at":"2023-10-04T22:11:40Z","updated_at":"2023-10-04T22:11:50Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/Azure.Bicep.CommandLine.win-arm64.0.22.6.nupkg"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129068358","id":129068358,"node_id":"RA_kwDOD7S9ks4HsW1G","name":"Azure.Bicep.CommandLine.win-x64.0.22.6.nupkg","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":33091357,"download_count":28,"created_at":"2023-10-04T22:11:17Z","updated_at":"2023-10-04T22:11:29Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/Azure.Bicep.CommandLine.win-x64.0.22.6.nupkg"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067804","id":129067804,"node_id":"RA_kwDOD7S9ks4HsWsc","name":"Azure.Bicep.Core.0.22.6.nupkg","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":717588,"download_count":9,"created_at":"2023-10-04T22:08:27Z","updated_at":"2023-10-04T22:08:28Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/Azure.Bicep.Core.0.22.6.nupkg"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067813","id":129067813,"node_id":"RA_kwDOD7S9ks4HsWsl","name":"Azure.Bicep.Core.0.22.6.snupkg","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":248094,"download_count":3,"created_at":"2023-10-04T22:08:31Z","updated_at":"2023-10-04T22:08:31Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/Azure.Bicep.Core.0.22.6.snupkg"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067827","id":129067827,"node_id":"RA_kwDOD7S9ks4HsWsz","name":"Azure.Bicep.Decompiler.0.22.6.nupkg","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":102324,"download_count":5,"created_at":"2023-10-04T22:08:35Z","updated_at":"2023-10-04T22:08:35Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/Azure.Bicep.Decompiler.0.22.6.nupkg"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067837","id":129067837,"node_id":"RA_kwDOD7S9ks4HsWs9","name":"Azure.Bicep.Decompiler.0.22.6.snupkg","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":24524,"download_count":4,"created_at":"2023-10-04T22:08:37Z","updated_at":"2023-10-04T22:08:38Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/Azure.Bicep.Decompiler.0.22.6.snupkg"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067843","id":129067843,"node_id":"RA_kwDOD7S9ks4HsWtD","name":"Azure.Bicep.MSBuild.0.22.6.nupkg","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":48177,"download_count":3,"created_at":"2023-10-04T22:08:40Z","updated_at":"2023-10-04T22:08:41Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/Azure.Bicep.MSBuild.0.22.6.nupkg"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067848","id":129067848,"node_id":"RA_kwDOD7S9ks4HsWtI","name":"Azure.Bicep.MSBuild.0.22.6.snupkg","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":6939,"download_count":4,"created_at":"2023-10-04T22:08:43Z","updated_at":"2023-10-04T22:08:43Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/Azure.Bicep.MSBuild.0.22.6.snupkg"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067852","id":129067852,"node_id":"RA_kwDOD7S9ks4HsWtM","name":"Azure.Bicep.RegistryModuleTool.0.22.6.nupkg","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":26036245,"download_count":3,"created_at":"2023-10-04T22:08:45Z","updated_at":"2023-10-04T22:08:52Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/Azure.Bicep.RegistryModuleTool.0.22.6.nupkg"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067862","id":129067862,"node_id":"RA_kwDOD7S9ks4HsWtW","name":"Azure.Bicep.RegistryModuleTool.0.22.6.snupkg","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":268940,"download_count":2,"created_at":"2023-10-04T22:08:54Z","updated_at":"2023-10-04T22:08:55Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/Azure.Bicep.RegistryModuleTool.0.22.6.snupkg"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067914","id":129067914,"node_id":"RA_kwDOD7S9ks4HsWuK","name":"bicep-langserver.zip","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/zip","state":"uploaded","size":27773399,"download_count":53,"created_at":"2023-10-04T22:09:12Z","updated_at":"2023-10-04T22:09:19Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/bicep-langserver.zip"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067490","id":129067490,"node_id":"RA_kwDOD7S9ks4HsWni","name":"bicep-linux-arm64","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":64463374,"download_count":149,"created_at":"2023-10-04T22:05:15Z","updated_at":"2023-10-04T22:05:38Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/bicep-linux-arm64"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067577","id":129067577,"node_id":"RA_kwDOD7S9ks4HsWo5","name":"bicep-linux-musl-x64","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":64658770,"download_count":1762,"created_at":"2023-10-04T22:05:53Z","updated_at":"2023-10-04T22:06:13Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/bicep-linux-musl-x64"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067440","id":129067440,"node_id":"RA_kwDOD7S9ks4HsWmw","name":"bicep-linux-x64","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":64822865,"download_count":23826,"created_at":"2023-10-04T22:04:53Z","updated_at":"2023-10-04T22:05:03Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/bicep-linux-x64"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067685","id":129067685,"node_id":"RA_kwDOD7S9ks4HsWql","name":"bicep-osx-arm64","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":64720432,"download_count":946,"created_at":"2023-10-04T22:07:02Z","updated_at":"2023-10-04T22:07:11Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/bicep-osx-arm64"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067616","id":129067616,"node_id":"RA_kwDOD7S9ks4HsWpg","name":"bicep-osx-x64","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/octet-stream","state":"uploaded","size":65107312,"download_count":4068,"created_at":"2023-10-04T22:06:28Z","updated_at":"2023-10-04T22:06:50Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/bicep-osx-x64"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067750","id":129067750,"node_id":"RA_kwDOD7S9ks4HsWrm","name":"bicep-setup-win-x64.exe","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/x-msdownload","state":"uploaded","size":28184104,"download_count":3309,"created_at":"2023-10-04T22:07:37Z","updated_at":"2023-10-04T22:07:51Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/bicep-setup-win-x64.exe"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129068008","id":129068008,"node_id":"RA_kwDOD7S9ks4HsWvo","name":"bicep-win-arm64.exe","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/x-msdownload","state":"uploaded","size":69837152,"download_count":5,"created_at":"2023-10-04T22:09:39Z","updated_at":"2023-10-04T22:10:10Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/bicep-win-arm64.exe"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129067775","id":129067775,"node_id":"RA_kwDOD7S9ks4HsWr_","name":"bicep-win-x64.exe","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/x-msdownload","state":"uploaded","size":67096824,"download_count":18067,"created_at":"2023-10-04T22:08:03Z","updated_at":"2023-10-04T22:08:23Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/bicep-win-x64.exe"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129068273","id":129068273,"node_id":"RA_kwDOD7S9ks4HsWzx","name":"vs-bicep.vsix","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/vsix","state":"uploaded","size":49076147,"download_count":10,"created_at":"2023-10-04T22:10:50Z","updated_at":"2023-10-04T22:11:03Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/vs-bicep.vsix"},{"url":"https://api.github.com/repos/Azure/bicep/releases/assets/129068194","id":129068194,"node_id":"RA_kwDOD7S9ks4HsWyi","name":"vscode-bicep.vsix","label":"","uploader":{"login":"asilverman","id":9611108,"node_id":"MDQ6VXNlcjk2MTExMDg=","avatar_url":"https://avatars.githubusercontent.com/u/9611108?v=4","gravatar_id":"","url":"https://api.github.com/users/asilverman","html_url":"https://github.com/asilverman","followers_url":"https://api.github.com/users/asilverman/followers","following_url":"https://api.github.com/users/asilverman/following{/other_user}","gists_url":"https://api.github.com/users/asilverman/gists{/gist_id}","starred_url":"https://api.github.com/users/asilverman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/asilverman/subscriptions","organizations_url":"https://api.github.com/users/asilverman/orgs","repos_url":"https://api.github.com/users/asilverman/repos","events_url":"https://api.github.com/users/asilverman/events{/privacy}","received_events_url":"https://api.github.com/users/asilverman/received_events","type":"User","site_admin":false},"content_type":"application/vsix","state":"uploaded","size":40984327,"download_count":388,"created_at":"2023-10-04T22:10:22Z","updated_at":"2023-10-04T22:10:36Z","browser_download_url":"https://github.com/Azure/bicep/releases/download/v0.22.6/vscode-bicep.vsix"}],"tarball_url":"https://api.github.com/repos/Azure/bicep/tarball/v0.22.6","zipball_url":"https://api.github.com/repos/Azure/bicep/zipball/v0.22.6","body":"##
-        Highlights\r\n\r\n \r\n\r\n### Bicep Team:\r\n* [Bicep CLI ONLY] Enable supplemental
-        params validation with `build-params` command  (#11975)\r\n  - Use cases for
-        supplemental params can be found [here](https://github.com/Azure/bicep/issues/11895).\r\n  -
-        Bicep CLI support only, Az CLI/Powershell support is coming soon.\r\n* Deprecating
-        `validate-params` command PR (#11974)\r\n  - We will now be validating inline
-        params through the build-params command\r\n* Compile-time variable imports
-        (#11657)\r\n* Allow bicepparam files to reference Registry Modules (including
-        BR, TS & JSON paths) (#11703)\r\n* [EXPERIMENTAL] F12 Bicep Publish with Sources
-        Part 1 (#11896)\r\n  - Must use temporary feature flag: \"publishSource\"\r\n\r\n
-        \r\n\r\n## Features and Bug Fixes\r\n\r\n \r\n\r\n### Bicep Team:\r\n* Deploy
-        Pane: Support tenant & management group scope deployments (#11917)\r\n* Add
-        linter rule to recommend using modules instead of ''Microsoft.Resources/deployments''
-        resources (#11848)\r\n* Reword experimental feature usage error message (#11961)\r\n*
-        Decompile Bicepparams: Use consistent URI -> FS conversion (#11834)\r\n* Use
-        languageVersion 2.0 if any types are imported (#11886)\r\n* Add implicit nullability
-        to optional module params (#11887)\r\n* Block calls to scope functions in
-        `.bicepparam` files (#11903)\r\n* Block nested deployment resources with inner
-        scoped evaluation and symbolic references to outer scope (#11884)\r\n* Support
-        variable imports in .bicepparam files (#11879)\r\n* Fix nested type property
-        decorator completions (#11972)\r\n* Perform deep validation on assigned parameter
-        values in `.bicepparam` files (#11985)\r\n* Added Bicep AvailableItemName
-        to MSBuild props (#11915)\r\n* Added support for skipping bicep build in MSBuild
-        targets (#11916)\r\n* Fix compiled representation of wildcard variable property
-        references (#12048)\r\n* Provide a declared type for imported variable accesses
-        to enable completions (#12050)","reactions":{"url":"https://api.github.com/repos/Azure/bicep/releases/123560692/reactions","total_count":5,"+1":5,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0}}'
-    headers:
-      content-length:
-      - '38680'
-      content-md5:
-      - 0GwI9cPz+Mq1XauvWEfPXw==
-      content-type:
-      - application/octet-stream
-      date:
-      - Fri, 27 Oct 2023 02:11:21 GMT
-      etag:
-      - '0x8DBD69121D037D3'
-      last-modified:
-      - Fri, 27 Oct 2023 02:05:02 GMT
-      x-azure-ref:
-      - 0SRw7ZQAAAAAKlaAuM1m/QIXSL9gU4p81U0pDMjExMDUxMjAyMDQ1ADU2N2EwYzJhLTU3YzktNGJhMS05NjM1LTA4NmUwYmVlYzExYQ==
-      x-azure-ref-originshield:
-      - 0SRw7ZQAAAABVVwjybtX1T7VSuCnpFantU0pDMjExMDUxMjA4MDQ1ADU2N2EwYzJhLTU3YzktNGJhMS05NjM1LTA4NmUwYmVlYzExYQ==
-      x-cache:
-      - TCP_MISS
-      x-ms-blob-type:
-      - BlockBlob
-      x-ms-lease-status:
-      - unlocked
-      x-ms-version:
-      - '2009-09-19'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westus2", "tags": {}, "properties": {"template": {"$schema":
+    body: '{"location": "eastus2euap", "tags": {}, "properties": {"template": {"$schema":
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "metadata": {"_generator": {"name": "bicep", "version":
-      "0.22.6.54827", "templateHash": "12155302990414892109"}}, "parameters": {"location":
+      "0.26.54.24096", "templateHash": "4676284590957754372"}}, "parameters": {"location":
       {"type": "string", "defaultValue": "centralus"}, "storageAccountName": {"type":
-      "string", "defaultValue": "uniquestorage001", "minLength": 3, "maxLength": 24}},
+      "string", "defaultValue": "uniquestorage002", "minLength": 3, "maxLength": 24}},
       "resources": [{"type": "Providers.Test/statefulResources", "apiVersion": "2014-04-01",
       "name": "[parameters(''storageAccountName'')]", "location": "[parameters(''location'')]"}],
       "outputs": {"storageId": {"type": "string", "value": "[resourceId(''Providers.Test/statefulResources'',
       parameters(''storageAccountName''))]"}}}, "parameters": {}, "actionOnUnmanage":
-      {"resources": "detach", "resourceGroups": "detach"}, "deploymentScope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001",
+      {"resources": "detach", "resourceGroups": "detach", "managementGroups": "detach"},
+      "bypassStackOutOfSyncError": false, "deploymentScope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001",
       "denySettings": {"mode": "none", "applyToChildScopes": false}}}'
     headers:
       Accept:
@@ -177,54 +71,61 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1082'
+      - '1152'
       Content-Type:
       - application/json
       ParameterSetName:
       - --name --location --template-file --deny-settings-mode --deployment-resource-group
-        --yes
+        --action-on-unmanage --yes
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.11.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2022-08-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2024-03-01
   response:
     body:
-      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
-        {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\":
-        \"detach\",\r\n      \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentScope\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001\",\r\n
-        \   \"denySettings\": {\r\n      \"mode\": \"none\",\r\n      \"applyToChildScopes\":
-        false\r\n    },\r\n    \"parameters\": {},\r\n    \"resources\": [],\r\n    \"provisioningState\":
-        \"initializing\",\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
-        [],\r\n    \"failedResources\": []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"danted@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2023-10-27T02:11:23.7498119Z\",\r\n    \"lastModifiedBy\": \"danted@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-10-27T02:11:23.7498119Z\"\r\n
-        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002\",\r\n
-        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-subscription000002\"\r\n}"
+      string: "{\r\n  \"location\": \"eastus2euap\",\r\n  \"tags\": {},\r\n  \"properties\"\
+        : {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"detach\",\r\n\
+        \      \"resourceGroups\": \"detach\",\r\n      \"managementGroups\": \"detach\"\
+        \r\n    },\r\n    \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001\"\
+        ,\r\n    \"denySettings\": {\r\n      \"mode\": \"none\",\r\n      \"applyToChildScopes\"\
+        : false\r\n    },\r\n    \"parameters\": {},\r\n    \"resources\": [],\r\n\
+        \    \"provisioningState\": \"initializing\",\r\n    \"detachedResources\"\
+        : [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": [],\r\n\
+        \    \"correlationId\": \"456764ce-2c50-45e6-9874-b81709ccea7e\"\r\n  },\r\
+        \n  \"systemData\": {\r\n    \"createdBy\": \"kylealbert@microsoft.com\",\r\
+        \n    \"createdByType\": \"User\",\r\n    \"createdAt\": \"2024-04-17T16:18:35.2435027Z\"\
+        ,\r\n    \"lastModifiedBy\": \"kylealbert@microsoft.com\",\r\n    \"lastModifiedByType\"\
+        : \"User\",\r\n    \"lastModifiedAt\": \"2024-04-17T16:18:35.2435027Z\"\r\n\
+        \  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002\"\
+        ,\r\n  \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\":\
+        \ \"cli-test-create-deployment-stack-subscription000002\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/141188ca-1a01-4ffb-9464-938b8271d178?api-version=2022-08-01-preview&t=638339694842810667&c=MIIHHjCCBgagAwIBAgITfwHQwFKsM_SaZ3oYQwAEAdDAUjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjMwODAzMDkwMzExWhcNMjQwNzI4MDkwMzExWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJQbCh6bI1fy33ihbuhnYAi-tK-wY4yp8CUXk_uSV8w0AzXrOwZStPhGL2QLmMALLJhLlGruhSEdRUd-ej9YImb9EcB7Sxa7gZM4TttscUWTI37jWjJGvmL2IS8gO-V08sDqRJs9nd7v3NYjwkYwI6upPO198_TvDODjEOoXzdbqNzdg8HK9PRg4R6BQ2SYtQVjaKuTmTVPKtHbYjFDSwqH4QCNwKB-RWl8y_n0aagYHyQLs7HxDh_OYa_ragWKwpVX12uIkZZOlOYoo9z-B3yg2Qc6H93HIyyNLvYYyWvzsXlWbxsigQspOpB-JsijqIMX2LpkicZ9Qt3hdqEH3TgECAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBSotg9l-TRXg2Od_Oq4_NlEL1rRszAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAHXBDjxwU1_SCJTLnITpRn3jC6-hLvpBjlvAcTcon2IrYP1NmLYetTIHeRJIXmkXroCJpCUa740vZLaRyyZKweV_Xav9ODpmbAEriFc24VQpI0eCg5lZxjnpY3SF7pjsQN5R5iXCcf8uPGz-ehUdVqLsTHThEqxqeDjneKzUFHd67creOfJih1BzFDUzzkYs2_ffNVEd_BsQb1RKlb8H3uxdoUizcXw92vz3Ymkntcb6GBTSAp9uTnZyiJaZOtJ4w77PIJqK4IKM2vDqYN6xRIoo9iANNAPHuL8yUSgxYh2LMXQ9b1zW5XrNJ2Q1ajEsRu-zctoZJAYDXhLXDz04rSo&s=etoWWDSRxMsRMYbFDISHLYKh88bNgZrQR0cghVfZfj3hT5z9BrrGKT4OpFfRbPuf8kaFlN_NbA54G5u4O9-B31X7o2Rq_5KxFfW7c_uq0QLRp7W1pCKyF_YORAlOEujtI1mKJwi-iV5J8AIVoxUr5yat3-MXnI9FZC9wAfIdZh6iwYi2TbgKZQgULeEofLNmp8UXEyJG6DwszCZ6BLnW3Af3k2WzRNg2V-0r9srHp6NgsDzIxinY91mB6uD-QKJ2w8IGAtvDLRcMc5zTyBEuik-kdM25DgLHHTR65eF2K0NnTlhS0FyQQ55V2VXIGykzSaJpFFM9iopxBvJJBEuFoA&h=iepYVbBSgAfND9yFYymarq9M2UARxnF43p3kxDuvjEI
+      - https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/eastus2euap/deploymentStackOperationStatus/818bc237-9d28-43f6-83ca-a6e7f81f0df1?api-version=2024-03-01&t=638489675153684958&c=MIIHHjCCBgagAwIBAgITOgKWZiB3yoN1J5HTbQAEApZmIDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwMTMwMTk1ODU1WhcNMjUwMTI0MTk1ODU1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALHDpcIzjOOE93YA83QNAACshNyWr2VF06_EUCOXpoCyjeXAbD0_9e5eBMoCLnMLthxrp3ooQJvZxy2BXPboMJ1wkfmtO0Nwy_IIGnBcOem3HE-6l4vEkAP1pOgbuhC_OYaSiEd-KZKlnDLoUgsa33gnyr5z_SeaW2zA3msDIkQ0ScjLtYEccOoUFVoS1sE4nXQ0W_wnJ5Olm_9px5fOrzdLPyJrjZP6o1vFS1d7I7qBuTaz8fMxK9VnbVF1XrdLxC5RMQvyA6pB0I1-vvPoU7IDoXimnXVv2jsh_ncgGu67P3KFiVJ_lcwCV22HYD2t-hJY-R3UEvFVblTfoBSdfFECAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQZhSdW5HTSCVeK1TBCzDX1w4-nEjAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACwofFfvTKvB1bQlbxHUkRIEEKbo3uBF1XygZts31b5AbOSAla0EvIOUXtMVcZjrm8AWJZdRiQ66LUmZZBBnlvI4SStiemsDj2LsEg_AC88degf8p5z496uDa5Qxtzg8Vy5WgeMG7rqZW-lBb-dK8WYjJzOvh8NGNFbjanaVvT9271fgJtzJWb-GMzn8N3WawYvswcIrIpJHCfUqgaHrKTWseb-3ZpPXLGlL8p6XRAAlpOiNJXwUy6v66W-ErqGJEkDHaBE771LxtLpo4RrhtE4tGKUeFGxgOx0WOjG5jbttv33W4M9pNJ5JQbAatsUnHCdoz4dYDIPSptZnrDXD6rU&s=D6CYoknUWZY46oxe_S5XE0Kz94DEYI9SXhT8y_lwGs3fo3Aghx49HnQb4dVY9uoz7d7H5_2wq-qzGVY7PLLOHBs4gnGp1tNSQngZtPqmFEVL9RuG_a_6auv3C89YNhrR8C5v2C1-qxN61qyvQyyVy5CdSKmsyWJUyx_s18xYoR36O5JqK56Phfz8o0FSbGzxWXymm75WnHvp8z4hxQ6fbztCANRyTitEnuW_fxzxehA6ca5k2m-dIlGiVCQIi_Gc3v9VIHD1AjC3J7VN3uKZ1b3zotRP9O-nGmcEBjs8EpP65FwV4vh1Hjg3Bx-fZV1kXWm0BNSPdJU1JHbSdRKkVw&h=4djPeS0jGEQX_FMeiWf5HUFWkXp4H6kqbrT5KSFFhdI
       cache-control:
       - no-cache
       content-length:
-      - '1157'
+      - '1231'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Oct 2023 02:11:24 GMT
+      - Wed, 17 Apr 2024 16:18:34 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7a2bb2be-2235-4d75-b601-4578b2d1fcb5/eastus2euap/91be49cd-6897-4708-a345-632278f92171
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1192'
+      x-msedge-ref:
+      - 'Ref A: 98A73858171847AAA30B9FC975604A7B Ref B: BN1AA2051012023 Ref C: 2024-04-17T16:18:35Z'
     status:
       code: 201
       message: Created
@@ -241,38 +142,39 @@ interactions:
       - keep-alive
       ParameterSetName:
       - --name --location --template-file --deny-settings-mode --deployment-resource-group
-        --yes
+        --action-on-unmanage --yes
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.11.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/141188ca-1a01-4ffb-9464-938b8271d178?api-version=2022-08-01-preview&t=638339694842810667&c=MIIHHjCCBgagAwIBAgITfwHQwFKsM_SaZ3oYQwAEAdDAUjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjMwODAzMDkwMzExWhcNMjQwNzI4MDkwMzExWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJQbCh6bI1fy33ihbuhnYAi-tK-wY4yp8CUXk_uSV8w0AzXrOwZStPhGL2QLmMALLJhLlGruhSEdRUd-ej9YImb9EcB7Sxa7gZM4TttscUWTI37jWjJGvmL2IS8gO-V08sDqRJs9nd7v3NYjwkYwI6upPO198_TvDODjEOoXzdbqNzdg8HK9PRg4R6BQ2SYtQVjaKuTmTVPKtHbYjFDSwqH4QCNwKB-RWl8y_n0aagYHyQLs7HxDh_OYa_ragWKwpVX12uIkZZOlOYoo9z-B3yg2Qc6H93HIyyNLvYYyWvzsXlWbxsigQspOpB-JsijqIMX2LpkicZ9Qt3hdqEH3TgECAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBSotg9l-TRXg2Od_Oq4_NlEL1rRszAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAHXBDjxwU1_SCJTLnITpRn3jC6-hLvpBjlvAcTcon2IrYP1NmLYetTIHeRJIXmkXroCJpCUa740vZLaRyyZKweV_Xav9ODpmbAEriFc24VQpI0eCg5lZxjnpY3SF7pjsQN5R5iXCcf8uPGz-ehUdVqLsTHThEqxqeDjneKzUFHd67creOfJih1BzFDUzzkYs2_ffNVEd_BsQb1RKlb8H3uxdoUizcXw92vz3Ymkntcb6GBTSAp9uTnZyiJaZOtJ4w77PIJqK4IKM2vDqYN6xRIoo9iANNAPHuL8yUSgxYh2LMXQ9b1zW5XrNJ2Q1ajEsRu-zctoZJAYDXhLXDz04rSo&s=etoWWDSRxMsRMYbFDISHLYKh88bNgZrQR0cghVfZfj3hT5z9BrrGKT4OpFfRbPuf8kaFlN_NbA54G5u4O9-B31X7o2Rq_5KxFfW7c_uq0QLRp7W1pCKyF_YORAlOEujtI1mKJwi-iV5J8AIVoxUr5yat3-MXnI9FZC9wAfIdZh6iwYi2TbgKZQgULeEofLNmp8UXEyJG6DwszCZ6BLnW3Af3k2WzRNg2V-0r9srHp6NgsDzIxinY91mB6uD-QKJ2w8IGAtvDLRcMc5zTyBEuik-kdM25DgLHHTR65eF2K0NnTlhS0FyQQ55V2VXIGykzSaJpFFM9iopxBvJJBEuFoA&h=iepYVbBSgAfND9yFYymarq9M2UARxnF43p3kxDuvjEI
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/eastus2euap/deploymentStackOperationStatus/818bc237-9d28-43f6-83ca-a6e7f81f0df1?api-version=2024-03-01&t=638489675153684958&c=MIIHHjCCBgagAwIBAgITOgKWZiB3yoN1J5HTbQAEApZmIDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwMTMwMTk1ODU1WhcNMjUwMTI0MTk1ODU1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALHDpcIzjOOE93YA83QNAACshNyWr2VF06_EUCOXpoCyjeXAbD0_9e5eBMoCLnMLthxrp3ooQJvZxy2BXPboMJ1wkfmtO0Nwy_IIGnBcOem3HE-6l4vEkAP1pOgbuhC_OYaSiEd-KZKlnDLoUgsa33gnyr5z_SeaW2zA3msDIkQ0ScjLtYEccOoUFVoS1sE4nXQ0W_wnJ5Olm_9px5fOrzdLPyJrjZP6o1vFS1d7I7qBuTaz8fMxK9VnbVF1XrdLxC5RMQvyA6pB0I1-vvPoU7IDoXimnXVv2jsh_ncgGu67P3KFiVJ_lcwCV22HYD2t-hJY-R3UEvFVblTfoBSdfFECAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQZhSdW5HTSCVeK1TBCzDX1w4-nEjAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACwofFfvTKvB1bQlbxHUkRIEEKbo3uBF1XygZts31b5AbOSAla0EvIOUXtMVcZjrm8AWJZdRiQ66LUmZZBBnlvI4SStiemsDj2LsEg_AC88degf8p5z496uDa5Qxtzg8Vy5WgeMG7rqZW-lBb-dK8WYjJzOvh8NGNFbjanaVvT9271fgJtzJWb-GMzn8N3WawYvswcIrIpJHCfUqgaHrKTWseb-3ZpPXLGlL8p6XRAAlpOiNJXwUy6v66W-ErqGJEkDHaBE771LxtLpo4RrhtE4tGKUeFGxgOx0WOjG5jbttv33W4M9pNJ5JQbAatsUnHCdoz4dYDIPSptZnrDXD6rU&s=D6CYoknUWZY46oxe_S5XE0Kz94DEYI9SXhT8y_lwGs3fo3Aghx49HnQb4dVY9uoz7d7H5_2wq-qzGVY7PLLOHBs4gnGp1tNSQngZtPqmFEVL9RuG_a_6auv3C89YNhrR8C5v2C1-qxN61qyvQyyVy5CdSKmsyWJUyx_s18xYoR36O5JqK56Phfz8o0FSbGzxWXymm75WnHvp8z4hxQ6fbztCANRyTitEnuW_fxzxehA6ca5k2m-dIlGiVCQIi_Gc3v9VIHD1AjC3J7VN3uKZ1b3zotRP9O-nGmcEBjs8EpP65FwV4vh1Hjg3Bx-fZV1kXWm0BNSPdJU1JHbSdRKkVw&h=4djPeS0jGEQX_FMeiWf5HUFWkXp4H6kqbrT5KSFFhdI
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/141188ca-1a01-4ffb-9464-938b8271d178\",\r\n
-        \ \"name\": \"141188ca-1a01-4ffb-9464-938b8271d178\",\r\n  \"status\": \"initializing\"\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/eastus2euap/deploymentStackOperationStatus/818bc237-9d28-43f6-83ca-a6e7f81f0df1\"\
+        ,\r\n  \"name\": \"818bc237-9d28-43f6-83ca-a6e7f81f0df1\",\r\n  \"status\"\
+        : \"initializing\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '263'
+      - '267'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Oct 2023 02:11:24 GMT
+      - Wed, 17 Apr 2024 16:18:35 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7a2bb2be-2235-4d75-b601-4578b2d1fcb5/eastus2euap/c8a2ad16-cb5b-44b2-9a26-1f6a18c288f3
+      x-msedge-ref:
+      - 'Ref A: F59A8832967649448ACFAF17F847A2E6 Ref B: BN1AA2051015019 Ref C: 2024-04-17T16:18:35Z'
     status:
       code: 200
       message: OK
@@ -289,38 +191,39 @@ interactions:
       - keep-alive
       ParameterSetName:
       - --name --location --template-file --deny-settings-mode --deployment-resource-group
-        --yes
+        --action-on-unmanage --yes
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.11.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/141188ca-1a01-4ffb-9464-938b8271d178?api-version=2022-08-01-preview&t=638339694842810667&c=MIIHHjCCBgagAwIBAgITfwHQwFKsM_SaZ3oYQwAEAdDAUjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjMwODAzMDkwMzExWhcNMjQwNzI4MDkwMzExWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJQbCh6bI1fy33ihbuhnYAi-tK-wY4yp8CUXk_uSV8w0AzXrOwZStPhGL2QLmMALLJhLlGruhSEdRUd-ej9YImb9EcB7Sxa7gZM4TttscUWTI37jWjJGvmL2IS8gO-V08sDqRJs9nd7v3NYjwkYwI6upPO198_TvDODjEOoXzdbqNzdg8HK9PRg4R6BQ2SYtQVjaKuTmTVPKtHbYjFDSwqH4QCNwKB-RWl8y_n0aagYHyQLs7HxDh_OYa_ragWKwpVX12uIkZZOlOYoo9z-B3yg2Qc6H93HIyyNLvYYyWvzsXlWbxsigQspOpB-JsijqIMX2LpkicZ9Qt3hdqEH3TgECAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBSotg9l-TRXg2Od_Oq4_NlEL1rRszAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAHXBDjxwU1_SCJTLnITpRn3jC6-hLvpBjlvAcTcon2IrYP1NmLYetTIHeRJIXmkXroCJpCUa740vZLaRyyZKweV_Xav9ODpmbAEriFc24VQpI0eCg5lZxjnpY3SF7pjsQN5R5iXCcf8uPGz-ehUdVqLsTHThEqxqeDjneKzUFHd67creOfJih1BzFDUzzkYs2_ffNVEd_BsQb1RKlb8H3uxdoUizcXw92vz3Ymkntcb6GBTSAp9uTnZyiJaZOtJ4w77PIJqK4IKM2vDqYN6xRIoo9iANNAPHuL8yUSgxYh2LMXQ9b1zW5XrNJ2Q1ajEsRu-zctoZJAYDXhLXDz04rSo&s=etoWWDSRxMsRMYbFDISHLYKh88bNgZrQR0cghVfZfj3hT5z9BrrGKT4OpFfRbPuf8kaFlN_NbA54G5u4O9-B31X7o2Rq_5KxFfW7c_uq0QLRp7W1pCKyF_YORAlOEujtI1mKJwi-iV5J8AIVoxUr5yat3-MXnI9FZC9wAfIdZh6iwYi2TbgKZQgULeEofLNmp8UXEyJG6DwszCZ6BLnW3Af3k2WzRNg2V-0r9srHp6NgsDzIxinY91mB6uD-QKJ2w8IGAtvDLRcMc5zTyBEuik-kdM25DgLHHTR65eF2K0NnTlhS0FyQQ55V2VXIGykzSaJpFFM9iopxBvJJBEuFoA&h=iepYVbBSgAfND9yFYymarq9M2UARxnF43p3kxDuvjEI
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/eastus2euap/deploymentStackOperationStatus/818bc237-9d28-43f6-83ca-a6e7f81f0df1?api-version=2024-03-01&t=638489675153684958&c=MIIHHjCCBgagAwIBAgITOgKWZiB3yoN1J5HTbQAEApZmIDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwMTMwMTk1ODU1WhcNMjUwMTI0MTk1ODU1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALHDpcIzjOOE93YA83QNAACshNyWr2VF06_EUCOXpoCyjeXAbD0_9e5eBMoCLnMLthxrp3ooQJvZxy2BXPboMJ1wkfmtO0Nwy_IIGnBcOem3HE-6l4vEkAP1pOgbuhC_OYaSiEd-KZKlnDLoUgsa33gnyr5z_SeaW2zA3msDIkQ0ScjLtYEccOoUFVoS1sE4nXQ0W_wnJ5Olm_9px5fOrzdLPyJrjZP6o1vFS1d7I7qBuTaz8fMxK9VnbVF1XrdLxC5RMQvyA6pB0I1-vvPoU7IDoXimnXVv2jsh_ncgGu67P3KFiVJ_lcwCV22HYD2t-hJY-R3UEvFVblTfoBSdfFECAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQZhSdW5HTSCVeK1TBCzDX1w4-nEjAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACwofFfvTKvB1bQlbxHUkRIEEKbo3uBF1XygZts31b5AbOSAla0EvIOUXtMVcZjrm8AWJZdRiQ66LUmZZBBnlvI4SStiemsDj2LsEg_AC88degf8p5z496uDa5Qxtzg8Vy5WgeMG7rqZW-lBb-dK8WYjJzOvh8NGNFbjanaVvT9271fgJtzJWb-GMzn8N3WawYvswcIrIpJHCfUqgaHrKTWseb-3ZpPXLGlL8p6XRAAlpOiNJXwUy6v66W-ErqGJEkDHaBE771LxtLpo4RrhtE4tGKUeFGxgOx0WOjG5jbttv33W4M9pNJ5JQbAatsUnHCdoz4dYDIPSptZnrDXD6rU&s=D6CYoknUWZY46oxe_S5XE0Kz94DEYI9SXhT8y_lwGs3fo3Aghx49HnQb4dVY9uoz7d7H5_2wq-qzGVY7PLLOHBs4gnGp1tNSQngZtPqmFEVL9RuG_a_6auv3C89YNhrR8C5v2C1-qxN61qyvQyyVy5CdSKmsyWJUyx_s18xYoR36O5JqK56Phfz8o0FSbGzxWXymm75WnHvp8z4hxQ6fbztCANRyTitEnuW_fxzxehA6ca5k2m-dIlGiVCQIi_Gc3v9VIHD1AjC3J7VN3uKZ1b3zotRP9O-nGmcEBjs8EpP65FwV4vh1Hjg3Bx-fZV1kXWm0BNSPdJU1JHbSdRKkVw&h=4djPeS0jGEQX_FMeiWf5HUFWkXp4H6kqbrT5KSFFhdI
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/141188ca-1a01-4ffb-9464-938b8271d178\",\r\n
-        \ \"name\": \"141188ca-1a01-4ffb-9464-938b8271d178\",\r\n  \"status\": \"succeeded\"\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/eastus2euap/deploymentStackOperationStatus/818bc237-9d28-43f6-83ca-a6e7f81f0df1\"\
+        ,\r\n  \"name\": \"818bc237-9d28-43f6-83ca-a6e7f81f0df1\",\r\n  \"status\"\
+        : \"succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '260'
+      - '264'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Oct 2023 02:11:54 GMT
+      - Wed, 17 Apr 2024 16:19:06 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7a2bb2be-2235-4d75-b601-4578b2d1fcb5/eastus2euap/4d372fd6-3ff6-4b6f-b04f-499e5493d03e
+      x-msedge-ref:
+      - 'Ref A: B4091C2D614D41E9B8E2392390C496D0 Ref B: BN1AA2051012019 Ref C: 2024-04-17T16:19:06Z'
     status:
       code: 200
       message: OK
@@ -337,55 +240,58 @@ interactions:
       - keep-alive
       ParameterSetName:
       - --name --location --template-file --deny-settings-mode --deployment-resource-group
-        --yes
+        --action-on-unmanage --yes
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.11.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2022-08-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2024-03-01
   response:
     body:
-      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
-        {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\":
-        \"detach\",\r\n      \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-subsc-2023-10-27-02-11-24-c7b23\",\r\n
-        \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001\",\r\n
-        \   \"duration\": \"PT6.2028761S\",\r\n    \"denySettings\": {\r\n      \"mode\":
-        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
-        {\r\n      \"storageId\": {\r\n        \"type\": \"String\",\r\n        \"value\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Providers.Test/statefulResources/uniquestorage001\"\r\n
-        \     }\r\n    },\r\n    \"parameters\": {},\r\n    \"resources\": [\r\n      {\r\n
-        \       \"status\": \"managed\",\r\n        \"denyStatus\": \"none\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Providers.Test/statefulResources/uniquestorage001\"\r\n
-        \     }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
-        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
-        \ \"systemData\": {\r\n    \"createdBy\": \"danted@microsoft.com\",\r\n    \"createdByType\":
-        \"User\",\r\n    \"createdAt\": \"2023-10-27T02:11:23.7498119Z\",\r\n    \"lastModifiedBy\":
-        \"danted@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
-        \"2023-10-27T02:11:23.7498119Z\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002\",\r\n
-        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-subscription000002\"\r\n}"
+      string: "{\r\n  \"location\": \"eastus2euap\",\r\n  \"tags\": {},\r\n  \"properties\"\
+        : {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"detach\",\r\n\
+        \      \"resourceGroups\": \"detach\",\r\n      \"managementGroups\": \"detach\"\
+        \r\n    },\r\n    \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-subscription227c4-240417165fsor\"\
+        ,\r\n    \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001\"\
+        ,\r\n    \"duration\": \"PT5.3399599S\",\r\n    \"denySettings\": {\r\n  \
+        \    \"mode\": \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\
+        \n    \"outputs\": {\r\n      \"storageId\": {\r\n        \"type\": \"String\"\
+        ,\r\n        \"value\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Providers.Test/statefulResources/uniquestorage002\"\
+        \r\n      }\r\n    },\r\n    \"parameters\": {},\r\n    \"resources\": [\r\
+        \n      {\r\n        \"status\": \"managed\",\r\n        \"denyStatus\": \"\
+        none\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Providers.Test/statefulResources/uniquestorage002\"\
+        \r\n      }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n   \
+        \ \"detachedResources\": [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\"\
+        : [],\r\n    \"correlationId\": \"456764ce-2c50-45e6-9874-b81709ccea7e\"\r\
+        \n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"kylealbert@microsoft.com\"\
+        ,\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\": \"2024-04-17T16:18:35.2435027Z\"\
+        ,\r\n    \"lastModifiedBy\": \"kylealbert@microsoft.com\",\r\n    \"lastModifiedByType\"\
+        : \"User\",\r\n    \"lastModifiedAt\": \"2024-04-17T16:18:35.2435027Z\"\r\n\
+        \  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002\"\
+        ,\r\n  \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\":\
+        \ \"cli-test-create-deployment-stack-subscription000002\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1944'
+      - '2018'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Oct 2023 02:11:54 GMT
+      - Wed, 17 Apr 2024 16:19:07 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7a2bb2be-2235-4d75-b601-4578b2d1fcb5/eastus2euap/6406446b-ee18-4922-bd48-787b8f620429
+      x-msedge-ref:
+      - 'Ref A: 9CBBB7ACEE954180B368805E10DDBB2A Ref B: BN1AA2051015025 Ref C: 2024-04-17T16:19:07Z'
     status:
       code: 200
       message: OK
@@ -401,55 +307,58 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --yes
+      - --name --action-on-unmanage --yes
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.11.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2022-08-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2024-03-01
   response:
     body:
-      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
-        {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\":
-        \"detach\",\r\n      \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-subsc-2023-10-27-02-11-24-c7b23\",\r\n
-        \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001\",\r\n
-        \   \"duration\": \"PT6.2028761S\",\r\n    \"denySettings\": {\r\n      \"mode\":
-        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
-        {\r\n      \"storageId\": {\r\n        \"type\": \"String\",\r\n        \"value\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Providers.Test/statefulResources/uniquestorage001\"\r\n
-        \     }\r\n    },\r\n    \"parameters\": {},\r\n    \"resources\": [\r\n      {\r\n
-        \       \"status\": \"managed\",\r\n        \"denyStatus\": \"none\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Providers.Test/statefulResources/uniquestorage001\"\r\n
-        \     }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
-        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
-        \ \"systemData\": {\r\n    \"createdBy\": \"danted@microsoft.com\",\r\n    \"createdByType\":
-        \"User\",\r\n    \"createdAt\": \"2023-10-27T02:11:23.7498119Z\",\r\n    \"lastModifiedBy\":
-        \"danted@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
-        \"2023-10-27T02:11:23.7498119Z\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002\",\r\n
-        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-subscription000002\"\r\n}"
+      string: "{\r\n  \"location\": \"eastus2euap\",\r\n  \"tags\": {},\r\n  \"properties\"\
+        : {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"detach\",\r\n\
+        \      \"resourceGroups\": \"detach\",\r\n      \"managementGroups\": \"detach\"\
+        \r\n    },\r\n    \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-subscription227c4-240417165fsor\"\
+        ,\r\n    \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001\"\
+        ,\r\n    \"duration\": \"PT5.3399599S\",\r\n    \"denySettings\": {\r\n  \
+        \    \"mode\": \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\
+        \n    \"outputs\": {\r\n      \"storageId\": {\r\n        \"type\": \"String\"\
+        ,\r\n        \"value\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Providers.Test/statefulResources/uniquestorage002\"\
+        \r\n      }\r\n    },\r\n    \"parameters\": {},\r\n    \"resources\": [\r\
+        \n      {\r\n        \"status\": \"managed\",\r\n        \"denyStatus\": \"\
+        none\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Providers.Test/statefulResources/uniquestorage002\"\
+        \r\n      }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n   \
+        \ \"detachedResources\": [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\"\
+        : [],\r\n    \"correlationId\": \"456764ce-2c50-45e6-9874-b81709ccea7e\"\r\
+        \n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"kylealbert@microsoft.com\"\
+        ,\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\": \"2024-04-17T16:18:35.2435027Z\"\
+        ,\r\n    \"lastModifiedBy\": \"kylealbert@microsoft.com\",\r\n    \"lastModifiedByType\"\
+        : \"User\",\r\n    \"lastModifiedAt\": \"2024-04-17T16:18:35.2435027Z\"\r\n\
+        \  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002\"\
+        ,\r\n  \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\":\
+        \ \"cli-test-create-deployment-stack-subscription000002\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1944'
+      - '2018'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Oct 2023 02:11:56 GMT
+      - Wed, 17 Apr 2024 16:19:07 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7a2bb2be-2235-4d75-b601-4578b2d1fcb5/eastus2euap/9ce35928-e7be-46b2-af91-3083db708640
+      x-msedge-ref:
+      - 'Ref A: C92BF6519FF84269AFC65F5CB96E6713 Ref B: BN1AA2051013037 Ref C: 2024-04-17T16:19:08Z'
     status:
       code: 200
       message: OK
@@ -467,11 +376,11 @@ interactions:
       Content-Length:
       - '0'
       ParameterSetName:
-      - --name --yes
+      - --name --action-on-unmanage --yes
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.11.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&unmanageAction.ManagementGroups=detach&api-version=2024-03-01
   response:
     body:
       string: ''
@@ -481,19 +390,23 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 27 Oct 2023 02:11:56 GMT
+      - Wed, 17 Apr 2024 16:19:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7a2bb2be-2235-4d75-b601-4578b2d1fcb5/eastus2euap/3a21dd77-ae0a-497a-a657-c61fbfeace71
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
+      x-msedge-ref:
+      - 'Ref A: 5FA85A88110F43C3892F1EA8E46ADC93 Ref B: BN1AA2051012035 Ref C: 2024-04-17T16:19:08Z'
     status:
       code: 200
       message: OK
@@ -509,12 +422,12 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --location --deployment-resource-group -p --deny-settings-mode --delete-all
+      - --name --location --deployment-resource-group -p --deny-settings-mode --aou
         --yes
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.11.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2022-08-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2024-03-01
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The resource ''cli-test-create-deployment-stack-subscription000002''
@@ -527,32 +440,38 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Oct 2023 02:11:58 GMT
+      - Wed, 17 Apr 2024 16:19:09 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-failure-cause:
       - gateway
+      x-msedge-ref:
+      - 'Ref A: D9902281719649238FF421E876C43633 Ref B: BN1AA2051014019 Ref C: 2024-04-17T16:19:09Z'
     status:
       code: 404
       message: Not Found
 - request:
-    body: '{"location": "westus2", "tags": {}, "properties": {"template": {"$schema":
+    body: '{"location": "eastus2euap", "tags": {}, "properties": {"template": {"$schema":
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "metadata": {"_generator": {"name": "bicep", "version":
-      "0.22.6.54827", "templateHash": "2864369118884833699"}}, "parameters": {"location":
+      "0.26.54.24096", "templateHash": "10117753893333852062"}}, "parameters": {"location":
       {"type": "string"}, "kind": {"type": "string"}}, "variables": {"storageAccountName":
-      "[format(''store{0}'', uniqueString(resourceGroup().id))]"}, "resources": [{"type":
-      "Microsoft.Storage/storageAccounts", "apiVersion": "2019-04-01", "name": "[variables(''storageAccountName'')]",
-      "location": "[parameters(''location'')]", "sku": {"name": "Standard_LRS"}, "kind":
-      "[parameters(''kind'')]", "properties": {}}]}, "parameters": {"location": {"value":
-      "westus2"}, "kind": {"value": "StorageV2"}}, "actionOnUnmanage": {"resources":
-      "delete", "resourceGroups": "delete"}, "deploymentScope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001",
+      "[format(''clistore{0}'', uniqueString(resourceGroup().id))]"}, "resources":
+      [{"type": "Microsoft.Storage/storageAccounts", "apiVersion": "2019-04-01", "name":
+      "[variables(''storageAccountName'')]", "location": "[parameters(''location'')]",
+      "sku": {"name": "Standard_LRS"}, "kind": "[parameters(''kind'')]", "properties":
+      {}}]}, "parameters": {"location": {"value": "eastus2euap"}, "kind": {"value":
+      "StorageV2"}}, "actionOnUnmanage": {"resources": "delete", "resourceGroups":
+      "delete", "managementGroups": "delete"}, "bypassStackOutOfSyncError": false,
+      "deploymentScope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001",
       "denySettings": {"mode": "none", "applyToChildScopes": false}}}'
     headers:
       Accept:
@@ -564,57 +483,64 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1070'
+      - '1149'
       Content-Type:
       - application/json
       ParameterSetName:
-      - --name --location --deployment-resource-group -p --deny-settings-mode --delete-all
+      - --name --location --deployment-resource-group -p --deny-settings-mode --aou
         --yes
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.11.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2022-08-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2024-03-01
   response:
     body:
-      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
-        {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"delete\",\r\n      \"resourceGroups\":
-        \"delete\",\r\n      \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentScope\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001\",\r\n
-        \   \"denySettings\": {\r\n      \"mode\": \"none\",\r\n      \"applyToChildScopes\":
-        false\r\n    },\r\n    \"parameters\": {\r\n      \"location\": {\r\n        \"value\":
-        \"westus2\",\r\n        \"type\": \"string\"\r\n      },\r\n      \"kind\":
-        {\r\n        \"value\": \"StorageV2\",\r\n        \"type\": \"string\"\r\n
-        \     }\r\n    },\r\n    \"resources\": [],\r\n    \"provisioningState\":
-        \"initializing\",\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
-        [],\r\n    \"failedResources\": []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"danted@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2023-10-27T02:12:01.3567204Z\",\r\n    \"lastModifiedBy\": \"danted@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-10-27T02:12:01.3567204Z\"\r\n
-        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002\",\r\n
-        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-subscription000002\"\r\n}"
+      string: "{\r\n  \"location\": \"eastus2euap\",\r\n  \"tags\": {},\r\n  \"properties\"\
+        : {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"delete\",\r\n\
+        \      \"resourceGroups\": \"delete\",\r\n      \"managementGroups\": \"delete\"\
+        \r\n    },\r\n    \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001\"\
+        ,\r\n    \"denySettings\": {\r\n      \"mode\": \"none\",\r\n      \"applyToChildScopes\"\
+        : false\r\n    },\r\n    \"parameters\": {\r\n      \"location\": {\r\n  \
+        \      \"value\": \"eastus2euap\",\r\n        \"type\": \"string\"\r\n   \
+        \   },\r\n      \"kind\": {\r\n        \"value\": \"StorageV2\",\r\n     \
+        \   \"type\": \"string\"\r\n      }\r\n    },\r\n    \"resources\": [],\r\n\
+        \    \"provisioningState\": \"initializing\",\r\n    \"detachedResources\"\
+        : [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": [],\r\n\
+        \    \"correlationId\": \"e5f81226-c43a-48b7-86e8-d046ed5e2490\"\r\n  },\r\
+        \n  \"systemData\": {\r\n    \"createdBy\": \"kylealbert@microsoft.com\",\r\
+        \n    \"createdByType\": \"User\",\r\n    \"createdAt\": \"2024-04-17T16:19:12.9476764Z\"\
+        ,\r\n    \"lastModifiedBy\": \"kylealbert@microsoft.com\",\r\n    \"lastModifiedByType\"\
+        : \"User\",\r\n    \"lastModifiedAt\": \"2024-04-17T16:19:12.9476764Z\"\r\n\
+        \  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002\"\
+        ,\r\n  \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\":\
+        \ \"cli-test-create-deployment-stack-subscription000002\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/e035cc71-e483-4d6a-bfb1-56f5968a0ed0?api-version=2022-08-01-preview&t=638339695217942495&c=MIIHHjCCBgagAwIBAgITfwHQwFKsM_SaZ3oYQwAEAdDAUjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjMwODAzMDkwMzExWhcNMjQwNzI4MDkwMzExWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJQbCh6bI1fy33ihbuhnYAi-tK-wY4yp8CUXk_uSV8w0AzXrOwZStPhGL2QLmMALLJhLlGruhSEdRUd-ej9YImb9EcB7Sxa7gZM4TttscUWTI37jWjJGvmL2IS8gO-V08sDqRJs9nd7v3NYjwkYwI6upPO198_TvDODjEOoXzdbqNzdg8HK9PRg4R6BQ2SYtQVjaKuTmTVPKtHbYjFDSwqH4QCNwKB-RWl8y_n0aagYHyQLs7HxDh_OYa_ragWKwpVX12uIkZZOlOYoo9z-B3yg2Qc6H93HIyyNLvYYyWvzsXlWbxsigQspOpB-JsijqIMX2LpkicZ9Qt3hdqEH3TgECAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBSotg9l-TRXg2Od_Oq4_NlEL1rRszAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAHXBDjxwU1_SCJTLnITpRn3jC6-hLvpBjlvAcTcon2IrYP1NmLYetTIHeRJIXmkXroCJpCUa740vZLaRyyZKweV_Xav9ODpmbAEriFc24VQpI0eCg5lZxjnpY3SF7pjsQN5R5iXCcf8uPGz-ehUdVqLsTHThEqxqeDjneKzUFHd67creOfJih1BzFDUzzkYs2_ffNVEd_BsQb1RKlb8H3uxdoUizcXw92vz3Ymkntcb6GBTSAp9uTnZyiJaZOtJ4w77PIJqK4IKM2vDqYN6xRIoo9iANNAPHuL8yUSgxYh2LMXQ9b1zW5XrNJ2Q1ajEsRu-zctoZJAYDXhLXDz04rSo&s=ZpkNFl4Wh5mqMz_sAiF570OfSB7AcEwFKs_4kr7qKo1EmE-zCcIxCymQ9guZQU48V8uwmSQ9eE3oi87Niju4O86wtkdV5V1-eM2CDAwjTo5EgAM8Jaj3JxaUC8crZiVfn82IpX5kWb8kr7q-RlZiLK4v49YcpGJQ21RlTWBMpjjgnTB-W6WrmTFEye-SdnRlUBCGt6YWi7nIEWfJFLinG0tbQbv4oEFskcpJjT5j2Qygcnr3flRdY_OwMskAELVAFCGI_9X09bnnsK9yxxkuT2_yINEFWGlOnbMLkm1exlnI5x2no2C9hhMSD-VQyiC9KSSzZfctDF4m5Os7ByQYAg&h=LEvN5Dqg2yqL5iN7bfXFkFMY5E3vSnpR9BwbT0_JMxU
+      - https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/eastus2euap/deploymentStackOperationStatus/e062addb-fc31-420c-a14c-46fd0b458e09?api-version=2024-03-01&t=638489675532133606&c=MIIHHjCCBgagAwIBAgITOgKWZiB3yoN1J5HTbQAEApZmIDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwMTMwMTk1ODU1WhcNMjUwMTI0MTk1ODU1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALHDpcIzjOOE93YA83QNAACshNyWr2VF06_EUCOXpoCyjeXAbD0_9e5eBMoCLnMLthxrp3ooQJvZxy2BXPboMJ1wkfmtO0Nwy_IIGnBcOem3HE-6l4vEkAP1pOgbuhC_OYaSiEd-KZKlnDLoUgsa33gnyr5z_SeaW2zA3msDIkQ0ScjLtYEccOoUFVoS1sE4nXQ0W_wnJ5Olm_9px5fOrzdLPyJrjZP6o1vFS1d7I7qBuTaz8fMxK9VnbVF1XrdLxC5RMQvyA6pB0I1-vvPoU7IDoXimnXVv2jsh_ncgGu67P3KFiVJ_lcwCV22HYD2t-hJY-R3UEvFVblTfoBSdfFECAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQZhSdW5HTSCVeK1TBCzDX1w4-nEjAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACwofFfvTKvB1bQlbxHUkRIEEKbo3uBF1XygZts31b5AbOSAla0EvIOUXtMVcZjrm8AWJZdRiQ66LUmZZBBnlvI4SStiemsDj2LsEg_AC88degf8p5z496uDa5Qxtzg8Vy5WgeMG7rqZW-lBb-dK8WYjJzOvh8NGNFbjanaVvT9271fgJtzJWb-GMzn8N3WawYvswcIrIpJHCfUqgaHrKTWseb-3ZpPXLGlL8p6XRAAlpOiNJXwUy6v66W-ErqGJEkDHaBE771LxtLpo4RrhtE4tGKUeFGxgOx0WOjG5jbttv33W4M9pNJ5JQbAatsUnHCdoz4dYDIPSptZnrDXD6rU&s=PK0fDE4ABATGwWPYdprgzJbXKlX0HEKs6o5N8kUqSKLvUQJgE1CtFlQzWc2l4eIQL-q4qEVw9Qqok18waY-65ukxSqI9G7z8HoRXxDQU93epdE_8pMEJilRl_E3zK03IrTSzvSpi-ws39mtIguL5ywjDR0JsoWSf1NLWHdyNNHB4uMRgoFk9N3qr6ry_msiqhDWCBi-bJKe4LZT3fIpl_dV2sc1S0ReYdOInByCRpfY0jz4mjMCRrazJglqMHXJt5iBz-_UWOJwbP6ommwDFLkZXVUngJAofy36J3TH6EASzWHHN2x0C-kqlGgIOQpg63tyTKM3NeAMmBadi1Kz4sQ&h=Ndzh8C0zrDvxnImQngWTsm2pSNyI63yB0vXR4Av37N4
       cache-control:
       - no-cache
       content-length:
-      - '1332'
+      - '1410'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Oct 2023 02:12:01 GMT
+      - Wed, 17 Apr 2024 16:19:12 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7a2bb2be-2235-4d75-b601-4578b2d1fcb5/eastus2euap/1aab455c-42ea-4739-b565-ff4b2f25d0a6
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1191'
+      x-msedge-ref:
+      - 'Ref A: 1B0CDDBE49514995A793FDFE29B6943B Ref B: BN1AA2051013049 Ref C: 2024-04-17T16:19:12Z'
     status:
       code: 201
       message: Created
@@ -630,39 +556,40 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --location --deployment-resource-group -p --deny-settings-mode --delete-all
+      - --name --location --deployment-resource-group -p --deny-settings-mode --aou
         --yes
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.11.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/e035cc71-e483-4d6a-bfb1-56f5968a0ed0?api-version=2022-08-01-preview&t=638339695217942495&c=MIIHHjCCBgagAwIBAgITfwHQwFKsM_SaZ3oYQwAEAdDAUjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjMwODAzMDkwMzExWhcNMjQwNzI4MDkwMzExWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJQbCh6bI1fy33ihbuhnYAi-tK-wY4yp8CUXk_uSV8w0AzXrOwZStPhGL2QLmMALLJhLlGruhSEdRUd-ej9YImb9EcB7Sxa7gZM4TttscUWTI37jWjJGvmL2IS8gO-V08sDqRJs9nd7v3NYjwkYwI6upPO198_TvDODjEOoXzdbqNzdg8HK9PRg4R6BQ2SYtQVjaKuTmTVPKtHbYjFDSwqH4QCNwKB-RWl8y_n0aagYHyQLs7HxDh_OYa_ragWKwpVX12uIkZZOlOYoo9z-B3yg2Qc6H93HIyyNLvYYyWvzsXlWbxsigQspOpB-JsijqIMX2LpkicZ9Qt3hdqEH3TgECAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBSotg9l-TRXg2Od_Oq4_NlEL1rRszAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAHXBDjxwU1_SCJTLnITpRn3jC6-hLvpBjlvAcTcon2IrYP1NmLYetTIHeRJIXmkXroCJpCUa740vZLaRyyZKweV_Xav9ODpmbAEriFc24VQpI0eCg5lZxjnpY3SF7pjsQN5R5iXCcf8uPGz-ehUdVqLsTHThEqxqeDjneKzUFHd67creOfJih1BzFDUzzkYs2_ffNVEd_BsQb1RKlb8H3uxdoUizcXw92vz3Ymkntcb6GBTSAp9uTnZyiJaZOtJ4w77PIJqK4IKM2vDqYN6xRIoo9iANNAPHuL8yUSgxYh2LMXQ9b1zW5XrNJ2Q1ajEsRu-zctoZJAYDXhLXDz04rSo&s=ZpkNFl4Wh5mqMz_sAiF570OfSB7AcEwFKs_4kr7qKo1EmE-zCcIxCymQ9guZQU48V8uwmSQ9eE3oi87Niju4O86wtkdV5V1-eM2CDAwjTo5EgAM8Jaj3JxaUC8crZiVfn82IpX5kWb8kr7q-RlZiLK4v49YcpGJQ21RlTWBMpjjgnTB-W6WrmTFEye-SdnRlUBCGt6YWi7nIEWfJFLinG0tbQbv4oEFskcpJjT5j2Qygcnr3flRdY_OwMskAELVAFCGI_9X09bnnsK9yxxkuT2_yINEFWGlOnbMLkm1exlnI5x2no2C9hhMSD-VQyiC9KSSzZfctDF4m5Os7ByQYAg&h=LEvN5Dqg2yqL5iN7bfXFkFMY5E3vSnpR9BwbT0_JMxU
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/eastus2euap/deploymentStackOperationStatus/e062addb-fc31-420c-a14c-46fd0b458e09?api-version=2024-03-01&t=638489675532133606&c=MIIHHjCCBgagAwIBAgITOgKWZiB3yoN1J5HTbQAEApZmIDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwMTMwMTk1ODU1WhcNMjUwMTI0MTk1ODU1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALHDpcIzjOOE93YA83QNAACshNyWr2VF06_EUCOXpoCyjeXAbD0_9e5eBMoCLnMLthxrp3ooQJvZxy2BXPboMJ1wkfmtO0Nwy_IIGnBcOem3HE-6l4vEkAP1pOgbuhC_OYaSiEd-KZKlnDLoUgsa33gnyr5z_SeaW2zA3msDIkQ0ScjLtYEccOoUFVoS1sE4nXQ0W_wnJ5Olm_9px5fOrzdLPyJrjZP6o1vFS1d7I7qBuTaz8fMxK9VnbVF1XrdLxC5RMQvyA6pB0I1-vvPoU7IDoXimnXVv2jsh_ncgGu67P3KFiVJ_lcwCV22HYD2t-hJY-R3UEvFVblTfoBSdfFECAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQZhSdW5HTSCVeK1TBCzDX1w4-nEjAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACwofFfvTKvB1bQlbxHUkRIEEKbo3uBF1XygZts31b5AbOSAla0EvIOUXtMVcZjrm8AWJZdRiQ66LUmZZBBnlvI4SStiemsDj2LsEg_AC88degf8p5z496uDa5Qxtzg8Vy5WgeMG7rqZW-lBb-dK8WYjJzOvh8NGNFbjanaVvT9271fgJtzJWb-GMzn8N3WawYvswcIrIpJHCfUqgaHrKTWseb-3ZpPXLGlL8p6XRAAlpOiNJXwUy6v66W-ErqGJEkDHaBE771LxtLpo4RrhtE4tGKUeFGxgOx0WOjG5jbttv33W4M9pNJ5JQbAatsUnHCdoz4dYDIPSptZnrDXD6rU&s=PK0fDE4ABATGwWPYdprgzJbXKlX0HEKs6o5N8kUqSKLvUQJgE1CtFlQzWc2l4eIQL-q4qEVw9Qqok18waY-65ukxSqI9G7z8HoRXxDQU93epdE_8pMEJilRl_E3zK03IrTSzvSpi-ws39mtIguL5ywjDR0JsoWSf1NLWHdyNNHB4uMRgoFk9N3qr6ry_msiqhDWCBi-bJKe4LZT3fIpl_dV2sc1S0ReYdOInByCRpfY0jz4mjMCRrazJglqMHXJt5iBz-_UWOJwbP6ommwDFLkZXVUngJAofy36J3TH6EASzWHHN2x0C-kqlGgIOQpg63tyTKM3NeAMmBadi1Kz4sQ&h=Ndzh8C0zrDvxnImQngWTsm2pSNyI63yB0vXR4Av37N4
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/e035cc71-e483-4d6a-bfb1-56f5968a0ed0\",\r\n
-        \ \"name\": \"e035cc71-e483-4d6a-bfb1-56f5968a0ed0\",\r\n  \"status\": \"initializing\"\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/eastus2euap/deploymentStackOperationStatus/e062addb-fc31-420c-a14c-46fd0b458e09\"\
+        ,\r\n  \"name\": \"e062addb-fc31-420c-a14c-46fd0b458e09\",\r\n  \"status\"\
+        : \"initializing\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '263'
+      - '267'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Oct 2023 02:12:01 GMT
+      - Wed, 17 Apr 2024 16:19:13 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7a2bb2be-2235-4d75-b601-4578b2d1fcb5/eastus2euap/84c7f77a-83a9-4424-b577-a051341b5475
+      x-msedge-ref:
+      - 'Ref A: D454BD57C58442C9A7BD35831692EC78 Ref B: BN1AA2051013045 Ref C: 2024-04-17T16:19:13Z'
     status:
       code: 200
       message: OK
@@ -678,39 +605,40 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --location --deployment-resource-group -p --deny-settings-mode --delete-all
+      - --name --location --deployment-resource-group -p --deny-settings-mode --aou
         --yes
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.11.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/e035cc71-e483-4d6a-bfb1-56f5968a0ed0?api-version=2022-08-01-preview&t=638339695217942495&c=MIIHHjCCBgagAwIBAgITfwHQwFKsM_SaZ3oYQwAEAdDAUjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjMwODAzMDkwMzExWhcNMjQwNzI4MDkwMzExWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJQbCh6bI1fy33ihbuhnYAi-tK-wY4yp8CUXk_uSV8w0AzXrOwZStPhGL2QLmMALLJhLlGruhSEdRUd-ej9YImb9EcB7Sxa7gZM4TttscUWTI37jWjJGvmL2IS8gO-V08sDqRJs9nd7v3NYjwkYwI6upPO198_TvDODjEOoXzdbqNzdg8HK9PRg4R6BQ2SYtQVjaKuTmTVPKtHbYjFDSwqH4QCNwKB-RWl8y_n0aagYHyQLs7HxDh_OYa_ragWKwpVX12uIkZZOlOYoo9z-B3yg2Qc6H93HIyyNLvYYyWvzsXlWbxsigQspOpB-JsijqIMX2LpkicZ9Qt3hdqEH3TgECAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBSotg9l-TRXg2Od_Oq4_NlEL1rRszAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAHXBDjxwU1_SCJTLnITpRn3jC6-hLvpBjlvAcTcon2IrYP1NmLYetTIHeRJIXmkXroCJpCUa740vZLaRyyZKweV_Xav9ODpmbAEriFc24VQpI0eCg5lZxjnpY3SF7pjsQN5R5iXCcf8uPGz-ehUdVqLsTHThEqxqeDjneKzUFHd67creOfJih1BzFDUzzkYs2_ffNVEd_BsQb1RKlb8H3uxdoUizcXw92vz3Ymkntcb6GBTSAp9uTnZyiJaZOtJ4w77PIJqK4IKM2vDqYN6xRIoo9iANNAPHuL8yUSgxYh2LMXQ9b1zW5XrNJ2Q1ajEsRu-zctoZJAYDXhLXDz04rSo&s=ZpkNFl4Wh5mqMz_sAiF570OfSB7AcEwFKs_4kr7qKo1EmE-zCcIxCymQ9guZQU48V8uwmSQ9eE3oi87Niju4O86wtkdV5V1-eM2CDAwjTo5EgAM8Jaj3JxaUC8crZiVfn82IpX5kWb8kr7q-RlZiLK4v49YcpGJQ21RlTWBMpjjgnTB-W6WrmTFEye-SdnRlUBCGt6YWi7nIEWfJFLinG0tbQbv4oEFskcpJjT5j2Qygcnr3flRdY_OwMskAELVAFCGI_9X09bnnsK9yxxkuT2_yINEFWGlOnbMLkm1exlnI5x2no2C9hhMSD-VQyiC9KSSzZfctDF4m5Os7ByQYAg&h=LEvN5Dqg2yqL5iN7bfXFkFMY5E3vSnpR9BwbT0_JMxU
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/eastus2euap/deploymentStackOperationStatus/e062addb-fc31-420c-a14c-46fd0b458e09?api-version=2024-03-01&t=638489675532133606&c=MIIHHjCCBgagAwIBAgITOgKWZiB3yoN1J5HTbQAEApZmIDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwMTMwMTk1ODU1WhcNMjUwMTI0MTk1ODU1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALHDpcIzjOOE93YA83QNAACshNyWr2VF06_EUCOXpoCyjeXAbD0_9e5eBMoCLnMLthxrp3ooQJvZxy2BXPboMJ1wkfmtO0Nwy_IIGnBcOem3HE-6l4vEkAP1pOgbuhC_OYaSiEd-KZKlnDLoUgsa33gnyr5z_SeaW2zA3msDIkQ0ScjLtYEccOoUFVoS1sE4nXQ0W_wnJ5Olm_9px5fOrzdLPyJrjZP6o1vFS1d7I7qBuTaz8fMxK9VnbVF1XrdLxC5RMQvyA6pB0I1-vvPoU7IDoXimnXVv2jsh_ncgGu67P3KFiVJ_lcwCV22HYD2t-hJY-R3UEvFVblTfoBSdfFECAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQZhSdW5HTSCVeK1TBCzDX1w4-nEjAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACwofFfvTKvB1bQlbxHUkRIEEKbo3uBF1XygZts31b5AbOSAla0EvIOUXtMVcZjrm8AWJZdRiQ66LUmZZBBnlvI4SStiemsDj2LsEg_AC88degf8p5z496uDa5Qxtzg8Vy5WgeMG7rqZW-lBb-dK8WYjJzOvh8NGNFbjanaVvT9271fgJtzJWb-GMzn8N3WawYvswcIrIpJHCfUqgaHrKTWseb-3ZpPXLGlL8p6XRAAlpOiNJXwUy6v66W-ErqGJEkDHaBE771LxtLpo4RrhtE4tGKUeFGxgOx0WOjG5jbttv33W4M9pNJ5JQbAatsUnHCdoz4dYDIPSptZnrDXD6rU&s=PK0fDE4ABATGwWPYdprgzJbXKlX0HEKs6o5N8kUqSKLvUQJgE1CtFlQzWc2l4eIQL-q4qEVw9Qqok18waY-65ukxSqI9G7z8HoRXxDQU93epdE_8pMEJilRl_E3zK03IrTSzvSpi-ws39mtIguL5ywjDR0JsoWSf1NLWHdyNNHB4uMRgoFk9N3qr6ry_msiqhDWCBi-bJKe4LZT3fIpl_dV2sc1S0ReYdOInByCRpfY0jz4mjMCRrazJglqMHXJt5iBz-_UWOJwbP6ommwDFLkZXVUngJAofy36J3TH6EASzWHHN2x0C-kqlGgIOQpg63tyTKM3NeAMmBadi1Kz4sQ&h=Ndzh8C0zrDvxnImQngWTsm2pSNyI63yB0vXR4Av37N4
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/e035cc71-e483-4d6a-bfb1-56f5968a0ed0\",\r\n
-        \ \"name\": \"e035cc71-e483-4d6a-bfb1-56f5968a0ed0\",\r\n  \"status\": \"succeeded\"\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/eastus2euap/deploymentStackOperationStatus/e062addb-fc31-420c-a14c-46fd0b458e09\"\
+        ,\r\n  \"name\": \"e062addb-fc31-420c-a14c-46fd0b458e09\",\r\n  \"status\"\
+        : \"succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '260'
+      - '264'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Oct 2023 02:12:31 GMT
+      - Wed, 17 Apr 2024 16:19:44 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7a2bb2be-2235-4d75-b601-4578b2d1fcb5/eastus2euap/62d40e31-49ef-498e-bde0-3df6a7233c04
+      x-msedge-ref:
+      - 'Ref A: 11A0443B14F54D02AF41A00418830B91 Ref B: BN1AA2051012037 Ref C: 2024-04-17T16:19:44Z'
     status:
       code: 200
       message: OK
@@ -726,56 +654,60 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --location --deployment-resource-group -p --deny-settings-mode --delete-all
+      - --name --location --deployment-resource-group -p --deny-settings-mode --aou
         --yes
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.11.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2022-08-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2024-03-01
   response:
     body:
-      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
-        {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"delete\",\r\n      \"resourceGroups\":
-        \"delete\",\r\n      \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-subsc-2023-10-27-02-12-01-8c5ad\",\r\n
-        \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001\",\r\n
-        \   \"duration\": \"PT28.602736S\",\r\n    \"denySettings\": {\r\n      \"mode\":
-        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"parameters\":
-        {\r\n      \"location\": {\r\n        \"value\": \"westus2\",\r\n        \"type\":
-        \"string\"\r\n      },\r\n      \"kind\": {\r\n        \"value\": \"StorageV2\",\r\n
-        \       \"type\": \"string\"\r\n      }\r\n    },\r\n    \"resources\": [\r\n
-        \     {\r\n        \"status\": \"managed\",\r\n        \"denyStatus\": \"none\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Storage/storageAccounts/storevdagov5iycxpy\"\r\n
-        \     }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
-        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
-        \ \"systemData\": {\r\n    \"createdBy\": \"danted@microsoft.com\",\r\n    \"createdByType\":
-        \"User\",\r\n    \"createdAt\": \"2023-10-27T02:12:01.3567204Z\",\r\n    \"lastModifiedBy\":
-        \"danted@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
-        \"2023-10-27T02:12:01.3567204Z\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002\",\r\n
-        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-subscription000002\"\r\n}"
+      string: "{\r\n  \"location\": \"eastus2euap\",\r\n  \"tags\": {},\r\n  \"properties\"\
+        : {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"delete\",\r\n\
+        \      \"resourceGroups\": \"delete\",\r\n      \"managementGroups\": \"delete\"\
+        \r\n    },\r\n    \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-subscription227c4-240417165mgvv\"\
+        ,\r\n    \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001\"\
+        ,\r\n    \"duration\": \"PT27.3789698S\",\r\n    \"denySettings\": {\r\n \
+        \     \"mode\": \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\
+        \n    \"parameters\": {\r\n      \"location\": {\r\n        \"value\": \"\
+        eastus2euap\",\r\n        \"type\": \"string\"\r\n      },\r\n      \"kind\"\
+        : {\r\n        \"value\": \"StorageV2\",\r\n        \"type\": \"string\"\r\
+        \n      }\r\n    },\r\n    \"resources\": [\r\n      {\r\n        \"status\"\
+        : \"managed\",\r\n        \"denyStatus\": \"none\",\r\n        \"id\": \"\
+        /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Storage/storageAccounts/clistore3qgebya47cvmg\"\
+        \r\n      }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n   \
+        \ \"detachedResources\": [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\"\
+        : [],\r\n    \"correlationId\": \"e5f81226-c43a-48b7-86e8-d046ed5e2490\"\r\
+        \n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"kylealbert@microsoft.com\"\
+        ,\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\": \"2024-04-17T16:19:12.9476764Z\"\
+        ,\r\n    \"lastModifiedBy\": \"kylealbert@microsoft.com\",\r\n    \"lastModifiedByType\"\
+        : \"User\",\r\n    \"lastModifiedAt\": \"2024-04-17T16:19:12.9476764Z\"\r\n\
+        \  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002\"\
+        ,\r\n  \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\":\
+        \ \"cli-test-create-deployment-stack-subscription000002\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1858'
+      - '1940'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Oct 2023 02:12:31 GMT
+      - Wed, 17 Apr 2024 16:19:44 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7a2bb2be-2235-4d75-b601-4578b2d1fcb5/eastus2euap/7ce72448-38f6-4f80-b100-65346d5ba0ad
+      x-msedge-ref:
+      - 'Ref A: A643AA147A1E41C590A58051EC86E637 Ref B: BN1AA2051013045 Ref C: 2024-04-17T16:19:44Z'
     status:
       code: 200
       message: OK
@@ -791,55 +723,59 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --yes
+      - --name --action-on-unmanage --yes
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.11.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2022-08-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?api-version=2024-03-01
   response:
     body:
-      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
-        {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"delete\",\r\n      \"resourceGroups\":
-        \"delete\",\r\n      \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-subsc-2023-10-27-02-12-01-8c5ad\",\r\n
-        \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001\",\r\n
-        \   \"duration\": \"PT28.602736S\",\r\n    \"denySettings\": {\r\n      \"mode\":
-        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"parameters\":
-        {\r\n      \"location\": {\r\n        \"value\": \"westus2\",\r\n        \"type\":
-        \"string\"\r\n      },\r\n      \"kind\": {\r\n        \"value\": \"StorageV2\",\r\n
-        \       \"type\": \"string\"\r\n      }\r\n    },\r\n    \"resources\": [\r\n
-        \     {\r\n        \"status\": \"managed\",\r\n        \"denyStatus\": \"none\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Storage/storageAccounts/storevdagov5iycxpy\"\r\n
-        \     }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
-        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
-        \ \"systemData\": {\r\n    \"createdBy\": \"danted@microsoft.com\",\r\n    \"createdByType\":
-        \"User\",\r\n    \"createdAt\": \"2023-10-27T02:12:01.3567204Z\",\r\n    \"lastModifiedBy\":
-        \"danted@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
-        \"2023-10-27T02:12:01.3567204Z\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002\",\r\n
-        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-subscription000002\"\r\n}"
+      string: "{\r\n  \"location\": \"eastus2euap\",\r\n  \"tags\": {},\r\n  \"properties\"\
+        : {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"delete\",\r\n\
+        \      \"resourceGroups\": \"delete\",\r\n      \"managementGroups\": \"delete\"\
+        \r\n    },\r\n    \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-subscription227c4-240417165mgvv\"\
+        ,\r\n    \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001\"\
+        ,\r\n    \"duration\": \"PT27.3789698S\",\r\n    \"denySettings\": {\r\n \
+        \     \"mode\": \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\
+        \n    \"parameters\": {\r\n      \"location\": {\r\n        \"value\": \"\
+        eastus2euap\",\r\n        \"type\": \"string\"\r\n      },\r\n      \"kind\"\
+        : {\r\n        \"value\": \"StorageV2\",\r\n        \"type\": \"string\"\r\
+        \n      }\r\n    },\r\n    \"resources\": [\r\n      {\r\n        \"status\"\
+        : \"managed\",\r\n        \"denyStatus\": \"none\",\r\n        \"id\": \"\
+        /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Storage/storageAccounts/clistore3qgebya47cvmg\"\
+        \r\n      }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n   \
+        \ \"detachedResources\": [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\"\
+        : [],\r\n    \"correlationId\": \"e5f81226-c43a-48b7-86e8-d046ed5e2490\"\r\
+        \n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"kylealbert@microsoft.com\"\
+        ,\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\": \"2024-04-17T16:19:12.9476764Z\"\
+        ,\r\n    \"lastModifiedBy\": \"kylealbert@microsoft.com\",\r\n    \"lastModifiedByType\"\
+        : \"User\",\r\n    \"lastModifiedAt\": \"2024-04-17T16:19:12.9476764Z\"\r\n\
+        \  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002\"\
+        ,\r\n  \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\":\
+        \ \"cli-test-create-deployment-stack-subscription000002\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1858'
+      - '1940'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Oct 2023 02:12:33 GMT
+      - Wed, 17 Apr 2024 16:19:45 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7a2bb2be-2235-4d75-b601-4578b2d1fcb5/eastus2euap/dc8f5236-2ebf-4df1-b254-4407f00d9ca8
+      x-msedge-ref:
+      - 'Ref A: 51EB5A2AD67F4F3BB563967F6ED679BF Ref B: BN1AA2051015039 Ref C: 2024-04-17T16:19:45Z'
     status:
       code: 200
       message: OK
@@ -857,11 +793,11 @@ interactions:
       Content-Length:
       - '0'
       ParameterSetName:
-      - --name --yes
+      - --name --action-on-unmanage --yes
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.11.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscription000002?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&unmanageAction.ManagementGroups=detach&api-version=2024-03-01
   response:
     body:
       string: ''
@@ -871,19 +807,23 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 27 Oct 2023 02:12:33 GMT
+      - Wed, 17 Apr 2024 16:19:46 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7a2bb2be-2235-4d75-b601-4578b2d1fcb5/eastus2euap/798ce564-9575-4311-a816-f6ea45d3f086
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14994'
+      x-msedge-ref:
+      - 'Ref A: 5B19ADA02CB44E32BF854BAC5CD43F66 Ref B: BN1AA2051015053 Ref C: 2024-04-17T16:19:46Z'
     status:
       code: 200
       message: OK
