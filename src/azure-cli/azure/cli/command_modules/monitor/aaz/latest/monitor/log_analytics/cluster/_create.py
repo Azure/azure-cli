@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-06-01",
+        "version": "2022-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2021-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2022-10-01"],
         ]
     }
 
@@ -49,7 +49,6 @@ class Create(AAZCommand):
             options=["-n", "--name", "--cluster-name"],
             help="The name of the Log Analytics cluster.",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^[A-Za-z0-9][A-Za-z0-9-]+[A-Za-z0-9]$",
                 max_length=63,
@@ -59,20 +58,6 @@ class Create(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.location = AAZResourceLocationArg(
-            help="The geo-location where the resource lives",
-            required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            help="Resource tags.",
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg()
 
         # define Arg Group "Identity"
 
@@ -82,7 +67,7 @@ class Create(AAZCommand):
             arg_group="Identity",
             help="Type of managed service identity.",
             default="SystemAssigned",
-            enum={"None": "None", "SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned"},
+            enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned,UserAssigned": "SystemAssigned,UserAssigned", "UserAssigned": "UserAssigned"},
         )
         _args_schema.user_assigned = AAZDictArg(
             options=["--user-assigned"],
@@ -92,6 +77,7 @@ class Create(AAZCommand):
 
         user_assigned = cls._args_schema.user_assigned
         user_assigned.Element = AAZObjectArg(
+            nullable=True,
             blank={},
         )
 
@@ -119,6 +105,26 @@ class Create(AAZCommand):
             help="The version of the key associated with the Log Analytics cluster.",
         )
 
+        # define Arg Group "Parameters"
+
+        _args_schema = cls._args_schema
+        _args_schema.location = AAZResourceLocationArg(
+            arg_group="Parameters",
+            help="The geo-location where the resource lives",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            arg_group="Parameters",
+            help="Resource tags.",
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg()
+
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
@@ -136,7 +142,7 @@ class Create(AAZCommand):
             options=["--sku-capacity"],
             arg_group="Sku",
             help="The capacity of the SKU. It can be decreased only after 31 days.",
-            enum={"1000": 1000, "2000": 2000, "500": 500, "5000": 5000},
+            enum={"100": 100, "1000": 1000, "10000": 10000, "200": 200, "2000": 2000, "25000": 25000, "300": 300, "400": 400, "500": 500, "5000": 5000, "50000": 50000},
         )
         _args_schema.sku_name = AAZStrArg(
             options=["--sku-name"],
@@ -152,11 +158,11 @@ class Create(AAZCommand):
         yield self.ClustersCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -228,7 +234,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-06-01",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -266,7 +272,7 @@ class Create(AAZCommand):
 
             user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
             if user_assigned_identities is not None:
-                user_assigned_identities.set_elements(AAZObjectType, ".")
+                user_assigned_identities.set_elements(AAZObjectType, ".", typ_kwargs={"nullable": True})
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -345,7 +351,9 @@ class Create(AAZCommand):
             )
 
             user_assigned_identities = cls._schema_on_200_201.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType()
+            user_assigned_identities.Element = AAZObjectType(
+                nullable=True,
+            )
 
             _element = cls._schema_on_200_201.identity.user_assigned_identities.Element
             _element.client_id = AAZStrType(
@@ -379,6 +387,9 @@ class Create(AAZCommand):
             properties.is_availability_zones_enabled = AAZBoolType(
                 serialized_name="isAvailabilityZonesEnabled",
             )
+            properties.is_double_encryption_enabled = AAZBoolType(
+                serialized_name="isDoubleEncryptionEnabled",
+            )
             properties.key_vault_properties = AAZObjectType(
                 serialized_name="keyVaultProperties",
             )
@@ -392,9 +403,7 @@ class Create(AAZCommand):
             )
 
             associated_workspaces = cls._schema_on_200_201.properties.associated_workspaces
-            associated_workspaces.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            associated_workspaces.Element = AAZObjectType()
 
             _element = cls._schema_on_200_201.properties.associated_workspaces.Element
             _element.associate_date = AAZStrType(
@@ -446,6 +455,10 @@ class Create(AAZCommand):
             tags.Element = AAZStrType()
 
             return cls._schema_on_200_201
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]
