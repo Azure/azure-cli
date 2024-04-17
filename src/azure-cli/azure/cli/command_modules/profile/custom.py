@@ -99,7 +99,7 @@ def account_clear(cmd):
 
 # pylint: disable=inconsistent-return-statements, too-many-branches
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None):
+          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None, redirect_port=None):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
@@ -145,7 +145,8 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         scopes=scopes,
         use_device_code=use_device_code,
         allow_no_subscriptions=allow_no_subscriptions,
-        use_cert_sn_issuer=use_cert_sn_issuer)
+        use_cert_sn_issuer=use_cert_sn_issuer,
+        redirect_port=redirect_port)
     all_subscriptions = list(subscriptions)
     for sub in all_subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
