@@ -237,12 +237,16 @@ def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classi
         if classic_alerts is not None:
             monitoring_settings.classic_alert_settings.alerts_for_critical_operations = \
                 cust_help.transform_enable_parameters(classic_alerts)
+        
+        return monitoring_settings
 
     # Create scenario
     monitoring_settings = MonitoringSettings()
     if azure_monitor_alerts_for_job_failures is not None:
         monitoring_settings.azure_monitor_alert_settings = AzureMonitorAlertSettings(
-            alerts_for_all_job_failures=cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures))
+            alerts_for_all_job_failures=cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures),
+            alerts_for_all_replication_issues="Enabled",
+            alerts_for_all_failover_issues="Enabled")
     if classic_alerts is not None:
         monitoring_settings.classic_alert_settings = ClassicAlertSettings(
             alerts_for_critical_operations=cust_help.transform_enable_parameters(classic_alerts),
