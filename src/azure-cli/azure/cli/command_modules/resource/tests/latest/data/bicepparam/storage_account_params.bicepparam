@@ -1,5 +1,5 @@
 using './storage_account_template.bicep'
 
-param location = 'westus2'
+param location = 'eastus2euap'
 
 param kind = 'StorageV2'
