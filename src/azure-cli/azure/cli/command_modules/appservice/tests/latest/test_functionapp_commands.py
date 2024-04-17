@@ -479,12 +479,14 @@ class FunctionWorkloadProfile(ScenarioTest):
             resource_group,
         ))
         
+        time.sleep(260)
         self.cmd('containerapp env workload-profile add --name {} --resource-group {} --workload-profile-type D4 -w {} --min-nodes 3 --max-nodes 6'.format(
             managed_environment_name,
             resource_group,
             workload_profile_name
         ))
         
+        time.sleep(260)
         self.cmd('containerapp env workload-profile add --name {} --resource-group {} --workload-profile-type D4 -w {} --min-nodes 3 --max-nodes 6'.format(
             managed_environment_name,
             resource_group,
