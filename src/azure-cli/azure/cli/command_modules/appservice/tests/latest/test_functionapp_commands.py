@@ -2538,7 +2538,7 @@ class FunctionappCorsTest(ScenarioTest):
         self.assertEqual(result, False)
 
 
-class FunctionappNetworkConnectionTests(ScenarioTest):
+class FunctionappNetworkConnectionTests(LiveScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
