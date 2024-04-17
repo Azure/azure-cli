@@ -53,7 +53,7 @@ The storage fields can be stored in your config file or as environment variables
 
 Once your extension is published, you can view it via `az extension list-available -o table`.
 
-However, if you want your extension to be listed in [Official Available Extensions for Azure CLI](https://docs.microsoft.com/cli/azure/azure-cli-extensions-list), you have to wait until the next [Azure CLI release](https://github.com/Azure/azure-cli/milestones). We update that document every time Azure CLI is released. Alternatively, you could file a PR to update it manually if it's urgent.
+However, if you want your extension to be listed in [Official Available Extensions for Azure CLI](https://learn.microsoft.com/cli/azure/azure-cli-extensions-list), you have to wait until the next [Azure CLI release](https://github.com/Azure/azure-cli/milestones). We update that document every time Azure CLI is released. Alternatively, you could file a PR to update it manually if it's urgent.
 
 ## Uncommon Flows
 
@@ -73,7 +73,7 @@ Normally, you will have you extension installed in dev mode and your code change
 
 **(Step 1)** Build the extension to generate a WHL file.
 
-`azdev extension build myexampleextesion`
+`azdev extension build myexampleextension`
 
 **(Step 2)** Uninstall the dev extension.
 
