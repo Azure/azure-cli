@@ -3625,11 +3625,12 @@ class VMSSCreateOptions(ScenarioTest):
         self.kwargs.update({
             'vmss': self.create_random_name('vmss', 10)
         })
-        self.cmd(
-            'vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --upgrade-policy-mode Manual --max-surge true --disable-overprovision --orchestration-mode Uniform',
-            checks=[
-                self.check('vmss.upgradePolicy.rollingUpgradePolicy.maxSurge', True)
-            ])
+        self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --upgrade-policy-mode Manual --max-surge true --disable-overprovision --orchestration-mode Uniform', checks=[
+            self.check('vmss.upgradePolicy.rollingUpgradePolicy.maxSurge', True),
+        ])
+        self.cmd('vmss update -n {vmss} -g {rg} --max-surge false', checks=[
+            self.check('upgradePolicy.rollingUpgradePolicy.maxSurge', False),
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_with_auto_os_upgrade_', location='eastus2euap')
     def test_vmss_with_auto_os_upgrade(self, resource_group):
@@ -4037,6 +4038,21 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('upgradePolicy.rollingUpgradePolicy.maxUnhealthyInstancePercent', maxUUIP),
             self.check('upgradePolicy.rollingUpgradePolicy.pauseTimeBetweenBatches', PTB),
             self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_set_rolling_upgrade_policy_during_creation', location='eastus')
+    def test_vmss_set_rolling_upgrade_policy_during_creation(self):
+        self.kwargs.update({
+            'linux_vmss': self.create_random_name('vmss', 10),
+            'windows_vmss': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vmss create -g {rg} -n {linux_vmss} --image ubuntu2204 --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --orchestration-mode Uniform --admin-username clitester1 --admin-password Testqwer1234!', checks=[
+            self.check('vmss.upgradePolicy.mode', 'Rolling'),
+            self.check('vmss.virtualMachineProfile.extensionProfile.extensions[0].name', 'ApplicationHealthLinux')
+        ])
+        self.cmd('vmss create -g {rg} -n {windows_vmss} --image Win2022Datacenter --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --orchestration-mode Uniform --admin-username clitester1 --admin-password Testqwer1234!', checks=[
+            self.check('vmss.upgradePolicy.mode', 'Rolling'),
+            self.check('vmss.virtualMachineProfile.extensionProfile.extensions[0].name', 'ApplicationHealthWindows')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_', location='westus')
