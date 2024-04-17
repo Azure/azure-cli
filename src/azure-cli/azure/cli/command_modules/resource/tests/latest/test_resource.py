@@ -18,6 +18,8 @@ from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                create_random_name, live_only, record_only)
+from azure.cli.testsdk.checkers import (
+    StringContainCheckIgnoreCase)
 from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
 from azure.cli.core.util import get_file_json
 from knack.util import CLIError
@@ -3154,6 +3156,34 @@ class DeploymentStacksTest(ScenarioTest):
         ])
 
         self.cmd('stack group delete -g {resource-group} --name {name} --action-on-unmanage detachAll --yes')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
+    def test_validate_deployment_stack_resource_group(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-validate-deployment-stack-resource-group', 60)
+
+        self.kwargs.update(
+            {
+                'name': deployment_stack_name,
+                'resource-group': resource_group,
+                'location': location,
+                'template-file': os.path.join(curr_dir, 'template_validate.json').replace('\\', '\\\\'),
+                'parameter-file': os.path.join(curr_dir, 'template_validate_parameters_valid.json').replace('\\', '\\\\'),
+                'parameter-file-invalid': os.path.join(curr_dir, 'template_validate_parameters_invalid.json').replace('\\', '\\\\')
+            })
+
+        # validate deployment stack with template file and parameter file: success
+        self.cmd(
+            'stack group validate --name {name} --resource-group {resource-group} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --description "stack deployment" --aou deleteAll --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes',
+            checks=self.check_pattern(
+                'properties.validatedResources[0].id', r'^/subscriptions/.*/providers/Microsoft\.Storage/storageAccounts/.*'))
+
+        # validate deployment stack with template file and parameter file: failure due to parameter constraint
+        with self.assertRaises(CLIError) as err:
+            self.cmd(
+                'stack group validate --name {name} --resource-group {resource-group} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file-invalid}" --aou detachAll')
+            self.assertTrue("Deployment template validation failed" in str(err.exception))
+
 
 class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
 
