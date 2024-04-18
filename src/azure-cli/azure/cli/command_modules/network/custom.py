@@ -437,6 +437,19 @@ class AddressPoolUpdate(_AddressPoolUpdate):
         args_schema.backend_addresses._registered = False
         return args_schema
 
+    class NonRetryableCreateOrUpdate(_AddressPoolUpdate.ApplicationGatewaysCreateOrUpdate):
+        CLIENT_TYPE = "NonRetryableClient"
+
+    def _execute_operations(self):
+        self.pre_operations()
+        self.ApplicationGatewaysGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.selectors.subresource.required())
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.selectors.subresource.required())
+        yield self.NonRetryableCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
     def pre_operations(self):
         args = self.ctx.args
 
