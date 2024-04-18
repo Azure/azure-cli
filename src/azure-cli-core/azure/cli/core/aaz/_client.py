@@ -254,7 +254,7 @@ class AAZMgmtClient(AAZBaseClient):
 
 
 @register_client("NonRetryableClient")
-class AAZRetryableClient(AAZMgmtClient):
+class AAZNonRetryableClient(AAZMgmtClient):
     @classmethod
     def _build_configuration(cls, ctx, credential, **kwargs):
         from azure.cli.core.auth.util import resource_to_scopes
