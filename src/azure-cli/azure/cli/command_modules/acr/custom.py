@@ -272,7 +272,7 @@ def acr_login(cmd,
             username=username,
             password=password)
 
-        logger.warning("You can perform manual login using the provided access token below, "
+        logger.info("You can perform manual login using the provided access token below, "
                        "for example: 'docker login loginServer -u %s -p accessToken'", EMPTY_GUID)
 
         token_info = {
