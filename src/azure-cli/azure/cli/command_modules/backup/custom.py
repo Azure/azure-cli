@@ -396,14 +396,14 @@ def _force_delete_vault(cmd, vault_name, resource_group_name):
         _unregister_containers(cmd, protection_containers_client, resource_group_name, vault_name, container.name)
     # now delete the vault
     try:
-        vault_client.delete(resource_group_name, vault_name)
+        return vault_client.begin_delete(resource_group_name, vault_name)
     except HttpResponseError as ex:
         raise ex
 
 
 def delete_vault(cmd, client, vault_name, resource_group_name, force=False):
     try:
-        client.delete(resource_group_name, vault_name)
+        return client.begin_delete(resource_group_name, vault_name)
     except HttpResponseError as ex:  # pylint: disable=broad-except
         if 'existing resources within the vault' in ex.message and force:  # pylint: disable=no-member
             _force_delete_vault(cmd, vault_name, resource_group_name)
