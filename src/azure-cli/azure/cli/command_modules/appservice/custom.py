@@ -66,11 +66,10 @@ from .utils import (_normalize_sku,
                     _rename_server_farm_props,
                     _get_location_from_webapp,
                     _normalize_flex_location,
-                    _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
                     app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp,
-                    _remove_list_duplicates, get_raw_functionapp)
+                    _remove_list_duplicates, get_raw_functionapp, _normalize_stage_location)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -350,8 +349,8 @@ def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, w
 
     cmd.cli_ctx.data['subscription_id'] = current_sub_id
 
-    vnet_location = _normalize_location(cmd, vnet_location)
-    asp_location = _normalize_location(cmd, webapp_location)
+    vnet_location = _normalize_stage_location(cmd, vnet_location)
+    asp_location = _normalize_stage_location(cmd, webapp_location)
     if vnet_location != asp_location:
         raise ArgumentUsageError("Unable to create webapp: vnet and App Service Plan must be in the same location. "
                                  "vnet location: {}. Plan location: {}.".format(vnet_location, asp_location))
@@ -4758,29 +4757,13 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if runtime is None and runtime_version is not None:
         raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
 
-    if flexconsumption_location:
-        runtimes = [r for r in FLEX_RUNTIMES if r['runtime'] == runtime]
-        if not runtimes:
-            supported_runtimes = set(map(lambda x: x['runtime'], FLEX_RUNTIMES))
-            raise ValidationError("Invalid runtime. Supported runtimes for function apps on Flex App Service "
-                                  "plans are {0}".format(list(supported_runtimes)))
-        if runtime_version is not None:
-            lang = next((r for r in runtimes if r['version'] == runtime_version), None)
-            if lang is None:
-                supported_versions = list(map(lambda x: x['version'], runtimes))
-                raise ValidationError("Invalid version {0} for runtime {1} for function apps on the Flex "
-                                      "Consumption plan. Supported version for runtime {1} is {2}."
-                                      .format(runtime_version, runtime, supported_versions))
-        else:
-            runtime_version = runtimes[0]['version']
-
     runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
     matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
                                              runtime_version, functions_version, is_linux)
 
     if flexconsumption_location:
         runtime = matched_runtime.name
-        version = matched_runtime.site_config_dict.linux_fx_version.split("|")[1]
+        version = runtime_version
         runtime_config = {
             "name": runtime,
             "version": version
@@ -4916,8 +4899,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     for app_setting, value in app_settings_dict.items():
         site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
 
-    site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
-                                                  value=_get_extension_version_functionapp(functions_version)))
+    if flexconsumption_location is None:
+        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
+                                                      value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
 
     # If plan is not flex, consumption or elastic premium, we need to set always on
@@ -4942,7 +4926,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                                       value=app_insights_conn_string))
     elif disable_app_insights or not matched_runtime.app_insights:
         # set up dashboard if no app insights
-        site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
+        if flexconsumption_location is None:
+            site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     elif not disable_app_insights and matched_runtime.app_insights:
         create_app_insights = True
 
@@ -4983,8 +4968,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         except Exception:  # pylint: disable=broad-except
             logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
                            'Please use the Azure Portal to create and configure the Application Insights, if needed.')
-            update_app_settings(cmd, functionapp.resource_group, functionapp.name,
-                                ['AzureWebJobsDashboard={}'.format(con_string)])
+            if flexconsumption_location is None:
+                update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                                    ['AzureWebJobsDashboard={}'.format(con_string)])
 
     if image and environment is None:
         update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
@@ -5089,7 +5075,7 @@ def try_create_workspace_based_application_insights(cmd, functionapp, workspace_
 
     ai_resource_group_name = functionapp.resource_group
     ai_name = functionapp.name
-    ai_location = _normalize_location(cmd, functionapp.location)
+    ai_location = _normalize_stage_location(cmd, functionapp.location)
 
     workspace = get_workspace(cmd, workspace_name)
 
@@ -5417,6 +5403,9 @@ def list_flexconsumption_locations(cmd):
         },
         {
             "name": "southeastasia"
+        },
+        {
+            "name": "northcentralus(stage)"
         }
     ]
 
