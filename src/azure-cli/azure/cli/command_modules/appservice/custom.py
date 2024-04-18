@@ -1733,7 +1733,7 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
 def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None, linux_fx_version=None,  # pylint: disable=too-many-statements,too-many-branches
                         windows_fx_version=None, pre_warmed_instance_count=None, php_version=None,
                         python_version=None, net_framework_version=None, power_shell_version=None,
-                        java_version=None, java_container=None, java_container_version=None,
+                        java_version=None, java_container=None, java_container_version=None, runtime=None,
                         remote_debugging_enabled=None, web_sockets_enabled=None,
                         always_on=None, auto_heal_enabled=None,
                         use32_bit_worker_process=None,
@@ -1748,6 +1748,42 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
+
+    if runtime and (java_version or java_container or java_container_version or net_framework_version):
+        raise MutuallyExclusiveArgumentError("Cannot use --java-version or --java-container"
+                                             "or --java-container-version or --net-framework-version"
+                                             "with --runtime")
+    if runtime and linux_fx_version:
+        raise MutuallyExclusiveArgumentError("Cannot use both --runtime and --linux-fx-version")
+    if runtime:
+        runtime = _StackRuntimeHelper.remove_delimiters(runtime)
+        config_is_linux = False
+        if configs.linux_fx_version:
+            config_is_linux = True
+            helper = _StackRuntimeHelper(cmd, linux=config_is_linux, windows=not config_is_linux)
+            match = helper.resolve(runtime, linux=config_is_linux)
+            if not match:
+                raise ValidationError("Linux Runtime '{}' is not supported."
+                                      "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
+            helper.get_site_config_setter(match, linux=config_is_linux)(cmd=cmd, stack=match, site_config=configs)
+        else:
+            helper = _StackRuntimeHelper(cmd, linux=config_is_linux, windows=not config_is_linux)
+            match = helper.resolve(runtime, linux=config_is_linux)
+            if not match:
+                raise ValidationError("Windows runtime '{}' is not supported."
+                                      "Run 'az webapp list-runtimes --os-type windows' to cross check".format(runtime))
+            if not ('java_version' in match.configs or 'java_container' in match.configs or 'java_container_version' in match.configs):    # pylint: disable=line-too-long
+                setattr(configs, 'java_version', None)
+                setattr(configs, 'java_container', None)
+                setattr(configs, 'java_container_version', None)
+            helper.get_site_config_setter(match, linux=config_is_linux)(cmd=cmd, stack=match, site_config=configs)
+            language = runtime.split('|')[0]
+            version_used_create = '|'.join(runtime.split('|')[1:])
+            runtime_version = "{}|{}".format(language, version_used_create) if \
+                version_used_create != "-" else version_used_create
+            current_stack = get_current_stack_from_runtime(runtime_version)
+            _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
+
     if number_of_workers is not None:
         number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     if linux_fx_version:

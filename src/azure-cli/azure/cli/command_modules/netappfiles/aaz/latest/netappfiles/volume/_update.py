@@ -415,7 +415,7 @@ class Update(AAZCommand):
         _args_schema.usage_threshold = AAZIntArg(
             options=["--usage-threshold"],
             arg_group="Properties",
-            help={"short-summary": "Maximum storage quota allowed for a file system in bytes.", "long-summary": "This is a soft quota used for alerting only. Minimum size is 100 GiB. \nUpper limit is 100TiB, 500Tib for LargeVolume."},
+            help={"short-summary": "Maximum storage quota allowed for a file system as integer number of GiB", "long-summary": "This is a soft quota used for alerting only. Minimum size is 100 GiB. \nUpper limit is 100TiB, 500Tib for LargeVolume or 2400Tib for LargeVolume on exceptional basis."},
             fmt=AAZIntArgFormat(
                 maximum=2638827906662400,
                 minimum=107374182400,
