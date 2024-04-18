@@ -58,24 +58,16 @@ def validate_bicep_target_scope(template_schema, deployment_scope):
 
 
 def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None):
-    if _use_binary_from_path(cli_ctx):
-        from shutil import which
+    system = platform.system()
+    bicep_executable_path = _get_bicep_executable_path(cli_ctx, system)
 
-        if which("bicep") is None:
-            raise ValidationError(
-                'Could not find the "bicep" executable on PATH. To install Bicep via Azure CLI, set the "bicep.use_binary_from_path" configuration to False and run "az bicep install".'  # pylint: disable=line-too-long
-            )
-
-        bicep_version_message = _run_command("bicep", ["--version"])
-
+    if bicep_executable_path and not _is_bicep_installation_path(bicep_executable_path, system):
+        bicep_version_message = _get_bicep_installed_version(bicep_executable_path)
         _logger.debug("Using Bicep CLI from PATH. %s", bicep_version_message)
 
-        return _run_command("bicep", args, custom_env)
+        return _run_command(bicep_executable_path, args, custom_env)
 
-    installation_path = _get_bicep_installation_path(platform.system())
-    _logger.debug("Bicep CLI installation path: %s", installation_path)
-
-    installed = os.path.isfile(installation_path)
+    installed = os.path.isfile(bicep_executable_path)
     _logger.debug("Bicep CLI installed: %s.", installed)
 
     check_version = cli_ctx.config.getboolean("bicep", "check_version", True)
@@ -91,7 +83,7 @@ def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None):
         with suppress(ClientRequestError):
             # Checking upgrade should ignore connection issues.
             # Users may continue using the current installed version.
-            installed_version = _get_bicep_installed_version(installation_path)
+            installed_version = _get_bicep_installed_version(bicep_executable_path)
             latest_release_tag = get_bicep_latest_release_tag() if cache_expired else latest_release_tag
             latest_version = _extract_version(latest_release_tag)
 
@@ -104,12 +96,12 @@ def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None):
             if cache_expired:
                 _refresh_bicep_version_check_cache(latest_release_tag)
 
-    return _run_command(installation_path, args, custom_env)
+    return _run_command(bicep_executable_path, args, custom_env)
 
 
 def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, stdout=True):
     system = platform.system()
-    installation_path = _get_bicep_installation_path(system)
+    installation_path = _get_bicep_executable_path(cli_ctx, system)
 
     if os.path.isfile(installation_path):
         if not release_tag:
@@ -119,6 +111,9 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
         target_version = _extract_version(release_tag)
         if installed_version and target_version and installed_version == target_version:
             return
+
+    if not _is_bicep_installation_path(installation_path, system):
+        installation_path = _get_bicep_installation_path(system)
 
     installation_dir = os.path.dirname(installation_path)
     if not os.path.exists(installation_dir):
@@ -156,10 +151,14 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
 
 def remove_bicep_installation(cli_ctx):
     system = platform.system()
-    installation_path = _get_bicep_installation_path(system)
+    bicep_executable_path = _get_bicep_executable_path(cli_ctx, system)
 
-    if os.path.exists(installation_path):
-        os.remove(installation_path)
+    if not _is_bicep_installation_path(bicep_executable_path, system):
+        raise ValidationError(
+            f'The bicep executable "{bicep_executable_path}" is not managed by Azure CLI. To install Bicep via Azure CLI, set the "bicep.use_binary_from_path" configuration to False and run "az bicep install".'  # pylint: disable=line-too-long
+        )
+    if os.path.exists(bicep_executable_path):
+        os.remove(bicep_executable_path)
     if os.path.exists(_bicep_version_check_file_path):
         os.remove(_bicep_version_check_file_path)
 
@@ -196,10 +195,10 @@ def get_bicep_latest_release_tag():
         raise ClientRequestError(f"Error while attempting to retrieve the latest Bicep version: {err}.")
 
 
-def bicep_version_greater_than_or_equal_to(version):
+def bicep_version_greater_than_or_equal_to(cli_ctx, version):
     system = platform.system()
-    installation_path = _get_bicep_installation_path(system)
-    installed_version = _get_bicep_installed_version(installation_path)
+    bicep_executable_path = _get_bicep_executable_path(cli_ctx, system)
+    installed_version = _get_bicep_installed_version(bicep_executable_path)
     parsed_version = semver.VersionInfo.parse(version)
     return installed_version >= parsed_version
 
@@ -282,9 +281,32 @@ def _get_bicep_download_url(system, release_tag, target_platform=None):
             return download_url.format("bicep-linux-musl-x64")
         return download_url.format("bicep-linux-x64")
     if system == "Darwin":
-        return download_url.format("bicep-osx-x64")
+        return download_url.format("bicep-osx-arm64") if platform.processor() == 'arm' else download_url.format("bicep-osx-x64")
 
     raise ValidationError(f'The platform "{system}" is not supported.')
+
+
+def _get_bicep_executable_path(cli_ctx, system):
+    if _use_binary_from_path(cli_ctx):
+        from shutil import which
+
+        bicep_executable_path = which("bicep")
+
+        if bicep_executable_path is None:
+            raise ValidationError(
+                'Could not find the "bicep" executable on PATH. To install Bicep via Azure CLI, set the "bicep.use_binary_from_path" configuration to False and run "az bicep install".'  # pylint: disable=line-too-long
+            )
+
+        return bicep_executable_path
+
+    bicep_executable_path = _get_bicep_installation_path(system)
+    _logger.debug("Bicep CLI installation path: %s", bicep_executable_path)
+
+    return bicep_executable_path
+
+
+def _is_bicep_installation_path(bicep_executable_path, system):
+    return bicep_executable_path == _get_bicep_installation_path(system)
 
 
 def _get_bicep_installation_path(system):
@@ -301,9 +323,9 @@ def _extract_version(text):
     return semver.VersionInfo.parse(semver_match.group(0)) if semver_match else None
 
 
-def _run_command(bicep_installation_path, args, custom_env=None):
+def _run_command(bicep_executable_path, args, custom_env=None):
     process = subprocess.run(
-        [rf"{bicep_installation_path}"] + args,
+        [rf"{bicep_executable_path}"] + args,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         env=custom_env)
