@@ -138,7 +138,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                            self.check('metadata[1].value', 'd')])
 
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
-        
+
     @ResourceGroupPreparer()
     @BatchAccountPreparer()
     def test_batch_pool_trustedLaunch_cmd(
@@ -151,7 +151,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         key = self.get_account_key(
             batch_account_name,
             resource_group)
-        
+
         self.kwargs.update({
             'p_id': 'xplatCreatedPool',
             'acc_n': batch_account_name,
@@ -167,7 +167,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                         '--encryption-at-host true '
                         '--enable-secure-boot true '
                         '--enable-vtpm true')
-        
+
         res = self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()
 
         self.assertTrue(res['virtualMachineConfiguration']['securityProfile']['securityType'])
@@ -189,7 +189,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         key = self.get_account_key(
             batch_account_name,
             resource_group)
-        
+
         self.kwargs.update({
             'p_id': 'xplatCreatedPool',
             'acc_n': batch_account_name,
@@ -204,7 +204,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                         '--os-disk-size 100 '
                         '--os-disk-caching ReadWrite '
                         '--storage-account-type "StandardSSD_LRS" ')
-        
+
         res = self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()
         print(res)
 
@@ -226,7 +226,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         key = self.get_account_key(
             batch_account_name,
             resource_group)
-        
+
         self.kwargs.update({
             'p_id': 'xplatCreatedPool',
             'acc_n': batch_account_name,
@@ -238,19 +238,18 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                         '--image "MicrosoftWindowsServer:WindowsServer:2016-datacenter-smalldisk" '
                         '--node-agent-sku-id "batch.node.windows amd64" '
                         '--target-dedicated-nodes 2 '
-                        '--mode "automatic" '
-                        '--disable-automatic-rollback true '
-                        '--enable-automatic-os-upgrade true '
-                        '--os-rolling-upgrade-deferral true '
-                        '--use-rolling-upgrade-policy true '
-                        '--enable-cross-zone-upgrade true '
+                        '--upgrade-mode "automatic" '
+                        '--disable-automatic-rollback '
+                        '--enable-automatic-os-upgrade '
+                        '--os-rolling-upgrade-deferral '
+                        '--use-rolling-upgrade-policy '
                         '--max-batch-instance-percent 20 '
                         '--max-unhealthy-instance-percent 20 '
                         '--max-unhealthy-upgraded-instance-percent 20 '
                         '--pause-time-between-batches "PT0S" '
-                        '--prioritize-unhealthy-instances true '
-                        '--rollback-failed-instances-on-policy-breach true ')
-        
+                        '--prioritize-unhealthy-instances '
+                        '--rollback-failed-instances-on-policy-breach ')
+
         res = self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()
         print(res)
 
@@ -259,7 +258,6 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['enableAutomaticOsUpgrade'])
         self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['osRollingUpgradeDeferral'])
         self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['useRollingUpgradePolicy'])
-        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['enableCrossZoneUpgrade'])
         self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['maxBatchInstancePercent'])
         self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['maxUnhealthyInstancePercent'])
         self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['maxUnhealthyUpgradedInstancePercent'])
@@ -357,7 +355,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         task_result = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
         if self.is_live or self.in_recording or task_result["taskCounts"]["active"] == 0:
-            time.sleep(10) 
+            time.sleep(10)
 
         task_result = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
 

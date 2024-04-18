@@ -281,6 +281,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(NodeCommunicationMode))
         c.extra('enable_accelerated_networking', arg_type=get_three_state_flag(), options_list=['--accelerated-networking'], arg_group="Pool: Network Configuration",
                 help='Whether this pool should enable accelerated networking. Accelerated networking enables single root I/O virtualization (SR-IOV) to a VM, which may lead to improved networking performance. For more details, see: https://learn.microsoft.com/azure/virtual- network/accelerated-networking-overview. Set true to enable.')
+        c.extra('mode', options_list=['--upgrade-mode'], arg_group="Pool: Upgrade Policy Arguments", help='The mode of the pool OS upgrade. Possible values are: Automatic, Manual. Allowed values: automatic, manual, rolling')
 
     with self.argument_context('batch pool set') as c:
         c.argument('target_node_communication_mode', options_list=['--target-communication'],
