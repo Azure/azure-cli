@@ -31,4 +31,4 @@ DEFAULT_QUERY_TIME_RANGE = 3600000
 
 BLOCKED_MODS = ['context', 'shell', 'documentdb', 'component']
 
-CREDENTIAL_WARNING_EXCLUSIVE_COMMANDS = ['ad sp create-for-rbac']
+CREDENTIAL_WARNING_EXCLUSIVE_COMMANDS = ['ad sp create-for-rbac', 'ad app credential reset', 'ad sp credential reset']
