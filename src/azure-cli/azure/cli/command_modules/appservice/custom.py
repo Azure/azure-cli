@@ -353,9 +353,6 @@ def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, w
     vnet_location = _normalize_location(cmd, vnet_location)
     asp_location = _normalize_location(cmd, webapp_location)
 
-    logger.warning("VNet location: %s", vnet_location)
-    logger.warning("asp_location: %s", asp_location)
-
     if vnet_location != asp_location:
         raise ArgumentUsageError("Unable to create webapp: vnet and App Service Plan must be in the same location. "
                                  "vnet location: {}. Plan location: {}.".format(vnet_location, asp_location))
