@@ -54,13 +54,14 @@ class CredentialType(Enum):
         self.level = level
         self.description = description
 
+
 @decorators.call_once
 def get_secret_masker():
     # global secret_masker_instance
-    from microsoft_security_utilities.secret_masker import SecretMasker
-    from microsoft_security_utilities.regex_pattern import load_regex_patterns_from_json_file
+    from microsoft_security_utilities_secret_masker import SecretMasker, load_regex_patterns_from_json_file
     regex_patterns = load_regex_patterns_from_json_file('HighConfidenceMicrosoftSecurityModels.json')
     return SecretMasker(regex_patterns)
+
 
 def is_containing_credential(content, is_file=False, max_level=9):
     """Check if the given content contains credential or not.
