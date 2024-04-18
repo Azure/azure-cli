@@ -2171,7 +2171,9 @@ class DeploymentStacksTest(ScenarioTest):
             'resource-one': resource_one,
             'resource-two': resource_two,
             'resource-three': resource_three,
-            'resource-type-specs': "Microsoft.Resources/templateSpecs"
+            'resource-type-specs': "Microsoft.Resources/templateSpecs",
+            'template-validate-file': os.path.join(curr_dir, 'template_sub_validate.json').replace('\\', '\\\\'),
+            'template-validate-parameters-file-invalid': os.path.join(curr_dir, 'template_sub_validate_parameters_invalid.json').replace('\\', '\\\\')
         })
         # create template spec
         basic_template_spec = self.cmd('ts create --name {template-spec-name} --version {template-spec-version} --location {location} --template-file {template-file} --resource-group {resource-group}').get_output_in_json()
@@ -2286,6 +2288,12 @@ class DeploymentStacksTest(ScenarioTest):
 
         # cleanup - delete resource group two
         self.cmd('group delete --name {resource-group-two} --yes')
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd(
+                'stack sub create --name {name} --location {location} --template-file "{template-validate-file}" --parameters "{template-validate-parameters-file-invalid}" --deny-settings-mode "none" --action-on-unmanage detachAll --yes')
+            self.assertTrue("Deployment template validation failed" in str(err.exception))
+
 
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
@@ -2545,7 +2553,9 @@ class DeploymentStacksTest(ScenarioTest):
             'resource-one': resource_one,
             'resource-two': resource_two,
             'resource-three': resource_three,
-            'resource-type-specs': "Microsoft.Resources/templateSpecs"
+            'resource-type-specs': "Microsoft.Resources/templateSpecs",
+            'template-validate-file': os.path.join(curr_dir, 'template_rg_validate.json').replace('\\', '\\\\'),
+            'template-validate-parameters-file-invalid': os.path.join(curr_dir, 'template_rg_validate_parameters_invalid.json').replace('\\', '\\\\')
         })
 
         # create templete spec
@@ -2636,8 +2646,15 @@ class DeploymentStacksTest(ScenarioTest):
 
         self.cmd('stack group delete -g {resource-group-two} --name {name} --action-on-unmanage detachAll --yes')
 
+        # create stack with validation errors
+        with self.assertRaises(CLIError) as err:
+            self.cmd(
+                'stack group create --name {name} -g {resource-group-two} --template-file "{template-validate-file}" --parameters "{template-validate-parameters-file-invalid}" --deny-settings-mode "none" --aou deleteAll --yes')
+            self.assertTrue("Deployment template validation failed" in str(err.exception))
+
         # cleanup - delete resource group two
         self.cmd('group delete --name {resource-group-two} --yes')
+
 
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
