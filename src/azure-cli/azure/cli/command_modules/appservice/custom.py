@@ -4518,10 +4518,6 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
             }
         }
     )
-
-    logger.warning("Updating function app %s with the following properties: %s", name, updated_functionapp)
-    logger.warning("url: %s", url)
-
     response = send_raw_request(cmd.cli_ctx, method='PATCH', url=url, body=updated_functionapp)
     poll_url = response.headers.get('location', "")
     if response.status_code == 202 and poll_url:
