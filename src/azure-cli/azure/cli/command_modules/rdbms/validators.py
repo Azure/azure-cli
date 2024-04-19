@@ -636,7 +636,8 @@ def validate_migration_runtime_server(cmd, migrationInstanceResourceId, target_r
     server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
     target_server = server_operations_client.get(target_resource_group_name, target_server_name)
     if target_server.id.lower() == migrationInstanceResourceId.lower():
-        raise ValidationError("Migration Runtime server is same as Target Flexible server. Please change the values accordingly.")
+        raise ValidationError("Migration Runtime server is same as Target Flexible server. "
+                              "Please change the values accordingly.")
 
 
 def validate_private_dns_zone(db_context, server_name, private_dns_zone, private_dns_zone_suffix):
