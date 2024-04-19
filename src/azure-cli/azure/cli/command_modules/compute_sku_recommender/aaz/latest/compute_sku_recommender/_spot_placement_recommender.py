@@ -12,13 +12,13 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "compute-diagnostic spot-placement-recommender generate",
+    "compute-sku-recommender spot-placement-recommender",
 )
-class Generate(AAZCommand):
+class SpotPlacementRecommender(AAZCommand):
     """Generates placement scores for Spot VM skus.
 
     :example: generate spot vm placement score example
-        az compute diagnostic spot-placement-recommender generate -l eastus --subscription ffffffff-ffff-ffff-ffff-ffffffffffff --availability-zones true --desired-locations '["eastus", "eastus2"]' --desired-count 1 --desired-sizes '[{"sku": "Standard_D2_v2"}]'
+        az compute-sku-recommender spot-placement-recommender -l eastus --subscription ffffffff-ffff-ffff-ffff-ffffffffffff --availability-zones true --desired-locations '["eastus", "eastus2"]' --desired-count 1 --desired-sizes '[{"sku": "Standard_D2_v2"}]'
     """
 
     _aaz_info = {
@@ -251,8 +251,8 @@ class Generate(AAZCommand):
             return cls._schema_on_200
 
 
-class _GenerateHelper:
-    """Helper class for Generate"""
+class _SpotPlacementRecommenderHelper:
+    """Helper class for SpotPlacementRecommender"""
 
 
-__all__ = ["Generate"]
+__all__ = ["SpotPlacementRecommender"]

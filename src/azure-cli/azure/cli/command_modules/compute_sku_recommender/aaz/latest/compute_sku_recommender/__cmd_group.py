@@ -8,4 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "compute-sku-recommender",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage compute resource sku recommender info
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]

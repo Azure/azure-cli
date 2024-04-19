@@ -9,4 +9,4 @@
 # flake8: noqa
 
 from .__cmd_group import *
-from ._generate import *
+from ._spot_placement_recommender import *
