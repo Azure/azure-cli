@@ -140,7 +140,8 @@ standard_policy_type = "v1"
 # pylint: disable=line-too-long
 def update_vault(cmd, client, vault_name, resource_group_name, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
-                 classic_alerts=None, azure_monitor_alerts_for_job_failures=None, tenant_id=None):
+                 classic_alerts=None, azure_monitor_alerts_for_job_failures=None, tenant_id=None,
+                 backup_storage_redundancy=None, cross_region_restore_flag=None):
     try:
         existing_vault = client.get(resource_group_name, vault_name)
     except CoreResourceNotFoundError:
@@ -162,6 +163,10 @@ def update_vault(cmd, client, vault_name, resource_group_name, tags=None,
     if classic_alerts is not None or azure_monitor_alerts_for_job_failures is not None:
         patchvault.properties.monitoring_settings = _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures,
                                                                                    classic_alerts, existing_vault)
+
+    if backup_storage_redundancy is not None or cross_region_restore_flag is not None:
+        patchvault.properties.redundancy_settings = \
+            _get_vault_redunancy_settings(backup_storage_redundancy, cross_region_restore_flag, existing_vault)
 
     if tags is not None:
         patchvault.tags = tags
@@ -253,6 +258,23 @@ def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classi
             email_notifications_for_site_recovery="Enabled") # Not processing this yet but we need in new SDK
 
     return monitoring_settings
+
+
+# We only support backup vault update, not create. Hence we don't need to setup any defaults. Existing vault won't be None.
+def _get_vault_redunancy_settings(backup_storage_redundancy, cross_region_restore_flag, existing_vault):
+    redundancy_settings = existing_vault.properties.redundancy_settings
+
+    if backup_storage_redundancy is not None:
+        redundancy_settings.standard_tier_storage_redundancy = backup_storage_redundancy
+    
+    if cross_region_restore_flag is not None:
+        if redundancy_settings.cross_region_restore == 'Enabled' and cross_region_restore_flag == 'Disabled':
+            raise ArgumentUsageError("""
+            Cross Region Restore is currently a non-reversible storage property. You can not disable it once enabled.
+            """)
+        redundancy_settings.cross_region_restore = cross_region_restore_flag
+
+    return redundancy_settings
 
 
 # TODO Remove pylint supress once the new SDK is in place
