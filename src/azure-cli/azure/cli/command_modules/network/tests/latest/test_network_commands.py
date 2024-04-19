@@ -281,6 +281,8 @@ class NetworkPrivateEndpoints(ScenarioTest):
             ]
         )
 
+
+
     @ResourceGroupPreparer(name_prefix='fanqiu_cli_test_network_private_endpoints', location='CentralUSEuap')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
     def test_network_private_endpoint_private_dns_zone_group(self, resource_group, storage_account):
