@@ -144,7 +144,9 @@ def get_resource_guard_operation_request(cli_ctx, resource_group_name, vault_nam
 def is_immutability_weakened(existing_vault, patchvault):
     if existing_vault.properties.security_settings.immutability_settings is not None:
         if existing_vault.properties.security_settings.immutability_settings.state == "Unlocked":
-            if patchvault.properties.security_settings.immutability_settings.state == "Disabled":
+            if (patchvault.properties.security_settings is not None and
+                patchvault.properties.security_settings.immutability_settings is not None and
+                patchvault.properties.security_settings.immutability_settings.state == "Disabled"):
                 return True
     return False
 
