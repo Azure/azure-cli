@@ -1543,6 +1543,8 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
                                                                                     functionapp_name)).get_output_in_json()
         self.assertTrue('APPLICATIONINSIGHTS_CONNECTION_STRING' in [
                         kp['name'] for kp in app_set])
+        self.assertTrue('AzureWebJobsDashboard' not in [
+                        kp['name'] for kp in app_set])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1562,6 +1564,8 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
         app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
                                                                                     functionapp_name)).get_output_in_json()
         self.assertTrue('APPLICATIONINSIGHTS_CONNECTION_STRING' not in [
+                        kp['name'] for kp in app_set])
+        self.assertTrue('AzureWebJobsDashboard' in [
                         kp['name'] for kp in app_set])
 
 

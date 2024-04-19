@@ -4952,6 +4952,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         app_insights_conn_string = get_app_insights_connection_string(cmd.cli_ctx, resource_group_name, app_insights)
         site_config.app_settings.append(NameValuePair(name='APPLICATIONINSIGHTS_CONNECTION_STRING',
                                                       value=app_insights_conn_string))
+    elif disable_app_insights or not matched_runtime.app_insights:
+        # set up dashboard if no app insights
+        site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     elif not disable_app_insights and matched_runtime.app_insights:
         create_app_insights = True
 
@@ -5004,6 +5007,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         except Exception:  # pylint: disable=broad-except
             logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
                            'Please use the Azure Portal to create and configure the Application Insights, if needed.')
+            update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                                ['AzureWebJobsDashboard={}'.format(con_string)])
 
     if image and environment is None:
         update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
