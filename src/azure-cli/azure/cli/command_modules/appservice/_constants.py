@@ -137,41 +137,6 @@ LANGUAGE_EOL_DEPRECATION_NOTICES = {
     "node|16": "https://azure.microsoft.com/en-us/updates/node16support/"
 }
 
-FLEX_RUNTIMES = [
-    {
-        'runtime': 'dotnet-isolated',
-        'version': '8.0'
-    },
-    {
-        'runtime': 'java',
-        'version': '17'
-    },
-    {
-        'runtime': 'java',
-        'version': '11'
-    },
-    {
-        'runtime': 'node',
-        'version': '20'
-    },
-    {
-        'runtime': 'node',
-        'version': '18'
-    },
-    {
-        'runtime': 'python',
-        'version': '3.11'
-    },
-    {
-        'runtime': 'python',
-        'version': '3.10'
-    },
-    {
-        'runtime': 'powershell',
-        'version': '7.2'
-    }
-]
-
 FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
 
 DEPLOYMENT_STORAGE_AUTH_TYPES = ['SystemAssignedIdentity', 'UserAssignedIdentity', 'StorageAccountConnectionString']
