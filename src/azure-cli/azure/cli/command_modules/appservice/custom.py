@@ -4126,9 +4126,6 @@ class _FlexFunctionAppStackRuntimeHelper:
                         if sku['skuCode'] != 'FC1':
                             continue
 
-                        function_app_config = sku['functionAppConfigProperties']
-
-                        logger.warning("Function app config: %s", github_actions_settings)
                         github_actions_properties = {
                             'is_supported': github_actions_settings.get('isSupported', False),
                             'supported_version': github_actions_settings.get('supportedVersion', None)
@@ -4139,7 +4136,6 @@ class _FlexFunctionAppStackRuntimeHelper:
                             'sku': sku,
                             'applicationInsights': runtime_settings['appInsightsSettings']['isSupported'],
                             'endOfLifeDate': runtime_settings['endOfLifeDate'],
-                            'runtime_info': function_app_config,
                             'github_actions_properties': self.GithubActionsProperties(**github_actions_properties)
                         }
 
