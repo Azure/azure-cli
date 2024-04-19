@@ -747,6 +747,8 @@ class FunctionAppFlex(LiveScenarioTest):
         app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()
         self.assertTrue('APPLICATIONINSIGHTS_ENABLE_AGENT' not in [
                         kp['name'] for kp in app_set])
+        self.assertTrue('AzureWebJobsDashboard' not in [
+                        kp['name'] for kp in app_set])
 
         scale_config = self.cmd('functionapp scale config set -g {} -n {} --maximum-instance-count 200 --instance-memory 2048 --trigger-type http --trigger-settings perInstanceConcurrency=5'
                                .format(resource_group, functionapp_name)).get_output_in_json()
