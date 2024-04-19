@@ -629,8 +629,8 @@ def validate_server_name(db_context, server_name, type_):
 
 def validate_migration_runtime_server(cmd, migrationInstanceResourceId, target_resource_group_name, target_server_name):
     id_comps = parse_resource_id(migrationInstanceResourceId)
-    runtime_server_resource_resource_type = id_comps['resource_type']
-    if "flexibleServers" != runtime_server_resource_resource_type:
+    runtime_server_resource_resource_type = id_comps['resource_type'].lower()
+    if "flexibleservers" != runtime_server_resource_resource_type:
         raise ValidationError("Migration Runtime Resource ID provided should be Flexible server.")
 
     server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
