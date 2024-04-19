@@ -5423,7 +5423,7 @@ def list_consumption_locations(cmd):
 def list_flexconsumption_locations(cmd):
     from azure.cli.core.commands.client_factory import get_subscription_id
     sub_id = get_subscription_id(cmd.cli_ctx)
-    geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2022-03-01'
+    geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2023-01-01'
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + geo_regions_api.format(sub_id)
     regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
     return [{'name': x['name'].lower().replace(' ', '')} for x in regions]
