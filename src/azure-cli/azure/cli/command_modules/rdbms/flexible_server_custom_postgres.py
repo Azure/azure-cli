@@ -1118,7 +1118,7 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
         migration_option = "ValidateAndMigrate"
 
     if migrationInstanceResourceId is not None:
-        validate_migration_runtime_server(migrationInstanceResourceId)
+        validate_migration_runtime_server(cmd, migrationInstanceResourceId, resource_group_name, server_name)
 
     return _create_migration(logging_name, client, subscription_id, resource_group_name, server_name, migration_name,
                              migration_mode, migration_option, migration_parameters, tags, location, migrationInstanceResourceId)
