@@ -101,6 +101,9 @@ class ContainerAppEnvDecorator(BaseResource):
 
     def get_argument_mtls_enabled(self):
         return self.get_param("mtls_enabled")
+    
+    def get_argument_p2p_encryption_enabled(self):
+        return self.get_param("p2p_encryption_enabled")
 
     def get_argument_workload_profile_type(self):
         return self.get_param("workload_profile_type")
@@ -113,6 +116,20 @@ class ContainerAppEnvDecorator(BaseResource):
 
     def get_argument_max_nodes(self):
         return self.get_param("max_nodes")
+
+    def set_up_peer_to_peer_encryption(self):
+        is_p2p_encryption_enabled = self.get_argument_p2p_encryption_enabled()
+        is_mtls_enabled = self.get_argument_mtls_enabled()
+
+        if is_p2p_encryption_enabled is not None:
+            safe_set(self.managed_env_def, "properties", "peerTrafficConfiguration", "encryption", "enabled", value=is_p2p_encryption_enabled)
+            if is_p2p_encryption_enabled is False:  # keep the two properties consistent.
+                safe_set(self.managed_env_def, "properties", "peerAuthentication", "mtls", "enabled", value=False)
+
+        if is_mtls_enabled is not None:
+            safe_set(self.managed_env_def, "properties", "peerAuthentication", "mtls", "enabled", value=is_mtls_enabled)
+            if is_mtls_enabled is True:  # keep the two properties consistent.
+                safe_set(self.managed_env_def, "properties", "peerTrafficConfiguration", "encryption", "enabled", value=True)
 
 
 class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
@@ -190,8 +207,7 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         # Vnet
         self.set_up_vnet_configuration()
 
-        if self.get_argument_mtls_enabled() is not None:
-            safe_set(self.managed_env_def, "properties", "peerAuthentication", "mtls", "enabled", value=self.get_argument_mtls_enabled())
+        self.set_up_peer_to_peer_encryption()
 
     def set_up_workload_profiles(self):
         if self.get_argument_enable_workload_profiles():
@@ -293,8 +309,7 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
         # workload Profiles
         self.set_up_workload_profiles(r)
 
-        if self.get_argument_mtls_enabled() is not None:
-            safe_set(self.managed_env_def, "properties", "peerAuthentication", "mtls", "enabled", value=self.get_argument_mtls_enabled())
+        self.set_up_peer_to_peer_encryption()
 
     def set_up_app_log_configuration(self):
         logs_destination = self.get_argument_logs_destination()
