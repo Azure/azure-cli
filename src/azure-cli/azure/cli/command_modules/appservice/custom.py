@@ -1882,7 +1882,8 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
     location = functionapp["location"]
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime, runtime_version)
     matched_runtime = runtime_helper.resolve(runtime, runtime_version)
-    version = matched_runtime.version
+    flex_sku = matched_runtime.sku
+    version = flex_sku['functionAppConfigProperties']['runtime']['version']
 
     functionapp["properties"]["functionAppConfig"]["runtime"]["version"] = version
 
