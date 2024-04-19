@@ -687,45 +687,19 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
     if backup_storage_redundancy or cross_region_restore_flag:
         logger.warning(
             '--classic-alerts and --azure-monitor-alerts-for-job-failures parameters will be ignored if provided.')
-        backup_config_response = client.get(vault_name, resource_group_name)
-        prev_crr_flag = backup_config_response.properties.cross_region_restore_flag
-        if backup_storage_redundancy is None:
-            backup_storage_redundancy = backup_config_response.properties.storage_type
-        if cross_region_restore_flag is None:
-            cross_region_restore_flag = prev_crr_flag
-        else:
-            cross_region_restore_flag = bool(cross_region_restore_flag.lower() == 'true')
-
-        if prev_crr_flag and not cross_region_restore_flag:
-            raise ArgumentUsageError("""
-            Cross Region Restore is currently a non-reversible storage property. You can not disable it once enabled.
-            """)
-
-        backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy,
-                                                     cross_region_restore_flag=cross_region_restore_flag)
-        backup_storage_config_resource = BackupResourceConfigResource(properties=backup_storage_config)
-        return client.update(vault_name, resource_group_name, backup_storage_config_resource)
+        logger.warning('Please use the "az backup vault update" command to perform this operation instead.')
+        cross_region_restore_flag_str = 'Enabled' if cross_region_restore_flag else 'Disabled'
+        vault_client = vaults_cf(cmd.cli_ctx)
+        return update_vault(cmd, vault_client, vault_name, resource_group_name,
+                            backup_storage_redundancy=backup_storage_redundancy,
+                            cross_region_restore_flag=cross_region_restore_flag_str)
 
     if classic_alerts or azure_monitor_alerts_for_job_failures:
-        monitor_settings = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name).properties.monitoring_settings
-        prev_classic_alerts = 'Enabled'
-        prev_azmon_alerts = 'Enabled'
-        if (hasattr(monitor_settings, 'classic_alert_settings') and
-                hasattr(monitor_settings.classic_alert_settings, 'alerts_for_critical_operations')):
-            prev_classic_alerts = monitor_settings.classic_alert_settings.alerts_for_critical_operations
-        if (hasattr(monitor_settings, 'azure_monitor_alert_settings') and
-                hasattr(monitor_settings.azure_monitor_alert_settings, 'alerts_for_all_job_failures')):
-            prev_azmon_alerts = monitor_settings.azure_monitor_alert_settings.alerts_for_all_job_failures
-        classic_alerts = prev_classic_alerts if classic_alerts is None else classic_alerts + 'd'
-        azmon_alerts = (prev_azmon_alerts if azure_monitor_alerts_for_job_failures is None else
-                        azure_monitor_alerts_for_job_failures + 'd')
-        vault_properties = VaultProperties(
-            monitoring_settings=MonitoringSettings(
-                azure_monitor_alert_settings=AzureMonitorAlertSettings(
-                    alerts_for_all_job_failures=azmon_alerts),
-                classic_alert_settings=ClassicAlertSettings(alerts_for_critical_operations=classic_alerts)))
-        return vaults_cf(cmd.cli_ctx).begin_update(resource_group_name, vault_name,
-                                                   PatchVault(properties=vault_properties))
+        logger.warning('This command will be deprecated soon and some operations may not work.'
+                       'Please use the "az backup vault update" command to perform this operation instead.')
+        vault_client = vaults_cf(cmd.cli_ctx)
+        return update_vault(cmd, vault_client, vault_name, resource_group_name, classic_alerts=classic_alerts,
+                            azure_monitor_alerts_for_job_failures=azure_monitor_alerts_for_job_failures)
 
 
 def get_backup_properties(cmd, client, vault_name, resource_group_name):
