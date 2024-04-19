@@ -18,7 +18,7 @@ from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
 class BatchMgmtScenarioTests(ScenarioTest):
 
     def __init__(self, method_name, *arg, **kwargs):
-        super().__init__(method_name, *arg, random_config_dir=True, **kwargs, recording_processors=[
+        super().__init__(method_name, *arg, **kwargs, recording_processors=[
             BatchAccountKeyReplacer(),
             StorageSASReplacer()
         ])
@@ -55,7 +55,7 @@ class BatchMgmtScenarioTests(ScenarioTest):
             self.check('encryption.keySource', 'Microsoft.Batch'),
             self.check('resourceGroup', '{rg}')])
 
-        if self.in_recording:
+        if self.is_live or self.in_recording:
             time.sleep(100)
 
         self.cmd('batch account set -g {rg} -n {acc} --storage-account {str_n}').assert_with_checks([
@@ -106,7 +106,7 @@ class BatchMgmtScenarioTests(ScenarioTest):
         self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())
 
         self.cmd('batch location quotas show -l {loc}').assert_with_checks(
-            [self.check('accountQuota', 3)])
+            [self.check('accountQuota', 1000)])
 
         self.cmd('batch location list-skus -l {loc} --query "[0:20]"').assert_with_checks([
             self.check('length(@)', 20), # Ensure at least 20 entries

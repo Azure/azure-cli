@@ -93,7 +93,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                                 '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
                                 '--disk-encryption-targets "TemporaryDisk"')
 
-        time.sleep(120)
+        if self.is_live or self.in_recording:
+            time.sleep(120)
 
         result = self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
             self.check('allocationState', 'steady'),
@@ -237,12 +238,14 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool create --id {p_id} --vm-size "standard_d4s_v3" '
                         '--image "MicrosoftWindowsServer:WindowsServer:2016-datacenter-smalldisk" '
                         '--node-agent-sku-id "batch.node.windows amd64" '
+                        '--policy "zonal" '
                         '--target-dedicated-nodes 2 '
-                        '--upgrade-mode "automatic" '
-                        '--disable-automatic-rollback '
-                        '--enable-automatic-os-upgrade '
-                        '--os-rolling-upgrade-deferral '
+                        '--upgrade-policy-mode "automatic" '
+                        '--disable-auto-rollback '
+                        '--enable-auto-os-upgrade '
+                        '--defer-os-rolling-upgrade '
                         '--use-rolling-upgrade-policy '
+                        '--enable-cross-zone-upgrade '
                         '--max-batch-instance-percent 20 '
                         '--max-unhealthy-instance-percent 20 '
                         '--max-unhealthy-upgraded-instance-percent 20 '
@@ -258,10 +261,11 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['enableAutomaticOsUpgrade'])
         self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['osRollingUpgradeDeferral'])
         self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['useRollingUpgradePolicy'])
-        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['maxBatchInstancePercent'])
-        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['maxUnhealthyInstancePercent'])
-        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['maxUnhealthyUpgradedInstancePercent'])
-        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['pauseTimeBetweenBatches'])
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['enableCrossZoneUpgrade'])
+        self.assertEqual(res['upgradePolicy']['rollingUpgradePolicy']['maxBatchInstancePercent'], 20)
+        self.assertEqual(res['upgradePolicy']['rollingUpgradePolicy']['maxUnhealthyInstancePercent'], 20)
+        self.assertEqual(res['upgradePolicy']['rollingUpgradePolicy']['maxUnhealthyUpgradedInstancePercent'], 20)
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['pauseTimeBetweenBatches'], '')
         self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['prioritizeUnhealthyInstances'])
         self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['rollbackFailedInstancesOnPolicyBreach'])
 

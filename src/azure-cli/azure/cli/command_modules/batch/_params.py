@@ -281,7 +281,14 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(NodeCommunicationMode))
         c.extra('enable_accelerated_networking', arg_type=get_three_state_flag(), options_list=['--accelerated-networking'], arg_group="Pool: Network Configuration",
                 help='Whether this pool should enable accelerated networking. Accelerated networking enables single root I/O virtualization (SR-IOV) to a VM, which may lead to improved networking performance. For more details, see: https://learn.microsoft.com/azure/virtual- network/accelerated-networking-overview. Set true to enable.')
-        c.extra('mode', options_list=['--upgrade-mode'], arg_group="Pool: Upgrade Policy Arguments", help='The mode of the pool OS upgrade. Possible values are: Automatic, Manual. Allowed values: automatic, manual, rolling')
+        c.argument('mode', options_list=['--upgrade-policy-mode'], help='The mode of the pool OS upgrade.')
+        c.argument('disable_automatic_rollback', options_list=['--disable-auto-rollback'], arg_type=get_three_state_flag())
+        c.argument('enable_automatic_os_upgrade', options_list=['--enable-auto-os-upgrade'], arg_type=get_three_state_flag())
+        c.argument('os_rolling_upgrade_deferral', options_list=['--defer-os-rolling-upgrade'], arg_type=get_three_state_flag())
+        c.argument('use_rolling_upgrade_policy', arg_type=get_three_state_flag())
+        c.argument('enable_cross_zone_upgrade', arg_type=get_three_state_flag())
+        c.argument('prioritize_unhealthy_instances', arg_type=get_three_state_flag())
+        c.argument('rollback_failed_instances_on_policy_breach', arg_type=get_three_state_flag())
 
     with self.argument_context('batch pool set') as c:
         c.argument('target_node_communication_mode', options_list=['--target-communication'],
