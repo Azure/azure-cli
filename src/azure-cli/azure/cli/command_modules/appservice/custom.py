@@ -70,7 +70,8 @@ from .utils import (_normalize_sku,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
                     app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp,
-                    _remove_list_duplicates, get_raw_functionapp)
+                    _remove_list_duplicates, get_raw_functionapp,
+                    register_app_provider)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -4366,8 +4367,9 @@ def is_plan_elastic_premium(cmd, plan_info):
     return False
 
 
-def should_enable_distributed_tracing(consumption_plan_location, matched_runtime, image):
+def should_enable_distributed_tracing(consumption_plan_location, flexconsumption_location, matched_runtime, image):
     return consumption_plan_location is None \
+        and flexconsumption_location is None \
         and matched_runtime.name.lower() == "java" \
         and image is None
 
@@ -4590,6 +4592,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             webapp_location = plan_info.location
         elif flexconsumption_location:
             webapp_location = flexconsumption_location
+            register_app_provider(cmd)
         else:
             webapp_location = consumption_plan_location
 
@@ -4608,6 +4611,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                subnet_service_delegation=FLEX_SUBNET_DELEGATION if flexconsumption_location else None)
         subnet_resource_id = subnet_info["subnet_resource_id"]
         vnet_route_all_enabled = True
+        site_config.vnet_route_all_enabled = True
     else:
         subnet_resource_id = None
         vnet_route_all_enabled = None
@@ -4619,6 +4623,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     plan_info = None
     if runtime is not None:
         runtime = runtime.lower()
+
+    is_storage_container_created = False
+    is_user_assigned_identity_created = False
 
     if consumption_plan_location:
         locations = list_consumption_locations(cmd)
@@ -4650,7 +4657,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             raise ValidationError("Location is invalid. Use: az functionapp list-flexconsumption-locations")
         is_linux = True
         # Following the same plan name format as the backend
-        plan_name = "{}FlexPlan".format(name)
+        plan_name = generatePlanName(resource_group_name)
         plan_info = create_flex_app_service_plan(
             cmd, resource_group_name, plan_name, flexconsumption_location)
         functionapp_def.server_farm_id = plan_info.id
@@ -4664,6 +4671,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         deployment_storage_container = _get_or_create_deployment_storage_container(cmd, resource_group_name, name,
                                                                                    deployment_storage_name,
                                                                                    deployment_storage_container_name)
+        if deployment_storage_container_name is None:
+            is_storage_container_created = True
         deployment_storage_container_name = deployment_storage_container.name
 
         endpoints = deployment_storage.primary_endpoints
@@ -4698,6 +4707,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 name,
                 deployment_storage_auth_value,
                 flexconsumption_location)
+            if deployment_storage_auth_value is None:
+                is_user_assigned_identity_created = True
             deployment_storage_auth_value = deployment_storage_user_assigned_identity.id
             deployment_storage_auth_config["userAssignedIdentityResourceId"] = deployment_storage_auth_value
         elif deployment_storage_auth_type == 'StorageAccountConnectionString':
@@ -4916,8 +4927,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     for app_setting, value in app_settings_dict.items():
         site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
 
-    site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
-                                                  value=_get_extension_version_functionapp(functions_version)))
+    if flexconsumption_location is None:
+        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
+                                                      value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
 
     # If plan is not flex, consumption or elastic premium, we need to set always on
@@ -4940,7 +4952,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         app_insights_conn_string = get_app_insights_connection_string(cmd.cli_ctx, resource_group_name, app_insights)
         site_config.app_settings.append(NameValuePair(name='APPLICATIONINSIGHTS_CONNECTION_STRING',
                                                       value=app_insights_conn_string))
-    elif disable_app_insights or not matched_runtime.app_insights:
+    elif flexconsumption_location is None and (disable_app_insights or not matched_runtime.app_insights):
         # set up dashboard if no app insights
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     elif not disable_app_insights and matched_runtime.app_insights:
@@ -4955,9 +4967,18 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.additional_properties["properties"] = existing_properties
         functionapp_def.additional_properties["properties"]["functionAppConfig"] = function_app_config
         functionapp_def.additional_properties["properties"]["sku"] = "FlexConsumption"
-        poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
-                                                        api_version='2023-12-01')
-        functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
+        try:
+            poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
+                                                            api_version='2023-12-01')
+            functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
+        except Exception as ex:  # pylint: disable=broad-except
+            client.app_service_plans.delete(resource_group_name, plan_name)
+            if is_storage_container_created:
+                delete_storage_container(cmd, resource_group_name, deployment_storage_name,
+                                         deployment_storage_container_name)
+            if is_user_assigned_identity_created:
+                delete_user_assigned_identity(cmd, resource_group_name, deployment_storage_user_assigned_identity.name)
+            raise ex
     else:
         poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
         functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -4976,15 +4997,19 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if create_app_insights:
         try:
             try_create_workspace_based_application_insights(cmd, functionapp, workspace)
-            if should_enable_distributed_tracing(consumption_plan_location, matched_runtime, image):
+            if should_enable_distributed_tracing(consumption_plan_location,
+                                                 flexconsumption_location,
+                                                 matched_runtime,
+                                                 image):
                 update_app_settings(cmd, functionapp.resource_group, functionapp.name,
                                     ["APPLICATIONINSIGHTS_ENABLE_AGENT=true"])
 
         except Exception:  # pylint: disable=broad-except
             logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
                            'Please use the Azure Portal to create and configure the Application Insights, if needed.')
-            update_app_settings(cmd, functionapp.resource_group, functionapp.name,
-                                ['AzureWebJobsDashboard={}'.format(con_string)])
+            if flexconsumption_location is None:
+                update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                                    ['AzureWebJobsDashboard={}'.format(con_string)])
 
     if image and environment is None:
         update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
@@ -5072,6 +5097,13 @@ def _get_runtime_version_functionapp(version_string, is_linux):
         return float(version_string)
     except ValueError:
         return 0
+
+
+def generatePlanName(resource_group_name):
+    suffix = "-" + str(uuid.uuid4())[:4]
+    alphanumeric_resource_group_name = re.sub(r"[^a-zA-Z0-9]", '', resource_group_name)
+    first_part = 'ASP-{}'.format(alphanumeric_resource_group_name)[:35]
+    return '{}{}'.format(first_part, suffix)
 
 
 def _get_content_share_name(app_name):
@@ -5207,6 +5239,17 @@ def _validate_and_get_deployment_storage(cli_ctx, resource_group_name, deploymen
 
 def _normalize_functionapp_name(functionapp_name):
     return re.sub(r"[^a-zA-Z0-9]", '', functionapp_name).lower()
+
+
+def delete_storage_container(cmd, resource_group_name, storage_name, container_name):
+    storage_client = get_mgmt_service_client(cmd.cli_ctx, StorageManagementClient)
+    storage_client.blob_containers.delete(resource_group_name, storage_name, container_name)
+
+
+def delete_user_assigned_identity(cmd, resource_group_name, identity_name):
+    from azure.mgmt.msi import ManagedServiceIdentityClient
+    msi_client = get_mgmt_service_client(cmd.cli_ctx, ManagedServiceIdentityClient)
+    msi_client.user_assigned_identities.delete(resource_group_name, identity_name)
 
 
 def _get_or_create_deployment_storage_container(cmd, resource_group_name, functionapp_name,
@@ -5378,47 +5421,12 @@ def list_consumption_locations(cmd):
 
 
 def list_flexconsumption_locations(cmd):
-    return [
-        {
-            "name": "eastus",
-        },
-        {
-            "name": "northeurope"
-        },
-        {
-            "name": "eastasia"
-        },
-        {
-            "name": "centralus"
-        },
-        {
-            "name": "uksouth"
-        },
-        {
-            "name": "eastus2"
-        },
-        {
-            "name": "eastus2euap"
-        },
-        {
-            "name": "australiaeast"
-        },
-        {
-            "name": "westus2"
-        },
-        {
-            "name": "westus3"
-        },
-        {
-            "name": "southcentralus"
-        },
-        {
-            "name": "swedencentral"
-        },
-        {
-            "name": "southeastasia"
-        }
-    ]
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    sub_id = get_subscription_id(cmd.cli_ctx)
+    geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2023-01-01'
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + geo_regions_api.format(sub_id)
+    regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
+    return [{'name': x['name'].lower().replace(' ', '')} for x in regions]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
@@ -6026,6 +6034,8 @@ def add_functionapp_vnet_integration(cmd, name, resource_group_name, vnet, subne
         raise ResourceNotFoundError('Could not determine the current plan of the functionapp')
     if is_plan_consumption(cmd, plan_info):
         raise ValidationError('Virtual network integration is not allowed for consumption plans')
+    if is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+        register_app_provider(cmd)
     return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check)
 
 
@@ -7940,7 +7950,7 @@ def _get_functionapp_runtime_info(cmd, resource_group, name, slot, is_linux):  #
         app_runtime_config = get_runtime_config(cmd, resource_group, name)
         app_runtime = app_runtime_config.get("name", "")
         app_runtime_version = app_runtime_config.get("version", "")
-        return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, None)
+        return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, "~4", None)
 
     if is_linux:
         app_metadata = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
