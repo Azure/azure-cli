@@ -387,17 +387,17 @@ def is_packaged_installed(package_name):
 
 
 def get_object_id_of_current_user():
-    signed_in_user = run_cli_cmd('az account show').get('user')
+    signed_in_user = run_cli_cmd('az account show -o json').get('user')
     user_type = signed_in_user.get('type')
     try:
         if user_type == 'user':
-            user_info = run_cli_cmd('az ad signed-in-user show')
+            user_info = run_cli_cmd('az ad signed-in-user show -o json')
             user_object_id = user_info.get('objectId') if user_info.get(
                 'objectId') else user_info.get('id')
             return user_object_id
         if user_type == 'servicePrincipal':
             user_info = run_cli_cmd(
-                f'az ad sp show --id {signed_in_user.get("name")}')
+                f'az ad sp show --id {signed_in_user.get("name")} -o json')
             user_object_id = user_info.get('id')
             return user_object_id
     except CLIInternalError as e:
