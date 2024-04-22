@@ -393,17 +393,23 @@ def get_object_id_of_current_user():
             f"Can't parse login user information {signed_in_user_info}")
     signed_in_user = signed_in_user_info.get('user')
     user_type = signed_in_user.get('type')
+    if not user_type or not signed_in_user.get('name'):
+        raise CLIInternalError(
+            f"Can't get user type or name from signed-in user {signed_in_user}")
     try:
         if user_type == 'user':
             user_info = run_cli_cmd('az ad signed-in-user show -o json')
             user_object_id = user_info.get('objectId') if user_info.get(
                 'objectId') else user_info.get('id')
             return user_object_id
-        if user_type == 'servicePrincipal':
+        elif user_type == 'servicePrincipal':
             user_info = run_cli_cmd(
                 f'az ad sp show --id {signed_in_user.get("name")} -o json')
             user_object_id = user_info.get('id')
             return user_object_id
+        else:
+            raise CLIInternalError(
+                f"Unknown user type {user_type} for signed-in user {signed_in_user}")
     except CLIInternalError as e:
         if 'AADSTS530003' in e.error_msg:
             logger.warning(
