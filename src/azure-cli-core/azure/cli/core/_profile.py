@@ -26,8 +26,11 @@ _SUBSCRIPTION_ID = 'id'
 _SUBSCRIPTION_NAME = 'name'
 # Tenant of the token which is used to list the subscription
 _TENANT_ID = 'tenantId'
-# Home tenant of the subscription, which maps to tenantId in 'Subscriptions - List REST API'
-# https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
+# Token tenant's default domain. Maps to defaultDomain in 'Tenants - List' REST API
+# https://learn.microsoft.com/en-us/rest/api/resources/tenants/list
+_TENANT_DEFAULT_DOMAIN = 'tenantDefaultDomain'
+# Home tenant of the subscription. Maps to tenantId in 'Subscriptions - List' REST API
+# https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/list
 _HOME_TENANT_ID = 'homeTenantId'
 _MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'
@@ -91,17 +94,22 @@ def _get_cloud_console_token_endpoint():
     return os.environ.get('MSI_ENDPOINT')
 
 
-def _attach_token_tenant(subscription, tenant):
-    """Attach the token tenant ID to the subscription as tenant_id, so that CLI knows which token should be used
+def _attach_token_tenant(subscription, tenant, tenant_id_description=None):
+    """Attach the token tenant information to the subscription. CLI uses tenant_id to know which token should be used
     to access the subscription.
 
     This function supports multiple APIs:
       - v2016_06_01's Subscription doesn't have tenant_id
-      - v2019_11_01's Subscription has tenant_id representing the home tenant ID. It will mapped to home_tenant_id
+      - v2019_11_01's Subscription has tenant_id representing the home tenant ID. It's mapped to home_tenant_id
+      - v2022_12_01's TenantIdDescription has default_domain. It's mapped to tenant_default_domain.
     """
     if hasattr(subscription, "tenant_id"):
         setattr(subscription, 'home_tenant_id', subscription.tenant_id)
     setattr(subscription, 'tenant_id', tenant)
+
+    # Attach tenant_default_domain, if available
+    if tenant_id_description and hasattr(tenant_id_description, "default_domain"):
+        setattr(subscription, 'tenant_default_domain', tenant_id_description.default_domain)
 
 
 # pylint: disable=too-many-lines,too-many-instance-attributes,unused-argument
@@ -133,10 +141,14 @@ class Profile:
               use_device_code=False,
               allow_no_subscriptions=False,
               use_cert_sn_issuer=None,
+              redirect_port=None,
               **kwargs):
         """
         For service principal, `password` is a dict returned by ServicePrincipalAuth.build_credential
         """
+        # A shortcut for quick debugging
+        # return self._invoke_interactive_subscription_selection_demo()
+
         if not scopes:
             scopes = self._arm_scope
 
@@ -151,7 +163,7 @@ class Profile:
             if use_device_code:
                 user_identity = identity.login_with_device_code(scopes=scopes, **kwargs)
             else:
-                user_identity = identity.login_with_auth_code(scopes=scopes, **kwargs)
+                user_identity = identity.login_with_auth_code(scopes=scopes, **kwargs, port=redirect_port)
         else:
             if not is_service_principal:
                 user_identity = identity.login_with_username_password(username, password, scopes=scopes, **kwargs)
@@ -159,6 +171,11 @@ class Profile:
                 identity.login_with_service_principal(username, password, scopes=scopes)
 
         # We have finished login. Let's find all subscriptions.
+        if interactive:
+            message = ('Retrieving subscriptions for the selection...' if tenant else
+                       'Retrieving tenants and subscriptions for the selection...')
+            print(f"\n{message}")
+
         if user_identity:
             username = user_identity['username']
 
@@ -189,7 +206,7 @@ class Profile:
         consolidated = self._normalize_properties(username, subscriptions,
                                                   is_service_principal, bool(use_cert_sn_issuer))
 
-        self._set_subscriptions(consolidated)
+        self._set_subscriptions(consolidated, interactive=interactive)
         return deepcopy(consolidated)
 
     def login_with_managed_identity(self, identity_id=None, allow_no_subscriptions=None):
@@ -451,7 +468,7 @@ class Profile:
         s.state = 'Enabled'
         return s
 
-    def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
+    def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None, interactive=None):
 
         def _get_key_name(account, secondary_key_name):
             return (account[_SUBSCRIPTION_ID] if secondary_key_name is None
@@ -477,6 +494,7 @@ class Profile:
         dic.update((_get_key_name(x, secondary_key_name), x) for x in new_subscriptions)
         subscriptions = list(dic.values())
         if subscriptions:
+            # Automatically pick one first
             if active_one:
                 new_active_one = next(
                     (x for x in new_subscriptions if _match_account(x, active_subscription_id, secondary_key_name,
@@ -490,6 +508,10 @@ class Profile:
             else:
                 new_active_one = Profile._pick_working_subscription(new_subscriptions)
 
+            # Let the user interactively select one
+            if interactive:
+                new_active_one = Profile._interactively_select_subscription(subscriptions, new_active_one)
+
             new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
             default_sub_id = new_active_one[_SUBSCRIPTION_ID]
 
@@ -498,8 +520,92 @@ class Profile:
 
     @staticmethod
     def _pick_working_subscription(subscriptions):
+        """Pick the first enabled subscription"""
         s = next((x for x in subscriptions if x.get(_STATE) == 'Enabled'), None)
         return s or subscriptions[0]
+
+    @staticmethod
+    def _interactively_select_subscription(subscriptions, active_one):
+        from azure.cli.core.style import format_styled_text, Style
+        index_to_subscription_map = {}
+        table_data = []
+        subscriptions_sorted = sorted(subscriptions, key=lambda s: s[_SUBSCRIPTION_NAME].lower())
+
+        def get_tenant_string(subscription):
+            try:
+                return subscription[_TENANT_DEFAULT_DOMAIN]
+            except KeyError:
+                return subscription[_TENANT_ID]
+
+        def highlight_text(text, is_default):
+            return format_styled_text((Style.HIGHLIGHT, text)) if is_default else text
+
+        for index, sub in enumerate(subscriptions_sorted, start=1):
+            # There is no need to use int, as int requires parsing. str match is sufficient.
+            index_str = str(index)  # '1', '2', ...
+            index_to_subscription_map[index_str] = sub
+
+            # asterisk = format_styled_text((Style.WARNING, '*'))
+            asterisk = ' *'
+            is_default = sub is active_one
+
+            # Trim subscription name if it is too long
+            subscription_name = sub[_SUBSCRIPTION_NAME]
+            length_limit = 40
+            if len(subscription_name) > length_limit:
+                subscription_name = subscription_name[:length_limit - 3] + '...'
+
+            row = {
+                'No': f'[{index_str}]' + (asterisk if is_default else ''),
+                'Subscription name': highlight_text(subscription_name, is_default),
+                'Subscription ID': highlight_text(sub[_SUBSCRIPTION_ID], is_default),
+                'Tenant': highlight_text(get_tenant_string(sub), is_default)
+            }
+            table_data.append(row)
+
+        from tabulate import tabulate
+        table_str = tabulate(table_data, headers="keys", tablefmt="simple", disable_numparse=True)
+
+        print()
+        print('[Tenant and subscription selection]')
+        print()
+        print(table_str)
+        print()
+        tenant_string = get_tenant_string(active_one)
+        print("The default is marked with an *; "
+              f"the default tenant is '{tenant_string}' and subscription is "
+              f"'{active_one[_SUBSCRIPTION_NAME]}' ({active_one[_SUBSCRIPTION_ID]}).")
+        print()
+
+        from knack.prompting import prompt, NoTTYException
+
+        # Keep prompting until the user inputs a valid index
+        while True:
+            try:
+                select_index = prompt('Select a subscription and tenant (Type a number or Enter for no changes): ')
+            except NoTTYException:
+                # This is a good example showing interactive and non-TTY are not contradictory
+                logger.warning("No TTY to select the default subscription.")
+                return active_one
+
+            # Nothing is typed, keep current selection
+            if select_index == '':
+                break
+
+            if select_index in index_to_subscription_map:
+                active_one = index_to_subscription_map[select_index]
+                break
+
+            logger.warning("Invalid selection.")
+            # Let retry
+
+        # Echo the selection
+        tenant_string = get_tenant_string(active_one)
+        print()
+        print(f"Tenant: {tenant_string}")
+        print(f"Subscription: {active_one[_SUBSCRIPTION_NAME]} ({active_one[_SUBSCRIPTION_ID]})")
+        print()
+        return active_one
 
     def is_tenant_level_account(self):
         return self.get_subscription()[_SUBSCRIPTION_NAME] == _TENANT_LEVEL_ACCOUNT_NAME
@@ -691,6 +797,55 @@ class Profile:
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
 
+    def _invoke_interactive_subscription_selection_demo(self, with_tenant_domain):
+        # Random order, as returned by REST API
+        subscriptions = [
+            # 2
+            {
+                "id": "00000000-0000-0000-0000-222222222222",
+                "name": "sub 2",
+                "tenantDefaultDomain": "microsoft.onmicrosoft.com",
+                "tenantId": "00000000-0000-0000-1111-111111111111",
+                "environmentName": "AzureCloud",
+            },
+            # 1
+            {
+                "id": "00000000-0000-0000-0000-111111111111",
+                "name": "SUB 1",
+                "tenantDefaultDomain": "microsoft.onmicrosoft.com",
+                "tenantId": "00000000-0000-0000-1111-111111111111",
+                "environmentName": "AzureCloud",
+            },
+            # 3
+            {
+                "id": "00000000-0000-0000-0000-333333333333",
+                "name": "Sub 3 with long long long long name",
+                "tenantDefaultDomain": "microsoft.onmicrosoft.com",
+                "tenantId": "00000000-0000-0000-1111-111111111111",
+                "environmentName": "AzureCloud",
+            },
+            # 3
+            {
+                "id": "00000000-0000-0000-1111-111111111111",
+                "name": "N/A(tenant level account)",
+                "tenantDefaultDomain": "azuresdkteam.onmicrosoft.com",
+                "tenantId": "00000000-0000-0000-1111-222222222222",
+                "environmentName": "AzureCloud",
+            }
+        ]
+
+        subscriptions_no_tenant_domain = [
+            {
+                "id": "00000000-0000-0000-0000-222222222222",
+                "name": "sub 2",
+                "tenantId": "00000000-0000-0000-1111-111111111111",
+                "environmentName": "AzureCloud",
+            }
+        ]
+        self._interactively_select_subscription(
+            subscriptions if with_tenant_domain else subscriptions_no_tenant_domain, subscriptions[0])
+        return []
+
 
 class MsiAccountTypes:
     # pylint: disable=no-method-argument,no-self-argument
@@ -756,7 +911,9 @@ class SubscriptionFinder:
             specific_tenant_credential = identity.get_user_credential(username)
 
             try:
-                subscriptions = self.find_using_specific_tenant(tenant_id, specific_tenant_credential)
+
+                subscriptions = self.find_using_specific_tenant(tenant_id, specific_tenant_credential,
+                                                                tenant_id_description=t)
             except AuthenticationError as ex:
                 # because user creds went through the 'common' tenant, the error here must be
                 # tenant specific, like the account was disabled. For such errors, we will continue
@@ -802,12 +959,18 @@ class SubscriptionFinder:
                 logger.warning("%s", t.tenant_id_name)
         return all_subscriptions
 
-    def find_using_specific_tenant(self, tenant, credential):
+    def find_using_specific_tenant(self, tenant, credential, tenant_id_description=None):
+        """List subscriptions that can be accessed from a specific tenant.
+
+        :param tenant: tenant ID
+        :param credential: credential for the tenant
+        :param tenant_id_description: tenant Id information retrieved from 'Tenants - List' REST API
+        """
         client = self._create_subscription_client(credential)
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
         for s in subscriptions:
-            _attach_token_tenant(s, tenant)
+            _attach_token_tenant(s, tenant, tenant_id_description=tenant_id_description)
             all_subscriptions.append(s)
         self.tenants.append(tenant)
         return all_subscriptions
@@ -840,6 +1003,10 @@ def _transform_subscription_for_multiapi(s, s_dict):
     """
     if hasattr(s, 'home_tenant_id'):
         s_dict[_HOME_TENANT_ID] = s.home_tenant_id
+
+    if hasattr(s, 'tenant_default_domain'):
+        s_dict[_TENANT_DEFAULT_DOMAIN] = s.tenant_default_domain
+
     if hasattr(s, 'managed_by_tenants'):
         if s.managed_by_tenants is None:
             s_dict[_MANAGED_BY_TENANTS] = None

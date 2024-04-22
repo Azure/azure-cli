@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.59.0"
+VERSION = "2.59.100"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -62,7 +62,9 @@ DEPENDENCIES = [
     'psutil~=5.9; sys_platform != "cygwin"',
     'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'requests[socks]'
+    'requests[socks]',
+    # Even though knack already depends on tabulate, core directly uses it for interactive subscription selection
+    'tabulate'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

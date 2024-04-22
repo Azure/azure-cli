@@ -30,6 +30,18 @@ _CLOUD_CONSOLE_LOGIN_WARNING = ("Cloud Shell is automatically authenticated unde
                                 " Run 'az login' only if you need to use a different account")
 
 
+LOGIN_ANNOUNCEMENT = (
+    "[Announcements]\n"
+    "Share your feedback regarding your experience with `az login` at https://aka.ms/azloginfeedback\n\n"
+    "If you encounter any problem, please open an issue at https://aka.ms/azclibug\n"
+)
+
+LOGIN_OUTPUT_WARNING = (
+    "[WARNING] The login output has been updated. Please be aware that it no longer displays the full list of "
+    "available subscriptions by default.\n"
+)
+
+
 def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
     from azure.cli.core.api import load_subscriptions
@@ -99,7 +111,7 @@ def account_clear(cmd):
 
 # pylint: disable=inconsistent-return-statements, too-many-branches
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None):
+          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None, redirect_port=None):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
@@ -145,10 +157,18 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         scopes=scopes,
         use_device_code=use_device_code,
         allow_no_subscriptions=allow_no_subscriptions,
-        use_cert_sn_issuer=use_cert_sn_issuer)
+        use_cert_sn_issuer=use_cert_sn_issuer,
+        redirect_port=redirect_port)
     all_subscriptions = list(subscriptions)
     for sub in all_subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
+
+    # No JSON output in interactive mode
+    if interactive:
+        print(LOGIN_ANNOUNCEMENT)
+        logger.warning(LOGIN_OUTPUT_WARNING)
+        return
+
     return all_subscriptions
 
 
