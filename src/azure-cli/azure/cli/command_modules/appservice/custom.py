@@ -1922,7 +1922,7 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
         raise ValidationError("Invalid version {0} for runtime {1} for function apps on the "
                               "Flex Consumption plan. Supported version for runtime {1} is {2}."
                               .format(runtime_version, runtime, supported_versions))
-    
+
     location = functionapp["location"]
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime, runtime_version)
     matched_runtime = runtime_helper.resolve(runtime, runtime_version)
@@ -4527,8 +4527,19 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
     )
     url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
+    site_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}'.format(
+        sub_id,
+        resource_group_name,
+        name,
+    )
+
     updated_functionapp = json.dumps(
         {
+            "id": site_resource_id,
+            "name": name,
+            "type": "Microsoft.Web/sites",
+            "kind": "functionapp,linux,container,azurecontainerapps",
+            "location": functionapp.location,
             "properties": {
                 "daprConfig": {"enabled": False} if functionapp.dapr_config is None else {
                     "enabled": functionapp.dapr_config.enabled,

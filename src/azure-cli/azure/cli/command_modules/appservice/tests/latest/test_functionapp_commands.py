@@ -457,11 +457,10 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
 
 class FunctionWorkloadProfile(ScenarioTest):
     @AllowLargeResponse(8192)
-    @ResourceGroupPreparer(location="westus")
+    @ResourceGroupPreparer(location='northeurope')
     @StorageAccountPreparer()
     def test_functionapp_workloadprofiles(self, resource_group, storage_account):
         
-        location = "NorthCentralUS(Stage)"
         functionapp_name = self.create_random_name(
             'functionapp', 32)
         managed_environment_name = self.create_random_name(
@@ -475,24 +474,26 @@ class FunctionWorkloadProfile(ScenarioTest):
             'wlp', 15
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location {} --enable-workload-profiles  --logs-destination none'.format(
+        self.cmd('containerapp env create --name {} --resource-group {} --location northeurope --enable-workload-profiles  --logs-destination none'.format(
             managed_environment_name,
             resource_group,
-            location,
         ))
-        
+
+        time.sleep(260)
         self.cmd('containerapp env workload-profile add --name {} --resource-group {} --workload-profile-type D4 -w {} --min-nodes 3 --max-nodes 6'.format(
             managed_environment_name,
             resource_group,
             workload_profile_name
         ))
-        
+
+        time.sleep(260)
         self.cmd('containerapp env workload-profile add --name {} --resource-group {} --workload-profile-type D4 -w {} --min-nodes 3 --max-nodes 6'.format(
             managed_environment_name,
             resource_group,
             workload_profile_name_2
         ))
 
+        time.sleep(260)
         self.cmd('functionapp create -g {} -n {} -s {} --functions-version 4 --runtime dotnet-isolated --environment {} --workload-profile-name {} --cpu 1.0 --memory 1.0Gi'.format(
             resource_group,
             functionapp_name,
@@ -517,6 +518,7 @@ class FunctionWorkloadProfile(ScenarioTest):
             workload_profile_name_2
         ))
 
+        time.sleep(1200)
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
             JMESPathCheck('resourceConfig.cpu', 0.75),
             JMESPathCheck('resourceConfig.memory', '2Gi'),
@@ -2907,6 +2909,8 @@ class FunctionAppConfigTest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
             JMESPathCheck('powerShellVersion', '7.2')
         ])
+
+        time.sleep(60)
         self.cmd('functionapp config set -g {} -n {} --powershell-version 7.0'
                  .format(resource_group, functionapp_name)).assert_with_checks([
                      JMESPathCheck('powerShellVersion', '7.0')])
