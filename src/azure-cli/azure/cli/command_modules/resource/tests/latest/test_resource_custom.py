@@ -676,7 +676,6 @@ class TestFormatBicepFile(unittest.TestCase):
             mock.call("0.12.1"),
             mock.call("0.26.54"),
         ])
-        mock_bicep_version_greater_than_or_equal_to.assert_called_once_with("")
         mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ["format", file_path, "--stdout"])
 
 class TestPublishWithSource(unittest.TestCase):
