@@ -78,8 +78,6 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                               registry_name), yes)
         acr_update_custom(cmd, registry, resource_group_name, data_endpoint_enabled=True)
 
-    connected_registry_name = connected_registry_name.lower()
-    parent_name = parent_name.lower() if parent_name else None
     mode = mode.lower()
     parent = None
     if parent_name:
@@ -181,7 +179,7 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
         remove_client_token_set = set(remove_client_token_list)
     else:
         remove_client_token_set = set()
-    # check for interesaction between add and remove.
+    # check for intersection between add and remove.
     duplicate_client_token = set.intersection(add_client_token_set, remove_client_token_set)
     if duplicate_client_token:
         errors = sorted(map(lambda action: action[action.rfind('/') + 1:], duplicate_client_token))
@@ -201,7 +199,7 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
         if add_notifications else set()
     remove_notifications_set = set(list(remove_notifications)) \
         if remove_notifications else set()
-    # check for interesaction between add and remove.
+    # check for intersection between add and remove.
     duplicate_notifications = set.intersection(add_notifications_set, remove_notifications_set)
     if duplicate_notifications:
         errors = sorted(duplicate_notifications)
