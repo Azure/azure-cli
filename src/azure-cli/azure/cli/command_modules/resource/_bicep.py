@@ -276,7 +276,7 @@ def _get_bicep_installed_version(bicep_executable_path):
     return _extract_version(installed_version_output)
 
 
-def _has_musl_binaries():
+def _has_musl_library_only():
     return os.path.exists("/lib/ld-musl-x86_64.so.1") and not os.path.exists("/lib/x86_64-linux-gnu/libc.so.6")
 
 
@@ -289,7 +289,7 @@ def _get_bicep_download_url(system, machine, release_tag, target_platform=None):
             target_platform = "win-x64"
         elif system == "Linux" and machine == "arm64":
             target_platform = "linux-arm64"
-        elif system == "Linux" and _has_musl_binaries():
+        elif system == "Linux" and _has_musl_library_only():
             # check for alpine linux
             target_platform = "linux-musl-x64"
         elif system == "Linux":
