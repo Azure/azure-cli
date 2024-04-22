@@ -47,7 +47,8 @@ operation_name_map = {"deleteProtection": rsc_type + "/backupFabrics/protectionC
                       "getSecurityPIN": rsc_type + "/backupSecurityPIN/action",
                       "disableSoftDelete": rsc_type + "/backupconfig/write",
                       "RecoveryServicesDisableImmutability": rsc_type + "/write#reduceImmutabilityState",
-                      "RecoveryServicesStopProtection": rsc_type + "/backupFabrics/protectionContainers/protectedItems/write#stopProtectionWithRetainData"}
+                      "RecoveryServicesStopProtection": rsc_type +
+                      "/backupFabrics/protectionContainers/protectedItems/write#stopProtectionWithRetainData"}
 
 # Client Utilities
 
@@ -145,8 +146,8 @@ def is_immutability_weakened(existing_vault, patchvault):
     if existing_vault.properties.security_settings.immutability_settings is not None:
         if existing_vault.properties.security_settings.immutability_settings.state == "Unlocked":
             if (patchvault.properties.security_settings is not None and
-                patchvault.properties.security_settings.immutability_settings is not None and
-                patchvault.properties.security_settings.immutability_settings.state == "Disabled"):
+               patchvault.properties.security_settings.immutability_settings is not None and
+               patchvault.properties.security_settings.immutability_settings.state == "Disabled"):
                 return True
     return False
 
@@ -197,7 +198,7 @@ def calculate_rpo(policy, backup_management_type):
         elif full_policy.schedule_policy.schedule_run_frequency == "Daily":
             rpo_time = 24
 
-        else: # weekly policy
+        else:  # weekly policy
             combined_schedule = []
             if full_policy.retention_policy.weekly_schedule is not None:
                 combined_schedule.append(full_policy.retention_policy.weekly_schedule.days_of_the_week)
@@ -209,6 +210,7 @@ def calculate_rpo(policy, backup_management_type):
 
     return rpo_time
 
+
 def calculate_weekly_rpo(schedule_run_days):
     week_map = {
         'sunday': 0,
@@ -219,9 +221,10 @@ def calculate_weekly_rpo(schedule_run_days):
         'friday': 5,
         'saturday': 6
     }
-    week_mask = [False]*7
-    for day in schedule_run_days and day.lower() in week_map:
-        week_mask[int(week_map[day.lower()])] = True
+    week_mask = [False] * 7
+    for day in schedule_run_days:
+        if day.lower() in week_map:
+            week_mask[int(week_map[day.lower()])] = True
     week_circular_mask = week_mask * 2
 
     last_active_index = None

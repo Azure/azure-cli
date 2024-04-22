@@ -23,7 +23,7 @@ from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuN
 from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
     BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
-    ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
+    ILRRequestResource, IaasVMILRRegistrationRequest, \
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
     BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails, ScheduleRunType, \
@@ -234,7 +234,7 @@ def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classi
     # Update scenario
     if existing_vault is not None:
         monitoring_settings = existing_vault.properties.monitoring_settings
-        
+
         if azure_monitor_alerts_for_job_failures is not None:
             monitoring_settings.azure_monitor_alert_settings.alerts_for_all_job_failures = \
                 cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures)
@@ -242,7 +242,7 @@ def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classi
         if classic_alerts is not None:
             monitoring_settings.classic_alert_settings.alerts_for_critical_operations = \
                 cust_help.transform_enable_parameters(classic_alerts)
-        
+
         return monitoring_settings
 
     # Create scenario
@@ -255,7 +255,7 @@ def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classi
     if classic_alerts is not None:
         monitoring_settings.classic_alert_settings = ClassicAlertSettings(
             alerts_for_critical_operations=cust_help.transform_enable_parameters(classic_alerts),
-            email_notifications_for_site_recovery="Enabled") # Not processing this yet but we need in new SDK
+            email_notifications_for_site_recovery="Enabled")  # Not processing this yet but we need in new SDK
 
     return monitoring_settings
 
@@ -266,7 +266,7 @@ def _get_vault_redunancy_settings(backup_storage_redundancy, cross_region_restor
 
     if backup_storage_redundancy is not None:
         redundancy_settings.standard_tier_storage_redundancy = backup_storage_redundancy
-    
+
     if cross_region_restore_flag is not None:
         if redundancy_settings.cross_region_restore == 'Enabled' and cross_region_restore_flag == 'Disabled':
             raise ArgumentUsageError("""
