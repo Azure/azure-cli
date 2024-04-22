@@ -173,6 +173,9 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
 
+    with self.argument_context('webapp list') as c:
+        c.argument('show_details', action='store_true', help='Include detailed site configuration of listed web apps in output')
+
     with self.argument_context('webapp list-instances') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
