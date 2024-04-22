@@ -1118,7 +1118,7 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
         migration_option = "ValidateAndMigrate"
 
     return _create_migration(cmd, logging_name, client, subscription_id, resource_group_name, server_name, migration_name,
-                             migration_mode, migration_option, migration_parameters, tags, location, migrationInstanceResourceId)
+                             migration_mode, migration_option, migration_parameters, tags, location)
 
 
 def migration_show_func(cmd, client, resource_group_name, server_name, migration_name):
@@ -1395,9 +1395,9 @@ def _get_pg_replica_zone(availabilityZones, sourceServerZone, replicaZone):
 
 
 def _create_migration(cmd, logging_name, client, subscription_id, resource_group_name, target_db_server_name,
-                      migration_name, migration_mode, migration_option, parameters, tags, location, migrationRuntimeResourceId):
+                      migration_name, migration_mode, migration_option, parameters, tags, location):
     parameter_keys = list(parameters.keys())
-    migrationInstanceResourceId = migrationRuntimeResourceId if migrationRuntimeResourceId is not None else get_case_insensitive_key_value("MigrationRuntimeResourceId", parameter_keys, parameters)
+    migrationInstanceResourceId = get_case_insensitive_key_value("MigrationRuntimeResourceId", parameter_keys, parameters)
     if migrationInstanceResourceId is not None:
         validate_migration_runtime_server(cmd, migrationInstanceResourceId, resource_group_name, target_db_server_name)
 
