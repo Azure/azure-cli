@@ -8,17 +8,19 @@ import os
 import urllib
 import urllib3
 import certifi
+from datetime import datetime
 
 from knack.log import get_logger
 
-from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError, ResourceNotFoundError)
+from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError, ResourceNotFoundError,
+                                       CLIInternalError)
 from azure.cli.core.commands.parameters import get_subscription_locations
 from azure.cli.core.util import should_disable_connection_verify, send_raw_request
 from azure.cli.core.commands.client_factory import get_subscription_id
 
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
-from ._client_factory import web_client_factory
+from ._client_factory import web_client_factory, providers_client_factory
 from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND, LINUXAPP_KIND
 
 logger = get_logger(__name__)
@@ -135,6 +137,37 @@ def retryable_method(retries=3, interval_sec=5, excpt_type=Exception):
                 time.sleep(interval_sec)
         return call
     return decorate
+
+
+def register_app_provider(cmd):
+    from azure.mgmt.resource.resources.models import ProviderRegistrationRequest, ProviderConsentDefinition
+
+    namespace = "Microsoft.App"
+    providers_client = providers_client_factory(cmd.cli_ctx)
+    is_registered = False
+    try:
+        registration_state = providers_client.get(namespace).registration_state
+        is_registered = registration_state and registration_state.lower() == 'registered'
+    except Exception:  # pylint: disable=broad-except
+        logger.warning("An error occurred while trying to get the registration state of the '%s' provider.", namespace)
+
+    if not is_registered:
+        try:
+            logger.warning("Registering the '%s' provider.", namespace)
+            properties = ProviderRegistrationRequest(
+                third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=True))
+            providers_client.register(namespace, properties=properties)
+            timeout_secs = 120
+            start_time = datetime.now()
+            while not is_registered:
+                time.sleep(5)
+                registration_state = providers_client.get(namespace).registration_state
+                is_registered = registration_state and registration_state.lower() == 'registered'
+                if not is_registered and (datetime.now() - start_time).seconds >= timeout_secs:
+                    raise CLIInternalError("Timed out waiting for the '%s' provider to register." % namespace)
+            logger.warning("Successfully registered the '%s' provider.", namespace)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning("An error occurred while trying to register the '%s' provider: %s", namespace, str(ex))
 
 
 def raise_missing_token_suggestion():
