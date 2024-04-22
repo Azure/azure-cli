@@ -407,9 +407,6 @@ def get_object_id_of_current_user():
                 f'az ad sp show --id {signed_in_user.get("name")} -o json')
             user_object_id = user_info.get('id')
             return user_object_id
-        else:
-            raise CLIInternalError(
-                f"Unknown user type {user_type} for signed-in user {signed_in_user}")
     except CLIInternalError as e:
         if 'AADSTS530003' in e.error_msg:
             logger.warning(
