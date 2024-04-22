@@ -353,6 +353,7 @@ def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, w
 
     vnet_location = _normalize_location(cmd, vnet_location)
     asp_location = _normalize_location(cmd, webapp_location)
+
     if vnet_location != asp_location:
         raise ArgumentUsageError("Unable to create webapp: vnet and App Service Plan must be in the same location. "
                                  "vnet location: {}. Plan location: {}.".format(vnet_location, asp_location))
@@ -461,7 +462,6 @@ def check_language_runtime(cmd, resource_group_name, name):
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     is_linux = app.reserved
-    
     if is_functionapp(app):
         is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
         runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, is_linux)
@@ -1434,12 +1434,9 @@ def list_function_app_runtimes(cmd, os_type=None):
     return {WINDOWS_OS_NAME: windows_stacks, LINUX_OS_NAME: linux_stacks}
 
 
-def list_flexconsumption_runtimes():
-    return FLEX_RUNTIMES
-
 def list_flex_function_app_runtimes(cmd, location, runtime):
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
-    return { 'flex': runtime_helper.stacks}
+    return runtime_helper.stacks
 
 
 def delete_logic_app(cmd, resource_group_name, name, slot=None):
@@ -1916,8 +1913,8 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
 
     runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, True)
-    functionapp_version = runtime_info['functionapp_version']
     runtime = runtime_info['app_runtime']
+
     runtimes = [r for r in FLEX_RUNTIMES if r['runtime'] == runtime]
     lang = next((r for r in runtimes if r['version'] == runtime_version), None)
     if lang is None:
@@ -4073,14 +4070,14 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
 class _FlexFunctionAppStackRuntimeHelper:
     class Runtime:
-        def __init__(self, name, version, app_insights=False, default=False, sku=None, end_of_life_date=None, runtime_info=None, github_actions_properties=None):
+        def __init__(self, name, version, app_insights=False, default=False, sku=None, 
+                     end_of_life_date=None, github_actions_properties=None):
             self.name = name
             self.version = version
             self.app_insights = app_insights
             self.default = default
             self.sku = sku
             self.end_of_life_date = end_of_life_date
-            self.runtime_info = runtime_info
             self.github_actions_properties = github_actions_properties
     
     class GithubActionsProperties:
@@ -4155,7 +4152,6 @@ class _FlexFunctionAppStackRuntimeHelper:
                             default=version_properties['isDefault'],
                             sku=version_properties['sku'],
                             end_of_life_date=version_properties['endOfLifeDate'],
-                            runtime_info=version_properties['runtime_info'],
                             github_actions_properties=version_properties['github_actions_properties'])
 
     def _load_stacks(self):
