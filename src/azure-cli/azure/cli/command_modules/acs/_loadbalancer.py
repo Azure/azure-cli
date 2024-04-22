@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from distutils.version import StrictVersion  # pylint: disable=deprecated-module
+from packaging.version import Version
 from types import SimpleNamespace
 from knack.log import get_logger
 
@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 def set_load_balancer_sku(sku, kubernetes_version):
     if sku:
         return sku
-    if kubernetes_version and StrictVersion(kubernetes_version) < StrictVersion("1.13.0"):
+    if kubernetes_version and Version(kubernetes_version) < Version("1.13.0"):
         logger.warning('Setting load_balancer_sku to basic as it is not specified and kubernetes'
                        'version(%s) less than 1.13.0 only supports basic load balancer SKU\n',
                        kubernetes_version)
