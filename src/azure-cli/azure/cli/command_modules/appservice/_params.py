@@ -1079,6 +1079,12 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('use_same_restrictions_for_scm_site',
                        help="Use same access restrictions for scm site",
                        arg_type=get_three_state_flag())
+            c.argument('default_action',
+                       help="Configure default action for main site",
+                       arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES))
+            c.argument('scm_default_action',
+                       help="Configure default action for scm site",
+                       arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES))
 
     # App Service Environment Commands
     with self.argument_context('appservice ase show') as c:
