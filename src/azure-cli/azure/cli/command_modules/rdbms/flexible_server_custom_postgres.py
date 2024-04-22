@@ -1089,7 +1089,7 @@ def flexible_server_list_log_files_with_filter(client, resource_group_name, serv
 
 
 def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_mode="offline",
-                          migration_name=None, migration_option=None, tags=None, location=None, migrationInstanceResourceId=None):
+                          migration_name=None, migration_option=None, tags=None, location=None):
 
     logging_name = 'PostgreSQL'
     subscription_id = get_subscription_id(cmd.cli_ctx)
