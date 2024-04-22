@@ -387,7 +387,11 @@ def is_packaged_installed(package_name):
 
 
 def get_object_id_of_current_user():
-    signed_in_user = run_cli_cmd('az account show -o json').get('user')
+    signed_in_user_info = run_cli_cmd('az account show -o json')
+    if not isinstance(signed_in_user_info, dict):
+        raise CLIInternalError(
+            f"Can't parse login user information {signed_in_user_info}")
+    signed_in_user = signed_in_user_info.get('user')
     user_type = signed_in_user.get('type')
     try:
         if user_type == 'user':
