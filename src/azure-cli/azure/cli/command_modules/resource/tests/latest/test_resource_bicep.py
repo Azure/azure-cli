@@ -40,11 +40,11 @@ class TestBicep(unittest.TestCase):
     @mock.patch("os.stat")
     @mock.patch("io.BufferedWriter")
     @mock.patch("azure.cli.command_modules.resource._bicep.open")
-    @mock.patch("azure.cli.command_modules.resource._bicep.urlopen")
     @mock.patch("os.path.exists")
     @mock.patch("os.path.dirname")
     @mock.patch("os.path.isfile")
-    def test_use_bicep_cli_from_path_false_after_install(self, isfile_stub, dirname_stub, exists_stub, urlopen_stub, open_stub, buffered_writer_stub, stat_stub, chmod_stub):
+    @mock.patch('requests.request', autospec=True)
+    def test_use_bicep_cli_from_path_false_after_install(self, isfile_stub, dirname_stub, exists_stub, mock_requests_get, open_stub, buffered_writer_stub, stat_stub, chmod_stub):
         isfile_stub.return_value = False
         dirname_stub.return_value = "tmp"
         exists_stub.return_value = True
@@ -56,10 +56,11 @@ class TestBicep(unittest.TestCase):
 
         chmod_stub.return_value = None
 
-        response = mock.Mock()
-        response.getcode.return_value = 200
-        response.read.return_value = b"test"
-        urlopen_stub.return_value = response
+        response = mock.MagicMock()
+        response.headers = {}
+        response.status_code = 200
+        response.content = b"test"
+        mock_requests_get.return_value = response
 
         ensure_bicep_installation(self.cli_ctx, release_tag="v0.14.85", stdout=False)
 
