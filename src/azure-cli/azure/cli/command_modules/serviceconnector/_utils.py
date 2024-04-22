@@ -402,7 +402,7 @@ def get_object_id_of_current_user():
             user_object_id = user_info.get('objectId') if user_info.get(
                 'objectId') else user_info.get('id')
             return user_object_id
-        elif user_type == 'servicePrincipal':
+        if user_type == 'servicePrincipal':
             user_info = run_cli_cmd(
                 f'az ad sp show --id {signed_in_user.get("name")} -o json')
             user_object_id = user_info.get('id')
