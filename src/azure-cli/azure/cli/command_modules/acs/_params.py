@@ -825,6 +825,22 @@ def load_arguments(self, _):
     with self.argument_context('aks mesh upgrade start') as c:
         c.argument('revision', validator=validate_azure_service_mesh_revision, required=True)
 
+    with self.argument_context("aks mesh upgrade rollback") as c:
+        c.argument(
+            "yes",
+            options_list=["--yes", "-y"],
+            help="Do not prompt for confirmation.",
+            action="store_true"
+        )
+
+    with self.argument_context("aks mesh upgrade complete") as c:
+        c.argument(
+            "yes",
+            options_list=["--yes", "-y"],
+            help="Do not prompt for confirmation.",
+            action="store_true"
+        )
+
     with self.argument_context('aks approuting enable') as c:
         c.argument('enable_kv', action='store_true')
         c.argument('keyvault_id', options_list=['--attach-kv'])

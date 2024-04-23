@@ -2897,12 +2897,14 @@ def aks_mesh_upgrade_complete(
         cmd,
         client,
         resource_group_name,
-        name):
+        name,
+        yes=False):
     return _aks_mesh_update(
         cmd,
         client,
         resource_group_name,
         name,
+        yes=yes,
         mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE)
 
 
@@ -2910,13 +2912,15 @@ def aks_mesh_upgrade_rollback(
         cmd,
         client,
         resource_group_name,
-        name
+        name,
+        yes=False
 ):
     return _aks_mesh_update(
         cmd,
         client,
         resource_group_name,
         name,
+        yes=yes,
         mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK)
 
 
@@ -2936,6 +2940,7 @@ def _aks_mesh_update(
         disable_ingress_gateway=None,
         ingress_gateway_type=None,
         revision=None,
+        yes=False,
         mesh_upgrade_command=None,
 ):
     raw_parameters = locals()
