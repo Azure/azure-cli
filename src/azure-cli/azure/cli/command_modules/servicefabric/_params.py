@@ -13,7 +13,7 @@ from azure.cli.command_modules.servicefabric._validators import (
     validate_update_managed_application, validate_update_managed_service,
     validate_create_managed_service_correlation, validate_create_managed_service_load_metric,
     validate_update_managed_service_load_metric, validate_update_managed_service_correlation,
-    validate_add_network_security_rule)
+    validate_network_security_rule)
 from azure.cli.core.commands.parameters import (get_enum_type,
                                                 get_three_state_flag,
                                                 resource_group_name_type,
@@ -279,7 +279,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('thumbprint', nargs='+', help='A single or Space-separated list of client certificate thumbprint(s) to be remove.')
         c.argument('common_name', nargs='+', help='A single or Space-separated list of client certificate common name(s) to be remove.')
 
-    with self.argument_context('sf managed-cluster network-security-rule add', validator=validate_add_network_security_rule) as c:
+    with self.argument_context('sf managed-cluster network-security-rule', validator=validate_network_security_rule) as c:
         c.argument('name', help='Network security rule name')
         c.argument('access', arg_type=get_enum_type(['allow', 'deny']), help='Allows or denies network traffic')
         c.argument('direction', arg_type=get_enum_type(['inbound', 'outbound']), help='Network security rule direction')
