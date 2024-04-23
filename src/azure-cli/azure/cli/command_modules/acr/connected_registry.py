@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from enum import Enum
-import re
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
@@ -12,6 +11,7 @@ from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueEr
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import user_confirmation
+from azure.core.exceptions import HttpResponseError
 from ._client_factory import cf_acr_tokens, cf_acr_scope_maps
 from ._utils import (
     build_token_id,
@@ -22,6 +22,7 @@ from ._utils import (
     parse_scope_map_actions,
     validate_managed_registry
 )
+from .custom import acr_update_custom
 
 
 class ConnectedRegistryModes(Enum):
@@ -59,33 +60,31 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                                   sync_window=None,
                                   log_level=None,
                                   sync_audit_logs_enabled=False,
-                                  notifications=None):
+                                  notifications=None,
+                                  yes=False):
 
     if bool(sync_token_name) == bool(repositories):
         raise CLIError("argument error: either --sync-token or --repository must be provided, but not both.")
     # Check needed since the sync token gateway actions must be at least 5 characters long.
     if len(connected_registry_name) < 5:
         raise InvalidArgumentValueError("argument error: Connected registry name must be at least 5 characters long.")
-    if re.match(r'\w*[A-Z]\w*', connected_registry_name):
-        raise InvalidArgumentValueError("argument error: Connected registry name must use only lowercase.")
-    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+
     subscription_id = get_subscription_id(cmd.cli_ctx)
-
+    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
     if not registry.data_endpoint_enabled:
-        raise CLIError("Can't create the connected registry '{}' ".format(connected_registry_name) +
-                       "because the cloud registry '{}' data endpoint is disabled. ".format(registry_name) +
-                       "Enabling the data endpoint might affect your firewall rules.\nTo enable data endpoint run:" +
-                       "\n\taz acr update -n {} --data-endpoint-enabled true".format(registry_name))
+        user_confirmation("Dedicated data enpoints must be enabled to use connected-registry. Enabling might " +
+                          "impact your firewall rules. Are you sure you want to enable it for '{}' registry?".format(
+                              registry_name), yes)
+        acr_update_custom(cmd, registry, resource_group_name, data_endpoint_enabled=True)
 
-    from azure.core.exceptions import HttpResponseError as ErrorResponseException
-    parent = None
     mode = mode.lower()
+    parent = None
     if parent_name:
         try:
             parent = acr_connected_registry_show(cmd, client, parent_name, registry_name, resource_group_name)
             connected_registry_list = list(client.list(resource_group_name, registry_name))
             family_tree, _ = _get_family_tree(connected_registry_list, None)
-        except ErrorResponseException as ex:
+        except HttpResponseError as ex:
             if ex.response.status_code == 404:
                 raise CLIError("The parent connected registry '{}' could not be found.".format(parent_name))
             raise CLIError(ex)
@@ -145,6 +144,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
 
 def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
                                   client,
+                                  instance,
                                   registry_name,
                                   connected_registry_name,
                                   add_client_token_list=None,
@@ -163,7 +163,7 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
     current_connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
 
-    # Add or remove from the current client token id list
+    # create add client token set and remove client token set
     if add_client_token_list is not None:
         for i, client_token_name in enumerate(add_client_token_list):
             add_client_token_list[i] = build_token_id(
@@ -178,61 +178,76 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
         remove_client_token_set = set(remove_client_token_list)
     else:
         remove_client_token_set = set()
-
+    # check for intersection between add and remove.
     duplicate_client_token = set.intersection(add_client_token_set, remove_client_token_set)
     if duplicate_client_token:
         errors = sorted(map(lambda action: action[action.rfind('/') + 1:], duplicate_client_token))
         raise CLIError(
             'Update ambiguity. Duplicate client token ids were provided with ' +
             '--add-client-tokens and --remove-client-tokens arguments.\n{}'.format(errors))
-
+    # get updated client token list
     current_client_token_set = set(current_connected_registry.client_token_ids) \
         if current_connected_registry.client_token_ids else set()
     client_token_set = current_client_token_set.union(add_client_token_set).difference(remove_client_token_set)
-
     client_token_list = list(client_token_set) if client_token_set != current_client_token_set else None
+    # update client token properties
+    instance.client_token_ids = client_token_list
 
-    # Add or remove from the current notifications list
+    # create add notifications set and remove notifications set
     add_notifications_set = set(list(add_notifications)) \
         if add_notifications else set()
-
     remove_notifications_set = set(list(remove_notifications)) \
         if remove_notifications else set()
-
+    # check for intersection between add and remove.
     duplicate_notifications = set.intersection(add_notifications_set, remove_notifications_set)
     if duplicate_notifications:
         errors = sorted(duplicate_notifications)
         raise ArgumentUsageError(
             'Update ambiguity. Duplicate notifications list were provided with ' +
             '--add-notifications and --remove-notifications arguments.\n{}'.format(errors))
-
+    # get updated notifications list
     current_notifications_set = set(current_connected_registry.notifications_list) \
         if current_connected_registry.notifications_list else set()
     notifications_set = current_notifications_set.union(add_notifications_set).difference(remove_notifications_set)
-
     notifications_list = list(notifications_set) if notifications_set != current_notifications_set else None
+    # update notifications properties
+    instance.notifications_list = notifications_list
 
-    ConnectedRegistryUpdateParameters, SyncUpdateProperties, LoggingProperties = cmd.get_models(
-        'ConnectedRegistryUpdateParameters', 'SyncUpdateProperties', 'LoggingProperties')
-    connected_registry_update_parameters = ConnectedRegistryUpdateParameters(
-        sync_properties=SyncUpdateProperties(
+    # update sync properties and logging properties
+    SyncUpdateProperties, LoggingProperties = cmd.get_models('SyncUpdateProperties', 'LoggingProperties')
+    if bool(sync_schedule) or bool(sync_window) or bool(sync_message_ttl):
+        instance.sync_properties = SyncUpdateProperties(
             schedule=sync_schedule,
             message_ttl=sync_message_ttl,
             sync_window=sync_window
-        ),
-        logging=LoggingProperties(
+        )
+    if bool(log_level) or bool(sync_audit_logs_enabled):
+        instance.logging = LoggingProperties(
             log_level=log_level,
             audit_log_status=sync_audit_logs_enabled
-        ),
-        client_token_ids=client_token_list,
-        notifications_list=notifications_list
-    )
+        )
+    return instance
 
+
+def acr_connected_registry_update_get(cmd):
+    """Returns an empty RegistryUpdateParameters object.
+    """
+    ConnectedRegistryUpdateParameters = cmd.get_models('ConnectedRegistryUpdateParameters')
+    return ConnectedRegistryUpdateParameters()
+
+
+def acr_connected_registry_update_set(cmd,
+                                      client,
+                                      registry_name,
+                                      connected_registry_name,
+                                      resource_group_name=None,
+                                      parameters=None):
+    _, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
     try:
         return client.begin_update(resource_group_name=resource_group_name,
                                    registry_name=registry_name,
                                    connected_registry_name=connected_registry_name,
-                                   connected_registry_update_parameters=connected_registry_update_parameters)
+                                   connected_registry_update_parameters=parameters)
     except ValidationError as e:
         raise CLIError(e)
 
@@ -430,27 +445,6 @@ def _get_descendants(family_tree, parent_id):
 
 
 # region connected-registry install subgroup
-def acr_connected_registry_install_info(cmd,
-                                        client,
-                                        connected_registry_name,
-                                        registry_name,
-                                        parent_protocol,
-                                        resource_group_name=None):
-    return acr_connected_registry_get_settings(cmd, client, connected_registry_name, registry_name, parent_protocol,
-                                               None, False, resource_group_name)
-
-
-def acr_connected_registry_install_renew_credentials(cmd,
-                                                     client,
-                                                     connected_registry_name,
-                                                     registry_name,
-                                                     parent_protocol,
-                                                     yes=False,
-                                                     resource_group_name=None):
-    return acr_connected_registry_get_settings(cmd, client, connected_registry_name, registry_name, parent_protocol,
-                                               '1', yes, resource_group_name)
-
-
 def acr_connected_registry_get_settings(cmd,
                                         client,
                                         connected_registry_name,
