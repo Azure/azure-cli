@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "compute-sku-recommender",
+    "compute-recommender",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage compute resource sku recommender info
+    """Manage sku/zone/region recommender info for compute resources
     """
     pass
 
