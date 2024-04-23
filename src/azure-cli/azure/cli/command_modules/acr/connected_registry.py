@@ -59,23 +59,22 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                                   sync_window=None,
                                   log_level=None,
                                   sync_audit_logs_enabled=False,
-                                  notifications=None):
+                                  notifications=None,
+                                  yes=False):
 
     if bool(sync_token_name) == bool(repositories):
         raise CLIError("argument error: either --sync-token or --repository must be provided, but not both.")
     # Check needed since the sync token gateway actions must be at least 5 characters long.
     if len(connected_registry_name) < 5:
         raise InvalidArgumentValueError("argument error: Connected registry name must be at least 5 characters long.")
-    if re.match(r'\w*[A-Z]\w*', connected_registry_name):
-        raise InvalidArgumentValueError("argument error: Connected registry name must use only lowercase.")
-    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
+    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     if not registry.data_endpoint_enabled:
-        raise CLIError("Can't create the connected registry '{}' ".format(connected_registry_name) +
-                       "because the cloud registry '{}' data endpoint is disabled. ".format(registry_name) +
-                       "Enabling the data endpoint might affect your firewall rules.\nTo enable data endpoint run:" +
-                       "\n\taz acr update -n {} --data-endpoint-enabled true".format(registry_name))
+        user_confirmation("Dedicated data enpoints must be enabled to use connected-registry. Enabling might " +
+                          "impact your firewall rules. Are you sure you want to enable it for '{}' registry?".format(
+                              registry_name), yes)
+        acr_update_custom(cmd, registry, resource_group_name, data_endpoint_enabled=True)
 
     from azure.core.exceptions import HttpResponseError as ErrorResponseException
     parent = None
