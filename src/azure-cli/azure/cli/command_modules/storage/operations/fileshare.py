@@ -139,6 +139,9 @@ def close_handle(client, **kwargs):
     handle = kwargs.pop("handle", None)
     if kwargs.pop("close_all", None) or handle == '*':
         return client.close_all_handles(**kwargs)
+    # recursive argument not supported when handle is specified
+    if handle and "recursive" in kwargs:
+        kwargs.pop("recursive")
     return client.close_handle(handle=handle, **kwargs)
 
 

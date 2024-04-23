@@ -2798,6 +2798,14 @@ configuration:
             bodyContains:
               pattern: '\b(az network dns)\b'
               isRegex: True
+        - not:
+            titleContains:
+              pattern: '\b(az network bastion)\b'
+              isRegex: True
+        - not:
+            bodyContains:
+              pattern: '\b(az network bastion)\b'
+              isRegex: True
       then:
       - addLabel:
           label: Network

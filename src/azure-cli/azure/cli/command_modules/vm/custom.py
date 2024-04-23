@@ -47,6 +47,7 @@ from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_
 from ._client_factory import (_compute_client_factory, cf_vm_image_term, _dev_test_labs_client_factory)
 from .aaz.latest.ppg import Show as _PPGShow
 from .aaz.latest.vmss import ListInstances as _VMSSListInstances
+from .aaz.latest.capacity.reservation.group import List as _CapacityReservationGroupList
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -5581,20 +5582,35 @@ def show_capacity_reservation_group(client, resource_group_name, capacity_reserv
                       expand=expand)
 
 
-def list_capacity_reservation_group(client, resource_group_name, vm_instance=None, vmss_instance=None):
+class CapacityReservationGroupList(_CapacityReservationGroupList):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZBoolArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vm_instance = AAZBoolArg(
+            options=['--vm-instance'],
+            help="Retrieve the Virtual Machine Instance "
+                 "which are associated to capacity reservation group in the response.",
+            nullable=True
+        )
+        args_schema.vmss_instance = AAZBoolArg(
+            options=['--vmss-instance'],
+            help="Retrieve the ScaleSet VM Instance which are associated to capacity reservation group in the response.",
+            nullable=True
+        )
+        args_schema.expand._registered = False
+        return args_schema
 
-    expand = None
-    if vm_instance:
-        expand = "virtualMachines/$ref"
-    if vmss_instance:
-        if expand is None:
-            expand = "virtualMachineScaleSetVMs/$ref"
-        else:
-            expand = expand + ",virtualMachineScaleSetVMs/$ref"
-
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name=resource_group_name, expand=expand)
-    return client.list_by_subscription(expand=expand)
+    def pre_operations(self):
+        from azure.cli.core.aaz import has_value
+        args = self.ctx.args
+        if args.vm_instance:
+            args.expand = "virtualMachines/$ref"
+        if args.vmss_instance:
+            if has_value(args.expand):
+                args.expand = args.expand.to_serialized_data() + ",virtualMachineScaleSetVMs/$ref"
+            else:
+                args.expand = "virtualMachineScaleSetVMs/$ref"
 
 
 def create_capacity_reservation(cmd, client, resource_group_name, capacity_reservation_group_name,
