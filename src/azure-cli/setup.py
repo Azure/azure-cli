@@ -52,7 +52,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.13.1",
     'azure-appconfiguration~=1.1.1',
-    'azure-batch~=14.1.0',
+    'azure-batch~=14.2.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
@@ -69,7 +69,7 @@ DEPENDENCIES = [
     'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization~=4.0.0',
     'azure-mgmt-batchai==7.0.0b1',
-    'azure-mgmt-batch~=17.2.0',
+    'azure-mgmt-batch~=17.3.0',
     'azure-mgmt-billing==6.0.0',
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
