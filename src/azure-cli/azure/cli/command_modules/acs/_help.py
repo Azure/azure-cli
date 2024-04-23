@@ -1568,6 +1568,9 @@ parameters:
   - name: --crg-id
     type: string
     short-summary: The crg id used to associate the new nodepool with the existed Capacity Reservation Group resource.
+  - name: --disable-windows-outbound-nat
+    type: bool
+    short-summary: Disable Windows OutboundNAT on Windows agent node pool.
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.

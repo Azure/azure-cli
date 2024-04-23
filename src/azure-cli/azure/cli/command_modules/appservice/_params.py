@@ -187,6 +187,10 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp list-runtimes') as c:
         c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
 
+    with self.argument_context('functionapp list-flexconsumption-runtimes') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), help="limit the output to just the runtimes available in the specified location")
+        c.argument('runtime', help="limit the output to just the specified runtime")
+
     with self.argument_context('webapp deleted list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('slot', options_list=['--slot', '-s'], help='Name of the deleted web app slot.')

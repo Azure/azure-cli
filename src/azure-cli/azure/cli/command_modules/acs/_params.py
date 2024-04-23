@@ -88,6 +88,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_force_upgrade_disable_and_enable_parameters,
     validate_allowed_host_ports, validate_application_security_groups,
     validate_node_public_ip_tags,
+    validate_disable_windows_outbound_nat,
     validate_crg_id,
     validate_azure_service_mesh_revision)
 from azure.cli.core.commands.parameters import (
@@ -706,6 +707,7 @@ def load_arguments(self, _):
         c.argument('enable_encryption_at_host', action='store_true')
         c.argument('enable_ultra_ssd', action='store_true')
         c.argument('enable_fips_image', action='store_true')
+        c.argument("disable_windows_outbound_nat", action="store_true", validator=validate_disable_windows_outbound_nat)
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
