@@ -251,18 +251,3 @@ class AAZMgmtClient(AAZBaseClient):
             deserialization_callback=deserialization_callback
         )
         return polling
-
-
-@register_client("NonRetryableClient")
-class AAZNonRetryableClient(AAZMgmtClient):
-    @classmethod
-    def _build_configuration(cls, ctx, credential, **kwargs):
-        from azure.cli.core.auth.util import resource_to_scopes
-        from azure.core.pipeline.policies import RetryPolicy
-        kwargs["retry_policy"] = RetryPolicy(**kwargs).no_retries()
-
-        return AAZClientConfiguration(
-            credential=credential,
-            credential_scopes=resource_to_scopes(ctx.cli_ctx.cloud.endpoints.active_directory_resource_id),
-            **kwargs
-        )
