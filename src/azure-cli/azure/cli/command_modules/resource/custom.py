@@ -4470,26 +4470,35 @@ def build_bicepparam_file(cmd, file, stdout=None, outdir=None, outfile=None, no_
         print(output)
 
 
-def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indent_kind=None, indent_size=None, insert_final_newline=None):
+def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, newline_kind=None, indent_kind=None, indent_size=None, insert_final_newline=None):
     ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.12.1"
+    kebab_case_params_supported_version = "0.26.54"
+
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["format", file]
+        use_kebab_case_params = bicep_version_greater_than_or_equal_to(kebab_case_params_supported_version)
+        newline_kind = newline_kind or newline
+
+        # Auto is no longer supported by Bicep formatter v2. Use LF as default.
+        if use_kebab_case_params and newline_kind == "Auto":
+            newline_kind = "LF"
+
         if outdir:
             args += ["--outdir", outdir]
         if outfile:
             args += ["--outfile", outfile]
         if stdout:
             args += ["--stdout"]
-        if newline:
-            args += ["--newline", newline]
+        if newline_kind:
+            args += ["--newline-kind" if use_kebab_case_params else "newline", newline_kind]
         if indent_kind:
-            args += ["--indentKind", indent_kind]
+            args += ["--indent-kind" if use_kebab_case_params else "indentKind", indent_kind]
         if indent_size:
-            args += ["--indentSize", indent_size]
+            args += ["--indent-size" if use_kebab_case_params else "indentSize", indent_size]
         if insert_final_newline:
-            args += ["--insertFinalNewline"]
+            args += ["--insert-final-newline" if use_kebab_case_params else "--insertFinalNewline"]
 
         output = run_bicep_command(cmd.cli_ctx, args)
 
@@ -4499,16 +4508,21 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         logger.error("az bicep format could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
-def publish_bicep_file(cmd, file, target, documentationUri=None, with_source=None, force=None):
+def publish_bicep_file(cmd, file, target, documentationUri=None, documentation_uri=None, with_source=None, force=None):
     ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.4.1008"
+    kebab_case_param_supported_version = "0.26.54"
+
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["publish", file, "--target", target]
-        if documentationUri:
+        use_kebab_case_params = bicep_version_greater_than_or_equal_to(kebab_case_param_supported_version)
+        documentation_uri = documentation_uri or documentationUri
+
+        if documentation_uri:
             minimum_supported_version_for_documentationUri_parameter = "0.14.46"
             if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_documentationUri_parameter):
-                args += ["--documentationUri", documentationUri]
+                args += ["--documentation-uri" if use_kebab_case_params else "--documentationUri", documentation_uri]
             else:
                 logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_documentationUri_parameter)
         if with_source:
@@ -4523,6 +4537,7 @@ def publish_bicep_file(cmd, file, target, documentationUri=None, with_source=Non
                 args += ["--force"]
             else:
                 logger.error("az bicep publish with --force parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_publish_force)
+
         run_bicep_command(cmd.cli_ctx, args)
     else:
         logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
