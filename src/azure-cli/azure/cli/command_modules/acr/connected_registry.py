@@ -23,6 +23,7 @@ from ._utils import (
 )
 from .custom import acr_update_custom
 
+
 class ConnectedRegistryModes(Enum):
     READONLY = 'readonly'
     READWRITE = 'readwrite'
