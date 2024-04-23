@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.59.0
+++++++
+* Minor fixes
+
 2.58.0
 ++++++
 * [BREAKING CHANGE] `az login`: Replace `allow_broker` with `enable_broker_on_windows` (#27726)

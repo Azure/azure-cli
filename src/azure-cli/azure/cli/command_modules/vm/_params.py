@@ -134,6 +134,8 @@ def load_arguments(self, _):
     # The `Standard` is used for backward compatibility to allow customers to keep their current behavior after changing the default values to Trusted Launch VMs in the future.
     t_security = [x.value for x in self.get_models('SecurityTypes') or []] + [COMPATIBLE_SECURITY_TYPE_VALUE]
     security_type = CLIArgumentType(arg_type=get_enum_type(t_security), min_api='2020-12-01', help='Specify the security type of the virtual machine.')
+    enable_auto_os_upgrade_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2018-10-01',
+                                                  help='Indicate whether OS upgrades should automatically be applied to scale set instances in a rolling fashion when a newer version of the OS image becomes available.')
     gallery_image_name_type = CLIArgumentType(options_list=['--gallery-image-definition', '-i'], help='The name of the community gallery image definition from which the image versions are to be listed.', id_part='child_name_2')
     gallery_image_name_version_type = CLIArgumentType(options_list=['--gallery-image-version', '-e'], help='The name of the gallery image version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
     public_gallery_name_type = CLIArgumentType(help='The public name of community gallery.', id_part='child_name_1')
@@ -240,6 +242,12 @@ def load_arguments(self, _):
         c.argument('elastic_san_resource_id', min_api='2023-04-02',
                    options_list=['--elastic-san-resource-id', '--elastic-san-id'],
                    help='This is the ARM id of the source elastic san volume snapshot.')
+        c.argument('bandwidth_copy_speed', min_api='2023-10-02',
+                   help='If this field is set on a snapshot and createOption is CopyStart, the snapshot will be copied at a quicker speed.',
+                   arg_type=get_enum_type(["None", "Enhanced"]))
+
+    with self.argument_context('snapshot grant-access', resource_type=ResourceType.MGMT_COMPUTE, operation_group='snapshots') as c:
+        c.argument('file_format', arg_type=get_enum_type(self.get_models('FileFormat', operation_group='snapshots')), help='Used to specify the file format when making request for SAS on a VHDX file format snapshot.')
     # endregion
 
     # region Images
@@ -762,8 +770,14 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('os_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2022-03-01', arg_group='Storage', help='Specify whether OS disk should be deleted or detached upon VMSS Flex deletion (This feature is only for VMSS with flexible orchestration mode).')
         c.argument('data_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2022-03-01', arg_group='Storage', help='Specify whether data disk should be deleted or detached upon VMSS Flex deletion (This feature is only for VMSS with flexible orchestration mode)')
-        c.argument('max_surge', arg_type=get_three_state_flag(), min_api='2022-11-01', is_preview=True,
-                   help='Specify it to create new virtual machines to upgrade the scale set, rather than updating the existing virtual machines.')
+        c.argument('enable_auto_os_upgrade', enable_auto_os_upgrade_type)
+        c.argument('security_posture_reference_id', min_api='2023-03-01',
+                   options_list=['--security-posture-reference-id', '--security-posture-id'],
+                   help='The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest')
+        c.argument('security_posture_reference_exclude_extensions', min_api='2023-03-01', type=validate_file_or_dict,
+                   options_list=['--security-posture-reference-exclude-extensions', '--exclude-extensions'],
+                   help='List of virtual machine extensions to exclude when applying the Security Posture. Either a Json string or a file path is acceptable. '
+                        'Please refer to https://docs.microsoft.com/rest/api/compute/virtualmachinescalesets/get#virtualmachineextension for the data format.')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         c.argument('application_gateway', help='Name to use when creating a new application gateway (default) or referencing an existing one. Can also reference an existing application gateway by ID or specify "" for none.', options_list=['--app-gateway'])
@@ -809,6 +823,13 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
         c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch"]), min_api='2020-06-01', help='Specify the security type of the virtual machine scale set.')
+        c.argument('security_posture_reference_id', min_api='2023-03-01',
+                   options_list=['--security-posture-reference-id', '--security-posture-id'],
+                   help='The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest')
+        c.argument('security_posture_reference_exclude_extensions', min_api='2023-03-01', type=validate_file_or_dict,
+                   options_list=['--security-posture-reference-exclude-extensions', '--exclude-extensions'],
+                   help='List of virtual machine extensions to exclude when applying the Security Posture. Either a Json string or a file path is acceptable. '
+                        'Please refer to https://docs.microsoft.com/rest/api/compute/virtualmachinescalesets/get#virtualmachineextension for the data format.')
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
 
@@ -835,6 +856,8 @@ def load_arguments(self, _):
                        help='Set this Boolean property will allow VMSS to ignore AZ boundaries when constructing upgrade batches, and only consider Update Domain and maxBatchInstancePercent to determine the batch size')
             c.argument('prioritize_unhealthy_instances', arg_type=get_three_state_flag(), min_api='2020-12-01',
                        help='Set this Boolean property will lead to all unhealthy instances in a scale set getting upgraded before any healthy instances')
+            c.argument('max_surge', arg_type=get_three_state_flag(), min_api='2022-11-01', is_preview=True,
+                       help='Specify it to create new virtual machines to upgrade the scale set, rather than updating the existing virtual machines.')
             c.argument('regular_priority_count', type=int, min_api='2022-08-01', is_preview=True, help='The base number of regular priority VMs that will be created in this scale set as it scales out. Must be greater than 0.')
             c.argument('regular_priority_percentage', type=int, min_api='2022-08-01', is_preview=True, help='The percentage of VM instances, after the base regular priority count has been reached, that are expected to use regular priority. Must be between 0 and 100.')
             c.argument('enable_osimage_notification', arg_type=get_three_state_flag(), min_api='2022-11-01', help='Specify whether the OS Image Scheduled event is enabled or disabled.')
@@ -1575,16 +1598,13 @@ def load_arguments(self, _):
         c.argument('capacity_reservation_group_name', options_list=['--capacity-reservation-group', '-n'],
                    help='The name of the capacity reservation group.')
         c.argument('tags', tags_type)
+        c.argument('sharing_profile', nargs='*', help='Space-separated subscription resource IDs or nothing. Specify the settings to enable sharing across subscriptions for the capacity reservation group resource. Specify it to nothing to unsharing.')
 
     with self.argument_context('capacity reservation group create') as c:
         c.argument('zones', zones_type, help='Availability Zones to use for this capacity reservation group. If not provided, the group supports only regional resources in the region. If provided, enforces each capacity reservation in the group to be in one of the zones.')
 
     with self.argument_context('capacity reservation group show') as c:
         c.argument('instance_view', action='store_true', options_list=['--instance-view', '-i'], help='Retrieve the list of instance views of the capacity reservations under the capacity reservation group which is a snapshot of the runtime properties of a capacity reservation that is managed by the platform and can change outside of control plane operations.')
-
-    with self.argument_context('capacity reservation group list') as c:
-        c.argument('vm_instance', action='store_true', help='Retrieve the Virtual Machine Instance which are associated to capacity reservation group in the response.')
-        c.argument('vmss_instance', action='store_true', help='Retrieve the ScaleSet VM Instance which are associated to capacity reservation group in the response.')
 
     with self.argument_context('capacity reservation') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)

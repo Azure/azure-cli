@@ -12,6 +12,7 @@ from knack.prompting import prompt_y_n
 from azure.mgmt.core.tools import is_valid_resource_id
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+from azure.mgmt.recoveryservices import RecoveryServicesClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType
 
@@ -22,7 +23,7 @@ from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuN
 from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
     BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
-    ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
+    ILRRequestResource, IaasVMILRRegistrationRequest, \
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
     BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails, ScheduleRunType, \
@@ -137,9 +138,10 @@ standard_policy_type = "v1"
 
 
 # pylint: disable=line-too-long
-def update_vault(client, vault_name, resource_group_name, tags=None,
+def update_vault(cmd, client, vault_name, resource_group_name, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
-                 classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
+                 classic_alerts=None, azure_monitor_alerts_for_job_failures=None, tenant_id=None,
+                 backup_storage_redundancy=None, cross_region_restore_flag=None):
     try:
         existing_vault = client.get(resource_group_name, vault_name)
     except CoreResourceNotFoundError:
@@ -162,15 +164,34 @@ def update_vault(client, vault_name, resource_group_name, tags=None,
         patchvault.properties.monitoring_settings = _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures,
                                                                                    classic_alerts, existing_vault)
 
+    if backup_storage_redundancy is not None or cross_region_restore_flag is not None:
+        patchvault.properties.redundancy_settings = \
+            _get_vault_redunancy_settings(backup_storage_redundancy, cross_region_restore_flag, existing_vault)
+
     if tags is not None:
         patchvault.tags = tags
+
+    # If immutability settings have been switched from Unlocked to Disabled, then we have an issue with it.
+    # Also need to figure out how to deal with both soft delete and immutability getting weakened but not today.
+    resource_guard_used = False
+
+    if cust_help.is_immutability_weakened(existing_vault, patchvault):
+        if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
+                                                vault_name, operation_name="RecoveryServicesDisableImmutability"):
+            resource_guard_used = True
+            patchvault.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesDisableImmutability")]
+
+    if resource_guard_used and tenant_id is not None:
+        client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesClient,
+                                         aux_tenants=[tenant_id]).vaults
 
     return client.begin_update(resource_group_name, vault_name, patchvault)
 
 
 # TODO: Re-add references to SoftDeleteSettings once SDK version is upgraded:
 # Import SoftDeleteSettings, args in create_vault and _get_vault_security_settings
-def create_vault(client, vault_name, resource_group_name, location, tags=None,
+def create_vault(cmd, client, vault_name, resource_group_name, location, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
                  classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
     try:
@@ -180,7 +201,7 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
                        "to their default values. It is recommended to use az backup vault update instead.")
 
         # If the vault exists, we move to the update flow instead
-        return update_vault(client, vault_name, resource_group_name, tags, public_network_access,
+        return update_vault(cmd, client, vault_name, resource_group_name, tags, public_network_access,
                             immutability_state, cross_subscription_restore_state, classic_alerts,
                             azure_monitor_alerts_for_job_failures)
     except CoreResourceNotFoundError:
@@ -210,18 +231,50 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
 
 
 def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts, existing_vault=None):
-    monitoring_settings = MonitoringSettings()
+    # Update scenario
     if existing_vault is not None:
         monitoring_settings = existing_vault.properties.monitoring_settings
 
+        if azure_monitor_alerts_for_job_failures is not None:
+            monitoring_settings.azure_monitor_alert_settings.alerts_for_all_job_failures = \
+                cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures)
+
+        if classic_alerts is not None:
+            monitoring_settings.classic_alert_settings.alerts_for_critical_operations = \
+                cust_help.transform_enable_parameters(classic_alerts)
+
+        return monitoring_settings
+
+    # Create scenario
+    monitoring_settings = MonitoringSettings()
     if azure_monitor_alerts_for_job_failures is not None:
         monitoring_settings.azure_monitor_alert_settings = AzureMonitorAlertSettings(
-            alerts_for_all_job_failures=cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures))
+            alerts_for_all_job_failures=cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures),
+            alerts_for_all_replication_issues="Enabled",
+            alerts_for_all_failover_issues="Enabled")
     if classic_alerts is not None:
         monitoring_settings.classic_alert_settings = ClassicAlertSettings(
-            alerts_for_critical_operations=cust_help.transform_enable_parameters(classic_alerts))
+            alerts_for_critical_operations=cust_help.transform_enable_parameters(classic_alerts),
+            email_notifications_for_site_recovery="Enabled")  # Not processing this yet but we need in new SDK
 
     return monitoring_settings
+
+
+# We only support backup vault update, not create. Hence we don't need to setup any defaults. Existing vault won't be None.
+def _get_vault_redunancy_settings(backup_storage_redundancy, cross_region_restore_flag, existing_vault):
+    redundancy_settings = existing_vault.properties.redundancy_settings
+
+    if backup_storage_redundancy is not None:
+        redundancy_settings.standard_tier_storage_redundancy = backup_storage_redundancy
+
+    if cross_region_restore_flag is not None:
+        if redundancy_settings.cross_region_restore == 'Enabled' and cross_region_restore_flag == 'Disabled':
+            raise ArgumentUsageError("""
+            Cross Region Restore is currently a non-reversible storage property. You can not disable it once enabled.
+            """)
+        redundancy_settings.cross_region_restore = cross_region_restore_flag
+
+    return redundancy_settings
 
 
 # TODO Remove pylint supress once the new SDK is in place
@@ -365,14 +418,14 @@ def _force_delete_vault(cmd, vault_name, resource_group_name):
         _unregister_containers(cmd, protection_containers_client, resource_group_name, vault_name, container.name)
     # now delete the vault
     try:
-        vault_client.delete(resource_group_name, vault_name)
+        return vault_client.begin_delete(resource_group_name, vault_name)
     except HttpResponseError as ex:
         raise ex
 
 
 def delete_vault(cmd, client, vault_name, resource_group_name, force=False):
     try:
-        client.delete(resource_group_name, vault_name)
+        return client.begin_delete(resource_group_name, vault_name)
     except HttpResponseError as ex:  # pylint: disable=broad-except
         if 'existing resources within the vault' in ex.message and force:  # pylint: disable=no-member
             _force_delete_vault(cmd, vault_name, resource_group_name)
@@ -634,45 +687,19 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
     if backup_storage_redundancy or cross_region_restore_flag:
         logger.warning(
             '--classic-alerts and --azure-monitor-alerts-for-job-failures parameters will be ignored if provided.')
-        backup_config_response = client.get(vault_name, resource_group_name)
-        prev_crr_flag = backup_config_response.properties.cross_region_restore_flag
-        if backup_storage_redundancy is None:
-            backup_storage_redundancy = backup_config_response.properties.storage_type
-        if cross_region_restore_flag is None:
-            cross_region_restore_flag = prev_crr_flag
-        else:
-            cross_region_restore_flag = bool(cross_region_restore_flag.lower() == 'true')
-
-        if prev_crr_flag and not cross_region_restore_flag:
-            raise ArgumentUsageError("""
-            Cross Region Restore is currently a non-reversible storage property. You can not disable it once enabled.
-            """)
-
-        backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy,
-                                                     cross_region_restore_flag=cross_region_restore_flag)
-        backup_storage_config_resource = BackupResourceConfigResource(properties=backup_storage_config)
-        return client.update(vault_name, resource_group_name, backup_storage_config_resource)
+        logger.warning('Please use the "az backup vault update" command to perform this operation instead.')
+        cross_region_restore_flag_str = 'Enabled' if cross_region_restore_flag else 'Disabled'
+        vault_client = vaults_cf(cmd.cli_ctx)
+        return update_vault(cmd, vault_client, vault_name, resource_group_name,
+                            backup_storage_redundancy=backup_storage_redundancy,
+                            cross_region_restore_flag=cross_region_restore_flag_str)
 
     if classic_alerts or azure_monitor_alerts_for_job_failures:
-        monitor_settings = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name).properties.monitoring_settings
-        prev_classic_alerts = 'Enabled'
-        prev_azmon_alerts = 'Enabled'
-        if (hasattr(monitor_settings, 'classic_alert_settings') and
-                hasattr(monitor_settings.classic_alert_settings, 'alerts_for_critical_operations')):
-            prev_classic_alerts = monitor_settings.classic_alert_settings.alerts_for_critical_operations
-        if (hasattr(monitor_settings, 'azure_monitor_alert_settings') and
-                hasattr(monitor_settings.azure_monitor_alert_settings, 'alerts_for_all_job_failures')):
-            prev_azmon_alerts = monitor_settings.azure_monitor_alert_settings.alerts_for_all_job_failures
-        classic_alerts = prev_classic_alerts if classic_alerts is None else classic_alerts + 'd'
-        azmon_alerts = (prev_azmon_alerts if azure_monitor_alerts_for_job_failures is None else
-                        azure_monitor_alerts_for_job_failures + 'd')
-        vault_properties = VaultProperties(
-            monitoring_settings=MonitoringSettings(
-                azure_monitor_alert_settings=AzureMonitorAlertSettings(
-                    alerts_for_all_job_failures=azmon_alerts),
-                classic_alert_settings=ClassicAlertSettings(alerts_for_critical_operations=classic_alerts)))
-        return vaults_cf(cmd.cli_ctx).begin_update(resource_group_name, vault_name,
-                                                   PatchVault(properties=vault_properties))
+        logger.warning('This command will be deprecated soon and some operations may not work.'
+                       'Please use the "az backup vault update" command to perform this operation instead.')
+        vault_client = vaults_cf(cmd.cli_ctx)
+        return update_vault(cmd, vault_client, vault_name, resource_group_name, classic_alerts=classic_alerts,
+                            azure_monitor_alerts_for_job_failures=azure_monitor_alerts_for_job_failures)
 
 
 def get_backup_properties(cmd, client, vault_name, resource_group_name):
@@ -1515,7 +1542,7 @@ def restore_files_unmount_rp(cmd, client, resource_group_name, vault_name, conta
 
 
 def disable_protection(cmd, client, resource_group_name, vault_name, item,
-                       retain_recovery_points_as_per_policy=False):
+                       retain_recovery_points_as_per_policy=False, tenant_id=None):
     # Get container and item URIs
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
@@ -1523,6 +1550,18 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
     # Parameters: item, undelete=True, retain_recovery_points_as_per_policy=False. Passed like this
     # because the parameter=variable format breaks linting.
     vm_item = _get_disable_protection_request(item, False, retain_recovery_points_as_per_policy)
+
+    # ResourceGuard scenario: if we are stopping backup and there is MUA setup for the scenario,
+    # we want to set the appropriate parameters.
+    if vm_item.properties.protection_state == ProtectionState.protection_stopped:
+        if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
+                                                vault_name, "RecoveryServicesStopProtection"):
+            # Cross Tenant scenario
+            if tenant_id is not None:
+                client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                 aux_tenants=[tenant_id]).protected_item
+            vm_item.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesStopProtection")]
 
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, vm_item, cls=cust_help.get_pipeline_response)

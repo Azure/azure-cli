@@ -49,7 +49,7 @@ $ Command arguments: ['find', 'vm create', '--debug']
 #### Entry script exits before command finishes
 The [entry script](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/az) exits once `os.execl()` is called. It does not wait for the actual command to finish.
 
-According to [_exec, _wexec Functions](https://docs.microsoft.com/en-us/cpp/c-runtime-library/exec-wexec-functions?view=vs-2019), `os.exec` internally uses [CreateProcess](https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw) which doesn't wait for the sub-process.
+According to [_exec, _wexec Functions](https://learn.microsoft.com/cpp/c-runtime-library/exec-wexec-functions?view=vs-2019), `os.exec` internally uses [CreateProcess](https://learn.microsoft.com/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw) which doesn't wait for the sub-process.
 
 #### Exit Code is 0 even when the command fails
 Related to the above issue, Windows creates a new process and exits the current one with `os.exec`. Hence the calling program only sees that the script has terminated without an issue (See [Issue9148: os.execve puts process to background on windows](https://bugs.python.org/issue9148#msg109179)). The exit code does not reflect the actual result of the command execution in the new process.
