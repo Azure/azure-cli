@@ -8,7 +8,7 @@
 # --------------------------------------------------------------------------
 # pylint: disable=line-too-long
 # pylint: disable=redefined-builtin
-# pylint: disable=too-many-instance-attributes, useless-parent-delegation
+# pylint: disable=too-many-instance-attributes, useless-parent-delegation, anomalous-backslash-in-string
 
 import datetime
 import sys
