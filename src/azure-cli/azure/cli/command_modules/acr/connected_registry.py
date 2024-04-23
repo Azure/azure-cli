@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from enum import Enum
-import re
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
@@ -22,7 +21,7 @@ from ._utils import (
     parse_scope_map_actions,
     validate_managed_registry
 )
-
+from .custom import acr_update_custom
 
 class ConnectedRegistryModes(Enum):
     READONLY = 'readonly'
