@@ -1089,7 +1089,7 @@ def flexible_server_list_log_files_with_filter(client, resource_group_name, serv
 
 
 def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_mode="offline",
-                          migration_name=None, migration_option=None, tags=None, location=None):
+                          migration_name=None, migration_option=None, tags=None, location=None, migrationInstanceResourceId=None):
 
     logging_name = 'PostgreSQL'
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1117,8 +1117,11 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
         # Use default migration_option as 'ValidateAndMigrate'
         migration_option = "ValidateAndMigrate"
 
-    return _create_migration(cmd, logging_name, client, subscription_id, resource_group_name, server_name, migration_name,
-                             migration_mode, migration_option, migration_parameters, tags, location)
+    if migrationInstanceResourceId is not None:
+        validate_migration_runtime_server(cmd, migrationInstanceResourceId, resource_group_name, server_name)
+
+    return _create_migration(logging_name, client, subscription_id, resource_group_name, server_name, migration_name,
+                             migration_mode, migration_option, migration_parameters, tags, location, migrationInstanceResourceId)
 
 
 def migration_show_func(cmd, client, resource_group_name, server_name, migration_name):
@@ -1394,14 +1397,11 @@ def _get_pg_replica_zone(availabilityZones, sourceServerZone, replicaZone):
     return pg_replica_zone
 
 
-def _create_migration(cmd, logging_name, client, subscription_id, resource_group_name, target_db_server_name,
-                      migration_name, migration_mode, migration_option, parameters, tags, location):
-    parameter_keys = list(parameters.keys())
-    migrationInstanceResourceId = get_case_insensitive_key_value("MigrationRuntimeResourceId", parameter_keys, parameters)
-    if migrationInstanceResourceId is not None:
-        validate_migration_runtime_server(cmd, migrationInstanceResourceId, resource_group_name, target_db_server_name)
+def _create_migration(logging_name, client, subscription_id, resource_group_name, target_db_server_name,
+                      migration_name, migration_mode, migration_option, parameters, tags, location, migrationInstanceResourceId):
 
     logger.warning('Creating %s Migration for server \'%s\' in group \'%s\' and subscription \'%s\'...', logging_name, target_db_server_name, resource_group_name, subscription_id)
+    parameter_keys = list(parameters.keys())
     secret_parameter_dictionary = get_case_insensitive_key_value("SecretParameters", parameter_keys, parameters)
     secret_parameter_keys = list(secret_parameter_dictionary.keys())
     admin_credentials_dictionary = get_case_insensitive_key_value("AdminCredentials", secret_parameter_keys, secret_parameter_dictionary)
