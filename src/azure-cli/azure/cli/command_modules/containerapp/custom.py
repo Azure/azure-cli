@@ -3429,6 +3429,10 @@ def containerapp_ssh(cmd, resource_group_name, name, container=None, revision=No
 
     logger.warning("Use ctrl + D to exit.")
     while conn.is_connected:
+        if not reader.is_alive() or not writer.is_alive():
+            logger.warning("Reader or Writer for WebSocket is not alive. Closing the connection.")
+            conn.disconnect()
+
         try:
             time.sleep(0.1)
         except KeyboardInterrupt:

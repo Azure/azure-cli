@@ -168,11 +168,11 @@ class WorkspaceTableCreate(_WorkspaceTableCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZIntArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.total_retention_time._fmt = AAZIntArgFormat(
-            maximum=2556,
+        args_schema.total_retention_in_days._fmt = AAZIntArgFormat(
+            maximum=4383,
             minimum=-1,
         )
-        args_schema.retention_time._fmt = AAZIntArgFormat(
+        args_schema.retention_in_days._fmt = AAZIntArgFormat(
             maximum=730,
             minimum=-1,
         )
@@ -180,8 +180,8 @@ class WorkspaceTableCreate(_WorkspaceTableCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.retention_time):
-            retention_time = args.retention_time.to_serialized_data()
+        if has_value(args.retention_in_days):
+            retention_time = args.retention_in_days.to_serialized_data()
             if retention_time == -1 or (4 <= retention_time <= 730):
                 pass
             else:
@@ -189,12 +189,12 @@ class WorkspaceTableCreate(_WorkspaceTableCreate):
                                                 "Otherwise setting this property to -1 will default to "
                                                 "workspace retention.")
 
-        if has_value(args.total_retention_time):
-            total_retention_time = args.total_retention_time.to_serialized_data()
-            if total_retention_time == -1 or (4 <= total_retention_time <= 2556):
+        if has_value(args.total_retention_in_days):
+            total_retention_time = args.total_retention_in_days.to_serialized_data()
+            if total_retention_time == -1 or (4 <= total_retention_time <= 4383):
                 pass
             else:
-                raise InvalidArgumentValueError("usage error: --total-retention-time should between 4 and 2556. "
+                raise InvalidArgumentValueError("usage error: --total-retention-time should between 4 and 4383. "
                                                 "Otherwise setting this property to -1 will default to "
                                                 "table retention.")
 
@@ -205,11 +205,11 @@ class WorkspaceTableUpdate(_WorkspaceTableUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZIntArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.total_retention_time._fmt = AAZIntArgFormat(
-            maximum=2556,
+        args_schema.total_retention_in_days._fmt = AAZIntArgFormat(
+            maximum=4383,
             minimum=-1,
         )
-        args_schema.retention_time._fmt = AAZIntArgFormat(
+        args_schema.retention_in_days._fmt = AAZIntArgFormat(
             maximum=730,
             minimum=-1,
         )
@@ -217,8 +217,8 @@ class WorkspaceTableUpdate(_WorkspaceTableUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.retention_time):
-            retention_time = args.retention_time.to_serialized_data()
+        if has_value(args.retention_in_days):
+            retention_time = args.retention_in_days.to_serialized_data()
             if retention_time == -1 or (4 <= retention_time <= 730):
                 pass
             else:
@@ -226,12 +226,12 @@ class WorkspaceTableUpdate(_WorkspaceTableUpdate):
                                                 "Otherwise setting this property to -1 will default to "
                                                 "workspace retention.")
 
-        if has_value(args.total_retention_time):
-            total_retention_time = args.total_retention_time.to_serialized_data()
-            if total_retention_time == -1 or (4 <= total_retention_time <= 2556):
+        if has_value(args.total_retention_in_days):
+            total_retention_time = args.total_retention_in_days.to_serialized_data()
+            if total_retention_time == -1 or (4 <= total_retention_time <= 4383):
                 pass
             else:
-                raise InvalidArgumentValueError("usage error: --total-retention-time should between 4 and 2556. "
+                raise InvalidArgumentValueError("usage error: --total-retention-time should between 4 and 4383. "
                                                 "Otherwise setting this property to -1 will default to "
                                                 "table retention.")
 
@@ -240,6 +240,7 @@ class WorkspaceTableSearchJobCancel(_WorkspaceTableSearchJobCancel):
     def pre_operations(self):
         args = self.ctx.args
         table_name = args.table_name.to_serialized_data()
+
         if table_name and not table_name.endswith("_SRCH"):
             raise InvalidArgumentValueError('usage: The table name needs to end with _SRCH')
 
@@ -269,8 +270,8 @@ def create_log_analytics_workspace_table(cmd, resource_group_name, workspace_nam
         "resource_group": resource_group_name,
         "table_name": table_name,
         "workspace_name": workspace_name,
-        "retention_time": retention_in_days,
-        "total_retention_time": total_retention_in_days,
+        "retention_in_days": retention_in_days,
+        "total_retention_in_days": total_retention_in_days,
         "plan": plan,
         "schema": {
             "columns": columns_list,
@@ -285,14 +286,13 @@ def create_log_analytics_workspace_table_search_job(cmd, resource_group_name, wo
                                                     search_query, start_search_time, end_search_time,
                                                     retention_in_days=None, total_retention_in_days=None, limit=None,
                                                     no_wait=False):
-
     return WorkspaceTableCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "table_name": table_name,
         "workspace_name": workspace_name,
-        "retention_time": retention_in_days,
-        "total_retention_time": total_retention_in_days,
-        "search_job": {
+        "retention_in_days": retention_in_days,
+        "total_retention_in_days": total_retention_in_days,
+        "search_results": {
             "query": search_query,
             "limit": limit,
             "start_search_time": start_search_time,
@@ -309,7 +309,7 @@ def create_log_analytics_workspace_table_restore(cmd, resource_group_name, works
         "resource_group": resource_group_name,
         "table_name": table_name,
         "workspace_name": workspace_name,
-        "restore": {
+        "restored_logs": {
             "start_restore_time": start_restore_time,
             "end_restore_time": end_restore_time,
             "source_table": restore_source_table,
@@ -338,9 +338,9 @@ def update_log_analytics_workspace_table(cmd, resource_group_name, workspace_nam
         "no_wait": no_wait,
     }
     if retention_in_days is not None:
-        command_args["retention_time"] = retention_in_days
+        command_args["retention_in_days"] = retention_in_days
     if total_retention_in_days is not None:
-        command_args["total_retention_time"] = total_retention_in_days
+        command_args["total_retention_in_days"] = total_retention_in_days
     if plan is not None:
         command_args["plan"] = plan
     if columns_list or description is not None:
