@@ -15,6 +15,7 @@ from azure.cli.command_modules.resource._bicep import (
     remove_bicep_installation,
     run_bicep_command,
     validate_bicep_target_scope,
+    _get_bicep_download_url,
     _bicep_version_check_file_path,
 )
 from azure.cli.core.azclierror import InvalidTemplateError
@@ -196,3 +197,28 @@ class TestBicep(unittest.TestCase):
     def _remove_bicep_version_check_file(self):
         with contextlib.suppress(FileNotFoundError):
             os.remove(_bicep_version_check_file_path)
+
+    def test_get_bicep_download_url_returns_correct_urls(self):
+        download_url = _get_bicep_download_url("Windows", "arm64", "v0.26.54")
+        self.assertEqual(download_url, "https://downloads.bicep.azure.com/v0.26.54/bicep-win-arm64.exe")
+
+        download_url = _get_bicep_download_url("Windows", "x64", "v0.26.54")
+        self.assertEqual(download_url, "https://downloads.bicep.azure.com/v0.26.54/bicep-win-x64.exe")
+
+        download_url = _get_bicep_download_url("Linux", "arm64", "v0.26.54")
+        self.assertEqual(download_url, "https://downloads.bicep.azure.com/v0.26.54/bicep-linux-arm64")
+
+        download_url = _get_bicep_download_url("Linux", "x64", "v0.26.54")
+        self.assertEqual(download_url, "https://downloads.bicep.azure.com/v0.26.54/bicep-linux-x64")
+
+        download_url = _get_bicep_download_url("Darwin", "arm64", "v0.26.54")
+        self.assertEqual(download_url, "https://downloads.bicep.azure.com/v0.26.54/bicep-osx-arm64")
+
+        download_url = _get_bicep_download_url("Darwin", "x64", "v0.26.54")
+        self.assertEqual(download_url, "https://downloads.bicep.azure.com/v0.26.54/bicep-osx-x64")
+
+        download_url = _get_bicep_download_url("Darwin", "x64", "v0.26.54", "win-arm64")
+        self.assertEqual(download_url, "https://downloads.bicep.azure.com/v0.26.54/bicep-win-arm64.exe")
+        
+        with self.assertRaises(CLIError):
+            _get_bicep_download_url("Made Up", "x64", "v0.26.54")
