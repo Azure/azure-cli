@@ -5314,7 +5314,7 @@ class JobConfiguration(_serialization.Model):
      Properties replicaCompletionCount and parallelism would be set to 1 by default.
     :vartype manual_trigger_config:
      ~azure.mgmt.appcontainers.models.JobConfigurationManualTriggerConfig
-    :ivar schedule_trigger_config: Cron formatted repeating trigger schedule ("\ * * * * *") for
+    :ivar schedule_trigger_config: Cron formatted repeating trigger schedule ("\\ * * * * *") for
      cronjobs. Properties completions and parallelism would be set to 1 by default.
     :vartype schedule_trigger_config:
      ~azure.mgmt.appcontainers.models.JobConfigurationScheduleTriggerConfig
@@ -5369,7 +5369,7 @@ class JobConfiguration(_serialization.Model):
          Properties replicaCompletionCount and parallelism would be set to 1 by default.
         :paramtype manual_trigger_config:
          ~azure.mgmt.appcontainers.models.JobConfigurationManualTriggerConfig
-        :keyword schedule_trigger_config: Cron formatted repeating trigger schedule ("\ * * * * *") for
+        :keyword schedule_trigger_config: Cron formatted repeating trigger schedule ("\\ * * * * *") for
          cronjobs. Properties completions and parallelism would be set to 1 by default.
         :paramtype schedule_trigger_config:
          ~azure.mgmt.appcontainers.models.JobConfigurationScheduleTriggerConfig
@@ -5464,7 +5464,7 @@ class JobConfigurationManualTriggerConfig(_serialization.Model):
 
 
 class JobConfigurationScheduleTriggerConfig(_serialization.Model):
-    """Cron formatted repeating trigger schedule ("\ * * * * *") for cronjobs. Properties completions
+    """Cron formatted repeating trigger schedule ("\\ * * * * *") for cronjobs. Properties completions
     and parallelism would be set to 1 by default.
 
     All required parameters must be populated in order to send to server.
@@ -5472,7 +5472,7 @@ class JobConfigurationScheduleTriggerConfig(_serialization.Model):
     :ivar replica_completion_count: Minimum number of successful replica completions before overall
      job completion.
     :vartype replica_completion_count: int
-    :ivar cron_expression: Cron formatted repeating schedule ("\ * * * * *") of a Cron Job.
+    :ivar cron_expression: Cron formatted repeating schedule ("\\ * * * * *") of a Cron Job.
      Required.
     :vartype cron_expression: str
     :ivar parallelism: Number of parallel replicas of a job that can run at a given time.
@@ -5501,7 +5501,7 @@ class JobConfigurationScheduleTriggerConfig(_serialization.Model):
         :keyword replica_completion_count: Minimum number of successful replica completions before
          overall job completion.
         :paramtype replica_completion_count: int
-        :keyword cron_expression: Cron formatted repeating schedule ("\ * * * * *") of a Cron Job.
+        :keyword cron_expression: Cron formatted repeating schedule ("\\ * * * * *") of a Cron Job.
          Required.
         :paramtype cron_expression: str
         :keyword parallelism: Number of parallel replicas of a job that can run at a given time.
