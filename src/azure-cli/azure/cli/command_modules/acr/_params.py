@@ -569,12 +569,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('remove_repos', options_list=['--remove'], nargs='*',
                    help='repository permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
 
-    with self.argument_context('acr connected-registry repo') as c:
-        c.argument('add_repos', options_list=['--add'], nargs='*',
-                   help='repository permissions to be added to the targeted connected registry and it\'s ancestors sync scope maps. Use the format "--add [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
-        c.argument('remove_repos', options_list=['--remove'], nargs='*',
-                   help='repository permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
-
 
 def _get_helm_default_install_location():
     exe_name = 'helm'

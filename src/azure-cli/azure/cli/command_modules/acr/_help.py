@@ -1692,22 +1692,6 @@ examples:
     text: >
         az acr connected-registry permissions show -r mycloudregistry -n myconnectedregistry
 """
-
-# To be deprecated
-helps['acr connected-registry repo'] = """
-type: command
-short-summary: Update all the necessary connected registry sync scope maps repository permissions.
-examples:
-  - name: Add permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
-    text: >
-        az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --add repo1 repo2
-  - name: Remove permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its descendants.
-    text: >
-        az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 repo2
-  - name: Remove permissions to synchronize 'repo1' images and adds permissions for 'repo2' images.
-    text: >
-        az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 --add repo2
-"""
 # endregion
 
 # region private-endpoint-connection

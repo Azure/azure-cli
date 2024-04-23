@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from enum import Enum
-import re
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
