@@ -518,7 +518,7 @@ examples:
             },
             "SourceServerUserName": "testuser@pg-single-1",
             "TargetServerUserName": "fspguser"
-          }
+          },
           "dBsToMigrate": [
             "postgres"
           ],
@@ -543,7 +543,7 @@ examples:
             },
             "SourceServerUserName": "testuser@pg-single-1",
             "TargetServerUserName": "fspguser"
-          }
+          },
           "dBsToMigrate": [
             "postgres"
           ],
@@ -574,7 +574,7 @@ examples:
             },
             "SourceServerUserName": "postgres",
             "TargetServerUserName": "fspguser"
-          }
+          },
           "dBsToMigrate": [
             "ticketdb","timedb","inventorydb"
           ],
