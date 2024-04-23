@@ -1105,6 +1105,18 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
                                               mode=None, rollback_on_error=None, no_prompt=False, template_spec=None, query_string=None):
     DeploymentProperties, TemplateLink, OnErrorDeployment = cmd.get_models('DeploymentProperties', 'TemplateLink', 'OnErrorDeployment')
 
+    if template_file:
+        pass
+    elif template_spec:
+        pass
+    elif template_uri:
+        pass
+    elif _is_bicepparam_file_provided(parameters):
+        pass
+    else:
+        raise InvalidArgumentValueError(
+            "Please enter one of the following: template file, template spec, template url, or Bicep parameters file.")
+
     template_link = None
     template_obj = None
     on_error_deployment = None
@@ -1316,7 +1328,7 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
         pass
     else:
         raise InvalidArgumentValueError(
-            "Please enter one of the following: template file, template spec, or template url")
+            "Please enter one of the following: template file, template spec, template url, or Bicep parameters file.")
 
     if t_spec:
         deployment_stack_model.template_link = DeploymentStacksTemplateLink(id=t_spec)

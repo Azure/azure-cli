@@ -178,11 +178,11 @@ def remove_bicep_installation(cli_ctx):
 
 
 def is_bicep_file(file_path):
-    return file_path.lower().endswith(".bicep")
+    return file_path.lower().endswith(".bicep") if file_path else False
 
 
 def is_bicepparam_file(file_path):
-    return file_path.lower().endswith(".bicepparam")
+    return file_path.lower().endswith(".bicepparam") if file_path else False
 
 
 def get_bicep_available_release_tags():
