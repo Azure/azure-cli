@@ -479,21 +479,27 @@ class FunctionWorkloadProfile(ScenarioTest):
             resource_group,
         ))
 
-        time.sleep(260)
+        if self.is_live:
+            time.sleep(260)
+
         self.cmd('containerapp env workload-profile add --name {} --resource-group {} --workload-profile-type D4 -w {} --min-nodes 3 --max-nodes 6'.format(
             managed_environment_name,
             resource_group,
             workload_profile_name
         ))
 
-        time.sleep(260)
+        if self.is_live:
+            time.sleep(260)
+
         self.cmd('containerapp env workload-profile add --name {} --resource-group {} --workload-profile-type D4 -w {} --min-nodes 3 --max-nodes 6'.format(
             managed_environment_name,
             resource_group,
             workload_profile_name_2
         ))
 
-        time.sleep(260)
+        if self.is_live:
+            time.sleep(260)
+
         self.cmd('functionapp create -g {} -n {} -s {} --functions-version 4 --runtime dotnet-isolated --environment {} --workload-profile-name {} --cpu 1.0 --memory 1.0Gi'.format(
             resource_group,
             functionapp_name,
@@ -518,7 +524,9 @@ class FunctionWorkloadProfile(ScenarioTest):
             workload_profile_name_2
         ))
 
-        time.sleep(1200)
+        if self.is_live:
+            time.sleep(1200)
+
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
             JMESPathCheck('resourceConfig.cpu', 0.75),
             JMESPathCheck('resourceConfig.memory', '2Gi'),
