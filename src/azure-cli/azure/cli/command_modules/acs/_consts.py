@@ -197,6 +197,10 @@ CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START = "Start"
 CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE = "Complete"
 CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK = "Rollback"
 
+# Dns zone contributor role
+CONST_PRIVATE_DNS_ZONE_CONTRIBUTOR_ROLE = "Private DNS Zone Contributor"
+CONST_DNS_ZONE_CONTRIBUTOR_ROLE = "DNS Zone Contributor"
+
 
 # consts for decorator pattern
 class DecoratorMode(Enum):

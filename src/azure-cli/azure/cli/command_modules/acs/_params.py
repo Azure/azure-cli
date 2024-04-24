@@ -46,6 +46,20 @@ from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION,
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_EXTERNAL,
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL)
+from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
+    CONST_ACSTOR_ALL,
+    CONST_STORAGE_POOL_TYPE_AZURE_DISK,
+    CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
+    CONST_STORAGE_POOL_TYPE_ELASTIC_SAN,
+    CONST_STORAGE_POOL_SKU_PREMIUM_LRS,
+    CONST_STORAGE_POOL_SKU_STANDARD_LRS,
+    CONST_STORAGE_POOL_SKU_STANDARDSSD_LRS,
+    CONST_STORAGE_POOL_SKU_ULTRASSD_LRS,
+    CONST_STORAGE_POOL_SKU_PREMIUM_ZRS,
+    CONST_STORAGE_POOL_SKU_PREMIUMV2_LRS,
+    CONST_STORAGE_POOL_SKU_STANDARDSSD_ZRS,
+    CONST_STORAGE_POOL_OPTION_NVME,
+    CONST_STORAGE_POOL_OPTION_SSD)
 from azure.cli.command_modules.acs._validators import (
     validate_acr, validate_agent_pool_name, validate_assign_identity,
     validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
@@ -74,6 +88,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_force_upgrade_disable_and_enable_parameters,
     validate_allowed_host_ports, validate_application_security_groups,
     validate_node_public_ip_tags,
+    validate_disable_windows_outbound_nat,
     validate_crg_id,
     validate_azure_service_mesh_revision)
 from azure.cli.core.commands.parameters import (
@@ -187,6 +202,41 @@ backend_pool_types = [
 ingress_gateway_types = [
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_EXTERNAL,
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL,
+]
+
+# azure container storage
+storage_pool_types = [
+    CONST_STORAGE_POOL_TYPE_AZURE_DISK,
+    CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
+    CONST_STORAGE_POOL_TYPE_ELASTIC_SAN,
+]
+
+disable_storage_pool_types = [
+    CONST_STORAGE_POOL_TYPE_AZURE_DISK,
+    CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
+    CONST_STORAGE_POOL_TYPE_ELASTIC_SAN,
+    CONST_ACSTOR_ALL,
+]
+
+storage_pool_skus = [
+    CONST_STORAGE_POOL_SKU_PREMIUM_LRS,
+    CONST_STORAGE_POOL_SKU_STANDARD_LRS,
+    CONST_STORAGE_POOL_SKU_STANDARDSSD_LRS,
+    CONST_STORAGE_POOL_SKU_ULTRASSD_LRS,
+    CONST_STORAGE_POOL_SKU_PREMIUM_ZRS,
+    CONST_STORAGE_POOL_SKU_PREMIUMV2_LRS,
+    CONST_STORAGE_POOL_SKU_STANDARDSSD_ZRS,
+]
+
+storage_pool_options = [
+    CONST_STORAGE_POOL_OPTION_NVME,
+    CONST_STORAGE_POOL_OPTION_SSD,
+]
+
+disable_storage_pool_options = [
+    CONST_STORAGE_POOL_OPTION_NVME,
+    CONST_STORAGE_POOL_OPTION_SSD,
+    CONST_ACSTOR_ALL,
 ]
 
 
@@ -313,6 +363,7 @@ def load_arguments(self, _):
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('rotation_poll_interval')
         c.argument('enable_sgxquotehelper', action='store_true')
+        c.argument('enable_app_routing', action="store_true")
 
         # nodepool paramerters
         c.argument('nodepool_name', default='nodepool1',
@@ -357,6 +408,30 @@ def load_arguments(self, _):
         c.argument('enable_windows_recording_rules', action='store_true')
         c.argument('node_public_ip_tags', arg_type=tags_type, validator=validate_node_public_ip_tags,
                    help='space-separated tags: key[=value] [key[=value] ...].')
+        # azure container storage
+        c.argument(
+            "enable_azure_container_storage",
+            arg_type=get_enum_type(storage_pool_types),
+            help="enable azure container storage and define storage pool type",
+        )
+        c.argument(
+            "storage_pool_name",
+            help="set storage pool name for azure container storage",
+        )
+        c.argument(
+            "storage_pool_size",
+            help="set storage pool size for azure container storage",
+        )
+        c.argument(
+            "storage_pool_sku",
+            arg_type=get_enum_type(storage_pool_skus),
+            help="set azure disk type storage pool sku for azure container storage",
+        )
+        c.argument(
+            "storage_pool_option",
+            arg_type=get_enum_type(storage_pool_options),
+            help="set ephemeral disk storage pool option for azure container storage",
+        )
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
@@ -460,6 +535,39 @@ def load_arguments(self, _):
         c.argument('grafana_resource_id', validator=validate_grafanaresourceid)
         c.argument('enable_windows_recording_rules', action='store_true')
         c.argument('disable_azure_monitor_metrics', action='store_true')
+        # azure container storage
+        c.argument(
+            "enable_azure_container_storage",
+            arg_type=get_enum_type(storage_pool_types),
+            help="enable azure container storage and define storage pool type",
+        )
+        c.argument(
+            "disable_azure_container_storage",
+            arg_type=get_enum_type(disable_storage_pool_types),
+            help="disable azure container storage or any one of the storagepool types",
+        )
+        c.argument(
+            "storage_pool_name",
+            help="set storage pool name for azure container storage",
+        )
+        c.argument(
+            "storage_pool_size",
+            help="set storage pool size for azure container storage",
+        )
+        c.argument(
+            "storage_pool_sku",
+            arg_type=get_enum_type(storage_pool_skus),
+            help="set azure disk type storage pool sku for azure container storage",
+        )
+        c.argument(
+            "storage_pool_option",
+            arg_type=get_enum_type(disable_storage_pool_options),
+            help="set ephemeral disk storage pool option for azure container storage",
+        )
+        c.argument(
+            "azure_container_storage_nodepools",
+            help="define the comma separated nodepool list to install azure container storage",
+        )
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
@@ -599,6 +707,7 @@ def load_arguments(self, _):
         c.argument('enable_encryption_at_host', action='store_true')
         c.argument('enable_ultra_ssd', action='store_true')
         c.argument('enable_fips_image', action='store_true')
+        c.argument("disable_windows_outbound_nat", action="store_true", validator=validate_disable_windows_outbound_nat)
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
@@ -717,6 +826,25 @@ def load_arguments(self, _):
 
     with self.argument_context('aks mesh upgrade start') as c:
         c.argument('revision', validator=validate_azure_service_mesh_revision, required=True)
+
+    with self.argument_context('aks approuting enable') as c:
+        c.argument('enable_kv', action='store_true')
+        c.argument('keyvault_id', options_list=['--attach-kv'])
+
+    with self.argument_context('aks approuting update') as c:
+        c.argument('keyvault_id', options_list=['--attach-kv'])
+        c.argument('enable_kv', action='store_true')
+
+    with self.argument_context('aks approuting zone add') as c:
+        c.argument('dns_zone_resource_ids', options_list=['--ids'], required=True)
+        c.argument('attach_zones')
+
+    with self.argument_context('aks approuting zone delete') as c:
+        c.argument('dns_zone_resource_ids', options_list=['--ids'], required=True)
+
+    with self.argument_context('aks approuting zone update') as c:
+        c.argument('dns_zone_resource_ids', options_list=['--ids'], required=True)
+        c.argument('attach_zones')
 
 
 def _get_default_install_location(exe_name):

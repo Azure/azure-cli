@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import unittest
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 LOCATION = "westus2"
 VNET_LOCATION = "westus2"
@@ -179,8 +180,8 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         monthly_backups_to_keep = 6
         enabled = False
         tags = "Tag1=Value2"
-        self.cmd("az netappfiles account backup-policy update -g {rg} -a %s --backup-policy-name %s -l %s -d %s -w %s "
-                 "-m %s -e %s --tags %s" % (account_name, backup_policy_name, LOCATION, daily_backups_to_keep,
+        self.cmd("az netappfiles account backup-policy update -g {rg} -a %s --backup-policy-name %s -d %s -w %s "
+                 "-m %s -e %s --tags %s" % (account_name, backup_policy_name, daily_backups_to_keep,
                                             weekly_backups_to_keep, monthly_backups_to_keep, enabled, tags)).get_output_in_json()
 
         # get updated backup policy and validate update
@@ -193,10 +194,11 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert backup_policy['tags']['Tag1'] == 'Value2'
 
 
+    # @unittest.skip('(servicedeployment) Backups has been deprecated, new backup API is in 2023-05-01-preview -> netappfiles-preview extension')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_', additional_tags={'owner': 'cli_test'})
     def test_assign_backup_policy_to_volume(self):
         # create account
-        account_name = self.create_random_name(prefix='cli-acc-', length=24)        
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
 

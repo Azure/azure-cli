@@ -128,7 +128,7 @@ parameters:
     short-summary: Enable managed AAD feature for cluster.
   - name: --aad-admin-group-object-ids
     type: string
-    short-summary: Comma seperated list of aad group object IDs that will be set as cluster admin.
+    short-summary: Comma-separated list of aad group object IDs that will be set as cluster admin.
   - name: --aad-client-app-id
     type: string
     short-summary: The ID of an Azure Active Directory client application of type "Native". This application is for user login via kubectl.
@@ -279,15 +279,15 @@ parameters:
     long-summary: This range must not overlap with any Subnet IP ranges. For example, 10.0.0.0/16.
   - name: --service-cidrs
     type: string
-    short-summary: A comma separated list of CIDR notation IP ranges from which to assign service cluster IPs.
+    short-summary: A comma-separated list of CIDR notation IP ranges from which to assign service cluster IPs.
     long-summary: Each range must not overlap with any Subnet IP ranges. For example, "10.0.0.0/16,2001:abcd::/108".
   - name: --pod-cidrs
     type: string
-    short-summary: A comma separated list of CIDR notation IP ranges from which to assign pod IPs when kubenet is used.
+    short-summary: A comma-separated list of CIDR notation IP ranges from which to assign pod IPs when kubenet is used.
     long-summary: Each range must not overlap with any Subnet IP ranges. For example, "172.244.0.0/16,fd0:abcd::/64".
   - name: --ip-families
     type: string
-    short-summary: A comma separated list of IP versions to use for cluster networking.
+    short-summary: A comma-separated list of IP versions to use for cluster networking.
     long-summary: Each IP version should be in the format IPvN. For example, IPv4.
   - name: --vnet-subnet-id
     type: string
@@ -340,7 +340,7 @@ parameters:
     short-summary: Disable public fqdn feature for private cluster.
   - name: --api-server-authorized-ip-ranges
     type: string
-    short-summary: Comma seperated list of authorized apiserver IP ranges. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
+    short-summary: Comma-separated list of authorized apiserver IP ranges. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
   - name: --enable-managed-identity
     type: bool
     short-summary: Using a system assigned managed identity to manage cluster resource group.
@@ -531,6 +531,9 @@ parameters:
   - name: --enable-asm --enable-azure-service-mesh
     type: bool
     short-summary: Enable Azure Service Mesh addon.
+  - name: --enable-app-routing
+    type: bool
+    short-summary: Enable Application Routing addon.
   - name: --revision
     type: string
     short-summary: Azure Service Mesh revision to install.
@@ -718,13 +721,13 @@ parameters:
     short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
   - name: --api-server-authorized-ip-ranges
     type: string
-    short-summary: Comma seperated list of authorized apiserver IP ranges. Set to "" to allow all traffic on a previously restricted cluster. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
+    short-summary: Comma-separated list of authorized apiserver IP ranges. Set to "" to allow all traffic on a previously restricted cluster. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
   - name: --enable-aad
     type: bool
     short-summary: Enable managed AAD feature for cluster.
   - name: --aad-admin-group-object-ids
     type: string
-    short-summary: Comma seperated list of aad group object IDs that will be set as cluster admin.
+    short-summary: Comma-separated list of aad group object IDs that will be set as cluster admin.
   - name: --aad-tenant-id
     type: string
     short-summary: The ID of an Azure Active Directory tenant.
@@ -1565,6 +1568,9 @@ parameters:
   - name: --crg-id
     type: string
     short-summary: The crg id used to associate the new nodepool with the existed Capacity Reservation Group resource.
+  - name: --disable-windows-outbound-nat
+    type: bool
+    short-summary: Disable Windows OutboundNAT on Windows agent node pool.
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
@@ -2254,4 +2260,94 @@ helps['aks mesh upgrade rollback'] = """
     examples:
       - name: Rollback Azure Service Mesh upgrade.
         text: az aks mesh upgrade rollback --resource-group MyResourceGroup --name MyManagedCluster
+"""
+
+helps['aks approuting'] = """
+    type: group
+    short-summary: Commands to manage App Routing aadon.
+    long-summary: A group of commands to manage App Routing in given cluster.
+"""
+
+helps['aks approuting enable'] = """
+    type: command
+    short-summary: Enable App Routing.
+    long-summary: This command enables App Routing in given cluster.
+    parameters:
+      - name: --enable-kv
+        type: bool
+        short-summary: Enable the keyvault secrets provider.
+        long-summary: This optional flag enables the keyvault-secrets-provider addon in given cluster. This is required for most App Routing use-cases.
+      - name: --attach-kv
+        type: string
+        short-summary: Attach a keyvault id to access secrets and certificates.
+        long-summary: This optional flag attaches a keyvault id to access secrets and certificates.
+"""
+
+helps['aks approuting disable'] = """
+    type: command
+    short-summary: Disable App Routing addon.
+    long-summary: This command disables App Routing in given cluster.
+"""
+
+helps['aks approuting update'] = """
+    type: command
+    short-summary: Update App Routing addon.
+    long-summary: This command is used to update keyvault id in App Routing addon.
+    parameters:
+      - name: --attach-kv
+        type: string
+        short-summary: Attach a keyvault id to access secrets and certificates.
+        long-summary: This optional flag attaches a keyvault id to access secrets and certificates.
+      - name: --enable-kv
+        type: bool
+        short-summary: Enable the keyvault secrets provider addon.
+        long-summary: This optional flag enables the keyvault-secrets-provider addon in given cluster. This is required for most App Routing use-cases.
+"""
+
+helps['aks approuting zone'] = """
+    type: group
+    short-summary: Commands to manage App Routing DNS Zones.
+    long-summary: A group of commands to manage App Routing DNS zones in given cluster.
+"""
+
+helps['aks approuting zone add'] = """
+    type: command
+    short-summary: Add DNS Zone(s) to App Routing.
+    long-summary: This command adds multiple DNS zone resource IDs to App Routing.
+    parameters:
+      - name: --ids
+        type: string
+        short-summary: Comma-separated list of DNS zone resource IDs to add to App Routing.
+      - name: --attach-zones
+        type: bool
+        short-summary: Grant DNS zone Contributor permissions on all zone IDs specified in --ids.
+"""
+
+helps['aks approuting zone delete'] = """
+    type: command
+    short-summary: Delete DNS Zone(s) from App Routing.
+    long-summary: This command deletes DNS zone resource IDs from App Routing in given cluster.
+    parameters:
+      - name: --ids
+        type: string
+        short-summary: Comma-separated list of DNS zone resource IDs to delete from App Routing.
+"""
+
+helps['aks approuting zone update'] = """
+    type: command
+    short-summary: Replace DNS Zone(s) in App Routing.
+    long-summary: This command replaces the DNS zone resource IDs used in App Routing.
+    parameters:
+      - name: --ids
+        type: string
+        short-summary: Comma-separated list of DNS zone resource IDs to replace in App Routing.
+      - name: --attach-zones
+        type: bool
+        short-summary: Grant DNS zone Contributor permissions on all zone IDs specified in --ids.
+"""
+
+helps['aks approuting zone list'] = """
+    type: command
+    short-summary: List DNS Zone IDs in App Routing.
+    long-summary: This command lists the DNS zone resources used in App Routing.
 """

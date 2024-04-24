@@ -136,3 +136,9 @@ LANGUAGE_EOL_DEPRECATION_NOTICES = {
                "14-lts-is-ending-on-30-april-2023/",
     "node|16": "https://azure.microsoft.com/en-us/updates/node16support/"
 }
+
+FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
+
+DEPLOYMENT_STORAGE_AUTH_TYPES = ['SystemAssignedIdentity', 'UserAssignedIdentity', 'StorageAccountConnectionString']
+
+STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
