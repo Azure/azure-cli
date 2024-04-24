@@ -197,13 +197,13 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item_name, 
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.disable_protection(cmd, client, resource_group_name, vault_name, item,
-                                         retain_recovery_points_as_per_policy)
+                                         retain_recovery_points_as_per_policy, tenant_id)
     if item.properties.backup_management_type.lower() == "azurestorage":
         return custom_afs.disable_protection(cmd, client, resource_group_name, vault_name, item,
-                                             retain_recovery_points_as_per_policy)
+                                             retain_recovery_points_as_per_policy, tenant_id)
     if item.properties.backup_management_type.lower() == "azureworkload":
         return custom_wl.disable_protection(cmd, client, resource_group_name, vault_name, item,
-                                            retain_recovery_points_as_per_policy)
+                                            retain_recovery_points_as_per_policy, tenant_id)
     return None
 
 

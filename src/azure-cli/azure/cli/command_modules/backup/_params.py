@@ -121,6 +121,9 @@ def load_arguments(self, _):
         # TODO Re-add once the new SDK is in place
         # c.argument('soft_delete_state', options_list=['--soft-delete-state', '--soft-delete-feature-state'], arg_type=get_enum_type(allowed_softdelete_options), help='Set soft-delete feature state for a Recovery Services Vault.')
         # c.argument('soft_delete_retention_period_in_days', type=int, options_list=['--soft-delete-duration'], help='Set soft-delete retention duration time in days for a Recovery Services Vault.')
+        c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant', 'ZoneRedundant']), help='Set backup storage properties for a Recovery Services vault.')
+        c.argument('cross_region_restore_flag', arg_type=get_enum_type(['Enabled', 'Disabled']), help='Set cross-region-restore feature state for a Recovery Services Vault. Default: False.')
+        c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
 
     with self.argument_context('backup vault backup-properties set') as c:
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant', 'ZoneRedundant']), help='Set backup storage properties for a Recovery Services vault.')

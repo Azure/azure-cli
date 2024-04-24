@@ -28,7 +28,7 @@ If in doubt, ask!
 
 - Be consistent with POSIX tools (support piping, work with grep, awk, jq, etc.)
 - Support tab completion for parameter names and values (e.g. resource names)
-- Commands must support all output types (json, tsv, table)
+- Commands must support all output types (JSON, TSV, table)
 - Provide custom table outputs for commands that don't provide table output automatically
 - Commands must return an object, dictionary or `None` (do not string, Boolean, etc. types)
 - Command output must go to `stdout`, everything else to `stderr` (log/status/errors).
