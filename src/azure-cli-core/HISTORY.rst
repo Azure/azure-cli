@@ -5,7 +5,7 @@ Release History
 
 2.60.0
 ++++++
-* Fix #28737: Azure CLI tasks can now run longer than 5 minutes utilizing the token cache (#28747)
+* Fix #28737: Fix token cache for service principal authentication (#28747)
 * Resolve CVE-2023-3651 (#28735)
 
 2.59.0
