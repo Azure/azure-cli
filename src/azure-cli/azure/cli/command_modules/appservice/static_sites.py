@@ -291,8 +291,10 @@ def set_staticsite_app_settings(cmd, name, setting_pairs, resource_group_name=No
     for k, v in setting_dict.items():
         settings.properties[k] = v
 
-    return client.create_or_update_static_site_app_settings(
+    result = client.create_or_update_static_site_app_settings(
         resource_group_name, name, app_settings=settings)
+
+    return _redact_appsettings(result)
 
 
 def delete_staticsite_app_settings(cmd, name, setting_names, resource_group_name=None):
@@ -308,8 +310,17 @@ def delete_staticsite_app_settings(cmd, name, setting_names, resource_group_name
         else:
             logger.warning("key '%s' not found in app settings", key)
 
-    return client.create_or_update_static_site_app_settings(
+    result = client.create_or_update_static_site_app_settings(
         resource_group_name, name, app_settings=app_settings)
+
+    return _redact_appsettings(result)
+
+
+def _redact_appsettings(payload):
+    logger.warning('App settings have been redacted. Use `az staticwebapp appsettings list` to view.')
+    for x in payload.properties:
+        payload.properties[x] = None
+    return payload
 
 
 def list_staticsite_users(cmd, name, resource_group_name=None, authentication_provider='all'):

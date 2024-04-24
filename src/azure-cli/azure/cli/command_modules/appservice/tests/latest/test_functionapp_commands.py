@@ -948,11 +948,11 @@ class FunctionAppSlotTests(ScenarioTest):
         self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, functionapp, slotname), checks=[
             JMESPathCheck('name', slotname)
         ])
-        self.cmd('functionapp config appsettings set -g {} -n {} --slot {} --slot-settings FOO=BAR'.format(resource_group, functionapp,
-                                                                                                           slotname), checks=[
-            JMESPathCheck("[?name=='FOO'].value|[0]", 'BAR'),
-            JMESPathCheck("[?name=='FOO'].slotSetting|[0]", True)
-        ])
+        self.cmd('functionapp config appsettings set -g {} -n {} --slot {} --slot-settings FOO=BAR'
+                 .format(resource_group, functionapp, slotname)).assert_with_checks([
+                     JMESPathCheck("[?name=='FOO']|[0].name", 'FOO'),
+                     JMESPathCheck("[?name=='FOO']|[0].value", None)
+                 ])
         self.cmd('functionapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, functionapp, slotname), checks=[
             JMESPathCheck("[?name=='FOO'].value|[0]", 'BAR'),
             JMESPathCheck("[?name=='FOO'].slotSetting|[0]", True)
@@ -979,7 +979,8 @@ class FunctionAppSlotTests(ScenarioTest):
             JMESPathCheck('name', slotname)
         ])
         self.cmd('functionapp config appsettings set -g {} -n {} --slot {} --settings FOO=BAR'.format(resource_group, functionapp,
-                                                                                                      slotname), checks=[
+                                                                                                      slotname))
+        self.cmd('functionapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, functionapp, slotname), checks=[
             JMESPathCheck("[?name=='FOO'].value|[0]", 'BAR')
         ])
         self.cmd('functionapp deployment slot swap -g {} -n {} --slot {} --action swap'.format(
