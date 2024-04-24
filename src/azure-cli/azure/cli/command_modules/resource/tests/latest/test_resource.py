@@ -2141,7 +2141,7 @@ class DeploymentScriptsTest(ScenarioTest):
 
 class DeploymentStacksTest(ScenarioTest):
     global location
-    location = "eastus2euap"
+    location = "westcentralus"
     global management_group_id
     management_group_id = "AzBlueprintAssignTest"
 
@@ -2897,8 +2897,6 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --action-on-unmanage detachAll --yes')
 
-    @unittest.skip(
-        "2024-03-01 api version bump for Microsoft Build 2024 is being tested in canary and we can't test management groups there.")
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_create_deployment_stack_management_group(self, resource_group):
@@ -2993,8 +2991,6 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup
         self.cmd('stack mg delete --name {name} --management-group-id {mg} --action-on-unmanage detachAll --yes')
 
-    @unittest.skip(
-        "2024-03-01 api version bump for Microsoft Build 2024 is being tested in canary and we can't test management groups there.")
     def test_show_deployment_stack_management_group(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-get-deployment-stack-subscription', 60)
@@ -3021,8 +3017,6 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup
         self.cmd('stack mg delete --name {name} --management-group-id {mg} --action-on-unmanage detachAll --yes')
 
-    @unittest.skip(
-        "2024-03-01 api version bump for Microsoft Build 2024 is being tested in canary and we can't test management groups there.")
     def test_delete_deployment_stack_management_group(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-delete-deployment-stack-subscription', 60)
@@ -3096,8 +3090,6 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup
         self.cmd('group delete --name {resource-one} --yes')
 
-    @unittest.skip(
-        "2024-03-01 api version bump for Microsoft Build 2024 is being tested in canary and we can't test management groups there.")
     def test_export_template_deployment_stack_management_group(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-get-deployment-stack-subscription', 60)
@@ -3127,8 +3119,6 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup
         self.cmd('stack mg delete --name {name} --management-group-id {mg} --action-on-unmanage detachAll --yes')
 
-    @unittest.skip(
-        "2024-03-01 api version bump for Microsoft Build 2024 is being tested in canary and we can't test management groups there.")
     @AllowLargeResponse(4096)
     def test_list_deployment_stack_management_group(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
