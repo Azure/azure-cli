@@ -16,7 +16,7 @@ Release History
 * `az aks create/update`: Prompt warning during disablement about CR deletion (#28655)
 * `az aks create/update`: Udpate RP registration code to work on azure monitor subscription (#28607)
 * `az aks create/update`: Update to add default region for workspace creation in air gapped cloud (#28607)
-* Add option `--disable-windows-outbound-nat` for `az aks nodepool add` to add a Windows agent pool which the Windows OutboundNAT is disabled (#28806)
+* `az aks nodepool add`: Add parameter `--disable-windows-outbound-nat` to add a Windows agent pool which the Windows OutboundNAT is disabled (#28806)
 
 **App Service**
 
@@ -46,22 +46,18 @@ Release History
 
 **Batch**
 
-* `az batch pool create` Add `--upgrade-policy-mode` argument to support automatic OS upgrade (#28784)
-* `az batch pool create` Add `--enable-auto-os-upgrade` argument to enable automatic OS upgrade (#28784)
-* `az batch pool create` Add `--disable-auto-rollback` argument to disable OS image rollback feature (#28784)
-* `az batch pool create` Add `--defer-os-rolling-upgrade` argument to defer OS upgrades on the TVMs if they are running tasks (#28784)
-* `az batch pool create` Add `--use-rolling-upgrade-policy` argument to support OS rolling upgrade policy (#28784)
-* `az batch pool create` Add `--enable-cross-zone-upgrade` argument to support cross zone OS upgrade (#28784)
-* `az batch pool create` Add `--max-batch-instance-percent` argument to set the maximum percent of total VMs that will be upgraded in one batch (#28784)
-* `az batch pool create` Add `--max-unhealthy-instance-percent` argument to set the maximum percentage of the total VMs can be simultaneously unhealthy (#28784)
-* `az batch pool create` Add `--max-unhealthy-upgraded-instance-percent` argument to set the maximum percentage of upgraded VMs that can be found to be in an unhealthy state (#28784)
-* `az batch pool create` Add `--pause-time-between-batches` argument to set the wait time between batches in rolling OS upgrade (#28784)
-* `az batch pool create` Add `--prioritize-unhealthy-instances` argument to support upgrade all unhealthy VMs first (#28784)
-* `az batch pool create` Add `--rollback-failed-instances-on-policy-breach` argument to enable rollback failed instances to previous model if the Rolling Upgrade policy is violated (#28784)
-
-**CI**
-
-* Limit workflow target branches (#28706)
+* `az batch pool create`: Add `--upgrade-policy-mode` argument to support automatic OS upgrade (#28784)
+* `az batch pool create`: Add `--enable-auto-os-upgrade` argument to enable automatic OS upgrade (#28784)
+* `az batch pool create`: Add `--disable-auto-rollback` argument to disable OS image rollback feature (#28784)
+* `az batch pool create`: Add `--defer-os-rolling-upgrade` argument to defer OS upgrades on the TVMs if they are running tasks (#28784)
+* `az batch pool create`: Add `--use-rolling-upgrade-policy` argument to support OS rolling upgrade policy (#28784)
+* `az batch pool create`: Add `--enable-cross-zone-upgrade` argument to support cross zone OS upgrade (#28784)
+* `az batch pool create`: Add `--max-batch-instance-percent` argument to set the maximum percent of total VMs that will be upgraded in one batch (#28784)
+* `az batch pool create`: Add `--max-unhealthy-instance-percent` argument to set the maximum percentage of the total VMs can be simultaneously unhealthy (#28784)
+* `az batch pool create`: Add `--max-unhealthy-upgraded-instance-percent` argument to set the maximum percentage of upgraded VMs that can be found to be in an unhealthy state (#28784)
+* `az batch pool create`: Add `--pause-time-between-batches` argument to set the wait time between batches in rolling OS upgrade (#28784)
+* `az batch pool create`: Add `--prioritize-unhealthy-instances` argument to support upgrade all unhealthy VMs first (#28784)
+* `az batch pool create`: Add `--rollback-failed-instances-on-policy-breach` argument to enable rollback failed instances to previous model if the Rolling Upgrade policy is violated (#28784)
 
 **Compute**
 
@@ -82,7 +78,7 @@ Release History
 **NetAppFiles**
 
 * `az netappfiles`: Update to api-version 2023-07-01 (#28575)
-* `az netappfiles volume-group create`: Add `zones` argument to set Availability Zone for volume group volumes (#28709)
+* `az netappfiles volume-group create`: Add `--zones` argument to set Availability Zone for volume group volumes (#28709)
 * `az netappfiles volume create`: Update maximum value for `--usage-threshold` to support large volumes (#28709)
 * `az netappfiles volume update`: Update maximum value for `--usage-threshold` to support large volumes (#28709)
 
