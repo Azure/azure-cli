@@ -2,6 +2,15 @@
 
 Release History
 ===============
+2.38.2
+++++++
+
+This version is only released for CentOS 7 and RHEL 7.
+
+**App Service**
+
+* Backport Breaking Change: Redact appsettings, storage-account, configs (#28671)
+* Backport Breaking Change: Redact keys (#28751)
 
 2.38.1
 ++++++
