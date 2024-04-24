@@ -77,7 +77,6 @@ Release History
 
 **NetAppFiles**
 
-* `az netappfiles`: Update to api-version 2023-07-01 (#28575)
 * `az netappfiles volume-group create`: Add `--zones` argument to set Availability Zone for volume group volumes (#28709)
 * `az netappfiles volume create`: Update maximum value for `--usage-threshold` to support large volumes (#28709)
 * `az netappfiles volume update`: Update maximum value for `--usage-threshold` to support large volumes (#28709)
