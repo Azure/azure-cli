@@ -149,6 +149,40 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         # SystemExit 3 'not found'
         with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
+            
+    @ResourceGroupPreparer()
+    def test_secureboot_security_type_test(self):
+        self.kwargs.update({
+            'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
+            'loc': 'eastus',
+            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'vm_password': self.create_random_name('Pass@', 9),
+            'vm_image_sku': '2022-datacenter-g2'
+        })
+
+        self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --sku Standard --upgrade-mode Automatic --upgrade-cadence Wave1',
+                 checks=[self.check('provisioningState', 'Succeeded'),
+                         self.check('clusterState', 'WaitingForNodes'),
+                         self.check('clusterUpgradeMode', 'Automatic'),
+                         self.check('clusterUpgradeCadence', 'Wave1')])
+        
+        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary',
+                 checks=[self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n snt --instance-count 5 --vm-size Standard_DC1s_v2 --security-type TrustedLaunch --secure-boot-enabled --vm-image-sku {vm_image_sku}',
+                 checks=[self.check('provisioningState', 'Succeeded')])
+        
+        self.cmd('az sf managed-node-type update -g {rg} -c {cluster_name} -n pnt --instance-count 5 --vm-size Standard_DC1s_v2 --security-type TrustedLaunch --secure-boot-enabled --vm-image-sku {vm_image_sku}',
+                 checks=[self.check('provisioningState', 'Succeeded')])
+        
+        self.cmd('az sf managed-node-type list -g {rg} -c {cluster_name}',
+                 checks=[self.check('length(@)', 2)])
+        
+        self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
+
+        # SystemExit 3 'not found'
+        with self.assertRaisesRegex(SystemExit, '3'):
+            self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
     @ResourceGroupPreparer()
     @KeyVaultPreparer(name_prefix='sfrp-cli-kv-', location='eastasia', additional_params='--enabled-for-deployment --enabled-for-template-deployment')

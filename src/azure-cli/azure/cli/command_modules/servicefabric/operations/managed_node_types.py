@@ -44,7 +44,9 @@ def create_node_type(cmd,
                      capacity=None,
                      placement_property=None,
                      is_stateless=False,
-                     multiple_placement_groups=False):
+                     multiple_placement_groups=False,
+                     security_type=None,
+                     secure_boot_enabled=None):
 
     #  set defult parameters
     if disk_size is None:
@@ -78,7 +80,9 @@ def create_node_type(cmd,
                                  capacities=capacity,
                                  placement_properties=placement_property,
                                  is_stateless=is_stateless,
-                                 multiple_placement_groups=multiple_placement_groups)
+                                 multiple_placement_groups=multiple_placement_groups,
+                                 security_type=security_type,
+                                 secure_boot_enabled=secure_boot_enabled)
 
         if application_start_port and application_end_port:
             new_node_type.application_ports = EndpointRangeDescription(start_port=application_start_port,
@@ -108,7 +112,11 @@ def update_node_type(cmd,
                      ephemeral_start_port=None,
                      ephemeral_end_port=None,
                      capacity=None,
-                     placement_property=None):
+                     placement_property=None,
+                     security_type=None,
+                     secure_boot_enabled=None,
+                     vm_size=None,
+                     vm_image_sku=None):
     try:
         node_type = client.node_types.get(resource_group_name, cluster_name, node_type_name)
 
@@ -128,6 +136,18 @@ def update_node_type(cmd,
 
         if placement_property is not None:
             node_type.placement_properties = placement_property
+            
+        if security_type is not None:
+            node_type.security_type = security_type
+            
+        if secure_boot_enabled is not None:
+            node_type.secure_boot_enabled = secure_boot_enabled
+            
+        if vm_size is not None:
+            node_type.vm_size = vm_size
+            
+        if vm_image_sku is not None:
+            node_type.vm_image_sku = vm_image_sku
 
         poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)
