@@ -5438,6 +5438,11 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
+        # this 2nd format should also work and have the same effect
+        self.cmd('deployment group create --resource-group {rg} --parameters {params} {params2}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_bicepparam_inline_params_e2e')
     def test_bicepparams_and_inline_params_e2e(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
