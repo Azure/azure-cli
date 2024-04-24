@@ -4095,6 +4095,8 @@ class _FlexFunctionAppStackRuntimeHelper:
         return self._stacks
 
     def get_flex_raw_function_app_stacks(self, cmd, location, runtime):
+        if "northcentralus" in location:
+            location = "eastasia"
         stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?' \
                          'api-version=2020-10-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}'
         if runtime == "dotnet-isolated":
