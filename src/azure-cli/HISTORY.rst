@@ -21,7 +21,8 @@ Release History
 **App Service**
 
 * `az webapp config container set`: Remove docker prefix and rename container related parameters (#28621)
-* `az webapp create` and `az webapp deployment slot create`: Rename `--docker-registry-server-user` and `--docker-registry-server-password` to `--container-registry-user` and `--container-registry-password` and add parameters `--container-image-name` and `container-registry-url` to deprecate `--deployment-container-image-name` (#28621)
+* `az webapp create` and `az webapp deployment slot create`: Rename `--docker-registry-server-user` and `--docker-registry-server-password` to `--container-registry-user` and `--container-registry-password` (#28621)
+* `az webapp create` and `az webapp deployment slot create`: Add parameters `--container-image-name` and `container-registry-url` to deprecate `--deployment-container-image-name` (#28621)
 * `az webapp create` and `az logicapp create`: Update help message (#28621)
 * `az webapp config set`: Add new parameter `--runtime` to allow users to update their stack by using single parameter (#28736)
 * `az functionapp create`: Remove unnecessary app settings for flex function apps (#28726)
@@ -78,8 +79,7 @@ Release History
 **NetAppFiles**
 
 * `az netappfiles volume-group create`: Add `--zones` argument to set Availability Zone for volume group volumes (#28709)
-* `az netappfiles volume create`: Update maximum value for `--usage-threshold` to support large volumes (#28709)
-* `az netappfiles volume update`: Update maximum value for `--usage-threshold` to support large volumes (#28709)
+* `az netappfiles volume create/update`: Update maximum value for `--usage-threshold` to support large volumes (#28709)
 
 **Network**
 
@@ -87,7 +87,7 @@ Release History
 
 **RDBMS**
 
-* `az postgres flexible-server upgrade`: Add capability to perform major version upgrade to PG16. (#28687)
+* `az postgres flexible-server upgrade`: Add capability to perform major version upgrade to PG16 (#28687)
 
 **Service Connector**
 
