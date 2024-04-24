@@ -581,13 +581,13 @@ helps['sf managed-node-type node restart'] = """
 type: command
 short-summary: Restart nodes of a node type.
 examples:
-  - name: Restart all nodes.
+  - name: Restart 2 nodes.
     text: >
         az sf managed-node-type node restart -g testRG -c testCluster -n snt --node-name snt_0 snt_1
 
   - name: Restart nodes with updateType set to ByUpgradeDomain
     text: >
-        az sf managed-node-type node restart -g testRG -c testCluster -n snt --update-type ByUpgradeDomain
+        az sf managed-node-type node restart -g testRG -c testCluster -n snt --node-name snt_0 snt_1 --update-type ByUpgradeDomain
 """
 
 helps['sf managed-node-type node reimage'] = """
