@@ -5018,6 +5018,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     else:
         functionapp_def.kind = 'functionapp'
 
+    if site_config_dict.additional_properties:
+        for prop, value in site_config_dict.additional_properties.items():
+            snake_case_prop = _convert_camel_to_snake_case(prop)
+            setattr(site_config, snake_case_prop, value)
+
     # set site configs
     for prop, value in site_config_dict.as_dict().items():
         snake_case_prop = _convert_camel_to_snake_case(prop)
