@@ -1847,7 +1847,14 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
             poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                              'begin_create_or_update_source_control',
                                              slot, source_control)
-            return LongRunningOperation(cmd.cli_ctx)(poller)
+            response = LongRunningOperation(cmd.cli_ctx)(poller)
+            if response.git_hub_action_configuration and \
+                response.git_hub_action_configuration.container_configuration and \
+                    response.git_hub_action_configuration.container_configuration.password:
+                logger.warning("GitHub action password has been redacted. Use "
+                               "`az webapp/functionapp deployment source show` to view.")
+                response.git_hub_action_configuration.container_configuration.password = None
+            return response
         except Exception as ex:  # pylint: disable=broad-except
             import re
             ex = ex_handler_factory(no_throw=True)(ex)
@@ -1861,12 +1868,17 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
 def update_git_token(cmd, git_token=None):
     '''
     Update source control token cached in Azure app service. If no token is provided,
-    the command will clean up existing token.
+    the command will clean up existing token. Note that tokens are now redacted in the result.
     '''
     client = web_client_factory(cmd.cli_ctx)
     from azure.mgmt.web.models import SourceControl
     sc = SourceControl(name='not-really-needed', source_control_name='GitHub', token=git_token or '')
-    return client.update_source_control('GitHub', sc)
+    response = client.update_source_control('GitHub', sc)
+    logger.warning('Tokens have been redacted.')
+    response.refresh_token = None
+    response.token = None
+    response.token_secret = None
+    return response
 
 
 def show_source_control(cmd, resource_group_name, name, slot=None):
@@ -4937,15 +4949,21 @@ def update_host_key(cmd, resource_group_name, name, key_type, key_name, key_valu
     }
     client = web_client_factory(cmd.cli_ctx)
     if slot:
-        return client.web_apps.create_or_update_host_secret_slot(resource_group_name,
-                                                                 name,
-                                                                 key_type,
-                                                                 key_name,
-                                                                 slot, key=key_info)
-    return client.web_apps.create_or_update_host_secret(resource_group_name,
-                                                        name,
-                                                        key_type,
-                                                        key_name, key=key_info)
+        response = client.web_apps.create_or_update_host_secret_slot(resource_group_name,
+                                                                     name,
+                                                                     key_type,
+                                                                     key_name,
+                                                                     slot,
+                                                                     key=key_info)
+    else:
+        response = client.web_apps.create_or_update_host_secret(resource_group_name,
+                                                                name,
+                                                                key_type,
+                                                                key_name,
+                                                                key=key_info)
+    logger.warning('Keys have been redacted. Use `az functionapp keys list` to view.')
+    response.value = None
+    return response
 
 
 def list_host_keys(cmd, resource_group_name, name, slot=None):
@@ -4985,17 +5003,21 @@ def update_function_key(cmd, resource_group_name, name, function_name, key_name,
     }
     client = web_client_factory(cmd.cli_ctx)
     if slot:
-        return client.web_apps.create_or_update_function_secret_slot(resource_group_name,
-                                                                     name,
-                                                                     function_name,
-                                                                     key_name,
-                                                                     slot,
-                                                                     key_info)
-    return client.web_apps.create_or_update_function_secret(resource_group_name,
-                                                            name,
-                                                            function_name,
-                                                            key_name,
-                                                            key_info)
+        response = client.web_apps.create_or_update_function_secret_slot(resource_group_name,
+                                                                         name,
+                                                                         function_name,
+                                                                         key_name,
+                                                                         slot,
+                                                                         key_info)
+    else:
+        response = client.web_apps.create_or_update_function_secret(resource_group_name,
+                                                                    name,
+                                                                    function_name,
+                                                                    key_name,
+                                                                    key_info)
+    logger.warning('Keys have been redacted. Use `az functionapp function keys list` to view.')
+    response.value = None
+    return response
 
 
 def list_function_keys(cmd, resource_group_name, name, function_name, slot=None):

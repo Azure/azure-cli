@@ -101,7 +101,7 @@ class TestWebappMocked(unittest.TestCase):
         result = update_git_token(cmd_mock, 'veryNiceToken')
 
         # assert things gets wired up
-        self.assertEqual(result.token, 'veryNiceToken')
+        self.assertEqual(result.token, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_domain_name(self, client_factory_mock):
