@@ -213,15 +213,15 @@ def add_vm_extension(cmd,
             node_type.vm_extensions = []
 
         updatedExtension = VMSSExtension(name=extension_name,
-                                     publisher=publisher,
-                                     type=extension_type,
-                                     type_handler_version=type_handler_version,
-                                     force_update_tag=force_update_tag,
-                                     auto_upgrade_minor_version=auto_upgrade_minor_version,
-                                     settings=setting,
-                                     protected_settings=protected_setting,
-                                     provision_after_extensions=provision_after_extension,
-                                     setup_order=setup_order)
+                                         publisher=publisher,
+                                         type=extension_type,
+                                         type_handler_version=type_handler_version,
+                                         force_update_tag=force_update_tag,
+                                         auto_upgrade_minor_version=auto_upgrade_minor_version,
+                                         settings=setting,
+                                         protected_settings=protected_setting,
+                                         provision_after_extensions=provision_after_extension,
+                                         setup_order=setup_order)
 
         node_type.vm_extensions.append(updatedExtension)
 
