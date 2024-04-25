@@ -71,7 +71,7 @@ from .utils import (_normalize_sku,
                     get_resource_if_exists, repo_url_to_name, get_token,
                     app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp,
                     _remove_list_duplicates, get_raw_functionapp,
-                    register_app_provider)
+                    register_app_provider, _normalize_location)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -4095,7 +4095,7 @@ class _FlexFunctionAppStackRuntimeHelper:
         return self._stacks
 
     def get_flex_raw_function_app_stacks(self, cmd, location, runtime):
-        if "northcentralus" in location:
+        if "northcentralus" in _normalize_location(cmd, location):
             location = "eastasia"
         stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?' \
                          'api-version=2020-10-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}'
