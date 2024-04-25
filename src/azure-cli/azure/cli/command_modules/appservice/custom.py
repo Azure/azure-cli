@@ -66,7 +66,7 @@ from .utils import (_normalize_sku,
                     _rename_server_farm_props,
                     _get_location_from_webapp,
                     _normalize_flex_location,
-                    _normalize_location,
+                    _normalize_stage_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
                     app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp,
@@ -351,8 +351,8 @@ def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, w
 
     cmd.cli_ctx.data['subscription_id'] = current_sub_id
 
-    vnet_location = _normalize_location(cmd, vnet_location)
-    asp_location = _normalize_location(cmd, webapp_location)
+    vnet_location = _normalize_stage_location(cmd, vnet_location)
+    asp_location = _normalize_stage_location(cmd, webapp_location)
 
     if vnet_location != asp_location:
         raise ArgumentUsageError("Unable to create webapp: vnet and App Service Plan must be in the same location. "
@@ -5280,7 +5280,7 @@ def try_create_workspace_based_application_insights(cmd, functionapp, workspace_
 
     ai_resource_group_name = functionapp.resource_group
     ai_name = functionapp.name
-    ai_location = _normalize_location(cmd, functionapp.location)
+    ai_location = _normalize_stage_location(cmd, functionapp.location)
 
     workspace = get_workspace(cmd, workspace_name)
 
