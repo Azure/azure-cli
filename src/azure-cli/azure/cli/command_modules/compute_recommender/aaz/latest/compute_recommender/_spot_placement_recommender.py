@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "compute-recommender spot-placement-recommender",
 )
 class SpotPlacementRecommender(AAZCommand):
-    """Generates placement scores for Spot VM skus.
+    """Generate placement scores for Spot VM skus.
 
     :example: generate spot vm placement score example
         az compute-recommender spot-placement-recommender -l eastus --subscription ffffffff-ffff-ffff-ffff-ffffffffffff --availability-zones true --desired-locations '["eastus", "eastus2"]' --desired-count 1 --desired-sizes '[{"sku": "Standard_D2_v2"}]'
