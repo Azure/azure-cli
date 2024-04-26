@@ -2624,7 +2624,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
                 storage_account),
         })
 
-        _test_private_endpoint(self, group_id=False)
+        _test_private_endpoint(self)
 
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_sql_server", location="eastus")
     def test_private_endpoint_connection_sql_server(self, resource_group):
@@ -2759,10 +2759,10 @@ class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
         self.kwargs.update({
             'powerbi_resource_name': powerBIResourceName,
             'powerbi_resource_id': resource_id(subscription=self.get_subscription_id(),
-                                              resource_group=resource_group,
-                                              namespace=resource_type.split('/')[0],
-                                              type=resource_type.split('/')[1],
-                                              name=powerBIResourceName),
+                                               resource_group=resource_group,
+                                               namespace=resource_type.split('/')[0],
+                                               type=resource_type.split('/')[1],
+                                               name=powerBIResourceName),
             'rg': resource_group,
             'resource_type': resource_type,
             'tenant_id': tenant_id,
@@ -4635,7 +4635,7 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
         self.cmd('az network private-link-resource list --name {cluster_name} --resource-group {rg} --type Microsoft.DocumentDB/mongoClusters',
                  checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'MongoCluster')])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongo_cl', random_name_length=30, location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongo_cl', random_name_length=30, location='eastus')
     def test_private_endpoint_connection_cosmosdb_mongo_clusters(self, resource_group):
         from azure.mgmt.core.tools import resource_id
         namespace = 'Microsoft.DocumentDB'
@@ -4653,7 +4653,7 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
         self.kwargs.update({
             'cluster_name': resource_name,
             'target_resource_id': target_resource_id,
-            'loc': 'eastus2euap',
+            'loc': 'eastus',
             'sub': self.get_subscription_id(),
             'namespace': namespace,
             'resource_type': resource_type,
@@ -4662,7 +4662,7 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
             'pe': self.create_random_name('cli-pe-', 24),
             'pe_connection': self.create_random_name('cli-pec-', 24),
             'api_version': '2023-03-01-preview',
-            'body': f"""{{\\"location\\":\\"eastus2euap\\",\\"properties\\":{{\\"nodeGroupSpecs\\":[{{\\"kind\\":\\"Shard\\",\\"sku\\":\\"M30\\",\\"diskSizeGB\\":128,\\"nodeCount\\":1,\\"enableHa\\":false}}],\\"administratorLogin\\":\\"{secret1}\\",\\"administratorLoginPassword\\":\\"{secret2}\\"}}}}"""
+            'body': f"""{{\\"location\\":\\"eastus\\",\\"properties\\":{{\\"nodeGroupSpecs\\":[{{\\"kind\\":\\"Shard\\",\\"sku\\":\\"M30\\",\\"diskSizeGB\\":128,\\"nodeCount\\":1,\\"enableHa\\":false}}],\\"administratorLogin\\":\\"{secret1}\\",\\"administratorLoginPassword\\":\\"{secret2}\\"}}}}"""
         })
 
         cluster = self.cmd('az rest --method "PUT" \
