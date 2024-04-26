@@ -7,6 +7,7 @@ from knack.log import get_logger
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
     AAZStrArg, AAZArgEnum
+from msrestazure.tools import parse_resource_id
 from ..aaz.latest.network.lb import Delete as _LBDelete, Update as _LBUpdate, List as _LBList, Show as _LBShow
 from ..aaz.latest.network.lb.frontend_ip import Create as _LBFrontendIPCreate, Update as _LBFrontendIPUpdate, \
     Show as _LBFrontendIPShow, Delete as _LBFrontendIPDelete, List as _LBFrontendIPList
@@ -261,7 +262,7 @@ class LBRuleCreate(_LBRuleCreate):
                 args.frontend_ip_name = instance.properties.frontend_ip_configurations[0].id
             elif len(frontend_ip_configurations) > 1:
                 raise ArgumentUsageError(
-                    "Multiple FrontendIpConfigurations found in loadbalancer. Specify --frontend-ip explicitly.")
+                    "Multiple FrontendIpConfigurations found in loadbalancer. Specify --frontend-ip-name explicitly.")
         if not has_value(args.backend_pools):
             instance = self.ctx.vars.instance
             backend_address_pools = instance.properties.backend_address_pools
@@ -274,6 +275,17 @@ class LBRuleCreate(_LBRuleCreate):
             args.backend_address_pools, args.backend_pools,
             element_transformer=lambda _, id: {"id": id}
         )
+
+    def post_instance_create(self, _):
+        args = self.ctx.args
+        if has_value(args.frontend_ip_name):
+            instance = self.ctx.vars.instance
+            frontend_ip_configurations = instance.properties.frontend_ip_configurations
+
+            for fip in frontend_ip_configurations:
+                if fip.name == args.frontend_ip_name:
+                    rid = fip.id.to_serialized_data()
+                    self.ctx.update_aux_subscriptions(parse_resource_id(rid)["subscription"])
 
 
 class LBRuleUpdate(_LBRuleUpdate):
@@ -323,6 +335,16 @@ class LBRuleUpdate(_LBRuleUpdate):
             instance.properties.probe = None
         # always remove backend_address_pool in update request, service will fill this property based on backend_address_pools property.
         instance.properties.backend_address_pool = None
+
+        args = self.ctx.args
+        if has_value(args.frontend_ip_name):
+            parent = self.ctx.vars.instance
+            frontend_ip_configurations = parent.properties.frontend_ip_configurations
+
+            for fip in frontend_ip_configurations:
+                if fip.name == args.frontend_ip_name:
+                    rid = fip.id.to_serialized_data()
+                    self.ctx.update_aux_subscriptions(parse_resource_id(rid)["subscription"])
 
 
 class LBOutboundRuleCreate(_LBOutboundRuleCreate):
