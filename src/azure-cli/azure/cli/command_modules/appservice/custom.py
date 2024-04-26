@@ -5076,10 +5076,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
         functionapp_def.managed_environment_id = managed_environment.id
 
-    # temporary workaround for dotnet-isolated linux consumption apps
-    if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
-        site_config.linux_fx_version = ''
-
     # adding app settings
     for app_setting, value in app_settings_dict.items():
         site_config.app_settings.append(NameValuePair(name=app_setting, value=value))

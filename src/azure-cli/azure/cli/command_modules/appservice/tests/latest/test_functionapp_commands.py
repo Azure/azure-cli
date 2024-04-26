@@ -592,6 +592,23 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
 
+    @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_consumption_linux_dotnet_isolated(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapplinuxconsumption', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --runtime dotnet-isolated --runtime-version 8 --functions-version 4'
+                 .format(resource_group, functionapp_name, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('reserved', True),
+                     JMESPathCheck('kind', 'functionapp,linux'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOTNET-ISOLATED|8.0')])
+
 
 class FunctionappDaprConfig(ScenarioTest):
     @ResourceGroupPreparer(location='northeurope')
