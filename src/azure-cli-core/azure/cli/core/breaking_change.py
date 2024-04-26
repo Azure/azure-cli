@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import abc
-import enum
 import re
+from functools import lru_cache
 
 import packaging.version
 
@@ -24,7 +24,7 @@ def _next_breaking_change_version_from_milestone(cur_version):
         response = requests.get(url)
         response.raise_for_status()
         milestones = response.json()
-    except requests.RequestException as e:
+    except requests.RequestException:
         return None
     for milestone in milestones:
         try:
@@ -36,40 +36,36 @@ def _next_breaking_change_version_from_milestone(cur_version):
                     parsed_version = packaging.version.parse(version)
                     if parsed_version > cur_version:
                         return version
-        except (IndexError, KeyError) as e:
+        except (IndexError, KeyError):
             pass
     return None
 
 
-__bc_version = None
-
-
+@lru_cache()
 def _next_breaking_change_version():
-    global __bc_version
-    if __bc_version:
-        return __bc_version
     cur_version = packaging.version.parse(__version__)
     next_bc_version = packaging.version.parse(NEXT_BREAKING_CHANGE_RELEASE)
     if cur_version >= next_bc_version:
         fetched_bc_version = _next_breaking_change_version_from_milestone(cur_version)
         if fetched_bc_version:
-            __bc_version = fetched_bc_version
             return fetched_bc_version
-    __bc_version = NEXT_BREAKING_CHANGE_RELEASE
     return NEXT_BREAKING_CHANGE_RELEASE
 
 
+# pylint: disable=too-few-public-methods
 class TargetVersion(abc.ABC):
     @abc.abstractmethod
     def __str__(self):
         raise NotImplementedError()
 
 
+# pylint: disable=too-few-public-methods
 class NextBreakingChangeWindow(TargetVersion):
     def __str__(self):
         return f'in next breaking change release({_next_breaking_change_version()})'
 
 
+# pylint: disable=too-few-public-methods
 class ExactVersion(TargetVersion):
     def __init__(self, version):
         self.version = version
@@ -78,6 +74,7 @@ class ExactVersion(TargetVersion):
         return f'in {self.version}'
 
 
+# pylint: disable=too-few-public-methods
 class UnspecificVersion(TargetVersion):
     def __str__(self):
         return 'in future'
