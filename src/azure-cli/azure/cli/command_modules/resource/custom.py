@@ -2802,7 +2802,7 @@ def validate_deployment_stack_at_subscription(
 
 
 def validate_deployment_stack_at_management_group(
-    cmd, management_group_id, name, location, deny_settings_mode, action_on_unmanage=None, deployment_subscription=None,
+    cmd, management_group_id, name, location, deny_settings_mode, action_on_unmanage, deployment_subscription=None,
     template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None,
     deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None
 ):
