@@ -1161,7 +1161,7 @@ def list_function_app(cmd, resource_group_name=None):
 
 def show_functionapp(cmd, resource_group_name, name, slot=None):
     if is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
-        return get_raw_functionapp(cmd, resource_group_name, name)
+        return get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not app:
         raise ResourceNotFoundError("Unable to find resource'{}', in ResourceGroup '{}'.".format(name,
@@ -1639,7 +1639,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 
 
 def get_deployment_configs(cmd, resource_group_name, name):
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
     return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
         "deployment", {})
 
@@ -1665,7 +1665,7 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
             'StorageAccountConnectionString.'
         )
 
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     functionapp_deployment_storage = functionapp["properties"]["functionAppConfig"]["deployment"]["storage"]
 
@@ -1892,7 +1892,7 @@ def update_flex_functionapp(cmd, resource_group_name, name, functionapp):
 
 
 def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     always_ready_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady", [])
 
@@ -1907,14 +1907,14 @@ def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
 
 
 def get_runtime_config(cmd, resource_group_name, name):
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
         "runtime", {})
 
 
 def update_runtime_config(cmd, resource_group_name, name, runtime_version):
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, True)
     runtime = runtime_info['app_runtime']
@@ -1934,7 +1934,7 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
 
 
 def update_always_ready_settings(cmd, resource_group_name, name, settings):
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     always_ready_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady", [])
 
@@ -1962,7 +1962,7 @@ def update_always_ready_settings(cmd, resource_group_name, name, settings):
 
 
 def get_scale_config(cmd, resource_group_name, name):
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
         "scaleAndConcurrency", {})
@@ -1974,7 +1974,7 @@ def update_scale_config(cmd, resource_group_name, name, maximum_instance_count=N
         raise RequiredArgumentMissingError("usage error: --trigger-type must be used with parameter "
                                            "--trigger-settings.")
 
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     scale_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]
 
@@ -5199,7 +5199,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp.identity = identity
 
     if flexconsumption_location is not None:
-        return get_raw_functionapp(cmd, resource_group_name, name)
+        return get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     return functionapp
 
