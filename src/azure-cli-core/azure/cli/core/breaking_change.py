@@ -17,11 +17,18 @@ class TargetVersion(abc.ABC):
     def __str__(self):
         raise NotImplementedError()
 
+    @abc.abstractmethod
+    def version(self):
+        raise NotImplementedError()
+
 
 # pylint: disable=too-few-public-methods
 class NextBreakingChangeWindow(TargetVersion):
     def __str__(self):
         return f'in next breaking change release({_next_breaking_change_version()})'
+
+    def version(self):
+        return _next_breaking_change_version()
 
 
 # pylint: disable=too-few-public-methods
@@ -32,11 +39,17 @@ class ExactVersion(TargetVersion):
     def __str__(self):
         return f'in {self.version}'
 
+    def version(self):
+        return self.version()
+
 
 # pylint: disable=too-few-public-methods
 class UnspecificVersion(TargetVersion):
     def __str__(self):
         return 'in future'
+
+    def version(self):
+        return None
 
 
 class BreakingChange(abc.ABC):
