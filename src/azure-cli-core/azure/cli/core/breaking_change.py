@@ -3,52 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import abc
-import re
-from functools import lru_cache
-
-import packaging.version
-
-import requests
-
-from azure.cli.core import __version__
 
 NEXT_BREAKING_CHANGE_RELEASE = '2.61.0'
 
 
-def _next_breaking_change_version_from_milestone(cur_version):
-    owner = "Azure"
-    repo = "azure-cli"
-    # The GitHub API v3 URL for milestones
-    url = f"https://api.github.com/repos/{owner}/{repo}/milestones"
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        milestones = response.json()
-    except requests.RequestException:
-        return None
-    for milestone in milestones:
-        try:
-            if 'breaking change' in milestone['title'].lower():
-                pattern = re.compile(r'Azure CLI version: *(?P<version>[\d.]+) *$', re.MULTILINE | re.IGNORECASE)
-                match = re.search(pattern, milestone['description'])
-                if match:
-                    version = match.group('version')
-                    parsed_version = packaging.version.parse(version)
-                    if parsed_version > cur_version:
-                        return version
-        except (IndexError, KeyError):
-            pass
-    return None
-
-
-@lru_cache()
 def _next_breaking_change_version():
-    cur_version = packaging.version.parse(__version__)
-    next_bc_version = packaging.version.parse(NEXT_BREAKING_CHANGE_RELEASE)
-    if cur_version >= next_bc_version:
-        fetched_bc_version = _next_breaking_change_version_from_milestone(cur_version)
-        if fetched_bc_version:
-            return fetched_bc_version
     return NEXT_BREAKING_CHANGE_RELEASE
 
 
