@@ -83,7 +83,6 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def __init__(self, method_name, config_file=None, recording_name=None,
                  recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None,
                  random_config_dir=False):
-        self.cli_ctx = get_dummy_cli(random_config_dir=random_config_dir)
         self.random_config_dir = random_config_dir
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
@@ -136,13 +135,38 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             recording_name=recording_name
         )
 
+    def setUp(self):
+        if self.random_config_dir:
+            from unittest.mock import patch
+            from azure.cli.core.util import random_string, rmtree_with_retry
+            from azure.cli.core._config import GLOBAL_CONFIG_DIR
+            from knack.util import ensure_dir
+
+            config_dir = os.path.join(GLOBAL_CONFIG_DIR, 'dummy_cli_config_dir', random_string())
+            self.addCleanup(rmtree_with_retry, config_dir)
+            logger.warning('Using random config dir: %s', config_dir)
+            # Knack prioritizes the AZURE_CONFIG_DIR env over the config_dir param, and other functions may call
+            # get_config_dir directly. We need to set the env to make sure the config_dir is used.
+            env_patch = patch.dict(os.environ, {'AZURE_CONFIG_DIR': config_dir})
+            env_patch.start()
+            self.addCleanup(env_patch.stop)
+
+            # In recording mode, copy login credentials from global config dir to the dummy config dir
+            if self.in_recording:
+                ensure_dir(config_dir)
+                import shutil
+                for file in ['azureProfile.json', 'clouds.config', 'msal_token_cache.bin', 'msal_token_cache.json',
+                             'service_principal_entries.bin', 'service_principal_entries.json']:
+                    try:
+                        shutil.copy(os.path.join(GLOBAL_CONFIG_DIR, file), config_dir)
+                    except FileNotFoundError:
+                        pass
+        self.cli_ctx = get_dummy_cli()
+        super(ScenarioTest, self).setUp()
+
     def tearDown(self):
         for processor in self._processors_to_reset:
             processor.reset()
-        if self.random_config_dir:
-            from azure.cli.core.util import rmtree_with_retry
-            rmtree_with_retry(self.cli_ctx.config.config_dir)
-            self.cli_ctx.env_patch.stop()
         super(ScenarioTest, self).tearDown()
 
     def create_random_name(self, prefix, length):
