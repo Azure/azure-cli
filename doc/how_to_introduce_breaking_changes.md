@@ -17,7 +17,7 @@ To mitigate the impact of breaking changes, Azure CLI delays breaking changes an
 
 ### Breaking Change Window
 
-The breaking change window *allows* for service command breaking changes. When a Pull Request is merged during this sprint, it will be included in the next Breaking Change Release.
+The breaking change window is a designated sprint that **permits** the merging of service command breaking changes. Any Pull Request merged during this sprint will be included in the subsequent Breaking Change Release.
 
 The timing of the breaking change window in Azure CLI aligns with [Microsoft Build](https://build.microsoft.com/) and [Microsoft Ignite](https://ignite.microsoft.com/). You could find the next Breaking Change Release plan in our [milestones](https://github.com/Azure/azure-cli/milestones).
 
@@ -40,7 +40,7 @@ All breaking changes **must** be pre-announced several sprints ahead Release. Th
 ### Overview
 
 * CLI Owned Module
-  * Service Team should create an Issue that requests CLI Team to create the pre-announcement several sprints ahead Breaking Change Window. The CLI team will look at the issue and evaluate if it will be accepted in the next breaking change release.
+  * Service Team should create an Issue that requests CLI Team to create the pre-announcement several sprints ahead Breaking Change Window. The issue should include the label `Breaking Change`. The CLI team will look at the issue and evaluate if it will be accepted in the next breaking change release.
     * Please ensure sufficient time for CLI Team to finish the pre-announcement.
   * The pre-announcement should be released ahead of Breaking Change Window.
 * Service Owned Module
