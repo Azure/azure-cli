@@ -21,12 +21,11 @@ The breaking change window is a designated sprint that **permits** the merging o
 
 The timing of the breaking change window in Azure CLI aligns with [Microsoft Build](https://build.microsoft.com/) and [Microsoft Ignite](https://ignite.microsoft.com/). You could find the next Breaking Change Release plan in our [milestones](https://github.com/Azure/azure-cli/milestones).
 
-> If you would like to release ad-hoc breaking changes, reach out to the CLI team to provide an explanation for the necessity of these changes. The exceptions can be provide in the following cases:
-> * The critical bugs need hotfix
-> * The security patch
-> * If server side has produced a breaking change which is inevitable for users, then CLI side has to adapt it
+> It's highlighted that  the introduction of breaking changes is typically prohibited within non-breaking-change window, based on what we stated above for consistency and stable tooling experience.
 > 
-> The above situation makes it necessary to introduce breaking change as soon as possible.
+> Exceptions to this policy may be considered under extraordinary circumstances. We understand and would like to help out. There would be high-graded justifications required to provide the info Azure CLI can access.
+> 
+> Please note that providing the required info for assessment does not mean it will be assured to be green-lighted for breaking changes. Team will still make the decision based on the overall impact.
 
 ### Pre-announce Breaking Changes
 
