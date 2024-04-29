@@ -44,8 +44,9 @@ class AAZArgumentsSchema(AAZObjectType):
 class AAZArgEnum:
     """Argument enum properties"""
 
-    def __init__(self, items, case_sensitive=False):
+    def __init__(self, items, case_sensitive=False, support_extension=False):
         self._case_sensitive = case_sensitive
+        self._support_extension = support_extension
         self.items = items
 
     def to_choices(self):
@@ -70,6 +71,17 @@ class AAZArgEnum:
             if isinstance(self.items, dict):
                 return self.items[key]
             raise NotImplementedError()
+        if self._support_extension:
+            # support extension value which is not in choices
+            if isinstance(self.items, dict):
+                values = list(self.items.values())
+            elif isinstance(self.items, (list, tuple, set)):
+                values = list(self.items)
+            try:
+                data_type = type(values[0])
+                return data_type(data)
+            except (ValueError, IndexError):
+                pass
         raise azclierror.InvalidArgumentValueError(
             f"unrecognized value '{data}' from choices '{self.to_choices()}' ")
 
@@ -205,9 +217,9 @@ class AAZBaseArg(AAZBaseType):
 class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
     """Argument accept simple value"""
 
-    def __init__(self, enum=None, enum_case_sensitive=False, **kwargs):
+    def __init__(self, enum=None, enum_case_sensitive=False, enum_support_extension=False, **kwargs):
         super().__init__(**kwargs)
-        self.enum = AAZArgEnum(enum, case_sensitive=enum_case_sensitive) if enum else None
+        self.enum = AAZArgEnum(enum, case_sensitive=enum_case_sensitive, support_extension=enum_support_extension) if enum else None
 
     def to_cmd_arg(self, name, **kwargs):
         arg = super().to_cmd_arg(name, **kwargs)

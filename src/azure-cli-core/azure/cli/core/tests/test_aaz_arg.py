@@ -467,7 +467,7 @@ class TestAAZArg(unittest.TestCase):
             parse_partial_value_key("b.a.'/bc sef'/.sss[2]")
 
     def test_aaz_str_arg(self):
-        from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema, AAZListArg
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
         from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
@@ -493,6 +493,14 @@ class TestAAZArg(unittest.TestCase):
             },
             nullable=True,
             blank="Sunday"
+        )
+        schema.tasks = AAZListArg(
+            options=["--tasks"],
+            singular_options=["--task", "-t"],
+        )
+        schema.tasks.Element = AAZStrArg(
+            enum={"task1", "task2"},
+            enum_support_extension=True,
         )
         self.assertFalse(has_value(v.work_day))
 
@@ -548,6 +556,18 @@ class TestAAZArg(unittest.TestCase):
         dest_ops.apply(v, "work_day")
         self.assertEqual(v.work_day, None)
 
+        # Task argument
+        arg = schema.tasks.to_cmd_arg("tasks")
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        self.assertEqual(len(dest_ops._ops), 0)
+
+        action.setup_operations(dest_ops, ["[task1,task2,task_ext]"])
+        self.assertEqual(len(dest_ops._ops), 1)
+        dest_ops.apply(v, "tasks")
+        self.assertEqual(v.tasks.to_serialized_data(), ["task1", "task2", "task_ext"])
+
         # New argument
         schema.name = AAZStrArg(options=["--name", "-n"])
         arg = schema.name.to_cmd_arg("work_day")
@@ -596,6 +616,7 @@ class TestAAZArg(unittest.TestCase):
                 "C": 80,
                 "D": 0,
             },
+            enum_support_extension=True,
             nullable=True,
             blank=0
         )
@@ -631,6 +652,16 @@ class TestAAZArg(unittest.TestCase):
         self.assertEqual(len(dest_ops._ops), 4)
         dest_ops.apply(v, "score")
         self.assertEqual(v.score, None)
+
+         # extension value
+        action.setup_operations(dest_ops, "1234")
+        self.assertEqual(len(dest_ops._ops), 5)
+        dest_ops.apply(v, "score")
+        self.assertEqual(v.score, 1234)
+
+        # extension invalid value
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            action.setup_operations(dest_ops, "12A34")
 
         # credit argument
         schema.credit = AAZIntArg(options=["--credit", "-c"])
@@ -689,6 +720,7 @@ class TestAAZArg(unittest.TestCase):
                 "C": 80.0,
                 "D": 0.0,
             },
+            enum_support_extension=True,
             nullable=True,
             blank=0.0
         )
@@ -723,6 +755,16 @@ class TestAAZArg(unittest.TestCase):
         self.assertEqual(len(dest_ops._ops), 4)
         dest_ops.apply(v, "score")
         self.assertEqual(v.score, None)
+        
+        # extension value
+        action.setup_operations(dest_ops, "1234")
+        self.assertEqual(len(dest_ops._ops), 5)
+        dest_ops.apply(v, "score")
+        self.assertEqual(v.score, 1234.0)
+
+        # extension invalid value
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            action.setup_operations(dest_ops, "12A34")
 
         # credit argument
         schema.credit = AAZFloatArg(options=["--credit", "-c"])
