@@ -644,13 +644,13 @@ TARGET_RESOURCES_PARAMS = {
             'options': ['--target-resource-group', '--tg'],
             'help': 'The resource group which contains the cognitive services',
             'placeholder': 'CognitiveServicesRG'
-		},
-		'account': {
-			'options': ['--account'],
-			'help': 'Name of the cognitive services account',
-			'placeholder': 'MyAccount'
-		}
-	}
+        },
+        'account': {
+            'options': ['--account'],
+            'help': 'Name of the cognitive services account',
+            'placeholder': 'MyAccount'
+        }
+    }
 }
 
 

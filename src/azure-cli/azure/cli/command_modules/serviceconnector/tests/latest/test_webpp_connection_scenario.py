@@ -1828,7 +1828,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # update connection
-        self.cmd('webapp connection update storage-table --id {} --client-type dotnet'.format(connection_id),
+        self.cmd('webapp connection update cognitiveservices --id {} --client-type dotnet'.format(connection_id),
                  checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
@@ -1875,7 +1875,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # update connection
-        self.cmd('webapp connection update storage-table --id {} --client-type dotnet'.format(connection_id),
+        self.cmd('webapp connection update cognitiveservices --id {} --client-type dotnet'.format(connection_id),
                  checks = [ 
                      self.check('clientType', 'dotnet'),
                      self.check('authInfo.authType', 'systemAssignedIdentity')
@@ -1926,7 +1926,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # update connection
-        self.cmd('webapp connection update storage-table --id {} --client-type dotnet'.format(connection_id),
+        self.cmd('webapp connection update cognitiveservices --id {} --client-type dotnet'.format(connection_id),
                  checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
@@ -1972,7 +1972,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # update connection
-        self.cmd('webapp connection update storage-table --id {} --client-type dotnet'.format(connection_id),
+        self.cmd('webapp connection update cognitiveservices --id {} --client-type dotnet'.format(connection_id),
                  checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
