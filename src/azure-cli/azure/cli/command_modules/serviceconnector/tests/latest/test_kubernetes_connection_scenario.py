@@ -395,3 +395,112 @@ class KubernetesConnectionScenarioTest(ScenarioTest):
         # delete connections
         for connection in connections:
             self.cmd('aks connection delete --id {} --yes'.format(connection.get('id')))
+
+
+    @record_only()
+    def test_kubernetes_openai_secret_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'aks-openai-test',
+            'cluster': 'servicelinker-cognitive-cluster',
+            'account': 'testaksopenai'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.KubernetesCluster).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.CognitiveServices).format(**self.kwargs)
+
+        # create connection
+        self.cmd('aks connection create cognitiveservices --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type python'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'aks connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('aks connection update storage-blob --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ 
+                     self.check('clientType', 'dotnet'),
+                     self.check('authInfo.authType', 'secret')
+                ])
+
+        # list configuration
+        self.cmd('aks connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('aks connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('aks connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('aks connection delete --id {} --yes'.format(connection_id))
+
+
+    @live_only()
+    # "run_cli_cmd" could only work at live mode
+    def test_kubernetes_openai_workload_identity_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'aks-openai-test',
+            'cluster': 'servicelinker-cognitive-cluster',
+            'account': 'testaksopenai'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.KubernetesCluster).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+
+        # get user identity id
+        user_identity_name = 'aitest'
+        user_identity_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{}'.format(
+            self.kwargs['subscription'],
+            'clitest',
+            user_identity_name
+        )
+
+        # create connection
+        self.cmd('aks connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--workload-identity {} --client-type python'.format(name, source_id, target_id, user_identity_id))
+
+        # list connection
+        connections = self.cmd(
+            'aks connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'userAssignedIdentity'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('aks connection update storage-blob --id {} --client-type dotnet'.format(connection_id),
+                 checks = [
+                    self.check('clientType', 'dotnet'),
+                    self.check('authInfo.authType', 'userAssignedIdentity')
+                ])
+
+        # list configuration
+        self.cmd('aks connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('aks connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('aks connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('aks connection delete --id {} --yes'.format(connection_id))
