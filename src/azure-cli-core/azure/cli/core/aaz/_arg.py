@@ -10,6 +10,7 @@ from knack.arguments import CLICommandArgument, CaseInsensitiveList
 from knack.preview import PreviewItem
 from knack.experimental import ExperimentalItem
 from knack.util import status_tag_messages
+from knack.log import get_logger
 
 from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZFreeFormDictArgAction, \
     AAZListArgAction, AAZGenericUpdateAction, AAZGenericUpdateForceStringAction
@@ -25,6 +26,8 @@ from .exceptions import AAZUnregisteredArg
 from ._prompt import AAZPromptInput
 
 # pylint: disable=redefined-builtin, protected-access, too-few-public-methods, too-many-instance-attributes
+
+logger = get_logger(__name__)
 
 
 class AAZArgumentsSchema(AAZObjectType):
@@ -46,7 +49,7 @@ class AAZArgEnum:
 
     def __init__(self, items, case_sensitive=False, support_extension=False):
         self._case_sensitive = case_sensitive
-        self._support_extension = support_extension
+        self.support_extension = support_extension
         self.items = items
 
     def to_choices(self):
@@ -71,7 +74,7 @@ class AAZArgEnum:
             if isinstance(self.items, dict):
                 return self.items[key]
             raise NotImplementedError()
-        if self._support_extension:
+        if self.support_extension:
             # support extension value which is not in choices
             if isinstance(self.items, dict):
                 values = list(self.items.values())
@@ -79,7 +82,9 @@ class AAZArgEnum:
                 values = list(self.items)
             try:
                 data_type = type(values[0])
-                return data_type(data)
+                value = data_type(data)
+                logger.warning(f"Use extended value `{value}` outside choices {self.to_choices()}.")
+                return value
             except (ValueError, IndexError):
                 pass
         raise azclierror.InvalidArgumentValueError(
@@ -226,7 +231,17 @@ class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
     def to_cmd_arg(self, name, **kwargs):
         arg = super().to_cmd_arg(name, **kwargs)
         if self.enum:
-            arg.choices = self.enum.to_choices()    # convert it's enum value into choices in arg
+            choices = self.enum.to_choices() 
+            if self.enum.support_extension:
+                # Display the allowed values in help only without verifying the user input in argparse
+                short_summary = arg.type.settings.get('help', None) or ''
+                if short_summary:
+                    short_summary += '  '
+                short_summary += 'Allowed values: {}.'.format(', '.join(sorted([str(x) for x in choices])))
+                arg.help = short_summary
+            else:
+                # this will verify the user input in argparse
+                arg.choices = choices   # convert it's enum value into choices in arg
         return arg
 
     def _build_cmd_action(self):
