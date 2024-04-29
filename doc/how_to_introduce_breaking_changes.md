@@ -188,6 +188,22 @@ if not_use_type:
 
 This way, the pre-announcement wouldn't be display unless running into the branch, but still could be collected into the upcoming breaking change documentation.
 
+### Check Your Breaking Change Pre-Announcement
+
+Before you publish the breaking changes, you need to make sure that the announcement is ready for the Upcoming Breaking Change Documentation. To do that, run this command:
+
+```commandline
+azdev breaking-change collect
+```
+
+If your breaking change is not for the next breaking change window, you can see all the announcements by using `--target-version None` like this:
+
+```commandline
+azdev breaking-change collect --target-version None
+```
+
+The output should be a json object including the pre-announcement you made.
+
 ## Upcoming Breaking Change Documentation
 
 The Upcoming Breaking Change Documentation is released every sprint. This document lists the expected breaking changes for the next Breaking Change Release. However, due to the implementation’s dependency on the Service Team, not all the listed Breaking Changes may be adopted.
@@ -195,3 +211,9 @@ The Upcoming Breaking Change Documentation is released every sprint. This docume
 The Upcoming Breaking Change Documentation includes:
 * The deprecation targeted at the next Breaking Change Release;
 * The pre-announcement declared in `_breaking_change.py`.
+
+The documentation is generated through `azdev` tool. You can preview the documentation locally through the following command.
+
+```commandline
+azdev breaking-change collect CLI --output-format markdown
+```
