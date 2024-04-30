@@ -164,21 +164,17 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'ipv6_3': 'fe00:0:0:1::/111',
         }
         # test storage account create/update with ipv6 settings
-        self.cmd('storage account create -g {rg} -n {sa} --default-dual-stack-endpoint true',
+        self.cmd('storage account create -g {rg} -n {sa} --publish-ipv6-endpoint true',
                  checks=[
-                     JMESPathCheck('dualStackEndpointPreference.defaultDualStackEndpoints', True),
-                     JMESPathCheck('dualStackEndpointPreference.publishIpv4Endpoint', True),
                      JMESPathCheck('dualStackEndpointPreference.publishIpv6Endpoint', True),
-                     JMESPathCheckExists('primaryEndpoints.ipv4Endpoints'),
+                     JMESPathCheckExists('primaryEndpoints.ipEndpoints'),
                      JMESPathCheckExists('primaryEndpoints.ipv6Endpoints')
                  ])
 
-        self.cmd('storage account update -g {rg} -n {sa} --default-dual-stack-endpoint false',
+        self.cmd('storage account update -g {rg} -n {sa} --publish-ipv6-endpoint false',
                  checks=[
-                     JMESPathCheck('dualStackEndpointPreference.defaultDualStackEndpoints', False),
-                     JMESPathCheck('dualStackEndpointPreference.publishIpv4Endpoint', False),
                      JMESPathCheck('dualStackEndpointPreference.publishIpv6Endpoint', False),
-                     JMESPathCheckNotExists('primaryEndpoints.ipv4Endpoints'),
+                     JMESPathCheckExists('primaryEndpoints.ipEndpoints'),
                      JMESPathCheckNotExists('primaryEndpoints.ipv6Endpoints')
         ])
 

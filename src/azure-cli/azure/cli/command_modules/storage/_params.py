@@ -428,10 +428,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Allow you to specify the type of endpoint. Set this to AzureDNSZone to create a large number '
                         'of accounts in a single subscription, which creates accounts in an Azure DNS Zone and the '
                         'endpoint URL will have an alphanumeric DNS Zone identifier.')
-        c.argument('default_dual_stack_endpoints', arg_type=get_three_state_flag(), min_api='2023-01-01',
+        c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(), min_api='2023-01-01',
                    arg_group='IPv6 Endpoint',
-                   help='A boolean flag which indicates whether dual-stack storage endpoints are to be published. '
-                        'When set to true, this will switch the default storage account endpoints to dual stack.')
+                   help='A boolean flag which indicates whether IPv6 storage endpoints are to be published.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -519,10 +518,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
-        c.argument('default_dual_stack_endpoints', arg_type=get_three_state_flag(), min_api='2023-01-01',
+        c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(), min_api='2023-01-01',
                    arg_group='IPv6 Endpoint',
-                   help='A boolean flag which indicates whether dual-stack storage endpoints are to be published. '
-                        'When set to true, this will switch the default storage account endpoints to dual stack.')
+                   help='A boolean flag which indicates whether IPv6 storage endpoints are to be published.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',

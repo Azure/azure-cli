@@ -74,7 +74,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None,
-                           default_dual_stack_endpoints=None):
+                           publish_ipv6_endpoint=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -283,12 +283,10 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if dns_endpoint_type is not None:
         params.dns_endpoint_type = dns_endpoint_type
 
-    if default_dual_stack_endpoints is not None:
+    if publish_ipv6_endpoint is not None:
         DualStackEndpointPreference = cmd.get_models('DualStackEndpointPreference')
         params.dual_stack_endpoint_preference = DualStackEndpointPreference(
-            default_dual_stack_endpoints=default_dual_stack_endpoints,
-            publish_ipv4_endpoint=default_dual_stack_endpoints,
-            publish_ipv6_endpoint=default_dual_stack_endpoints
+            publish_ipv6_endpoint=publish_ipv6_endpoint
         )
 
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
@@ -385,7 +383,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None,
-                           default_dual_stack_endpoints=None):
+                           publish_ipv6_endpoint=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -636,12 +634,10 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if enable_local_user is not None:
         params.is_local_user_enabled = enable_local_user
 
-    if default_dual_stack_endpoints is not None:
+    if publishIpv6Endpoint is not None:
         DualStackEndpointPreference = cmd.get_models('DualStackEndpointPreference')
         params.dual_stack_endpoint_preference = DualStackEndpointPreference(
-            default_dual_stack_endpoints=default_dual_stack_endpoints,
-            publish_ipv4_endpoint=default_dual_stack_endpoints,
-            publish_ipv6_endpoint=default_dual_stack_endpoints
+            publish_ipv6_endpoint=publishIpv6Endpoint
         )
 
     return params
