@@ -231,7 +231,7 @@ class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
     def to_cmd_arg(self, name, **kwargs):
         arg = super().to_cmd_arg(name, **kwargs)
         if self.enum:
-            choices = self.enum.to_choices() 
+            choices = self.enum.to_choices()
             if self.enum.support_extension:
                 # Display the allowed values in help only without verifying the user input in argparse
                 short_summary = arg.type.settings.get('help', None) or ''
