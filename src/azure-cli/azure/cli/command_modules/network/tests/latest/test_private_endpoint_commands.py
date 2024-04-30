@@ -4901,3 +4901,79 @@ class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
             count+=1
             state = self.get_provisioning_state_for_postgresql_flexible_server()
         print("Server creation succeeded!")
+
+    class NetworkPrivateLinkManagedEnvironmentScenarioTest(ScenarioTest):
+
+        @ResourceGroupPreparer(name_prefix='cli_test', random_name_length=18, location='eastasia')
+        def test_private_link_managed_environment(self, resource_group):
+            self.kwargs.update({
+                'rg': resource_group,
+                'location': 'eastasia',
+                'env': self.create_random_name(prefix='env', length=24),
+                'vnet': self.create_random_name('cli-vnet-', 24),
+                'pe': self.create_random_name('cli-pe-', 24),
+                'pe_connection': self.create_random_name('cli-pec-', 24)
+            })
+
+            self.cmd(
+                'containerapp env create -g {rg} -n {env} --location {location}  --logs-destination none --enable-workload-profiles')
+            containerapp_env = self.cmd('containerapp env show -g {rg} -n {env}').get_output_in_json()
+
+            while containerapp_env["properties"]["provisioningState"].lower() in ["waiting", "inprogress"]:
+                time.sleep(5)
+                containerapp_env = self.cmd('containerapp env show -g {rg} -n {env}').get_output_in_json()
+            time.sleep(30)
+
+            vnet = self.cmd(
+                'az network vnet create -n {vnet} -g {rg} -l {location} --address-prefix 10.0.0.0/16 --subnet-name subnet --subnet-prefixes 10.0.0.0/24').get_output_in_json()
+
+            self.cmd(
+                'az network private-link-resource list --name {env} --resource-group {rg} --type Microsoft.App/managedEnvironments',
+                checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'managedEnvironments')])
+
+            self.kwargs.update({
+                'target_resource_id': containerapp_env["id"],
+                'subnet': vnet['newVNet']['subnets'][0]['id']})
+            # Create a private endpoint connection
+            pe = self.cmd(
+                'az network private-endpoint create -g {rg} -n {pe} --subnet {subnet} -l {location} '
+                '--connection-name {pe_connection} --private-connection-resource-id {target_resource_id} '
+                '--group-id managedEnvironments --manual-request').get_output_in_json()
+            self.kwargs['pe_id'] = pe['id']
+            self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+
+            # Show the connection at managed environment
+            list_private_endpoint_conn = self.cmd(
+                'az network private-endpoint-connection list --id {target_resource_id}').get_output_in_json()
+            self.kwargs.update({
+                "pec_id": list_private_endpoint_conn[0]['id']
+            })
+
+            self.kwargs.update({
+                "pec_name": self.kwargs['pec_id'].split('/')[-1]
+            })
+            self.cmd('az network private-endpoint-connection show --id {pec_id}',
+                     checks=[self.check('id', '{pec_id}'),
+                             self.check('properties.privateLinkServiceConnectionState.status', 'Pending')])
+
+            # Approve / reject private endpoint
+            self.kwargs.update({
+                'approval_desc': 'Approved.',
+                'rejection_desc': 'Rejected.'
+            })
+            self.cmd(
+                'az network private-endpoint-connection approve --id {pec_id} --description "{approval_desc}"',
+                checks=[
+                    self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+                ])
+            self.cmd('az network private-endpoint-connection reject --id {pec_id} '
+                     '--description "{rejection_desc}"',
+                     checks=[
+                         self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+                     ])
+            self.cmd('az network private-endpoint-connection list --id {target_resource_id}', checks=[
+                self.check('length(@)', 1)
+            ])
+
+            # Test delete
+            self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
