@@ -13,33 +13,38 @@ interactions:
       ParameterSetName:
       - -g --profile-name
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints?api-version=2023-05-01
   response:
     body:
-      string: '{"error":{"code":"ParentResourceNotFound","message":"Can not perform
-        requested operation on nested resource. Parent resource ''profile123'' not
-        found."}}'
+      string: '{"error":{"code":"ParentResourceNotFound","message":"Failed to perform
+        ''read'' on resource(s) of type ''profiles/endpoints'', because the parent
+        resource ''/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123''
+        could not be found."}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '151'
+      - '303'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:17:46 GMT
+      - Mon, 18 Mar 2024 07:58:03 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-failure-cause:
       - gateway
+      x-msedge-ref:
+      - 'Ref A: C95646C5DFE44B9392F53C5162350CF0 Ref B: MAA201060513009 Ref C: 2024-03-18T07:58:04Z'
     status:
       code: 404
       message: Not Found
@@ -57,31 +62,33 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-24T07:17:06Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_cdn_custom_domain_https_msft","date":"2024-03-18T07:57:20Z","module":"cdn"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '310'
+      - '368'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:17:47 GMT
+      - Mon, 18 Mar 2024 07:58:05 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 37AE5CF73D224B99AD6CE205978B6FB1 Ref B: MAA201060513017 Ref C: 2024-03-18T07:58:05Z'
     status:
       code: 200
       message: OK
@@ -103,35 +110,37 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123","type":"Microsoft.Cdn/profiles","name":"profile123","location":"WestUs","kind":"cdn","tags":{},"sku":{"name":"Standard_Microsoft"},"properties":{"resourceState":"Creating","provisioningState":"Creating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123","type":"Microsoft.Cdn/profiles","name":"profile123","location":"WestUs","kind":"cdn","tags":{},"sku":{"name":"Standard_Microsoft"},"properties":{"extendedProperties":{},"resourceState":"Creating","provisioningState":"Creating"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/d888698a-61fa-4afe-844c-d1a8e21e979e?api-version=2021-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/1267a10b-88e0-4716-acdf-37ec5cfeccd6?api-version=2023-05-01&t=638463454893412146&c=MIIHADCCBeigAwIBAgITHgPr-Oynpc11nukqPwAAA-v47DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAxMTUzMzMzWhcNMjUwMTI2MTUzMzMzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0fVpJv9HfZ9lDyFsKVf2PJgsZDMFA6khnm_67kUV0KDb8vTd3bmnw1UYl75g2Cp9GDvvaCqKVn-aux3TWe11D61vAtFcTPbNvezESM6bHR-RV1e4LhXUIl6PZRcIE65rk0bYF8P1O_zZ4mpWHx99Mc9gSe6E2sqh_sWRIuE4mSXNxVzzmndknLOkcDnqNl9Kt1VpXt5orBSwAV74sCBJuvzSE7MEW2kHUJtqzGWoXvf5pm-rYfwqhQa3HLjUMj7xbwzsBDtEn2ZYJLlqJqIps5iVHixHPn8k6opx-9FVP2u009BccFRDwiVl1b6xWXhwzq58hYtdYc3SoMCcWMtf0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBR1fq2N8kAQnlwHFZuqRYZ3nIu5LjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBABwCQ0hRgTzuMiiq8PUrVdDBN8_c3HcEZsxdazvy4RNcw_7WjYA3QdRzVtaOAEfPq6GrfCF7n8qlpXjMSOq5Oc-mL6EwulQAybtx4RxY0zI5tDTHfITDo2FVSa6thj9WVlgOF2UxNbopXBAYpN-fbgUTanBsphWY2F_Kz_VKFv-4UXHwyNiDa3wpaQrmQ2urunWos3lEhx0aRKdNTZwjJtK78rfIazNccJHT1LHpWU7i8XEBYP_RzftkGhoEhofdnth4t99G4Clw9RBOC8Km1SZ7zJTtaYcCU-NXSzWQgWTQeGMwo5CnvADN5uPXz3aUMxAukDY-ed4wPldjzzJFmzk&s=eiT4dfnND8NkJWrI_yiV2dixZaInMitOe9tEyj2NZJd4Lva9iF_bZUkPu1qb2ZmXidNCl3LpDGfB3wVQTfZxbAJe9Fu4vIGy1_tIZ9NBoFxfElWc8JbQTN65lGOsvNNSsg-uwovjt4Wp7pKpbd7XSM4xXFjcB97yzER_BLB-lAJWTpDvSvEZTfklEBf7JPo9gIF-9FvKzoTZVtx5_i0qIY7yld4xdX-4iqDc29q1-L3w9B4mE6t9wfghHo4qOWtgjvuG2Fj8vGw2qN32dtMm-6Nm2KGtc1wxaFcpYWmi1z542Whf3JusuwpIqXXTVRfndFLxRPRtXp4ZRKuJ8kyN4w&h=nJYZmeMBe51xkCEwnxjjFGTY0Jy0PXwDVcxdhnW3CWs
       cache-control:
       - no-cache
       content-length:
-      - '340'
+      - '364'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:17:51 GMT
+      - Mon, 18 Mar 2024 07:58:09 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '23'
+      - '999'
+      x-msedge-ref:
+      - 'Ref A: CCA08C97FE874D35B69E2530997E322A Ref B: MAA201060516029 Ref C: 2024-03-18T07:58:06Z'
     status:
       code: 201
       message: Created
@@ -149,9 +158,9 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/d888698a-61fa-4afe-844c-d1a8e21e979e?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/1267a10b-88e0-4716-acdf-37ec5cfeccd6?api-version=2023-05-01&t=638463454893412146&c=MIIHADCCBeigAwIBAgITHgPr-Oynpc11nukqPwAAA-v47DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAxMTUzMzMzWhcNMjUwMTI2MTUzMzMzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0fVpJv9HfZ9lDyFsKVf2PJgsZDMFA6khnm_67kUV0KDb8vTd3bmnw1UYl75g2Cp9GDvvaCqKVn-aux3TWe11D61vAtFcTPbNvezESM6bHR-RV1e4LhXUIl6PZRcIE65rk0bYF8P1O_zZ4mpWHx99Mc9gSe6E2sqh_sWRIuE4mSXNxVzzmndknLOkcDnqNl9Kt1VpXt5orBSwAV74sCBJuvzSE7MEW2kHUJtqzGWoXvf5pm-rYfwqhQa3HLjUMj7xbwzsBDtEn2ZYJLlqJqIps5iVHixHPn8k6opx-9FVP2u009BccFRDwiVl1b6xWXhwzq58hYtdYc3SoMCcWMtf0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBR1fq2N8kAQnlwHFZuqRYZ3nIu5LjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBABwCQ0hRgTzuMiiq8PUrVdDBN8_c3HcEZsxdazvy4RNcw_7WjYA3QdRzVtaOAEfPq6GrfCF7n8qlpXjMSOq5Oc-mL6EwulQAybtx4RxY0zI5tDTHfITDo2FVSa6thj9WVlgOF2UxNbopXBAYpN-fbgUTanBsphWY2F_Kz_VKFv-4UXHwyNiDa3wpaQrmQ2urunWos3lEhx0aRKdNTZwjJtK78rfIazNccJHT1LHpWU7i8XEBYP_RzftkGhoEhofdnth4t99G4Clw9RBOC8Km1SZ7zJTtaYcCU-NXSzWQgWTQeGMwo5CnvADN5uPXz3aUMxAukDY-ed4wPldjzzJFmzk&s=eiT4dfnND8NkJWrI_yiV2dixZaInMitOe9tEyj2NZJd4Lva9iF_bZUkPu1qb2ZmXidNCl3LpDGfB3wVQTfZxbAJe9Fu4vIGy1_tIZ9NBoFxfElWc8JbQTN65lGOsvNNSsg-uwovjt4Wp7pKpbd7XSM4xXFjcB97yzER_BLB-lAJWTpDvSvEZTfklEBf7JPo9gIF-9FvKzoTZVtx5_i0qIY7yld4xdX-4iqDc29q1-L3w9B4mE6t9wfghHo4qOWtgjvuG2Fj8vGw2qN32dtMm-6Nm2KGtc1wxaFcpYWmi1z542Whf3JusuwpIqXXTVRfndFLxRPRtXp4ZRKuJ8kyN4w&h=nJYZmeMBe51xkCEwnxjjFGTY0Jy0PXwDVcxdhnW3CWs
   response:
     body:
       string: '{"status":"InProgress","error":{"code":"None","message":null}}'
@@ -163,21 +172,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:18:01 GMT
+      - Mon, 18 Mar 2024 07:58:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: B9D162F067444A9496626E1E45F2372D Ref B: MAA201060516029 Ref C: 2024-03-18T07:58:09Z'
     status:
       code: 200
       message: OK
@@ -195,9 +202,9 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/d888698a-61fa-4afe-844c-d1a8e21e979e?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/1267a10b-88e0-4716-acdf-37ec5cfeccd6?api-version=2023-05-01&t=638463454893412146&c=MIIHADCCBeigAwIBAgITHgPr-Oynpc11nukqPwAAA-v47DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAxMTUzMzMzWhcNMjUwMTI2MTUzMzMzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0fVpJv9HfZ9lDyFsKVf2PJgsZDMFA6khnm_67kUV0KDb8vTd3bmnw1UYl75g2Cp9GDvvaCqKVn-aux3TWe11D61vAtFcTPbNvezESM6bHR-RV1e4LhXUIl6PZRcIE65rk0bYF8P1O_zZ4mpWHx99Mc9gSe6E2sqh_sWRIuE4mSXNxVzzmndknLOkcDnqNl9Kt1VpXt5orBSwAV74sCBJuvzSE7MEW2kHUJtqzGWoXvf5pm-rYfwqhQa3HLjUMj7xbwzsBDtEn2ZYJLlqJqIps5iVHixHPn8k6opx-9FVP2u009BccFRDwiVl1b6xWXhwzq58hYtdYc3SoMCcWMtf0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBR1fq2N8kAQnlwHFZuqRYZ3nIu5LjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBABwCQ0hRgTzuMiiq8PUrVdDBN8_c3HcEZsxdazvy4RNcw_7WjYA3QdRzVtaOAEfPq6GrfCF7n8qlpXjMSOq5Oc-mL6EwulQAybtx4RxY0zI5tDTHfITDo2FVSa6thj9WVlgOF2UxNbopXBAYpN-fbgUTanBsphWY2F_Kz_VKFv-4UXHwyNiDa3wpaQrmQ2urunWos3lEhx0aRKdNTZwjJtK78rfIazNccJHT1LHpWU7i8XEBYP_RzftkGhoEhofdnth4t99G4Clw9RBOC8Km1SZ7zJTtaYcCU-NXSzWQgWTQeGMwo5CnvADN5uPXz3aUMxAukDY-ed4wPldjzzJFmzk&s=eiT4dfnND8NkJWrI_yiV2dixZaInMitOe9tEyj2NZJd4Lva9iF_bZUkPu1qb2ZmXidNCl3LpDGfB3wVQTfZxbAJe9Fu4vIGy1_tIZ9NBoFxfElWc8JbQTN65lGOsvNNSsg-uwovjt4Wp7pKpbd7XSM4xXFjcB97yzER_BLB-lAJWTpDvSvEZTfklEBf7JPo9gIF-9FvKzoTZVtx5_i0qIY7yld4xdX-4iqDc29q1-L3w9B4mE6t9wfghHo4qOWtgjvuG2Fj8vGw2qN32dtMm-6Nm2KGtc1wxaFcpYWmi1z542Whf3JusuwpIqXXTVRfndFLxRPRtXp4ZRKuJ8kyN4w&h=nJYZmeMBe51xkCEwnxjjFGTY0Jy0PXwDVcxdhnW3CWs
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -209,21 +216,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:18:31 GMT
+      - Mon, 18 Mar 2024 07:58:41 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 62123FAA8A7C404B9DB864EDB889663B Ref B: MAA201060516029 Ref C: 2024-03-18T07:58:40Z'
     status:
       code: 200
       message: OK
@@ -241,37 +246,35 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123","type":"Microsoft.Cdn/profiles","name":"profile123","location":"WestUs","kind":"cdn","tags":{},"sku":{"name":"Standard_Microsoft"},"properties":{"resourceState":"Active","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123","type":"Microsoft.Cdn/profiles","name":"profile123","location":"WestUs","kind":"cdn","tags":{},"sku":{"name":"Standard_Microsoft"},"properties":{"extendedProperties":{},"resourceState":"Active","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '339'
+      - '363'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:18:32 GMT
+      - Mon, 18 Mar 2024 07:58:42 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '48'
+      - '4999'
+      x-msedge-ref:
+      - 'Ref A: A3CE4E88500D4ABA8DB65FE7D8DA3BDB Ref B: MAA201060516029 Ref C: 2024-03-18T07:58:41Z'
     status:
       code: 200
       message: OK
@@ -289,38 +292,40 @@ interactions:
       ParameterSetName:
       - -g -n --profile-name --origin
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-24T07:17:06Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_cdn_custom_domain_https_msft","date":"2024-03-18T07:57:20Z","module":"cdn"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '310'
+      - '368'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:18:32 GMT
+      - Mon, 18 Mar 2024 07:58:43 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 3F0FD99E941A4A69A77D051FACCB8319 Ref B: MAA201060516021 Ref C: 2024-03-18T07:58:44Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "properties": {"isCompressionEnabled": false, "isHttpAllowed":
-      true, "isHttpsAllowed": true, "origins": [{"name": "origin-0", "properties":
-      {"hostName": "www.example.com", "httpPort": 80, "httpsPort": 443}}]}}'
+    body: '{"location": "westus", "properties": {"origins": [{"name": "www-microsoft1-com",
+      "properties": {"hostName": "www.microsoft1.com", "httpPort": 80, "httpsPort":
+      443}}], "queryStringCachingBehavior": "NotSet"}}'
     headers:
       Accept:
       - application/json
@@ -331,41 +336,43 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '232'
+      - '207'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --profile-name --origin
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4","type":"Microsoft.Cdn/profiles/endpoints","name":"cdn-cli-test-4","location":"WestUs","tags":{},"properties":{"hostName":"cdn-cli-test-4.azureedge.net","originHostHeader":null,"originPath":null,"contentTypesToCompress":[],"isCompressionEnabled":false,"isHttpAllowed":true,"isHttpsAllowed":true,"queryStringCachingBehavior":"IgnoreQueryString","optimizationType":null,"probePath":null,"origins":[{"name":"origin-0","properties":{"hostName":"www.example.com","httpPort":80,"httpsPort":443,"originHostHeader":null,"priority":1,"weight":1000,"enabled":true,"privateLinkAlias":null,"privateLinkResourceId":null,"privateLinkLocation":null,"privateEndpointStatus":null,"privateLinkApprovalMessage":null}}],"originGroups":[],"defaultOriginGroup":null,"customDomains":[],"geoFilters":[],"deliveryPolicy":null,"urlSigningKeys":null,"webApplicationFirewallPolicyLink":null,"resourceState":"Creating","provisioningState":"Creating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4","type":"Microsoft.Cdn/profiles/endpoints","name":"cdn-cli-test-aaz-4","location":"WestUs","tags":{},"properties":{"hostName":"cdn-cli-test-aaz-4.azureedge.net","originHostHeader":null,"originPath":null,"contentTypesToCompress":[],"isCompressionEnabled":false,"isHttpAllowed":true,"isHttpsAllowed":true,"queryStringCachingBehavior":"IgnoreQueryString","optimizationType":null,"probePath":null,"origins":[{"name":"www-microsoft1-com","properties":{"hostName":"www.microsoft1.com","httpPort":80,"httpsPort":443,"originHostHeader":null,"priority":1,"weight":1000,"enabled":true,"privateLinkAlias":null,"privateLinkResourceId":null,"privateLinkLocation":null,"privateEndpointStatus":null,"privateLinkApprovalMessage":null}}],"originGroups":[],"defaultOriginGroup":null,"customDomains":[],"geoFilters":[],"deliveryPolicy":null,"urlSigningKeys":null,"webApplicationFirewallPolicyLink":null,"resourceState":"Creating","provisioningState":"Creating"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/54665aed-f690-4dca-8b71-a566b8392195?api-version=2021-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/d70ed25c-267d-43b7-a361-110ecf011ea4?api-version=2023-05-01&t=638463455303943075&c=MIIHADCCBeigAwIBAgITHgPr-Oynpc11nukqPwAAA-v47DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAxMTUzMzMzWhcNMjUwMTI2MTUzMzMzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0fVpJv9HfZ9lDyFsKVf2PJgsZDMFA6khnm_67kUV0KDb8vTd3bmnw1UYl75g2Cp9GDvvaCqKVn-aux3TWe11D61vAtFcTPbNvezESM6bHR-RV1e4LhXUIl6PZRcIE65rk0bYF8P1O_zZ4mpWHx99Mc9gSe6E2sqh_sWRIuE4mSXNxVzzmndknLOkcDnqNl9Kt1VpXt5orBSwAV74sCBJuvzSE7MEW2kHUJtqzGWoXvf5pm-rYfwqhQa3HLjUMj7xbwzsBDtEn2ZYJLlqJqIps5iVHixHPn8k6opx-9FVP2u009BccFRDwiVl1b6xWXhwzq58hYtdYc3SoMCcWMtf0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBR1fq2N8kAQnlwHFZuqRYZ3nIu5LjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBABwCQ0hRgTzuMiiq8PUrVdDBN8_c3HcEZsxdazvy4RNcw_7WjYA3QdRzVtaOAEfPq6GrfCF7n8qlpXjMSOq5Oc-mL6EwulQAybtx4RxY0zI5tDTHfITDo2FVSa6thj9WVlgOF2UxNbopXBAYpN-fbgUTanBsphWY2F_Kz_VKFv-4UXHwyNiDa3wpaQrmQ2urunWos3lEhx0aRKdNTZwjJtK78rfIazNccJHT1LHpWU7i8XEBYP_RzftkGhoEhofdnth4t99G4Clw9RBOC8Km1SZ7zJTtaYcCU-NXSzWQgWTQeGMwo5CnvADN5uPXz3aUMxAukDY-ed4wPldjzzJFmzk&s=jmz8NdXfj0hdV-W-A2ucq6TcZXdsN0WtW_8DvWBjdAeGfY03KovjabwOn9sM7a0FErF4xZ-xxWFSdiMENXyoN3Y0wBpj8-1Li1VmQn5pIm3sVMk-d3llpI9Lsg6f6gJJoMUjX2z4AxPDl5IkjdoY6NwZB4qZR6wzWBaozWWjpjWCb9yvQmORmRQYmNQfMuPWmNZg7tc0vDbuVzBBS21UHtbCslLKoN9vVqjRtGTOqs4ZNOygQOiiUVQ4quMtSoaAqrocgw87MGPGffC0e81uWW1ez2rGH491QlUc6TyAGvnznXguivmUdMfkK8dK9dlgOGKiL5MlfCdr1s238pGZpA&h=2SZhelHbK_sXBh0qZTJ0bNV1su9LN4xmZOh3eCejvd4
       cache-control:
       - no-cache
       content-length:
-      - '1082'
+      - '1107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:18:40 GMT
+      - Mon, 18 Mar 2024 07:58:49 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '99'
+      - '399'
+      x-msedge-ref:
+      - 'Ref A: FCE5408188F74741A593EBB49928D444 Ref B: MAA201060513039 Ref C: 2024-03-18T07:58:44Z'
     status:
       code: 201
       message: Created
@@ -383,35 +390,33 @@ interactions:
       ParameterSetName:
       - -g -n --profile-name --origin
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/54665aed-f690-4dca-8b71-a566b8392195?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/d70ed25c-267d-43b7-a361-110ecf011ea4?api-version=2023-05-01&t=638463455303943075&c=MIIHADCCBeigAwIBAgITHgPr-Oynpc11nukqPwAAA-v47DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAxMTUzMzMzWhcNMjUwMTI2MTUzMzMzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0fVpJv9HfZ9lDyFsKVf2PJgsZDMFA6khnm_67kUV0KDb8vTd3bmnw1UYl75g2Cp9GDvvaCqKVn-aux3TWe11D61vAtFcTPbNvezESM6bHR-RV1e4LhXUIl6PZRcIE65rk0bYF8P1O_zZ4mpWHx99Mc9gSe6E2sqh_sWRIuE4mSXNxVzzmndknLOkcDnqNl9Kt1VpXt5orBSwAV74sCBJuvzSE7MEW2kHUJtqzGWoXvf5pm-rYfwqhQa3HLjUMj7xbwzsBDtEn2ZYJLlqJqIps5iVHixHPn8k6opx-9FVP2u009BccFRDwiVl1b6xWXhwzq58hYtdYc3SoMCcWMtf0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBR1fq2N8kAQnlwHFZuqRYZ3nIu5LjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBABwCQ0hRgTzuMiiq8PUrVdDBN8_c3HcEZsxdazvy4RNcw_7WjYA3QdRzVtaOAEfPq6GrfCF7n8qlpXjMSOq5Oc-mL6EwulQAybtx4RxY0zI5tDTHfITDo2FVSa6thj9WVlgOF2UxNbopXBAYpN-fbgUTanBsphWY2F_Kz_VKFv-4UXHwyNiDa3wpaQrmQ2urunWos3lEhx0aRKdNTZwjJtK78rfIazNccJHT1LHpWU7i8XEBYP_RzftkGhoEhofdnth4t99G4Clw9RBOC8Km1SZ7zJTtaYcCU-NXSzWQgWTQeGMwo5CnvADN5uPXz3aUMxAukDY-ed4wPldjzzJFmzk&s=jmz8NdXfj0hdV-W-A2ucq6TcZXdsN0WtW_8DvWBjdAeGfY03KovjabwOn9sM7a0FErF4xZ-xxWFSdiMENXyoN3Y0wBpj8-1Li1VmQn5pIm3sVMk-d3llpI9Lsg6f6gJJoMUjX2z4AxPDl5IkjdoY6NwZB4qZR6wzWBaozWWjpjWCb9yvQmORmRQYmNQfMuPWmNZg7tc0vDbuVzBBS21UHtbCslLKoN9vVqjRtGTOqs4ZNOygQOiiUVQ4quMtSoaAqrocgw87MGPGffC0e81uWW1ez2rGH491QlUc6TyAGvnznXguivmUdMfkK8dK9dlgOGKiL5MlfCdr1s238pGZpA&h=2SZhelHbK_sXBh0qZTJ0bNV1su9LN4xmZOh3eCejvd4
   response:
     body:
-      string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
+      string: '{"status":"InProgress","error":{"code":"None","message":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '61'
+      - '62'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:18:50 GMT
+      - Mon, 18 Mar 2024 07:58:50 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 568B5DA5A2B14CD79985C10212B99225 Ref B: MAA201060513039 Ref C: 2024-03-18T07:58:50Z'
     status:
       code: 200
       message: OK
@@ -429,37 +434,33 @@ interactions:
       ParameterSetName:
       - -g -n --profile-name --origin
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/d70ed25c-267d-43b7-a361-110ecf011ea4?api-version=2023-05-01&t=638463455303943075&c=MIIHADCCBeigAwIBAgITHgPr-Oynpc11nukqPwAAA-v47DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAxMTUzMzMzWhcNMjUwMTI2MTUzMzMzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0fVpJv9HfZ9lDyFsKVf2PJgsZDMFA6khnm_67kUV0KDb8vTd3bmnw1UYl75g2Cp9GDvvaCqKVn-aux3TWe11D61vAtFcTPbNvezESM6bHR-RV1e4LhXUIl6PZRcIE65rk0bYF8P1O_zZ4mpWHx99Mc9gSe6E2sqh_sWRIuE4mSXNxVzzmndknLOkcDnqNl9Kt1VpXt5orBSwAV74sCBJuvzSE7MEW2kHUJtqzGWoXvf5pm-rYfwqhQa3HLjUMj7xbwzsBDtEn2ZYJLlqJqIps5iVHixHPn8k6opx-9FVP2u009BccFRDwiVl1b6xWXhwzq58hYtdYc3SoMCcWMtf0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBR1fq2N8kAQnlwHFZuqRYZ3nIu5LjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBABwCQ0hRgTzuMiiq8PUrVdDBN8_c3HcEZsxdazvy4RNcw_7WjYA3QdRzVtaOAEfPq6GrfCF7n8qlpXjMSOq5Oc-mL6EwulQAybtx4RxY0zI5tDTHfITDo2FVSa6thj9WVlgOF2UxNbopXBAYpN-fbgUTanBsphWY2F_Kz_VKFv-4UXHwyNiDa3wpaQrmQ2urunWos3lEhx0aRKdNTZwjJtK78rfIazNccJHT1LHpWU7i8XEBYP_RzftkGhoEhofdnth4t99G4Clw9RBOC8Km1SZ7zJTtaYcCU-NXSzWQgWTQeGMwo5CnvADN5uPXz3aUMxAukDY-ed4wPldjzzJFmzk&s=jmz8NdXfj0hdV-W-A2ucq6TcZXdsN0WtW_8DvWBjdAeGfY03KovjabwOn9sM7a0FErF4xZ-xxWFSdiMENXyoN3Y0wBpj8-1Li1VmQn5pIm3sVMk-d3llpI9Lsg6f6gJJoMUjX2z4AxPDl5IkjdoY6NwZB4qZR6wzWBaozWWjpjWCb9yvQmORmRQYmNQfMuPWmNZg7tc0vDbuVzBBS21UHtbCslLKoN9vVqjRtGTOqs4ZNOygQOiiUVQ4quMtSoaAqrocgw87MGPGffC0e81uWW1ez2rGH491QlUc6TyAGvnznXguivmUdMfkK8dK9dlgOGKiL5MlfCdr1s238pGZpA&h=2SZhelHbK_sXBh0qZTJ0bNV1su9LN4xmZOh3eCejvd4
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4","type":"Microsoft.Cdn/profiles/endpoints","name":"cdn-cli-test-4","location":"WestUs","tags":{},"properties":{"hostName":"cdn-cli-test-4.azureedge.net","originHostHeader":null,"originPath":null,"contentTypesToCompress":[],"isCompressionEnabled":false,"isHttpAllowed":true,"isHttpsAllowed":true,"queryStringCachingBehavior":"IgnoreQueryString","optimizationType":null,"probePath":null,"origins":[{"name":"origin-0","properties":{"hostName":"www.example.com","httpPort":80,"httpsPort":443,"originHostHeader":null,"priority":1,"weight":1000,"enabled":true,"privateLinkAlias":null,"privateLinkResourceId":null,"privateLinkLocation":null,"privateEndpointStatus":null,"privateLinkApprovalMessage":null}}],"originGroups":[],"defaultOriginGroup":null,"customDomains":[],"geoFilters":[],"deliveryPolicy":null,"urlSigningKeys":null,"webApplicationFirewallPolicyLink":null,"resourceState":"Running","provisioningState":"Succeeded"}}'
+      string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1082'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:18:51 GMT
+      - Mon, 18 Mar 2024 07:59:21 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '49'
+      x-msedge-ref:
+      - 'Ref A: 3E2DFC82271B46ED979A7EFA3439C689 Ref B: MAA201060513039 Ref C: 2024-03-18T07:59:21Z'
     status:
       code: 200
       message: OK
@@ -467,46 +468,50 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cdn custom-domain create
+      - cdn endpoint create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --endpoint-name --profile-name --hostname
+      - -g -n --profile-name --origin
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-24T07:17:06Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4","type":"Microsoft.Cdn/profiles/endpoints","name":"cdn-cli-test-aaz-4","location":"WestUs","tags":{},"properties":{"hostName":"cdn-cli-test-aaz-4.azureedge.net","originHostHeader":null,"originPath":null,"contentTypesToCompress":[],"isCompressionEnabled":false,"isHttpAllowed":true,"isHttpsAllowed":true,"queryStringCachingBehavior":"IgnoreQueryString","optimizationType":null,"probePath":null,"origins":[{"name":"www-microsoft1-com","properties":{"hostName":"www.microsoft1.com","httpPort":80,"httpsPort":443,"originHostHeader":null,"priority":1,"weight":1000,"enabled":true,"privateLinkAlias":null,"privateLinkResourceId":null,"privateLinkLocation":null,"privateEndpointStatus":null,"privateLinkApprovalMessage":null}}],"originGroups":[],"defaultOriginGroup":null,"customDomains":[],"geoFilters":[],"deliveryPolicy":null,"urlSigningKeys":null,"webApplicationFirewallPolicyLink":null,"resourceState":"Running","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '310'
+      - '1107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:18:53 GMT
+      - Mon, 18 Mar 2024 07:59:22 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-msedge-ref:
+      - 'Ref A: 4A33C5E4A7F14DF18CE151A6034A11D3 Ref B: MAA201060513039 Ref C: 2024-03-18T07:59:22Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"hostName": "customdomain000003.cdn-cli-test-4.azfdtest.xyz"}}'
+    body: '{"properties": {"hostName": "customdomain000003.aaz-4.clitest.azfdtest.xyz"}}'
     headers:
       Accept:
       - application/json
@@ -517,41 +522,43 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '78'
+      - '77'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --endpoint-name --profile-name --hostname
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customDomains/customdomain000003?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customDomains/customdomain000003?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customdomains/customdomain000003","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000003","properties":{"hostName":"customdomain000003.cdn-cli-test-4.azfdtest.xyz","validationData":null,"resourceState":"Creating","customHttpsProvisioningState":"Disabled","customHttpsProvisioningSubstate":"None","customHttpsParameters":null,"provisioningState":"Creating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customdomains/customdomain000003","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000003","properties":{"hostName":"customdomain000003.aaz-4.clitest.azfdtest.xyz","validationData":null,"resourceState":"Creating","customHttpsProvisioningState":"Disabled","customHttpsProvisioningSubstate":"None","customHttpsParameters":null,"provisioningState":"Creating"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/4034ec9a-4473-44a7-9ce5-0aea54286667?api-version=2021-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/f1a32252-88da-4ed0-9c5d-6b3e24abd3a9?api-version=2023-05-01&t=638463455678856890&c=MIIHADCCBeigAwIBAgITHgPr-Oynpc11nukqPwAAA-v47DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAxMTUzMzMzWhcNMjUwMTI2MTUzMzMzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0fVpJv9HfZ9lDyFsKVf2PJgsZDMFA6khnm_67kUV0KDb8vTd3bmnw1UYl75g2Cp9GDvvaCqKVn-aux3TWe11D61vAtFcTPbNvezESM6bHR-RV1e4LhXUIl6PZRcIE65rk0bYF8P1O_zZ4mpWHx99Mc9gSe6E2sqh_sWRIuE4mSXNxVzzmndknLOkcDnqNl9Kt1VpXt5orBSwAV74sCBJuvzSE7MEW2kHUJtqzGWoXvf5pm-rYfwqhQa3HLjUMj7xbwzsBDtEn2ZYJLlqJqIps5iVHixHPn8k6opx-9FVP2u009BccFRDwiVl1b6xWXhwzq58hYtdYc3SoMCcWMtf0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBR1fq2N8kAQnlwHFZuqRYZ3nIu5LjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBABwCQ0hRgTzuMiiq8PUrVdDBN8_c3HcEZsxdazvy4RNcw_7WjYA3QdRzVtaOAEfPq6GrfCF7n8qlpXjMSOq5Oc-mL6EwulQAybtx4RxY0zI5tDTHfITDo2FVSa6thj9WVlgOF2UxNbopXBAYpN-fbgUTanBsphWY2F_Kz_VKFv-4UXHwyNiDa3wpaQrmQ2urunWos3lEhx0aRKdNTZwjJtK78rfIazNccJHT1LHpWU7i8XEBYP_RzftkGhoEhofdnth4t99G4Clw9RBOC8Km1SZ7zJTtaYcCU-NXSzWQgWTQeGMwo5CnvADN5uPXz3aUMxAukDY-ed4wPldjzzJFmzk&s=bsOJ0QRxIf0vzDMcwpL-V293hBSKkLg-OiqbTr__t9kgsdq_Iv_l61EokbKLAJIslsV1Tb6g0d0iIr3zHCIKmqGBdZ4SpV_P8kSACtosf_t8YanD1lYzPAAi1HEqq0pNqXRh58fHQ5wr1_SJp2JloQQbwuZzhAV8D37HFrpns8ajLcG2wCPc1vZawFAkTNdEqC1kebpEj6fwWBaO1SrA40NtmN3Bcg60HLn3XvO5Pa0-10iAS30TtFaB10sJ0ROugCpzZ0X0Ntv8YBlzGuZaUF0kYckQiFhjh-94vANt34KV38nFQ9orI8NQm2N4GWK_2Ez6p7Qqxen4YKd9Nh7QvQ&h=MvTl-UG1LQvufKEdMxOm6pKEkfUrUeisA3qJMg6ymg8
       cache-control:
       - no-cache
       content-length:
-      - '545'
+      - '548'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:18:55 GMT
+      - Mon, 18 Mar 2024 07:59:27 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
+      x-msedge-ref:
+      - 'Ref A: 95BA199D8CCA46B7BC189C38600837E5 Ref B: MAA201060515031 Ref C: 2024-03-18T07:59:24Z'
     status:
       code: 201
       message: Created
@@ -569,35 +576,33 @@ interactions:
       ParameterSetName:
       - -g -n --endpoint-name --profile-name --hostname
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/4034ec9a-4473-44a7-9ce5-0aea54286667?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/f1a32252-88da-4ed0-9c5d-6b3e24abd3a9?api-version=2023-05-01&t=638463455678856890&c=MIIHADCCBeigAwIBAgITHgPr-Oynpc11nukqPwAAA-v47DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAxMTUzMzMzWhcNMjUwMTI2MTUzMzMzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0fVpJv9HfZ9lDyFsKVf2PJgsZDMFA6khnm_67kUV0KDb8vTd3bmnw1UYl75g2Cp9GDvvaCqKVn-aux3TWe11D61vAtFcTPbNvezESM6bHR-RV1e4LhXUIl6PZRcIE65rk0bYF8P1O_zZ4mpWHx99Mc9gSe6E2sqh_sWRIuE4mSXNxVzzmndknLOkcDnqNl9Kt1VpXt5orBSwAV74sCBJuvzSE7MEW2kHUJtqzGWoXvf5pm-rYfwqhQa3HLjUMj7xbwzsBDtEn2ZYJLlqJqIps5iVHixHPn8k6opx-9FVP2u009BccFRDwiVl1b6xWXhwzq58hYtdYc3SoMCcWMtf0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBR1fq2N8kAQnlwHFZuqRYZ3nIu5LjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBABwCQ0hRgTzuMiiq8PUrVdDBN8_c3HcEZsxdazvy4RNcw_7WjYA3QdRzVtaOAEfPq6GrfCF7n8qlpXjMSOq5Oc-mL6EwulQAybtx4RxY0zI5tDTHfITDo2FVSa6thj9WVlgOF2UxNbopXBAYpN-fbgUTanBsphWY2F_Kz_VKFv-4UXHwyNiDa3wpaQrmQ2urunWos3lEhx0aRKdNTZwjJtK78rfIazNccJHT1LHpWU7i8XEBYP_RzftkGhoEhofdnth4t99G4Clw9RBOC8Km1SZ7zJTtaYcCU-NXSzWQgWTQeGMwo5CnvADN5uPXz3aUMxAukDY-ed4wPldjzzJFmzk&s=bsOJ0QRxIf0vzDMcwpL-V293hBSKkLg-OiqbTr__t9kgsdq_Iv_l61EokbKLAJIslsV1Tb6g0d0iIr3zHCIKmqGBdZ4SpV_P8kSACtosf_t8YanD1lYzPAAi1HEqq0pNqXRh58fHQ5wr1_SJp2JloQQbwuZzhAV8D37HFrpns8ajLcG2wCPc1vZawFAkTNdEqC1kebpEj6fwWBaO1SrA40NtmN3Bcg60HLn3XvO5Pa0-10iAS30TtFaB10sJ0ROugCpzZ0X0Ntv8YBlzGuZaUF0kYckQiFhjh-94vANt34KV38nFQ9orI8NQm2N4GWK_2Ez6p7Qqxen4YKd9Nh7QvQ&h=MvTl-UG1LQvufKEdMxOm6pKEkfUrUeisA3qJMg6ymg8
   response:
     body:
-      string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
+      string: '{"status":"InProgress","error":{"code":"None","message":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '61'
+      - '62'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:06 GMT
+      - Mon, 18 Mar 2024 07:59:28 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 552F3C346F5147468830C36DFE5AB30E Ref B: MAA201060515031 Ref C: 2024-03-18T07:59:28Z'
     status:
       code: 200
       message: OK
@@ -615,35 +620,33 @@ interactions:
       ParameterSetName:
       - -g -n --endpoint-name --profile-name --hostname
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customDomains/customdomain000003?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/f1a32252-88da-4ed0-9c5d-6b3e24abd3a9?api-version=2023-05-01&t=638463455678856890&c=MIIHADCCBeigAwIBAgITHgPr-Oynpc11nukqPwAAA-v47DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAxMTUzMzMzWhcNMjUwMTI2MTUzMzMzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0fVpJv9HfZ9lDyFsKVf2PJgsZDMFA6khnm_67kUV0KDb8vTd3bmnw1UYl75g2Cp9GDvvaCqKVn-aux3TWe11D61vAtFcTPbNvezESM6bHR-RV1e4LhXUIl6PZRcIE65rk0bYF8P1O_zZ4mpWHx99Mc9gSe6E2sqh_sWRIuE4mSXNxVzzmndknLOkcDnqNl9Kt1VpXt5orBSwAV74sCBJuvzSE7MEW2kHUJtqzGWoXvf5pm-rYfwqhQa3HLjUMj7xbwzsBDtEn2ZYJLlqJqIps5iVHixHPn8k6opx-9FVP2u009BccFRDwiVl1b6xWXhwzq58hYtdYc3SoMCcWMtf0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBR1fq2N8kAQnlwHFZuqRYZ3nIu5LjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBABwCQ0hRgTzuMiiq8PUrVdDBN8_c3HcEZsxdazvy4RNcw_7WjYA3QdRzVtaOAEfPq6GrfCF7n8qlpXjMSOq5Oc-mL6EwulQAybtx4RxY0zI5tDTHfITDo2FVSa6thj9WVlgOF2UxNbopXBAYpN-fbgUTanBsphWY2F_Kz_VKFv-4UXHwyNiDa3wpaQrmQ2urunWos3lEhx0aRKdNTZwjJtK78rfIazNccJHT1LHpWU7i8XEBYP_RzftkGhoEhofdnth4t99G4Clw9RBOC8Km1SZ7zJTtaYcCU-NXSzWQgWTQeGMwo5CnvADN5uPXz3aUMxAukDY-ed4wPldjzzJFmzk&s=bsOJ0QRxIf0vzDMcwpL-V293hBSKkLg-OiqbTr__t9kgsdq_Iv_l61EokbKLAJIslsV1Tb6g0d0iIr3zHCIKmqGBdZ4SpV_P8kSACtosf_t8YanD1lYzPAAi1HEqq0pNqXRh58fHQ5wr1_SJp2JloQQbwuZzhAV8D37HFrpns8ajLcG2wCPc1vZawFAkTNdEqC1kebpEj6fwWBaO1SrA40NtmN3Bcg60HLn3XvO5Pa0-10iAS30TtFaB10sJ0ROugCpzZ0X0Ntv8YBlzGuZaUF0kYckQiFhjh-94vANt34KV38nFQ9orI8NQm2N4GWK_2Ez6p7Qqxen4YKd9Nh7QvQ&h=MvTl-UG1LQvufKEdMxOm6pKEkfUrUeisA3qJMg6ymg8
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customdomains/customdomain000003","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000003","properties":{"hostName":"customdomain000003.cdn-cli-test-4.azfdtest.xyz","validationData":null,"resourceState":"Active","customHttpsProvisioningState":"Disabled","customHttpsProvisioningSubstate":"None","customHttpsParameters":null,"provisioningState":"Succeeded"}}'
+      string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '544'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:06 GMT
+      - Mon, 18 Mar 2024 07:59:58 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: A3ADFE9013F248009D4DEB8BA24D29C2 Ref B: MAA201060515031 Ref C: 2024-03-18T07:59:59Z'
     status:
       code: 200
       message: OK
@@ -651,7 +654,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -661,36 +664,38 @@ interactions:
       ParameterSetName:
       - -g -n --endpoint-name --profile-name --hostname
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customDomains/customdomain000003?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-03-24T07:17:06Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customdomains/customdomain000003","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000003","properties":{"hostName":"customdomain000003.aaz-4.clitest.azfdtest.xyz","validationData":null,"resourceState":"Active","customHttpsProvisioningState":"Disabled","customHttpsProvisioningSubstate":"None","customHttpsParameters":null,"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '310'
+      - '547'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:07 GMT
+      - Mon, 18 Mar 2024 08:00:00 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 4AE60E52435A4481A292651752BAAA65 Ref B: MAA201060515031 Ref C: 2024-03-18T07:59:59Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"hostName": "customdomain000004.cdn-cli-test-4.azfdtest.xyz"}}'
+    body: '{"properties": {"hostName": "customdomain000004.aaz-4.clitest.azfdtest.xyz"}}'
     headers:
       Accept:
       - application/json
@@ -701,41 +706,43 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '78'
+      - '77'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --endpoint-name --profile-name --hostname
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customDomains/customdomain000004?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customDomains/customdomain000004?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customdomains/customdomain000004","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000004","properties":{"hostName":"customdomain000004.cdn-cli-test-4.azfdtest.xyz","validationData":null,"resourceState":"Creating","customHttpsProvisioningState":"Disabled","customHttpsProvisioningSubstate":"None","customHttpsParameters":null,"provisioningState":"Creating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customdomains/customdomain000004","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000004","properties":{"hostName":"customdomain000004.aaz-4.clitest.azfdtest.xyz","validationData":null,"resourceState":"Creating","customHttpsProvisioningState":"Disabled","customHttpsProvisioningSubstate":"None","customHttpsParameters":null,"provisioningState":"Creating"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/948cb48a-8a86-419e-bf63-0840df0422ad?api-version=2021-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/bf8a4783-8d80-4d0d-aa63-5f6d10bb433e?api-version=2023-05-01&t=638463456052731082&c=MIIHADCCBeigAwIBAgITHgPr-Oynpc11nukqPwAAA-v47DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAxMTUzMzMzWhcNMjUwMTI2MTUzMzMzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0fVpJv9HfZ9lDyFsKVf2PJgsZDMFA6khnm_67kUV0KDb8vTd3bmnw1UYl75g2Cp9GDvvaCqKVn-aux3TWe11D61vAtFcTPbNvezESM6bHR-RV1e4LhXUIl6PZRcIE65rk0bYF8P1O_zZ4mpWHx99Mc9gSe6E2sqh_sWRIuE4mSXNxVzzmndknLOkcDnqNl9Kt1VpXt5orBSwAV74sCBJuvzSE7MEW2kHUJtqzGWoXvf5pm-rYfwqhQa3HLjUMj7xbwzsBDtEn2ZYJLlqJqIps5iVHixHPn8k6opx-9FVP2u009BccFRDwiVl1b6xWXhwzq58hYtdYc3SoMCcWMtf0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBR1fq2N8kAQnlwHFZuqRYZ3nIu5LjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBABwCQ0hRgTzuMiiq8PUrVdDBN8_c3HcEZsxdazvy4RNcw_7WjYA3QdRzVtaOAEfPq6GrfCF7n8qlpXjMSOq5Oc-mL6EwulQAybtx4RxY0zI5tDTHfITDo2FVSa6thj9WVlgOF2UxNbopXBAYpN-fbgUTanBsphWY2F_Kz_VKFv-4UXHwyNiDa3wpaQrmQ2urunWos3lEhx0aRKdNTZwjJtK78rfIazNccJHT1LHpWU7i8XEBYP_RzftkGhoEhofdnth4t99G4Clw9RBOC8Km1SZ7zJTtaYcCU-NXSzWQgWTQeGMwo5CnvADN5uPXz3aUMxAukDY-ed4wPldjzzJFmzk&s=Ec3S3MiYe_9WllDAJ8wdnPu5k0YX68eP4BCvX-H_HBoFnPAxI7KvZcO-PA56CCgjyTY18f_jxU3vgC87--ekuTOz82OQvZ3eEPqYfhxUMJpGIUam8ejiaOh5O4tEO2JIDZd8yzFYeyKcPLIIeaywaEoFwjmrqBrWlwD7M_7N7OjsqXOHMEpnPYcpr97fV_T4ocwSCirMwAka4cb3GJKpDls141-4n1pnW2viOTmYx7d2ngEtjvXT6Itjwww-Xj7norkGGTY3C08Ri7kI3nL2QtV8iAu-KycDmKI_3dmz72g8tg0t9IRkyNlWuj2-AVpUhF1tfgRQ8hWVIIDVLcjbZw&h=B5obgPnQaD6hHfn2-IPNlhNxFsrMHbumIDWMZlRnW-g
       cache-control:
       - no-cache
       content-length:
-      - '545'
+      - '548'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:09 GMT
+      - Mon, 18 Mar 2024 08:00:04 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: F977FD5FF7DD46FE8DFFBF6B9EA5A57E Ref B: MAA201060513009 Ref C: 2024-03-18T08:00:02Z'
     status:
       code: 201
       message: Created
@@ -753,35 +760,33 @@ interactions:
       ParameterSetName:
       - -g -n --endpoint-name --profile-name --hostname
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/948cb48a-8a86-419e-bf63-0840df0422ad?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/bf8a4783-8d80-4d0d-aa63-5f6d10bb433e?api-version=2023-05-01&t=638463456052731082&c=MIIHADCCBeigAwIBAgITHgPr-Oynpc11nukqPwAAA-v47DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAxMTUzMzMzWhcNMjUwMTI2MTUzMzMzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0fVpJv9HfZ9lDyFsKVf2PJgsZDMFA6khnm_67kUV0KDb8vTd3bmnw1UYl75g2Cp9GDvvaCqKVn-aux3TWe11D61vAtFcTPbNvezESM6bHR-RV1e4LhXUIl6PZRcIE65rk0bYF8P1O_zZ4mpWHx99Mc9gSe6E2sqh_sWRIuE4mSXNxVzzmndknLOkcDnqNl9Kt1VpXt5orBSwAV74sCBJuvzSE7MEW2kHUJtqzGWoXvf5pm-rYfwqhQa3HLjUMj7xbwzsBDtEn2ZYJLlqJqIps5iVHixHPn8k6opx-9FVP2u009BccFRDwiVl1b6xWXhwzq58hYtdYc3SoMCcWMtf0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBR1fq2N8kAQnlwHFZuqRYZ3nIu5LjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBABwCQ0hRgTzuMiiq8PUrVdDBN8_c3HcEZsxdazvy4RNcw_7WjYA3QdRzVtaOAEfPq6GrfCF7n8qlpXjMSOq5Oc-mL6EwulQAybtx4RxY0zI5tDTHfITDo2FVSa6thj9WVlgOF2UxNbopXBAYpN-fbgUTanBsphWY2F_Kz_VKFv-4UXHwyNiDa3wpaQrmQ2urunWos3lEhx0aRKdNTZwjJtK78rfIazNccJHT1LHpWU7i8XEBYP_RzftkGhoEhofdnth4t99G4Clw9RBOC8Km1SZ7zJTtaYcCU-NXSzWQgWTQeGMwo5CnvADN5uPXz3aUMxAukDY-ed4wPldjzzJFmzk&s=Ec3S3MiYe_9WllDAJ8wdnPu5k0YX68eP4BCvX-H_HBoFnPAxI7KvZcO-PA56CCgjyTY18f_jxU3vgC87--ekuTOz82OQvZ3eEPqYfhxUMJpGIUam8ejiaOh5O4tEO2JIDZd8yzFYeyKcPLIIeaywaEoFwjmrqBrWlwD7M_7N7OjsqXOHMEpnPYcpr97fV_T4ocwSCirMwAka4cb3GJKpDls141-4n1pnW2viOTmYx7d2ngEtjvXT6Itjwww-Xj7norkGGTY3C08Ri7kI3nL2QtV8iAu-KycDmKI_3dmz72g8tg0t9IRkyNlWuj2-AVpUhF1tfgRQ8hWVIIDVLcjbZw&h=B5obgPnQaD6hHfn2-IPNlhNxFsrMHbumIDWMZlRnW-g
   response:
     body:
-      string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
+      string: '{"status":"InProgress","error":{"code":"None","message":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '61'
+      - '62'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:20 GMT
+      - Mon, 18 Mar 2024 08:00:05 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 0FAC0FA04D9F479294A8EDCCC599B7BF Ref B: MAA201060513009 Ref C: 2024-03-18T08:00:05Z'
     status:
       code: 200
       message: OK
@@ -799,35 +804,77 @@ interactions:
       ParameterSetName:
       - -g -n --endpoint-name --profile-name --hostname
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customDomains/customdomain000004?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/bf8a4783-8d80-4d0d-aa63-5f6d10bb433e?api-version=2023-05-01&t=638463456052731082&c=MIIHADCCBeigAwIBAgITHgPr-Oynpc11nukqPwAAA-v47DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAxMTUzMzMzWhcNMjUwMTI2MTUzMzMzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0fVpJv9HfZ9lDyFsKVf2PJgsZDMFA6khnm_67kUV0KDb8vTd3bmnw1UYl75g2Cp9GDvvaCqKVn-aux3TWe11D61vAtFcTPbNvezESM6bHR-RV1e4LhXUIl6PZRcIE65rk0bYF8P1O_zZ4mpWHx99Mc9gSe6E2sqh_sWRIuE4mSXNxVzzmndknLOkcDnqNl9Kt1VpXt5orBSwAV74sCBJuvzSE7MEW2kHUJtqzGWoXvf5pm-rYfwqhQa3HLjUMj7xbwzsBDtEn2ZYJLlqJqIps5iVHixHPn8k6opx-9FVP2u009BccFRDwiVl1b6xWXhwzq58hYtdYc3SoMCcWMtf0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBR1fq2N8kAQnlwHFZuqRYZ3nIu5LjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBABwCQ0hRgTzuMiiq8PUrVdDBN8_c3HcEZsxdazvy4RNcw_7WjYA3QdRzVtaOAEfPq6GrfCF7n8qlpXjMSOq5Oc-mL6EwulQAybtx4RxY0zI5tDTHfITDo2FVSa6thj9WVlgOF2UxNbopXBAYpN-fbgUTanBsphWY2F_Kz_VKFv-4UXHwyNiDa3wpaQrmQ2urunWos3lEhx0aRKdNTZwjJtK78rfIazNccJHT1LHpWU7i8XEBYP_RzftkGhoEhofdnth4t99G4Clw9RBOC8Km1SZ7zJTtaYcCU-NXSzWQgWTQeGMwo5CnvADN5uPXz3aUMxAukDY-ed4wPldjzzJFmzk&s=Ec3S3MiYe_9WllDAJ8wdnPu5k0YX68eP4BCvX-H_HBoFnPAxI7KvZcO-PA56CCgjyTY18f_jxU3vgC87--ekuTOz82OQvZ3eEPqYfhxUMJpGIUam8ejiaOh5O4tEO2JIDZd8yzFYeyKcPLIIeaywaEoFwjmrqBrWlwD7M_7N7OjsqXOHMEpnPYcpr97fV_T4ocwSCirMwAka4cb3GJKpDls141-4n1pnW2viOTmYx7d2ngEtjvXT6Itjwww-Xj7norkGGTY3C08Ri7kI3nL2QtV8iAu-KycDmKI_3dmz72g8tg0t9IRkyNlWuj2-AVpUhF1tfgRQ8hWVIIDVLcjbZw&h=B5obgPnQaD6hHfn2-IPNlhNxFsrMHbumIDWMZlRnW-g
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customdomains/customdomain000004","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000004","properties":{"hostName":"customdomain000004.cdn-cli-test-4.azfdtest.xyz","validationData":null,"resourceState":"Active","customHttpsProvisioningState":"Disabled","customHttpsProvisioningSubstate":"None","customHttpsParameters":null,"provisioningState":"Succeeded"}}'
+      string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '544'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:21 GMT
+      - Mon, 18 Mar 2024 08:00:36 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 0C936460F07D4534B1626ED615C39DE9 Ref B: MAA201060513009 Ref C: 2024-03-18T08:00:36Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn custom-domain create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --endpoint-name --profile-name --hostname
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customDomains/customdomain000004?api-version=2023-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customdomains/customdomain000004","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000004","properties":{"hostName":"customdomain000004.aaz-4.clitest.azfdtest.xyz","validationData":null,"resourceState":"Active","customHttpsProvisioningState":"Disabled","customHttpsProvisioningSubstate":"None","customHttpsParameters":null,"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '547'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 18 Mar 2024 08:00:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: ADB6EEF8F8274D198B6FE30ED0D992D1 Ref B: MAA201060513009 Ref C: 2024-03-18T08:00:37Z'
     status:
       code: 200
       message: OK
@@ -845,35 +892,33 @@ interactions:
       ParameterSetName:
       - -g -n --endpoint-name --profile-name
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customDomains/customdomain000003?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customDomains/customdomain000003?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customdomains/customdomain000003","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000003","properties":{"hostName":"customdomain000003.cdn-cli-test-4.azfdtest.xyz","validationData":null,"resourceState":"Active","customHttpsProvisioningState":"Disabled","customHttpsProvisioningSubstate":"None","customHttpsParameters":null,"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customdomains/customdomain000003","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000003","properties":{"hostName":"customdomain000003.aaz-4.clitest.azfdtest.xyz","validationData":null,"resourceState":"Active","customHttpsProvisioningState":"Disabled","customHttpsProvisioningSubstate":"None","customHttpsParameters":null,"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '544'
+      - '547'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:22 GMT
+      - Mon, 18 Mar 2024 08:00:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: D5F72C82ECC94E85A304E12483E81653 Ref B: MAA201060513049 Ref C: 2024-03-18T08:00:39Z'
     status:
       code: 200
       message: OK
@@ -891,35 +936,33 @@ interactions:
       ParameterSetName:
       - -g -n --endpoint-name --profile-name
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customDomains/customdomain000003?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customDomains/customdomain000003?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customdomains/customdomain000003","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000003","properties":{"hostName":"customdomain000003.cdn-cli-test-4.azfdtest.xyz","validationData":null,"resourceState":"Active","customHttpsProvisioningState":"Disabled","customHttpsProvisioningSubstate":"None","customHttpsParameters":null,"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customdomains/customdomain000003","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000003","properties":{"hostName":"customdomain000003.aaz-4.clitest.azfdtest.xyz","validationData":null,"resourceState":"Active","customHttpsProvisioningState":"Disabled","customHttpsProvisioningSubstate":"None","customHttpsParameters":null,"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '544'
+      - '547'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:23 GMT
+      - Mon, 18 Mar 2024 08:00:43 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 40A8E863C3E44642B9A53F2412F2729A Ref B: MAA201060514011 Ref C: 2024-03-18T08:00:42Z'
     status:
       code: 200
       message: OK
@@ -937,7 +980,7 @@ interactions:
       ParameterSetName:
       - -g -n --endpoint-name --profile-name --min-tls-version
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123?api-version=2021-06-01
   response:
@@ -951,23 +994,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:24 GMT
+      - Mon, 18 Mar 2024 08:00:45 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '49'
+      - '4999'
+      x-msedge-ref:
+      - 'Ref A: 55F915E124534DADB892D806AC29B144 Ref B: MAA201060515045 Ref C: 2024-03-18T08:00:44Z'
     status:
       code: 200
       message: OK
@@ -991,37 +1032,39 @@ interactions:
       ParameterSetName:
       - -g -n --endpoint-name --profile-name --min-tls-version
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customDomains/customdomain000003/enableCustomHttps?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customDomains/customdomain000003/enableCustomHttps?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customdomains/customdomain000003","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000003","properties":{"hostName":"customdomain000003.cdn-cli-test-4.azfdtest.xyz","validationData":null,"resourceState":"Active","customHttpsProvisioningState":"Enabling","customHttpsProvisioningSubstate":"SubmittingDomainControlValidationRequest","customHttpsParameters":{"certificateSource":"Cdn","certificateSourceParameters":{"typeName":"CdnCertificateSourceParameters","certificateType":"Dedicated"},"protocolType":"ServerNameIndication","minimumTlsVersion":"TLS10"},"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customdomains/customdomain000003","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000003","properties":{"hostName":"customdomain000003.aaz-4.clitest.azfdtest.xyz","validationData":null,"resourceState":"Active","customHttpsProvisioningState":"Enabling","customHttpsProvisioningSubstate":"SubmittingDomainControlValidationRequest","customHttpsParameters":{"certificateSource":"Cdn","certificateSourceParameters":{"typeName":"CdnCertificateSourceParameters","certificateType":"Dedicated"},"protocolType":"ServerNameIndication","minimumTlsVersion":"TLS10"},"provisioningState":"Succeeded"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/4e223112-42a5-4875-b4bb-d123f5b2c269?api-version=2021-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/18c45bb2-9c6c-402a-90d6-00d3e2d8265c?api-version=2021-06-01&t=638463456491524374&c=MIIHADCCBeigAwIBAgITHgPr-Oynpc11nukqPwAAA-v47DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAxMTUzMzMzWhcNMjUwMTI2MTUzMzMzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0fVpJv9HfZ9lDyFsKVf2PJgsZDMFA6khnm_67kUV0KDb8vTd3bmnw1UYl75g2Cp9GDvvaCqKVn-aux3TWe11D61vAtFcTPbNvezESM6bHR-RV1e4LhXUIl6PZRcIE65rk0bYF8P1O_zZ4mpWHx99Mc9gSe6E2sqh_sWRIuE4mSXNxVzzmndknLOkcDnqNl9Kt1VpXt5orBSwAV74sCBJuvzSE7MEW2kHUJtqzGWoXvf5pm-rYfwqhQa3HLjUMj7xbwzsBDtEn2ZYJLlqJqIps5iVHixHPn8k6opx-9FVP2u009BccFRDwiVl1b6xWXhwzq58hYtdYc3SoMCcWMtf0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBR1fq2N8kAQnlwHFZuqRYZ3nIu5LjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBABwCQ0hRgTzuMiiq8PUrVdDBN8_c3HcEZsxdazvy4RNcw_7WjYA3QdRzVtaOAEfPq6GrfCF7n8qlpXjMSOq5Oc-mL6EwulQAybtx4RxY0zI5tDTHfITDo2FVSa6thj9WVlgOF2UxNbopXBAYpN-fbgUTanBsphWY2F_Kz_VKFv-4UXHwyNiDa3wpaQrmQ2urunWos3lEhx0aRKdNTZwjJtK78rfIazNccJHT1LHpWU7i8XEBYP_RzftkGhoEhofdnth4t99G4Clw9RBOC8Km1SZ7zJTtaYcCU-NXSzWQgWTQeGMwo5CnvADN5uPXz3aUMxAukDY-ed4wPldjzzJFmzk&s=XQzsiJqs0Txx5eDW1JKQfmRagIaqN_bB85Qvdl0mS7scGurYrC-3emapPcJCCeNoGfPVsHOP8xCF9dvvU1sx7_KZENWJ115y9ql7sC_dg7Qu4KP4janZjQMX1973eJ3Qda7ymwOsSCi1fSMUbN-uoa7YHKaq4QxSdSRHjMEkqiJzSc6PIL8GQIpLHIsOvQ_xtZJR63hVxvYMZu8IyiFvmsuz0TP8YQ52_83FNf0E8VIWLDgFCDOT6xVWqoSucnwGGdwSpd2ewsKejqcMcrdTX9S9S_qhMUTOhOQ_Zm7QO5ItUJe_sLGtXtoYfgYDaJkrua0MgtzIa0W7oyP2zaRxMw&h=ehZueZIancWkpj1jIX56uHursyafHJpqfjIcElJSJno
       cache-control:
       - no-cache
       content-length:
-      - '775'
+      - '778'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:26 GMT
+      - Mon, 18 Mar 2024 08:00:48 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/4e223112-42a5-4875-b4bb-d123f5b2c269/profileresults/profile123/endpointresults/cdn-cli-test-4/customdomainresults/customdomain000003?api-version=2021-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/18c45bb2-9c6c-402a-90d6-00d3e2d8265c/profileresults/profile123/endpointresults/cdn-cli-test-aaz-4/customdomainresults/customdomain000003?api-version=2021-06-01&t=638463456491680238&c=MIIHADCCBeigAwIBAgITHgPr-Oynpc11nukqPwAAA-v47DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAxMTUzMzMzWhcNMjUwMTI2MTUzMzMzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0fVpJv9HfZ9lDyFsKVf2PJgsZDMFA6khnm_67kUV0KDb8vTd3bmnw1UYl75g2Cp9GDvvaCqKVn-aux3TWe11D61vAtFcTPbNvezESM6bHR-RV1e4LhXUIl6PZRcIE65rk0bYF8P1O_zZ4mpWHx99Mc9gSe6E2sqh_sWRIuE4mSXNxVzzmndknLOkcDnqNl9Kt1VpXt5orBSwAV74sCBJuvzSE7MEW2kHUJtqzGWoXvf5pm-rYfwqhQa3HLjUMj7xbwzsBDtEn2ZYJLlqJqIps5iVHixHPn8k6opx-9FVP2u009BccFRDwiVl1b6xWXhwzq58hYtdYc3SoMCcWMtf0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBR1fq2N8kAQnlwHFZuqRYZ3nIu5LjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBABwCQ0hRgTzuMiiq8PUrVdDBN8_c3HcEZsxdazvy4RNcw_7WjYA3QdRzVtaOAEfPq6GrfCF7n8qlpXjMSOq5Oc-mL6EwulQAybtx4RxY0zI5tDTHfITDo2FVSa6thj9WVlgOF2UxNbopXBAYpN-fbgUTanBsphWY2F_Kz_VKFv-4UXHwyNiDa3wpaQrmQ2urunWos3lEhx0aRKdNTZwjJtK78rfIazNccJHT1LHpWU7i8XEBYP_RzftkGhoEhofdnth4t99G4Clw9RBOC8Km1SZ7zJTtaYcCU-NXSzWQgWTQeGMwo5CnvADN5uPXz3aUMxAukDY-ed4wPldjzzJFmzk&s=QSkCL6T197F0WQNnk4uaKspQH7LeDlOhelaM5uosnKQDiZyyGRLo44grlUoZW3jLbvaAz3BuQ3vhqG58lDRbq115hNfaxx_-13DvJpMEAVeaYKQ9C_XJ1-imeD8AlQae1eaUdtJ5Kq6jUtPqYB3xUKer6FjFgZM-GMPPMm2UXSSkJNQaX7rhsJk8mbPnOdFRWyswmA47X6rCW1MgIwakZGUlTfbrV4JoJx1s0l8a5wwT9Az3XjeA7dAB5zWoxg8IL02cAxQTx7CAaWOq-G5fhSCoMe0n7-NWOtDbFPk284toh7pkAmPNgNy9pq3SEx2GBIZDKem6pPFiWD6OBdTcgQ&h=qzW1L9ZbkvhFh4s9MuwoWqGl8tKpQPLxRmz9lv0cLMU
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
+      x-msedge-ref:
+      - 'Ref A: 9FED53AC0C40464283D069167CA22BD0 Ref B: MAA201060515045 Ref C: 2024-03-18T08:00:45Z'
     status:
       code: 202
       message: Accepted
@@ -1039,35 +1082,33 @@ interactions:
       ParameterSetName:
       - -g -n --endpoint-name --profile-name --min-tls-version
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customDomains/customdomain000003?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customDomains/customdomain000003?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customdomains/customdomain000003","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000003","properties":{"hostName":"customdomain000003.cdn-cli-test-4.azfdtest.xyz","validationData":null,"resourceState":"Active","customHttpsProvisioningState":"Enabling","customHttpsProvisioningSubstate":"SubmittingDomainControlValidationRequest","customHttpsParameters":{"certificateSource":"Cdn","certificateSourceParameters":{"typeName":"CdnCertificateSourceParameters","certificateType":"Dedicated"},"protocolType":"ServerNameIndication","minimumTlsVersion":"TLS10"},"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customdomains/customdomain000003","type":"Microsoft.Cdn/profiles/endpoints/customdomains","name":"customdomain000003","properties":{"hostName":"customdomain000003.aaz-4.clitest.azfdtest.xyz","validationData":null,"resourceState":"Active","customHttpsProvisioningState":"Enabling","customHttpsProvisioningSubstate":"SubmittingDomainControlValidationRequest","customHttpsParameters":{"certificateSource":"Cdn","certificateSourceParameters":{"typeName":"CdnCertificateSourceParameters","certificateType":"Dedicated"},"protocolType":"ServerNameIndication","minimumTlsVersion":"TLS10"},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '775'
+      - '778'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:27 GMT
+      - Mon, 18 Mar 2024 08:00:50 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: A9591142EADD4554A9D79C2846CFF9F1 Ref B: MAA201060515045 Ref C: 2024-03-18T08:00:49Z'
     status:
       code: 200
       message: OK
@@ -1085,31 +1126,77 @@ interactions:
       ParameterSetName:
       - --name --secret-permissions --certificate-permissions --object-id
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27&api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27%20and%20name%20eq%20%27cdncli-byoc000002%27&api-version=2015-11-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lyue-test-2021/providers/Microsoft.KeyVault/vaults/lyuetest2021","name":"lyuetest2021","type":"Microsoft.KeyVault/vaults","location":"southeastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rt-rt06-eun-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdnrtrt06eunckvres1","name":"cdnrtrt06eunckvres1","type":"Microsoft.KeyVault/vaults","location":"northeurope","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-r2df-usc-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevr2dfuscckvres1","name":"cdndevr2dfuscckvres1","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lyue-test-byoc-rg/providers/Microsoft.KeyVault/vaults/lyue-test-byoc-kv","name":"lyue-test-byoc-kv","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lyue-afdx-test/providers/Microsoft.KeyVault/vaults/lyue-afdx-test-kv","name":"lyue-afdx-test-kv","type":"Microsoft.KeyVault/vaults","location":"eastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/afdxprivatepreview/providers/Microsoft.KeyVault/vaults/yuajia","name":"yuajia","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Default-Storage-WestUS/providers/Microsoft.KeyVault/vaults/cdnrollingusesharedinbox","name":"cdnrollingusesharedinbox","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Default-Storage-WestUS/providers/Microsoft.KeyVault/vaults/cdnrollinguseafdoutbox","name":"cdnrollinguseafdoutbox","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Default-Storage-WestUS/providers/Microsoft.KeyVault/vaults/cdnrollingusevzoutbox","name":"cdnrollingusevzoutbox","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/WestUsTest/providers/Microsoft.KeyVault/vaults/FEKeyvaultTest","name":"FEKeyvaultTest","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-r2dbox-usw-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevr2dboxuswckvres1","name":"cdndevr2dboxuswckvres1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rt-rt04-use-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdnrtrt04useckvres1","name":"cdnrtrt04useckvres1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rt-rt05-use-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdnrtrt05useckvres1","name":"cdnrtrt05useckvres1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rt-rt04-use-c-rg-res-1/providers/Microsoft.KeyVault/vaults/rt04testkvpaul","name":"rt04testkvpaul","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rt-r2rt1-use-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdnrtr2rt1useckvres1","name":"cdnrtr2rt1useckvres1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-test-rpv2-rg/providers/Microsoft.KeyVault/vaults/mccdncloudtest","name":"mccdncloudtest","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AFD/providers/Microsoft.KeyVault/vaults/hata-test1","name":"hata-test1","type":"Microsoft.KeyVault/vaults","location":"northcentralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/afd-dev-usc-g-rg-vaultmanager-1/providers/Microsoft.KeyVault/vaults/afddevuscgkvvmk1","name":"afddevuscgkvvmk1","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/afd-dev-usc-g-rg-vaultmanager-1/providers/Microsoft.KeyVault/vaults/afddevuscgkvvmafd1","name":"afddevuscgkvvmafd1","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/afd-dev-usc-g-rg-vaultmanager-1/providers/Microsoft.KeyVault/vaults/afddevuscgkvvms1","name":"afddevuscgkvvms1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/afd-dev-xuji-usw-c-rg-res-1/providers/Microsoft.KeyVault/vaults/afd-xuji-kv-pav2-ppe","name":"afd-xuji-kv-pav2-ppe","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/afd-dev-xuji-usw-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/afddevxujiuswckvres1","name":"afddevxujiuswckvres1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/arameshcanary/providers/Microsoft.KeyVault/vaults/arameshcanarykv","name":"arameshcanarykv","type":"Microsoft.KeyVault/vaults","location":"northcentralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecdntestresourcegroup/providers/Microsoft.KeyVault/vaults/azurecdn-test-keyvault","name":"azurecdn-test-keyvault","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azuretest/providers/Microsoft.KeyVault/vaults/CDNAutomationTest","name":"CDNAutomationTest","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/byoc/providers/Microsoft.KeyVault/vaults/cdn-byoc-test","name":"cdn-byoc-test","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-dbox-usw-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevdboxuswckvres1","name":"cdndevdboxuswckvres1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Catchpoint/providers/Microsoft.KeyVault/vaults/Catchpoint-CDN","name":"Catchpoint-CDN","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-df-usc-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevdfuscckvres1","name":"cdndevdfuscckvres1","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-inzar-usw-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevinzaruswckvres1","name":"cdndevinzaruswckvres1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-guru-usw-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevguruuswckvres1","name":"cdndevguruuswckvres1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-las-usw-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevlasuswckvres1","name":"cdndevlasuswckvres1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-ravi-usw-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevraviuswckvres1","name":"cdndevraviuswckvres1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-rosh-usw-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevroshuswckvres1","name":"cdndevroshuswckvres1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-rr-usw-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevrruswckvres1","name":"cdndevrruswckvres1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-sai-usw-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevsaiuswckvres1","name":"cdndevsaiuswckvres1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-susi-usw-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevsusiuswckvres1","name":"cdndevsusiuswckvres1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-usc-g-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevuscgkvnoti1","name":"cdndevuscgkvnoti1","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-usc-g-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevuscgkvres1","name":"cdndevuscgkvres1","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-usc-g-rg-vaultmanager-1/providers/Microsoft.KeyVault/vaults/cdndevuscgkvvmk1","name":"cdndevuscgkvvmk1","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-usc-g-rg-vaultmanager-1/providers/Microsoft.KeyVault/vaults/cdndevuscgkvvmafd1","name":"cdndevuscgkvvmafd1","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-usc-g-rg-vaultmanager-1/providers/Microsoft.KeyVault/vaults/cdndevuscgkvvms1","name":"cdndevuscgkvvms1","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-varu-usw-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevvaruuswckvres1","name":"cdndevvaruuswckvres1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-xuji-usw-c-rg-res-1/providers/Microsoft.KeyVault/vaults/afd-kv-pav2-ppe","name":"afd-kv-pav2-ppe","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-xuji-usw-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevxujiuswckvres1","name":"cdndevxujiuswckvres1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-provider-demo/providers/Microsoft.KeyVault/vaults/provider-outbox-kv","name":"provider-outbox-kv","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rt-renv-eun-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdnrtrenveunckvres1","name":"cdnrtrenveunckvres1","type":"Microsoft.KeyVault/vaults","location":"northeurope","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rt-rt01-use-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdnrtrt01useckvres1","name":"cdnrtrt01useckvres1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rt-rt02-use-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdnrtrt02useckvres1","name":"cdnrtrt02useckvres1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rt-rt03-eun-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdnrtrt03eunckvres1","name":"cdnrtrt03eunckvres1","type":"Microsoft.KeyVault/vaults","location":"northeurope","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rt-use-g-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdnrtusegkvres1","name":"cdnrtusegkvres1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-test-dogfood-usc-1-rgp-resources-1-p/providers/Microsoft.KeyVault/vaults/cdndevuscgkvvmverizondf","name":"cdndevuscgkvvmverizondf","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-test-dogfood-usc-1-rgp-resources-1-p/providers/Microsoft.KeyVault/vaults/azurecdn-kv-pav2-ppe","name":"azurecdn-kv-pav2-ppe","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CDN-VaultManager-DF/providers/Microsoft.KeyVault/vaults/VaultManager-Certificate","name":"VaultManager-Certificate","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CDN-VaultManager-DF/providers/Microsoft.KeyVault/vaults/VaultManager-Key","name":"VaultManager-Key","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdnrolling01/providers/Microsoft.KeyVault/vaults/RollingTest01KV","name":"RollingTest01KV","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ganga-rg/providers/Microsoft.KeyVault/vaults/ganga-kv","name":"ganga-kv","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/henwu-rg-test-1/providers/Microsoft.KeyVault/vaults/henwu-kv-test-1","name":"henwu-kv-test-1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/injy-rg/providers/Microsoft.KeyVault/vaults/injy-kv","name":"injy-kv","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jucoon/providers/Microsoft.KeyVault/vaults/jucoon-test","name":"jucoon-test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/manlingtest/providers/Microsoft.KeyVault/vaults/Manlingkeyvault","name":"Manlingkeyvault","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/manlingtest/providers/Microsoft.KeyVault/vaults/Manlingtest","name":"Manlingtest","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nachakra-rg-test/providers/Microsoft.KeyVault/vaults/nachakra-test-kv","name":"nachakra-test-kv","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/prakhar/providers/Microsoft.KeyVault/vaults/keyvaulttest12","name":"keyvaulttest12","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rintest/providers/Microsoft.KeyVault/vaults/rin","name":"rin","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RPTest/providers/Microsoft.KeyVault/vaults/cdnrptestkvdeployment","name":"cdnrptestkvdeployment","type":"Microsoft.KeyVault/vaults","location":"northcentralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sriResourceGroup/providers/Microsoft.KeyVault/vaults/sriTest-kv","name":"sriTest-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gubalasu-rg/providers/Microsoft.KeyVault/vaults/guru-urlsigning-secrets","name":"guru-urlsigning-secrets","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-test-dogfood-usc-1-rgp-resources-1-p/providers/Microsoft.KeyVault/vaults/cdn-dev-df-usc-0-kv-bill","name":"cdn-dev-df-usc-0-kv-bill","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-df-usc-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/mccdne2e","name":"mccdne2e","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/urlSigningRG/providers/Microsoft.KeyVault/vaults/urlsigning-kv","name":"urlsigning-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rt-r2rt2-use-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdnrtr2rt2useckvres1","name":"cdnrtr2rt2useckvres1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/afdconftrans-dev-rg/providers/Microsoft.KeyVault/vaults/afdconftrans-devbox","name":"afdconftrans-devbox","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecdnutilities-rg/providers/Microsoft.KeyVault/vaults/azurecdnutilties-kv","name":"azurecdnutilties-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ev2-buildout-test/providers/Microsoft.KeyVault/vaults/yunheev2test","name":"yunheev2test","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-lyue-usw-c-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevlyueuswckvres1","name":"cdndevlyueuswckvres1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rolling-tests/providers/Microsoft.KeyVault/vaults/urlsigningkeys-rt-kv","name":"urlsigningkeys-rt-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mutli_cdn_ml/providers/Microsoft.KeyVault/vaults/mlws12591685714","name":"mlws12591685714","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/urlsigining-quickstart-rg/providers/Microsoft.KeyVault/vaults/urlsigning-quickstart-kv","name":"urlsigning-quickstart-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-ps-int-test/providers/Microsoft.KeyVault/vaults/cdn-pls-test-byoc","name":"cdn-pls-test-byoc","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lyue-test-2021/providers/Microsoft.KeyVault/vaults/lyuetestaadkv","name":"lyuetestaadkv","type":"Microsoft.KeyVault/vaults","location":"southeastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdnlogprocessortest/providers/Microsoft.KeyVault/vaults/cdnlogdeploykvtest","name":"cdnlogdeploykvtest","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/varunch-cdn/providers/Microsoft.KeyVault/vaults/varunchtestkv","name":"varunchtestkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PortalExtensionBuildoutTest/providers/Microsoft.KeyVault/vaults/portalbuildoutkv","name":"portalbuildoutkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-test-dogfood-usc-1-rgp-resources-1-p/providers/Microsoft.KeyVault/vaults/cdn-dev-df-testing-bill","name":"cdn-dev-df-testing-bill","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lyue-test-secret-notify/providers/Microsoft.KeyVault/vaults/lyuetestsecretnotifykv","name":"lyuetestsecretnotifykv","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pkanetest/providers/Microsoft.KeyVault/vaults/akanrt","name":"akanrt","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/afdxlog-rt-eus/providers/Microsoft.KeyVault/vaults/cdnlogdeploykvrt","name":"cdnlogdeploykvrt","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhow-rg/providers/Microsoft.KeyVault/vaults/zhow-keyvault-01","name":"zhow-keyvault-01","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhow-rg/providers/Microsoft.KeyVault/vaults/zhow-keyvault-02","name":"zhow-keyvault-02","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/afdxlog-rt01-eus/providers/Microsoft.KeyVault/vaults/cdnlogdeploykvrt01","name":"cdnlogdeploykvrt01","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/huaiyiz/providers/Microsoft.KeyVault/vaults/huaiyizkvtest","name":"huaiyizkvtest","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-test-dogfood-usc-1-rgp-resources-1-p/providers/Microsoft.KeyVault/vaults/cdn-dev-df-testing-bill9","name":"cdn-dev-df-testing-bill9","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/contoso-rg/providers/Microsoft.KeyVault/vaults/contosokeyvaultpre","name":"contosokeyvaultpre","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/SecretNearExpiryNotifierE2ETests/providers/Microsoft.KeyVault/vaults/secretnearexpirye2e","name":"secretnearexpirye2e","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dff58-usw-g-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndff58uswgkvres1","name":"cdndff58uswgkvres1","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dff59-usw-g-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndff59uswgkvres1","name":"cdndff59uswgkvres1","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc-int","name":"clibyoc-int","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgpuyu/providers/Microsoft.KeyVault/vaults/puyuTestKv","name":"puyuTestKv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AFD/providers/Microsoft.KeyVault/vaults/jessicl-canary-testKV","name":"jessicl-canary-testKV","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/wyctest1/providers/Microsoft.KeyVault/vaults/cert-test-afdrp","name":"cert-test-afdrp","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rolling-tests/providers/Microsoft.KeyVault/vaults/cdnrollingtest","name":"cdnrollingtest","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal-deployment-for-test-env/providers/Microsoft.KeyVault/vaults/deploy-kv-for-test-env","name":"deploy-kv-for-test-env","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-dev-lyue-aae-g-rg-sec-1/providers/Microsoft.KeyVault/vaults/cdndevlyueaaegkvres1","name":"cdndevlyueaaegkvres1","type":"Microsoft.KeyVault/vaults","location":"eastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/afdxprivatepreview/providers/Microsoft.KeyVault/vaults/afdx-preflight-test","name":"afdx-preflight-test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ursa-web-scanner/providers/Microsoft.KeyVault/vaults/ursawebscanner","name":"ursawebscanner","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhden-rp-test/providers/Microsoft.KeyVault/vaults/zhdenTestKv","name":"zhdenTestKv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rt-use-g-rg-sec-1/providers/Microsoft.KeyVault/vaults/afdx-managed-rt","name":"afdx-managed-rt","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-rt-use-g-rg-res-1/providers/Microsoft.KeyVault/vaults/afdx-managed-2-rt","name":"afdx-managed-2-rt","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lyue-test-2021/providers/Microsoft.KeyVault/vaults/lyuetestml5852045470","name":"lyuetestml5852045470","type":"Microsoft.KeyVault/vaults","location":"southeastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lyue-test-2021/providers/Microsoft.KeyVault/vaults/lyuedebugml5195254853","name":"lyuedebugml5195254853","type":"Microsoft.KeyVault/vaults","location":"southeastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhow-rg/providers/Microsoft.KeyVault/vaults/zhow-keyvault-03","name":"zhow-keyvault-03","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhow-rg/providers/Microsoft.KeyVault/vaults/zhow-keyvault-04","name":"zhow-keyvault-04","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cdn-geneva-automation/providers/Microsoft.KeyVault/vaults/icm-geneva-automation","name":"icm-geneva-automation","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rggplmz2afw5lothwqrpj44tnj2pei4d34nxwtj6g26lg3wuf4sx5dokn3xkrftasa6/providers/Microsoft.KeyVault/vaults/keyvault6pimkiraqetm","name":"keyvault6pimkiraqetm","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg4rw5wpiha7we7opxdvyg24klpekjqngombm34hrq6kfxzsac6l6b3lexjvltjburb/providers/Microsoft.KeyVault/vaults/keyvaultkjjdj4gdwkgo","name":"keyvaultkjjdj4gdwkgo","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rrahultest/providers/Microsoft.KeyVault/vaults/rr-rbactest","name":"rr-rbactest","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdnrp-rt02-c/providers/Microsoft.KeyVault/vaults/cdnrt02ckvres2","name":"cdnrt02ckvres2","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdnrp-rt03-c/providers/Microsoft.KeyVault/vaults/cdnrt03ckvres2","name":"cdnrt03ckvres2","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/v-dozhangResourceGroup/providers/Microsoft.KeyVault/vaults/vdozhangtest01","name":"vdozhangtest01","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chengll-test-east/providers/Microsoft.KeyVault/vaults/chenglltestkveast","name":"chenglltestkveast","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jessicl-canary-rg/providers/Microsoft.KeyVault/vaults/jessicl-canary-kv","name":"jessicl-canary-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/haitao/providers/Microsoft.KeyVault/vaults/htkv","name":"htkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-sdk-test/providers/Microsoft.KeyVault/vaults/cdn-sdk-test-kv","name":"cdn-sdk-test-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Afdx_RPv2Runner_Local/providers/Microsoft.KeyVault/vaults/localrunnerbyoc","name":"localrunnerbyoc","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/afdxe2etest/providers/Microsoft.KeyVault/vaults/afdportal-e2e-test-kv","name":"afdportal-e2e-test-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Afd_RPv2_Ztna_CDS/providers/Microsoft.KeyVault/vaults/ztnaStagerKeyVault","name":"ztnaStagerKeyVault","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgdgj6byuch6swy2vvi7ulr2xw7nl77pcwyzcqbojjr2bamrd4xd3bp6oevoks2qfnh/providers/Microsoft.KeyVault/vaults/cdncli-byocfq57w4oq4to7c","name":"cdncli-byocfq57w4oq4to7c","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rghhyt5zo5vbz5hxs4tsfzpksqaf3yeyzq2pv2st4j2fpiwsimnrjkzaarnx24salr4/providers/Microsoft.KeyVault/vaults/cdncli-byoc2fcis5rhgidga","name":"cdncli-byoc2fcis5rhgidga","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgtv5zflbock6t6ol5qsceah45hcvtl2jnt5rkirvvorzjtqrbh3j5owxkgsomdrz6f/providers/Microsoft.KeyVault/vaults/cdnclibyoc-latesti7juxzf","name":"cdnclibyoc-latesti7juxzf","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cdncli-byoc000002","name":"cdncli-byoc000002","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/haitao/providers/Microsoft.KeyVault/vaults/htkv2","name":"htkv2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/haitao/providers/Microsoft.KeyVault/vaults/htkv3","name":"htkv3","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdnrp-rt-wus2/providers/Microsoft.KeyVault/vaults/cdnztnrt01ztnackvres2","name":"cdnztnrt01ztnackvres2","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{"Purpose":"ZTNA"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdnrp-rt-wus2/providers/Microsoft.KeyVault/vaults/cdnztnrt02ztnackvres2","name":"cdnztnrt02ztnackvres2","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{"Purpose":"ZTNA"}}]}'
+      string: '{"value":[],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceType+eq+%27Microsoft.KeyVault%2fvaults%27+and+name+eq+%27cdncli-byoc000002%27&api-version=2015-11-01&%24skiptoken=hVZPk6I4HP0unueAES9TtQd7gyyWv1C6ASa5sWoJgdhd3VhIpua774vaM91bi3PwYGm9vLx%2f8H1yOly6dX1q3iZfv0%2fK81v3WrZ1eSjfusnXyWFYnfW3KpDFcihZPiTmuSa3bYk%2fNdpmHZkjo7%2bDgHjerIukTwvqhE16ktponvXatE1yCv6YfPkF%2ffZ87qpH%2bDLpRbzBJ%2bm0TUKPr3HOWh5DbbJOm4gJI9qUJwEVyeyO%2f89r6er2Cj5CXDE1FXwzCBN1mueVroNAFLlZy2ae8qZTpulBfiC3mZHdXO7Au%2fJU7svd4eSVGYEWcgduR%2fDcdMqSE3%2bCs6RgXUSB5qqjOGPEj6GIyaVSTd%2bhb6D1aV%2bXY8g8mQmzrFN57FKOWwNZxNsKpPs0Vp1wVaOgjnBtLUxef0Y%2bw9X%2fNRHmBcrmjYizTrHEKWihXOZAmCm361JZtUKurOZRqOW2%2fS%2fs4Vy%2bjECLIroyFpIAnVsF%2f3CUBXSYxhvkY1vjyFBzuhDkv0P7RJRvozr4JCiJO3KQixN30yEL17LCJaJOySdDNpoLtjJQOPyAOioCGV1rowbgwbVVfRNh2SBpMw1MbSqjbBSQ2QRCLj5jspHrK6etiHVLBvGVGfPX1%2fI4gGiNhMGwHeTZMSgLpSP3iSh7pKtnYXZTz5ZiRNQnge8NdJ0SVFFOXbSEpRLt4Nt3XU35Up4e1E0XFAqTzTRHdNnGCV9nRhC2YRSTr1uoXAKR1IB7sDvfK2x%2fGF0JYRYDQjbTctGRTC5iCAJkeA5te2H8StBAvGohkcMxwx329PzaVfeujfqm2LYS%2fMmSUaCX2xSUU3kt8lQUfiGSKaFlyMWciqj%2fiH04vz6%2fHMa8M8oRXzCySSd41F%2bj66IBEvdCRh253GojGmXxP7d%2fn7br6PyONCaywkRcFANOETm%2fPlpGzNdCS0wEE42OVxXq01Oh5nfSP9fyQTfIrBpiyYUk4mVyQ9AaPcBGYBtY5htn0yJhSqq534k79Ll54J%2fGUgmztYSVT7nq%2faKRWfRr2ZoUo6Ft3lKRzYRUl5Qv7R3TI%2f5OCdDwKvfCbfAAWcyuDeFtC7o25aDropD4HmqtDNIXfIB%2b6J4olla4JiT%2fEJLbyuMK02CEl6j5Du41aN5ximHqNSL5AffRAqd%2bBm1ekUPaYqyBL4hRMyhhcZUuLRAJK1qS2aCKnwvslRhNMNJaC7eshF9wvm398giZgeqq8qnGwttU4ncj8H3zHoYb5tjyIFUzpOuirb8%2fhfpqGSpXJLASuhboNT8OxFaNKjbvTb6BzkYqQe44x8NwUBIAkpjvmpLJFKCB38g0RnAZXTBtF1VEtx7%2f%2bPLrtSI9%2ffXc7vFy8ePHvw%3d%3d"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '33133'
+      - '1686'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:28 GMT
+      - Mon, 18 Mar 2024 08:00:52 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: AA0153EF75FC474E91FED239269CC501 Ref B: MAA201060513053 Ref C: 2024-03-18T08:00:51Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --secret-permissions --certificate-permissions --object-id
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault/vaults%27%20and%20name%20eq%20%27cdncli-byoc000002%27&api-version=2015-11-01&$skiptoken=hVZPk6I4HP0unueAES9TtQd7gyyWv1C6ASa5sWoJgdhd3VhIpua774vaM91bi3PwYGm9vLx/8H1yOly6dX1q3iZfv0/K81v3WrZ1eSjfusnXyWFYnfW3KpDFcihZPiTmuSa3bYk/NdpmHZkjo7%2BDgHjerIukTwvqhE16ktponvXatE1yCv6YfPkF/fZ87qpH%2BDLpRbzBJ%2Bm0TUKPr3HOWh5DbbJOm4gJI9qUJwEVyeyO/89r6er2Cj5CXDE1FXwzCBN1mueVroNAFLlZy2ae8qZTpulBfiC3mZHdXO7Au/JU7svd4eSVGYEWcgduR/DcdMqSE3%2BCs6RgXUSB5qqjOGPEj6GIyaVSTd%2Bhb6D1aV%2BXY8g8mQmzrFN57FKOWwNZxNsKpPs0Vp1wVaOgjnBtLUxef0Y%2Bw9X/NRHmBcrmjYizTrHEKWihXOZAmCm361JZtUKurOZRqOW2/S/s4Vy%2BjECLIroyFpIAnVsF/3CUBXSYxhvkY1vjyFBzuhDkv0P7RJRvozr4JCiJO3KQixN30yEL17LCJaJOySdDNpoLtjJQOPyAOioCGV1rowbgwbVVfRNh2SBpMw1MbSqjbBSQ2QRCLj5jspHrK6etiHVLBvGVGfPX1/I4gGiNhMGwHeTZMSgLpSP3iSh7pKtnYXZTz5ZiRNQnge8NdJ0SVFFOXbSEpRLt4Nt3XU35Up4e1E0XFAqTzTRHdNnGCV9nRhC2YRSTr1uoXAKR1IB7sDvfK2x/GF0JYRYDQjbTctGRTC5iCAJkeA5te2H8StBAvGohkcMxwx329PzaVfeujfqm2LYS/MmSUaCX2xSUU3kt8lQUfiGSKaFlyMWciqj/iH04vz6/HMa8M8oRXzCySSd41F%2Bj66IBEvdCRh253GojGmXxP7d/n7br6PyONCaywkRcFANOETm/PlpGzNdCS0wEE42OVxXq01Oh5nfSP9fyQTfIrBpiyYUk4mVyQ9AaPcBGYBtY5htn0yJhSqq534k79Ll54J/GUgmztYSVT7nq/aKRWfRr2ZoUo6Ft3lKRzYRUl5Qv7R3TI/5OCdDwKvfCbfAAWcyuDeFtC7o25aDropD4HmqtDNIXfIB%2B6J4olla4JiT/EJLbyuMK02CEl6j5Du41aN5ximHqNSL5AffRAqd%2BBm1ekUPaYqyBL4hRMyhhcZUuLRAJK1qS2aCKnwvslRhNMNJaC7eshF9wvm398giZgeqq8qnGwttU4ncj8H3zHoYb5tjyIFUzpOuirb8/hfpqGSpXJLASuhboNT8OxFaNKjbvTb6BzkYqQe44x8NwUBIAkpjvmpLJFKCB38g0RnAZXTBtF1VEtx7/%2BPLrtSI9/fXc7vFy8ePHvw%3D%3D
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cdncli-byoc000002","name":"cdncli-byoc000002","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceType+eq+%27Microsoft.KeyVault%2fvaults%27+and+name+eq+%27cdncli-byoc000002%27&api-version=2015-11-01&%24skiptoken=hZXBjuI4FEX%2fhXUvEkM2LfWCGYd0EM9RGAe3vUOASJyYajVBJG7Vv891VVHdM5rUrBBCOr4%2bvu%2fxc3Y5Df2mubTX2eefs%2f3t2v%2fYd83%2btL%2f2s8%2bz07i%2bmW91JNVq3LPdmNunxsjlXNhdR6zstTwPxZ9RVMhlslGrjjLdC06JcLkvZJoUshryS%2fRl9ukX%2bvp06%2bsP%2bCTzxHA9GrvsC0mDbqLIuHyxkWec2%2fZCnpnIaDRZxQw%2fszf%2b4XR5iX45NvuJ5ORyRnxdE0t7YsIKJMd3h%2bSt9ilOyxc4KdFs25Ba1%2f8k32Dov4W4dCh4tRBM99qVQ8AWSsfAWsqoJ68XCM7IlpFRO%2fdv7Om2%2fz6BJo6UwYGE1wxHwIVQ5XwjO0c2h4tjU8AD0APxun1DB7v766QH4fRdMxqJUa%2f90dFfoPJ1FwJr2cLDcmGyMhbwIvz6EThQJyWQXDltc69dYJ6T0ArDD%2fONSu%2fhJcmlc%2bHWFr%2bPwuePVrwy2cT1hd22Qrax9lVveHXXCArTw0atW610X2SiRuCE%2fDkSLB9%2fu%2f7tyj70mt%2bJb5F42QtHcfBayNJvVD5oVuEZd458uxBy2xT8%2fcleqvtWtEkTRWiTpFjbEqGPziA04RMmEiND8yg26DgpzYpMP0y8j8VHD6cwWhbVd2iapUiPQNtVu5F1beQBD7fuNMaOmOkKRfM3H7f2fpoeZyVqw%2f%2fANdNe2AMrQlyXh%2fbWYdyM3VlilRf8kGjfPuIG4v%2ba4OUIk1bYFJh2EUzAOJ5v1QU0zHbCtzGpPBb%2b%2bJi3gD7dfjx9P03UAlERsfSG57C5cyZ0LctH1MKSQlXsGdujHVCL0PPfIzcfrQd%2fDPX0As0ihlWBuOJRCtRaWNMYDrv8WIsMK%2b51sYW4k2VAiTxYiVHYA7yuRWDa8h6iCldBQTXXKo212mHU3svwypwcC7dqjdSYNWxgVWKSAWUVtkJ7L%2fi5N6pC8G2tbW3h6LEhX6HzCalYL5BVeoB6soc7BakqjQD1WoaRwErHUqSseqnvy%2b2fP%2f36%2fyguX5%2b6I%2f5Fnp%2f%2fBg%3d%3d"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1637'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 18 Mar 2024 08:00:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 0DF9018220AE4116917CEFDEF929C10E Ref B: MAA201060513053 Ref C: 2024-03-18T08:00:53Z'
     status:
       code: 200
       message: OK
@@ -1127,50 +1214,48 @@ interactions:
       ParameterSetName:
       - --name --secret-permissions --certificate-permissions --object-id
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cdncli-byoc000002?api-version=2023-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cdncli-byoc000002","name":"cdncli-byoc000002","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{},"systemData":{"createdBy":"bzhan@microsoft.com","createdByType":"User","createdAt":"2022-03-24T07:17:13.639Z","lastModifiedBy":"bzhan@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-24T07:17:13.639Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"869af0a9-0d80-4745-a601-bcf7a8f51a3b","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cdncli-byoc000002.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cdncli-byoc000002","name":"cdncli-byoc000002","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{},"systemData":{"createdBy":"jingnanxu@microsoft.com","createdByType":"User","createdAt":"2024-03-18T07:57:28.091Z","lastModifiedBy":"jingnanxu@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2024-03-18T07:57:28.091Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"2e396a67-4dc1-43ae-afcc-c6747d291866","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cdncli-byoc000002.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '981'
+      - '989'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:29 GMT
+      - Mon, 18 Mar 2024 08:00:55 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.322.0
+      - 1.5.1109.0
+      x-msedge-ref:
+      - 'Ref A: 566A9C45DF1746619A50805D0635AE73 Ref B: MAA201060516017 Ref C: 2024-03-18T08:00:54Z'
     status:
       code: 200
       message: OK
 - request:
     body: '{"location": "centralus", "tags": {}, "properties": {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
       "sku": {"family": "A", "name": "standard"}, "accessPolicies": [{"tenantId":
-      "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "869af0a9-0d80-4745-a601-bcf7a8f51a3b",
+      "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "2e396a67-4dc1-43ae-afcc-c6747d291866",
       "permissions": {"keys": ["all"], "secrets": ["all"], "certificates": ["all"],
       "storage": ["all"]}}, {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId":
-      "4dbab725-22a4-44d5-ad44-c267ca38a954", "permissions": {"secrets": ["list",
-      "get"], "certificates": ["list", "get"]}}], "vaultUri": "https://cdncli-byoc000002.vault.azure.net/",
+      "4dbab725-22a4-44d5-ad44-c267ca38a954", "permissions": {"secrets": ["get", "list"],
+      "certificates": ["list", "get"]}}], "vaultUri": "https://cdncli-byoc000002.vault.azure.net/",
       "enabledForDeployment": false, "enableSoftDelete": true, "softDeleteRetentionInDays":
       7, "provisioningState": "Succeeded", "publicNetworkAccess": "Enabled"}}'
     headers:
@@ -1189,46 +1274,44 @@ interactions:
       ParameterSetName:
       - --name --secret-permissions --certificate-permissions --object-id
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cdncli-byoc000002?api-version=2023-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cdncli-byoc000002","name":"cdncli-byoc000002","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{},"systemData":{"createdBy":"bzhan@microsoft.com","createdByType":"User","createdAt":"2022-03-24T07:17:13.639Z","lastModifiedBy":"bzhan@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-24T07:19:30.883Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"869af0a9-0d80-4745-a601-bcf7a8f51a3b","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"4dbab725-22a4-44d5-ad44-c267ca38a954","permissions":{"secrets":["list","get"],"certificates":["list","get"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cdncli-byoc000002.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/cdncli-byoc000002","name":"cdncli-byoc000002","type":"Microsoft.KeyVault/vaults","location":"centralus","tags":{},"systemData":{"createdBy":"jingnanxu@microsoft.com","createdByType":"User","createdAt":"2024-03-18T07:57:28.091Z","lastModifiedBy":"jingnanxu@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2024-03-18T08:00:56.057Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"2e396a67-4dc1-43ae-afcc-c6747d291866","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"4dbab725-22a4-44d5-ad44-c267ca38a954","permissions":{"secrets":["get","list"],"certificates":["list","get"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cdncli-byoc000002.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1154'
+      - '1162'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:30 GMT
+      - Mon, 18 Mar 2024 08:00:56 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.322.0
+      - 1.5.1109.0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
+      x-msedge-ref:
+      - 'Ref A: 4A37FEDA357B4C079BEE5FE0112763E8 Ref B: MAA201060516017 Ref C: 2024-03-18T08:00:55Z'
     status:
       code: 200
       message: OK
 - request:
-    body: ''
+    body: null
     headers:
       Accept:
       - application/json
@@ -1237,14 +1320,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - 0
+      - '0'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: POST
     uri: https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/create?api-version=7.4
   response:
@@ -1259,7 +1339,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:32 GMT
+      - Mon, 18 Mar 2024 08:00:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1267,18 +1347,16 @@ interactions:
       strict-transport-security:
       - max-age=31536000;includeSubDomains
       www-authenticate:
-      - Bearer authorization="https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47",
+      - Bearer authorization="https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47",
         resource="https://vault.azure.net"
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.3;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.87;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - centralus
       x-ms-keyvault-service-version:
-      - 1.9.331.5
-      x-powered-by:
-      - ASP.NET
+      - 1.9.1352.1
     status:
       code: 401
       message: Unauthorized
@@ -1286,9 +1364,9 @@ interactions:
     body: '{"policy": {"key_props": {"exportable": true, "kty": "RSA", "key_size":
       2048, "reuse_key": true}, "secret_props": {"contentType": "application/x-pkcs12"},
       "x509_props": {"subject": "CN=CLIGetDefaultPolicy", "sans": {"emails": ["hello@contoso.com"],
-      "dns_names": ["*.cdn-cli-test-4.azfdtest.xyz", "*.cdn-cli-test-5.azfdtest.xyz"],
-      "upns": []}, "key_usage": ["cRLSign", "dataEncipherment", "digitalSignature",
-      "keyEncipherment", "keyAgreement", "keyCertSign"], "validity_months": 12}, "lifetime_actions":
+      "dns_names": ["*.cdn-cli-test-4.azfdtest.xyz", "*.cdn-cli-test-5.azfdtest.xyz"]},
+      "key_usage": ["cRLSign", "dataEncipherment", "digitalSignature", "keyEncipherment",
+      "keyAgreement", "keyCertSign"], "validity_months": 12}, "lifetime_actions":
       [{"trigger": {"days_before_expiry": 90}, "action": {"action_type": "AutoRenew"}}],
       "issuer": {"name": "Self"}}, "attributes": {"enabled": true}}'
     headers:
@@ -1299,21 +1377,18 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '647'
+      - '635'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: POST
     uri: https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/create?api-version=7.4
   response:
     body:
-      string: '{"id":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/pending","issuer":{"name":"Self"},"csr":"MIIDDjCCAfYCAQAwHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKe7lUI4eO/Ru9upH0JuokRepbtz1DaK325R1oUcBXYklQ7UnVLK1MCmDY8vW8Bf00rp7Mis3oXsuMjARapwZjXxAQAQTcnzmXtPdhUUS+n3ZBvQPVV8HvA7d7TpXMg9abwQQKVjtF63356p+CyqkcrHijd9sMFEN9xjBNepXGt8Agi0Zn3CTdhYsGeFjnYbIowJTZEAW9/ecubIOjFxdEz+jdmpW2S02Q2ZGcm9ngHzghpRN1LsNhZJIzSf16JrRb+idHhlm6HQqScmjFSNJ5rSyrgH+cm4pCAtwzTPRyMfzqY7Dm94ClXyocFsKpZGDUjqvZoTsJp7qME/Vd1XPWkCAwEAAaCBqjCBpwYJKoZIhvcNAQkOMYGZMIGWMA4GA1UdDwEB/wQEAwIBvjAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwWgYDVR0RBFMwUYERaGVsbG9AY29udG9zby5jb22CHSouY2RuLWNsaS10ZXN0LTQuYXpmZHRlc3QueHl6gh0qLmNkbi1jbGktdGVzdC01LmF6ZmR0ZXN0Lnh5ejAJBgNVHRMEAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQBs6Ce5XeqYCcAVL9gJVrEcZOEEJJxcvFBCEoySrtkh8sZdnN2l0cYOXlPdyIYIaTViUCBPVceRoG4aDjmiWRnlfSOIwCki5g2WbcHLpQZOaCB2JD1pyR5ZiB2K5OpPjKKuROu0nx+pmzdRrC/VAvdOodYk7XbxxTUgoDvaeQTipglZ7SXyXjOd3DPRh9mKq5YZDiR66Ceax+aGm3KmEEHeJxdOuQUkpUZui1lR0UUHHG4QBG8lHw/V3nUeq6hi7Nopcj405jWU0oVlxJoeNY8wFy2622ufrnjz9W63PHWJ8EvqeOHRnb+/6K7bR8SmqtmOw/a/di6+Pr6KIotscNiH","cancellation_requested":false,"status":"inProgress","status_details":"Pending
+      string: '{"id":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/pending","issuer":{"name":"Self"},"csr":"MIIDDjCCAfYCAQAwHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM4Gr0Q7al23qihCSSePJXLWgqm8palD2+JGsf1yeuOkBiuOQivtt7diqB2Mdx+2BK7aWWpRaNTYoWKh53pBqnrJOJ2KtfW6hv3umJgXsQvsCbbQYAZ7nqbgN4onzP+wA9Hjmtwk1Rc8YL0soQ2ropQjHIhrvDvLDhH+T8YenDt7chDCZSqts/nrVLhq5sf3AVzMYDvv+CYgQByHOBaxAFHazVQtF0jFToETyjbJrvFL0mw6UMF5jjE+K/dRFU1+2qaEexiUBnoIAAXZzR37n4XwUJeY6XPQTagDDrznFG3RX2FRRsyFrjOjkD2qfG7AfIxaGyZGP6GEgh0USdznRkECAwEAAaCBqjCBpwYJKoZIhvcNAQkOMYGZMIGWMA4GA1UdDwEB/wQEAwIBvjAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwWgYDVR0RBFMwUYERaGVsbG9AY29udG9zby5jb22CHSouY2RuLWNsaS10ZXN0LTQuYXpmZHRlc3QueHl6gh0qLmNkbi1jbGktdGVzdC01LmF6ZmR0ZXN0Lnh5ejAJBgNVHRMEAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQCPsaFKpwePnWb6iQSlEh2GlVZROxOtZ95LvSU31zfvpATSJphY5FMKO+BS6SrDt00SSp4btCjT/F8fkztvC7t2dk3OMBlvyVhcGTXz42/yPFbxFGzJ6hcbFm8fABzAaKH1stcuuelx8W59Jdqc6tlkbKxtTBEmf8gGkuJp1u0vnhIqgRZ5lIejnTTmZnm3ZosEO6rcKoSmkIS28cR0/W/+r5ZItY3BtFxaS6HTboB/KNs3044GzfksmEEC+B4MF3PxZWuJA40rgNn6Pj4vZ639uCWm2ld4O7aNKC9xT+Oq8LsEOFJYigyefp6MT3i9z3apCSV33OpcIgVefNI0KwX7","cancellation_requested":false,"status":"inProgress","status_details":"Pending
         certificate created. Certificate request is in progress. This may take some
-        time based on the issuer provider. Please check again later.","request_id":"c9c7ef472dfa4e76b0cc5d44b253958e"}'
+        time based on the issuer provider. Please check again later.","request_id":"a78d1e2870e84df0907a53e2b8fca30a"}'
     headers:
       cache-control:
       - no-cache
@@ -1322,11 +1397,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:33 GMT
+      - Mon, 18 Mar 2024 08:00:58 GMT
       expires:
       - '-1'
       location:
-      - https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/pending?api-version=7.4&request_id=c9c7ef472dfa4e76b0cc5d44b253958e
+      - https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/pending?api-version=7.4&request_id=a78d1e2870e84df0907a53e2b8fca30a
       pragma:
       - no-cache
       strict-transport-security:
@@ -1334,13 +1409,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.3;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.87;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - centralus
       x-ms-keyvault-service-version:
-      - 1.9.331.5
-      x-powered-by:
-      - ASP.NET
+      - 1.9.1352.1
     status:
       code: 202
       message: Accepted
@@ -1353,20 +1426,15 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/pending?api-version=7.4
   response:
     body:
-      string: '{"id":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/pending","issuer":{"name":"Self"},"csr":"MIIDDjCCAfYCAQAwHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKe7lUI4eO/Ru9upH0JuokRepbtz1DaK325R1oUcBXYklQ7UnVLK1MCmDY8vW8Bf00rp7Mis3oXsuMjARapwZjXxAQAQTcnzmXtPdhUUS+n3ZBvQPVV8HvA7d7TpXMg9abwQQKVjtF63356p+CyqkcrHijd9sMFEN9xjBNepXGt8Agi0Zn3CTdhYsGeFjnYbIowJTZEAW9/ecubIOjFxdEz+jdmpW2S02Q2ZGcm9ngHzghpRN1LsNhZJIzSf16JrRb+idHhlm6HQqScmjFSNJ5rSyrgH+cm4pCAtwzTPRyMfzqY7Dm94ClXyocFsKpZGDUjqvZoTsJp7qME/Vd1XPWkCAwEAAaCBqjCBpwYJKoZIhvcNAQkOMYGZMIGWMA4GA1UdDwEB/wQEAwIBvjAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwWgYDVR0RBFMwUYERaGVsbG9AY29udG9zby5jb22CHSouY2RuLWNsaS10ZXN0LTQuYXpmZHRlc3QueHl6gh0qLmNkbi1jbGktdGVzdC01LmF6ZmR0ZXN0Lnh5ejAJBgNVHRMEAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQBs6Ce5XeqYCcAVL9gJVrEcZOEEJJxcvFBCEoySrtkh8sZdnN2l0cYOXlPdyIYIaTViUCBPVceRoG4aDjmiWRnlfSOIwCki5g2WbcHLpQZOaCB2JD1pyR5ZiB2K5OpPjKKuROu0nx+pmzdRrC/VAvdOodYk7XbxxTUgoDvaeQTipglZ7SXyXjOd3DPRh9mKq5YZDiR66Ceax+aGm3KmEEHeJxdOuQUkpUZui1lR0UUHHG4QBG8lHw/V3nUeq6hi7Nopcj405jWU0oVlxJoeNY8wFy2622ufrnjz9W63PHWJ8EvqeOHRnb+/6K7bR8SmqtmOw/a/di6+Pr6KIotscNiH","cancellation_requested":false,"status":"inProgress","status_details":"Pending
+      string: '{"id":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/pending","issuer":{"name":"Self"},"csr":"MIIDDjCCAfYCAQAwHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM4Gr0Q7al23qihCSSePJXLWgqm8palD2+JGsf1yeuOkBiuOQivtt7diqB2Mdx+2BK7aWWpRaNTYoWKh53pBqnrJOJ2KtfW6hv3umJgXsQvsCbbQYAZ7nqbgN4onzP+wA9Hjmtwk1Rc8YL0soQ2ropQjHIhrvDvLDhH+T8YenDt7chDCZSqts/nrVLhq5sf3AVzMYDvv+CYgQByHOBaxAFHazVQtF0jFToETyjbJrvFL0mw6UMF5jjE+K/dRFU1+2qaEexiUBnoIAAXZzR37n4XwUJeY6XPQTagDDrznFG3RX2FRRsyFrjOjkD2qfG7AfIxaGyZGP6GEgh0USdznRkECAwEAAaCBqjCBpwYJKoZIhvcNAQkOMYGZMIGWMA4GA1UdDwEB/wQEAwIBvjAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwWgYDVR0RBFMwUYERaGVsbG9AY29udG9zby5jb22CHSouY2RuLWNsaS10ZXN0LTQuYXpmZHRlc3QueHl6gh0qLmNkbi1jbGktdGVzdC01LmF6ZmR0ZXN0Lnh5ejAJBgNVHRMEAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQCPsaFKpwePnWb6iQSlEh2GlVZROxOtZ95LvSU31zfvpATSJphY5FMKO+BS6SrDt00SSp4btCjT/F8fkztvC7t2dk3OMBlvyVhcGTXz42/yPFbxFGzJ6hcbFm8fABzAaKH1stcuuelx8W59Jdqc6tlkbKxtTBEmf8gGkuJp1u0vnhIqgRZ5lIejnTTmZnm3ZosEO6rcKoSmkIS28cR0/W/+r5ZItY3BtFxaS6HTboB/KNs3044GzfksmEEC+B4MF3PxZWuJA40rgNn6Pj4vZ639uCWm2ld4O7aNKC9xT+Oq8LsEOFJYigyefp6MT3i9z3apCSV33OpcIgVefNI0KwX7","cancellation_requested":false,"status":"inProgress","status_details":"Pending
         certificate created. Certificate request is in progress. This may take some
-        time based on the issuer provider. Please check again later.","request_id":"c9c7ef472dfa4e76b0cc5d44b253958e"}'
+        time based on the issuer provider. Please check again later.","request_id":"a78d1e2870e84df0907a53e2b8fca30a"}'
     headers:
       cache-control:
       - no-cache
@@ -1375,7 +1443,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:34 GMT
+      - Mon, 18 Mar 2024 08:00:58 GMT
       expires:
       - '-1'
       pragma:
@@ -1385,13 +1453,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.3;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.87;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - centralus
       x-ms-keyvault-service-version:
-      - 1.9.331.5
-      x-powered-by:
-      - ASP.NET
+      - 1.9.1352.1
     status:
       code: 200
       message: OK
@@ -1404,18 +1470,13 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/pending?api-version=7.4
   response:
     body:
-      string: '{"id":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/pending","issuer":{"name":"Self"},"csr":"MIIDDjCCAfYCAQAwHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKe7lUI4eO/Ru9upH0JuokRepbtz1DaK325R1oUcBXYklQ7UnVLK1MCmDY8vW8Bf00rp7Mis3oXsuMjARapwZjXxAQAQTcnzmXtPdhUUS+n3ZBvQPVV8HvA7d7TpXMg9abwQQKVjtF63356p+CyqkcrHijd9sMFEN9xjBNepXGt8Agi0Zn3CTdhYsGeFjnYbIowJTZEAW9/ecubIOjFxdEz+jdmpW2S02Q2ZGcm9ngHzghpRN1LsNhZJIzSf16JrRb+idHhlm6HQqScmjFSNJ5rSyrgH+cm4pCAtwzTPRyMfzqY7Dm94ClXyocFsKpZGDUjqvZoTsJp7qME/Vd1XPWkCAwEAAaCBqjCBpwYJKoZIhvcNAQkOMYGZMIGWMA4GA1UdDwEB/wQEAwIBvjAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwWgYDVR0RBFMwUYERaGVsbG9AY29udG9zby5jb22CHSouY2RuLWNsaS10ZXN0LTQuYXpmZHRlc3QueHl6gh0qLmNkbi1jbGktdGVzdC01LmF6ZmR0ZXN0Lnh5ejAJBgNVHRMEAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQBs6Ce5XeqYCcAVL9gJVrEcZOEEJJxcvFBCEoySrtkh8sZdnN2l0cYOXlPdyIYIaTViUCBPVceRoG4aDjmiWRnlfSOIwCki5g2WbcHLpQZOaCB2JD1pyR5ZiB2K5OpPjKKuROu0nx+pmzdRrC/VAvdOodYk7XbxxTUgoDvaeQTipglZ7SXyXjOd3DPRh9mKq5YZDiR66Ceax+aGm3KmEEHeJxdOuQUkpUZui1lR0UUHHG4QBG8lHw/V3nUeq6hi7Nopcj405jWU0oVlxJoeNY8wFy2622ufrnjz9W63PHWJ8EvqeOHRnb+/6K7bR8SmqtmOw/a/di6+Pr6KIotscNiH","cancellation_requested":false,"status":"completed","target":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005","request_id":"c9c7ef472dfa4e76b0cc5d44b253958e"}'
+      string: '{"id":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/pending","issuer":{"name":"Self"},"csr":"MIIDDjCCAfYCAQAwHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM4Gr0Q7al23qihCSSePJXLWgqm8palD2+JGsf1yeuOkBiuOQivtt7diqB2Mdx+2BK7aWWpRaNTYoWKh53pBqnrJOJ2KtfW6hv3umJgXsQvsCbbQYAZ7nqbgN4onzP+wA9Hjmtwk1Rc8YL0soQ2ropQjHIhrvDvLDhH+T8YenDt7chDCZSqts/nrVLhq5sf3AVzMYDvv+CYgQByHOBaxAFHazVQtF0jFToETyjbJrvFL0mw6UMF5jjE+K/dRFU1+2qaEexiUBnoIAAXZzR37n4XwUJeY6XPQTagDDrznFG3RX2FRRsyFrjOjkD2qfG7AfIxaGyZGP6GEgh0USdznRkECAwEAAaCBqjCBpwYJKoZIhvcNAQkOMYGZMIGWMA4GA1UdDwEB/wQEAwIBvjAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwWgYDVR0RBFMwUYERaGVsbG9AY29udG9zby5jb22CHSouY2RuLWNsaS10ZXN0LTQuYXpmZHRlc3QueHl6gh0qLmNkbi1jbGktdGVzdC01LmF6ZmR0ZXN0Lnh5ejAJBgNVHRMEAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQCPsaFKpwePnWb6iQSlEh2GlVZROxOtZ95LvSU31zfvpATSJphY5FMKO+BS6SrDt00SSp4btCjT/F8fkztvC7t2dk3OMBlvyVhcGTXz42/yPFbxFGzJ6hcbFm8fABzAaKH1stcuuelx8W59Jdqc6tlkbKxtTBEmf8gGkuJp1u0vnhIqgRZ5lIejnTTmZnm3ZosEO6rcKoSmkIS28cR0/W/+r5ZItY3BtFxaS6HTboB/KNs3044GzfksmEEC+B4MF3PxZWuJA40rgNn6Pj4vZ639uCWm2ld4O7aNKC9xT+Oq8LsEOFJYigyefp6MT3i9z3apCSV33OpcIgVefNI0KwX7","cancellation_requested":false,"status":"completed","target":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005","request_id":"a78d1e2870e84df0907a53e2b8fca30a"}'
     headers:
       cache-control:
       - no-cache
@@ -1424,7 +1485,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:45 GMT
+      - Mon, 18 Mar 2024 08:01:04 GMT
       expires:
       - '-1'
       pragma:
@@ -1434,13 +1495,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.3;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.87;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - centralus
       x-ms-keyvault-service-version:
-      - 1.9.331.5
-      x-powered-by:
-      - ASP.NET
+      - 1.9.1352.1
     status:
       code: 200
       message: OK
@@ -1453,27 +1512,22 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/versions?api-version=7.4
+    uri: https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/?api-version=7.4
   response:
     body:
-      string: '{"value":[{"id":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/643fa261a4014349af269180390c613c","x5t":"iZCtdFq-6CRlSLD3OGbf_lXTsCk","attributes":{"enabled":true,"nbf":1648105774,"exp":1679642374,"created":1648106375,"updated":1648106375},"subject":""}],"nextLink":null}'
+      string: '{"id":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/1862dd594dd54424b0a03670bd7027fb","kid":"https://cdncli-byoc000002.vault.azure.net/keys/cert000005/1862dd594dd54424b0a03670bd7027fb","sid":"https://cdncli-byoc000002.vault.azure.net/secrets/cert000005/1862dd594dd54424b0a03670bd7027fb","x5t":"gyyx11UwPb2etdjtLiQ7W5sZvZs","cer":"MIIDoDCCAoigAwIBAgIQM7HFMu9nSwW1YiQlW8DrnzANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDExNDTElHZXREZWZhdWx0UG9saWN5MB4XDTI0MDMxODA3NTA1OVoXDTI1MDMxODA4MDA1OVowHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM4Gr0Q7al23qihCSSePJXLWgqm8palD2+JGsf1yeuOkBiuOQivtt7diqB2Mdx+2BK7aWWpRaNTYoWKh53pBqnrJOJ2KtfW6hv3umJgXsQvsCbbQYAZ7nqbgN4onzP+wA9Hjmtwk1Rc8YL0soQ2ropQjHIhrvDvLDhH+T8YenDt7chDCZSqts/nrVLhq5sf3AVzMYDvv+CYgQByHOBaxAFHazVQtF0jFToETyjbJrvFL0mw6UMF5jjE+K/dRFU1+2qaEexiUBnoIAAXZzR37n4XwUJeY6XPQTagDDrznFG3RX2FRRsyFrjOjkD2qfG7AfIxaGyZGP6GEgh0USdznRkECAwEAAaOB2TCB1jAOBgNVHQ8BAf8EBAMCAb4wCQYDVR0TBAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwWgYDVR0RBFMwUYERaGVsbG9AY29udG9zby5jb22CHSouY2RuLWNsaS10ZXN0LTQuYXpmZHRlc3QueHl6gh0qLmNkbi1jbGktdGVzdC01LmF6ZmR0ZXN0Lnh5ejAfBgNVHSMEGDAWgBTCufKEVIfZ7KJFSXW4G/UVxRxGTTAdBgNVHQ4EFgQUwrnyhFSH2eyiRUl1uBv1FcUcRk0wDQYJKoZIhvcNAQELBQADggEBAAEFJoGHUWRAgf5rdgpTE0o5WnVWdOl++JJCDLylzoMcLbux7sqUcfhg1ppSCacYt7YX1ElHYx4/Qh2/Ifemd8Hivvp3S/kghc9tHh6I38kwPom0UlZ9LrClDMlttJKmiKC+0Cm/rcwCU4kDS6uZBHd1FYvbladGTx8LJUNdGRk+eH38vXS0o0kseOq9v+Y3gm6QGcdkux3JXxe+LX2ODNp8/1ECo74fcn9FTBWeuazTbbhPfsr2QNKkuN4DVPk2mYqY+0J+ZbzUY2U3hSlXBnBCgkckBmICrNMeBOEBRTGllV+X1D1FpYq77xfYZqg2+fJx8yvNBGYG5cS3dWhkWXc=","attributes":{"enabled":true,"nbf":1710748259,"exp":1742284859,"created":1710748859,"updated":1710748859,"recoveryLevel":"CustomizedRecoverable+Purgeable","recoverableDays":7},"policy":{"id":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/policy","key_props":{"exportable":true,"kty":"RSA","key_size":2048,"reuse_key":true},"secret_props":{"contentType":"application/x-pkcs12"},"x509_props":{"subject":"CN=CLIGetDefaultPolicy","sans":{"emails":["hello@contoso.com"],"dns_names":["*.cdn-cli-test-4.azfdtest.xyz","*.cdn-cli-test-5.azfdtest.xyz"]},"ekus":["1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2"],"key_usage":["cRLSign","dataEncipherment","digitalSignature","keyAgreement","keyCertSign","keyEncipherment"],"validity_months":12,"basic_constraints":{"ca":false}},"lifetime_actions":[{"trigger":{"days_before_expiry":90},"action":{"action_type":"AutoRenew"}}],"issuer":{"name":"Self"},"attributes":{"enabled":true,"created":1710748858,"updated":1710748858}},"pending":{"id":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/pending"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '290'
+      - '2661'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:46 GMT
+      - Mon, 18 Mar 2024 08:01:04 GMT
       expires:
       - '-1'
       pragma:
@@ -1483,13 +1537,95 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.3;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.87;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - centralus
       x-ms-keyvault-service-version:
-      - 1.9.331.5
-      x-powered-by:
-      - ASP.NET
+      - 1.9.1352.1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/pending?api-version=7.4
+  response:
+    body:
+      string: '{"id":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/pending","issuer":{"name":"Self"},"csr":"MIIDDjCCAfYCAQAwHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM4Gr0Q7al23qihCSSePJXLWgqm8palD2+JGsf1yeuOkBiuOQivtt7diqB2Mdx+2BK7aWWpRaNTYoWKh53pBqnrJOJ2KtfW6hv3umJgXsQvsCbbQYAZ7nqbgN4onzP+wA9Hjmtwk1Rc8YL0soQ2ropQjHIhrvDvLDhH+T8YenDt7chDCZSqts/nrVLhq5sf3AVzMYDvv+CYgQByHOBaxAFHazVQtF0jFToETyjbJrvFL0mw6UMF5jjE+K/dRFU1+2qaEexiUBnoIAAXZzR37n4XwUJeY6XPQTagDDrznFG3RX2FRRsyFrjOjkD2qfG7AfIxaGyZGP6GEgh0USdznRkECAwEAAaCBqjCBpwYJKoZIhvcNAQkOMYGZMIGWMA4GA1UdDwEB/wQEAwIBvjAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwWgYDVR0RBFMwUYERaGVsbG9AY29udG9zby5jb22CHSouY2RuLWNsaS10ZXN0LTQuYXpmZHRlc3QueHl6gh0qLmNkbi1jbGktdGVzdC01LmF6ZmR0ZXN0Lnh5ejAJBgNVHRMEAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQCPsaFKpwePnWb6iQSlEh2GlVZROxOtZ95LvSU31zfvpATSJphY5FMKO+BS6SrDt00SSp4btCjT/F8fkztvC7t2dk3OMBlvyVhcGTXz42/yPFbxFGzJ6hcbFm8fABzAaKH1stcuuelx8W59Jdqc6tlkbKxtTBEmf8gGkuJp1u0vnhIqgRZ5lIejnTTmZnm3ZosEO6rcKoSmkIS28cR0/W/+r5ZItY3BtFxaS6HTboB/KNs3044GzfksmEEC+B4MF3PxZWuJA40rgNn6Pj4vZ639uCWm2ld4O7aNKC9xT+Oq8LsEOFJYigyefp6MT3i9z3apCSV33OpcIgVefNI0KwX7","cancellation_requested":false,"status":"completed","target":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005","request_id":"a78d1e2870e84df0907a53e2b8fca30a"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1341'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 18 Mar 2024 08:01:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.87;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - centralus
+      x-ms-keyvault-service-version:
+      - 1.9.1352.1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/versions?api-version=7.4
+  response:
+    body:
+      string: '{"value":[{"id":"https://cdncli-byoc000002.vault.azure.net/certificates/cert000005/1862dd594dd54424b0a03670bd7027fb","x5t":"gyyx11UwPb2etdjtLiQ7W5sZvZs","attributes":{"enabled":true,"nbf":1710748259,"exp":1742284859,"created":1710748859,"updated":1710748859},"subject":""}],"nextLink":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '290'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 18 Mar 2024 08:01:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.87;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - centralus
+      x-ms-keyvault-service-version:
+      - 1.9.1352.1
     status:
       code: 200
       message: OK
@@ -1509,7 +1645,7 @@ interactions:
         --user-cert-vault-name --user-cert-secret-name --user-cert-secret-version
         --user-cert-protocol-type
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123?api-version=2021-06-01
   response:
@@ -1523,23 +1659,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Mar 2022 07:19:48 GMT
+      - Mon, 18 Mar 2024 08:01:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '48'
+      - '4999'
+      x-msedge-ref:
+      - 'Ref A: A957076AEA564B2DA8E217EC4570646A Ref B: MAA201060513021 Ref C: 2024-03-18T08:01:07Z'
     status:
       code: 200
       message: OK
@@ -1548,7 +1682,7 @@ interactions:
       "certificateSourceParameters": {"typeName": "KeyVaultCertificateSourceParameters",
       "subscriptionId": "27cafca8-b9a4-4264-b399-45d0c9cca1ab", "resourceGroupName":
       "clitest.rg000001", "vaultName": "cdncli-byoc000002", "secretName": "cert000005",
-      "secretVersion": "643fa261a4014349af269180390c613c", "updateRule": "NoAction",
+      "secretVersion": "1862dd594dd54424b0a03670bd7027fb", "updateRule": "NoAction",
       "deleteRule": "NoAction"}}'
     headers:
       Accept:
@@ -1568,35 +1702,37 @@ interactions:
         --user-cert-vault-name --user-cert-secret-name --user-cert-secret-version
         --user-cert-protocol-type
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-4/customDomains/customdomain000004/enableCustomHttps?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/cdn-cli-test-aaz-4/customDomains/customdomain000004/enableCustomHttps?api-version=2021-06-01
   response:
     body:
-      string: "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\":
-        \"The certificate imported from the Key Vault is a Self Signed certificate
-        and is not permitted for Bring Your Own Certificate\"\n  }\n}"
+      string: "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\":\
+        \ \"The certificate chain includes an invalid number of certificates. The\
+        \ number of certificates should be greater than 2.\"\n  }\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '188'
+      - '182'
       content-type:
       - application/json
       date:
-      - Thu, 24 Mar 2022 07:19:49 GMT
+      - Mon, 18 Mar 2024 08:01:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
+      x-msedge-ref:
+      - 'Ref A: EF6F083945784757837C9B7C87D50825 Ref B: MAA201060513021 Ref C: 2024-03-18T08:01:08Z'
     status:
       code: 400
       message: Bad Request

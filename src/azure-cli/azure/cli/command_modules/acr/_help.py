@@ -18,34 +18,34 @@ short-summary: Queues a quick build, providing streaming logs for an Azure Conta
 examples:
   - name: Queue a local context as a Linux build, tag it, and push it to the registry.
     text: >
-        az acr build -t sample/hello-world:{{.Run.ID}} -r MyRegistry .
+        az acr build -t sample/hello-world:{{.Run.ID}} -r myregistry .
   - name: Queue a local context as a Linux build, tag it, and push it to the registry without streaming logs.
     text: >
-        az acr build -t sample/hello-world:{{.Run.ID}} -r MyRegistry --no-logs .
+        az acr build -t sample/hello-world:{{.Run.ID}} -r myregistry --no-logs .
   - name: Queue a local context as a Linux build without pushing it to the registry.
     text: >
-        az acr build -t sample/hello-world:{{.Run.ID}} -r MyRegistry --no-push .
+        az acr build -t sample/hello-world:{{.Run.ID}} -r myregistry --no-push .
   - name: Queue a local context as a Linux build without pushing it to the registry.
     text: >
-        az acr build -r MyRegistry .
+        az acr build -r myregistry .
   - name: Queue a remote GitHub context as a Windows build, tag it, and push it to the registry.
     text: >
-        az acr build -r MyRegistry https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --platform windows
+        az acr build -r myregistry https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --platform windows
   - name: Queue a remote OCI Artifact context build.
     text: >
-        az acr build -r MyRegistry oci://myregistry.azurecr.io/myartifact:mytag
+        az acr build -r myregistry oci://myregistry.azurecr.io/myartifact:mytag
   - name: Queue a local context as a Linux build on arm/v7 architecture, tag it, and push it to the registry.
     text: >
-        az acr build -t sample/hello-world:{{.Run.ID}} -r MyRegistry . --platform linux/arm/v7
+        az acr build -t sample/hello-world:{{.Run.ID}} -r myregistry . --platform linux/arm/v7
 """
 
 helps['acr check-health'] = """
 type: command
 short-summary: Gets health information on the environment and optionally a target registry.
 examples:
-  - name: Gets health state with target registry 'MyRegistry', skipping confirmation for pulling image.
+  - name: Gets health state with target registry 'myregistry', skipping confirmation for pulling image.
     text: >
-        az acr check-health -n MyRegistry -y
+        az acr check-health -n myregistry -y
   - name: Gets health state of the environment, without stopping on first error.
     text: >
         az acr check-health --ignore-errors
@@ -81,7 +81,7 @@ short-summary: Show the configured 'Azure AD authenticate as ARM' policy for an 
 examples:
   - name: Show the configured 'Azure AD authenticate as ARM' policy for an Azure Container Registry
     text: >
-        az acr config authentication-as-arm show -r MyRegistry
+        az acr config authentication-as-arm show -r myregistry
 """
 
 helps['acr config authentication-as-arm update'] = """
@@ -90,10 +90,10 @@ short-summary: Update 'Azure AD authenticate as ARM' policy for an Azure Contain
 examples:
   - name: Disable 'Azure AD authenticate as ARM' policy for an Azure Container Registry, so only ACR audienced tokens can be used for authentication
     text: >
-        az acr config authentication-as-arm update -r MyRegistry --status Disabled
+        az acr config authentication-as-arm update -r myregistry --status Disabled
   - name: Enable 'Azure AD authenticate as ARM' policy for an Azure Container Registry, it will allow both ACR and ARM audienced tokens to be used for authentication
     text: >
-        az acr config authentication-as-arm update -r MyRegistry --status Enabled
+        az acr config authentication-as-arm update -r myregistry --status Enabled
 """
 
 helps['acr config content-trust show'] = """
@@ -102,7 +102,7 @@ short-summary: Show the configured content-trust policy for an Azure Container R
 examples:
   - name: Show the configured content-trust policy for an Azure Container Registry
     text: >
-        az acr config content-trust show -r MyRegistry
+        az acr config content-trust show -r myregistry
 """
 
 helps['acr config content-trust update'] = """
@@ -111,7 +111,7 @@ short-summary: Update content-trust policy for an Azure Container Registry.
 examples:
   - name: Update content-trust policy for an Azure Container Registry
     text: >
-        az acr config content-trust update -r MyRegistry --status Enabled
+        az acr config content-trust update -r myregistry --status Enabled
 """
 
 helps['acr config retention'] = """
@@ -125,7 +125,7 @@ short-summary: Show the configured retention policy for an Azure Container Regis
 examples:
   - name: Show the configured retention policy for an Azure Container Registry
     text: >
-        az acr config retention show -r MyRegistry
+        az acr config retention show -r myregistry
 """
 
 helps['acr config retention update'] = """
@@ -134,10 +134,10 @@ short-summary: Update retention policy for an Azure Container Registry.
 examples:
   - name: Enable retention policy for an Azure Container Registry to delete an untagged manifest after 30 days.
     text: >
-        az acr config retention update -r MyRegistry --status Enabled --days 30 --type UntaggedManifests
+        az acr config retention update -r myregistry --status Enabled --days 30 --type UntaggedManifests
   - name: Enable retention policy for an Azure Container Registry to delete a manifest as soon as it gets untagged.
     text: >
-        az acr config retention update -r MyRegistry --status Enabled --days 0 --type UntaggedManifests
+        az acr config retention update -r myregistry --status Enabled --days 0 --type UntaggedManifests
 """
 
 helps['acr config soft-delete'] = """
@@ -169,7 +169,7 @@ short-summary: Create an Azure Container Registry.
 examples:
   - name: Create a managed container registry with the Standard SKU.
     text: >
-        az acr create -n MyRegistry -g MyResourceGroup --sku Standard
+        az acr create -n myregistry -g MyResourceGroup --sku Standard
 """
 
 helps['acr credential'] = """
@@ -183,9 +183,9 @@ short-summary: Regenerate login credentials for an Azure Container Registry.
 examples:
   - name: Renew the second password for an Azure Container Registry.
     text: >
-        az acr credential renew -n MyRegistry --password-name password2
+        az acr credential renew -n myregistry --password-name password2
   - name: Regenerate login credentials for an Azure Container Registry. (autogenerated)
-    text: az acr credential renew --name MyRegistry --password-name password --resource-group MyResourceGroup
+    text: az acr credential renew --name myregistry --password-name password --resource-group MyResourceGroup
     crafted: true
 """
 
@@ -195,13 +195,13 @@ short-summary: Get the login credentials for an Azure Container Registry.
 examples:
   - name: Get the login credentials for an Azure Container Registry.
     text: >
-        az acr credential show -n MyRegistry
+        az acr credential show -n myregistry
   - name: Get the username used to log in to an Azure Container Registry.
     text: >
-        az acr credential show -n MyRegistry --query username
+        az acr credential show -n myregistry --query username
   - name: Get a password used to log in to an Azure Container Registry.
     text: >
-        az acr credential show -n MyRegistry --query 'passwords[0].value'
+        az acr credential show -n myregistry --query 'passwords[0].value'
 """
 
 helps['acr delete'] = """
@@ -210,7 +210,7 @@ short-summary: Deletes an Azure Container Registry.
 examples:
   - name: Delete an Azure Container Registry.
     text: >
-        az acr delete -n MyRegistry
+        az acr delete -n myregistry
 """
 
 helps['acr helm'] = """
@@ -224,10 +224,10 @@ short-summary: Delete a helm chart version in an Azure Container Registry.
 examples:
   - name: Delete all versions of a helm chart in an Azure Container Registry
     text: >
-        az acr helm delete -n MyRegistry mychart
+        az acr helm delete -n myregistry mychart
   - name: Delete a helm chart version in an Azure Container Registry
     text: >
-        az acr helm delete -n MyRegistry mychart --version 0.3.2
+        az acr helm delete -n myregistry mychart --version 0.3.2
 """
 
 helps['acr helm list'] = """
@@ -236,7 +236,7 @@ short-summary: List all helm charts in an Azure Container Registry.
 examples:
   - name: List all helm charts in an Azure Container Registry
     text: >
-        az acr helm list -n MyRegistry
+        az acr helm list -n myregistry
 """
 
 helps['acr helm push'] = """
@@ -245,10 +245,10 @@ short-summary: Push a helm chart package to an Azure Container Registry.
 examples:
   - name: Push a chart package to an Azure Container Registry
     text: >
-        az acr helm push -n MyRegistry mychart-0.3.2.tgz
+        az acr helm push -n myregistry mychart-0.3.2.tgz
   - name: Push a chart package to an Azure Container Registry, overwriting the existing one.
     text: >
-        az acr helm push -n MyRegistry mychart-0.3.2.tgz --force
+        az acr helm push -n myregistry mychart-0.3.2.tgz --force
 """
 
 helps['acr helm repo'] = """
@@ -263,7 +263,7 @@ long-summary: Helm must be installed on your machine.
 examples:
   - name: Add a helm chart repository from an Azure Container Registry to manage helm charts.
     text: >
-        az acr helm repo add -n MyRegistry
+        az acr helm repo add -n myregistry
 """
 
 helps['acr helm show'] = """
@@ -272,10 +272,10 @@ short-summary: Describe a helm chart in an Azure Container Registry.
 examples:
   - name: Show all versions of a helm chart in an Azure Container Registry
     text: >
-        az acr helm show -n MyRegistry mychart
+        az acr helm show -n myregistry mychart
   - name: Show a helm chart version in an Azure Container Registry
     text: >
-        az acr helm show -n MyRegistry mychart --version 0.3.2
+        az acr helm show -n myregistry mychart --version 0.3.2
 """
 
 helps['acr helm install-cli'] = """
@@ -300,22 +300,22 @@ helps['acr import'] = """
 type: command
 short-summary: Imports an image to an Azure Container Registry from another Container Registry. Import removes the need to docker pull, docker tag, docker push. For larger images consider using `--no-wait`.
 examples:
-  - name: Import an image from 'sourceregistry' to 'MyRegistry'. The image inherits its source repository and tag names.
+  - name: Import an image from 'sourceregistry' to 'myregistry'. The image inherits its source repository and tag names.
     text: >
-        az acr import -n MyRegistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag
+        az acr import -n myregistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag
   - name: Import an image from a public repository on Docker Hub. The image uses the specified repository and tag names.
     text: >
-        az acr import -n MyRegistry --source docker.io/library/hello-world:latest -t targetrepository:targettag
+        az acr import -n myregistry --source docker.io/library/hello-world:latest -t targetrepository:targettag
   - name: Import an image from a private repository using its username and password. This also applies to registries outside Azure.
     text: >
-        az acr import -n MyRegistry --source myprivateregistry.azurecr.io/hello-world:latest -u username -p password
+        az acr import -n myregistry --source myprivateregistry.azurecr.io/hello-world:latest -u username -p password
   - name: Import an image from an Azure container registry in a different subscription.
     text: |
-        az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag \\
+        az acr import -n myregistry --source sourcerepository:sourcetag -t targetrepository:targettag \\
             -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
   - name: Import an image without waiting for successful completion. Failures during import will not be reflected. Run `az acr repository show-tags` to confirm that import succeeded.
     text: >
-        az acr import -n MyRegistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag --no-wait
+        az acr import -n myregistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag --no-wait
 """
 
 helps['acr list'] = """
@@ -337,10 +337,10 @@ long-summary: Docker must be installed on your machine. Once done, use 'docker l
 examples:
   - name: Log in to an Azure Container Registry
     text: >
-        az acr login -n MyRegistry
+        az acr login -n myregistry
   - name: Get an Azure Container Registry access token
     text: >
-        az acr login -n MyRegistry --expose-token
+        az acr login -n myregistry --expose-token
 """
 
 helps['acr network-rule'] = """
@@ -352,15 +352,9 @@ helps['acr network-rule add'] = """
 type: command
 short-summary: Add a network rule.
 examples:
-  - name: Add a rule to allow access for a subnet in the same resource group as the registry.
-    text: >
-        az acr network-rule add -n MyRegistry --vnet-name myvnet --subnet mysubnet
-  - name: Add a rule to allow access for a subnet in a different subscription or resource group.
-    text: >
-        az acr network-rule add -n MyRegistry --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
   - name: Add a rule to allow access for a specific IP address-range.
     text: >
-        az acr network-rule add -n MyRegistry --ip-address 23.45.1.0/24
+        az acr network-rule add -n myregistry --ip-address 23.45.1.0/24
 """
 
 helps['acr network-rule list'] = """
@@ -369,22 +363,16 @@ short-summary: List network rules.
 examples:
   - name: List network rules for a registry.
     text: >
-        az acr network-rule list -n MyRegistry
+        az acr network-rule list -n myregistry
 """
 
 helps['acr network-rule remove'] = """
 type: command
 short-summary: Remove a network rule.
 examples:
-  - name: Remove a rule that allows access for a subnet in the same resource group as the registry.
-    text: >
-        az acr network-rule remove -n MyRegistry --vnet-name myvnet --subnet mysubnet
-  - name: Remove a rule that allows access for a subnet in a different subscription or resource group.
-    text: >
-        az acr network-rule remove -n MyRegistry --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
   - name: Remove a rule that allows access for a specific IP address-range.
     text: >
-        az acr network-rule remove -n MyRegistry --ip-address 23.45.1.0/24
+        az acr network-rule remove -n myregistry --ip-address 23.45.1.0/24
 """
 
 helps['acr pack'] = """
@@ -397,9 +385,9 @@ type: command
 short-summary: Queues a quick build task that builds an app and pushes it into an Azure Container Registry.
 examples:
   - name: Queue a build for the current directory with the CloudFoundry builder.
-    text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --builder cloudfoundry/cnb:bionic .
+    text: az acr pack build -r myregistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --builder cloudfoundry/cnb:bionic .
   - name: Queue a build for the given GitHub repository with the Heroku builder.
-    text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --pull --builder heroku/buildpacks:18 https://github.com/Azure-Samples/nodejs-docs-hello-world.git
+    text: az acr pack build -r myregistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --pull --builder heroku/buildpacks:18 https://github.com/Azure-Samples/nodejs-docs-hello-world.git
 """
 
 helps['acr replication'] = """
@@ -413,9 +401,9 @@ short-summary: Create a replicated region for an Azure Container Registry.
 examples:
   - name: Create a replicated region for an Azure Container Registry.
     text: >
-        az acr replication create -r MyRegistry -l westus
+        az acr replication create -r myregistry -l westus
   - name: Create a replicated region for an Azure Container Registry. (autogenerated)
-    text: az acr replication create --location westus --registry MyRegistry --resource-group MyResourceGroup
+    text: az acr replication create --location westus --registry myregistry --resource-group MyResourceGroup
     crafted: true
 """
 
@@ -425,7 +413,7 @@ short-summary: Delete a replicated region from an Azure Container Registry.
 examples:
   - name: Delete a replicated region from an Azure Container Registry.
     text: >
-        az acr replication delete -n MyReplication -r MyRegistry
+        az acr replication delete -n MyReplication -r myregistry
 """
 
 helps['acr replication list'] = """
@@ -434,7 +422,7 @@ short-summary: List all of the regions for a geo-replicated Azure Container Regi
 examples:
   - name: List replications and show the results in a table.
     text: >
-        az acr replication list -r MyRegistry -o table
+        az acr replication list -r myregistry -o table
 """
 
 helps['acr replication show'] = """
@@ -443,7 +431,7 @@ short-summary: Get the details of a replicated region.
 examples:
   - name: Get the details of a replicated region
     text: >
-        az acr replication show -n MyReplication -r MyRegistry
+        az acr replication show -n MyReplication -r myregistry
 """
 
 helps['acr replication update'] = """
@@ -452,9 +440,9 @@ short-summary: Updates a replication.
 examples:
   - name: Update tags for a replication
     text: >
-        az acr replication update -n MyReplication -r MyRegistry --tags key1=value1 key2=value2
+        az acr replication update -n MyReplication -r myregistry --tags key1=value1 key2=value2
   - name: Updates a replication. (autogenerated)
-    text: az acr replication update --name MyReplication --registry MyRegistry --resource-group MyResourceGroup --tags key1=value1 key2=value2
+    text: az acr replication update --name MyReplication --registry myregistry --resource-group MyResourceGroup --tags key1=value1 key2=value2
     crafted: true
 """
 
@@ -469,11 +457,11 @@ short-summary: Delete a repository or image in an Azure Container Registry.
 long-summary: This command deletes all associated layer data that are not referenced by any other manifest in the container registry.
 examples:
   - name: Delete an image manifest by tag. This deletes the manifest referenced by 'hello-world:latest' and all other tags referencing the same manifest.
-    text: az acr repository delete -n MyRegistry --image hello-world:latest
+    text: az acr repository delete -n myregistry --image hello-world:latest
   - name: Delete an image manifest by sha256-based manifest digest. This deletes the manifest identified by 'hello-world@sha256:abc123' and all tags referencing the manifest.
-    text: az acr repository delete -n MyRegistry --image hello-world@sha256:abc123
+    text: az acr repository delete -n myregistry --image hello-world@sha256:abc123
   - name: Delete a repository from an Azure Container Registry. This deletes all manifests and tags under 'hello-world'.
-    text: az acr repository delete -n MyRegistry --repository hello-world
+    text: az acr repository delete -n myregistry --repository hello-world
 """
 
 helps['acr repository list'] = """
@@ -481,7 +469,7 @@ type: command
 short-summary: List repositories in an Azure Container Registry.
 examples:
   - name: List repositories in a given Azure Container Registry.
-    text: az acr repository list -n MyRegistry
+    text: az acr repository list -n myregistry
 """
 
 helps['acr repository list-deleted'] = """
@@ -489,7 +477,7 @@ type: command
 short-summary: List soft-deleted repositories in an Azure Container Registry.
 examples:
   - name: List soft-deleted repositories in a given Azure Container Registry.
-    text: az acr repository list-deleted -n MyRegistry
+    text: az acr repository list-deleted -n myregistry
 """
 
 helps['acr repository show'] = """
@@ -497,11 +485,11 @@ type: command
 short-summary: Get the attributes of a repository or image in an Azure Container Registry.
 examples:
   - name: Get the attributes of the repository 'hello-world'.
-    text: az acr repository show -n MyRegistry --repository hello-world
+    text: az acr repository show -n myregistry --repository hello-world
   - name: Get the attributes of the image referenced by tag 'hello-world:latest'.
-    text: az acr repository show -n MyRegistry --image hello-world:latest
+    text: az acr repository show -n myregistry --image hello-world:latest
   - name: Get the attributes of the image referenced by digest 'hello-world@sha256:abc123'.
-    text: az acr repository show -n MyRegistry --image hello-world@sha256:abc123
+    text: az acr repository show -n myregistry --image hello-world@sha256:abc123
 """
 
 helps['acr repository show-manifests'] = """
@@ -509,11 +497,11 @@ type: command
 short-summary: Show manifests of a repository in an Azure Container Registry.
 examples:
   - name: Show manifests of a repository in an Azure Container Registry.
-    text: az acr repository show-manifests -n MyRegistry --repository MyRepository
+    text: az acr repository show-manifests -n myregistry --repository MyRepository
   - name: Show the latest 10 manifests ordered by timestamp of a repository in an Azure Container Registry.
-    text: az acr repository show-manifests -n MyRegistry --repository MyRepository --top 10 --orderby time_desc
+    text: az acr repository show-manifests -n myregistry --repository MyRepository --top 10 --orderby time_desc
   - name: Show the detailed information of the latest 10 manifests ordered by timestamp of a repository in an Azure Container Registry.
-    text: az acr repository show-manifests -n MyRegistry --repository MyRepository --top 10 --orderby time_desc --detail
+    text: az acr repository show-manifests -n myregistry --repository MyRepository --top 10 --orderby time_desc --detail
 """
 
 helps['acr repository show-tags'] = """
@@ -521,11 +509,11 @@ type: command
 short-summary: Show tags for a repository in an Azure Container Registry.
 examples:
   - name: Show tags of a repository in an Azure Container Registry.
-    text: az acr repository show-tags -n MyRegistry --repository MyRepository
+    text: az acr repository show-tags -n myregistry --repository MyRepository
   - name: Show the detailed information of tags of a repository in an Azure Container Registry.
-    text: az acr repository show-tags -n MyRegistry --repository MyRepository --detail
+    text: az acr repository show-tags -n myregistry --repository MyRepository --detail
   - name: Show the detailed information of the latest 10 tags ordered by timestamp of a repository in an Azure Container Registry.
-    text: az acr repository show-tags -n MyRegistry --repository MyRepository --top 10 --orderby time_desc --detail
+    text: az acr repository show-tags -n myregistry --repository MyRepository --top 10 --orderby time_desc --detail
 """
 
 helps['acr repository untag'] = """
@@ -534,7 +522,7 @@ short-summary: Untag an image in an Azure Container Registry.
 long-summary: This command does not delete the manifest referenced by the tag or any associated layer data.
 examples:
   - name: Untag an image from a repository.
-    text: az acr repository untag -n MyRegistry --image hello-world:latest
+    text: az acr repository untag -n myregistry --image hello-world:latest
 """
 
 helps['acr repository update'] = """
@@ -542,11 +530,11 @@ type: command
 short-summary: Update the attributes of a repository or image in an Azure Container Registry.
 examples:
   - name: Update the attributes of the repository 'hello-world' to disable write operation.
-    text: az acr repository update -n MyRegistry --repository hello-world --write-enabled false
+    text: az acr repository update -n myregistry --repository hello-world --write-enabled false
   - name: Update the attributes of the image referenced by tag 'hello-world:latest' to disable write operation.
-    text: az acr repository update -n MyRegistry --image hello-world:latest --write-enabled false
+    text: az acr repository update -n myregistry --image hello-world:latest --write-enabled false
   - name: Update the attributes of the image referenced by digest 'hello-world@sha256:abc123' to disable write operation.
-    text: az acr repository update -n MyRegistry --image hello-world@sha256:abc123 --write-enabled false
+    text: az acr repository update -n myregistry --image hello-world@sha256:abc123 --write-enabled false
 """
 
 helps['acr cache'] = """
@@ -559,7 +547,7 @@ type: command
 short-summary: Show a cache rule.
 examples:
   - name: Show a cache rule.
-    text: az acr cache show -r MyRegistry -n MyRule
+    text: az acr cache show -r myregistry -n MyRule
 """
 
 helps['acr cache list'] = """
@@ -567,7 +555,7 @@ type: command
 short-summary: List the cache rules in an Azure Container Registry.
 examples:
   - name: List the cache rules in an Azure Container Registry.
-    text: az acr cache list -r MyRegistry
+    text: az acr cache list -r myregistry
 """
 
 helps['acr cache create'] = """
@@ -575,9 +563,9 @@ type: command
 short-summary: Create a cache rule.
 examples:
   - name: Create a cache rule without a credential set.
-    text: az acr cache create -r MyRegistry -n MyRule -s docker.io/library/ubuntu -t ubuntu
+    text: az acr cache create -r myregistry -n MyRule -s docker.io/library/ubuntu -t ubuntu
   - name: Create a cache rule with a credential set.
-    text: az acr cache create -r MyRegistry -n MyRule -s docker.io/library/ubuntu -t ubuntu -c MyCredSet
+    text: az acr cache create -r myregistry -n MyRule -s docker.io/library/ubuntu -t ubuntu -c MyCredSet
 """
 
 helps['acr cache update'] = """
@@ -585,9 +573,9 @@ type: command
 short-summary: Update the credential set on a cache rule.
 examples:
   - name: Change or add a credential set to an existing cache rule.
-    text: az acr cache update -r MyRegistry -n MyRule -c NewCredSet
+    text: az acr cache update -r myregistry -n MyRule -c NewCredSet
   - name: Remove a credential set from an existing cache rule.
-    text: az acr cache update -r MyRegistry -n MyRule --remove-cred-set
+    text: az acr cache update -r myregistry -n MyRule --remove-cred-set
 """
 
 helps['acr cache delete'] = """
@@ -595,7 +583,7 @@ type: command
 short-summary: Delete a cache rule.
 examples:
   - name: Delete a cache rule.
-    text: az acr cache delete -r MyRegistry -n MyRule
+    text: az acr cache delete -r myregistry -n MyRule
 """
 
 helps['acr credential-set'] = """
@@ -608,7 +596,7 @@ type: command
 short-summary: Show a credential set.
 examples:
   - name: Show a credential set rule.
-    text: az acr credential-set show -r MyRegistry -n MyCredSet
+    text: az acr credential-set show -r myregistry -n MyCredSet
 """
 
 helps['acr credential-set list'] = """
@@ -616,7 +604,7 @@ type: command
 short-summary: List the credential sets in an Azure Container Registry.
 examples:
   - name: List the credential sets in an Azure Container Registry.
-    text: az acr credential-set list -r MyRegistry
+    text: az acr credential-set list -r myregistry
 """
 
 helps['acr credential-set create'] = """
@@ -624,7 +612,7 @@ type: command
 short-summary: Create a credential set.
 examples:
   - name: Create a credential set.
-    text: az acr credential-set create -r MyRegistry -n MyRule -l docker.io -u https://MyKeyvault.vault.azure.net/secrets/usernamesecret -p https://MyKeyvault.vault.azure.net/secrets/passwordsecret
+    text: az acr credential-set create -r myregistry -n MyRule -l docker.io -u https://MyKeyvault.vault.azure.net/secrets/usernamesecret -p https://MyKeyvault.vault.azure.net/secrets/passwordsecret
 """
 
 helps['acr credential-set update'] = """
@@ -632,7 +620,7 @@ type: command
 short-summary: Update the username or password Azure Key Vault secret ID on a credential set.
 examples:
   - name: Update the password Azure Key Vault secret ID.
-    text: az acr credential-set update -r MyRegistry -n MyRule -p https://MyKeyvault.vault.azure.net/secrets/newsecretname
+    text: az acr credential-set update -r myregistry -n MyRule -p https://MyKeyvault.vault.azure.net/secrets/newsecretname
 """
 
 helps['acr credential-set delete'] = """
@@ -640,7 +628,7 @@ type: command
 short-summary: Delete a credential set.
 examples:
   - name: Delete a credential set.
-    text: az acr credential-set delete -r MyRegistry -n MyCredSet
+    text: az acr credential-set delete -r myregistry -n MyCredSet
 """
 
 helps['acr manifest'] = """
@@ -653,13 +641,13 @@ type: command
 short-summary: Get a manifest in an Azure Container Registry.
 examples:
   - name: Get the manifest of the artifact 'hello-world:latest'.
-    text: az acr manifest show -r MyRegistry -n hello-world:latest
+    text: az acr manifest show -r myregistry -n hello-world:latest
   - name: Get the manifest of the artifact 'hello-world:latest'.
     text: az acr manifest show myregistry.azurecr.io/hello-world:latest
   - name: Get the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
-    text: az acr manifest show -r MyRegistry -n hello-world@sha256:abc123
+    text: az acr manifest show -r myregistry -n hello-world@sha256:abc123
   - name: Get the raw, unformatted manifest of the artifact 'hello-world:latest'.
-    text: az acr manifest show -r MyRegistry -n hello-world:latest --raw
+    text: az acr manifest show -r myregistry -n hello-world:latest --raw
 """
 
 helps['acr manifest list'] = """
@@ -667,7 +655,7 @@ type: command
 short-summary: List the manifests in a repository in an Azure Container Registry.
 examples:
   - name: List the manifests of the repository 'hello-world'.
-    text: az acr manifest list -r MyRegistry -n hello-world
+    text: az acr manifest list -r myregistry -n hello-world
   - name: List the manifests of the repository 'hello-world'.
     text: az acr manifest list myregistry.azurecr.io/hello-world
 """
@@ -677,11 +665,11 @@ type: command
 short-summary: Delete a manifest in an Azure Container Registry.
 examples:
   - name: Delete the manifest of the artifact 'hello-world:latest'.
-    text: az acr manifest delete -r MyRegistry -n hello-world:latest
+    text: az acr manifest delete -r myregistry -n hello-world:latest
   - name: Delete the manifest of the artifact 'hello-world:latest'.
     text: az acr manifest delete myregistry.azurecr.io/hello-world:latest
   - name: Delete the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
-    text: az acr manifest delete -r MyRegistry -n hello-world@sha256:abc123
+    text: az acr manifest delete -r myregistry -n hello-world@sha256:abc123
 """
 
 helps['acr manifest list-referrers'] = """
@@ -689,11 +677,11 @@ type: command
 short-summary: List the referrers to a manifest in an Azure Container Registry.
 examples:
   - name: List the referrers to the manifest of the artifact 'hello-world:latest'.
-    text: az acr manifest list-referrers -r MyRegistry -n hello-world:latest
+    text: az acr manifest list-referrers -r myregistry -n hello-world:latest
   - name: List the referrers to the manifest of the artifact 'hello-world:latest'.
     text: az acr manifest list-referrers myregistry.azurecr.io/hello-world:latest
   - name: List the referrers to the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
-    text: az acr manifest list-referrers -r MyRegistry -n hello-world@sha256:abc123
+    text: az acr manifest list-referrers -r myregistry -n hello-world@sha256:abc123
 """
 
 helps['acr manifest show-metadata'] = """
@@ -701,11 +689,11 @@ type: command
 short-summary: Get the metadata of an artifact in an Azure Container Registry.
 examples:
   - name: Get the metadata of the tag 'hello-world:latest'.
-    text: az acr manifest show-metadata -r MyRegistry -n hello-world:latest
+    text: az acr manifest show-metadata -r myregistry -n hello-world:latest
   - name: Get the metadata of the tag 'hello-world:latest'.
     text: az acr manifest show-metadata myregistry.azurecr.io/hello-world:latest
   - name: Get the metadata of the manifest referenced by digest 'hello-world@sha256:abc123'.
-    text: az acr manifest show-metadata -r MyRegistry -n hello-world@sha256:abc123
+    text: az acr manifest show-metadata -r myregistry -n hello-world@sha256:abc123
 """
 
 helps['acr manifest list-metadata'] = """
@@ -713,7 +701,7 @@ type: command
 short-summary: List the metadata of the manifests in a repository in an Azure Container Registry.
 examples:
   - name: List the metadata of the manifests in the repository 'hello-world'.
-    text: az acr manifest list-metadata -r MyRegistry -n hello-world
+    text: az acr manifest list-metadata -r myregistry -n hello-world
   - name: List the metadata of the manifests in the repository 'hello-world'.
     text: az acr manifest list-metadata myregistry.azurecr.io/hello-world
 """
@@ -723,11 +711,11 @@ type: command
 short-summary: Update the manifest metadata of an artifact in an Azure Container Registry.
 examples:
   - name: Update the metadata of the tag 'hello-world:latest'.
-    text: az acr manifest update-metadata -r MyRegistry -n hello-world:latest --write-enabled false
+    text: az acr manifest update-metadata -r myregistry -n hello-world:latest --write-enabled false
   - name: Update the metadata of the tag 'hello-world:latest'.
     text: az acr manifest update-metadata myregistry.azurecr.io/hello-world:latest --write-enabled false
   - name: Update the metadata of the artifact referenced by digest 'hello-world@sha256:abc123'.
-    text: az acr manifest update-metadata -r MyRegistry -n hello-world@sha256:abc123 --write-enabled false
+    text: az acr manifest update-metadata -r myregistry -n hello-world@sha256:abc123 --write-enabled false
 """
 
 # Deprecated
@@ -756,7 +744,7 @@ type: command
 short-summary: List the soft-deleted manifests in a repository in an Azure Container Registry.
 examples:
   - name: List the soft-deleted manifests in the repository 'hello-world'.
-    text: az acr manifest list-deleted -r MyRegistry -n hello-world
+    text: az acr manifest list-deleted -r myregistry -n hello-world
   - name: List the soft-deleted manifests in the repository 'hello-world'.
     text: az acr manifest list-deleted myregistry.azurecr.io/hello-world
 """
@@ -766,11 +754,11 @@ type: command
 short-summary: List the soft-deleted tags in a repository in an Azure Container Registry.
 examples:
   - name: List the soft-deleted tags in the repository 'hello-world'.
-    text: az acr manifest list-deleted-tags -r MyRegistry -n hello-world
+    text: az acr manifest list-deleted-tags -r myregistry -n hello-world
   - name: List the soft-deleted tags in the repository 'hello-world'.
     text: az acr manifest list-deleted-tags myregistry.azurecr.io/hello-world
   - name: List the soft-deleted tags that match tag 'latest' in the repository 'hello-world'.
-    text: az acr manifest list-deleted-tags -r MyRegistry -n hello-world:latest
+    text: az acr manifest list-deleted-tags -r myregistry -n hello-world:latest
   - name: List the soft-deleted tags that match tag 'latest' in the repository 'hello-world'.
     text: az acr manifest list-deleted-tags myregistry.azurecr.io/hello-world:latest
 """
@@ -780,11 +768,11 @@ type: command
 short-summary: Restore a soft-deleted artifact and tag in an Azure Container Registry.
 examples:
   - name: Restore the manifest matching digest 'sha256:abc123' with tag 'latest' in the repository 'hello-world'.
-    text: az acr manifest restore -r MyRegistry -n hello-world:latest -d sha256:abc123
+    text: az acr manifest restore -r myregistry -n hello-world:latest -d sha256:abc123
   - name: Restore the manifest matching digest 'sha256:abc123' with tag 'latest' in the repository 'hello-world'.
     text: az acr manifest restore myregistry.azurecr.io/hello-world:latest -d sha256:abc123
   - name: Restore the most recently deleted manifest associated with the tag 'latest' in the repository 'hello-world'.
-    text: az acr manifest restore -r MyRegistry -n hello-world:latest
+    text: az acr manifest restore -r myregistry -n hello-world:latest
   - name: Restore the most recently deleted manifest associated with the tag 'latest' in the repository 'hello-world'.
     text: az acr manifest restore myregistry.azurecr.io/hello-world:latest
 """
@@ -795,25 +783,25 @@ short-summary: Queues a quick run providing streamed logs for an Azure Container
 examples:
   - name: Queue a run to execute a container command.
     text: >
-        az acr run -r MyRegistry --cmd '$Registry/myimage' /dev/null
+        az acr run -r myregistry --cmd '$Registry/myimage' /dev/null
   - name: Queue a run with the task definition from the standard input. Either 'Ctrl + Z'(Windows) or 'Ctrl + D'(Linux) terminates the input stream.
     text: >
-        az acr run -r MyRegistry -f - /dev/null
+        az acr run -r myregistry -f - /dev/null
   - name: Queue a run to execute the tasks passed through the pipe.
     text: >
-        cat task.yaml | az acr run -r MyRegistry -f - /dev/null
+        cat task.yaml | az acr run -r myregistry -f - /dev/null
   - name: Queue a local context, pushed to ACR with streaming logs.
     text: >
-        az acr run -r MyRegistry -f bash-echo.yaml ./workspace
+        az acr run -r myregistry -f bash-echo.yaml ./workspace
   - name: Queue a remote git context with streaming logs.
     text: >
-        az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f hello-world.yaml
+        az acr run -r myregistry https://github.com/Azure-Samples/acr-tasks.git -f hello-world.yaml
   - name: Queue a remote git context with streaming logs and runs the task on Linux platform.
     text: >
-        az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f build-hello-world.yaml --platform linux
+        az acr run -r myregistry https://github.com/Azure-Samples/acr-tasks.git -f build-hello-world.yaml --platform linux
   - name: Queue a remote OCI Artifact context and runs the task.
     text: >
-        az acr run -r MyRegistry oci://myregistry.azurecr.io/myartifact:mytag -f hello-world.yaml
+        az acr run -r myregistry oci://myregistry.azurecr.io/myartifact:mytag -f hello-world.yaml
 """
 
 helps['acr scope-map'] = """
@@ -827,10 +815,10 @@ short-summary: Create a scope map for an Azure Container Registry.
 examples:
   - name: Create a scope map that allows content/write and metadata/read actions for `hello-world` repository, and content/read action for `hello-world-again`.
     text: >
-        az acr scope-map create -n MyScopeMap -r MyRegistry --repository hello-world content/write metadata/read --repository hello-world-again content/read --description "Sample scope map."
+        az acr scope-map create -n MyScopeMap -r myregistry --repository hello-world content/write metadata/read --repository hello-world-again content/read --description "Sample scope map."
   - name: Create a scope map that allows all repository actions for `test`, and all gateway actions for `connectedRegistry`.
     text: >
-        az acr scope-map create -n MyScopeMap -r MyRegistry --description "Sample scope map."
+        az acr scope-map create -n MyScopeMap -r myregistry --description "Sample scope map."
           --repository test content/delete content/read content/write metadata/read metadata/write
           --gateway connectedRegistry config/read config/write message/read message/write
 
@@ -842,16 +830,16 @@ short-summary: Delete a scope map for an Azure Container Registry.
 examples:
   - name: Delete the scope map 'MyScopeMap'.
     text: >
-        az acr scope-map delete -n MyScopeMap -r MyRegistry
+        az acr scope-map delete -n MyScopeMap -r myregistry
 """
 
 helps['acr scope-map list'] = """
 type: command
 short-summary: List all scope maps for an Azure Container Registry.
 examples:
-  - name: List scope maps under the registry 'MyRegistry'.
+  - name: List scope maps under the registry 'myregistry'.
     text: >
-        az acr scope-map list -r MyRegistry
+        az acr scope-map list -r myregistry
 """
 
 helps['acr scope-map show'] = """
@@ -860,7 +848,7 @@ short-summary: Show details and attributes of a scope map for an Azure Container
 examples:
   - name: Get information for the scope map 'MyScopeMap'.
     text: >
-        az acr scope-map show -n MyScopeMap -r MyRegistry
+        az acr scope-map show -n MyScopeMap -r myregistry
 """
 
 helps['acr scope-map update'] = """
@@ -869,7 +857,7 @@ short-summary: Update a scope map for an Azure Container Registry.
 examples:
   - name: Update the scope map 'MyScopeMap' removing metadata/read and content/read actions for `hello-world` repository, and message/write action for `connectedRegistry`.
     text: >
-        az acr scope-map update -n MyScopeMap -r MyRegistry --remove-repo hello-world metadata/read content/read --remove-gateway connectedRegistry message/write
+        az acr scope-map update -n MyScopeMap -r myregistry --remove-repo hello-world metadata/read content/read --remove-gateway connectedRegistry message/write
 """
 
 helps['acr show'] = """
@@ -878,9 +866,9 @@ short-summary: Get the details of an Azure Container Registry.
 examples:
   - name: Get the login server for an Azure Container Registry.
     text: >
-        az acr show -n MyRegistry --query loginServer
+        az acr show -n myregistry --query loginServer
   - name: Get the details of an Azure Container Registry
-    text: az acr show --name MyRegistry --resource-group MyResourceGroup
+    text: az acr show --name myregistry --resource-group MyResourceGroup
     crafted: true
 """
 
@@ -890,7 +878,7 @@ short-summary: Get the storage usage for an Azure Container Registry.
 examples:
   - name: Get the storage usage for an Azure Container Registry.
     text: >
-        az acr show-usage -n MyRegistry
+        az acr show-usage -n myregistry
 """
 
 helps['acr task'] = """
@@ -904,7 +892,7 @@ short-summary: Cancel a specified run of an Azure Container Registry.
 examples:
   - name: Cancel a run
     text: >
-        az acr task cancel-run -r MyRegistry --run-id runId
+        az acr task cancel-run -r myregistry --run-id runId
 """
 
 helps['acr task create'] = """
@@ -913,36 +901,36 @@ short-summary: Create a series of steps for building, testing and OS & Framework
 examples:
   - name: Create a task without the source location.
     text: >
-        az acr task create -n hello-world -r MyRegistry --cmd '$Registry/myimage' -c /dev/null
+        az acr task create -n hello-world -r myregistry --cmd '$Registry/myimage' -c /dev/null
   - name: Create a task with the definition from the standard input and with a timer trigger that runs the task at the top of every hour using the default trigger name. Either 'Ctrl + Z'(Windows) or 'Ctrl + D'(Linux) terminates the input stream.
     text: |
-        cat task.yaml | az acr task create -n hello-world -r MyRegistry -f - -c /dev/null \\
+        cat task.yaml | az acr task create -n hello-world -r myregistry -f - -c /dev/null \\
             --schedule "0 */1 * * *"
-        az acr task create -n hello-world -r MyRegistry -f - -c /dev/null --schedule "0 */1 * * *"
+        az acr task create -n hello-world -r myregistry -f - -c /dev/null --schedule "0 */1 * * *"
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image without triggers and uses a build argument.
     text: |
-        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r myregistry \\
             -c https://github.com/Azure/acr-builder.git -f Dockerfile \\
             --commit-trigger-enabled false --base-image-trigger-enabled false \\
             --arg DOCKER_CLI_BASE_IMAGE=docker:18.03.0-ce-git
   - name: Create a Linux task using a specific branch of a private Azure DevOps repository which builds the hello-world image on Arm architecture (V7 variant) and has triggers enabled.
     text: |
-        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r myregistry \\
             -c https://msazure.visualstudio.com/DefaultCollection/Project/_git/Repo#Branch:Folder \\
             -f Dockerfile --git-access-token <Personal Access Token> --platform linux/arm/v7
-  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with both a git commit and pull request trigger enabled. Note that this task does not use Source Registry (MyRegistry), so we can explicitly set Auth mode as None for it.
+  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with both a git commit and pull request trigger enabled. Note that this task does not use Source Registry (myregistry), so we can explicitly set Auth mode as None for it.
     text: |
-        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry  -f Dockerfile \\
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r myregistry  -f Dockerfile \\
             --no-push true --auth-mode None -c https://github.com/Azure-Samples/acr-build-helloworld-node.git \\
             --pull-request-trigger-enabled true --git-access-token 000000000000000000000000000000000
   - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image on Amd64 architecture with only base image trigger enabled.
     text: |
-        az acr task create -t acb:{{.Run.ID}} -n acb-win -r MyRegistry \\
+        az acr task create -t acb:{{.Run.ID}} -n acb-win -r myregistry \\
             -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile \\
             --commit-trigger-enabled false --platform Windows/amd64
   - name: Create a Linux multi-step task from a public GitHub repository with with both system-assigned and user-assigned managed identities and base image, git commit, pull request, and timer triggers that run the task at noon on Mondays through Fridays with the timer trigger name provided.
     text: |
-        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r myregistry \\
             --pull-request-trigger-enabled true --schedule "dailyTimer:0 12 * * Mon-Fri" \\
             -c https://github.com/Azure-Samples/acr-tasks.git#:multipleRegistries -f testtask.yaml \\
             --assign-identity [system] "/subscriptions/<subscriptionId>/resourcegroups/<myResourceGroup>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<myUserAssignedIdentitiy>"
@@ -1020,7 +1008,7 @@ short-summary: Delete a task from an Azure Container Registry.
 examples:
   - name: Delete a task from an Azure Container Registry.
     text: >
-        az acr task delete -n MyTask -r MyRegistry
+        az acr task delete -n MyTask -r myregistry
 """
 
 helps['acr task identity'] = """
@@ -1034,14 +1022,14 @@ short-summary: Update the managed identity for a task.
 examples:
   - name: Enable the system-assigned identity on an existing task. This will replace all existing user-assigned identities for that task.
     text: >
-        az acr task identity assign -n MyTask -r MyRegistry
+        az acr task identity assign -n MyTask -r myregistry
   - name: Assign user-assigned managed identities to an existing task. This will remove the existing system-assigned identity.
     text: |
-        az acr task identity assign -n MyTask -r MyRegistry \\
+        az acr task identity assign -n MyTask -r myregistry \\
             --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
   - name: Assign both system-assigned and user-assigned managed identities to an existing task.
     text: |
-        az acr task identity assign -n MyTask -r MyRegistry \\
+        az acr task identity assign -n MyTask -r myregistry \\
             --identities [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
 """
 
@@ -1051,14 +1039,14 @@ short-summary: Remove managed identities for a task.
 examples:
   - name: Remove the system-assigned identity from a task.
     text: >
-        az acr task identity remove -n MyTask -r MyRegistry
+        az acr task identity remove -n MyTask -r myregistry
   - name: Remove a user-assigned identity from a task.
     text: |
-        az acr task identity remove -n MyTask -r MyRegistry \\
+        az acr task identity remove -n MyTask -r myregistry \\
             --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
   - name: Remove all managed identities from a task.
     text: >
-        az acr task identity remove -n MyTask -r MyRegistry --identities [all]
+        az acr task identity remove -n MyTask -r myregistry --identities [all]
 """
 
 helps['acr task identity show'] = """
@@ -1067,7 +1055,7 @@ short-summary: Display the managed identities for task.
 examples:
   - name: Display the managed identities for a task.
     text: >
-        az acr task identity show -n MyTask -r MyRegistry
+        az acr task identity show -n MyTask -r myregistry
 """
 
 helps['acr task list'] = """
@@ -1076,7 +1064,7 @@ short-summary: List the tasks for an Azure Container Registry.
 examples:
   - name: List tasks and show the results in a table.
     text: >
-        az acr task list -r MyRegistry -o table
+        az acr task list -r myregistry -o table
 """
 
 helps['acr task list-runs'] = """
@@ -1085,16 +1073,16 @@ short-summary: List all of the executed runs for an Azure Container Registry, wi
 examples:
   - name: List all of the runs for a registry and show the results in a table.
     text: >
-        az acr task list-runs -r MyRegistry -o table
+        az acr task list-runs -r myregistry -o table
   - name: List runs for a task and show the results in a table.
     text: >
-        az acr task list-runs -r MyRegistry -n MyTask -o table
+        az acr task list-runs -r myregistry -n MyTask -o table
   - name: List the last 10 successful runs for a registry and show the results in a table.
     text: >
-        az acr task list-runs -r MyRegistry --run-status Succeeded --top 10 -o table
+        az acr task list-runs -r myregistry --run-status Succeeded --top 10 -o table
   - name: List all of the runs that built the image 'hello-world' for a registry and show the results in a table.
     text: >
-        az acr task list-runs -r MyRegistry --image hello-world -o table
+        az acr task list-runs -r myregistry --image hello-world -o table
 """
 
 helps['acr task logs'] = """
@@ -1103,16 +1091,16 @@ short-summary: Show logs for a particular run. If no run-id is supplied, show lo
 examples:
   - name: Show logs for the last created run in the registry.
     text: >
-        az acr task logs -r MyRegistry
+        az acr task logs -r myregistry
   - name: Show logs for the last created run in the registry, filtered by task.
     text: >
-        az acr task logs -r MyRegistry -n MyTask
+        az acr task logs -r myregistry -n MyTask
   - name: Show logs for a particular run.
     text: >
-        az acr task logs -r MyRegistry --run-id runId
+        az acr task logs -r myregistry --run-id runId
   - name: Show logs for the last created run in the registry that built the image 'hello-world'.
     text: >
-        az acr task logs -r MyRegistry --image hello-world
+        az acr task logs -r myregistry --image hello-world
 """
 
 helps['acr task run'] = """
@@ -1121,16 +1109,16 @@ short-summary: Manually trigger a task that might otherwise be waiting for git c
 examples:
   - name: Trigger a task run.
     text: >
-        az acr task run -n MyTask -r MyRegistry
+        az acr task run -n MyTask -r myregistry
   - name: Trigger a task run by overriding the context and file passed during Task create with a remote repository.
     text: >
-        az acr task run -n MyTask -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile
+        az acr task run -n MyTask -r myregistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile
   - name: Trigger a task run by overriding the context and file passed during Task create with a local context.
     text: >
-        az acr task run -n MyTask -r MyRegistry -c . -f Dockerfile
+        az acr task run -n MyTask -r myregistry -c . -f Dockerfile
   - name: Trigger a task run by adding or overriding build arguments set during Task create.
     text: |
-        az acr task run -n MyTask -r MyRegistry --arg DOCKER_CLI_BASE_IMAGE=docker:18.03.0-ce-git
+        az acr task run -n MyTask -r myregistry --arg DOCKER_CLI_BASE_IMAGE=docker:18.03.0-ce-git
 """
 
 helps['acr task show'] = """
@@ -1139,11 +1127,11 @@ short-summary: Get the properties of a named task for an Azure Container Registr
 examples:
   - name: Get the properties of a task, displaying the results in a table.
     text: >
-        az acr task show -n MyTask -r MyRegistry -o table
+        az acr task show -n MyTask -r myregistry -o table
 
   - name: Get the properties of a task, including secure properties.
     text: >
-        az acr task show -n MyTask -r MyRegistry --with-secure-properties
+        az acr task show -n MyTask -r myregistry --with-secure-properties
 """
 
 helps['acr task show-run'] = """
@@ -1152,7 +1140,7 @@ short-summary: Get the properties of a specified run of an Azure Container Regis
 examples:
   - name: Get the details of a run, displaying the results in a table.
     text: >
-        az acr task show-run -r MyRegistry --run-id runId -o table
+        az acr task show-run -r myregistry --run-id runId -o table
 """
 
 helps['acr task timer'] = """
@@ -1205,18 +1193,18 @@ short-summary: Update a task for an Azure Container Registry.
 examples:
   - name: Update base image updates to trigger on all dependent images of a multi-stage dockerfile, and status of a task in an Azure Container Registry.
     text: >
-        az acr task update -n MyTask -r MyRegistry --base-image-trigger-type All --status Disabled
+        az acr task update -n MyTask -r myregistry --base-image-trigger-type All --status Disabled
   - name: Update platform for the Build step of your Task to Windows (prev Linux).
     text: >
-        az acr task update -n MyTask -r MyRegistry --platform Windows
+        az acr task update -n MyTask -r myregistry --platform Windows
   - name: Update task's triggers and context for an Azure Container Registry.
     text: |
-        az acr task update -n hello-world -r MyRegistry -f Dockerfile \\
+        az acr task update -n hello-world -r myregistry -f Dockerfile \\
             --commit-trigger-enabled false --pull-request-trigger-enabled true \\
             -c https://msazure.visualstudio.com/DefaultCollection/Project/_git/Repo#Branch:Folder
   - name: Update a task for an Azure Container Registry. (autogenerated)
     text: |
-        az acr task update --image MyImage --name MyTask --registry MyRegistry \\
+        az acr task update --image MyImage --name MyTask --registry myregistry \\
             --context https://github.com/Azure-Samples/acr-build-helloworld-node.git
     crafted: true
 """
@@ -1227,7 +1215,7 @@ short-summary: Patch the run properties of an Azure Container Registry Task.
 examples:
   - name: Update an existing run to be archived.
     text: >
-        az acr task update-run -r MyRegistry --run-id runId --no-archive false
+        az acr task update-run -r myregistry --run-id runId --no-archive false
 """
 
 helps['acr taskrun'] = """
@@ -1242,7 +1230,7 @@ short-summary: Delete a taskrun from an Azure Container Registry.
 examples:
   - name: Delete a taskrun from an Azure Container Registry.
     text: >
-        az acr taskrun delete -r MyRegistry -n MyTaskRun -g MyResourceGroup
+        az acr taskrun delete -r myregistry -n MyTaskRun -g MyResourceGroup
 """
 
 helps['acr taskrun list'] = """
@@ -1251,7 +1239,7 @@ short-summary: List the taskruns for an Azure Container Registry.
 examples:
   - name: List taskruns and show the results in a table.
     text: >
-        az acr taskrun list -r MyRegistry -g MyResourceGroup -o table
+        az acr taskrun list -r myregistry -g MyResourceGroup -o table
 """
 
 helps['acr taskrun show'] = """
@@ -1260,7 +1248,7 @@ short-summary: Get the properties of a named taskrun for an Azure Container Regi
 examples:
   - name: Get the properties of a taskrun, displaying the results in a table.
     text: >
-        az acr taskrun show -r MyRegistry -n MyTaskRun -o table
+        az acr taskrun show -r myregistry -n MyTaskRun -o table
 """
 
 helps['acr taskrun logs'] = """
@@ -1269,7 +1257,7 @@ short-summary: Show run logs for a particular taskrun.
 examples:
   - name: Show run logs for a particular taskrun.
     text: >
-        az acr taskrun logs -r MyRegistry -n MyTaskRun
+        az acr taskrun logs -r myregistry -n MyTaskRun
 """
 
 helps['acr token'] = """
@@ -1283,17 +1271,17 @@ short-summary: Create a token associated with a scope map for an Azure Container
 examples:
   - name: Create a token with repository permissions defined in the scope map 'MyScopeMap'.
     text: >
-        az acr token create -n MyToken -r MyRegistry --scope-map MyScopeMap
+        az acr token create -n MyToken -r myregistry --scope-map MyScopeMap
   - name: Create a token which has read permissions on hello-world repository.
     text: >
-        az acr token create -n myToken -r MyRegistry --repository hello-world content/read metadata/read
+        az acr token create -n myToken -r myregistry --repository hello-world content/read metadata/read
   - name: Create a token without credentials and with all gateway permissions.
     text: |
-        az acr token create -n myToken -r MyRegistry --repository hello-world content/read
+        az acr token create -n myToken -r myregistry --repository hello-world content/read
           --gateway registry config/read config/write message/read message/write --no-passwords
   - name: Create a token in disabled status.
     text: >
-        az acr token create -n MyToken -r MyRegistry --scope-map MyScopeMap --status disabled
+        az acr token create -n MyToken -r myregistry --scope-map MyScopeMap --status disabled
 """
 
 helps['acr token credential'] = """
@@ -1306,7 +1294,7 @@ type: command
 short-summary: Delete a token credential.
 examples:
   - name: Delete both passwords for the token 'MyToken'.
-    text: az acr token credential delete -n MyToken -r MyRegistry --password1 --password2
+    text: az acr token credential delete -n MyToken -r myregistry --password1 --password2
 """
 
 helps['acr token credential generate'] = """
@@ -1314,7 +1302,7 @@ type: command
 short-summary: Generate or replace one or both passwords of a token for an Azure Container Registry. For using token and password to access a container registry, see https://aka.ms/acr/repo-permissions.
 examples:
   - name: Generate password1 for the token 'MyToken', with an expiration of 30 days.
-    text: az acr token credential generate -n MyToken -r MyRegistry --password1 --days 30
+    text: az acr token credential generate -n MyToken -r myregistry --password1 --days 30
 """
 
 helps['acr token delete'] = """
@@ -1323,16 +1311,16 @@ short-summary: Delete a token for an Azure Container Registry.
 examples:
   - name: Delete the token 'MyToken'.
     text: >
-        az acr token delete -n MyToken -r MyRegistry
+        az acr token delete -n MyToken -r myregistry
 """
 
 helps['acr token list'] = """
 type: command
 short-summary: List all tokens for an Azure Container Registry.
 examples:
-  - name: List tokens under the registry 'MyRegistry'.
+  - name: List tokens under the registry 'myregistry'.
     text: >
-        az acr token list -r MyRegistry
+        az acr token list -r myregistry
 """
 
 helps['acr token show'] = """
@@ -1341,7 +1329,7 @@ short-summary: Show details and attributes of a token for an Azure Container Reg
 examples:
   - name: Get information for the token 'MyToken'.
     text: >
-        az acr token show -n MyToken -r MyRegistry
+        az acr token show -n MyToken -r myregistry
 """
 
 helps['acr token update'] = """
@@ -1350,7 +1338,66 @@ short-summary: Update a token (replace associated scope map) for an Azure Contai
 examples:
   - name: Update the token 'MyToken', making it associated with the scope map 'MyNewScopeMap'.
     text: >
-        az acr token update -n MyToken -r MyRegistry --scope-map MyNewScopeMap
+        az acr token update -n MyToken -r myregistry --scope-map MyNewScopeMap
+"""
+
+helps['acr artifact-streaming'] = """
+type: group
+short-summary: Manage artifact streaming for any repositories or supported images in an ACR.
+"""
+
+helps['acr artifact-streaming operation'] = """
+type: group
+short-summary: Manage the streaming artifact creation operations for ACR.
+"""
+
+helps['acr artifact-streaming operation cancel'] = """
+type: command
+short-summary: Cancel the given streaming artifact operation for ACR.
+examples:
+  - name: Cancel the streaming artifact creation associated with the id 'OperationId' under repository 'MyRepo' in ACR 'myregistry'.
+    text: >
+        az acr artifact-streaming operation cancel -n myregistry --repository MyRepo --id OperationId
+"""
+
+helps['acr artifact-streaming operation show'] = """
+type: command
+short-summary: Check the operation status for artifact streaming in an ACR.
+examples:
+  - name: Get the streaming artifact creation status for id 'OperationId' under repository 'MyRepo' in ACR 'myregistry'.
+    text: >
+        az acr artifact-streaming operation show -n myregistry --repository MyRepo --id OperationId
+"""
+
+helps['acr artifact-streaming create'] = """
+type: command
+short-summary: Create a referrers streaming artifact for a specific image in an ACR.
+examples:
+  - name: Create the streaming artifact of 'MyImage' in the registry 'myregistry'.
+    text: >
+        az acr artifact-streaming create -n myregistry -t MyImage
+"""
+
+helps['acr artifact-streaming update'] = """
+type: command
+short-summary: Enable or disable auto-creation of streaming artifacts for newly pushed images under a given registry.
+long-summary: Enable or disable auto-creation of streaming artifacts for newly pushed images under a given registry. Note that whenever the flag is enabled, new images pushed into the selected registry will have auto-creation enabled and will be associated with the original image as a referrers artifact.
+examples:
+  - name: Enable artifact streaming for 'MyRepository' associated with the registry 'myregistry'.
+    text: >
+        az acr artifact-streaming update -n myregistry --repository MyRepository --enable-streaming True
+  - name: Disable artifact streaming for 'MyRepository' associated with the registry 'myregistry'.
+    text: >
+        az acr artifact-streaming update -n myregistry --repository MyRepository --enable-streaming False
+"""
+
+helps['acr artifact-streaming show'] = """
+type: command
+short-summary: Show if artifact streaming is enabled in a repository for an Azure Container Registry.
+examples:
+  - name: Get the repository 'MyRepo' streaming status.
+    text: >
+        az acr artifact-streaming show -n myregistry --repository MyRepo
 """
 
 helps['acr agentpool'] = """
@@ -1362,15 +1409,15 @@ helps['acr agentpool create'] = """
 type: command
 short-summary: Create an agent pool for an Azure Container Registry.
 examples:
-  - name: Create the agent pool 'MyAgentName' associated with the registry 'MyRegistry'.
+  - name: Create the agent pool 'MyAgentName' associated with the registry 'myregistry'.
     text: >
-        az acr agentpool create -n MyAgentName -r MyRegistry
+        az acr agentpool create -n MyAgentName -r myregistry
   - name: Create the agent pool 'MyAgentName' with 2 agent count.
     text: >
-        az acr agentpool create -n MyAgentName -r MyRegistry --count 2
-  - name: Create the agent pool 'MyAgentName' associated with the registry 'MyRegistry' in VNET subnet.
+        az acr agentpool create -n MyAgentName -r myregistry --count 2
+  - name: Create the agent pool 'MyAgentName' associated with the registry 'myregistry' in VNET subnet.
     text: >
-        az acr agentpool create -n MyAgentName -r MyRegistry --subnet-id /subscriptions/<SubscriptionId>/resourceGroups/<ResourceGroupName>/providers/Microsoft.ClassicNetwork/virtualNetworks/<myNetwork>/subnets/<subNet>
+        az acr agentpool create -n MyAgentName -r myregistry --subnet-id /subscriptions/<SubscriptionId>/resourceGroups/<ResourceGroupName>/providers/Microsoft.ClassicNetwork/virtualNetworks/<myNetwork>/subnets/<subNet>
 """
 
 helps['acr agentpool update'] = """
@@ -1379,7 +1426,7 @@ short-summary: Update an agent pool for an Azure Container Registry.
 examples:
   - name: Update the agent pool 'MyAgentName' count to 5
     text: >
-        az acr agentpool update -n MyAgentName -r MyRegistry --count 5
+        az acr agentpool update -n MyAgentName -r myregistry --count 5
 """
 
 helps['acr agentpool delete'] = """
@@ -1388,7 +1435,7 @@ short-summary: Delete an agent pool.
 examples:
   - name: Delete the agent pool 'MyAgentName'.
     text: >
-        az acr agentpool delete -n MyAgentName -r MyRegistry
+        az acr agentpool delete -n MyAgentName -r myregistry
 """
 
 helps['acr agentpool list'] = """
@@ -1397,7 +1444,7 @@ short-summary: List the agent pools for an Azure Container Registry.
 examples:
   - name: List agent pools and show the result in a table.
     text: >
-        az acr agentpool list -r MyRegistry -o table
+        az acr agentpool list -r myregistry -o table
 """
 
 helps['acr agentpool show'] = """
@@ -1406,7 +1453,7 @@ short-summary: Get the properties of a specified agent pool for an Azure Contain
 examples:
   - name: Get the properties of an agent pool, displaying the results in a table.
     text: >
-        az acr agentpool show -n MyAgentName -r MyRegistry -o table
+        az acr agentpool show -n MyAgentName -r myregistry -o table
 """
 
 
@@ -1416,10 +1463,10 @@ short-summary: Update an Azure Container Registry.
 examples:
   - name: Update tags for an Azure Container Registry.
     text: >
-        az acr update -n MyRegistry --tags key1=value1 key2=value2
+        az acr update -n myregistry --tags key1=value1 key2=value2
   - name: Enable the administrator user account for an Azure Container Registry.
     text: >
-        az acr update -n MyRegistry --admin-enabled true
+        az acr update -n myregistry --admin-enabled true
 """
 
 helps['acr webhook'] = """
@@ -1433,13 +1480,13 @@ short-summary: Create a webhook for an Azure Container Registry.
 examples:
   - name: Create a webhook for an Azure Container Registry that will deliver docker push and delete events to a service URI.
     text: >
-        az acr webhook create -n MyWebhook -r MyRegistry --uri http://myservice.com --actions push delete
+        az acr webhook create -n mywebhook -r myregistry --uri http://myservice.com --actions push delete
   - name: Create a webhook for an Azure Container Registry that will deliver docker push events to a service URI with a basic authentication header.
     text: >
-        az acr webhook create -n MyWebhook -r MyRegistry --uri http://myservice.com --actions push --headers "Authorization=Basic 000000"
+        az acr webhook create -n mywebhook -r myregistry --uri http://myservice.com --actions push --headers "Authorization=Basic 000000"
   - name: Create a webhook for an Azure Container Registry that will deliver helm chart push and delete events to a service URI.
     text: >
-        az acr webhook create -n MyWebhook -r MyRegistry --uri http://myservice.com --actions chart_push chart_delete
+        az acr webhook create -n mywebhook -r myregistry --uri http://myservice.com --actions chart_push chart_delete
 """
 
 helps['acr webhook delete'] = """
@@ -1448,7 +1495,7 @@ short-summary: Delete a webhook from an Azure Container Registry.
 examples:
   - name: Delete a webhook from an Azure Container Registry.
     text: >
-        az acr webhook delete -n MyWebhook -r MyRegistry
+        az acr webhook delete -n mywebhook -r myregistry
 """
 
 helps['acr webhook get-config'] = """
@@ -1457,7 +1504,7 @@ short-summary: Get the service URI and custom headers for the webhook.
 examples:
   - name: Get the configuration information for a webhook.
     text: >
-        az acr webhook get-config -n MyWebhook -r MyRegistry
+        az acr webhook get-config -n mywebhook -r myregistry
 """
 
 helps['acr webhook list'] = """
@@ -1466,7 +1513,7 @@ short-summary: List all of the webhooks for an Azure Container Registry.
 examples:
   - name: List webhooks and show the results in a table.
     text: >
-        az acr webhook list -r MyRegistry -o table
+        az acr webhook list -r myregistry -o table
 """
 
 helps['acr webhook list-events'] = """
@@ -1475,7 +1522,7 @@ short-summary: List recent events for a webhook.
 examples:
   - name: List recent events for a webhook.
     text: >
-        az acr webhook list-events -n MyWebhook -r MyRegistry
+        az acr webhook list-events -n mywebhook -r myregistry
 """
 
 helps['acr webhook ping'] = """
@@ -1484,7 +1531,7 @@ short-summary: Trigger a ping event for a webhook.
 examples:
   - name: Trigger a ping event for a webhook.
     text: >
-        az acr webhook ping -n MyWebhook -r MyRegistry
+        az acr webhook ping -n mywebhook -r myregistry
 """
 
 helps['acr webhook show'] = """
@@ -1493,7 +1540,7 @@ short-summary: Get the details of a webhook.
 examples:
   - name: Get the details of a webhook.
     text: >
-        az acr webhook show -n MyWebhook -r MyRegistry
+        az acr webhook show -n mywebhook -r myregistry
 """
 
 helps['acr webhook update'] = """
@@ -1502,13 +1549,13 @@ short-summary: Update a webhook.
 examples:
   - name: Update headers for a webhook.
     text: >
-        az acr webhook update -n MyWebhook -r MyRegistry --headers "Authorization=Basic 000000"
+        az acr webhook update -n mywebhook -r myregistry --headers "Authorization=Basic 000000"
   - name: Update the service URI and actions for a webhook.
     text: >
-        az acr webhook update -n MyWebhook -r MyRegistry --uri http://myservice.com --actions push delete
+        az acr webhook update -n mywebhook -r myregistry --uri http://myservice.com --actions push delete
   - name: Disable a webhook.
     text: >
-        az acr webhook update -n MyWebhook -r MyRegistry --status disabled
+        az acr webhook update -n mywebhook -r myregistry --status disabled
 """
 
 # region connected-registry

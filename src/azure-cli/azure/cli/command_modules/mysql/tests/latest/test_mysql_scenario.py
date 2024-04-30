@@ -6,14 +6,14 @@ import os
 import time
 import uuid
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 from dateutil import parser
 from dateutil.tz import tzutc
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
-from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer
+from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer, StorageAccountPreparer
 from azure.core.exceptions import HttpResponseError
 from ..._client_factory import cf_mysql_flexible_private_dns_zone_suffix_operations
 from ..._network import prepare_private_dns_zone
@@ -30,14 +30,19 @@ from azure.cli.testsdk import (
     StringContainCheck,
     live_only)
 
+from azure.mgmt.sql.models import AdvancedThreatProtectionState
+
+
 # Constants
 SERVER_NAME_PREFIX = 'azuredbclitest-'
 SERVER_NAME_MAX_LENGTH = 20
 DEFAULT_LOCATION = "eastus2euap"
 DEFAULT_PAIRED_LOCATION = "centraluseuap"
 DEFAULT_GENERAL_PURPOSE_SKU = "Standard_D2s_v3"
-DEFAULT_MEMORY_OPTIMIZED_SKU = "Standard_E2s_v3"
+DEFAULT_MEMORY_OPTIMIZED_SKU = "Standard_E4ads_v5"
 RESOURCE_RANDOM_NAME = "clirecording"
+STORAGE_ACCOUNT_PREFIX = "storageaccount"
+STORAGE_ACCOUNT_NAME_MAX_LENGTH = 20
 
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
@@ -83,7 +88,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self._test_flexible_server_paid_iops_mgmt('mysql', resource_group)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @ResourceGroupPreparer(location='northeurope')
     def test_mysql_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('mysql', resource_group)
     
@@ -132,8 +137,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         storage_size = 32
         version = '5.7'
-        location = DEFAULT_LOCATION
-        sku_name = DEFAULT_GENERAL_PURPOSE_SKU
+        location = 'northeurope'
+        sku_name = 'Standard_D2ds_v4'
         memory_optimized_sku = DEFAULT_MEMORY_OPTIMIZED_SKU
         tier = 'GeneralPurpose'
         backup_retention = 7
@@ -220,23 +225,36 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         location = 'westus2'
         ss_storage_size = 51200
         ss_version = '5.7'
-        self.cmd('{} server create -g {} -n {} -l {} --storage-size {} --version {}'.format(database_engine, resource_group, ss_server_name, location, ss_storage_size, ss_version))
+        source_sku_name = 'GP_Gen5_4'
+        source_public_network_access = 'Disabled'
+        source_backup_retention_days = 10 
+        source_geo_redundant_backup = 'Enabled'
+        source_admin_login = 'mysqluser'
+        source_auto_grow = 'Enabled'
+
+        self.cmd('{} server create -g {} -n {} -l {} --storage-size {} --version {} --sku-name {} \
+                  --public-network-access {} --backup-retention {} --geo-redundant-backup {} --auto-grow {} -u {}'
+                 .format(database_engine, resource_group, ss_server_name, location,
+                         ss_storage_size, ss_version, source_sku_name, source_public_network_access,
+                         source_backup_retention_days, source_geo_redundant_backup, source_auto_grow, source_admin_login))
 
         # flexible server details
-        storage_size = 128
+        storage_size_gb = 50
         version = '5.7'
-        sku_name = 'Standard_B1ms'
-        tier = 'Burstable'
+        sku_name = 'Standard_D4ds_v4'
+        tier = 'GeneralPurpose'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         data_source_type = 'mysql_single'
         data_source = ss_server_name
-        mode = 'offline'
+        mode = 'Offline'
+        target_public_network_access = 'Disabled'
+        target_backup_retention_days = 10 
+        target_geo_redundant_backup = 'Enabled'
+        target_admin_login = 'mysqluser'
+        target_auto_grow = 'Enabled'
 
-        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
-                  --storage-size {} -u {} --version {} --tags keys=3 \
-                  --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                              resource_group, server_name, sku_name, tier, storage_size,
-                                                                                                              'dbadmin', version, location, data_source_type, data_source, mode))
+        self.cmd('{} flexible-server import create -g {} -n {} --data-source-type {} --data-source {} --mode {}'
+                 .format(database_engine, resource_group, server_name, data_source_type, data_source, mode))
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], server_name)
@@ -245,57 +263,52 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['sku']['name'], sku_name)
         self.assertEqual(basic_info['sku']['tier'], tier)
         self.assertEqual(basic_info['version'], version)
-        self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
+        self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size_gb)
+        self.assertEqual(basic_info['network']['publicNetworkAccess'], target_public_network_access)
+        self.assertEqual(basic_info['storage']['autoGrow'], target_auto_grow)
+        self.assertEqual(basic_info['backup']['backupRetentionDays'], target_backup_retention_days)
+        self.assertEqual(basic_info['backup']['geoRedundantBackup'], target_geo_redundant_backup)
+        self.assertEqual(basic_info['administratorLogin'], target_admin_login)
 
         # deletion of flexible server created
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         # size for flex server is less than single server
-        invalid_storage_szie = 64
-        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
-                  --storage-size {} -u {} --version {} --tags keys=3 \
-                  --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                              resource_group, server_name, sku_name, tier, invalid_storage_szie,
-                                                                                                              'dbadmin', version, location, data_source_type, data_source, mode),
-                                                                                                              expect_failure=True)
+        invalid_storage_size_gb = 20
+        self.cmd('{} flexible-server import create -g {} -n {} --storage-size {} \
+                 --data-source-type {} --data-source {} --mode {}'.format(database_engine, resource_group, server_name, invalid_storage_size_gb,
+                                                                          data_source_type, data_source, mode),
+                                                                          expect_failure=True)
 
         # version for flex server given is different from single server version
         invalid_version = '8.0.21'
-        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
-            --storage-size {} -u {} --version {} --tags keys=3 \
-            --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                        resource_group, server_name, sku_name, tier, storage_size,
-                                                                                                        'dbadmin', invalid_version, location, data_source_type, data_source, mode),
-                                                                                                        expect_failure=True)
+        self.cmd('{} flexible-server import create -g {} -n {} --version {} \
+                 --data-source-type {} --data-source {} --mode {}'.format(database_engine, resource_group, server_name,
+                                                                          invalid_version, data_source_type, data_source, mode),
+                                                                          expect_failure=True)
 
         # resource group passed does not exist
         invalid_resource_group = self.create_random_name('rg', 10)
-        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
-            --storage-size {} -u {} --version {} --tags keys=3 \
-            --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                        invalid_resource_group, server_name, sku_name, tier, storage_size,
-                                                                                                        'dbadmin', version, location, data_source_type, data_source, mode),
-                                                                                                        expect_failure=True)
+        self.cmd('{} flexible-server import create -g {} -n {} --data-source-type {} \
+                  --data-source {} --mode {}'.format(database_engine, invalid_resource_group, server_name, data_source_type,
+                                                     data_source, mode),
+                                                     expect_failure=True)
 
         # single server name passed does not exist in the resource group passed
         invalid_data_source_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
-            --storage-size {} -u {} --version {} --tags keys=3 \
-            --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                        resource_group, server_name, sku_name, tier, storage_size,
-                                                                                                        'dbadmin', version, location, data_source_type, invalid_data_source_name, mode),
-                                                                                                        expect_failure=True)
+        self.cmd('{} flexible-server import create -g {} -n {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
+                                                                                                                        resource_group, server_name,
+                                                                                                                        data_source_type, invalid_data_source_name, mode),
+                                                                                                                        expect_failure=True)
 
         # single server resource id passed is invalid or does not exist
         invalid_data_source_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforMySQL/servers/{}'.format(
             self.get_subscription_id(), invalid_resource_group, invalid_data_source_name
         )
-        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
-            --storage-size {} -u {} --version {} --tags keys=3 \
-            --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                        resource_group, server_name, sku_name, tier, storage_size,
-                                                                                                        'dbadmin', version, location, data_source_type, invalid_data_source_resource_id, mode),
-                                                                                                        expect_failure=True)
+        self.cmd('{} flexible-server import create -g {} -n {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
+                                                                                                                        resource_group, server_name, data_source_type,
+                                                                                                                        invalid_data_source_resource_id, mode),
+                                                                                                                        expect_failure=True)
 
         # deletion of single server created
         self.cmd('{} server delete -g {} -n {} --yes'.format(database_engine, resource_group, ss_server_name), checks=NoneCheck())
@@ -647,14 +660,14 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  database_engine, resource_group, target_server_config), checks=NoneCheck())
 
     def _test_flexible_server_georestore_update_mgmt(self, database_engine, resource_group):
-        location = DEFAULT_LOCATION
-        target_location = DEFAULT_PAIRED_LOCATION
+        location = 'eastus'
+        target_location = 'westus'
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
         self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none --tier {} --sku-name {}'
-                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', DEFAULT_GENERAL_PURPOSE_SKU))
+                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', 'Standard_D2ds_v4'))
 
         self.cmd('{} flexible-server show -g {} -n {}'
                  .format(database_engine, resource_group, source_server),
@@ -917,16 +930,13 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 
     def _test_flexible_server_gtid_reset(self, database_engine, resource_group):
-        location = DEFAULT_LOCATION
+        location = 'northeurope'
+        general_purpose_sku = "Standard_D2ds_v4"
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
         self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none --tier {} --sku-name {}'
-                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', DEFAULT_GENERAL_PURPOSE_SKU))
-        
-        self.cmd('{} flexible-server show -g {} -n {}'
-                 .format(database_engine, resource_group, source_server),
-                 checks=[JMESPathCheck('backup.geoRedundantBackup', 'Disabled')])
+                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', general_purpose_sku))
         
         # update server paramters to enable gtid
         source = 'user-override'
@@ -947,18 +957,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server parameter set --name {} -v {} --source {} -s {} -g {}'
                  .format(database_engine, parameter_name, 'ON', source, source_server, resource_group),
                  checks=[JMESPathCheck('value', 'ON'), JMESPathCheck('source', source), JMESPathCheck('name', parameter_name)])
-
-        # set gtid string to source server
-        self.cmd('{} flexible-server gtid reset --resource-group {} --server-name {} --gtid-set {} --yes'
-                 .format(database_engine, resource_group, source_server, str(uuid.uuid4()).upper() + ":1"), expect_failure=False)
-
-        # udpate server geo-redundant-backup to enable
-        self.cmd('{} flexible-server update -g {} -n {} --geo-redundant-backup Enabled'
-                 .format(database_engine, resource_group, source_server),
-                 checks=[JMESPathCheck('backup.geoRedundantBackup', 'Enabled')])
         
         self.cmd('{} flexible-server gtid reset --resource-group {} --server-name {} --gtid-set {} --yes'
-                 .format(database_engine, resource_group, source_server, str(uuid.uuid4()).upper() + ":1"), expect_failure=True)
+                 .format(database_engine, resource_group, source_server, str(uuid.uuid4()).upper() + ":1"), expect_failure=False)
         
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, source_server))
 
@@ -1042,6 +1043,20 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server parameter set --name {} -v {} --source {} -s {} -g {}'.format(database_engine, parameter_name, value, source, server, resource_group),
                  checks=[JMESPathCheck('value', value),
                          JMESPathCheck('source', source)])
+        
+        args = "auto_increment_offset=2 explicit_defaults_for_timestamp=ON ft_query_expansion_limit=18"
+        self.cmd('{} flexible-server parameter set-batch -s {} -g {} --args {}'.format(database_engine, server, resource_group, args),
+                 checks=[JMESPathCheck('status', 'Succeeded')])
+        
+        self.cmd('{} flexible-server parameter show --name auto_increment_offset -g {} -s {}'.format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('currentValue', 2)])
+        
+        self.cmd('{} flexible-server parameter show --name explicit_defaults_for_timestamp -g {} -s {}'.format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('currentValue', 'ON')])
+        
+        self.cmd('{} flexible-server parameter show --name ft_query_expansion_limit -g {} -s {}'.format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('currentValue', 18)])
+
 
     def _test_database_mgmt(self, database_engine, resource_group, server):
 
@@ -1438,7 +1453,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         self._test_mysql_flexible_server_public_access_custom('mysql', resource_group)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @ResourceGroupPreparer(location='northeurope')
     def test_mysql_flexible_server_public_access_restore(self, resource_group):
         self._test_mysql_flexible_server_public_access_restore('mysql', resource_group)
 
@@ -1967,8 +1982,8 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @ServerPreparer(engine_type='mysql', location=DEFAULT_LOCATION)
+    @ResourceGroupPreparer(location="northeurope")
+    @ServerPreparer(engine_type='mysql', location="northeurope")
     def test_mysql_flexible_server_backups_mgmt(self, resource_group, server):
         self._test_backups_mgmt('mysql', resource_group, server)
 
@@ -2155,3 +2170,132 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
         # delete everything
         for server_name in [replica[0], replica[1], server]:
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+
+class FlexibleServerAdvancedThreatProtectionScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='eastus2')
+    @ServerPreparer(engine_type='mysql', location='eastus2')
+    def test_mysql_advanced_threat_protection_mgmt(self, resource_group, server):
+        self._test_advanced_threat_protection_mgmt('mysql', resource_group, server)
+
+    def _test_advanced_threat_protection_mgmt(self, database_engine, resource_group, server):
+        state_enabled = AdvancedThreatProtectionState.ENABLED.value
+        state_disabled = AdvancedThreatProtectionState.DISABLED.value
+
+        # get advanced threat protection setting
+        response = self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} -n {}'
+                            .format(database_engine, resource_group, server),
+                            checks=[JMESPathCheck('resourceGroup', resource_group)])
+
+        # flip the setting, if current setting is disabled, then enable it and vice versa
+        new_defender_state = state_enabled if response.get_output_in_json()['state'] == state_disabled else state_disabled
+
+        # update advanced threat protection setting
+        self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(database_engine, resource_group, server, new_defender_state),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', new_defender_state)])
+
+        # get advanced threat protection settings after the update
+        response = self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} -n {}'
+                            .format(database_engine, resource_group, server),
+                            checks=[
+                                JMESPathCheck('resourceGroup', resource_group),
+                                JMESPathCheck('state', new_defender_state)])
+        
+        # flip the setting, if current setting is disabled, then enable it and vice versa
+        new_defender_state = state_enabled if response.get_output_in_json()['state'] == state_disabled else state_disabled
+
+        # update advanced threat protection setting one more time to again get back to the original state
+        self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(database_engine, resource_group, server, new_defender_state),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', new_defender_state)])
+
+        # get advanced threat protection settings after the update
+        response = self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} -n {}'
+                            .format(database_engine, resource_group, server),
+                            checks=[
+                                JMESPathCheck('resourceGroup', resource_group),
+                                JMESPathCheck('state', new_defender_state)])
+
+class MySQLExportTest(ScenarioTest):
+    profile = None
+
+    def get_current_profile(self):
+        if not self.profile:
+            self.profile = self.cmd('cloud show --query profile -otsv').output
+        return self.profile
+
+    def get_account_key(self, group, name):
+        if self.get_current_profile() == '2017-03-09-profile':
+            template = 'storage account keys list -n {} -g {} --query "key1" -otsv'
+        else:
+            template = 'storage account keys list -n {} -g {} --query "[0].value" -otsv'
+
+        return self.cmd(template.format(name, group)).output
+
+    def get_account_info(self, group, name):
+        """Returns the storage account name and key in a tuple"""
+        return name, self.get_account_key(group, name)
+    
+    def storage_cmd(self, cmd, account_info, *args):
+        cmd = cmd.format(*args)
+        cmd = '{} --account-name {} --account-key {}'.format(cmd, *account_info)
+        return self.cmd(cmd)
+    
+    def create_container(self, account_info, prefix='cont', length=24):
+        container_name = self.create_random_name(prefix=prefix, length=length)
+        self.storage_cmd('storage container create -n {}', account_info, container_name)
+        return container_name
+
+    @live_only()
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location="eastus")
+    @ServerPreparer(engine_type='mysql', location="eastus")
+    @StorageAccountPreparer(location="eastus")
+
+    def test_mysql_export(self, resource_group, server, storage_account):
+        self._test_flexible_server_export_create_mgmt('mysql', resource_group, server, storage_account)
+
+    def _test_flexible_server_export_create_mgmt(self, database_engine, resource_group, server, storage_account):     
+        backup_name = "testexport"
+
+        target_account_info = self.get_account_info(resource_group, storage_account)
+
+        # Create the blob container
+        container = self.create_container(target_account_info)
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        self.kwargs.update({
+            'expiry': expiry,
+            'account': storage_account,
+            'container': container
+        })
+
+        connection_str = self.cmd('storage account show-connection-string -n {account}  --query connectionString '
+                                  '-otsv').output.strip()
+        self.kwargs['con_str'] = connection_str
+        # test sas-token for a container
+        sas_uri = self.cmd('storage container generate-sas -n {container} --https-only --permissions racwdxyltfmei '
+                       '--connection-string {con_str} --expiry {expiry} -otsv').output.strip()
+
+        sas_uri = "https://" + storage_account + ".blob.core.windows.net/" + container + "?" + sas_uri
+
+        update_response=self.cmd('{} flexible-server export create -n {} -g {} -b {} -u {}'.format(database_engine, server, resource_group, backup_name, sas_uri)).get_output_in_json()
+
+        #Test to check if export is succeeded
+        self.assertEqual(update_response['status'], 'Succeeded')
+
+        #Delete storage account
+        self.cmd('storage account delete --name {} --resource-group {} --yes --output none'.format(storage_account, resource_group))
+
+        # deletion of single server created
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server), checks=NoneCheck())

@@ -163,15 +163,20 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
     def _save_recording_file(self, *args):  # pylint: disable=unused-argument
         if self.in_recording and self.cassette.dirty:
             self.cassette._save()  # pylint: disable=protected-access
-            if self._outcome.errors or self._outcome.skipped:   # pylint: disable=protected-access
+
+            # Since Python 3.11, unittest.case._Outcome no longer has 'errors' attribute.
+            # The below statements only work in Python <= 3.10.
+            # https://github.com/Azure/azure-cli/issues/27641
+            if hasattr(self._outcome, 'errors') and (self._outcome.errors or self._outcome.skipped):   # pylint: disable=protected-access
                 # remove temp file
                 # to keep the temp_recording_file for debug, a switch logic can add here
                 os.remove(self.temp_recording_file)
-            else:
-                # replace recording_file by temp_recording_file
-                if os.path.exists(self.recording_file):
-                    os.remove(self.recording_file)
-                os.rename(self.temp_recording_file, self.recording_file)
+                return
+
+            # replace recording_file by temp_recording_file
+            if os.path.exists(self.recording_file):
+                os.remove(self.recording_file)
+            os.rename(self.temp_recording_file, self.recording_file)
 
     def _process_request_recording(self, request):
         if self.disable_recording:

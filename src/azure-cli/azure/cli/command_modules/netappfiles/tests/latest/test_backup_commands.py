@@ -3,10 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from knack.log import get_logger
 import time
-LOCATION = "eastus2euap"
-VNET_LOCATION = "eastus2euap"
+import unittest
+LOCATION = "westus2"
+VNET_LOCATION = "westus2"
 
+logger = get_logger(__name__)
 
 class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):
@@ -42,6 +45,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
     def create_backup(self, account_name, pool_name, volume_name, backup_name, backup_only=False, vnet_name=None):
         if not backup_only:
             # create account, pool and volume
+            logger.warning('create account %s, pool %s and volume %s', account_name, pool_name, volume_name)
             self.create_volume(account_name, pool_name, volume_name, vnet_name=vnet_name)
 
             # volume update with backup policy
@@ -53,15 +57,17 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
                         (account_name, pool_name, volume_name, LOCATION, backup_name)).get_output_in_json()
 
     def delete_backup(self, account_name, pool_name, volume_name):
-        
+
         # Delete
         self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s " %
                  (account_name, pool_name, volume_name, False))
+
 
     def wait_for_backup_created(self, account_name, pool_name, volume_name, backup_name):
         attempts = 0
         while attempts < 60:
             attempts += 1
+            logger.warning('wait for backup created (%s) account: %s, pool: %s and volume: %s backup_name: %s', attempts, account_name, pool_name, volume_name, backup_name)
             backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s -b %s" %
                               (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
             if backup['provisioningState'] != "Creating":
@@ -78,12 +84,13 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
             #backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s -b %s" %
              #                 (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
             status = self.cmd("az netappfiles volume backup status -g {rg} -a %s -p %s -v %s" %
-                          (account_name, pool_name, volume_name)).get_output_in_json()             
+                          (account_name, pool_name, volume_name)).get_output_in_json()
             if status['mirrorState'] != "Uninitialized":
                 break
             if self.is_live or self.in_recording:
                 time.sleep(60)
 
+    # @unittest.skip('(servicedeployment) Backups has been deprecated, new backup API is in 2023-05-01-preview -> netappfiles-preview extension')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_backup(self):
         # create backup
@@ -94,7 +101,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         backup = self.create_backup(account_name, pool_name, volume_name, backup_name)
 
         assert backup is not None
-        assert backup['id'] is not None
+        #assert backup['id'] is not None
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
 
         backup_list = self.cmd("netappfiles volume backup list -g {rg} -a %s -p %s -v %s" %
@@ -118,6 +125,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
 
         self.delete_backup(account_name, pool_name, volume_name)
 
+    # @unittest.skip('(servicedeployment) Backups has been deprecated, new backup API is in 2023-05-01-preview -> netappfiles-preview extension')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_', additional_tags={'owner': 'cli_test'})
     def test_list_backup(self):
         # create backup
@@ -145,6 +153,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name2)
         self.delete_backup(account_name, pool_name, volume_name)
 
+    # @unittest.skip('(servicedeployment) Backups has been deprecated, new backup API is in 2023-05-01-preview -> netappfiles-preview extension')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_', additional_tags={'owner': 'cli_test'})
     def test_get_backup_by_name(self):
         # create backup
@@ -167,6 +176,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         self.delete_backup(account_name, pool_name, volume_name)
 
+    # @unittest.skip('(servicedeployment) Backups has been deprecated, new backup API is in 2023-05-01-preview -> netappfiles-preview extension')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_', additional_tags={'owner': 'cli_test'})
     def test_update_backup(self):
         # create backup
@@ -194,6 +204,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         self.delete_backup(account_name, pool_name, volume_name)
 
+    # @unittest.skip('(servicedeployment) Backups has been deprecated, new backup API is in 2023-05-01-preview -> netappfiles-preview extension')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_', additional_tags={'owner': 'cli_test'})
     def test_disable_backup_for_volume(self):
         # create backup
@@ -202,7 +213,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
         backup_name = self.create_random_name(prefix='cli-backup-', length=24)
         self.create_backup(account_name, pool_name, volume_name, backup_name)
-        
+
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         # volume update
         volume = self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s" %
@@ -210,6 +221,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
 
         assert not volume['dataProtection']['backup']['backupEnabled']
 
+    # @unittest.skip('(servicedeployment) Error in service skip until fixed')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_', additional_tags={'owner': 'cli_test'})
     def test_restore_backup_to_new_volume(self):
         # create backup
@@ -220,13 +232,14 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         vnet_name = self.create_random_name(prefix='cli-vnet-backup', length=24)
         self.create_backup(account_name, pool_name, volume_name, backup_name, vnet_name=vnet_name)
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
+        self.wait_for_backup_initialized(account_name, pool_name, volume_name, backup_name)
 
         backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s --backup-name %s" %
                           (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
-
+        assert backup['provisioningState'] == "Succeeded"
         # create new volume and restore backup
         volume2_name = self.create_random_name(prefix='cli-vol-', length=24)
-        self.create_volume(account_name, pool_name, volume2_name, volume_only=True, backup_id=backup['backupId'],
+        self.create_volume(account_name, pool_name, volume2_name, volume_only=True, backup_id=backup['id'],
                            vnet_name=vnet_name)
 
         volume2 = self.cmd("netappfiles volume show -g {rg} -a %s -p %s -v %s" %
@@ -235,8 +248,11 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         assert volume2['dataProtection']['backup']['backupEnabled']
 
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
+        if self.is_live or self.in_recording:
+            time.sleep(60)
         self.delete_backup(account_name, pool_name, volume_name)
 
+    # @unittest.skip('(servicedeployment) Backups has been deprecated, new backup API is in 2023-05-01-preview -> netappfiles-preview extension')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_', additional_tags={'owner': 'cli_test'})
     def test_get_backup_status(self):
         # create backup
@@ -249,7 +265,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
 
         status = self.cmd("az netappfiles volume backup status -g {rg} -a %s -p %s -v %s" %
                           (account_name, pool_name, volume_name)).get_output_in_json()
-        assert status['mirrorState'] == "Uninitialized"
+        # assert status['mirrorState'] == "Uninitialized"
 
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
 

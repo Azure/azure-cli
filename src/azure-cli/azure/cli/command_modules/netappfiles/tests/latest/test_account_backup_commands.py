@@ -5,8 +5,9 @@
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
-LOCATION = "eastus2"
-VNET_LOCATION = "eastus2"
+import unittest
+LOCATION = "westus2"
+VNET_LOCATION = "westus2"
 
 # No tidy up of tests required. The resource group is automatically removed
 
@@ -58,7 +59,7 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
                         (account_name, pool_name, volume_name, LOCATION, backup_name)).get_output_in_json()
 
     def delete_backup(self, account_name, pool_name, volume_name):
-        
+
         # Delete
         self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s " %
                  (account_name, pool_name, volume_name, False))
@@ -77,6 +78,7 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
             if self.is_live or self.in_recording:
                 time.sleep(60)
 
+    # @unittest.skip('Backups has been deprecated, new backup API is in 2023-05-01-preview -> netappfiles-preview extension')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_', additional_tags={'owner': 'cli_test'})
     def test_list_account_backups(self):
         # create backup
@@ -94,6 +96,7 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         self.delete_backup(account_name, pool_name, volume_name)
 
+    # @unittest.skip('Backups has been deprecated, new backup API is in 2023-05-01-preview -> netappfiles-preview extension')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_', additional_tags={'owner': 'cli_test'})
     def test_get_account_backup(self):
         # create backup
@@ -112,6 +115,7 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         self.delete_backup(account_name, pool_name, volume_name)
 
+    # @unittest.skip('Backups has been deprecated, new backup API is in 2023-05-01-preview -> netappfiles-preview extension')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_', additional_tags={'owner': 'cli_test'})
     def test_delete_account_backup(self):
         # create backup

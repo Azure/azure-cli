@@ -5,12 +5,12 @@
 import time
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
-from knack.util import CLIError
+from azure.core.exceptions import HttpResponseError
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
-LOCATION = "eastus2"
-VNET_LOCATION = "eastus2"
+LOCATION = "eastus"
+VNET_LOCATION = "eastus"
 
 # No tidy up of tests required. The resource group is automatically removed
 
@@ -190,6 +190,9 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
 
         snapshot_file_path = "'/snap_file_path_1.txt' '/snap_file_path_2.txt'"
 
-        with self.assertRaisesRegex(CLIError, "The specified filePath /snap_file_path_1.txt does not exist"):
+        #with self.assertRaisesRegex(HttpResponseError, "The specified filePath /snap_file_path_1.txt does not exist"):
+        with self.assertRaises(HttpResponseError) as cm:
             self.cmd("az netappfiles snapshot restore-files -g {rg} -a %s -p %s -v %s -s %s --file-paths %s" %
                      (account_name, pool_name, volume_name, snapshot_name, snapshot_file_path))
+        self.assertIn('FilePath', str(
+            cm.exception))

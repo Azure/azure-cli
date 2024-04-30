@@ -1,0 +1,1264 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --hyper-v --sku
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/webapp_hyperv_acr_use_identity000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001","name":"webapp_hyperv_acr_use_identity000001","type":"Microsoft.Resources/resourceGroups","location":"westeurope","tags":{"product":"azurecli","cause":"automation","test":"test_webapp_hyperv_acr_use_identity","date":"2024-02-15T22:58:17Z","module":"appservice"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '421'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 15 Feb 2024 22:58:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 8C3D2D7642BC4ABD8FEE4951065103D5 Ref B: SN4AA2022304053 Ref C: 2024-02-15T22:58:19Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westeurope", "sku": {"name": "P1V3", "tier": "PREMIUMV3",
+      "capacity": 1}, "properties": {"perSiteScaling": false, "isXenon": false, "hyperV":
+      true, "zoneRedundant": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '186'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --hyper-v --sku
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003","name":"plan-hyperv000003","type":"Microsoft.Web/serverfarms","kind":"windows","location":"westeurope","properties":{"serverFarmId":56272,"name":"plan-hyperv000003","sku":{"name":"P1v3","tier":"PremiumV3","size":"P1v3","family":"Pv3","capacity":1},"workerSize":"SmallV3","workerSizeId":6,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV3","currentWorkerSizeId":6,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon","subscription":"dbf67cc6-6c57-44b8-97fc-4356f0d555b3","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"windows","resourceGroup":"webapp_hyperv_acr_use_identity000001","reserved":false,"isXenon":true,"hyperV":true,"mdmId":"waws-prod-am2-501_56272","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2024-02-15T22:58:25.0833333"},"sku":{"name":"P1v3","tier":"PremiumV3","size":"P1v3","family":"Pv3","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1700'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:28 GMT
+      etag:
+      - '"1DA60627BF78C55"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: 25F969C401A147FD911013958AF0AB5D Ref B: SN4AA2022304025 Ref C: 2024-02-15T22:58:19Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003","name":"plan-hyperv000003","type":"Microsoft.Web/serverfarms","kind":"windows","location":"West
+        Europe","properties":{"serverFarmId":56272,"name":"plan-hyperv000003","workerSize":"SmallV3","workerSizeId":6,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV3","currentWorkerSizeId":6,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon","subscription":"dbf67cc6-6c57-44b8-97fc-4356f0d555b3","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"windows","resourceGroup":"webapp_hyperv_acr_use_identity000001","reserved":false,"isXenon":true,"hyperV":true,"mdmId":"waws-prod-am2-501_56272","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2024-02-15T22:58:25.0833333"},"sku":{"name":"P1v3","tier":"PremiumV3","size":"P1v3","family":"Pv3","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1613'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: E18D953D659744229A6C9E722C2AB00A Ref B: SN4AA2022303023 Ref C: 2024-02-15T22:58:28Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "webapp-hyperv000002", "type": "Site"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '47'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/checknameavailability?api-version=2023-01-01
+  response:
+    body:
+      string: '{"nameAvailable":true,"reason":"","message":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '47'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 8908E2B5A096454882E9006CC4432978 Ref B: DM2AA1091214009 Ref C: 2024-02-15T22:58:29Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "West Europe", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003",
+      "reserved": false, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
+      "v4.6", "windowsFxVersion": "DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest",
+      "acrUseManagedIdentityCreds": true, "appSettings": [{"name": "DOCKER_REGISTRY_SERVER_USERNAME"},
+      {"name": "DOCKER_REGISTRY_SERVER_PASSWORD"}, {"name": "DOCKER_REGISTRY_SERVER_URL",
+      "value": "https://docker|mcr.microsoft.com"}], "alwaysOn": true, "localMySqlEnabled":
+      false, "http20Enabled": true}, "scmSiteAlsoStopped": false, "httpsOnly": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '760'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002","name":"webapp-hyperv000002","type":"Microsoft.Web/sites","kind":"app,container,windows","location":"West
+        Europe","properties":{"name":"webapp-hyperv000002","state":"Running","hostNames":["webapp-hyperv000002.azurewebsites.net"],"webSpace":"webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon","selfLink":"https://waws-prod-am2-501.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon/sites/webapp-hyperv000002","repositorySiteName":"webapp-hyperv000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"afdEnabled":false,"enabledHostNames":["webapp-hyperv000002.azurewebsites.net","webapp-hyperv000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-hyperv000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-hyperv000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003","reserved":false,"isXenon":true,"hyperV":true,"lastModifiedTimeUtc":"2024-02-15T22:58:31.98","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+        all","description":"Allow all access"}],"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":null,"elasticWebAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null},"daprConfig":null,"deploymentId":"webapp-hyperv000002","slotName":null,"trafficManagerHostNames":null,"sku":"PremiumV3","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2","kind":"app,container,windows","managedEnvironmentId":null,"workloadProfileName":null,"resourceConfig":null,"inboundIpAddress":"20.50.2.87","possibleInboundIpAddresses":"20.50.2.87","ftpUsername":"webapp-hyperv000002\\$webapp-hyperv000002","ftpsHostName":"ftps://waws-prod-am2-501.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.50.2.87","possibleOutboundIpAddresses":"20.82.19.12,20.82.19.81,20.82.20.86,20.82.20.178,20.82.21.234,20.82.21.254,20.82.19.173,20.82.22.29,20.82.22.53,20.82.22.100,20.82.22.119,20.82.22.141,20.82.22.183,20.82.22.243,20.82.23.121,20.82.23.195,20.82.21.132,20.82.23.231,20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.82.19.123,20.101.216.181,20.101.216.212,20.101.216.230,20.101.217.81,20.101.217.96,20.50.2.87","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-501","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"webapp_hyperv_acr_use_identity000001","defaultHostName":"webapp-hyperv000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs,AppServiceFileAuditLogs,AppServiceAntivirusScanAuditLogs","inFlightFeatures":null,"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '7459'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:50 GMT
+      etag:
+      - '"1DA60627FDDFB4B"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-msedge-ref:
+      - 'Ref A: DC97C07257224F15A80C6EBE68C5E204 Ref B: SN4AA2022303023 Ref C: 2024-02-15T22:58:29Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"format": "WebDeploy"}'
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/publishxml?api-version=2023-01-01
+  response:
+    body:
+      string: <publishData><publishProfile profileName="webapp-hyperv000002 - Web
+        Deploy" publishMethod="MSDeploy" publishUrl="webapp-hyperv000002.scm.azurewebsites.net:443"
+        msdeploySite="webapp-hyperv000002" userName="$webapp-hyperv000002" userPWD="fH3u9X9hlqN4iXpvWRXxdKl4uljDhfbubmtf17YDXnzZB6tY6MkrFLfln8f1"
+        destinationAppUrl="http://webapp-hyperv000002.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="webapp-hyperv000002
+        - FTP" publishMethod="FTP" publishUrl="ftps://waws-prod-am2-501.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="webapp-hyperv000002\$webapp-hyperv000002"
+        userPWD="fH3u9X9hlqN4iXpvWRXxdKl4uljDhfbubmtf17YDXnzZB6tY6MkrFLfln8f1" destinationAppUrl="http://webapp-hyperv000002.azurewebsites.net"
+        SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
+        controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
+        /></publishProfile><publishProfile profileName="webapp-hyperv000002 - Zip
+        Deploy" publishMethod="ZipDeploy" publishUrl="webapp-hyperv000002.scm.azurewebsites.net:443"
+        userName="$webapp-hyperv000002" userPWD="fH3u9X9hlqN4iXpvWRXxdKl4uljDhfbubmtf17YDXnzZB6tY6MkrFLfln8f1"
+        destinationAppUrl="http://webapp-hyperv000002.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile></publishData>
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1603'
+      content-type:
+      - application/xml
+      date:
+      - Thu, 15 Feb 2024 22:58:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 18EA47C76FC64BAFAF7AFFA2FD7594E5 Ref B: SN4AA2022303053 Ref C: 2024-02-15T22:58:50Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/appsettings/list?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
+        Europe","properties":{"DOCKER_REGISTRY_SERVER_USERNAME":"","DOCKER_REGISTRY_SERVER_PASSWORD":"","DOCKER_REGISTRY_SERVER_URL":"https://docker|mcr.microsoft.com"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '416'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 69ACBE936FE64371A8AA592EC0324E4E Ref B: DM2AA1091212039 Ref C: 2024-02-15T22:58:51Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002","name":"webapp-hyperv000002","type":"Microsoft.Web/sites","kind":"app,container,windows","location":"West
+        Europe","properties":{"name":"webapp-hyperv000002","state":"Running","hostNames":["webapp-hyperv000002.azurewebsites.net"],"webSpace":"webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon","selfLink":"https://waws-prod-am2-501.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon/sites/webapp-hyperv000002","repositorySiteName":"webapp-hyperv000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"afdEnabled":false,"enabledHostNames":["webapp-hyperv000002.azurewebsites.net","webapp-hyperv000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-hyperv000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-hyperv000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003","reserved":false,"isXenon":true,"hyperV":true,"lastModifiedTimeUtc":"2024-02-15T22:58:49.99","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest","windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":true,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null},"daprConfig":null,"deploymentId":"webapp-hyperv000002","slotName":null,"trafficManagerHostNames":null,"sku":"PremiumV3","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2","kind":"app,container,windows","managedEnvironmentId":null,"workloadProfileName":null,"resourceConfig":null,"inboundIpAddress":"20.50.2.87","possibleInboundIpAddresses":"20.50.2.87","ftpUsername":"webapp-hyperv000002\\$webapp-hyperv000002","ftpsHostName":"ftps://waws-prod-am2-501.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.50.2.87","possibleOutboundIpAddresses":"20.82.19.12,20.82.19.81,20.82.20.86,20.82.20.178,20.82.21.234,20.82.21.254,20.82.19.173,20.82.22.29,20.82.22.53,20.82.22.100,20.82.22.119,20.82.22.141,20.82.22.183,20.82.22.243,20.82.23.121,20.82.23.195,20.82.21.132,20.82.23.231,20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.82.19.123,20.101.216.181,20.101.216.212,20.101.216.230,20.101.217.81,20.101.217.96,20.50.2.87","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-501","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"webapp_hyperv_acr_use_identity000001","defaultHostName":"webapp-hyperv000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs,AppServiceFileAuditLogs,AppServiceAntivirusScanAuditLogs","inFlightFeatures":[],"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '7303'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:51 GMT
+      etag:
+      - '"1DA60628A0B2A60"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: C82DD30B02064C09A24A22E97A9ED9E9 Ref B: SN4AA2022303029 Ref C: 2024-02-15T22:58:51Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"DOCKER_REGISTRY_SERVER_USERNAME": "", "DOCKER_REGISTRY_SERVER_PASSWORD":
+      "", "DOCKER_REGISTRY_SERVER_URL": "https://docker|mcr.microsoft.com"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '160'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/appsettings?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
+        Europe","properties":{"DOCKER_REGISTRY_SERVER_USERNAME":"","DOCKER_REGISTRY_SERVER_PASSWORD":"","DOCKER_REGISTRY_SERVER_URL":"https://docker|mcr.microsoft.com"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '416'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:52 GMT
+      etag:
+      - '"1DA60628A0B2A60"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-msedge-ref:
+      - 'Ref A: 603FB0DCA2B14E00A10FF76A27F031BA Ref B: SN4AA2022304045 Ref C: 2024-02-15T22:58:52Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/appsettings/list?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
+        Europe","properties":{"DOCKER_REGISTRY_SERVER_USERNAME":"","DOCKER_REGISTRY_SERVER_PASSWORD":"","DOCKER_REGISTRY_SERVER_URL":"https://docker|mcr.microsoft.com"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '416'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: C3062E68BBC042649E537BFD655866B6 Ref B: SN4AA2022302009 Ref C: 2024-02-15T22:58:53Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002","name":"webapp-hyperv000002","type":"Microsoft.Web/sites","kind":"app,container,windows","location":"West
+        Europe","properties":{"name":"webapp-hyperv000002","state":"Running","hostNames":["webapp-hyperv000002.azurewebsites.net"],"webSpace":"webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon","selfLink":"https://waws-prod-am2-501.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon/sites/webapp-hyperv000002","repositorySiteName":"webapp-hyperv000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"afdEnabled":false,"enabledHostNames":["webapp-hyperv000002.azurewebsites.net","webapp-hyperv000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-hyperv000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-hyperv000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003","reserved":false,"isXenon":true,"hyperV":true,"lastModifiedTimeUtc":"2024-02-15T22:58:53.0566667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest","windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":true,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null},"daprConfig":null,"deploymentId":"webapp-hyperv000002","slotName":null,"trafficManagerHostNames":null,"sku":"PremiumV3","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2","kind":"app,container,windows","managedEnvironmentId":null,"workloadProfileName":null,"resourceConfig":null,"inboundIpAddress":"20.50.2.87","possibleInboundIpAddresses":"20.50.2.87","ftpUsername":"webapp-hyperv000002\\$webapp-hyperv000002","ftpsHostName":"ftps://waws-prod-am2-501.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.50.2.87","possibleOutboundIpAddresses":"20.82.19.12,20.82.19.81,20.82.20.86,20.82.20.178,20.82.21.234,20.82.21.254,20.82.19.173,20.82.22.29,20.82.22.53,20.82.22.100,20.82.22.119,20.82.22.141,20.82.22.183,20.82.22.243,20.82.23.121,20.82.23.195,20.82.21.132,20.82.23.231,20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.82.19.123,20.101.216.181,20.101.216.212,20.101.216.230,20.101.217.81,20.101.217.96,20.50.2.87","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-501","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"webapp_hyperv_acr_use_identity000001","defaultHostName":"webapp-hyperv000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs,AppServiceFileAuditLogs,AppServiceAntivirusScanAuditLogs","inFlightFeatures":[],"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '7308'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:53 GMT
+      etag:
+      - '"1DA60628BDF1A0B"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: A3AE870D8F4D49889743D17EA60651E7 Ref B: SN4AA2022302053 Ref C: 2024-02-15T22:58:53Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002","name":"webapp-hyperv000002","type":"Microsoft.Web/sites","kind":"app,container,windows","location":"West
+        Europe","properties":{"name":"webapp-hyperv000002","state":"Running","hostNames":["webapp-hyperv000002.azurewebsites.net"],"webSpace":"webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon","selfLink":"https://waws-prod-am2-501.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon/sites/webapp-hyperv000002","repositorySiteName":"webapp-hyperv000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"afdEnabled":false,"enabledHostNames":["webapp-hyperv000002.azurewebsites.net","webapp-hyperv000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-hyperv000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-hyperv000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003","reserved":false,"isXenon":true,"hyperV":true,"lastModifiedTimeUtc":"2024-02-15T22:58:53.0566667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest","windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":true,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null},"daprConfig":null,"deploymentId":"webapp-hyperv000002","slotName":null,"trafficManagerHostNames":null,"sku":"PremiumV3","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2","kind":"app,container,windows","managedEnvironmentId":null,"workloadProfileName":null,"resourceConfig":null,"inboundIpAddress":"20.50.2.87","possibleInboundIpAddresses":"20.50.2.87","ftpUsername":"webapp-hyperv000002\\$webapp-hyperv000002","ftpsHostName":"ftps://waws-prod-am2-501.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.50.2.87","possibleOutboundIpAddresses":"20.82.19.12,20.82.19.81,20.82.20.86,20.82.20.178,20.82.21.234,20.82.21.254,20.82.19.173,20.82.22.29,20.82.22.53,20.82.22.100,20.82.22.119,20.82.22.141,20.82.22.183,20.82.22.243,20.82.23.121,20.82.23.195,20.82.21.132,20.82.23.231,20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.82.19.123,20.101.216.181,20.101.216.212,20.101.216.230,20.101.217.81,20.101.217.96,20.50.2.87","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-501","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"webapp_hyperv_acr_use_identity000001","defaultHostName":"webapp-hyperv000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs,AppServiceFileAuditLogs,AppServiceAntivirusScanAuditLogs","inFlightFeatures":[],"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '7308'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:54 GMT
+      etag:
+      - '"1DA60628BDF1A0B"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: E7F483C88A53444D9F986A28BCFD9553 Ref B: DM2AA1091214021 Ref C: 2024-02-15T22:58:54Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003","name":"plan-hyperv000003","type":"Microsoft.Web/serverfarms","kind":"windows","location":"West
+        Europe","properties":{"serverFarmId":56272,"name":"plan-hyperv000003","workerSize":"SmallV3","workerSizeId":6,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV3","currentWorkerSizeId":6,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon","subscription":"dbf67cc6-6c57-44b8-97fc-4356f0d555b3","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":1,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"windows","resourceGroup":"webapp_hyperv_acr_use_identity000001","reserved":false,"isXenon":true,"hyperV":true,"mdmId":"waws-prod-am2-501_56272","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2024-02-15T22:58:25.0833333"},"sku":{"name":"P1v3","tier":"PremiumV3","size":"P1v3","family":"Pv3","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1613'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 0A82E1F517E548BEACA75ED82A2AEA7D Ref B: DM2AA1091214021 Ref C: 2024-02-15T22:58:54Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/slotConfigNames?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":null,"name":"webapp-hyperv000002","type":"Microsoft.Web/sites","location":"West
+        Europe","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '192'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 77832520E3FB47D0ABB083EBDDA3C0A5 Ref B: SN4AA2022304009 Ref C: 2024-02-15T22:58:55Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002","name":"webapp-hyperv000002","type":"Microsoft.Web/sites","kind":"app,container,windows","location":"West
+        Europe","properties":{"name":"webapp-hyperv000002","state":"Running","hostNames":["webapp-hyperv000002.azurewebsites.net"],"webSpace":"webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon","selfLink":"https://waws-prod-am2-501.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon/sites/webapp-hyperv000002","repositorySiteName":"webapp-hyperv000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"afdEnabled":false,"enabledHostNames":["webapp-hyperv000002.azurewebsites.net","webapp-hyperv000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-hyperv000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-hyperv000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003","reserved":false,"isXenon":true,"hyperV":true,"lastModifiedTimeUtc":"2024-02-15T22:58:53.0566667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest","windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":true,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null},"daprConfig":null,"deploymentId":"webapp-hyperv000002","slotName":null,"trafficManagerHostNames":null,"sku":"PremiumV3","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2","kind":"app,container,windows","managedEnvironmentId":null,"workloadProfileName":null,"resourceConfig":null,"inboundIpAddress":"20.50.2.87","possibleInboundIpAddresses":"20.50.2.87","ftpUsername":"webapp-hyperv000002\\$webapp-hyperv000002","ftpsHostName":"ftps://waws-prod-am2-501.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.50.2.87","possibleOutboundIpAddresses":"20.82.19.12,20.82.19.81,20.82.20.86,20.82.20.178,20.82.21.234,20.82.21.254,20.82.19.173,20.82.22.29,20.82.22.53,20.82.22.100,20.82.22.119,20.82.22.141,20.82.22.183,20.82.22.243,20.82.23.121,20.82.23.195,20.82.21.132,20.82.23.231,20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.82.19.123,20.101.216.181,20.101.216.212,20.101.216.230,20.101.217.81,20.101.217.96,20.50.2.87","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-501","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"webapp_hyperv_acr_use_identity000001","defaultHostName":"webapp-hyperv000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs,AppServiceFileAuditLogs,AppServiceAntivirusScanAuditLogs","inFlightFeatures":[],"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '7308'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:56 GMT
+      etag:
+      - '"1DA60628BDF1A0B"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: DB7D3A0D6E2A40048C7B0235AB367111 Ref B: SN4AA2022305035 Ref C: 2024-02-15T22:58:55Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/web?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/web","name":"webapp-hyperv000002","type":"Microsoft.Web/sites/config","location":"West
+        Europe","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","powerShellVersion":"","linuxFxVersion":"","windowsFxVersion":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest","windowsConfiguredStacks":[],"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":true,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-hyperv000002","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","vnetRouteAllEnabled":false,"vnetPrivatePortsCount":0,"publicNetworkAccess":null,"siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretSettingName":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"aadClaimsAuthorization":null,"googleClientId":null,"googleClientSecret":null,"googleClientSecretSettingName":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookAppSecretSettingName":null,"facebookOAuthScopes":null,"gitHubClientId":null,"gitHubClientSecret":null,"gitHubClientSecretSettingName":null,"gitHubOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"twitterConsumerSecretSettingName":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountClientSecretSettingName":null,"microsoftAccountOAuthScopes":null,"configVersion":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+        all","description":"Allow all access"}],"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":"1.2","ftpsState":"FtpsOnly","preWarmedInstanceCount":0,"functionAppScaleLimit":null,"elasticWebAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":false,"functionsRuntimeScaleMonitoringEnabled":false,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":{},"http20ProxyFlag":0,"sitePort":null,"antivirusScanEnabled":false,"storageType":"StorageVolume","sitePrivateLinkHostEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4114'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: CC0FC977CB7445E0AE3791D775FF973E Ref B: SN4AA2022302025 Ref C: 2024-02-15T22:58:56Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/appsettings/list?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
+        Europe","properties":{"DOCKER_REGISTRY_SERVER_USERNAME":"","DOCKER_REGISTRY_SERVER_PASSWORD":"","DOCKER_REGISTRY_SERVER_URL":"https://docker|mcr.microsoft.com"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '416'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: F1D7AE6ECFFE47E499235B01186B89CA Ref B: SN4AA2022303047 Ref C: 2024-02-15T22:58:56Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002","name":"webapp-hyperv000002","type":"Microsoft.Web/sites","kind":"app,container,windows","location":"West
+        Europe","properties":{"name":"webapp-hyperv000002","state":"Running","hostNames":["webapp-hyperv000002.azurewebsites.net"],"webSpace":"webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon","selfLink":"https://waws-prod-am2-501.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon/sites/webapp-hyperv000002","repositorySiteName":"webapp-hyperv000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"afdEnabled":false,"enabledHostNames":["webapp-hyperv000002.azurewebsites.net","webapp-hyperv000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-hyperv000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-hyperv000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003","reserved":false,"isXenon":true,"hyperV":true,"lastModifiedTimeUtc":"2024-02-15T22:58:53.0566667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest","windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":true,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null},"daprConfig":null,"deploymentId":"webapp-hyperv000002","slotName":null,"trafficManagerHostNames":null,"sku":"PremiumV3","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2","kind":"app,container,windows","managedEnvironmentId":null,"workloadProfileName":null,"resourceConfig":null,"inboundIpAddress":"20.50.2.87","possibleInboundIpAddresses":"20.50.2.87","ftpUsername":"webapp-hyperv000002\\$webapp-hyperv000002","ftpsHostName":"ftps://waws-prod-am2-501.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.50.2.87","possibleOutboundIpAddresses":"20.82.19.12,20.82.19.81,20.82.20.86,20.82.20.178,20.82.21.234,20.82.21.254,20.82.19.173,20.82.22.29,20.82.22.53,20.82.22.100,20.82.22.119,20.82.22.141,20.82.22.183,20.82.22.243,20.82.23.121,20.82.23.195,20.82.21.132,20.82.23.231,20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.82.19.123,20.101.216.181,20.101.216.212,20.101.216.230,20.101.217.81,20.101.217.96,20.50.2.87","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-501","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"webapp_hyperv_acr_use_identity000001","defaultHostName":"webapp-hyperv000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs,AppServiceFileAuditLogs,AppServiceAntivirusScanAuditLogs","inFlightFeatures":[],"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '7308'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:56 GMT
+      etag:
+      - '"1DA60628BDF1A0B"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: FB7DC0BE3C964D3C9EE5B56AF2A71EA0 Ref B: DM2AA1091211049 Ref C: 2024-02-15T22:58:57Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"numberOfWorkers": 1, "defaultDocuments": ["Default.htm",
+      "Default.html", "Default.asp", "index.htm", "index.html", "iisstart.htm", "default.aspx",
+      "index.php", "hostingstart.html"], "netFrameworkVersion": "v4.0", "phpVersion":
+      "", "pythonVersion": "", "nodeVersion": "", "powerShellVersion": "", "linuxFxVersion":
+      "", "windowsFxVersion": "DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest",
+      "requestTracingEnabled": false, "remoteDebuggingEnabled": false, "httpLoggingEnabled":
+      false, "acrUseManagedIdentityCreds": true, "logsDirectorySizeLimit": 35, "detailedErrorLoggingEnabled":
+      false, "publishingUsername": "$webapp-hyperv000002", "scmType": "None", "use32BitWorkerProcess":
+      true, "webSocketsEnabled": false, "alwaysOn": true, "appCommandLine": "", "managedPipelineMode":
+      "Integrated", "virtualApplications": [{"virtualPath": "/", "physicalPath": "site\\wwwroot",
+      "preloadEnabled": true}], "loadBalancing": "LeastRequests", "experiments": {"rampUpRules":
+      []}, "autoHealEnabled": false, "vnetName": "", "vnetRouteAllEnabled": false,
+      "vnetPrivatePortsCount": 0, "localMySqlEnabled": false, "scmIpSecurityRestrictionsUseMain":
+      false, "http20Enabled": true, "minTlsVersion": "1.2", "scmMinTlsVersion": "1.2",
+      "ftpsState": "FtpsOnly", "preWarmedInstanceCount": 0, "elasticWebAppScaleLimit":
+      0, "functionsRuntimeScaleMonitoringEnabled": false, "minimumElasticInstanceCount":
+      0, "azureStorageAccounts": {}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1441'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/web?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002","name":"webapp-hyperv000002","type":"Microsoft.Web/sites","location":"West
+        Europe","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","powerShellVersion":"","linuxFxVersion":"","windowsFxVersion":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest","windowsConfiguredStacks":[],"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2019","httpLoggingEnabled":false,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":true,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-hyperv000002","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","vnetRouteAllEnabled":false,"vnetPrivatePortsCount":0,"publicNetworkAccess":null,"siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretSettingName":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"aadClaimsAuthorization":null,"googleClientId":null,"googleClientSecret":null,"googleClientSecretSettingName":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookAppSecretSettingName":null,"facebookOAuthScopes":null,"gitHubClientId":null,"gitHubClientSecret":null,"gitHubClientSecretSettingName":null,"gitHubOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"twitterConsumerSecretSettingName":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountClientSecretSettingName":null,"microsoftAccountOAuthScopes":null,"configVersion":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+        all","description":"Allow all access"}],"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":"1.2","ftpsState":"FtpsOnly","preWarmedInstanceCount":0,"functionAppScaleLimit":null,"elasticWebAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":false,"functionsRuntimeScaleMonitoringEnabled":false,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":{},"http20ProxyFlag":0,"sitePort":null,"antivirusScanEnabled":false,"storageType":"StorageVolume","sitePrivateLinkHostEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4100'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:58:59 GMT
+      etag:
+      - '"1DA60628BDF1A0B"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-msedge-ref:
+      - 'Ref A: 0941A93877EA47409832F1F7C2E5B987 Ref B: DM2AA1091214009 Ref C: 2024-02-15T22:58:57Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/web?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/web","name":"webapp-hyperv000002","type":"Microsoft.Web/sites/config","location":"West
+        Europe","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","powerShellVersion":"","linuxFxVersion":"","windowsFxVersion":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest","windowsConfiguredStacks":[],"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2019","httpLoggingEnabled":false,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":true,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-hyperv000002","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","vnetRouteAllEnabled":false,"vnetPrivatePortsCount":0,"publicNetworkAccess":null,"siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretSettingName":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"aadClaimsAuthorization":null,"googleClientId":null,"googleClientSecret":null,"googleClientSecretSettingName":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookAppSecretSettingName":null,"facebookOAuthScopes":null,"gitHubClientId":null,"gitHubClientSecret":null,"gitHubClientSecretSettingName":null,"gitHubOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"twitterConsumerSecretSettingName":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountClientSecretSettingName":null,"microsoftAccountOAuthScopes":null,"configVersion":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+        all","description":"Allow all access"}],"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":"1.2","ftpsState":"FtpsOnly","preWarmedInstanceCount":0,"functionAppScaleLimit":null,"elasticWebAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":false,"functionsRuntimeScaleMonitoringEnabled":false,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":{},"http20ProxyFlag":0,"sitePort":null,"antivirusScanEnabled":false,"storageType":"StorageVolume","sitePrivateLinkHostEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4118'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:59:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 180EDE7B974440599ECE04B822272E57 Ref B: SN4AA2022303021 Ref C: 2024-02-15T22:59:00Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002","name":"webapp-hyperv000002","type":"Microsoft.Web/sites","kind":"app,container,windows","location":"West
+        Europe","properties":{"name":"webapp-hyperv000002","state":"Running","hostNames":["webapp-hyperv000002.azurewebsites.net"],"webSpace":"webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon","selfLink":"https://waws-prod-am2-501.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon/sites/webapp-hyperv000002","repositorySiteName":"webapp-hyperv000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"afdEnabled":false,"enabledHostNames":["webapp-hyperv000002.azurewebsites.net","webapp-hyperv000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-hyperv000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-hyperv000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003","reserved":false,"isXenon":true,"hyperV":true,"lastModifiedTimeUtc":"2024-02-15T22:58:59.4266667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest","windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":true,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null},"daprConfig":null,"deploymentId":"webapp-hyperv000002","slotName":null,"trafficManagerHostNames":null,"sku":"PremiumV3","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2","kind":"app,container,windows","managedEnvironmentId":null,"workloadProfileName":null,"resourceConfig":null,"inboundIpAddress":"20.50.2.87","possibleInboundIpAddresses":"20.50.2.87","ftpUsername":"webapp-hyperv000002\\$webapp-hyperv000002","ftpsHostName":"ftps://waws-prod-am2-501.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.50.2.87","possibleOutboundIpAddresses":"20.82.19.12,20.82.19.81,20.82.20.86,20.82.20.178,20.82.21.234,20.82.21.254,20.82.19.173,20.82.22.29,20.82.22.53,20.82.22.100,20.82.22.119,20.82.22.141,20.82.22.183,20.82.22.243,20.82.23.121,20.82.23.195,20.82.21.132,20.82.23.231,20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.82.19.123,20.101.216.181,20.101.216.212,20.101.216.230,20.101.217.81,20.101.217.96,20.50.2.87","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-501","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"webapp_hyperv_acr_use_identity000001","defaultHostName":"webapp-hyperv000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs,AppServiceFileAuditLogs,AppServiceAntivirusScanAuditLogs","inFlightFeatures":[],"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '7308'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:59:00 GMT
+      etag:
+      - '"1DA60628FAB162B"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 7842F0053639444A8B5CD02023761EAC Ref B: DM2AA1091213053 Ref C: 2024-02-15T22:59:00Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"kind": "app,container,windows", "location": "West Europe", "identity":
+      {"type": "SystemAssigned"}, "properties": {"enabled": true, "hostNameSslStates":
+      [{"name": "webapp-hyperv000002.azurewebsites.net", "sslState": "Disabled", "hostType":
+      "Standard"}, {"name": "webapp-hyperv000002.scm.azurewebsites.net", "sslState":
+      "Disabled", "hostType": "Repository"}], "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003",
+      "reserved": false, "isXenon": true, "hyperV": true, "vnetRouteAllEnabled": false,
+      "vnetImagePullEnabled": false, "vnetContentShareEnabled": false, "siteConfig":
+      {"numberOfWorkers": 1, "linuxFxVersion": "", "windowsFxVersion": "DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest",
+      "acrUseManagedIdentityCreds": true, "alwaysOn": true, "http20Enabled": true,
+      "functionAppScaleLimit": 0, "minimumElasticInstanceCount": 0}, "scmSiteAlsoStopped":
+      false, "clientAffinityEnabled": true, "clientCertEnabled": false, "clientCertMode":
+      "Required", "hostNamesDisabled": false, "customDomainVerificationId": "941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2",
+      "containerSize": 0, "dailyMemoryTimeQuota": 0, "httpsOnly": false, "redundancyMode":
+      "None", "storageAccountRequired": false, "keyVaultReferenceIdentity": "SystemAssigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1393'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan --deployment-container-image-name --assign-identity --acr-use-identity
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002","name":"webapp-hyperv000002","type":"Microsoft.Web/sites","kind":"app,container,windows","location":"West
+        Europe","properties":{"name":"webapp-hyperv000002","state":"Running","hostNames":["webapp-hyperv000002.azurewebsites.net"],"webSpace":"webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon","selfLink":"https://waws-prod-am2-501.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/webapp_hyperv_acr_use_identity000001-WestEuropewebspace-Xenon/sites/webapp-hyperv000002","repositorySiteName":"webapp-hyperv000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"afdEnabled":false,"enabledHostNames":["webapp-hyperv000002.azurewebsites.net","webapp-hyperv000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-hyperv000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-hyperv000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/serverfarms/plan-hyperv000003","reserved":false,"isXenon":true,"hyperV":true,"lastModifiedTimeUtc":"2024-02-15T22:59:04.38","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest","windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":true,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+        all","description":"Allow all access"}],"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":null,"elasticWebAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null},"daprConfig":null,"deploymentId":"webapp-hyperv000002","slotName":null,"trafficManagerHostNames":null,"sku":"PremiumV3","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2","kind":"app,container,windows","managedEnvironmentId":null,"workloadProfileName":null,"resourceConfig":null,"inboundIpAddress":"20.50.2.87","possibleInboundIpAddresses":"20.50.2.87","ftpUsername":"webapp-hyperv000002\\$webapp-hyperv000002","ftpsHostName":"ftps://waws-prod-am2-501.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.50.2.87","possibleOutboundIpAddresses":"20.82.19.12,20.82.19.81,20.82.20.86,20.82.20.178,20.82.21.234,20.82.21.254,20.82.19.173,20.82.22.29,20.82.22.53,20.82.22.100,20.82.22.119,20.82.22.141,20.82.22.183,20.82.22.243,20.82.23.121,20.82.23.195,20.82.21.132,20.82.23.231,20.82.23.233,20.101.216.117,20.101.216.128,20.82.23.124,20.101.216.169,20.101.216.171,20.82.19.123,20.101.216.181,20.101.216.212,20.101.216.230,20.101.217.81,20.101.217.96,20.50.2.87","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-501","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"webapp_hyperv_acr_use_identity000001","defaultHostName":"webapp-hyperv000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs,AppServiceFileAuditLogs,AppServiceAntivirusScanAuditLogs","inFlightFeatures":null,"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null},"identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"f098bf6e-74ff-4924-9b9b-fd94c2509c5b"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '7663'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:59:05 GMT
+      etag:
+      - '"1DA60628FAB162B"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-msedge-ref:
+      - 'Ref A: 428A698A67D14A5E85DEDDF5FA6E19B2 Ref B: SN4AA2022303045 Ref C: 2024-02-15T22:59:00Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-azure-mgmt-web/7.2.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/web?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/webapp_hyperv_acr_use_identity000001/providers/Microsoft.Web/sites/webapp-hyperv000002/config/web","name":"webapp-hyperv000002","type":"Microsoft.Web/sites/config","location":"West
+        Europe","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","powerShellVersion":"","linuxFxVersion":"","windowsFxVersion":"DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest","windowsConfiguredStacks":[],"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2019","httpLoggingEnabled":false,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":true,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-hyperv000002","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","vnetRouteAllEnabled":false,"vnetPrivatePortsCount":0,"publicNetworkAccess":null,"siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretSettingName":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"aadClaimsAuthorization":null,"googleClientId":null,"googleClientSecret":null,"googleClientSecretSettingName":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookAppSecretSettingName":null,"facebookOAuthScopes":null,"gitHubClientId":null,"gitHubClientSecret":null,"gitHubClientSecretSettingName":null,"gitHubOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"twitterConsumerSecretSettingName":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountClientSecretSettingName":null,"microsoftAccountOAuthScopes":null,"configVersion":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":51483,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+        all","description":"Allow all access"}],"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":"1.2","ftpsState":"FtpsOnly","preWarmedInstanceCount":0,"functionAppScaleLimit":null,"elasticWebAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":false,"functionsRuntimeScaleMonitoringEnabled":false,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":{},"http20ProxyFlag":0,"sitePort":null,"antivirusScanEnabled":false,"storageType":"StorageVolume","sitePrivateLinkHostEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4119'
+      content-type:
+      - application/json
+      date:
+      - Thu, 15 Feb 2024 22:59:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: A2524EB7411A4C7A9ADFF6146B8C9FC0 Ref B: DM2AA1091212047 Ref C: 2024-02-15T22:59:05Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

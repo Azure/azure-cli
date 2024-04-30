@@ -19,7 +19,7 @@ from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants,
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, RecordingProcessor
 from azure.cli.testsdk.scenario_tests.utilities import is_json_payload
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 from azure.cli.core.util import shell_safe_json_parse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -783,6 +783,8 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         export_separator_features_file_path = os.path.join(TEST_DIR, 'export_separator_features.json')
         import_separator_features_file_path = os.path.join(TEST_DIR, 'import_separator_features.json')
         import_features_alt_syntax_file_path = os.path.join(TEST_DIR, 'import_features_alt_syntax.json')
+        import_features_random_conditions_file_path = os.path.join(TEST_DIR, 'import_features_random_conditions.json')
+        import_features_invalid_requirement_type_file_path = os.path.join(TEST_DIR, 'import_features_invalid_requirement_type.json')
 
         self.kwargs.update({
             'label': 'KeyValuesWithFeatures',
@@ -885,7 +887,31 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
+
+        # Support including all properties in the feature flag conditions
+        self.kwargs.update({
+            'imported_file_path': import_features_random_conditions_file_path,
+            'label': 'RandomConditionsTest',
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+        with open(import_features_random_conditions_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
         os.remove(exported_file_path)
+
+        self.kwargs.update({
+            'imported_file_path': import_features_invalid_requirement_type_file_path
+        })
+
+        # Invalid requirement type should fail import
+        with self.assertRaisesRegex(CLIError, "Feature 'Timestamp' must have an any/all requirement type"):
+            self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -1060,6 +1086,10 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
             'export_dest': 'appservice',
             'appservice_account': webapp_name
         })
+
+         # Export snapshot kvs to app service as reference should fail
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'Cannot export snapshot key-values as references to App Service.'):
+            self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} -y --export-as-reference --snapshot dummy_snapshot')
 
         self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} --label {label} -y --export-as-reference')
         self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} -y --export-as-reference')
@@ -2004,19 +2034,23 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                          self.check('state', default_state),
                          self.check('conditions', default_conditions)])
 
-        # update an existing feature flag entry (we can only update description)
+        # update an existing feature flag entry
         updated_entry_description = "Beta Testing Feature Flag"
+        updated_requirement_type =  FeatureFlagConstants.REQUIREMENT_TYPE_ANY
+
         self.kwargs.update({
-            'description': updated_entry_description
+            'description': updated_entry_description,
+            'requirement_type': updated_requirement_type
         })
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --description "{description}" -y',
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --description "{description}" --requirement-type {requirement_type} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', entry_feature),
                          self.check('key', internal_feature_key),
                          self.check('description', updated_entry_description),
                          self.check('label', entry_label),
                          self.check('state', default_state),
-                         self.check('conditions', default_conditions)])
+                         self.check('conditions.client_filters', []),
+                         self.check('conditions.requirement_type', updated_requirement_type)])
 
         # add a new label - this should create a new KV in the config store
         updated_label = 'v2'
@@ -2487,8 +2521,8 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
                                          self.check('label', entry_label),
                                          self.check('state', default_state)]).get_output_in_json()
 
-        conditions = response_dict.get('conditions')
-        list_filters = conditions.get('client_filters')
+        conditions = response_dict.get(FeatureFlagConstants.CONDITIONS)
+        list_filters = conditions.get(FeatureFlagConstants.CLIENT_FILTERS)
         assert len(list_filters) == 3
 
         # Enable feature
@@ -2950,7 +2984,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
     def test_azconfig_snapshot_mgmt(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='SnapshotStore', length=24)
         snapshot_name = "TestSnapshot"
-        store_location = 'eastus2euap'
+        store_location = 'francecentral'
         sku = 'standard'
 
         self.kwargs.update({
@@ -2975,6 +3009,8 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         entry_key2 = "TestKey2"
         entry_value2 = "TestValue2"
         dev_label = "dev"
+        entry_key3 = "LastTestKey"
+        entry_value3 = "LastTestValue"
         
         # Create 2 keys with a common prefix and label "dev"
         self.kwargs.update({
@@ -2996,6 +3032,16 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --label {label} -y',
                  checks=[self.check('key', entry_key2),
                          self.check('value', entry_value2),
+                         self.check('label', dev_label)])
+
+        self.kwargs.update({
+            'key': entry_key3,
+            'value': entry_value3,
+        })
+
+        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --label {label} -y',
+                 checks=[self.check('key', entry_key3),
+                         self.check('value', entry_value3),
                          self.check('label', dev_label)])
 
         # Create a snapshot of all key-values that begin with the prefix 'Test'
@@ -3055,6 +3101,49 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(CliResourceNotFoundError, f'No snapshot with name \'{non_existent_snapshot_name}\' was found.'):
             self.cmd('appconfig kv list --connection-string {connection_string} --snapshot {snapshot_name}')
 
+        # Test snapshot import/export
+        config_store_2_name = self.create_random_name(prefix='SnapshotStore', length=24)
+
+        self.kwargs.update({
+            'config_store_name': config_store_2_name,
+            'snapshot_name': snapshot_name,
+        })
+
+        _create_config_store(self, self.kwargs)
+
+        credential_list_2 =  self.cmd('appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'dest_connection_string': credential_list_2[0]['connectionString']
+        })
+
+        # Export snapshot kvs to store
+        self.cmd('appconfig kv export -d appconfig --connection-string {connection_string} --dest-connection-string {dest_connection_string} --snapshot {snapshot_name} -y')
+
+        # Export with skip-features should fail
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "'--snapshot' cannot be specified with '--key',  '--label', '--skip-keyvault' or '--skip-features' arguments."):
+            self.cmd('appconfig kv export -d appconfig --connection-string {connection_string} --dest-connection-string {dest_connection_string} --snapshot {snapshot_name} --skip-features -y')
+
+        # Export with skip-keyvault should fail
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "'--snapshot' cannot be specified with '--key',  '--label', '--skip-keyvault' or '--skip-features' arguments."):
+            self.cmd('appconfig kv export -d appconfig --connection-string {connection_string} --dest-connection-string {dest_connection_string} --snapshot {snapshot_name} --skip-keyvault -y')
+
+        # List snapshots in store
+        dest_kvs = self.cmd('appconfig kv list --connection-string {dest_connection_string} --key * --label *').get_output_in_json()
+        self.assertEqual(len(dest_kvs), 2)
+
+        # Delete all kvs
+        self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key * --label * -y')
+
+        # Import snapshot kvs from source
+        self.cmd('appconfig kv import -s appconfig --connection-string {dest_connection_string} --src-connection-string {connection_string} --src-snapshot {snapshot_name} -y')
+
+        # Import with skip-features should fail
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "'--src-snapshot' cannot be specified with '--src-key', '--src-label', or '--skip-features' arguments."):
+            self.cmd('appconfig kv import -s appconfig --connection-string {dest_connection_string} --src-connection-string {connection_string} --src-snapshot {snapshot_name} --skip-features -y')
+
+        # List snapshots in store
+        current_kvs = self.cmd('appconfig kv list --connection-string {dest_connection_string} --key * --label *').get_output_in_json()
+        self.assertEqual(len(current_kvs), 2)
 
 def _create_config_store(test, kwargs):
     if 'retention_days' not in kwargs:

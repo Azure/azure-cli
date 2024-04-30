@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import collections.abc as collections
+from collections.abc import MutableMapping
 import pickle
 
 from azure.cli.core.decorators import retry
@@ -12,7 +12,7 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-class BinaryCache(collections.MutableMapping):
+class BinaryCache(MutableMapping):
     """
     Derived from azure.cli.core._session.Session.
     A simple dict-like class that is backed by a binary file.

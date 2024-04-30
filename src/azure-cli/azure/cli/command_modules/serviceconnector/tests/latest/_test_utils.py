@@ -62,7 +62,7 @@ class CredentialReplacer(RecordingProcessor):
 
 MASK_ID = '00000000-0000-0000-0000-000000000000'
 
-class UserMICredentialReplacer(RecordingProcessor):
+class ConfigCredentialReplacer(RecordingProcessor):
 
     def process_request(self, request):
         if is_text_payload(request) and request.body and isinstance(request.body, str):
