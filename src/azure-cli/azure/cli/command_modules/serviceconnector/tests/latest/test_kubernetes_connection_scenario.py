@@ -447,7 +447,7 @@ class KubernetesConnectionScenarioTest(ScenarioTest):
         self.cmd('aks connection delete --id {} --yes'.format(connection_id))
 
 
-    # @live_only()
+    @live_only()
     # "run_cli_cmd" could only work at live mode
     def test_kubernetes_cognitive_workload_identity_e2e(self):
         self.kwargs.update({
@@ -461,13 +461,13 @@ class KubernetesConnectionScenarioTest(ScenarioTest):
         # prepare params
         name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.KubernetesCluster).format(**self.kwargs)
-        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.CognitiveServices).format(**self.kwargs)
 
         # get user identity id
         user_identity_name = 'aitest'
         user_identity_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{}'.format(
             self.kwargs['subscription'],
-            'clitest',
+            'servicelinker-test-linux-group',
             user_identity_name
         )
 
