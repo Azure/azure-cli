@@ -8,41 +8,18 @@ from azure.cli.core import AzCli
 
 class DummyCli(AzCli):
     """A dummy CLI instance can be used to facilitate automation"""
-    def __init__(self, commands_loader_cls=None, random_config_dir=False, **kwargs):
+    def __init__(self, commands_loader_cls=None, **kwargs):
         import os
-        from unittest.mock import patch
-
         from azure.cli.core import MainCommandsLoader
         from azure.cli.core.commands import AzCliCommandInvoker
         from azure.cli.core.azlogging import AzCliLogging
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.parser import AzCliCommandParser
-        from azure.cli.core.util import random_string
-        from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX, ENV_VAR_TEST_LIVE
+        from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
         from azure.cli.core._help import AzCliHelp
         from azure.cli.core._output import AzOutputProducer
 
         from knack.completion import ARGCOMPLETE_ENV_NAME
-        from knack.util import ensure_dir
-
-        if random_config_dir:
-            config_dir = os.path.join(GLOBAL_CONFIG_DIR, 'dummy_cli_config_dir', random_string())
-            # Knack prioritizes the AZURE_CONFIG_DIR env over the config_dir param, and other functions may call
-            # get_config_dir directly. We need to set the env to make sure the config_dir is used.
-            self.env_patch = patch.dict(os.environ, {'AZURE_CONFIG_DIR': config_dir})
-            self.env_patch.start()
-
-            # In recording mode, copy login credentials from global config dir to the dummy config dir
-            if os.getenv(ENV_VAR_TEST_LIVE, '').lower() == 'true':
-                if os.path.exists(GLOBAL_CONFIG_DIR):
-                    ensure_dir(config_dir)
-                    import shutil
-                    for file in ['azureProfile.json', 'msal_token_cache.bin', 'clouds.config', 'msal_token_cache.json',
-                                 'service_principal_entries.json']:
-                        try:
-                            shutil.copy(os.path.join(GLOBAL_CONFIG_DIR, file), config_dir)
-                        except FileNotFoundError:
-                            pass
 
         super(DummyCli, self).__init__(
             cli_name='az',
