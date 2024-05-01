@@ -319,7 +319,7 @@ parameters:
     short-summary: Path to JSON file containing data collection settings for Monitoring addon.
   - name: --azure-monitor-private-link-scope-resource-id
     type: string
-    short-summary: Resource ID of Azure Monitor Private Link scope for  Monitoring Addon.
+    short-summary: Resource ID of Azure Monitor Private Link scope for Monitoring Addon.
   - name: --uptime-sla
     type: bool
     short-summary: --uptime-sla is deprecated. Please use '--tier standard' instead.
