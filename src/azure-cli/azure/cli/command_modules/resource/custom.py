@@ -73,112 +73,55 @@ def _build_resource_id(**kwargs):
         return None
 
 
-def _get_parameter_type(template_obj, schema_node, visited=None):
-    if schema_node is None:
-        return None
+def _rfc6901_decode(encoded):
+    return unquote(encoded).replace("~1", "/").replace("~0", "~")
 
-    if 'type' in schema_node:
-        return schema_node['type']
 
-    if '$ref' not in schema_node:
-        return None
+def _get_json_pointer_segments(json_pointer):
+    return [_rfc6901_decode(segment) for segment in json_pointer.split('/')]
 
-    if visited is None:
-        visited = set()
 
-    pointer = schema_node['$ref']
-    if pointer in visited:
-        logger.warning("Cyclic type reference detected at '%s'", pointer)
-        return None
-    visited.add(pointer)
+def _resolve_parameter_type(parameter, template):
+    current = parameter
+    visited = set()
+    while '$ref' in current:
+        referenced = current.get('$ref')
+        if referenced in visited:
+            raise CLIError("Cycle detected with processing {}.".format(referenced))
+        visited.add(referenced)
 
-    class _UninitalizedState:
-        def get(self, segment):
-            if segment == '#':
-                return _Initialized()
+        segments = _get_json_pointer_segments(referenced)
+        if len(segments) < 2 or segments[0] != "#" or not (segments[1] in ['definitions', 'parameters', 'outputs']):
+            raise CLIError("Invalid $ref {}.".format(referenced))
 
-            return _TerminalState()
+        resolved = _resolve_type_from_path(referenced, segments[2:], template.get(segments[1])).copy()
 
-        def resolve(self):
-            return None
+        # it's possible to override some of these properties: the highest-level non-null value wins
+        if current.get('nullable', None) is not None:
+            resolved['nullable'] = current.get('nullable')
+        if current.get('minLength', None) is not None:
+            resolved['minLength'] = current.get('minLength')
+        if current.get('maxLength', None) is not None:
+            resolved['maxLength'] = current.get('maxLength')
+        if current.get('allowedValues', None) is not None:
+            resolved['allowedValues'] = current.get('allowedValues')
 
-    class _TerminalState:
-        def get(self, _):
-            return self
+        current = resolved
 
-        def resolve(self):
-            return None
+    return current
 
-    class _Initialized:
-        def get(self, segment):
-            if segment in ['definitions', 'parameters', 'outputs'] and segment in template_obj:
-                return _InSchemaDictionary(template_obj[segment])
 
-            return _TerminalState()
+def _resolve_type_from_path(current_ref, segments, definitions):
+    current = definitions
+    for segment in segments:
+        if isinstance(current, dict) and segment in current:
+            current = current[segment]
+        elif isinstance(current, list) and segment.isdigit() and 0 <= int(segment) < len(current):
+            current = current[int(segment)]
+        else:
+            raise CLIError("Failed to resolve path {}.".format(current_ref))
 
-        def resolve(self):
-            return None
-
-    class _InSchemaDictionary:
-        def __init__(self, schema_dict):
-            self.schema_dict = schema_dict
-
-        def get(self, segment):
-            for key, value in self.schema_dict.items():
-                if key.lower() == segment:
-                    return _InSchemaNode(value)
-
-            return _TerminalState()
-
-        def resolve(self):
-            return None
-
-    class _InSchemaArray:
-        def __init__(self, schema_array):
-            self.schema_array = schema_array
-
-        def get(self, segment):
-            if segment.isdigit() and len(self.schema_array) > int(segment):
-                return _InSchemaNode(self.schema_array[int(segment)])
-
-            return _TerminalState()
-
-        def resolve(self):
-            return None
-
-    class _InSchemaNode:
-        def __init__(self, schema_node):
-            self.schema_node = schema_node
-
-        def get(self, segment):
-            property_value = None
-            for key, value in self.schema_node.items():
-                if key.lower() == segment:
-                    property_value = value
-                    break
-
-            if property_value is None:
-                return _TerminalState()
-
-            if segment == 'properties':
-                return _InSchemaDictionary(property_value)
-
-            if segment in ['items', 'additionalproperties']:
-                return _InSchemaNode(property_value)
-
-            if segment == 'prefixitems':
-                return _InSchemaArray(property_value)
-
-            return _TerminalState()
-
-        def resolve(self):
-            return self.schema_node
-
-    state = _UninitalizedState()
-    for segment in pointer.split('/'):
-        state = state.get(unquote(segment).replace('~1', '/').replace('~0', '~').lower())
-
-    return _get_parameter_type(template_obj, state.resolve(), visited)
+    return current
 
 
 def _try_parse_key_value_object(parameters, template_obj, value):
@@ -196,7 +139,9 @@ def _try_parse_key_value_object(parameters, template_obj, value):
         raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
                        .format(key, ', '.join(sorted(template_obj.get('parameters', {}).keys()))))
 
-    param_type = _get_parameter_type(template_obj, param)
+    param_type_data = _resolve_parameter_type(param, template_obj)
+    param_type = param_type_data.get('type')
+
     if param_type:
         param_type = param_type.lower()
     if param_type in ['object', 'array', 'secureobject']:
@@ -276,7 +221,11 @@ def _find_missing_parameters(parameters, template):
     missing = OrderedDict()
     for parameter_name in template_parameters:
         parameter = template_parameters[parameter_name]
+        param_type_data = _resolve_parameter_type(parameter, template)
+
         if 'defaultValue' in parameter:
+            continue
+        if param_type_data.get('nullable', False):
             continue
         if parameters is not None and parameters.get(parameter_name, None) is not None:
             continue
@@ -1156,6 +1105,18 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
                                               mode=None, rollback_on_error=None, no_prompt=False, template_spec=None, query_string=None):
     DeploymentProperties, TemplateLink, OnErrorDeployment = cmd.get_models('DeploymentProperties', 'TemplateLink', 'OnErrorDeployment')
 
+    if template_file:
+        pass
+    elif template_spec:
+        pass
+    elif template_uri:
+        pass
+    elif _is_bicepparam_file_provided(parameters):
+        pass
+    else:
+        raise InvalidArgumentValueError(
+            "Please enter one of the following: template file, template spec, template url, or Bicep parameters file.")
+
     template_link = None
     template_obj = None
     on_error_deployment = None
@@ -1367,7 +1328,7 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
         pass
     else:
         raise InvalidArgumentValueError(
-            "Please enter one of the following: template file, template spec, or template url")
+            "Please enter one of the following: template file, template spec, template url, or Bicep parameters file.")
 
     if t_spec:
         deployment_stack_model.template_link = DeploymentStacksTemplateLink(id=t_spec)
@@ -4509,26 +4470,35 @@ def build_bicepparam_file(cmd, file, stdout=None, outdir=None, outfile=None, no_
         print(output)
 
 
-def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indent_kind=None, indent_size=None, insert_final_newline=None):
+def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, newline_kind=None, indent_kind=None, indent_size=None, insert_final_newline=None):
     ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.12.1"
+    kebab_case_params_supported_version = "0.26.54"
+
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["format", file]
+        use_kebab_case_params = bicep_version_greater_than_or_equal_to(kebab_case_params_supported_version)
+        newline_kind = newline_kind or newline
+
+        # Auto is no longer supported by Bicep formatter v2. Use LF as default.
+        if use_kebab_case_params and newline_kind == "Auto":
+            newline_kind = "LF"
+
         if outdir:
             args += ["--outdir", outdir]
         if outfile:
             args += ["--outfile", outfile]
         if stdout:
             args += ["--stdout"]
-        if newline:
-            args += ["--newline", newline]
+        if newline_kind:
+            args += ["--newline-kind" if use_kebab_case_params else "newline", newline_kind]
         if indent_kind:
-            args += ["--indentKind", indent_kind]
+            args += ["--indent-kind" if use_kebab_case_params else "indentKind", indent_kind]
         if indent_size:
-            args += ["--indentSize", indent_size]
+            args += ["--indent-size" if use_kebab_case_params else "indentSize", indent_size]
         if insert_final_newline:
-            args += ["--insertFinalNewline"]
+            args += ["--insert-final-newline" if use_kebab_case_params else "--insertFinalNewline"]
 
         output = run_bicep_command(cmd.cli_ctx, args)
 
@@ -4538,16 +4508,21 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         logger.error("az bicep format could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
-def publish_bicep_file(cmd, file, target, documentationUri=None, with_source=None, force=None):
+def publish_bicep_file(cmd, file, target, documentationUri=None, documentation_uri=None, with_source=None, force=None):
     ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.4.1008"
+    kebab_case_param_supported_version = "0.26.54"
+
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["publish", file, "--target", target]
-        if documentationUri:
+        use_kebab_case_params = bicep_version_greater_than_or_equal_to(kebab_case_param_supported_version)
+        documentation_uri = documentation_uri or documentationUri
+
+        if documentation_uri:
             minimum_supported_version_for_documentationUri_parameter = "0.14.46"
             if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_documentationUri_parameter):
-                args += ["--documentationUri", documentationUri]
+                args += ["--documentation-uri" if use_kebab_case_params else "--documentationUri", documentation_uri]
             else:
                 logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_documentationUri_parameter)
         if with_source:
@@ -4562,6 +4537,7 @@ def publish_bicep_file(cmd, file, target, documentationUri=None, with_source=Non
                 args += ["--force"]
             else:
                 logger.error("az bicep publish with --force parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_publish_force)
+
         run_bicep_command(cmd.cli_ctx, args)
     else:
         logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)

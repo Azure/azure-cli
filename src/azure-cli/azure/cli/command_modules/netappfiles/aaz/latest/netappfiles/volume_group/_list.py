@@ -22,9 +22,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2023-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups", "2023-07-01"],
         ]
     }
 
@@ -122,7 +122,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2023-07-01",
                     required=True,
                 ),
             }
@@ -190,9 +190,6 @@ class List(AAZCommand):
             )
             group_meta_data.application_type = AAZStrType(
                 serialized_name="applicationType",
-            )
-            group_meta_data.deployment_spec_id = AAZStrType(
-                serialized_name="deploymentSpecId",
             )
             group_meta_data.global_placement_rules = AAZListType(
                 serialized_name="globalPlacementRules",

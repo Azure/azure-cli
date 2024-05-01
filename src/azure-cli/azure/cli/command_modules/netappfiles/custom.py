@@ -11,6 +11,7 @@ from knack.log import get_logger
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.aaz import has_value, AAZJsonSelector
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from .aaz.latest.netappfiles import UpdateNetworkSiblingSet as _UpdateNetworkSiblingSet
 from .aaz.latest.netappfiles.account import Create as _AccountCreate, Update as _AccountUpdate
 from .aaz.latest.netappfiles.account.ad import Add as _ActiveDirectoryAdd, List as _ActiveDirectoryList, Update as _ActiveDirectoryUpdate
 from .aaz.latest.netappfiles.volume import Create as _VolumeCreate, Update as _VolumeUpdate, BreakFileLocks as _BreakFileLocks
@@ -41,6 +42,18 @@ def _update_mapper(existing, new, keys):
         logger.debug("ANF LOG: update mapper => setting:%s old:%s new:%s", key, existing_value, new_value)
         setattr(new, key, new_value if new_value is not None else existing_value)
     logger.debug("mapping done new is now: %s", new)
+
+
+# region NetworkSiblingset
+class UpdateNetworkSiblingSet(_UpdateNetworkSiblingSet):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZArgEnum
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        # # The API does only support setting Basic and Standard
+        args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=False)
+        return args_schema
+# endregion
 
 
 # region account
@@ -206,7 +219,7 @@ class PoolUpdate(_PoolUpdate):
 class VolumeCreate(_VolumeCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZIntArgFormat, AAZBoolArg
+        from azure.cli.core.aaz import AAZStrArg, AAZIntArgFormat, AAZBoolArg, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet = AAZStrArg(
             options=["--vnet"],
@@ -298,9 +311,12 @@ class VolumeCreate(_VolumeCreate):
 
         args_schema.usage_threshold._default = 100
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
-            maximum=500,
+            maximum=2400,
             minimum=100
         )
+
+        # The API does only support setting Basic and Standard
+        args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=False)
 
         return args_schema
 
@@ -419,7 +435,7 @@ class VolumeUpdate(_VolumeUpdate):
             required=False,
         )
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
-            maximum=500,
+            maximum=2400,
             minimum=100,
         )
 
@@ -578,7 +594,7 @@ class ReplicationResume(_ReplicationResume):
 class VolumeGroupCreate(_VolumeGroupCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZIntArg, AAZDictArg, AAZBoolArg
+        from azure.cli.core.aaz import AAZStrArg, AAZIntArg, AAZDictArg, AAZBoolArg, AAZListArg, AAZStrArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         logger.debug("ANF log: ExportPolicyRemove _build_arguments_schema")
 
@@ -590,7 +606,18 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         args_schema.tags.Element = AAZStrArg(
             nullable=True,
         )
-
+        args_schema.zones = AAZListArg(
+            options=["--zones"],
+            arg_group="Body",
+            help="Availability Zone",
+        )
+        zones = cls._args_schema.zones
+        zones.Element = AAZStrArg(
+            fmt=AAZStrArgFormat(
+                max_length=255,
+                min_length=1,
+            ),
+        )
         args_schema.gp_rules = AAZDictArg(
             options=["--gp-rules"],
             arg_group="GroupMetaData",
@@ -886,6 +913,11 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         kv_private_endpoint_id = args.key_vault_private_endpoint_resource_id.to_serialized_data()
         ppg = args.proximity_placement_group.to_serialized_data()
 
+        if has_value(args.zones):
+            zones = args.zones.to_serialized_data()
+        else:
+            zones = None
+
         logger.debug("ANF log: VolumeGroupCreate.pre_operations: Pool: %s, Hosts: %s, memory: %s, additional snapshot capacity: {add_snapshot_capacity}", {pool_name}, {number_of_hosts}, {memory})
         if number_of_hosts < 1 or number_of_hosts > 3:
             raise ValidationError("Number of hosts must be between 1 and 3")
@@ -936,6 +968,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         subnet_id = f"/subscriptions/{subscription_id}/resourceGroups/{subnet_rg}/providers/Microsoft.Network/virtualNetworks/{vnet}/subnets/{subnet}"
 
         pool_id = f"/subscriptions/{subscription_id}/resourceGroups/{subnet_rg}/providers/Microsoft.NetApp/netAppAccounts/{account_name}/capacityPools/{pool_name}"
+        logger.debug("ANF LOG: VolumeGroupCreate.pre_operations()  => Received: %s volumes ", len(args.volumes))
         if not has_value(args.volumes) or len(args.volumes) == 0:
             # Create data volume(s)
             data_volumes = []
@@ -944,13 +977,13 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             for i in range(start_host_id, start_host_id + number_of_hosts):
                 data_volumes.append(create_data_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory,
                                                                   add_snapshot_capacity, str(i), data_size, data_throughput,
-                                                                  prefix, data_repl_skd, data_src_id, kv_private_endpoint_id))
+                                                                  prefix, data_repl_skd, data_src_id, kv_private_endpoint_id, zones))
 
             # Create log volume(s)
             log_volumes = []
             for i in range(start_host_id, start_host_id + number_of_hosts):
                 log_volumes.append(create_log_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, str(i), log_size,
-                                                                log_throughput, prefix, kv_private_endpoint_id))
+                                                                log_throughput, prefix, kv_private_endpoint_id, zones))
             total_data_volume_size = sum(int(vol["usage_threshold"]) for vol in data_volumes)
             total_log_volume_size = sum(int(vol["usage_threshold"]) for vol in log_volumes)
 
@@ -961,22 +994,23 @@ class VolumeGroupCreate(_VolumeGroupCreate):
 
             args.volumes.append(create_shared_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, shared_size,
                                                                 shared_throughput, number_of_hosts, prefix, shared_repl_skd, shared_src_id, kv_private_endpoint_id, smb_access_based_enumeration,
-                                                                smb_non_browsable))
+                                                                smb_non_browsable, zones))
             args.volumes.append(create_data_backup_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, data_backup_size,
                                                                      data_backup_throughput, total_data_volume_size,
                                                                      total_log_volume_size, prefix, backup_nfsv3,
                                                                      data_backup_repl_skd, data_backup_src_id, kv_private_endpoint_id,
                                                                      smb_access_based_enumeration,
-                                                                     smb_non_browsable))
+                                                                     smb_non_browsable, zones))
             args.volumes.append(create_log_backup_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, log_backup_size,
                                                                     log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
                                                                     log_backup_src_id, kv_private_endpoint_id,
                                                                     smb_access_based_enumeration,
-                                                                    smb_non_browsable))
+                                                                    smb_non_browsable, zones))
 
 
 def create_data_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, add_snap_capacity, host_id,
-                                  data_size, data_throughput, prefix, data_repl_skd=None, data_src_id=None, kv_private_endpoint_id=None):
+                                  data_size, data_throughput, prefix, data_repl_skd=None, data_src_id=None, kv_private_endpoint_id=None,
+                                  zones=None):
     name = prefix + application_identifier + "-" + VolumeType.DATA.value + "-mnt" + (host_id.rjust(5, '0'))
 
     if data_size is None:
@@ -1006,14 +1040,15 @@ def create_data_volume_properties(subnet_id, application_identifier, pool_id, pp
         "throughput_mibps": throughput,
         "export_policy": create_default_export_policy_for_vg(),
         "data_protection": data_protection,
-        "key_vault_private_endpoint_resource_id": kv_private_endpoint_id
+        "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
+        "zones": zones
     }
 
     return data_volume
 
 
 def create_log_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, host_id, log_size,
-                                 log_throughput, prefix, kv_private_endpoint_id=None):
+                                 log_throughput, prefix, kv_private_endpoint_id=None, zones=None):
     name = prefix + sap_sid + "-" + VolumeType.LOG.value + "-mnt" + (host_id.rjust(5, '0'))
 
     if log_size is None:
@@ -1035,7 +1070,8 @@ def create_log_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, host_
         "usage_threshold": size,
         "throughput_mibps": log_throughput,
         "export_policy": create_default_export_policy_for_vg(),
-        "key_vault_private_endpoint_resource_id": kv_private_endpoint_id
+        "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
+        "zones": zones
     }
 
     return log_volume
@@ -1044,7 +1080,7 @@ def create_log_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, host_
 def create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, shared_size,
                                     shared_throughput, number_of_hosts, prefix, shared_repl_skd=None,
                                     shared_src_id=None, kv_private_endpoint_id=None, smb_access_based_enumeration=None,
-                                    smb_non_browsable=None):
+                                    smb_non_browsable=None, zones=None):
     name = prefix + sap_sid + "-" + VolumeType.SHARED.value
 
     if has_value(shared_size):
@@ -1075,7 +1111,8 @@ def create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, sh
         "data_protection": data_protection,
         "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
         "smb_access_based_enumeration": smb_access_based_enumeration,
-        "smb_non_browsable": smb_non_browsable
+        "smb_non_browsable": smb_non_browsable,
+        "zones": zones
     }
 
     return shared_volume
@@ -1085,7 +1122,7 @@ def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memor
                                          data_backup_throughput, total_data_volume_size, total_log_volume_size,
                                          prefix, backup_nfsv3, data_backup_repl_skd, data_backup_src_id,
                                          kv_private_endpoint_id=None, smb_access_based_enumeration=None,
-                                         smb_non_browsable=None):
+                                         smb_non_browsable=None, zones=None):
     name = prefix + sap_sid + "-" + VolumeType.DATA_BACKUP.value
 
     logger.debug("ANF LOG: create_data_backup_volume_properties  => data_backup_size: %s * %s ", data_backup_size, gib_scale)
@@ -1118,7 +1155,8 @@ def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memor
         "data_protection": data_protection,
         "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
         "smb_access_based_enumeration": smb_access_based_enumeration,
-        "smb_non_browsable": smb_non_browsable
+        "smb_non_browsable": smb_non_browsable,
+        "zones": zones
     }
 
     return data_backup_volume
@@ -1127,7 +1165,7 @@ def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memor
 def create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, log_backup_size,
                                         log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
                                         log_backup_src_id, kv_private_endpoint_id=None, smb_access_based_enumeration=None,
-                                        smb_non_browsable=None):
+                                        smb_non_browsable=None, zones=None):
     name = prefix + sap_sid + "-" + VolumeType.LOG_BACKUP.value
 
     if log_backup_size is None:
@@ -1158,7 +1196,8 @@ def create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory
         "data_protection": data_protection,
         "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
         "smb_access_based_enumeration": smb_access_based_enumeration,
-        "smb_non_browsable": smb_non_browsable
+        "smb_non_browsable": smb_non_browsable,
+        "zones": zones
     }
 
     return log_backup

@@ -190,7 +190,7 @@ class WebappQuickCreateTest(ScenarioTest):
 
         self.cmd(
             'appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -i patle/ruby-hello'.format(
+        self.cmd('webapp create -g {} -n {} --plan {} --container-image-name patle/ruby-hello'.format(
             resource_group, webapp_name, plan))
         r = requests.get(
             'http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
@@ -805,6 +805,66 @@ class WebappConfigureTest(ScenarioTest):
         self.assertTrue(
             self.cmd('webapp deployment user show').get_output_in_json()['type'])
 
+        # site config update runtime tests
+        # windows
+        self.cmd('webapp config set -g {} -n {} --runtime java:17:TOMCAT:10.0'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("javaVersion", "17"),
+            JMESPathCheck("javaContainer", "TOMCAT"),
+            JMESPathCheck("javaContainerVersion", "10.0"),
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("javaVersion", "17"),
+            JMESPathCheck("javaContainer", "TOMCAT"),
+            JMESPathCheck("javaContainerVersion", "10.0"),         
+        ])
+        self.cmd('webapp config set -g {} -n {} --runtime dotnet:8'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("netFrameworkVersion", "v8.0"),
+            JMESPathCheck("javaVersion", None),            
+            JMESPathCheck("javaContainer", None),
+            JMESPathCheck("javaContainerVersion", None),
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("netFrameworkVersion", "v8.0"),            
+            JMESPathCheck("javaVersion", None),
+            JMESPathCheck("javaContainer", None),
+            JMESPathCheck("javaContainerVersion", None),         
+        ])
+        self.cmd('webapp config set -g {} -n {} --runtime NODE:20LTS'.format(resource_group, webapp_name))
+        self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION']|[0].value", "~20"),
+        ])
+        #linux
+        self.cmd('webapp config set -g {} -n {} --runtime TOMCAT:10.1-java17'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "TOMCAT|10.1-java17"), 
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "TOMCAT|10.1-java17"),      
+        ])
+        self.cmd('webapp config set -g {} -n {} --runtime PYTHON:3.12'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "PYTHON|3.12"),
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "PYTHON|3.12"),  
+        ])
+        self.cmd('webapp config set -g {} -n {} --runtime PHP:8.2'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "PHP|8.2"),
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "PHP|8.2"),  
+        ])                
+        self.cmd('webapp config set -g {} -n {} --runtime DOTNETCORE:8.0'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "DOTNETCORE|8.0"),
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "DOTNETCORE|8.0"),
+        ])        
+        self.cmd('webapp config set -g {} -n {} --runtime NODE:16-lts'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "NODE|16-lts"),
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "NODE|16-lts"),  
+        ])                                  
+
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_update_site_configs_persists_ip_restrictions', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_update_site_configs_persists_ip_restrictions(self, resource_group):
         webapp_name = self.create_random_name('webapp-config-appsettings-persist', 40)
@@ -1305,7 +1365,7 @@ class WebappContainerScenarioTests(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
         creds = self.cmd('acr credential show -n {} -g {}'.format(
             acr_registry_name, resource_group)).get_output_in_json()
-        self.cmd('az webapp create -g {} -n {} -p {} -i {}.azurecr.io/image-name:latest -s {} -w {}'.format(
+        self.cmd('az webapp create -g {} -n {} -p {} --container-registry-url {}.azurecr.io --container-image-name image-name:latest -s {} -w {}'.format(
             resource_group, app_name, plan, acr_registry_name, creds['username'], creds['passwords'][0]['value']
         ))
 
@@ -1324,7 +1384,7 @@ class WebappContainerScenarioTests(ScenarioTest):
 
         slot_name = "slot"
         # note the different image name
-        self.cmd('az webapp deployment slot create -g {} -n {} --configuration-source {} -s {} --deployment-container-image-name {}.azurecr.io/image-name-2:latest'.format(
+        self.cmd('az webapp deployment slot create -g {} -n {} --configuration-source {} -s {} --container-registry-url {}.azurecr.io --container-image-name image-name-2:latest'.format(
             resource_group, app_name, app_name, slot_name, acr_registry_name
         ))
 
@@ -2124,8 +2184,10 @@ class ContainerWebappE2ETest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-container-e2e', length=24)
         plan = self.create_random_name(prefix='webapp-hyperv-plan', length=24)
         self.cmd('appservice plan create --hyper-v -n {} -g {} --sku p1v3 -l australiaeast'.format(plan, resource_group))
-        container = "mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"
-        self.cmd('webapp create -n {} -g {} -p {} -i {}'.format(webapp_name, resource_group, plan, container), checks=[
+        container_registry_url = "mcr.microsoft.com"
+        container_image_name = "azure-app-service/windows/parkingpage:latest"
+        self.cmd('webapp create -n {} -g {} -p {} --container-registry-url {} --container-image-name {}'.format(webapp_name, resource_group, plan, container_registry_url, container_image_name),
+        checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
@@ -2136,8 +2198,8 @@ class ContainerWebappE2ETest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-container', length=24)
         plan = self.create_random_name(prefix='webapp-plan', length=24)
         self.cmd('appservice plan create --is-linux -n {} -g {} -l australiaeast'.format(plan, resource_group))
-        container = "nginx"
-        self.cmd('webapp create -n {} -g {} -p {} -i {}'.format(webapp_name, resource_group, plan, container), checks=[
+        container_image_name = "nginx"
+        self.cmd('webapp create -n {} -g {} -p {} --container-image-name {}'.format(webapp_name, resource_group, plan, container_image_name), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
@@ -2167,8 +2229,8 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('name', plan)
         ])
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-container-image-name "DOCKER|microsoft/iis:windowsservercore-ltsc2022"'
-                 .format(resource_group, webapp_name, plan), checks=[
+        self.cmd('webapp create -g {} -n {} --plan {} --container-registry-url {} --container-image-name {}'
+                 .format(resource_group, webapp_name, plan, "https://mcr.microsoft.com", "windows/servercore/iis:latest"), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
@@ -2255,8 +2317,10 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
 
         self.cmd('appservice plan create -g {} -n {} --hyper-v --sku P1V3'.format(resource_group, plan))
 
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-container-image-name "DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest" --assign-identity --acr-use-identity'
-                 .format(resource_group, webapp_name, plan), checks=[
+        container_registry_url = "https://mcr.microsoft.com"
+        container_image_name = "azure-app-service/windows/parkingpage:latest"
+        self.cmd('webapp create -g {} -n {} --plan {} --container-registry-url {} --container-image-name {} --assign-identity --acr-use-identity'
+                 .format(resource_group, webapp_name, plan, container_registry_url, container_image_name), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
@@ -2986,6 +3050,25 @@ class WebappSlotTest(ScenarioTest):
             JMESPathCheck(f"siteConfig.azureStorageAccounts.{store_id}.type", store_type),
         ])
 
+class WebappStackTest(ScenarioTest):
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_list_show_details(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-list-show-details', length=40)
+        webapp_plan = self.create_random_name(prefix='webapp-list-show-details-plan', length=40)
+
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, webapp_plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp_name, webapp_plan, 'java:17:TOMCAT:10.0'),
+            checks=[
+                JMESPathCheck('name', webapp_name),
+        ])
+        self.cmd('webapp list -g {} --show-details'.format(resource_group), checks=[
+            JMESPathCheck('length([])', 1),
+            JMESPathCheck('[0].name', webapp_name),
+            JMESPathCheck('[0].siteConfig.javaVersion', '17'),
+            JMESPathCheck('[0].siteConfig.javaContainer', 'TOMCAT'),
+            JMESPathCheck('[0].siteConfig.javaContainerVersion', '10.0'),
+        ])
 
 if __name__ == '__main__':
     unittest.main()
