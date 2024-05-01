@@ -1060,7 +1060,7 @@ parameters:
     short-summary: Path to JSON file containing data collection settings for Monitoring addon.
   - name: --azure-monitor-private-link-scope-resource-id
     type: string
-    short-summary: Resource ID of Azure Monitor Private Link scope for  Monitoring Addon.
+    short-summary: Resource ID of Azure Monitor Private Link scope for Monitoring Addon.
   - name: --appgw-name
     type: string
     short-summary: Name of the application gateway to create/use in the node resource group. Use with ingress-azure addon.
