@@ -5880,9 +5880,34 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # update node os upgrade channel
-        self.cmd('aks update --resource-group={resource_group} --name={name} --node-os-upgrade-channel None', checks=[
+        self.cmd('aks update --resource-group={resource_group} --name={name} --node-os-upgrade-channel SecurityPatch', checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('autoUpgradeProfile.nodeOsUpgradeChannel', 'None')
+            self.check('autoUpgradeProfile.nodeOsUpgradeChannel', 'SecurityPatch')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+        
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_node_os_upgrade_channel_security_patch(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--enable-managed-identity ' \
+                     '--node-os-upgrade-channel SecurityPatch ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('autoUpgradeProfile.nodeOsUpgradeChannel', 'SecurityPatch')
         ])
 
         # delete
