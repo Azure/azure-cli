@@ -737,8 +737,8 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(len(locations) == 13)
 
     def test_functionapp_list_flexconsumption_runtimes(self):
-        runtimes = self.cmd('functionapp list-flexconsumption-runtimes').get_output_in_json()
-        self.assertTrue(len(runtimes) == 8)
+        runtimes = self.cmd('functionapp list-flexconsumption-runtimes -l eastasia --runtime python').get_output_in_json()
+        self.assertTrue(len(runtimes) == 2)
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
