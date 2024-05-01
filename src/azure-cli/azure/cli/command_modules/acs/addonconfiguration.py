@@ -19,7 +19,7 @@ from azure.cli.command_modules.acs._consts import (
 )
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._roleassignments import add_role_assignment
-from azure.cli.core.azclierror import AzCLIError, CLIError, InvalidArgumentValueError
+from azure.cli.core.azclierror import AzCLIError, CLIError, InvalidArgumentValueError, ArgumentUsageError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import send_raw_request
 from azure.core.exceptions import HttpResponseError
@@ -350,7 +350,7 @@ def ensure_container_insights_for_monitoring(
         return None
 
     if (not is_private_cluster or not aad_route) and azure_monitor_private_link_scope_resource_id is not None:
-        raise AzCLIError("--azure-monitor-private-link-scope-resource-id can only be used with private cluster in MSI mode.")
+        raise ArgumentUsageError("--azure-monitor-private-link-scope-resource-id can only be used with private cluster in MSI mode.")
 
     # workaround for this addon key which has been seen lowercased in the wild
     for key in list(addon.config):
