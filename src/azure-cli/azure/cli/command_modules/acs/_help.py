@@ -227,6 +227,7 @@ parameters:
                                          Specify "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled
                                          Specify "--data-collection-settings" to configure data collection settings
                                          Specify "--azure-monitor-private-link-scope-resource-id" for private link. Note MSI must be enabled.
+                                         Specify "--enable-high-log-scale-mode" to enable high log scale mode for container logs. Note MSI must be enabled.
                                          If monitoring addon is enabled --no-wait argument will have no effect
             - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
                                          Learn more at aka.ms/aks/policy.
@@ -320,6 +321,9 @@ parameters:
   - name: --azure-monitor-private-link-scope-resource-id
     type: string
     short-summary: Resource ID of Azure Monitor Private Link scope for Monitoring Addon.
+  - name: --enable-high-log-scale-mode
+    type: bool
+    short-summary: Enable High Log Scale Mode for Container Logs.
   - name: --uptime-sla
     type: bool
     short-summary: --uptime-sla is deprecated. Please use '--tier standard' instead.
@@ -1061,6 +1065,9 @@ parameters:
   - name: --azure-monitor-private-link-scope-resource-id
     type: string
     short-summary: Resource ID of Azure Monitor Private Link scope for Monitoring Addon.
+  - name: --enable-high-log-scale-mode
+    type: bool
+    short-summary: Enable High Log Scale Mode for Container Logs.
   - name: --appgw-name
     type: string
     short-summary: Name of the application gateway to create/use in the node resource group. Use with ingress-azure addon.

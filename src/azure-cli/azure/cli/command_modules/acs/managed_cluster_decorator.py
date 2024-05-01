@@ -2772,6 +2772,21 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return enable_syslog
 
+    def get_enable_high_log_scale_mode(self) -> Union[bool, None]:
+        """Obtain the value of enable_high_log_scale_mode.
+
+        Note: The arg type of this parameter supports three states (True, False or None), but the corresponding default
+        value in entry function is not None.
+
+        :return: bool or None
+        """
+        # read the original value passed by the command
+        enable_high_log_scale_mode = self.raw_param.get("enable_high_log_scale_mode")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_high_log_scale_mode
+
     def get_data_collection_settings(self) -> Union[str, None]:
         """Obtain the value of data_collection_settings.
 
@@ -5919,6 +5934,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             data_collection_settings=self.context.get_data_collection_settings(),
             is_private_cluster=self.context.get_enable_private_cluster(),
             azure_monitor_private_link_scope_resource_id=self.context.get_azure_monitor_private_link_scope_resource_id(),
+            enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
         )
         # set intermediate
         self.context.set_intermediate("monitoring_addon_enabled", True, overwrite_exists=True)
@@ -6694,6 +6710,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     create_dcra=True,
                     enable_syslog=self.context.get_enable_syslog(),
                     azure_monitor_private_link_scope_resource_id=self.context.get_azure_monitor_private_link_scope_resource_id(),
+                    enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
                 )
 
         # ingress appgw addon
@@ -8365,6 +8382,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     create_dcra=True,
                     enable_syslog=self.context.get_enable_syslog(),
                     azure_monitor_private_link_scope_resource_id=self.context.get_azure_monitor_private_link_scope_resource_id(),
+                    enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
                 )
 
         # ingress appgw addon

@@ -332,7 +332,8 @@ def ensure_container_insights_for_monitoring(
     enable_syslog=False,
     data_collection_settings=None,
     is_private_cluster=False,
-    azure_monitor_private_link_scope_resource_id=None
+    azure_monitor_private_link_scope_resource_id=None,
+    enable_high_log_scale_mode=False,
 ):
     """
     Either adds the ContainerInsights solution to a LA Workspace OR sets up a DCR (Data Collection Rule) and DCRA
@@ -416,7 +417,7 @@ def ensure_container_insights_for_monitoring(
         dataCollectionEndpointName = dataCollectionEndpointName[0:43]
         dce_resource_id = None
 
-        if azure_monitor_private_link_scope_resource_id is not None:
+        if enable_high_log_scale_mode or (azure_monitor_private_link_scope_resource_id is not None):
             dce_resource_id = (
                 f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
                 f"providers/Microsoft.Insights/dataCollectionEndpoints/{dataCollectionEndpointName}"
@@ -424,17 +425,18 @@ def ensure_container_insights_for_monitoring(
             dce_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
                 f"{dce_resource_id}?api-version=2022-06-01"
             # create the DCE
-            dce_creation_body_ = json.dumps(
-                {
-                    "location": location,
-                    "kind": "Linux",
-                    "properties": {
-                        "networkAcls": {
-                            "publicNetworkAccess": "Disabled"
-                        }
+            dce_creation_body_common = {
+                "location": location,
+                "kind": "Linux",
+                "properties": {
+                    "networkAcls": {
+                        "publicNetworkAccess": "Enabled"
                     }
                 }
-            )
+            }
+            if azure_monitor_private_link_scope_resource_id is not None:
+               dce_creation_body_common["properties"]["networkAcls"]["publicNetworkAccess"] = "Disabled"
+            dce_creation_body_ = json.dumps(dce_creation_body_common)
             for _ in range(3):
                 try:
                     send_raw_request(
@@ -480,6 +482,21 @@ def ensure_container_insights_for_monitoring(
             # get data collection settings
             extensionSettings = {}
             cistreams = ["Microsoft-ContainerInsights-Group-Default"]
+            if enable_high_log_scale_mode:
+                cistreams = [
+                               "Microsoft-ContainerLog",
+                               "Microsoft-ContainerLogV2-HighScale",
+                               "Microsoft-KubeEvents",
+                               "Microsoft-KubePodInventory",
+                               "Microsoft-KubeNodeInventory",
+                               "Microsoft-KubePVInventory",
+                               "Microsoft-KubeServices",
+                               "Microsoft-KubeMonAgentEvents",
+                               "Microsoft-InsightsMetrics",
+                               "Microsoft-ContainerInventory",
+                               "Microsoft-ContainerNodeInventory",
+                               "Microsoft-Perf"
+                            ]
             if data_collection_settings is not None:
                 dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
                 validate_data_collection_settings(dataCollectionSettings)
@@ -493,6 +510,10 @@ def ensure_container_insights_for_monitoring(
                 }
                 extensionSettings["dataCollectionSettings"] = dataCollectionSettings
 
+            if enable_high_log_scale_mode:
+                for i in range(len(cistreams)):
+                    if cistreams[i] == "Microsoft-ContainerLogV2":
+                        cistreams[i] = "Microsoft-ContainerLogV2-HighScale"
             # create the DCR
             dcr_creation_body_without_syslog = json.dumps(
                 {
@@ -655,7 +676,7 @@ def ensure_container_insights_for_monitoring(
             else:
                 raise error
         # create dce association
-        if azure_monitor_private_link_scope_resource_id is not None:
+        if enable_high_log_scale_mode or (azure_monitor_private_link_scope_resource_id is not None):
             association_body = json.dumps(
                 {
                     "location": cluster_region,
@@ -681,58 +702,58 @@ def ensure_container_insights_for_monitoring(
                     error = e
             else:
                 raise error
+            if azure_monitor_private_link_scope_resource_id is not None:
+                # link DCE to AMPLS
+                link_dce_ampls_body = json.dumps(
+                    {
+                        "properties": {
+                            "linkedResourceId": dce_resource_id,
+                        },
+                    }
+                )
+                link_dce_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                    f"{azure_monitor_private_link_scope_resource_id}/scopedresources/{dataCollectionEndpointName}-connection?api-version=2021-07-01-preview"
 
-            # link DCE to AMPLS
-            link_dce_ampls_body = json.dumps(
-                {
-                    "properties": {
-                        "linkedResourceId": dce_resource_id,
-                    },
-                }
-            )
-            link_dce_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{azure_monitor_private_link_scope_resource_id}/scopedresources/{dataCollectionEndpointName}-connection?api-version=2021-07-01-preview"
+                for _ in range(3):
+                    try:
+                        send_raw_request(
+                            cmd.cli_ctx,
+                            "PUT",
+                            link_dce_ampls_url,
+                            body=link_dce_ampls_body,
+                        )
+                        error = None
+                        break
+                    except AzCLIError as e:
+                        error = e
+                else:
+                    raise error
 
-            for _ in range(3):
-                try:
-                    send_raw_request(
-                        cmd.cli_ctx,
-                        "PUT",
-                        link_dce_ampls_url,
-                        body=link_dce_ampls_body,
-                    )
-                    error = None
-                    break
-                except AzCLIError as e:
-                    error = e
-            else:
-                raise error
+                # link workspace to AMPLS
+                link_ws_ampls_body = json.dumps(
+                    {
+                        "properties": {
+                            "linkedResourceId": workspace_resource_id,
+                        },
+                    }
+                )
+                link_ws_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                    f"{azure_monitor_private_link_scope_resource_id}/scopedresources/{workspace_name}-connection?api-version=2021-07-01-preview"
 
-            # link workspace to AMPLS
-            link_ws_ampls_body = json.dumps(
-                {
-                    "properties": {
-                        "linkedResourceId": workspace_resource_id,
-                    },
-                }
-            )
-            link_ws_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{azure_monitor_private_link_scope_resource_id}/scopedresources/{workspace_name}-connection?api-version=2021-07-01-preview"
-
-            for _ in range(3):
-                try:
-                    send_raw_request(
-                        cmd.cli_ctx,
-                        "PUT",
-                        link_ws_ampls_url,
-                        body=link_ws_ampls_body,
-                    )
-                    error = None
-                    break
-                except AzCLIError as e:
-                    error = e
-            else:
-                raise error
+                for _ in range(3):
+                    try:
+                        send_raw_request(
+                            cmd.cli_ctx,
+                            "PUT",
+                            link_ws_ampls_url,
+                            body=link_ws_ampls_body,
+                        )
+                        error = None
+                        break
+                    except AzCLIError as e:
+                        error = e
+                else:
+                    raise error
 
 
 def validate_data_collection_settings(dataCollectionSettings):
