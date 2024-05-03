@@ -258,11 +258,11 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'cluster_code_version': '10.1.1951.9590'
         })
 
-        cluster = self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --tags {tags} --upgrade-mode Manual --cluster-code-version {cluster_code_version}',
+        cluster = self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --tags {tags} --upgrade-mode Manual --cluster-code-version {cluster_code_version} --ddos-protection-plan-id {ddos_protection_plan_id}',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('clusterState', 'WaitingForNodes')]).get_output_in_json()
         
-        cluster = self.cmd('az sf managed-cluster update -g {rg} -c {cluster_name} --enable-http-gateway-exclusive-auth-mode',
+        cluster = self.cmd('az sf managed-cluster update -g {rg} -c {cluster_name} --http-gateway-token-auth-connection-port {http_gateway_token_auth_connection_port} --enable-http-gateway-exclusive-auth-mode',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('clusterState', 'WaitingForNodes')]).get_output_in_json()
 
@@ -271,6 +271,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
                          self.check('tags', cluster["tags"]),
                          self.check('httpGatewayTokenAuthConnectionPort', 19801),
                          self.check('enableHttpGatewayExclusiveAuthMode', True),
+                         self.check('ddosProtectionPlanId', '/subscriptions/21f993ff-292e-4f1e-99d5-92c7bb0b0a45/resourceGroups/sfmc-e2e-test-rg/providers/Microsoft.Network/ddosProtectionPlans/ddosProtectionPlan'),
                          self.check('clusterUpgradeMode', 'Manual')]).get_output_in_json()
 
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')

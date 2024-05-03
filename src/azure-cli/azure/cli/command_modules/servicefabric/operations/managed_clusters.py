@@ -54,7 +54,7 @@ def create_cluster(cmd,
                    code_version=None,
                    tags=None,
                    http_gateway_token_auth_connection_port=None,
-                   enable_http_gateway_exclusive_auth_mode=False,
+                   enable_http_gateway_exclusive_auth_mode=None,
                    ddos_protection_plan_id=None):
     try:
 
@@ -139,7 +139,7 @@ def update_cluster(cmd,
                    dns_name=None,
                    tags=None,
                    http_gateway_token_auth_connection_port=None,
-                   enable_http_gateway_exclusive_auth_mode=False):
+                   enable_http_gateway_exclusive_auth_mode=None):
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
 
