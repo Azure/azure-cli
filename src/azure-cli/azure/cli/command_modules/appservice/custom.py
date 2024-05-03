@@ -1162,7 +1162,7 @@ def list_function_app(cmd, resource_group_name=None):
 
 def show_functionapp(cmd, resource_group_name, name, slot=None):
     if is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
-        return get_raw_functionapp(cmd, resource_group_name, name)
+        return get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not app:
         raise ResourceNotFoundError("Unable to find resource'{}', in ResourceGroup '{}'.".format(name,
@@ -1640,7 +1640,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 
 
 def get_deployment_configs(cmd, resource_group_name, name):
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
     return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
         "deployment", {})
 
@@ -1666,7 +1666,7 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
             'StorageAccountConnectionString.'
         )
 
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     functionapp_deployment_storage = functionapp["properties"]["functionAppConfig"]["deployment"]["storage"]
 
@@ -1893,7 +1893,7 @@ def update_flex_functionapp(cmd, resource_group_name, name, functionapp):
 
 
 def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     always_ready_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady", [])
 
@@ -1908,14 +1908,14 @@ def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
 
 
 def get_runtime_config(cmd, resource_group_name, name):
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
         "runtime", {})
 
 
 def update_runtime_config(cmd, resource_group_name, name, runtime_version):
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, True)
     runtime = runtime_info['app_runtime']
@@ -1935,7 +1935,7 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
 
 
 def update_always_ready_settings(cmd, resource_group_name, name, settings):
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     always_ready_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady", [])
 
@@ -1963,7 +1963,7 @@ def update_always_ready_settings(cmd, resource_group_name, name, settings):
 
 
 def get_scale_config(cmd, resource_group_name, name):
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
         "scaleAndConcurrency", {})
@@ -1975,7 +1975,7 @@ def update_scale_config(cmd, resource_group_name, name, maximum_instance_count=N
         raise RequiredArgumentMissingError("usage error: --trigger-type must be used with parameter "
                                            "--trigger-settings.")
 
-    functionapp = get_raw_functionapp(cmd, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     scale_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]
 
@@ -4826,68 +4826,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if location is None:
             raise ValidationError("Location is invalid. Use: az functionapp list-flexconsumption-locations")
         is_linux = True
-        # Following the same plan name format as the backend
-        plan_name = generatePlanName(resource_group_name)
-        plan_info = create_flex_app_service_plan(
-            cmd, resource_group_name, plan_name, flexconsumption_location)
-        functionapp_def.server_farm_id = plan_info.id
-        functionapp_def.location = flexconsumption_location
-
-        if not deployment_storage_name:
-            deployment_storage_name = storage_account
-        deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx, resource_group_name,
-                                                                  deployment_storage_name)
-
-        deployment_storage_container = _get_or_create_deployment_storage_container(cmd, resource_group_name, name,
-                                                                                   deployment_storage_name,
-                                                                                   deployment_storage_container_name)
-        if deployment_storage_container_name is None:
-            is_storage_container_created = True
-        deployment_storage_container_name = deployment_storage_container.name
-
-        endpoints = deployment_storage.primary_endpoints
-        deployment_config_storage_value = getattr(endpoints, 'blob') + deployment_storage_container_name
-
-        deployment_storage_auth_type = deployment_storage_auth_type or 'StorageAccountConnectionString'
-
-        if deployment_storage_auth_value and deployment_storage_auth_type == 'SystemAssignedIdentity':
-            raise ArgumentUsageError(
-                '--deployment-storage-auth-value is only a valid input when '
-                '--deployment-storage-auth-type is set to UserAssignedIdentity or StorageAccountConnectionString. '
-                'Please try again with --deployment-storage-auth-type set to UserAssignedIdentity or '
-                'StorageAccountConnectionString.'
-            )
-
-        function_app_config = {}
-        deployment_storage_auth_config = {
-            "type": deployment_storage_auth_type
-        }
-        function_app_config["deployment"] = {
-            "storage": {
-                "type": "blobContainer",
-                "value": deployment_config_storage_value,
-                "authentication": deployment_storage_auth_config
-            }
-        }
-
-        if deployment_storage_auth_type == 'UserAssignedIdentity':
-            deployment_storage_user_assigned_identity = _get_or_create_user_assigned_identity(
-                cmd,
-                resource_group_name,
-                name,
-                deployment_storage_auth_value,
-                flexconsumption_location)
-            if deployment_storage_auth_value is None:
-                is_user_assigned_identity_created = True
-            deployment_storage_auth_value = deployment_storage_user_assigned_identity.id
-            deployment_storage_auth_config["userAssignedIdentityResourceId"] = deployment_storage_auth_value
-        elif deployment_storage_auth_type == 'StorageAccountConnectionString':
-            deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
-            conn_string_app_setting = deployment_storage_auth_value or 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
-            site_config.app_settings.append(NameValuePair(name=conn_string_app_setting,
-                                                          value=deployment_storage_conn_string))
-            deployment_storage_auth_value = conn_string_app_setting
-            deployment_storage_auth_config["storageAccountConnectionStringName"] = deployment_storage_auth_value
 
     if environment is not None:
         if consumption_plan_location is not None:
@@ -4929,34 +4867,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
         matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
                                                  runtime_version, functions_version, is_linux)
-
-    if flexconsumption_location:
-        flex_sku = matched_runtime.sku
-        runtime = flex_sku['functionAppConfigProperties']['runtime']['name']
-        version = flex_sku['functionAppConfigProperties']['runtime']['version']
-        runtime_config = {
-            "name": runtime,
-            "version": version
-        }
-        function_app_config["runtime"] = runtime_config
-        always_ready_dict = _parse_key_value_pairs(always_ready_instances)
-        always_ready_config = []
-
-        for key, value in always_ready_dict.items():
-            always_ready_config.append(
-                {
-                    "name": key,
-                    "instanceCount": max(0, validate_and_convert_to_int(key, value))
-                }
-            )
-
-        default_instance_memory = [x for x in flex_sku['instanceMemoryMB'] if x['isDefault'] is True][0]
-
-        function_app_config["scaleAndConcurrency"] = {
-            "maximumInstanceCount": maximum_instance_count or flex_sku['maximumInstanceCount']['defaultValue'],
-            "instanceMemoryMB": instance_memory or default_instance_memory['size'],
-            "alwaysReady": always_ready_config
-        }
 
     SiteConfigPropertiesDictionary = cmd.get_models('SiteConfigPropertiesDictionary')
 
@@ -5122,12 +5032,101 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.net_framework_version = None
         functionapp_def.reserved = None
         functionapp_def.is_xenon = None
-        functionapp_def.enable_additional_properties_sending()
-        existing_properties = functionapp_def.serialize()["properties"]
-        functionapp_def.additional_properties["properties"] = existing_properties
-        functionapp_def.additional_properties["properties"]["functionAppConfig"] = function_app_config
-        functionapp_def.additional_properties["properties"]["sku"] = "FlexConsumption"
+
         try:
+            plan_name = generatePlanName(resource_group_name)
+            plan_info = create_flex_app_service_plan(
+                cmd, resource_group_name, plan_name, flexconsumption_location)
+            functionapp_def.server_farm_id = plan_info.id
+            functionapp_def.location = flexconsumption_location
+
+            if not deployment_storage_name:
+                deployment_storage_name = storage_account
+            deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx, resource_group_name,
+                                                                      deployment_storage_name)
+
+            deployment_storage_container = _get_or_create_deployment_storage_container(
+                cmd, resource_group_name, name, deployment_storage_name, deployment_storage_container_name)
+            if deployment_storage_container_name is None:
+                is_storage_container_created = True
+            deployment_storage_container_name = deployment_storage_container.name
+
+            endpoints = deployment_storage.primary_endpoints
+            deployment_config_storage_value = getattr(endpoints, 'blob') + deployment_storage_container_name
+
+            deployment_storage_auth_type = deployment_storage_auth_type or 'StorageAccountConnectionString'
+
+            if deployment_storage_auth_value and deployment_storage_auth_type == 'SystemAssignedIdentity':
+                raise ArgumentUsageError(
+                    '--deployment-storage-auth-value is only a valid input when '
+                    '--deployment-storage-auth-type is set to UserAssignedIdentity or StorageAccountConnectionString. '
+                    'Please try again with --deployment-storage-auth-type set to UserAssignedIdentity or '
+                    'StorageAccountConnectionString.'
+                )
+
+            function_app_config = {}
+            deployment_storage_auth_config = {
+                "type": deployment_storage_auth_type
+            }
+            function_app_config["deployment"] = {
+                "storage": {
+                    "type": "blobContainer",
+                    "value": deployment_config_storage_value,
+                    "authentication": deployment_storage_auth_config
+                }
+            }
+
+            if deployment_storage_auth_type == 'UserAssignedIdentity':
+                deployment_storage_user_assigned_identity = _get_or_create_user_assigned_identity(
+                    cmd,
+                    resource_group_name,
+                    name,
+                    deployment_storage_auth_value,
+                    flexconsumption_location)
+                if deployment_storage_auth_value is None:
+                    is_user_assigned_identity_created = True
+                deployment_storage_auth_value = deployment_storage_user_assigned_identity.id
+                deployment_storage_auth_config["userAssignedIdentityResourceId"] = deployment_storage_auth_value
+            elif deployment_storage_auth_type == 'StorageAccountConnectionString':
+                deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
+                conn_string_app_setting = deployment_storage_auth_value or 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
+                site_config.app_settings.append(NameValuePair(name=conn_string_app_setting,
+                                                              value=deployment_storage_conn_string))
+                deployment_storage_auth_value = conn_string_app_setting
+                deployment_storage_auth_config["storageAccountConnectionStringName"] = deployment_storage_auth_value
+
+            flex_sku = matched_runtime.sku
+            runtime = flex_sku['functionAppConfigProperties']['runtime']['name']
+            version = flex_sku['functionAppConfigProperties']['runtime']['version']
+            runtime_config = {
+                "name": runtime,
+                "version": version
+            }
+            function_app_config["runtime"] = runtime_config
+            always_ready_dict = _parse_key_value_pairs(always_ready_instances)
+            always_ready_config = []
+
+            for key, value in always_ready_dict.items():
+                always_ready_config.append(
+                    {
+                        "name": key,
+                        "instanceCount": max(0, validate_and_convert_to_int(key, value))
+                    }
+                )
+
+            default_instance_memory = [x for x in flex_sku['instanceMemoryMB'] if x['isDefault'] is True][0]
+
+            function_app_config["scaleAndConcurrency"] = {
+                "maximumInstanceCount": maximum_instance_count or flex_sku['maximumInstanceCount']['defaultValue'],
+                "instanceMemoryMB": instance_memory or default_instance_memory['size'],
+                "alwaysReady": always_ready_config
+            }
+
+            functionapp_def.enable_additional_properties_sending()
+            existing_properties = functionapp_def.serialize()["properties"]
+            functionapp_def.additional_properties["properties"] = existing_properties
+            functionapp_def.additional_properties["properties"]["functionAppConfig"] = function_app_config
+            functionapp_def.additional_properties["properties"]["sku"] = "FlexConsumption"
             poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
                                                             api_version='2023-12-01')
             functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -5202,7 +5201,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp.identity = identity
 
     if flexconsumption_location is not None:
-        return get_raw_functionapp(cmd, resource_group_name, name)
+        return get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     return functionapp
 

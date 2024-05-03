@@ -737,8 +737,8 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(len(locations) == 13)
 
     def test_functionapp_list_flexconsumption_runtimes(self):
-        runtimes = self.cmd('functionapp list-flexconsumption-runtimes').get_output_in_json()
-        self.assertTrue(len(runtimes) == 8)
+        runtimes = self.cmd('functionapp list-flexconsumption-runtimes -l eastasia --runtime python').get_output_in_json()
+        self.assertTrue(len(runtimes) == 2)
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1390,7 +1390,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
                      "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~18')])
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~20')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1741,7 +1741,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|18')
+            JMESPathCheck('linuxFxVersion', 'Node|20')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
@@ -1778,7 +1778,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|18')
+            JMESPathCheck('linuxFxVersion', 'Node|20')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
