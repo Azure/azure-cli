@@ -96,6 +96,8 @@ def get_sku_tier(name):  # pylint: disable=too-many-return-statements
         return 'IsolatedV2'
     if name in ['WS1', 'WS2', 'WS3']:
         return 'WorkflowStandard'
+    if name in ['Y1']:
+        return 'Dynamic'
     raise ValidationError("Invalid sku(pricing tier), please refer to command help for valid values")
 
 

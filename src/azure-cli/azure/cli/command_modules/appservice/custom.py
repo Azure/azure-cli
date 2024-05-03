@@ -4485,6 +4485,21 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location):
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
+def create_consumption_plan(cmd, resource_group_name, name, is_linux, location):
+    SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
+    client = web_client_factory(cmd.cli_ctx)
+    sku_def = SkuDescription(tier='Dynamic', name='Y1', size='Y1', family='Y')
+    plan_def = AppServicePlan(
+        location=location,
+        sku=sku_def,
+        reserved=is_linux,
+        kind='functionapp',
+        name=name
+    )
+    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
+    return LongRunningOperation(cmd.cli_ctx)(poller)
+
+
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
                                         max_burst=None, location=None, tags=None, zone_redundant=False):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
@@ -4803,6 +4818,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.kind = 'functionapp'
         # if os_type is None, the os type is windows
         is_linux = bool(os_type and os_type.lower() == LINUX_OS_NAME)
+        plan_name = generatePlanName(resource_group_name)
+        plan_info = create_consumption_plan(
+            cmd, resource_group_name, plan_name, is_linux, consumption_plan_location
+        )
+        functionapp_def.server_farm_id = plan_info.id
 
     elif plan:  # apps with SKU based plan
         if is_valid_resource_id(plan):
@@ -4816,6 +4836,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         is_linux = bool(plan_info.reserved)
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
+        if is_plan_consumption(cmd, plan_info):
+            consumption_plan_location = location
 
     elif flexconsumption_location:
         locations = list_flexconsumption_locations(cmd)
