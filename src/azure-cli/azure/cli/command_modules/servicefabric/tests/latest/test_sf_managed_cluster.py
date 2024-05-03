@@ -271,7 +271,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
                          self.check('tags', cluster["tags"]),
                          self.check('httpGatewayTokenAuthConnectionPort', 19801),
                          self.check('enableHttpGatewayExclusiveAuthMode', True),
-                         self.check('ddosProtectionPlanId', '/subscriptions/21f993ff-292e-4f1e-99d5-92c7bb0b0a45/resourceGroups/sfmc-e2e-test-rg/providers/Microsoft.Network/ddosProtectionPlans/ddosProtectionPlan'),
+                         self.check('ddosProtectionPlanId', '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sfmc-e2e-test-rg/providers/Microsoft.Network/ddosProtectionPlans/ddosProtectionPlan'),
                          self.check('clusterUpgradeMode', 'Manual')]).get_output_in_json()
 
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
