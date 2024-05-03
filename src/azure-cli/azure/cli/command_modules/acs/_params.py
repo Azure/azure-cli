@@ -88,6 +88,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_force_upgrade_disable_and_enable_parameters,
     validate_allowed_host_ports, validate_application_security_groups,
     validate_node_public_ip_tags,
+    validate_disable_windows_outbound_nat,
     validate_crg_id,
     validate_azure_service_mesh_revision)
 from azure.cli.core.commands.parameters import (
@@ -706,6 +707,7 @@ def load_arguments(self, _):
         c.argument('enable_encryption_at_host', action='store_true')
         c.argument('enable_ultra_ssd', action='store_true')
         c.argument('enable_fips_image', action='store_true')
+        c.argument("disable_windows_outbound_nat", action="store_true", validator=validate_disable_windows_outbound_nat)
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
@@ -824,6 +826,22 @@ def load_arguments(self, _):
 
     with self.argument_context('aks mesh upgrade start') as c:
         c.argument('revision', validator=validate_azure_service_mesh_revision, required=True)
+
+    with self.argument_context("aks mesh upgrade rollback") as c:
+        c.argument(
+            "yes",
+            options_list=["--yes", "-y"],
+            help="Do not prompt for confirmation.",
+            action="store_true"
+        )
+
+    with self.argument_context("aks mesh upgrade complete") as c:
+        c.argument(
+            "yes",
+            options_list=["--yes", "-y"],
+            help="Do not prompt for confirmation.",
+            action="store_true"
+        )
 
     with self.argument_context('aks approuting enable') as c:
         c.argument('enable_kv', action='store_true')
