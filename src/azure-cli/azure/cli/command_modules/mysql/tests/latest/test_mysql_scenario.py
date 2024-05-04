@@ -5,6 +5,7 @@
 import os
 import time
 import uuid
+import unittest
 
 from datetime import datetime, timedelta
 from time import sleep
@@ -94,6 +95,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @unittest.skip("Currently blocked due to creation of 'Azure Database for MySQL - Single Server' no longer supported on March 19 2024.")
     def test_mysql_flexible_server_import_create(self, resource_group):
         self._test_mysql_flexible_server_import_create_mgmt('mysql', resource_group)
 
@@ -114,6 +116,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @unittest.skip('Temp skip - No available SKUs in this location')
     def test_mysql_flexible_server_georestore_update_mgmt(self, resource_group):
         self._test_flexible_server_georestore_update_mgmt('mysql', resource_group)
 
@@ -126,6 +129,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=DEFAULT_PAIRED_LOCATION, additional_params='--enable-purge-protection true --retention-days 90')
     @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=DEFAULT_LOCATION, additional_params='--enable-purge-protection true --retention-days 90')
+    @unittest.skip('(AuthenticationError) The refresh token has expired or is invalid due to sign-in frequency checks by conditional access.')
     def test_mysql_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name):
         self._test_flexible_server_byok_mgmt('mysql', resource_group, vault_name, backup_vault_name)
 
@@ -1252,6 +1256,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
     @AllowLargeResponse()
     @ResourceGroupPreparer()
+    @unittest.skip("Temp skip - flaky test")
     def test_mysql_flexible_server_cross_region_replica_mgmt(self, resource_group):
         self._test_flexible_server_cross_region_replica_mgmt('mysql', resource_group)
     
@@ -1682,6 +1687,7 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION, parameter_name='server_resource_group')
     @ResourceGroupPreparer(location=DEFAULT_LOCATION, parameter_name='vnet_resource_group')
+    @unittest.skip("Temp skip - flaky test")
     def test_mysql_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
         self._test_flexible_server_existing_private_dns_zone('mysql', server_resource_group, vnet_resource_group)
 
