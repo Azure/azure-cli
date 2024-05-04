@@ -36,9 +36,11 @@ logger = get_logger(__name__)
 class MigrationScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
+    @live_only()
     def test_postgres_flexible_server_migration(self):
         self._test_server_migration('postgres')
 
+    @live_only()
     def test_postgres_flexible_server_onpremise_migration(self):
         self._test_server_migration_onpremise('postgres', True, "b345de21-10e1-474d-8777-8956c9a6ca47")
         self._test_server_migration_onpremise('postgres', False, "bf81e96c-bde0-4492-ba8d-b6dd508fb97c")

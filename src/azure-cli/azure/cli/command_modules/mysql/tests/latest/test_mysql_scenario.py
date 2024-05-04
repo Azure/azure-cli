@@ -1695,6 +1695,7 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=DEFAULT_LOCATION, parameter_name='server_resource_group')
     @ResourceGroupPreparer(location=DEFAULT_LOCATION, parameter_name='vnet_resource_group')
     @ResourceGroupPreparer(location=DEFAULT_LOCATION, parameter_name='dns_resource_group')
+    @live_only()
     def test_mysql_flexible_server_new_private_dns_zone(self, server_resource_group, vnet_resource_group, dns_resource_group):
         self._test_flexible_server_new_private_dns_zone('mysql', server_resource_group, vnet_resource_group, dns_resource_group)
 
@@ -1931,6 +1932,7 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @live_only()
     def test_mysql_flexible_server_upgrade_mgmt(self, resource_group):
         self._test_flexible_server_upgrade_mgmt('mysql', resource_group, False)
         self._test_flexible_server_upgrade_mgmt('mysql', resource_group, True)
