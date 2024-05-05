@@ -435,7 +435,7 @@ def ensure_container_insights_for_monitoring(
                 }
             }
             if azure_monitor_private_link_scope_resource_id is not None:
-               dce_creation_body_common["properties"]["networkAcls"]["publicNetworkAccess"] = "Disabled"
+                dce_creation_body_common["properties"]["networkAcls"]["publicNetworkAccess"] = "Disabled"
             dce_creation_body_ = json.dumps(dce_creation_body_common)
             for _ in range(3):
                 try:
