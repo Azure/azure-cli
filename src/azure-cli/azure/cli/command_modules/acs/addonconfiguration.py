@@ -185,6 +185,20 @@ AzureUSSecRegionToOmsRegionMap = {
     "ussecwest": "ussecwest",
 }
 
+ContainerInsightsStreams = [
+    "Microsoft-ContainerLog",
+    "Microsoft-ContainerLogV2-HighScale",
+    "Microsoft-KubeEvents",
+    "Microsoft-KubePodInventory",
+    "Microsoft-KubeNodeInventory",
+    "Microsoft-KubePVInventory",
+    "Microsoft-KubeServices",
+    "Microsoft-KubeMonAgentEvents",
+    "Microsoft-InsightsMetrics",
+    "Microsoft-ContainerInventory",
+    "Microsoft-ContainerNodeInventory",
+    "Microsoft-Perf",
+]
 
 # pylint: disable=too-many-locals
 def ensure_default_log_analytics_workspace_for_monitoring(
@@ -483,20 +497,7 @@ def ensure_container_insights_for_monitoring(
             extensionSettings = {}
             cistreams = ["Microsoft-ContainerInsights-Group-Default"]
             if enable_high_log_scale_mode:
-                cistreams = [
-                               "Microsoft-ContainerLog",
-                               "Microsoft-ContainerLogV2-HighScale",
-                               "Microsoft-KubeEvents",
-                               "Microsoft-KubePodInventory",
-                               "Microsoft-KubeNodeInventory",
-                               "Microsoft-KubePVInventory",
-                               "Microsoft-KubeServices",
-                               "Microsoft-KubeMonAgentEvents",
-                               "Microsoft-InsightsMetrics",
-                               "Microsoft-ContainerInventory",
-                               "Microsoft-ContainerNodeInventory",
-                               "Microsoft-Perf"
-                            ]
+                cistreams = ContainerInsightsStreams
             if data_collection_settings is not None:
                 dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
                 validate_data_collection_settings(dataCollectionSettings)
