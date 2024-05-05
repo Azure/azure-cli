@@ -200,6 +200,7 @@ ContainerInsightsStreams = [
     "Microsoft-Perf",
 ]
 
+
 # pylint: disable=too-many-locals
 def ensure_default_log_analytics_workspace_for_monitoring(
     cmd, subscription_id, resource_group_name
