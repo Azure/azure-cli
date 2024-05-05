@@ -7696,6 +7696,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             create_dcra=True,
             enable_syslog=None,
             azure_monitor_private_link_scope_resource_id=None,
+            enable_high_log_scale_mode=False,
         )
 
         dec_3 = AKSManagedClusterCreateDecorator(
@@ -10969,6 +10970,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             create_dcra=True,
             enable_syslog=None,
             azure_monitor_private_link_scope_resource_id=None,
+            enable_high_log_scale_mode=False,
         )
 
         dec_3 = AKSManagedClusterUpdateDecorator(
@@ -11387,7 +11389,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_11.context.attach_mc(mc_11)
         with self.assertRaises(ArgumentUsageError):
             dec_11.update_azure_service_mesh_profile(mc_11)
-    
+
     def test_set_up_app_routing_profile(self):
         dec_1 = AKSManagedClusterCreateDecorator(
             self.cmd,
