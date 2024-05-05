@@ -356,7 +356,7 @@ def load_arguments(self, _):
         c.argument('enable_syslog', arg_type=get_three_state_flag())
         c.argument('data_collection_settings')
         c.argument('azure_monitor_private_link_scope_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
-        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag())
+        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag(), is_preview=True)
         c.argument('aci_subnet_name')
         c.argument('appgw_name', arg_group='Application Gateway')
         c.argument('appgw_subnet_cidr', arg_group='Application Gateway')
@@ -594,7 +594,7 @@ def load_arguments(self, _):
         c.argument('enable_syslog', arg_type=get_three_state_flag())
         c.argument('data_collection_settings')
         c.argument('azure_monitor_private_link_scope_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
-        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag())
+        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag(), is_preview=True)
 
     with self.argument_context('aks get-credentials', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
