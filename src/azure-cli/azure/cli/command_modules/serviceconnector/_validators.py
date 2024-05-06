@@ -315,7 +315,7 @@ def intelligent_experience(cmd, namespace, missing_args):
         }
         logger.warning('Auth info is not specified, use default one: --system-identity')
         if opt_out_auth(namespace):
-            logger.warning('Auth info is only used to generate configurations. ' + \
+            logger.warning('Auth info is only used to generate configurations. %s',
                            'Skip enabling identity and role assignments.')
     elif 'user_account_auth_info' in missing_args:
         cmd_arg_values['user_account_auth_info'] = {
