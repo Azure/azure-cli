@@ -8130,7 +8130,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension"
         get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2022-06-01'
         self.cmd(get_cmd, checks=[
-            self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}'.lower())
+            self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
         ])
 
         # check the DCE-A was created when high log scale mode enabled
@@ -8138,7 +8138,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             dcea_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint"
             get_cmd = f'rest --method get --url https://management.azure.com{dcea_resource_id}?api-version=2022-06-01'
             self.cmd(get_cmd, checks=[
-                self.check('properties.dataCollectionEndpointId', f'{dce_resource_id}'.lower())
+                self.check('properties.dataCollectionEndpointId', f'{dce_resource_id}')
             ])
 
         # make sure monitoring can be smoothly disabled
