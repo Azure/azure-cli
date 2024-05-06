@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import re
 import time
 from knack.log import get_logger
 from knack.util import todict, CLIError
@@ -547,3 +548,25 @@ def get_secret_type_for_update(authInfo):
     if 'secretInfo' in authInfo:
         return authInfo['secretInfo']['secretType']
     return ''
+
+
+# Decorator for AKS configurations.
+def is_aks_linker_by_id(resource_id):
+    pattern = r'/subscriptions/([^/]+)/resourceGroups/([^/]+)/providers/Microsoft.ContainerService' + \
+        r'/managedClusters/([^/]+)/providers/Microsoft.ServiceLinker/linkers/([^/]+)'
+    return re.match(pattern, resource_id, re.IGNORECASE) is not None
+
+
+def get_aks_resource_name(linker):
+    secret_name = get_aks_resource_secret_name(linker["name"])
+    if linker["authInfo"] is not None and linker["authInfo"].get("authType") == "userAssignedIdentity" and \
+            not (linker["targetService"]["resourceProperties"] is not None and
+                 linker["targetService"]["resourceProperties"].get("connectAsKubernetesCsiDriver")):
+        service_account_name = f'sc-account-{linker["authInfo"].get("clientId")}'
+        return f'{secret_name} / {service_account_name}'
+    return secret_name
+
+
+def get_aks_resource_secret_name(connection_name):
+    valid_name = re.sub(r'[^a-zA-Z0-9]', '', connection_name, flags=re.IGNORECASE)
+    return f'sc-{valid_name}-secret'
