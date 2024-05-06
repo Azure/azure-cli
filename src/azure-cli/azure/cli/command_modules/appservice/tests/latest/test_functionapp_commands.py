@@ -615,6 +615,8 @@ class FunctionappDaprConfig(ScenarioTest):
             JMESPathCheck('daprConfig', None)
         ])
 
+        time.sleep(1200)
+
         self.cmd('functionapp config container set -g {} -n {} --enable-dapr true --dapr-app-id daprappid --dal false'.format(
             resource_group,
             functionapp_name
