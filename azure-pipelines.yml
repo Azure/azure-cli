@@ -971,6 +971,13 @@ jobs:
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
 
+        Noble ${{ arch.name }}:
+          # 24.04
+          deb_system: ubuntu
+          distro: noble
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
+
         # https://wiki.debian.org/DebianReleases
         Buster ${{ arch.name }}:
           # 10
@@ -1029,6 +1036,11 @@ jobs:
         Jammy ${{ arch.name }}:
           deb_system: ubuntu
           distro: jammy
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
+        Noble ${{ arch.name }}:
+          deb_system: ubuntu
+          distro: noble
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
         Buster ${{ arch.name }}:
