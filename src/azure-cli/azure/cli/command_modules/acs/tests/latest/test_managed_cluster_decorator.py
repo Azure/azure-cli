@@ -7696,7 +7696,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             create_dcra=True,
             enable_syslog=None,
             azure_monitor_private_link_scope_resource_id=None,
-            enable_high_log_scale_mode=False,
+            enable_high_log_scale_mode=None,
         )
 
         dec_3 = AKSManagedClusterCreateDecorator(
@@ -10970,7 +10970,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             create_dcra=True,
             enable_syslog=None,
             azure_monitor_private_link_scope_resource_id=None,
-            enable_high_log_scale_mode=False,
+            enable_high_log_scale_mode=None,
         )
 
         dec_3 = AKSManagedClusterUpdateDecorator(
