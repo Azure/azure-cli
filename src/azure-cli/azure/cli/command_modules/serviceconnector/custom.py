@@ -57,8 +57,7 @@ def connection_list(client,
                     source_id=None,
                     cluster=None,
                     site=None, slot=None,
-                    spring=None, app=None, deployment=None,
-                    opt_out_list=None):
+                    spring=None, app=None, deployment=None):
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
     return auto_register(client.list, resource_uri=source_id)
@@ -112,8 +111,7 @@ def connection_show(client,
                     indentifier=None,
                     cluster=None,
                     site=None, slot=None,
-                    spring=None, app=None, deployment=None,
-                    opt_out_list=None):
+                    spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(
             err_msg.format('--source-id, --connection'))
@@ -144,8 +142,7 @@ def connection_delete(client,
                       cluster=None,
                       site=None, slot=None,
                       spring=None, app=None, deployment=None,
-                      no_wait=False,
-                      opt_out_list=None):
+                      no_wait=False):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
 
@@ -180,8 +177,7 @@ def connection_list_configuration(client,
                                   indentifier=None,
                                   cluster=None,
                                   site=None, slot=None,
-                                  spring=None, app=None, deployment=None,
-                                  opt_out_list=None):
+                                  spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
     configurations = auto_register(client.list_configurations,
@@ -257,8 +253,7 @@ def connection_validate(cmd, client,
                         indentifier=None,
                         cluster=None,
                         site=None, slot=None,
-                        spring=None, app=None, deployment=None,
-                        opt_out_list=None):
+                        spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
 

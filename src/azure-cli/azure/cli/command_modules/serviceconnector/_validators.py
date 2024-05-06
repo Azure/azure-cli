@@ -303,11 +303,6 @@ def intelligent_experience(cmd, namespace, missing_args):
         if getattr(namespace, arg, None) is not None:
             cmd_arg_values[arg] = getattr(namespace, arg)
 
-    opt_out_auth_message = ''
-    if opt_out_auth(namespace):
-        opt_out_auth_message += '. Auth info is only used to generate configurations. ' + \
-            'Skip enabling identity and role assignments.'
-
     # for auth info without additional parameters
     if 'secret_auth_info_auto' in missing_args:
         cmd_arg_values['secret_auth_info_auto'] = {
@@ -318,7 +313,10 @@ def intelligent_experience(cmd, namespace, missing_args):
         cmd_arg_values['system_identity_auth_info'] = {
             'auth_type': 'systemAssignedIdentity'
         }
-        logger.warning('Auth info is not specified, use default one: --system-identity%s', opt_out_auth_message)
+        logger.warning('Auth info is not specified, use default one: --system-identity')
+        if opt_out_auth(namespace):
+            logger.warning('Auth info is only used to generate configurations. ' + \
+                           'Skip enabling identity and role assignments.')
     elif 'user_account_auth_info' in missing_args:
         cmd_arg_values['user_account_auth_info'] = {
             'auth_type': 'userAccount'
