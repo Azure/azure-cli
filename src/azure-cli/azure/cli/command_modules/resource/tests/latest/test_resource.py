@@ -2229,7 +2229,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('resource show -n {resource-three} -g {resource-group-two} --resource-type {resource-type-specs}')
 
         # check resource2 does not exist in Azure - should have been purged
-        self.cmd('resource list -g {resource-group-two}', checks=self.check("length([?name=='{resource-two}'])", 0))
+        self.cmd('resource list -g {resource-group-two} --name "{resource-two}"', checks=self.check("length(@)", 0))
 
         # delete resource group two
         self.cmd('group delete --name {resource-group-two} --yes')
@@ -2259,7 +2259,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('group show -n {resource-three}')
 
         # check resource2 does not exist in Azure - should have been purged
-        self.cmd('resource list', checks=self.check("length([?name=='{resource-two}'])", 0))
+        self.cmd('resource list --name "{resource-two}"', checks=self.check("length(@)", 0))
 
         # cleanup
         self.cmd('stack sub delete --name {name} --action-on-unmanage detachAll --yes')
@@ -2281,7 +2281,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group-two} --template-file "{template-file}" --deny-settings-mode "none" --aou deleteAll --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # confirm template spec has been removed from azure
-        self.cmd('resource list -g {resource-group-two}',  checks=self.check("length([?name=='{template-spec-name}'])", 0))
+        self.cmd('resource list -g {resource-group-two} --name "{template-spec-name}"', checks=self.check('length(@)', 0))
 
         #confirm rg resource1 has been removed from azure
         self.cmd('group list', checks=self.check("length([?name=='{resource-one}'])", 0))
@@ -2444,7 +2444,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack sub delete --name {name} --action-on-unmanage deleteResources --yes')
 
         #confirm resource2 has been removed from Azure
-        self.cmd('resource list', checks=self.check("length([?name=='{resource-two}'])", 0))
+        self.cmd('resource list --name "{resource-two}"', checks=self.check("length(@)", 0))
 
         # cleanup - delete resource group two
         self.cmd('group delete --name {resource-group-two} --yes')
@@ -2490,7 +2490,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack sub delete --name {name} --action-on-unmanage deleteAll --yes')
 
         # confirm template spec has been removed from azure
-        self.cmd('resource list -g {resource-group-two}',  checks=self.check("length([?name=='{template-spec-name}'])", 0))
+        self.cmd('resource list -g {resource-group-two} --name "{template-spec-name}"', checks=self.check("length(@)", 0))
 
         #confirm rg resource1 has been removed from azure
         self.cmd('group list', checks=self.check("length([?name=='{resource-one}'])", 0))
@@ -2609,7 +2609,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack group create --name {name} -g {resource-group-two} --template-file "{track-rg-file}" --deny-settings-mode "none" --action-on-unmanage detachAll --parameters "rgname={resource-one}" "tsname={template-spec-name}" "rgDeploymentName=deploy-rg-{location}" --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # check template spec exists in Azure
-        self.cmd('resource list -g {resource-group-two}', checks=self.check("length([?name=='{template-spec-name}'])", 1))
+        self.cmd('resource list -g {resource-group-two} --name "{template-spec-name}"', checks=self.check("length(@)", 1))
 
         # check rg resource1 exists in Azure
         self.cmd('group show -n {resource-one}')
@@ -2618,7 +2618,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack group create --name {name} -g {resource-group-two} --template-file "{template-file}" --deny-settings-mode "none" --aou deleteAll --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # confirm template spec has been removed from azure
-        self.cmd('resource list -g {resource-group-two}',  checks=self.check("length([?name=='{template-spec-name}'])", 0))
+        self.cmd('resource list -g {resource-group-two} --name "{template-spec-name}"',  checks=self.check("length(@)", 0))
 
         #confirm rg resource1 has been removed from azure
         self.cmd('group list', checks=self.check("length([?name=='{resource-one}'])", 0))
@@ -2821,7 +2821,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack group delete -g {resource-group-two} --name {name} --aou deleteResources --yes')
 
         # confirm resource2 has been removed from Azure
-        self.cmd('resource list', checks=self.check("length([?name=='{resource-two}'])", 0))
+        self.cmd('resource list --name "{resource-two}"', checks=self.check("length(@)", 0))
 
         # cleanup - delete resource group two
         self.cmd('group delete --name {resource-group-two} --yes')
@@ -2833,7 +2833,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack group create --name {name} -g {resource-group-two} --template-file "{track-rg-file}" --deny-settings-mode "none" --action-on-unmanage detachAll --parameters "rgname={resource-one}" "tsname={template-spec-name}" "rgDeploymentName=deploy-rg-{location}" --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # check template spec exists in Azure
-        self.cmd('resource list -g {resource-group-two}', checks=self.check("length([?name=='{template-spec-name}'])", 1))
+        self.cmd('resource list -g {resource-group-two} --name "{template-spec-name}"', checks=self.check("length(@)", 1))
 
         # check rg resource1 exists in Azure
         self.cmd('group show -n {resource-one}')
@@ -2842,7 +2842,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack group delete --name {name} -g {resource-group-two} --action-on-unmanage deleteAll --yes')
 
         # confirm template spec has been removed from azure
-        self.cmd('resource list -g {resource-group-two}',  checks=self.check("length([?name=='{template-spec-name}'])", 0))
+        self.cmd('resource list -g {resource-group-two} --name "{template-spec-name}"',  checks=self.check("length(@)", 0))
 
         #confirm rg resource1 has been removed from azure
         self.cmd('group list', checks=self.check("length([?name=='{resource-one}'])", 0))
@@ -2984,7 +2984,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('group show -n {resource-three}')
 
         # check resource2 does not exist in Azure - should have been purged
-        self.cmd('resource list', checks=self.check("length([?name=='{resource-two}'])", 0))
+        self.cmd('resource list --name "{resource-two}"', checks=self.check("length(@)", 0))
 
         # cleanup
         self.cmd('stack mg delete --name {name} --management-group-id {mg} --action-on-unmanage detachAll --yes')
