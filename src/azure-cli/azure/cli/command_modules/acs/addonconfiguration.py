@@ -677,85 +677,85 @@ def ensure_container_insights_for_monitoring(
                     error = e
             else:
                 raise error
-        # create dce association
-        if enable_high_log_scale_mode or (azure_monitor_private_link_scope_resource_id is not None):
-            association_body = json.dumps(
-                {
-                    "location": cluster_region,
-                    "properties": {
-                        "dataCollectionEndpointId": dce_resource_id,
-                        "description": "routes monitoring data to a Log Analytics workspace",
-                    },
-                }
-            )
-            association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint?api-version=2022-06-01"
-            for _ in range(3):
-                try:
-                    send_raw_request(
-                        cmd.cli_ctx,
-                        "PUT" if not remove_monitoring else "DELETE",
-                        association_url,
-                        body=association_body,
+            # create dce association
+            if enable_high_log_scale_mode or (azure_monitor_private_link_scope_resource_id is not None):
+                association_body = json.dumps(
+                    {
+                        "location": cluster_region,
+                        "properties": {
+                            "dataCollectionEndpointId": dce_resource_id,
+                            "description": "routes monitoring data to a Log Analytics workspace",
+                        },
+                    }
+                )
+                association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                    f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint?api-version=2022-06-01"
+                for _ in range(3):
+                    try:
+                        send_raw_request(
+                            cmd.cli_ctx,
+                            "PUT" if not remove_monitoring else "DELETE",
+                            association_url,
+                            body=association_body,
+                        )
+                        error = None
+                        break
+                    except AzCLIError as e:
+                        error = e
+                else:
+                    raise error
+                if azure_monitor_private_link_scope_resource_id is not None:
+                    # link DCE to AMPLS
+                    link_dce_ampls_body = json.dumps(
+                        {
+                            "properties": {
+                                "linkedResourceId": dce_resource_id,
+                            },
+                        }
                     )
-                    error = None
-                    break
-                except AzCLIError as e:
-                    error = e
-            else:
-                raise error
-            if azure_monitor_private_link_scope_resource_id is not None:
-                # link DCE to AMPLS
-                link_dce_ampls_body = json.dumps(
-                    {
-                        "properties": {
-                            "linkedResourceId": dce_resource_id,
-                        },
-                    }
-                )
-                link_dce_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                    f"{azure_monitor_private_link_scope_resource_id}/scopedresources/{dataCollectionEndpointName}-connection?api-version=2021-07-01-preview"
+                    link_dce_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                        f"{azure_monitor_private_link_scope_resource_id}/scopedresources/{dataCollectionEndpointName}-connection?api-version=2021-07-01-preview"
 
-                for _ in range(3):
-                    try:
-                        send_raw_request(
-                            cmd.cli_ctx,
-                            "PUT",
-                            link_dce_ampls_url,
-                            body=link_dce_ampls_body,
-                        )
-                        error = None
-                        break
-                    except AzCLIError as e:
-                        error = e
-                else:
-                    raise error
+                    for _ in range(3):
+                        try:
+                            send_raw_request(
+                                cmd.cli_ctx,
+                                "PUT",
+                                link_dce_ampls_url,
+                                body=link_dce_ampls_body,
+                            )
+                            error = None
+                            break
+                        except AzCLIError as e:
+                            error = e
+                    else:
+                        raise error
 
-                # link workspace to AMPLS
-                link_ws_ampls_body = json.dumps(
-                    {
-                        "properties": {
-                            "linkedResourceId": workspace_resource_id,
-                        },
-                    }
-                )
-                link_ws_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                    f"{azure_monitor_private_link_scope_resource_id}/scopedresources/{workspace_name}-connection?api-version=2021-07-01-preview"
+                    # link workspace to AMPLS
+                    link_ws_ampls_body = json.dumps(
+                        {
+                            "properties": {
+                                "linkedResourceId": workspace_resource_id,
+                            },
+                        }
+                    )
+                    link_ws_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                        f"{azure_monitor_private_link_scope_resource_id}/scopedresources/{workspace_name}-connection?api-version=2021-07-01-preview"
 
-                for _ in range(3):
-                    try:
-                        send_raw_request(
-                            cmd.cli_ctx,
-                            "PUT",
-                            link_ws_ampls_url,
-                            body=link_ws_ampls_body,
-                        )
-                        error = None
-                        break
-                    except AzCLIError as e:
-                        error = e
-                else:
-                    raise error
+                    for _ in range(3):
+                        try:
+                            send_raw_request(
+                                cmd.cli_ctx,
+                                "PUT",
+                                link_ws_ampls_url,
+                                body=link_ws_ampls_body,
+                            )
+                            error = None
+                            break
+                        except AzCLIError as e:
+                            error = e
+                    else:
+                        raise error
 
 
 def validate_data_collection_settings(dataCollectionSettings):
