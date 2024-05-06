@@ -2844,7 +2844,7 @@ def _prepare_validate_stack_at_scope(
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
     excluded_actions_array = _prepare_stacks_excluded_actions(deny_settings_excluded_actions)
 
-    tags = tags or { }
+    tags = tags or {}
 
     if query_string and not template_uri:
         raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
