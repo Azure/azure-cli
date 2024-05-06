@@ -4216,6 +4216,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
     def _handle_upgrade_asm(self, new_profile: ServiceMeshProfile) -> Tuple[ServiceMeshProfile, bool]:
         mesh_upgrade_command = self.raw_param.get("mesh_upgrade_command", None)
+        supress_confirmation = self.raw_param.get("yes", False)
         updated = False
 
         # deal with mesh upgrade commands
@@ -4245,9 +4246,10 @@ class AKSManagedClusterContext(BaseAKSContext):
                     f"Please ensure all data plane workloads have been rolled over to revision {revision_to_keep} "
                     "so that they are still part of the mesh.\nAre you sure you want to proceed?"
                 )
-                if prompt_y_n(msg, default="y"):
-                    new_profile.istio.revisions.remove(revision_to_remove)
-                    updated = True
+                if not supress_confirmation and not prompt_y_n(msg, default="n"):
+                    raise DecoratorEarlyExitException()
+                new_profile.istio.revisions.remove(revision_to_remove)
+                updated = True
             elif (
                 mesh_upgrade_command == CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START and
                 requested_revision is not None
@@ -5313,6 +5315,37 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return self.raw_param.get("upgrade_override_until")
+
+    def _get_enable_cost_analysis(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_cost_analysis.
+        When enabled, if both enable_cost_analysis and disable_cost_analysis are
+        specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        enable_cost_analysis = self.raw_param.get("enable_cost_analysis")
+
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_cost_analysis and self.get_disable_cost_analysis():
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-cost-analysis and --disable-cost-analysis at the same time."
+                )
+
+        return enable_cost_analysis
+
+    def get_enable_cost_analysis(self) -> bool:
+        """Obtain the value of enable_cost_analysis.
+        :return: bool
+        """
+        return self._get_enable_cost_analysis(enable_validation=True)
+
+    def get_disable_cost_analysis(self) -> bool:
+        """Obtain the value of disable_cost_analysis.
+        :return: bool
+        """
+        # Note: No need to check for mutually exclusive parameter with enable-cost-analysis here
+        # because it's already checked in _get_enable_cost_analysis
+        return self.raw_param.get("disable_cost_analysis")
 
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
@@ -6491,6 +6524,29 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def set_up_cost_analysis(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_cost_analysis():
+            if mc.metrics_profile is None:
+                mc.metrics_profile = self.models.ManagedClusterMetricsProfile()
+            if mc.metrics_profile.cost_analysis is None:
+                mc.metrics_profile.cost_analysis = self.models.ManagedClusterCostAnalysis()
+
+            # set enabled
+            mc.metrics_profile.cost_analysis.enabled = True
+
+        # Default is disabled so no need to worry about that here
+
+        return mc
+
+    def set_up_metrics_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        mc = self.set_up_cost_analysis(mc)
+
+        return mc
+
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
@@ -6567,6 +6623,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_azure_service_mesh_profile(mc)
         # set up for azure container storage
         mc = self.set_up_azure_container_storage(mc)
+        # set up metrics profile
+        mc = self.set_up_metrics_profile(mc)
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
             mc = self._restore_defaults_in_mc(mc)
@@ -8186,6 +8244,39 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_cost_analysis(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_cost_analysis():
+            if mc.metrics_profile is None:
+                mc.metrics_profile = self.models.ManagedClusterMetricsProfile()
+            if mc.metrics_profile.cost_analysis is None:
+                mc.metrics_profile.cost_analysis = self.models.ManagedClusterCostAnalysis()
+
+            # set enabled
+            mc.metrics_profile.cost_analysis.enabled = True
+
+        if self.context.get_disable_cost_analysis():
+            if mc.metrics_profile is None:
+                mc.metrics_profile = self.models.ManagedClusterMetricsProfile()
+            if mc.metrics_profile.cost_analysis is None:
+                mc.metrics_profile.cost_analysis = self.models.ManagedClusterCostAnalysis()
+
+            # set disabled
+            mc.metrics_profile.cost_analysis.enabled = False
+
+        return mc
+
+    def update_metrics_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Updates the metricsProfile field of the managed cluster
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        mc = self.update_cost_analysis(mc)
+
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -8257,6 +8348,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_azure_container_storage(mc)
         # update cluster upgrade settings
         mc = self.update_upgrade_settings(mc)
+        # update metrics profile
+        mc = self.update_metrics_profile(mc)
         return mc
 
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:
