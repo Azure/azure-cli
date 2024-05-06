@@ -478,7 +478,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.remote_volume_resource_id = AAZStrArg(
-            options=["--remote-volume-resource-id"],
+            options=["--remote-volume-id", "--remote-volume-resource-id"],
             arg_group="Replication",
             help="The resource ID of the remote volume.",
         )
