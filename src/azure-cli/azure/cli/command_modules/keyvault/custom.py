@@ -671,8 +671,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
         # if client.get raise exception, we can take it as no existing vault found
         # just continue the normal creation process
         pass
-    logger.warning('We will enable rbac authorization by default in the near future,'
-                   ' please manually specify --enable-rbac-authorization if you want to overwrite the default value.')
     from azure.cli.core._profile import Profile, _TENANT_ID
     from azure.cli.command_modules.role import graph_client_factory, GraphError
 
