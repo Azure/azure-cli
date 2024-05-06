@@ -8122,15 +8122,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             # check the AMPLS was linked with DCE and workspace
             ampls_scoped_resources_cmd = f'rest --method get --url https://management.azure.com{ampls_resource_id}/scopedresources?api-version=2021-07-01-preview'
             self.cmd(ampls_scoped_resources_cmd, checks=[
-               self.check('value[0].properties.linkedResourceId', f'{dce_resource_id}'),
-               self.check('value[1].properties.linkedResourceId', f'{workspace_resource_id}'),
+               self.check('value[0].properties.linkedResourceId', f'{dce_resource_id}'.lower()),
+               self.check('value[1].properties.linkedResourceId', f'{workspace_resource_id}'.lower()),
             ])
 
         # check that the DCR-A was created
         dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension"
         get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2022-06-01'
         self.cmd(get_cmd, checks=[
-            self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
+            self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}'.lower())
         ])
 
         # check the DCE-A was created when high log scale mode enabled
@@ -8138,7 +8138,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             dcea_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint"
             get_cmd = f'rest --method get --url https://management.azure.com{dcea_resource_id}?api-version=2022-06-01'
             self.cmd(get_cmd, checks=[
-                self.check('properties.dataCollectionEndpointId', f'{dce_resource_id}')
+                self.check('properties.dataCollectionEndpointId', f'{dce_resource_id}'.lower())
             ])
 
         # make sure monitoring can be smoothly disabled
