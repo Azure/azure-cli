@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "netappfiles account backup",
+    "netappfiles resource region-info",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Azure NetApp Files (ANF) Account Backup Resources
+    """Provides region specific information
     """
     pass
 

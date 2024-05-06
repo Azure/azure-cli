@@ -125,7 +125,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         snapshot = self.cmd("az netappfiles snapshot show -g {rg} -a %s -p %s -v %s -s %s" %
                             (account_name, pool_name, volume_name, snapshot_name)).get_output_in_json()
         self.cmd("az netappfiles volume revert -g {rg} -a %s -p %s -v %s -s %s" %
-                 (account_name, pool_name, volume_name, snapshot["snapshotId"]))
+                 (account_name, pool_name, volume_name, snapshot['id']))
         snapshot_list = self.cmd("az netappfiles snapshot list -g {rg} -a %s -p %s -v %s" %
                                  (account_name, pool_name, volume_name)).get_output_in_json()
         assert len(snapshot_list) == 1

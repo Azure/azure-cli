@@ -29,7 +29,7 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles account create -g {rg} -a {acc} -l {loc}")
         self.cmd("az netappfiles pool create -g {rg} -a {acc} -p {pool} -l {loc} --service-level {service_level} "
                  "--size {pool_size} --qos-type {qos}")
-    @unittest.skip('(drp failure) DRP stamp pinning failing on the environment, no way to test until fixed')
+#    @unittest.skip('(drp failure) DRP stamp pinning failing on the environment, no way to test until fixed')
     def test_create_get_list_delete_volume_group(self):
         # Create Volume Group with defaults
         self.prepare_for_volume_group_creation()
@@ -87,7 +87,7 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles pool delete -g {rg} -a {acc} -p {pool}")
         self.cmd("az netappfiles account delete -g {rg} -a {acc}")
 
-    @unittest.skip('(drp failure) DRP stamp pinning failing on the environment, no way to test until fixed')
+    #@unittest.skip('(drp failure) DRP stamp pinning failing on the environment, no way to test until fixed')
     def test_hrs_volume_groups(self):
         # Create Volume Group with minimum size
         self.prepare_for_volume_group_creation()

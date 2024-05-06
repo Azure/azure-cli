@@ -12,16 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles volume backup update",
+    "netappfiles account backup-vault backup update",
 )
 class Update(AAZCommand):
-    """Update a backup for the volume
+    """Update a backup under the Backup Vault
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/backups/{}", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups/{}", "2023-11-01"],
         ]
     }
 
@@ -50,42 +50,29 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
             ),
         )
         _args_schema.backup_name = AAZStrArg(
-            options=["-b", "--name", "--backup-name"],
+            options=["-b", "-n", "--name", "--backup-name"],
             help="The name of the backup",
             required=True,
-            id_part="child_name_3",
+            id_part="child_name_2",
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_.]{0,255}$",
             ),
         )
-        _args_schema.pool_name = AAZStrArg(
-            options=["-p", "--pool-name"],
-            help="The name of the capacity pool",
+        _args_schema.backup_vault_name = AAZStrArg(
+            options=["-v", "--backup-vault-name"],
+            help="The name of the Backup Vault",
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-        )
-        _args_schema.volume_name = AAZStrArg(
-            options=["-n", "-v", "--volume-name"],
-            help="The name of the volume",
-            required=True,
-            id_part="child_name_2",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
-            ),
         )
 
         # define Arg Group "Properties"
@@ -95,12 +82,6 @@ class Update(AAZCommand):
             options=["--label"],
             arg_group="Properties",
             help="Label for backup",
-            nullable=True,
-        )
-        _args_schema.use_existing_snapshot = AAZBoolArg(
-            options=["--use-existing-snapshot"],
-            arg_group="Properties",
-            help="Manual backup an already existing snapshot. This will always be false for scheduled backups and true/false for manual backups",
             nullable=True,
         )
         return cls._args_schema
@@ -149,7 +130,7 @@ class Update(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/backups/{backupName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/backupVaults/{backupVaultName}/backups/{backupName}",
                 **self.url_parameters
             )
 
@@ -173,7 +154,7 @@ class Update(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "poolName", self.ctx.args.pool_name,
+                    "backupVaultName", self.ctx.args.backup_vault_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -184,10 +165,6 @@ class Update(AAZCommand):
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
-                **self.serialize_url_param(
-                    "volumeName", self.ctx.args.volume_name,
-                    required=True,
-                ),
             }
             return parameters
 
@@ -195,7 +172,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -260,7 +237,7 @@ class Update(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/backups/{backupName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/backupVaults/{backupVaultName}/backups/{backupName}",
                 **self.url_parameters
             )
 
@@ -284,7 +261,7 @@ class Update(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "poolName", self.ctx.args.pool_name,
+                    "backupVaultName", self.ctx.args.backup_vault_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -295,10 +272,6 @@ class Update(AAZCommand):
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
-                **self.serialize_url_param(
-                    "volumeName", self.ctx.args.volume_name,
-                    required=True,
-                ),
             }
             return parameters
 
@@ -306,7 +279,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -369,7 +342,6 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("label", AAZStrType, ".label")
-                properties.set_prop("useExistingSnapshot", AAZBoolType, ".use_existing_snapshot")
 
             return _instance_value
 
@@ -391,7 +363,6 @@ class _UpdateHelper:
     def _build_schema_backup_read(cls, _schema):
         if cls._schema_backup_read is not None:
             _schema.id = cls._schema_backup_read.id
-            _schema.location = cls._schema_backup_read.location
             _schema.name = cls._schema_backup_read.name
             _schema.properties = cls._schema_backup_read.properties
             _schema.system_data = cls._schema_backup_read.system_data
@@ -403,9 +374,6 @@ class _UpdateHelper:
         backup_read = _schema_backup_read
         backup_read.id = AAZStrType(
             flags={"read_only": True},
-        )
-        backup_read.location = AAZStrType(
-            flags={"required": True},
         )
         backup_read.name = AAZStrType(
             flags={"read_only": True},
@@ -424,6 +392,10 @@ class _UpdateHelper:
         properties = _schema_backup_read.properties
         properties.backup_id = AAZStrType(
             serialized_name="backupId",
+            flags={"read_only": True},
+        )
+        properties.backup_policy_resource_id = AAZStrType(
+            serialized_name="backupPolicyResourceId",
             flags={"read_only": True},
         )
         properties.backup_type = AAZStrType(
@@ -446,12 +418,15 @@ class _UpdateHelper:
         properties.size = AAZIntType(
             flags={"read_only": True},
         )
+        properties.snapshot_name = AAZStrType(
+            serialized_name="snapshotName",
+        )
         properties.use_existing_snapshot = AAZBoolType(
             serialized_name="useExistingSnapshot",
         )
-        properties.volume_name = AAZStrType(
-            serialized_name="volumeName",
-            flags={"read_only": True},
+        properties.volume_resource_id = AAZStrType(
+            serialized_name="volumeResourceId",
+            flags={"required": True},
         )
 
         system_data = _schema_backup_read.system_data
@@ -475,7 +450,6 @@ class _UpdateHelper:
         )
 
         _schema.id = cls._schema_backup_read.id
-        _schema.location = cls._schema_backup_read.location
         _schema.name = cls._schema_backup_read.name
         _schema.properties = cls._schema_backup_read.properties
         _schema.system_data = cls._schema_backup_read.system_data

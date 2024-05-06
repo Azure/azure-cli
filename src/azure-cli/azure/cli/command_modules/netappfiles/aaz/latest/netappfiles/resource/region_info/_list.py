@@ -12,23 +12,24 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles volume backup status",
+    "netappfiles resource region-info list",
 )
-class Status(AAZCommand):
-    """Get the status of the backup for a volume
+class List(AAZCommand):
+    """List region specific information.
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/backupstatus", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/regioninfos", "2023-11-01"],
         ]
     }
 
+    AZ_SUPPORT_PAGINATION = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_paging(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -41,45 +42,14 @@ class Status(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.account_name = AAZStrArg(
-            options=["-a", "--account-name"],
-            help="The name of the NetApp account",
+        _args_schema.location = AAZResourceLocationArg(
             required=True,
-            id_part="name",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
-            ),
-        )
-        _args_schema.pool_name = AAZStrArg(
-            options=["-p", "--pool-name"],
-            help="The name of the capacity pool",
-            required=True,
-            id_part="child_name_1",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
-            ),
-        )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            required=True,
-        )
-        _args_schema.volume_name = AAZStrArg(
-            options=["-n", "-v", "--volume-name"],
-            help="The name of the volume",
-            required=True,
-            id_part="child_name_2",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
-            ),
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.BackupsGetStatus(ctx=self.ctx)()
+        self.NetAppResourceRegionInfosList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -91,10 +61,11 @@ class Status(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+        return result, next_link
 
-    class BackupsGetStatus(AAZHttpOperation):
+    class NetAppResourceRegionInfosList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -108,7 +79,7 @@ class Status(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/backupStatus",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.NetApp/locations/{location}/regionInfos",
                 **self.url_parameters
             )
 
@@ -124,23 +95,11 @@ class Status(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "accountName", self.ctx.args.account_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "poolName", self.ctx.args.pool_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "location", self.ctx.args.location,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "volumeName", self.ctx.args.volume_name,
                     required=True,
                 ),
             }
@@ -150,7 +109,7 @@ class Status(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -183,43 +142,76 @@ class Status(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.error_message = AAZStrType(
-                serialized_name="errorMessage",
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType()
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.healthy = AAZBoolType(
+            _element.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.last_transfer_size = AAZIntType(
-                serialized_name="lastTransferSize",
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _schema_on_200.last_transfer_type = AAZStrType(
-                serialized_name="lastTransferType",
+            _element.type = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.mirror_state = AAZStrType(
-                serialized_name="mirrorState",
-                flags={"read_only": True},
+
+            properties = cls._schema_on_200.value.Element.properties
+            properties.availability_zone_mappings = AAZListType(
+                serialized_name="availabilityZoneMappings",
             )
-            _schema_on_200.relationship_status = AAZStrType(
-                serialized_name="relationshipStatus",
-                flags={"read_only": True},
+            properties.storage_to_network_proximity = AAZStrType(
+                serialized_name="storageToNetworkProximity",
             )
-            _schema_on_200.total_transfer_bytes = AAZIntType(
-                serialized_name="totalTransferBytes",
-                flags={"read_only": True},
+
+            availability_zone_mappings = cls._schema_on_200.value.Element.properties.availability_zone_mappings
+            availability_zone_mappings.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.availability_zone_mappings.Element
+            _element.availability_zone = AAZStrType(
+                serialized_name="availabilityZone",
             )
-            _schema_on_200.unhealthy_reason = AAZStrType(
-                serialized_name="unhealthyReason",
-                flags={"read_only": True},
+            _element.is_available = AAZBoolType(
+                serialized_name="isAvailable",
+            )
+
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
             )
 
             return cls._schema_on_200
 
 
-class _StatusHelper:
-    """Helper class for Status"""
+class _ListHelper:
+    """Helper class for List"""
 
 
-__all__ = ["Status"]
+__all__ = ["List"]
