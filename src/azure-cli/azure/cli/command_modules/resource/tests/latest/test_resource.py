@@ -2190,7 +2190,7 @@ class DeploymentStacksTest(ScenarioTest):
         #create deployment stack with template spec and parameter file
         self.cmd('stack sub create --name {name} --location {location} --template-spec "{template-spec-id}" --deny-settings-mode "none" --parameters "{parameter-file}" --action-on-unmanage detachAll --no-wait', checks=self.is_empty())
 
-        time.sleep(20)
+        time.sleep(40)
 
         # check if the stack was created successfully
         self.cmd('stack sub show --name {name}', checks=self.check('provisioningState', 'succeeded'))
@@ -2573,7 +2573,7 @@ class DeploymentStacksTest(ScenarioTest):
         # create deployment stack with template spec and parameter file
         self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-spec "{template-spec-id}" --deny-settings-mode "none" --action-on-unmanage detachAll --parameters "{parameter-file}" --yes --no-wait', checks=self.is_empty())
 
-        time.sleep(20)
+        time.sleep(40)
 
         # check if the stack was created successfully
         self.cmd('stack group show --name {name} -g {resource-group}', checks=self.check('provisioningState', 'succeeded'))
