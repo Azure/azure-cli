@@ -633,12 +633,21 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
             if scale_rule_type == "http":
                 scale_rule_def["name"] = scale_rule_name
                 scale_rule_def["custom"] = None
+                scale_rule_def["tcp"] = None
                 scale_rule_def["http"] = {}
                 scale_rule_def["http"]["metadata"] = metadata_def
                 scale_rule_def["http"]["auth"] = auth_def
+            elif scale_rule_type == "tcp":
+                scale_rule_def["name"] = scale_rule_name
+                scale_rule_def["custom"] = None
+                scale_rule_def["http"] = None
+                scale_rule_def["tcp"] = {}
+                scale_rule_def["tcp"]["metadata"] = metadata_def
+                scale_rule_def["tcp"]["auth"] = auth_def
             else:
                 scale_rule_def["name"] = scale_rule_name
                 scale_rule_def["http"] = None
+                scale_rule_def["tcp"] = None
                 scale_rule_def["custom"] = {}
                 scale_rule_def["custom"]["type"] = scale_rule_type
                 scale_rule_def["custom"]["metadata"] = metadata_def
