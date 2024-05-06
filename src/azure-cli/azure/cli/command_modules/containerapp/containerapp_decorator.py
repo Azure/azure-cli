@@ -624,8 +624,10 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
             scale_rule_def = ScaleRuleModel
             curr_metadata = {}
             if self.get_argument_scale_rule_http_concurrency():
-                if scale_rule_type in ('http', 'tcp'):
+                if scale_rule_type == 'http':
                     curr_metadata["concurrentRequests"] = str(scale_rule_http_concurrency)
+                elif scale_rule_type == 'tcp':
+                    curr_metadata["concurrentConnections"] = str(scale_rule_http_concurrency)
             metadata_def = parse_metadata_flags(scale_rule_metadata, curr_metadata)
             auth_def = parse_auth_flags(scale_rule_auth)
             if scale_rule_type == "http":
