@@ -1936,6 +1936,9 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
 def update_always_ready_settings(cmd, resource_group_name, name, settings):
     functionapp = get_raw_functionapp(cmd, resource_group_name, name)
 
+    if functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady") is None:
+        functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]["alwaysReady"] = []
+
     always_ready_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady", [])
 
     updated_always_ready_dict = _parse_key_value_pairs(settings)
