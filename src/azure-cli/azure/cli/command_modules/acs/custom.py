@@ -630,6 +630,8 @@ def aks_create(
     no_wait=False,
     aks_custom_headers=None,
     node_public_ip_tags=None,
+    # metrics profile
+    enable_cost_analysis=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -779,6 +781,9 @@ def aks_update(
     yes=False,
     no_wait=False,
     aks_custom_headers=None,
+    # metrics profile
+    enable_cost_analysis=False,
+    disable_cost_analysis=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
