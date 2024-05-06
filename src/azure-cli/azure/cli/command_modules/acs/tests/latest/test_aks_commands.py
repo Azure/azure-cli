@@ -8017,7 +8017,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         self.create_new_cluster_with_monitoring_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False, data_collection_settings=None, use_ampls=True)
 
-    def create_new_cluster_with_monitoring_aad_auth(self, resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False, data_collection_settings=None, use_ampls=False):
+    # live only due to workspace is not mocked
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_monitoring_aad_auth_uai_with_highlogscale(self, resource_group, resource_group_location,):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.create_new_cluster_with_monitoring_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False, data_collection_settings=None, use_ampls=False, highlogscale_mode_enabled=True)
+
+
+    def create_new_cluster_with_monitoring_aad_auth(self, resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False, data_collection_settings=None, use_ampls=False, highlogscale_mode_enabled=False):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -8053,6 +8062,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd += f'--data-collection-settings {data_collection_settings} ' if data_collection_settings else ''
         create_cmd += f'--enable-private-cluster ' if use_ampls else ''
         create_cmd += f'--azure-monitor-private-link-scope-resource-id {ampls_resource_id} ' if use_ampls else ''
+        create_cmd += f'--enable-high-log-scale-mode ' if highlogscale_mode_enabled else ''
 
         response = self.cmd(create_cmd, checks=[
             self.check('addonProfiles.omsagent.enabled', True),
@@ -8067,13 +8077,19 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         location = resource_group_location
         dataCollectionRuleName = f"MSCI-{location}-{aks_name}"
         dataCollectionRuleName = dataCollectionRuleName[0:64]
-        dataCollectionEndpointName = dataCollectionRuleName
+        dataCollectionEndpointName = f"MSCI-{location}-{aks_name}"
+        # Max length of the DCE name is 44 chars
+        dataCollectionEndpointName = dataCollectionEndpointName[0:43]
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
+        dce_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionEndpoints/{dataCollectionEndpointName}"
         get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2022-06-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
         ])
 
+        expected_log_stream = 'Microsoft-ContainerLogV2'
+        if highlogscale_mode_enabled:
+            expected_log_stream = 'Microsoft-ContainerLogV2-HighScale'
         if syslog_enabled:
             self.cmd(get_cmd, checks=[
                 self.check('properties.dataSources.syslog[0].streams[0]', f'Microsoft-Syslog')
@@ -8085,8 +8101,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.interval', f'1m'),
                 self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.namespaceFilteringMode', f'Include'),
                 self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.namespaces[0]', f'kube-system'),
-                self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.streams[0]', f'Microsoft-ContainerLogV2'),
-                self.check('properties.dataFlows[0].streams[0]', f'Microsoft-ContainerLogV2'),
+                self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.streams[0]', f'{expected_log_stream}'),
+                self.check('properties.dataFlows[0].streams[0]', f'{expected_log_stream}'),
                 self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.enableContainerLogV2', True)
             ])
 
@@ -8116,6 +8132,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(get_cmd, checks=[
             self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
         ])
+
+        # check the DCE-A was created when high log scale mode enabled
+        if highlogscale_mode_enabled:
+            dcea_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint"
+            get_cmd = f'rest --method get --url https://management.azure.com{dcea_resource_id}?api-version=2022-06-01'
+            self.cmd(get_cmd, checks=[
+                self.check('properties.dataCollectionEndpointId', f'{dce_resource_id}')
+            ])
 
         # make sure monitoring can be smoothly disabled
         self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
