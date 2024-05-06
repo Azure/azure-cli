@@ -2949,9 +2949,9 @@ type: command
 short-summary: Delete specified deployment stack from management group scope
 examples:
   - name: Delete stack by name.
-    text: az stack mg delete --name StackName --management-group-id myMg
+    text: az stack mg delete --name StackName --management-group-id myMg --action-on-unmanage detachAll
   - name: Delete stack by stack resource id.
-    text: az stack mg delete --id /providers/Microsoft.Management/managementGroups/myMg/providers/Microsoft.Resources/deploymentStacks/StackName --management-group-id myMg
+    text: az stack mg delete --id /providers/Microsoft.Management/managementGroups/myMg/providers/Microsoft.Resources/deploymentStacks/StackName --management-group-id myMg --action-on-unmanage deleteAll
 """
 
 helps['stack sub'] = """
@@ -3044,9 +3044,9 @@ type: command
 short-summary: Delete specified deployment stack from subscription scope
 examples:
   - name: Delete stack by name.
-    text: az stack sub delete --name StackName
+    text: az stack sub delete --name StackName --action-on-unmanage deleteResources
   - name: Delete stack by stack resource id.
-    text: az stack sub delete --id /subscriptions/111111111111/providers/Microsoft.Resources/deploymentStacks/StackName
+    text: az stack sub delete --id /subscriptions/111111111111/providers/Microsoft.Resources/deploymentStacks/StackName --action-on-unmanage detachAll 
 """
 
 helps['stack group'] = """
@@ -3135,9 +3135,9 @@ type: command
 short-summary: Delete specified deployment stack from resource group scope
 examples:
   - name: Delete stack by name.
-    text: az stack group delete --name StackName --resource-group ResourceGroup
+    text: az stack group delete --name StackName --resource-group ResourceGroup --action-on-unmanage deleteResources
   - name: Delete stack by stack resource id.
-    text: az stack group delete --id /subscriptions/111111111111/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/StackName
+    text: az stack group delete --id /subscriptions/111111111111/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/StackName --action-on-unmanage detachAll
 """
 
 helps['bicep generate-params'] = """
