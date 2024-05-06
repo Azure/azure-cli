@@ -387,17 +387,24 @@ def is_packaged_installed(package_name):
 
 
 def get_object_id_of_current_user():
-    signed_in_user = run_cli_cmd('az account show').get('user')
+    signed_in_user_info = run_cli_cmd('az account show -o json')
+    if not isinstance(signed_in_user_info, dict):
+        raise CLIInternalError(
+            f"Can't parse login user information {signed_in_user_info}")
+    signed_in_user = signed_in_user_info.get('user')
     user_type = signed_in_user.get('type')
+    if not user_type or not signed_in_user.get('name'):
+        raise CLIInternalError(
+            f"Can't get user type or name from signed-in user {signed_in_user}")
     try:
         if user_type == 'user':
-            user_info = run_cli_cmd('az ad signed-in-user show')
+            user_info = run_cli_cmd('az ad signed-in-user show -o json')
             user_object_id = user_info.get('objectId') if user_info.get(
                 'objectId') else user_info.get('id')
             return user_object_id
         if user_type == 'servicePrincipal':
             user_info = run_cli_cmd(
-                f'az ad sp show --id {signed_in_user.get("name")}')
+                f'az ad sp show --id {signed_in_user.get("name")} -o json')
             user_object_id = user_info.get('id')
             return user_object_id
     except CLIInternalError as e:
@@ -409,7 +416,7 @@ def get_object_id_of_current_user():
 
 def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
                              user_identity_auth_info, system_identity_auth_info,
-                             service_principal_auth_info_secret, new_addon):
+                             service_principal_auth_info_secret, new_addon, auth_action=None, config_action=None):
     all_auth_info = []
     if secret_auth_info is not None:
         all_auth_info.append(secret_auth_info)
@@ -421,9 +428,15 @@ def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
         all_auth_info.append(system_identity_auth_info)
     if service_principal_auth_info_secret is not None:
         all_auth_info.append(service_principal_auth_info_secret)
+    if len(all_auth_info) == 0:
+        if auth_action == 'optOutAllAuth' and config_action == 'optOut':
+            return None
+        raise ValidationError('At least one auth info is needed')
     if not new_addon and len(all_auth_info) != 1:
         raise ValidationError('Only one auth info is needed')
     auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    if auth_info is not None and auth_action is not None:
+        auth_info.update({'auth_mode': auth_action})
     return auth_info
 
 
