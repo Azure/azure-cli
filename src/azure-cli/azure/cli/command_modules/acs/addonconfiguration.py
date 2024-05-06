@@ -414,7 +414,7 @@ def ensure_container_insights_for_monitoring(
         except HttpResponseError as ex:
             raise ex
 
-    if aad_route:
+    if aad_route:  # pylint: disable=too-many-nested-blocks
         cluster_resource_id = (
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
