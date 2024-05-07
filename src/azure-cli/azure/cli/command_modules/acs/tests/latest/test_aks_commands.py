@@ -2395,8 +2395,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @AKSCustomRoleBasedServicePrincipalPreparer()
-    def test_aks_create_with_standard_sku(self, resource_group, resource_group_location, sp_name, sp_password):
+    def test_aks_create_with_standard_sku(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
         # kwargs for string formatting
@@ -2407,8 +2406,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': sp_name,
-            'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
 
@@ -5627,8 +5624,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @AKSCustomRoleBasedServicePrincipalPreparer()
-    def test_aks_update_with_windows_password(self, resource_group, resource_group_location, sp_name, sp_password):
+    def test_aks_update_with_windows_password(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
         # kwargs for string formatting
@@ -5638,8 +5634,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'location': resource_group_location,
-            'service_principal': sp_name,
-            'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'windows_admin_username': 'azureuser1',
             'windows_admin_password': self.create_random_name('p@0A', 14),
