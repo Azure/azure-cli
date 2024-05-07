@@ -743,7 +743,8 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
         zip_content = fs.read()
         logger.warning("Starting zip deployment. This operation can take a while to complete ...")
         res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
-        logger.warning("Deployment endpoint responded with status code %d", res.status_code)
+        logger.warning("Deployment endpoint responded with status code %d for deployment id %s",
+                       res.status_code, res.content.decode("utf-8"))
 
     # check the status of async deployment
     if res.status_code == 202:
@@ -4666,7 +4667,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        deployment_storage_container_name=None, deployment_storage_auth_type=None,
                        deployment_storage_auth_value=None):
     # pylint: disable=too-many-statements, too-many-branches
-    if functions_version is None:
+    if functions_version is None and flexconsumption_location is None:
         logger.warning("No functions version specified so defaulting to 4.")
         functions_version = '4'
     enable_dapr = (enable_dapr == "true")
@@ -5824,11 +5825,16 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
     num_trials = 0
     # Indicates whether the status has been non empty in previous calls
     has_response = False
+    has_partial_success = False
     while num_trials < total_trials:
         time.sleep(1)
         response = requests.get(deployment_status_url, headers=headers,
                                 verify=not should_disable_connection_verify())
         try:
+            if response.status_code == 202 and not has_partial_success:
+                has_partial_success = True
+            if response.status_code == 404 and has_partial_success:
+                break
             if (response.status_code == 404 or response.json().get('status') is None) and has_response:
                 raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.")
             if (response.status_code != 404 and response.json().get('status') is not None) and not has_response:
@@ -5858,7 +5864,7 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
         if 'progress' in res_dict:
             logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
-    if res_dict.get('status', 0) != 4:
+    if res_dict.get('status', 0) != 4 and not has_partial_success:
         raise CLIError("""Timeout reached by the command, however, the deployment operation
                        is still on-going. Navigate to your scm site to check the deployment status""")
     return res_dict
