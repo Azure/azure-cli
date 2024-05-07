@@ -121,7 +121,7 @@ def load_arguments(self, _):
         c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag(),
                    help='[Vault Only] Property to specify whether Azure Resource Manager is permitted to retrieve '
                         'secrets from the key vault.')
-        c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(), default=True,
+        c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(),
                    help='Property that controls how data actions are authorized. When true, the key vault will use '
                         'Role Based Access Control (RBAC) for authorization of data actions, and the access policies '
                         'specified in vault properties will be ignored. When false, the key vault will use the access '
