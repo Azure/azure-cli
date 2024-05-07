@@ -11,8 +11,14 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "network dns zone update",
+)
 class Update(AAZCommand):
     """Update a DNS zone. Does not modify DNS records within the zone.
+
+    :example: Update a DNS zone properties to change the user-defined value of a previously set tag.
+        az network dns zone update -g MyResourceGroup -n www.mysite.com --tags CostCenter=Marketing
     """
 
     _aaz_info = {
@@ -70,39 +76,6 @@ class Update(AAZCommand):
         )
 
         # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.registration_vnets = AAZListArg(
-            options=["--registration-vnets"],
-            arg_group="Properties",
-            help="A list of references to virtual networks that register hostnames in this DNS zone. This is a only when ZoneType is Private.",
-            nullable=True,
-        )
-        _args_schema.resolution_vnets = AAZListArg(
-            options=["--resolution-vnets"],
-            arg_group="Properties",
-            help="A list of references to virtual networks that resolve records in this DNS zone. This is a only when ZoneType is Private.",
-            nullable=True,
-        )
-        _args_schema.zone_type = AAZStrArg(
-            options=["--zone-type"],
-            arg_group="Properties",
-            help="The type of this DNS zone (Public or Private).",
-            nullable=True,
-            enum={"Private": "Private", "Public": "Public"},
-        )
-
-        registration_vnets = cls._args_schema.registration_vnets
-        registration_vnets.Element = AAZObjectArg(
-            nullable=True,
-        )
-        cls._build_args_sub_resource_update(registration_vnets.Element)
-
-        resolution_vnets = cls._args_schema.resolution_vnets
-        resolution_vnets.Element = AAZObjectArg(
-            nullable=True,
-        )
-        cls._build_args_sub_resource_update(resolution_vnets.Element)
         return cls._args_schema
 
     _args_sub_resource_update = None
@@ -350,20 +323,6 @@ class Update(AAZCommand):
             )
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
-
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("registrationVirtualNetworks", AAZListType, ".registration_vnets")
-                properties.set_prop("resolutionVirtualNetworks", AAZListType, ".resolution_vnets")
-                properties.set_prop("zoneType", AAZStrType, ".zone_type")
-
-            registration_virtual_networks = _builder.get(".properties.registrationVirtualNetworks")
-            if registration_virtual_networks is not None:
-                _UpdateHelper._build_schema_sub_resource_update(registration_virtual_networks.set_elements(AAZObjectType, "."))
-
-            resolution_virtual_networks = _builder.get(".properties.resolutionVirtualNetworks")
-            if resolution_virtual_networks is not None:
-                _UpdateHelper._build_schema_sub_resource_update(resolution_virtual_networks.set_elements(AAZObjectType, "."))
 
             tags = _builder.get(".tags")
             if tags is not None:

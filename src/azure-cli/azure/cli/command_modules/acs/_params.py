@@ -26,6 +26,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NODE_OS_CHANNEL_NODE_IMAGE,
     CONST_NODE_OS_CHANNEL_NONE,
     CONST_NODE_OS_CHANNEL_UNMANAGED,
+    CONST_NODE_OS_CHANNEL_SECURITY_PATCH,
     CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER,
     CONST_OS_DISK_TYPE_EPHEMERAL, CONST_OS_DISK_TYPE_MANAGED,
     CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER, CONST_OS_SKU_UBUNTU,
@@ -163,6 +164,7 @@ node_os_upgrade_channels = [
     CONST_NODE_OS_CHANNEL_NODE_IMAGE,
     CONST_NODE_OS_CHANNEL_NONE,
     CONST_NODE_OS_CHANNEL_UNMANAGED,
+    CONST_NODE_OS_CHANNEL_SECURITY_PATCH,
 ]
 
 dev_space_endpoint_types = ['Public', 'Private', 'None']
@@ -434,6 +436,7 @@ def load_arguments(self, _):
         )
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('enable_cost_analysis', action='store_true')
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -570,6 +573,8 @@ def load_arguments(self, _):
         )
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('enable_cost_analysis', action='store_true')
+        c.argument('disable_cost_analysis', action='store_true')
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -826,6 +831,22 @@ def load_arguments(self, _):
 
     with self.argument_context('aks mesh upgrade start') as c:
         c.argument('revision', validator=validate_azure_service_mesh_revision, required=True)
+
+    with self.argument_context("aks mesh upgrade rollback") as c:
+        c.argument(
+            "yes",
+            options_list=["--yes", "-y"],
+            help="Do not prompt for confirmation.",
+            action="store_true"
+        )
+
+    with self.argument_context("aks mesh upgrade complete") as c:
+        c.argument(
+            "yes",
+            options_list=["--yes", "-y"],
+            help="Do not prompt for confirmation.",
+            action="store_true"
+        )
 
     with self.argument_context('aks approuting enable') as c:
         c.argument('enable_kv', action='store_true')
