@@ -928,7 +928,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         identity = self.models.ManagedClusterIdentity()
         mc = self.models.ManagedCluster(location="test_location", identity=identity)
         ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_enable_managed_identity(), False)
+        self.assertEqual(ctx_1._get_enable_managed_identity(read_only=True), False)
+        self.assertEqual(ctx_1.get_enable_managed_identity(), True)
 
         # dynamic completion
         ctx_2 = AKSManagedClusterContext(
@@ -944,7 +945,9 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_2._get_enable_managed_identity(read_only=True), True)
-        self.assertEqual(ctx_2.get_enable_managed_identity(), False)
+        # fail on mutually exclusive enable_managed_identity and service_principal/client_secret
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_enable_managed_identity()
 
         # custom value
         ctx_3 = AKSManagedClusterContext(
@@ -952,6 +955,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             AKSManagedClusterParamDict(
                 {
                     "enable_managed_identity": False,
+                    "service_principal": "test_service_principal",
+                    "client_secret": "test_client_secret",
                     "assign_identity": "test_assign_identity",
                 }
             ),
@@ -997,6 +1002,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             AKSManagedClusterParamDict(
                 {
                     "enable_managed_identity": False,
+                    "service_principal": "test_service_principal",
+                    "client_secret": "test_client_secret",
                     "assign_identity": "test_assign_identity",
                 }
             ),
@@ -1160,7 +1167,10 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         # fail on service_principal/client_secret not specified
-        with self.assertRaises(RequiredArgumentMissingError):
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext._get_enable_managed_identity",
+            return_value=False,
+        ), self.assertRaises(RequiredArgumentMissingError):
             ctx_3.get_attach_acr()
 
         # custom value (update mode)
@@ -5933,15 +5943,32 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_2.context.attach_mc(mc_2)
-        dec_mc_2 = dec_2.set_up_service_principal_profile(mc_2)
-        service_principal_profile_2 = self.models.ManagedClusterServicePrincipalProfile(
+        # fail on mutually exclusive enable_managed_identity and service_principal/client_secret
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_2.set_up_service_principal_profile(mc_2)
+
+        # custom value
+        dec_3 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_managed_identity": False,
+                "service_principal": "test_service_principal",
+                "client_secret": "test_client_secret",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.set_up_service_principal_profile(mc_3)
+        service_principal_profile_3 = self.models.ManagedClusterServicePrincipalProfile(
             client_id="test_service_principal", secret="test_client_secret"
         )
-        ground_truth_mc_2 = self.models.ManagedCluster(
+        ground_truth_mc_3 = self.models.ManagedCluster(
             location="test_location",
-            service_principal_profile=service_principal_profile_2,
+            service_principal_profile=service_principal_profile_3,
         )
-        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
 
     def test_process_add_role_assignment_for_vnet_subnet(self):
         # default value in `aks_create`
@@ -6140,7 +6167,10 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         mc_3 = self.models.ManagedCluster(location="test_location")
         dec_3.context.attach_mc(mc_3)
         # fail on service_principal/client_secret not specified
-        with self.assertRaises(RequiredArgumentMissingError):
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext._get_enable_managed_identity",
+            return_value=False,
+        ), self.assertRaises(RequiredArgumentMissingError):
             dec_3.process_attach_acr(mc_3)
         service_principal_profile_3 = self.models.ManagedClusterServicePrincipalProfile(
             client_id="test_service_principal", secret="test_client_secret"
@@ -6995,6 +7025,8 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             self.client,
             {
                 "enable_managed_identity": False,
+                "service_principal": "test_service_principal",
+                "client_secret": "test_client_secret",
                 "assign_identity": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
@@ -7067,6 +7099,8 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             self.client,
             {
                 "enable_managed_identity": False,
+                "service_principal": "test_service_principal",
+                "client_secret": "test_client_secret",
                 "assign_identity": "test_assign_identity",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
@@ -7077,22 +7111,24 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         with self.assertRaises(RequiredArgumentMissingError):
             dec_4.set_up_identity(mc_4)
 
-        # custom, identity disabled by sp
+        # custom, identity backfilled to msi as no sp specified
         dec_5 = AKSManagedClusterCreateDecorator(
             self.cmd,
             self.client,
             {
-                "enable_managed_identity": True,
-                "service_principal": "test_service_principal",
-                "client_secret": "test_client_secret",
+                "enable_managed_identity": False,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_5 = self.models.ManagedCluster(location="test_location")
         dec_5.context.attach_mc(mc_5)
         dec_mc_5 = dec_5.set_up_identity(mc_5)
+        identity_5 = self.models.ManagedClusterIdentity(
+            type="SystemAssigned",
+        )
         ground_truth_mc_5 = self.models.ManagedCluster(
             location="test_location",
+            identity=identity_5,
         )
         self.assertEqual(dec_mc_5, ground_truth_mc_5)
 

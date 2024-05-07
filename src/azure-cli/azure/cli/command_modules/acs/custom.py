@@ -524,7 +524,7 @@ def aks_create(
     disable_public_fqdn=False,
     service_principal=None,
     client_secret=None,
-    enable_managed_identity=True,
+    enable_managed_identity=False,
     assign_identity=None,
     assign_kubelet_identity=None,
     enable_aad=False,
