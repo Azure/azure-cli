@@ -156,7 +156,7 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2023-01-01',
         ResourceType.MGMT_NETWORK: '2022-01-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2023-09-01', {
+        ResourceType.MGMT_COMPUTE: SDKProfile('2024-03-01', {
             'resource_skus': '2019-04-01',
             'disks': '2023-04-02',
             'disk_encryption_sets': '2022-03-02',
@@ -168,7 +168,7 @@ AZURE_API_PROFILES = {
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
-            'virtual_machine_scale_sets': '2023-09-01',
+            'virtual_machine_scale_sets': '2024-03-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
