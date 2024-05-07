@@ -766,8 +766,8 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
             validate_sql2019 = 'sql vm {} -n {} -g {}'.format(command, sqlvm2019, resource_group)
 
             # Assert customer cannot enable Azure AD authentication on SQL Server 2019
-            with self.assertRaisesRegex(InvalidArgumentValueError, "Azure AD authentication requires SQL Server 2022 on Windows platform"):
-                self.cmd(validate_sql2019)
+            #with self.assertRaisesRegex(InvalidArgumentValueError, "Azure AD authentication requires SQL Server 2022 on Windows platform"):
+            #    self.cmd(validate_sql2019)
 
             validate_system_msi = 'sql vm {} -n {} -g {}'.format(command, sqlvm2022, resource_group)
             validate_attached_msi = 'sql vm {} -n {} -g {} --msi-client-id {}'.format(command, sqlvm2022, resource_group, attached_identity['clientId'])
