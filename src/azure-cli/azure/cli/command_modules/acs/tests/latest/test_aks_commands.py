@@ -8046,10 +8046,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             ampls_cmd = f'monitor private-link-scope create -g {resource_group} -n {aks_name}_ampls'
             resp = self.cmd(ampls_cmd).get_output_in_json()
             ampls_resource_id = resp["id"]
-            print("********************")
-            print(f"azure monitor private link scope resource id: {ampls_resource_id}")
-            print("********************")
-
 
         # create
         create_cmd = f'aks create --resource-group={resource_group} --name={aks_name} --location={resource_group_location} ' \
