@@ -226,7 +226,7 @@ class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
         super().__init__(**kwargs)
         self.enum = AAZArgEnum(
             enum, case_sensitive=enum_case_sensitive, support_extension=enum_support_extension
-            ) if enum else None
+        ) if enum else None
 
     def to_cmd_arg(self, name, **kwargs):
         arg = super().to_cmd_arg(name, **kwargs)
