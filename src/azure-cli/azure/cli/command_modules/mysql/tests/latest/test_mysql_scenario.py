@@ -116,7 +116,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @unittest.skip('Temp skip - No available SKUs in this location')
     def test_mysql_flexible_server_georestore_update_mgmt(self, resource_group):
         self._test_flexible_server_georestore_update_mgmt('mysql', resource_group)
 
@@ -1256,7 +1255,6 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
     @AllowLargeResponse()
     @ResourceGroupPreparer()
-    @unittest.skip("Temp skip - flaky test")
     def test_mysql_flexible_server_cross_region_replica_mgmt(self, resource_group):
         self._test_flexible_server_cross_region_replica_mgmt('mysql', resource_group)
     
@@ -1268,10 +1266,10 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         replica_role = 'Replica'
         private_dns_param = 'privateDnsZoneResourceId'
 
-        master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
+        master_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
         self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --tier GeneralPurpose --sku-name {} --public-access none'
-                 .format(database_engine, resource_group, master_server, master_location, 32, DEFAULT_GENERAL_PURPOSE_SKU))
+                 .format(database_engine, resource_group, master_server, master_location, 256, DEFAULT_GENERAL_PURPOSE_SKU))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
                           checks=[JMESPathCheck('replicationRole', primary_role)]).get_output_in_json()
@@ -1687,7 +1685,6 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION, parameter_name='server_resource_group')
     @ResourceGroupPreparer(location=DEFAULT_LOCATION, parameter_name='vnet_resource_group')
-    @unittest.skip("Temp skip - flaky test")
     def test_mysql_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
         self._test_flexible_server_existing_private_dns_zone('mysql', server_resource_group, vnet_resource_group)
 
