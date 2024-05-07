@@ -1692,7 +1692,6 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=DEFAULT_LOCATION, parameter_name='server_resource_group')
     @ResourceGroupPreparer(location=DEFAULT_LOCATION, parameter_name='vnet_resource_group')
     @ResourceGroupPreparer(location=DEFAULT_LOCATION, parameter_name='dns_resource_group')
-    @live_only()
     def test_mysql_flexible_server_new_private_dns_zone(self, server_resource_group, vnet_resource_group, dns_resource_group):
         self._test_flexible_server_new_private_dns_zone('mysql', server_resource_group, vnet_resource_group, dns_resource_group)
 
@@ -1798,15 +1797,19 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
         vnet_group_subnet_name = 'vnetgrouptestsubnet'
         vnet_prefix = '172.1.0.0/16'
         subnet_prefix = '172.1.0.0/24'
+
+        # vnet in server rg
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
                  server_resource_group, location, server_group_vnet_name, vnet_prefix, server_group_subnet_name, subnet_prefix))
-
         server_group_subnet = self.cmd('network vnet subnet show -g {} -n {} --vnet-name {}'.format(
                                        server_resource_group, server_group_subnet_name, server_group_vnet_name)).get_output_in_json()
+
+        # vnet in vnet rg
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
                  vnet_resource_group, location, vnet_group_vnet_name, vnet_prefix, vnet_group_subnet_name, subnet_prefix))
         vnet_group_subnet = self.cmd('network vnet subnet show -g {} -n {} --vnet-name {}'.format(
                                        vnet_resource_group, vnet_group_subnet_name, vnet_group_vnet_name)).get_output_in_json()
+
         # no input, vnet in server rg
         dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[0], None, server_group_subnet["id"], location, True)
         self.assertEqual(dns_zone,
@@ -1814,12 +1817,12 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
                          self.get_subscription_id(), server_resource_group, server_names[0] + ".private." + database_engine + ".database.azure.com"))
 
         # no input, vnet in vnet rg
-        dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[1], None, vnet_group_subnet["id"], location, True)
+        dns_zone = prepare_private_dns_zone(db_context, database_engine, vnet_resource_group, server_names[1], None, vnet_group_subnet["id"], location, True)
         self.assertEqual(dns_zone,
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
                          self.get_subscription_id(), vnet_resource_group, server_names[1] + ".private." + database_engine + ".database.azure.com"))
 
-        # new private dns zone, zone name (vnet in smae rg)
+        # new private dns zone, zone name (vnet in same rg)
         dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[2], private_dns_zone_names[0],
                                             server_group_subnet["id"], location, True)
         self.assertEqual(dns_zone,
