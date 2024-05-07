@@ -563,8 +563,8 @@ def get_aks_resource_name(linker):
             not (linker["targetService"]["resourceProperties"] is not None and
                  linker["targetService"]["resourceProperties"].get("connectAsKubernetesCsiDriver")):
         service_account_name = f'sc-account-{linker["authInfo"].get("clientId")}'
-        return f'{secret_name} / {service_account_name}'
-    return secret_name
+        return [secret_name, service_account_name]
+    return [secret_name]
 
 
 def get_aks_resource_secret_name(connection_name):
