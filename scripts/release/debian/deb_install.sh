@@ -13,7 +13,7 @@
 # well-known publishers.                                                                                              #
 #######################################################################################################################
 
-set -e -o pipefail
+set -e
 
 if [[ $# -ge 1 && $1 == "-y" ]]; then
     global_consent=0
@@ -27,7 +27,7 @@ function assert_consent {
     fi
 
     echo -n "$1 [Y/n] "
-    read -r consent
+    read consent
     if [[ ! "${consent}" == "y" && ! "${consent}" == "Y" && ! "${consent}" == "" ]]; then
         echo "'${consent}'"
         exit 1
@@ -85,8 +85,8 @@ setup() {
         fi
     fi
 
-    if [ -f /etc/apt/sources.list.d/azure-cli.sources ]; then
-        rm /etc/apt/sources.list.d/azure-cli.sources
+    if [ -f /etc/apt/sources.list.d/azure-cli.list ]; then
+      rm /etc/apt/sources.list.d/azure-cli.list
     fi
 
     echo "Types: deb
