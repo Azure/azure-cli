@@ -534,6 +534,34 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ):
             self.assertEqual(ctx_3.get_os_sku(), "custom_os_sku")
 
+        # custom value
+        ctx_4 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "os_sku": "custom_os_sku",
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_4 = self.create_initialized_agentpool_instance(os_sku="test_os_sku")
+        ctx_4.attach_agentpool(agentpool_4)
+        self.assertEqual(ctx_4.get_os_sku(), "custom_os_sku")
+
+        # custom value
+        ctx_5 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"os_sku": None}),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_5 = self.create_initialized_agentpool_instance(os_sku="test_os_sku")
+        ctx_5.attach_agentpool(agentpool_5)
+        self.assertEqual(ctx_5.get_os_sku(), None)
+
     def common_get_vnet_subnet_id(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -2233,7 +2261,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
         }
         raw_param_dict.update(optional_params)
 
-        # default value in `aks_create`
+        # default value in `aks nodepool add`
         dec_1 = AKSAgentPoolAddDecorator(
             self.cmd,
             self.client,
@@ -2706,7 +2734,7 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
         }
         raw_param_dict.update(optional_params)
 
-        # default value in `aks_create`
+        # default value in `aks nodepool update`
         dec_1 = AKSAgentPoolUpdateDecorator(
             self.cmd,
             self.client,
@@ -2824,7 +2852,7 @@ class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDe
         }
         raw_param_dict.update(optional_params)
 
-        # default value in `aks_create`
+        # default value in `aks update`
         dec_1 = AKSAgentPoolUpdateDecorator(
             self.cmd,
             self.client,
