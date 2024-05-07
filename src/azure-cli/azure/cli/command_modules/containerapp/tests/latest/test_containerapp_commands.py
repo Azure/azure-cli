@@ -536,6 +536,40 @@ class ContainerappIngressTests(ScenarioTest):
             JMESPathCheck('exposedPort', 3020),
         ])
 
+        app = self.create_random_name(prefix='containerapp', length=24)
+
+        self.cmd(
+            f'containerapp create -g {resource_group} -n {app} --image redis --ingress external --target-port 6379 --environment {env_name} --transport tcp --scale-rule-type tcp --scale-rule-name tcp-scale-rule --scale-rule-tcp-concurrency 50 --scale-rule-auth trigger=secretref --scale-rule-metadata key=value',
+            checks=[
+                JMESPathCheck("properties.configuration.ingress.transport", "Tcp"),
+                JMESPathCheck("properties.provisioningState", "Succeeded"),
+                JMESPathCheck("properties.template.scale.rules[0].name", "tcp-scale-rule"),
+                JMESPathCheck("properties.template.scale.rules[0].tcp.auth[0].triggerParameter", "trigger"),
+                JMESPathCheck("properties.template.scale.rules[0].tcp.auth[0].secretRef", "secretref"),
+            ])
+        # the metadata is not returned in create/update command, we should use show command to check
+        self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+            JMESPathCheck("properties.template.scale.rules[0].name", "tcp-scale-rule"),
+            JMESPathCheck("properties.template.scale.rules[0].tcp.metadata.concurrentConnections", "50"),
+            JMESPathCheck("properties.template.scale.rules[0].tcp.metadata.key", "value")
+        ])
+        self.cmd(
+            f'containerapp update -g {resource_group} -n {app} --scale-rule-name tcp-scale-rule --scale-rule-type tcp  --scale-rule-tcp-concurrency 2 --scale-rule-auth "apiKey=api-key" "appKey=app-key"',
+            checks=[
+                JMESPathCheck("properties.configuration.ingress.transport", "Tcp"),
+                JMESPathCheck("properties.provisioningState", "Succeeded"),
+                JMESPathCheck("properties.template.scale.rules[0].name", "tcp-scale-rule"),
+                JMESPathCheck("properties.template.scale.rules[0].tcp.auth[0].triggerParameter", "apiKey"),
+                JMESPathCheck("properties.template.scale.rules[0].tcp.auth[0].secretRef", "api-key"),
+                JMESPathCheck("properties.template.scale.rules[0].tcp.auth[1].triggerParameter", "appKey"),
+                JMESPathCheck("properties.template.scale.rules[0].tcp.auth[1].secretRef", "app-key"),
+            ])
+        # the metadata is not returned in create/update command, we should use show command to check
+        self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+            JMESPathCheck("properties.template.scale.rules[0].name", "tcp-scale-rule"),
+            JMESPathCheck("properties.template.scale.rules[0].tcp.metadata.concurrentConnections", "2"),
+        ])
+
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
     def test_containerapp_ip_restrictions(self, resource_group):
@@ -1208,8 +1242,10 @@ class ContainerappScaleTests(ScenarioTest):
         env = prepare_containerapp_env_for_app_e2e_tests(self)
 
         self.cmd(
-            f'containerapp create -g {resource_group} -n {app} --image nginx --ingress external --target-port 80 --environment {env} --scale-rule-type tcp --scale-rule-name tcp-scale-rule --scale-rule-tcp-concurrency 50 --scale-rule-auth trigger=secretref --scale-rule-metadata key=value',
+            f'containerapp create -g {resource_group} -n {app} --image redis --ingress internal --target-port 6379 --transport tcp --environment {env} --transport tcp --scale-rule-type tcp --scale-rule-name tcp-scale-rule --scale-rule-tcp-concurrency 50 --scale-rule-auth trigger=secretref --scale-rule-metadata key=value',
             checks=[
+                JMESPathCheck("properties.configuration.ingress.transport", "Tcp"),
+                JMESPathCheck("properties.provisioningState", "Succeeded"),
                 JMESPathCheck("properties.template.scale.rules[0].name", "tcp-scale-rule"),
                 JMESPathCheck("properties.template.scale.rules[0].tcp.auth[0].triggerParameter", "trigger"),
                 JMESPathCheck("properties.template.scale.rules[0].tcp.auth[0].secretRef", "secretref"),
@@ -1221,7 +1257,7 @@ class ContainerappScaleTests(ScenarioTest):
             JMESPathCheck("properties.template.scale.rules[0].tcp.metadata.key", "value")
         ])
         self.cmd(
-            f'containerapp update -g {resource_group} -n {app} --image nginx --scale-rule-name tcp-scale-rule --scale-rule-type tcp --scale-rule-name tcp-scale-rule --scale-rule-tcp-concurrency 2 --scale-rule-auth "apiKey=api-key" "appKey=app-key"',
+            f'containerapp update -g {resource_group} -n {app} --scale-rule-name tcp-scale-rule --scale-rule-type tcp  --scale-rule-tcp-concurrency 2 --scale-rule-auth "apiKey=api-key" "appKey=app-key"',
             checks=[
                 JMESPathCheck("properties.template.scale.rules[0].name", "tcp-scale-rule"),
                 JMESPathCheck("properties.template.scale.rules[0].tcp.auth[0].triggerParameter", "apiKey"),
