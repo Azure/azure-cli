@@ -2663,6 +2663,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
 
 class VMSSExtensionImageTest(ScenarioTest):
 
+    @live_only()  # https://github.com/Azure/azure-cli/issues/28678
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension_image_')
     def test_vmss_extension_image(self, resource_group):
