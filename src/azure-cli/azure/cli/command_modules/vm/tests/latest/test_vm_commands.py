@@ -1347,7 +1347,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'volume_name': self.create_random_name('volume-name', 20),
             'snapshot_name': self.create_random_name('snapshot_name', 20),
         })
-        self.cmd('extension add -n elastic-san')
+        self.cmd('extension add -n elastic-san --allow-preview True')
         self.cmd('elastic-san create -n {elastic_san} -g {rg} -l westus2 --base-size-tib 23 --extended-size 14 --sku {{name:Premium_LRS,tier:Premium}}')
         self.cmd('elastic-san volume-group create -e {elastic_san} -g {rg} -n {volume_group}')
         volume = self.cmd('elastic-san volume create -e {elastic_san} -g {rg} -v {volume_group} -n {volume_name} --size-gib 2').get_output_in_json()

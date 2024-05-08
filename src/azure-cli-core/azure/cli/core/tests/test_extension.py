@@ -327,11 +327,6 @@ class TestExtensions(TestExtensionsBase):
         test_ext_source = _get_test_data_file('extension_test_pkg-1.2.3-py3-none-any.whl')
         with mock.patch('azure.cli.core.extension.operations.logger') as mock_logger:
             add_extension(cmd=self.cmd, source=test_ext_source)
-            call_args = mock_logger.warning.call_args
-            self.assertEqual("Default enabled including preview versions for extension installation now. "
-                       "Disabled in May 2024. "
-                       "Use '--allow-preview true' to enable it specifically if needed. "
-                       "Use '--allow-preview false' to install stable version only. ", call_args[0][0])
         ext = show_extension("extension-test-pkg")
         self.assertEqual(ext["name"], "extension-test-pkg")
         self.assertEqual(ext["version"], "1.2.3")
