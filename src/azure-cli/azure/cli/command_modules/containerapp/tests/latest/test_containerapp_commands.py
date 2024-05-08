@@ -238,6 +238,7 @@ class ContainerappIngressTests(ScenarioTest):
         for revision in revisions_list:
             self.assertEqual(revision["properties"]["trafficWeight"], 50)
 
+    @unittest.skip('https://github.com/Azure/azure-cli/issues/28680')
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
