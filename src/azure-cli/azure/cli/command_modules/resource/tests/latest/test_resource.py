@@ -2211,7 +2211,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group-two} --deny-settings-mode "none" --template-file "{template-file-spec}" --action-on-unmanage detachAll --parameters "name={resource-one}" --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # update stack with resource2 set to detach
-        self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group-two} --deny-settings-mode "none" --template-file "{template-file-spec}" --action-on-unmanage detachAll --parameters "name={resource-two}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group-two} --deny-settings-mode "none" --template-file "{template-file-spec}" --action-on-unmanage detachAll --parameters "name={resource-two}" --bypass-stack-out-of-sync-error --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # check resource1 still exists in Azure
         self.cmd('resource show -n {resource-one} -g {resource-group-two} --resource-type {resource-type-specs}')
@@ -2860,7 +2860,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('group show -n {resource-one}')
 
         # delete stack with delete-all set
-        self.cmd('stack group delete --name {name} -g {resource-group-two} --action-on-unmanage deleteAll --yes')
+        self.cmd('stack group delete --name {name} -g {resource-group-two} --action-on-unmanage deleteAll --bse --yes')
 
         # confirm rg resource1 has been removed from azure
         self.cmd('group list', checks=self.check("length([?name=='{resource-one}'])", 0))
