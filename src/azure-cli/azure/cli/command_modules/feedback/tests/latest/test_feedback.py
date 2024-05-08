@@ -41,7 +41,7 @@ class TestCommandLogFile(ScenarioTest):
     def setUp(self):
         def _add_alias(self, command_log_dir, logger):
             self.cli_ctx.logging.command_log_dir = command_log_dir
-            self.cmd("az extension add -n alias")
+            self.cmd("az extension add -n alias --allow-preview True")
             logger.warning("Adding whl ext alias")
 
         super(TestCommandLogFile, self).setUp()
@@ -58,7 +58,7 @@ class TestCommandLogFile(ScenarioTest):
         # populate command dir with logs
         self._run_cmd("extension remove -n alias", expect_failure=True)
         time.sleep(2)
-        self._run_cmd("extension add -n alias")
+        self._run_cmd("extension add -n alias --allow-preview True")
         time.sleep(2)
         self._run_cmd("alias create -n foo123 -c bar123", expect_failure=True)
         time.sleep(2)
@@ -144,7 +144,7 @@ class TestCommandLogFile(ScenarioTest):
         # check successful cli command
         data_dict = command_log_files[1].command_data_dict
         self.assertTrue(data_dict["success"] is True)
-        self.assertEqual(data_dict["command_args"], "extension add -n {}")
+        self.assertEqual(data_dict["command_args"], "extension add -n {} --allow-preview {}")
 
         # check unsuccessful extension command
         data_dict = command_log_files[2].command_data_dict
