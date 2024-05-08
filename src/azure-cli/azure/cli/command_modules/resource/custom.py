@@ -2747,7 +2747,7 @@ def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_
 def validate_deployment_stack_at_resource_group(
     cmd, name, resource_group, deny_settings_mode, action_on_unmanage, template_file=None, template_spec=None, template_uri=None,
     query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
-    deny_settings_apply_to_child_scopes=False, tags=None
+    deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, tags=None
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -2756,7 +2756,8 @@ def validate_deployment_stack_at_resource_group(
         template_file=template_file, template_spec=template_spec, template_uri=template_uri, query_string=query_string,
         parameters=parameters, description=description, deny_settings_excluded_principals=deny_settings_excluded_principals,
         deny_settings_excluded_actions=deny_settings_excluded_actions,
-        deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes, tags=tags)
+        deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes,
+        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, tags=tags)
 
     from azure.core.exceptions import HttpResponseError
     try:
@@ -2777,7 +2778,7 @@ def validate_deployment_stack_at_resource_group(
 def validate_deployment_stack_at_subscription(
     cmd, name, location, deny_settings_mode, action_on_unmanage, deployment_resource_group=None, template_file=None, template_spec=None,
     template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None,
-    deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None
+    deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, tags=None
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -2786,7 +2787,8 @@ def validate_deployment_stack_at_subscription(
         action_on_unmanage=action_on_unmanage, deployment_resource_group=deployment_resource_group, template_file=template_file,
         template_spec=template_spec, template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
         deny_settings_excluded_principals=deny_settings_excluded_principals, deny_settings_excluded_actions=deny_settings_excluded_actions,
-        deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes, tags=tags)
+        deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes,
+        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, tags=tags)
 
     from azure.core.exceptions import HttpResponseError
     try:
@@ -2807,7 +2809,8 @@ def validate_deployment_stack_at_subscription(
 def validate_deployment_stack_at_management_group(
     cmd, management_group_id, name, location, deny_settings_mode, action_on_unmanage, deployment_subscription=None,
     template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None,
-    deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None
+    deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False,
+    bypass_stack_out_of_sync_error=False, tags=None
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -2816,7 +2819,8 @@ def validate_deployment_stack_at_management_group(
         action_on_unmanage=action_on_unmanage, deployment_subscription=deployment_subscription, template_file=template_file,
         template_spec=template_spec, template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
         deny_settings_excluded_principals=deny_settings_excluded_principals, deny_settings_excluded_actions=deny_settings_excluded_actions,
-        deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes, tags=tags)
+        deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes,
+        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, tags=tags)
 
     from azure.core.exceptions import HttpResponseError
     try:
@@ -2838,7 +2842,7 @@ def _prepare_validate_stack_at_scope(
     rcf, deployment_scope, cmd, deny_settings_mode, action_on_unmanage, location=None, deployment_subscription=None,
     deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None,
     description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
-    deny_settings_apply_to_child_scopes=False, tags=None
+    deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, tags=None
 ):
     aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = _prepare_stacks_delete_detach_models(
         rcf, action_on_unmanage)
@@ -2865,7 +2869,7 @@ def _prepare_validate_stack_at_scope(
         apply_to_child_scopes=apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
         description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model,
-        tags=tags)
+        tags=tags, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error)
 
     if deployment_scope == 'managementGroup' and deployment_subscription:
         deployment_stack_model.deployment_scope = f"/subscriptions/{deployment_subscription}"

@@ -745,10 +745,10 @@ def load_arguments(self, _):
                 c.argument('deny_settings_excluded_principals', arg_type=stacks_excluded_principals)
                 c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
                 c.argument('deny_settings_apply_to_child_scopes', arg_type=stacks_apply_to_child_scopes)
+                c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
                 c.argument('tags', tags_type)
 
                 if action == 'create':
-                    c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
                     c.argument('yes', help='Do not prompt for confirmation')
 
     for scope in ['stack group show', 'stack group export']:
