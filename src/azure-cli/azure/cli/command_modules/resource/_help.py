@@ -3046,7 +3046,7 @@ examples:
   - name: Delete stack by name.
     text: az stack sub delete --name StackName --action-on-unmanage deleteResources
   - name: Delete stack by stack resource id.
-    text: az stack sub delete --id /subscriptions/111111111111/providers/Microsoft.Resources/deploymentStacks/StackName --action-on-unmanage detachAll 
+    text: az stack sub delete --id /subscriptions/111111111111/providers/Microsoft.Resources/deploymentStacks/StackName --action-on-unmanage detachAll
 """
 
 helps['stack group'] = """
