@@ -83,7 +83,7 @@ class AAZArgEnum:
             try:
                 data_type = type(values[0])
                 value = data_type(data)
-                logger.warning(f"Use extended value `{value}` outside choices {self.to_choices()}.")
+                logger.warning("Use extended value `%s` outside choices {self.to_choices()}.", str(value))
                 return value
             except (ValueError, IndexError):
                 pass
