@@ -3230,7 +3230,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         # validate deployment stack with template file and parameter file: success
         self.cmd(
-            'stack mg validate --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --description "stack deployment" --aou detachAll',
+            'stack mg validate --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --description "stack deployment" --aou detachAll --bse',
             checks=self.check_pattern(
                 'id', r'^/providers/Microsoft\.Management/managementGroups/'))
 
