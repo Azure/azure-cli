@@ -3062,6 +3062,12 @@ class WebappStackTest(ScenarioTest):
             checks=[
                 JMESPathCheck('name', webapp_name),
         ])
+        self.cmd('webapp list --show-details --query "[?name==\'{}\']"'.format(webapp_name), checks=[
+            JMESPathCheck('[0].name', webapp_name),
+            JMESPathCheck('[0].siteConfig.javaVersion', '17'),
+            JMESPathCheck('[0].siteConfig.javaContainer', 'TOMCAT'),
+            JMESPathCheck('[0].siteConfig.javaContainerVersion', '10.0'),
+        ])
         self.cmd('webapp list -g {} --show-details'.format(resource_group), checks=[
             JMESPathCheck('length([])', 1),
             JMESPathCheck('[0].name', webapp_name),

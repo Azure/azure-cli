@@ -1198,8 +1198,12 @@ def _list_app(cli_ctx, resource_group_name=None, show_details=False):
     for webapp in result:
         _rename_server_farm_props(webapp)
         if show_details:
+            if not resource_group_name:
+                webapp_resource_group_name = webapp.resource_group
+            else:
+                webapp_resource_group_name = resource_group_name
             webapp.site_config = _generic_site_operation(
-                cli_ctx, resource_group_name, webapp.name, 'get_configuration')
+                cli_ctx, webapp_resource_group_name, webapp.name, 'get_configuration')
     return result
 
 
