@@ -44,6 +44,10 @@ class AzureNetAppFilesBackupvaultServiceScenarioTest(ScenarioTest):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         vault_name = self.create_random_name(prefix='cli-backupvault-', length=24)        
         tags = "Tag1=Value1 Tag2=Value2"
+        self.kwargs.update({
+            'account_name': account_name,            
+            'vault_name': vault_name
+        })
         self.cmd(f"az netappfiles account create -g {resource_group} -a {account_name} -l {RG_LOCATION}")
         
         backupvault = self.cmd(f"az netappfiles account backup-vault create -g {resource_group} -a {account_name} -n {vault_name} -l {RG_LOCATION} --tags {tags}").get_output_in_json()
@@ -61,7 +65,11 @@ class AzureNetAppFilesBackupvaultServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_tests_rg')
     def test_get_backupvault_by_name(self, resource_group):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
-        vault_name = self.create_random_name(prefix='cli-backupvault-', length=24)        
+        vault_name = self.create_random_name(prefix='cli-backupvault-', length=24)
+        self.kwargs.update({
+            'account_name': account_name,            
+            'vault_name': vault_name
+        })
         tags = "Tag1=Value1 Tag2=Value2"
         self.cmd(f"az netappfiles account create -g {resource_group} -a {account_name} -l {RG_LOCATION}")
         
@@ -76,9 +84,42 @@ class AzureNetAppFilesBackupvaultServiceScenarioTest(ScenarioTest):
         assert backupvault_from_id['name'] == account_name + '/' + vault_name
 
     @ResourceGroupPreparer(name_prefix='cli_tests_rg')
+    def test_list_backupvault(self, resource_group):
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        vault_name = self.create_random_name(prefix='cli-backupvault-', length=24)
+        vault_name2 = self.create_random_name(prefix='cli-backupvault-', length=24)
+        self.kwargs.update({
+            'account_name': account_name,            
+            'vault_name': vault_name,
+            'vault_name2': vault_name2
+        })
+        tags = "Tag1=Value1 Tag2=Value2"
+        self.cmd(f"az netappfiles account create -g {resource_group} -a {account_name} -l {RG_LOCATION}")
+        
+        backupvault = self.cmd(f"az netappfiles account backup-vault create -g {resource_group} -a {account_name} -n {vault_name} -l {RG_LOCATION} --tags {tags}").get_output_in_json()
+        assert backupvault['name'] == account_name + '/' + vault_name
+
+        backupvault = self.cmd(f"az netappfiles account backup-vault show --resource-group {resource_group} -a {account_name} -n {vault_name}").get_output_in_json()
+        assert backupvault['name'] == account_name + '/' + vault_name
+        assert backupvault['tags']['Tag2'] == 'Value2'
+        
+        backupvaults = self.cmd(f"az netappfiles account backup-vault list --resource-group {resource_group} -a {account_name} ").get_output_in_json()
+        assert len(backupvaults) == 1
+
+        backupvault = self.cmd(f"az netappfiles account backup-vault create -g {resource_group} -a {account_name} -n {vault_name2} -l {RG_LOCATION} --tags {tags}").get_output_in_json()
+        assert backupvault['name'] == account_name + '/' + vault_name2        
+        backupvaults = self.cmd(f"az netappfiles account backup-vault list --resource-group {resource_group} -a {account_name} ").get_output_in_json()
+        assert len(backupvaults) == 2
+                
+
+    @ResourceGroupPreparer(name_prefix='cli_tests_rg')
     def test_update_backupvault(self, resource_group):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
-        vault_name = self.create_random_name(prefix='cli-backupvault-', length=24)        
+        vault_name = self.create_random_name(prefix='cli-backupvault-', length=24)
+        self.kwargs.update({
+            'account_name': account_name,            
+            'vault_name': vault_name
+        })
         tags = "Tag1=Value1 Tag2=Value2"
         self.cmd(f"az netappfiles account create -g {resource_group} -a {account_name} -l {RG_LOCATION}")
         

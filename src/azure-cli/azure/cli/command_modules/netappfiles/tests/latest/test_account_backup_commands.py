@@ -131,7 +131,7 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
         assert backup_list[len(backup_list) - 1]['name'] == account_name + "/" + backup_name
 
         # delete volume first to be able to call delete account backup
-        self.cmd("az netappfiles volume delete -g {rg} -a %s -p %s -v %s" %
+        self.cmd("az netappfiles volume delete -g {rg} -a %s -p %s -v %s --yes" %
                  (account_name, pool_name, volume_name))
         self.cmd("az netappfiles account backup delete -g {rg} -a %s --backup-name %s -y" % (account_name, backup_name))
 

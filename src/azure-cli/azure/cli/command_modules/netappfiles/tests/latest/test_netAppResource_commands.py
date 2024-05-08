@@ -84,4 +84,4 @@ class AzureNetAppFilesResourceServiceScenarioTest(ScenarioTest):
         })
 
         region_info = self.cmd("az netappfiles resource region-info default show -l {loc}").get_output_in_json()
-        assert region_info['name'] == "{loc}/default"
+        assert region_info['name'] == LOCATION+ '/default'
