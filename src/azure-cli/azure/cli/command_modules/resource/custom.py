@@ -2531,7 +2531,7 @@ def list_deployment_stack_at_subscription(cmd):
 
 
 def delete_deployment_stack_at_subscription(
-    cmd, action_on_unmanage, name=None, id=None, yes=False
+    cmd, action_on_unmanage, name=None, id=None, bypass_stack_out_of_sync_error=False, yes=False
 ):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
@@ -2576,7 +2576,8 @@ def delete_deployment_stack_at_subscription(
         return rcf.deployment_stacks.begin_delete_at_subscription(
             delete_name, unmanage_action_resources=aou_resources_action_enum,
             unmanage_action_resource_groups=aou_resource_groups_action_enum,
-            unmanage_action_management_groups=aou_management_groups_action_enum)
+            unmanage_action_management_groups=aou_management_groups_action_enum,
+            bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
@@ -2674,7 +2675,7 @@ def list_deployment_stack_at_resource_group(cmd, resource_group):
 
 
 def delete_deployment_stack_at_resource_group(
-    cmd, action_on_unmanage, name=None, resource_group=None, id=None, yes=False
+    cmd, action_on_unmanage, name=None, resource_group=None, id=None, bypass_stack_out_of_sync_error=False, yes=False
 ):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
@@ -2711,7 +2712,8 @@ def delete_deployment_stack_at_resource_group(
         return sdk_no_wait(
             False, rcf.deployment_stacks.begin_delete_at_resource_group, resource_group, name,
             unmanage_action_resources=aou_resources_action_enum, unmanage_action_resource_groups=aou_resource_groups_action_enum,
-            unmanage_action_management_groups=aou_management_groups_action_enum)
+            unmanage_action_management_groups=aou_management_groups_action_enum,
+            bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error)
     if id:
         stack_arr = id.split('/')
         if len(stack_arr) < 5:
@@ -2725,7 +2727,8 @@ def delete_deployment_stack_at_resource_group(
         return sdk_no_wait(
             False, rcf.deployment_stacks.begin_delete_at_resource_group, stack_rg, name,
             unmanage_action_resources=aou_resources_action_enum, unmanage_action_resource_groups=aou_resource_groups_action_enum,
-            unmanage_action_management_groups=aou_management_groups_action_enum)
+            unmanage_action_management_groups=aou_management_groups_action_enum,
+            bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error)
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
 
@@ -2966,7 +2969,7 @@ def list_deployment_stack_at_management_group(cmd, management_group_id):
 
 
 def delete_deployment_stack_at_management_group(
-    cmd, management_group_id, action_on_unmanage, name=None, id=None, yes=False
+    cmd, management_group_id, action_on_unmanage, name=None, id=None, bypass_stack_out_of_sync_error=False, yes=False
 ):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
@@ -3012,7 +3015,8 @@ def delete_deployment_stack_at_management_group(
         return rcf.deployment_stacks.begin_delete_at_management_group(
             management_group_id, delete_name, unmanage_action_resources=aou_resources_action_enum,
             unmanage_action_resource_groups=aou_resource_groups_action_enum,
-            unmanage_action_management_groups=aou_management_groups_action_enum)
+            unmanage_action_management_groups=aou_management_groups_action_enum,
+            bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 

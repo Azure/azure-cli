@@ -698,6 +698,7 @@ def load_arguments(self, _):
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
         c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
+        c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
         c.argument('yes', help='Do not prompt for confirmation')
 
     with self.argument_context('stack mg list') as c:
@@ -714,6 +715,7 @@ def load_arguments(self, _):
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
         c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
+        c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
         c.argument('yes', help='Do not prompt for confirmation')
 
     for scope in ['group', 'sub', 'mg']:
@@ -766,6 +768,7 @@ def load_arguments(self, _):
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
         c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
+        c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
         c.argument('yes', help='Do not prompt for confirmation')
 
     with self.argument_context('bicep build') as c:
