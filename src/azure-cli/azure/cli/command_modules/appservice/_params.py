@@ -173,6 +173,9 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
 
+    with self.argument_context('webapp list') as c:
+        c.argument('show_details', action='store_true', help='Include detailed site configuration of listed web apps in output')
+
     with self.argument_context('webapp list-instances') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
@@ -183,6 +186,10 @@ subscription than the app service environment, please use the resource ID for --
 
     with self.argument_context('functionapp list-runtimes') as c:
         c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
+
+    with self.argument_context('functionapp list-flexconsumption-runtimes') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), help="limit the output to just the runtimes available in the specified location")
+        c.argument('runtime', help="limit the output to just the specified runtime")
 
     with self.argument_context('webapp deleted list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -347,6 +354,8 @@ subscription than the app service environment, please use the resource ID for --
                        help="Number of pre-warmed instances a function app has")
             if scope == 'webapp':
                 c.ignore('reserved_instance_count')
+                c.argument('runtime', help="Canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\"."
+                                           "Use `az webapp list-runtimes` for available list")
             c.argument('java_version',
                        help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
             c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
@@ -1077,6 +1086,12 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('use_same_restrictions_for_scm_site',
                        help="Use same access restrictions for scm site",
                        arg_type=get_three_state_flag())
+            c.argument('default_action',
+                       help="Configure default action for main site",
+                       arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES))
+            c.argument('scm_default_action',
+                       help="Configure default action for scm site",
+                       arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES))
 
     # App Service Environment Commands
     with self.argument_context('appservice ase show') as c:

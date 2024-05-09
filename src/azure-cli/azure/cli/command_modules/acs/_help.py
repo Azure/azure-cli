@@ -537,6 +537,9 @@ parameters:
   - name: --revision
     type: string
     short-summary: Azure Service Mesh revision to install.
+  - name: --enable-cost-analysis
+    type: bool
+    short-summary: Enable exporting Kubernetes Namespace and Deployment details to the Cost Analysis views in the Azure portal. For more information see aka.ms/aks/docs/cost-analysis.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -937,6 +940,12 @@ parameters:
   - name: --upgrade-override-until
     type: string
     short-summary: Until when the cluster upgradeSettings overrides are effective. It needs to be in a valid date-time format that's within the next 30 days. For example, 2023-04-01T13:00:00Z. Note that if --force-upgrade is set to true and --upgrade-override-until is not set, by default it will be set to 3 days from now.
+  - name: --enable-cost-analysis
+    type: bool
+    short-summary: Enable exporting Kubernetes Namespace and Deployment details to the Cost Analysis views in the Azure portal. For more information see aka.ms/aks/docs/cost-analysis.
+  - name: --disable-cost-analysis
+    type: bool
+    short-summary: Disable exporting Kubernetes Namespace and Deployment details to the Cost Analysis views in the Azure portal.
 
 examples:
   - name: Reconcile the cluster back to its current state.
@@ -1568,6 +1577,9 @@ parameters:
   - name: --crg-id
     type: string
     short-summary: The crg id used to associate the new nodepool with the existed Capacity Reservation Group resource.
+  - name: --disable-windows-outbound-nat
+    type: bool
+    short-summary: Disable Windows OutboundNAT on Windows agent node pool.
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
