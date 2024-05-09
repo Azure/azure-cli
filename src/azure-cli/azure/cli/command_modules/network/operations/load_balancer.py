@@ -7,7 +7,7 @@ from knack.log import get_logger
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
     AAZStrArg, AAZArgEnum
-from msrestazure.tools import parse_resource_id
+from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from ..aaz.latest.network.lb import Delete as _LBDelete, Update as _LBUpdate, List as _LBList, Show as _LBShow
 from ..aaz.latest.network.lb.frontend_ip import Create as _LBFrontendIPCreate, Update as _LBFrontendIPUpdate, \
     Show as _LBFrontendIPShow, Delete as _LBFrontendIPDelete, List as _LBFrontendIPList
@@ -276,16 +276,19 @@ class LBRuleCreate(_LBRuleCreate):
             element_transformer=lambda _, id: {"id": id}
         )
 
-    def post_instance_create(self, _):
+    def post_instance_create(self, instance):
         args = self.ctx.args
         if has_value(args.frontend_ip_name):
-            instance = self.ctx.vars.instance
-            frontend_ip_configurations = instance.properties.frontend_ip_configurations
+            curr_id = args.frontend_ip_name.to_serialized_data()
+            curr_name = parse_resource_id(curr_id)["resource_name"] if is_valid_resource_id(curr_id) else curr_id
 
+            parent = self.ctx.vars.instance
+            frontend_ip_configurations = parent.properties.frontend_ip_configurations
             for fip in frontend_ip_configurations:
-                if fip.name == args.frontend_ip_name:
-                    rid = fip.id.to_serialized_data()
-                    self.ctx.update_aux_subscriptions(parse_resource_id(rid)["subscription"])
+                if fip.name == curr_name:
+                    if has_value(fip.properties.gateway_load_balancer):
+                        rid = fip.properties.gateway_load_balancer.id.to_serialized_data()
+                        self.ctx.update_aux_subscriptions(parse_resource_id(rid)["subscription"])
 
 
 class LBRuleUpdate(_LBRuleUpdate):
@@ -338,13 +341,16 @@ class LBRuleUpdate(_LBRuleUpdate):
 
         args = self.ctx.args
         if has_value(args.frontend_ip_name):
+            curr_id = args.frontend_ip_name.to_serialized_data()
+            curr_name = parse_resource_id(curr_id)["resource_name"] if is_valid_resource_id(curr_id) else curr_id
+
             parent = self.ctx.vars.instance
             frontend_ip_configurations = parent.properties.frontend_ip_configurations
-
             for fip in frontend_ip_configurations:
-                if fip.name == args.frontend_ip_name:
-                    rid = fip.id.to_serialized_data()
-                    self.ctx.update_aux_subscriptions(parse_resource_id(rid)["subscription"])
+                if fip.name == curr_name:
+                    if has_value(fip.properties.gateway_load_balancer):
+                        rid = fip.properties.gateway_load_balancer.id.to_serialized_data()
+                        self.ctx.update_aux_subscriptions(parse_resource_id(rid)["subscription"])
 
 
 class LBOutboundRuleCreate(_LBOutboundRuleCreate):
