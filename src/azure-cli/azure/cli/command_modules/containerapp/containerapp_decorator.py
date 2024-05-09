@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, consider-using-f-string, no-else-return, duplicate-string-formatting-argument, expression-not-assigned, too-many-locals, logging-fstring-interpolation, broad-except, pointless-statement, bare-except, too-many-public-methods, logging-format-interpolation, too-many-boolean-expressions, too-many-branches, useless-parent-delegation
+from copy import deepcopy
 from typing import Dict, Any
 
 from azure.cli.core.commands import AzCliCommand
@@ -278,7 +279,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
         self, cmd: AzCliCommand, client: Any, raw_parameters: Dict, models: str
     ):
         super().__init__(cmd, client, raw_parameters, models)
-        self.containerapp_def = ContainerAppModel
+        self.containerapp_def = deepcopy(ContainerAppModel)
 
     def validate_arguments(self):
         validate_container_app_name(self.get_argument_name(), AppType.ContainerApp.name)

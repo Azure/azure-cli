@@ -1,0 +1,18 @@
+
+services:
+  aca1rfdqfuv6yjdwnktlt4nq:
+    image: mcr.microsoft.com/azuredocs/aks-helloworld:v1
+    environment:
+      - RACK_ENV1=development1
+      - SHOW1=true
+      - BAZ1="snafu1"
+  aca2mrahsszmi2qvixjcskhx:
+      image: mcr.microsoft.com/azuredocs/aks-helloworld:v1
+      environment:
+        - RACK_ENV2=development2
+        - SHOW2=false
+        - BAZ2="snafu2"
+  php:
+      image: mcr.microsoft.com/azuredocs/aks-helloworld:v1
+      expose:
+      - 8080
