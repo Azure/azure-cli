@@ -68,7 +68,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         assert len(snapshot_list) == 1
 
         # delete snapshot
-        self.cmd("az netappfiles snapshot delete -g {rg} -a %s -p %s -v %s -s %s" %
+        self.cmd("az netappfiles snapshot delete -g {rg} -a %s -p %s -v %s -s %s -y" %
                  (account_name, pool_name, volume_name, snapshot_name))
         snapshot_list = self.cmd("az netappfiles snapshot list -g {rg} -a %s -p %s -v %s" %
                                  (account_name, pool_name, volume_name)).get_output_in_json()
