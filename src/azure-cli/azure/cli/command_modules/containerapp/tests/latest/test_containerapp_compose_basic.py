@@ -55,7 +55,9 @@ services:
         self.cmd(f'containerapp delete -n foo -g {resource_group} --yes', expect_failure=False)
         clean_up_test_file(compose_file_name)
 
-    @serial_test()
+    # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
+    # During create an environment, it created a log workspace with a random name, which cause the test cannot find the match Url
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
     def test_containerapp_compose_create_environment_to_target_location(self, resource_group):
         location = "East US"
