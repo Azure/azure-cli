@@ -264,7 +264,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('tags', arg_type=tags_type)
         c.argument('http_gateway_token_auth_connection_port', options_list=['--http-gateway-port'], help='The port used for token-auth based HTTPS connections to the cluster. Cannot be set to the same port as HttpGatewayEndpoint.')
         c.argument('ddos_protection_plan_id', options_list=['--ddos-plan-id'], help='Specify the resource id of a DDoS network protection plan that will be associated with the virtual network of the cluster.')
-        c.argument('enable_http_gateway_exclusive_auth_mode',  options_list=['--enable-gateway-mode'], arg_type=get_three_state_flag(), 
+        c.argument('enable_http_gateway_exclusive_auth_mode', options_list=['--enable-gateway-mode'], arg_type=get_three_state_flag(),
                    help='If true, token-based authentication is not allowed on the HttpGatewayEndpoint. This is required to support TLS versions 1.3 and above. If token-based authentication is used, HttpGatewayTokenAuthConnectionPort must be defined.')
 
     with self.argument_context('sf managed-cluster update') as c:
@@ -273,7 +273,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('dns_name', help='Cluster\'s dns name')
         c.argument('tags', arg_type=tags_type)
         c.argument('http_gateway_token_auth_connection_port', options_list=['--http-gateway-port'], help='The port used for token-auth based HTTPS connections to the cluster. Cannot be set to the same port as HttpGatewayEndpoint.')
-        c.argument('enable_http_gateway_exclusive_auth_mode',  options_list=['--enable-gateway-mode'], arg_type=get_three_state_flag(), 
+        c.argument('enable_http_gateway_exclusive_auth_mode', options_list=['--enable-gateway-mode'], arg_type=get_three_state_flag(),
                    help='If true, token-based authentication is not allowed on the HttpGatewayEndpoint. This is required to support TLS versions 1.3 and above. If token-based authentication is used, HttpGatewayTokenAuthConnectionPort must be defined.')
 
     with self.argument_context('sf managed-cluster client-certificate add') as c:

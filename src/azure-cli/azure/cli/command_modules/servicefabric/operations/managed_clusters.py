@@ -193,7 +193,7 @@ def add_client_cert(cmd,
             cluster.clients.append(ClientCertificate(is_admin=is_admin, common_name=common_name, issuer_thumbprint=issuer_thumbprint))
         else:
             raise CLIError("Thumbprint and Common name are empty")
-        
+
         if not cluster.public_ip_prefix_id:
             cluster.public_ip_prefix_id = None
 
