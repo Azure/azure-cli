@@ -1795,3 +1795,194 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @record_only()
+    def test_webapp_openai_secret_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'clitest',
+            'target_resource_group': 'servicelinker-test-openai-group',
+            'site': 'servicelinker-cognitive-app',
+            'account': 'servicelinker-test-openai'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.CognitiveServices).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create cognitiveservices --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type python'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update cognitiveservices --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @record_only()
+    def test_webapp_openai_system_identity_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'clitest',
+            'target_resource_group': 'servicelinker-test-openai-group',
+            'site': 'servicelinker-cognitive-app',
+            'account': 'servicelinker-test-openai'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.CognitiveServices).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create cognitiveservices --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type python'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update cognitiveservices --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ 
+                     self.check('clientType', 'dotnet'),
+                     self.check('authInfo.authType', 'systemAssignedIdentity')
+                ]
+        )
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @record_only()
+    def test_webapp_aiservices_system_identity_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'clitest',
+            'target_resource_group': 'servicelinker-test-openai-group',
+            'site': 'servicelinker-cognitive-app',
+            'account': 'serivcelinker-aiservices-test'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.CognitiveServices).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create cognitiveservices --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type python'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update cognitiveservices --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+    @record_only()
+    def test_webapp_cognitive_services_system_identity_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'clitest',
+            'target_resource_group': 'servicelinker-test-openai-group',
+            'site': 'servicelinker-cognitive-app',
+            'account': 'servicelinker-cognitiveservices-test'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.CognitiveServices).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create cognitiveservices --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type python'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update cognitiveservices --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))

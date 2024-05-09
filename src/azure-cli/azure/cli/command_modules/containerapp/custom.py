@@ -598,19 +598,30 @@ def update_containerapp_logic(cmd,
         scale_rule_def = ScaleRuleModel
         curr_metadata = {}
         if scale_rule_http_concurrency:
-            if scale_rule_type in ('http', 'tcp'):
+            if scale_rule_type == 'http':
                 curr_metadata["concurrentRequests"] = str(scale_rule_http_concurrency)
+            elif scale_rule_type == 'tcp':
+                curr_metadata["concurrentConnections"] = str(scale_rule_http_concurrency)
         metadata_def = parse_metadata_flags(scale_rule_metadata, curr_metadata)
         auth_def = parse_auth_flags(scale_rule_auth)
         if scale_rule_type == "http":
             scale_rule_def["name"] = scale_rule_name
             scale_rule_def["custom"] = None
+            scale_rule_def["tcp"] = None
             scale_rule_def["http"] = {}
             scale_rule_def["http"]["metadata"] = metadata_def
             scale_rule_def["http"]["auth"] = auth_def
+        elif scale_rule_type == "tcp":
+            scale_rule_def["name"] = scale_rule_name
+            scale_rule_def["custom"] = None
+            scale_rule_def["http"] = None
+            scale_rule_def["tcp"] = {}
+            scale_rule_def["tcp"]["metadata"] = metadata_def
+            scale_rule_def["tcp"]["auth"] = auth_def
         else:
             scale_rule_def["name"] = scale_rule_name
             scale_rule_def["http"] = None
+            scale_rule_def["tcp"] = None
             scale_rule_def["custom"] = {}
             scale_rule_def["custom"]["type"] = scale_rule_type
             scale_rule_def["custom"]["metadata"] = metadata_def
@@ -4806,7 +4817,8 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
         managed_environment = create_containerapps_compose_environment(cmd,
                                                                        managed_env_name,
                                                                        env_rg,
-                                                                       tags=tags)
+                                                                       tags=tags,
+                                                                       location=location)
 
     compose_yaml = load_yaml_file(compose_file_path)
     parsed_compose_file = ComposeFile(compose_yaml)

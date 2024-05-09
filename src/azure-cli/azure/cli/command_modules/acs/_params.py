@@ -436,6 +436,7 @@ def load_arguments(self, _):
         )
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('enable_cost_analysis', action='store_true')
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -572,6 +573,8 @@ def load_arguments(self, _):
         )
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('enable_cost_analysis', action='store_true')
+        c.argument('disable_cost_analysis', action='store_true')
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])

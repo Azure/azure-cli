@@ -1271,6 +1271,32 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             ctx_3.get_linux_os_config()
 
+    def common_get_agentpool_windows_profile(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({
+                "os_type": "windows",
+                "disable_windows_outbound_nat": True,
+            }),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        # check all fields under windows_profile
+        self.assertEqual(ctx_1.get_disable_windows_outbound_nat(), True)
+
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            windows_profile=self.models.AgentPoolWindowsProfile(
+                disable_outbound_nat=False
+            )
+        )
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(
+            ctx_1.get_disable_windows_outbound_nat(),
+            False,
+        )
+
     def common_get_aks_custom_headers(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -1510,6 +1536,9 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_linux_os_config(self):
         self.common_get_linux_os_config()
 
+    def test_get_agentpool_windows_profile(self):
+        self.common_get_agentpool_windows_profile()
+
     def test_get_aks_custom_headers(self):
         self.common_get_aks_custom_headers()
 
@@ -1669,6 +1698,9 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
 
     def test_get_linux_os_config(self):
         self.common_get_linux_os_config()
+
+    def test_get_agentpool_windows_profile(self):
+        self.common_get_agentpool_windows_profile()
 
     def test_get_aks_custom_headers(self):
         self.common_get_aks_custom_headers()
@@ -2081,6 +2113,29 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
+    def common_set_up_agentpool_windows_profile(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {
+                "os_type": "windows",
+                "disable_windows_outbound_nat": True,
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_agentpool_windows_profile(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
+
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            windows_profile=self.models.AgentPoolWindowsProfile(
+                disable_outbound_nat=True
+            )
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
     def common_set_up_gpu_propertes(self):
         dec_1 = AKSAgentPoolAddDecorator(
             self.cmd,
@@ -2145,6 +2200,9 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
 
     def test_set_up_custom_node_config(self):
         self.common_set_up_custom_node_config()
+
+    def test_set_up_agentpool_windows_profile(self):
+        self.common_set_up_agentpool_windows_profile()
 
     def test_construct_agentpool_profile_default(self):
         import inspect
@@ -2289,6 +2347,9 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
 
     def test_set_up_custom_node_config(self):
         self.common_set_up_custom_node_config()
+
+    def test_set_up_agentpool_windows_profile(self):
+        self.common_set_up_agentpool_windows_profile()
 
     def test_construct_agentpool_profile_default(self):
         import inspect
