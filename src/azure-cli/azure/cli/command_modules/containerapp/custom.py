@@ -598,19 +598,30 @@ def update_containerapp_logic(cmd,
         scale_rule_def = ScaleRuleModel
         curr_metadata = {}
         if scale_rule_http_concurrency:
-            if scale_rule_type in ('http', 'tcp'):
+            if scale_rule_type == 'http':
                 curr_metadata["concurrentRequests"] = str(scale_rule_http_concurrency)
+            elif scale_rule_type == 'tcp':
+                curr_metadata["concurrentConnections"] = str(scale_rule_http_concurrency)
         metadata_def = parse_metadata_flags(scale_rule_metadata, curr_metadata)
         auth_def = parse_auth_flags(scale_rule_auth)
         if scale_rule_type == "http":
             scale_rule_def["name"] = scale_rule_name
             scale_rule_def["custom"] = None
+            scale_rule_def["tcp"] = None
             scale_rule_def["http"] = {}
             scale_rule_def["http"]["metadata"] = metadata_def
             scale_rule_def["http"]["auth"] = auth_def
+        elif scale_rule_type == "tcp":
+            scale_rule_def["name"] = scale_rule_name
+            scale_rule_def["custom"] = None
+            scale_rule_def["http"] = None
+            scale_rule_def["tcp"] = {}
+            scale_rule_def["tcp"]["metadata"] = metadata_def
+            scale_rule_def["tcp"]["auth"] = auth_def
         else:
             scale_rule_def["name"] = scale_rule_name
             scale_rule_def["http"] = None
+            scale_rule_def["tcp"] = None
             scale_rule_def["custom"] = {}
             scale_rule_def["custom"]["type"] = scale_rule_type
             scale_rule_def["custom"]["metadata"] = metadata_def
@@ -3429,6 +3440,10 @@ def containerapp_ssh(cmd, resource_group_name, name, container=None, revision=No
 
     logger.warning("Use ctrl + D to exit.")
     while conn.is_connected:
+        if not reader.is_alive() or not writer.is_alive():
+            logger.warning("Reader or Writer for WebSocket is not alive. Closing the connection.")
+            conn.disconnect()
+
         try:
             time.sleep(0.1)
         except KeyboardInterrupt:

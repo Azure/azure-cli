@@ -2342,6 +2342,7 @@ class VMMonitorTestCreateWindows(ScenarioTest):
 
 class VMMonitorTestUpdateLinux(ScenarioTest):
 
+    @live_only() # Test playback fails and the live-only flag will be removed once it is addressed
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_update_with_workspace_linux', location='eastus')
     def test_vm_update_with_workspace_linux(self, resource_group):
@@ -2662,6 +2663,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
 
 class VMSSExtensionImageTest(ScenarioTest):
 
+    @live_only()  # https://github.com/Azure/azure-cli/issues/28678
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension_image_')
     def test_vmss_extension_image(self, resource_group):
@@ -3624,11 +3626,12 @@ class VMSSCreateOptions(ScenarioTest):
         self.kwargs.update({
             'vmss': self.create_random_name('vmss', 10)
         })
-        self.cmd(
-            'vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --upgrade-policy-mode Manual --max-surge true --disable-overprovision --orchestration-mode Uniform',
-            checks=[
-                self.check('vmss.upgradePolicy.rollingUpgradePolicy.maxSurge', True)
-            ])
+        self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --upgrade-policy-mode Manual --max-surge true --disable-overprovision --orchestration-mode Uniform', checks=[
+            self.check('vmss.upgradePolicy.rollingUpgradePolicy.maxSurge', True),
+        ])
+        self.cmd('vmss update -n {vmss} -g {rg} --max-surge false', checks=[
+            self.check('upgradePolicy.rollingUpgradePolicy.maxSurge', False),
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_with_auto_os_upgrade_', location='eastus2euap')
     def test_vmss_with_auto_os_upgrade(self, resource_group):
@@ -4036,6 +4039,21 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('upgradePolicy.rollingUpgradePolicy.maxUnhealthyInstancePercent', maxUUIP),
             self.check('upgradePolicy.rollingUpgradePolicy.pauseTimeBetweenBatches', PTB),
             self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_set_rolling_upgrade_policy_during_creation', location='eastus')
+    def test_vmss_set_rolling_upgrade_policy_during_creation(self):
+        self.kwargs.update({
+            'linux_vmss': self.create_random_name('vmss', 10),
+            'windows_vmss': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vmss create -g {rg} -n {linux_vmss} --image ubuntu2204 --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --orchestration-mode Uniform --admin-username clitester1 --admin-password Testqwer1234!', checks=[
+            self.check('vmss.upgradePolicy.mode', 'Rolling'),
+            self.check('vmss.virtualMachineProfile.extensionProfile.extensions[0].name', 'ApplicationHealthLinux')
+        ])
+        self.cmd('vmss create -g {rg} -n {windows_vmss} --image Win2022Datacenter --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --orchestration-mode Uniform --admin-username clitester1 --admin-password Testqwer1234!', checks=[
+            self.check('vmss.upgradePolicy.mode', 'Rolling'),
+            self.check('vmss.virtualMachineProfile.extensionProfile.extensions[0].name', 'ApplicationHealthWindows')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_', location='westus')
@@ -9965,11 +9983,21 @@ class CapacityReservationScenarioTest(ScenarioTest):
         self.kwargs.update({
             'reservation_group_1': self.create_random_name('reservation_group_', 30),
             'reservation_group_2': self.create_random_name('reservation_group_', 30),
-            'sub_id': '/subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be'
+            'sub_id': '/subscriptions/00000000-0000-0000-0000-000000000000'
         })
-        self.cmd('capacity reservation group create -n {reservation_group_1} -g {rg} --sharing-profile "subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be" -l westEurope')
+        self.cmd('capacity reservation group create -n {reservation_group_1} -g {rg} --sharing-profile {sub_id} subscriptions/00000000-0000-0000-0000-000000000000 -l westEurope')
         self.cmd('capacity reservation group create -n {reservation_group_2} -g {rg} -l westEurope')
-        self.cmd('capacity reservation group update -n {reservation_group_2} -g {rg} --sharing-profile "subscriptions/7a624c46-eaa3-4a6c-b362-77c14bf531be"')
+        self.cmd('capacity reservation group update -n {reservation_group_2} -g {rg} --sharing-profile {sub_id}')
+        self.cmd('capacity reservation group update -n {reservation_group_1} -g {rg} --sharing-profile')
+        self.cmd('capacity reservation group create -n {reservation_group_2} -g {rg} --sharing-profile {sub_id} 00000000-0000-0000-0000-000000000000 -l westEurope')
+
+    @record_only()  # Some special subscriptions can test it.
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_query_params', location='westEurope')
+    def test_capacity_reservation_list_query_params(self, resource_group):
+
+        self.cmd('capacity reservation group list --resource-ids-only all')
+        self.cmd('capacity reservation group list --resource-ids-only CreatedInSubscription')
+        self.cmd('capacity reservation group list --resource-ids-only SharedWithSubscription')
 
 
 class VMVMSSAddApplicationTestScenario(ScenarioTest):

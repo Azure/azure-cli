@@ -93,7 +93,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                                 '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
                                 '--disk-encryption-targets "TemporaryDisk"')
 
-        time.sleep(120)
+        if self.is_live or self.in_recording:
+            time.sleep(120)
 
         result = self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
             self.check('allocationState', 'steady'),
@@ -138,7 +139,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                            self.check('metadata[1].value', 'd')])
 
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
-        
+
     @ResourceGroupPreparer()
     @BatchAccountPreparer()
     def test_batch_pool_trustedLaunch_cmd(
@@ -151,7 +152,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         key = self.get_account_key(
             batch_account_name,
             resource_group)
-        
+
         self.kwargs.update({
             'p_id': 'xplatCreatedPool',
             'acc_n': batch_account_name,
@@ -167,7 +168,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                         '--encryption-at-host true '
                         '--enable-secure-boot true '
                         '--enable-vtpm true')
-        
+
         res = self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()
 
         self.assertTrue(res['virtualMachineConfiguration']['securityProfile']['securityType'])
@@ -189,7 +190,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         key = self.get_account_key(
             batch_account_name,
             resource_group)
-        
+
         self.kwargs.update({
             'p_id': 'xplatCreatedPool',
             'acc_n': batch_account_name,
@@ -204,13 +205,69 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                         '--os-disk-size 100 '
                         '--os-disk-caching ReadWrite '
                         '--storage-account-type "StandardSSD_LRS" ')
-        
+
         res = self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()
         print(res)
 
         self.assertTrue(res['virtualMachineConfiguration']['osDisk']['caching'])
         self.assertTrue(res['virtualMachineConfiguration']['osDisk']['managedDisk']['storageAccountType'])
         self.assertTrue(res['virtualMachineConfiguration']['osDisk']['diskSizeGb'])
+
+        self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
+
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer()
+    def test_batch_pool_upgradePolicy_cmd(
+            self,
+            resource_group,
+            batch_account_name):
+        endpoint = self.get_account_endpoint(
+            batch_account_name,
+            resource_group).replace("https://", "")
+        key = self.get_account_key(
+            batch_account_name,
+            resource_group)
+
+        self.kwargs.update({
+            'p_id': 'xplatCreatedPool',
+            'acc_n': batch_account_name,
+            'acc_k': key,
+            'acc_u': endpoint
+        })
+
+        self.batch_cmd('batch pool create --id {p_id} --vm-size "standard_d4s_v3" '
+                        '--image "MicrosoftWindowsServer:WindowsServer:2016-datacenter-smalldisk" '
+                        '--node-agent-sku-id "batch.node.windows amd64" '
+                        '--policy "zonal" '
+                        '--target-dedicated-nodes 2 '
+                        '--upgrade-policy-mode "automatic" '
+                        '--disable-auto-rollback '
+                        '--enable-auto-os-upgrade '
+                        '--defer-os-rolling-upgrade '
+                        '--use-rolling-upgrade-policy '
+                        '--enable-cross-zone-upgrade '
+                        '--max-batch-instance-percent 20 '
+                        '--max-unhealthy-instance-percent 20 '
+                        '--max-unhealthy-upgraded-instance-percent 20 '
+                        '--pause-time-between-batches "PT0S" '
+                        '--prioritize-unhealthy-instances '
+                        '--rollback-failed-instances-on-policy-breach ')
+
+        res = self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()
+        print(res)
+
+        self.assertTrue(res['upgradePolicy']['mode'])
+        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['disableAutomaticRollback'])
+        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['enableAutomaticOsUpgrade'])
+        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['osRollingUpgradeDeferral'])
+        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['useRollingUpgradePolicy'])
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['enableCrossZoneUpgrade'])
+        self.assertEqual(res['upgradePolicy']['rollingUpgradePolicy']['maxBatchInstancePercent'], 20)
+        self.assertEqual(res['upgradePolicy']['rollingUpgradePolicy']['maxUnhealthyInstancePercent'], 20)
+        self.assertEqual(res['upgradePolicy']['rollingUpgradePolicy']['maxUnhealthyUpgradedInstancePercent'], 20)
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['pauseTimeBetweenBatches'], '')
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['prioritizeUnhealthyInstances'])
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['rollbackFailedInstancesOnPolicyBreach'])
 
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
 
@@ -302,7 +359,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         task_result = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
         if self.is_live or self.in_recording or task_result["taskCounts"]["active"] == 0:
-            time.sleep(10) 
+            time.sleep(10)
 
         task_result = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
 
