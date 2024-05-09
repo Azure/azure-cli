@@ -5,7 +5,7 @@
 import os
 import unittest  # pylint: disable=unused-import
 
-from azure.cli.testsdk import (ResourceGroupPreparer, LogAnalyticsWorkspacePreparer, JMESPathCheck)
+from azure.cli.testsdk import (ResourceGroupPreparer, LogAnalyticsWorkspacePreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.command_modules.containerapp.tests.latest.common import (
     ContainerappComposePreviewScenarioTest,  # pylint: disable=unused-import
