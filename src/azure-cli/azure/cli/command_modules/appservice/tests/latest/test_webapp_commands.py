@@ -2048,7 +2048,7 @@ class WebappZipDeployScenarioTest(ScenarioTest):
             f'appservice plan create -g {resource_group} -n {plan_name} --sku S1 -l eastus')
         self.cmd(
             'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
-        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).assert_with_checks([
+        self.cmd('webapp deployment source config-zip -g {} -n {} --track-status false --src "{}"'.format(resource_group, webapp_name, zip_file)).assert_with_checks([
             JMESPathCheck('status', 4),
             JMESPathCheck('deployer', 'ZipDeploy'),
             JMESPathCheck('message', 'Created via a push deployment'),
@@ -2760,7 +2760,7 @@ class WebappDeploymentLogsScenarioTest(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
-        deployment_1 = self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
+        deployment_1 = self.cmd('webapp deployment source config-zip -g {} -n {} --track-status false --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
         self.cmd('webapp log deployment show -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@) > `0`', True),
         ])
@@ -2782,13 +2782,13 @@ class WebappDeploymentLogsScenarioTest(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
-        deployment_1 = self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
+        deployment_1 = self.cmd('webapp deployment source config-zip -g {} -n {} --track-status false --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
         self.cmd('webapp log deployment list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].id', deployment_1['id']),
         ])
 
-        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
+        self.cmd('webapp deployment source config-zip -g {} -n {} --track-status false --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
         self.cmd('webapp log deployment list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 2)
         ])
@@ -2827,7 +2827,7 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
-        self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --async true'.format(resource_group, webapp_name, war_file)).assert_with_checks([
+        self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --async true --track-status false'.format(resource_group, webapp_name, war_file)).assert_with_checks([
             JMESPathCheck('status', 4),
             JMESPathCheck('deployer', 'OneDeploy'),
             JMESPathCheck('message', 'OneDeploy'),
