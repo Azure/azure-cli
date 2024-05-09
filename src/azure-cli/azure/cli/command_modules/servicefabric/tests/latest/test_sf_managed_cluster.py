@@ -258,11 +258,11 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'cluster_code_version': '10.1.1951.9590'
         })
 
-        cluster = self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --tags {tags} --upgrade-mode Manual --cluster-code-version {cluster_code_version} --ddos-protection-plan-id {ddos_protection_plan_id}',
+        cluster = self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --tags {tags} --upgrade-mode Manual --cluster-code-version {cluster_code_version} --ddos-plan-id {ddos_protection_plan_id}',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('clusterState', 'WaitingForNodes')]).get_output_in_json()
         
-        cluster = self.cmd('az sf managed-cluster update -g {rg} -c {cluster_name} --http-gateway-token-auth-connection-port {http_gateway_token_auth_connection_port} --enable-http-gateway-exclusive-auth-mode',
+        cluster = self.cmd('az sf managed-cluster update -g {rg} -c {cluster_name} --http-gateway-port {http_gateway_token_auth_connection_port} --enable-gateway-mode',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('clusterState', 'WaitingForNodes')]).get_output_in_json()
 
