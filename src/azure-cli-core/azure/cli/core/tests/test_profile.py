@@ -1454,18 +1454,16 @@ class TenantStub(object):  # pylint: disable=too-few-public-methods
 
 
 class TestUtils(unittest.TestCase):
-    def test_attach_token_tenant(self):
-        from azure.mgmt.resource.subscriptions.v2016_06_01.models import Subscription \
-            as Subscription_v2016_06_01
-        subscription = Subscription_v2016_06_01()
+    def test_attach_token_tenant_v2016_06_01(self):
+        from azure.mgmt.resource.subscriptions.v2016_06_01.models import Subscription
+        subscription = Subscription()
         _attach_token_tenant(subscription, "token_tenant_1")
         self.assertEqual(subscription.tenant_id, "token_tenant_1")
         self.assertFalse(hasattr(subscription, "home_tenant_id"))
 
-    def test_attach_token_tenant_v2016_06_01(self):
-        from azure.mgmt.resource.subscriptions.v2019_11_01.models import Subscription \
-            as Subscription_v2019_11_01
-        subscription = Subscription_v2019_11_01()
+    def test_attach_token_tenant_v2022_12_01(self):
+        from azure.mgmt.resource.subscriptions.v2022_12_01.models import Subscription
+        subscription = Subscription()
         subscription.tenant_id = "home_tenant_1"
         _attach_token_tenant(subscription, "token_tenant_1")
         self.assertEqual(subscription.tenant_id, "token_tenant_1")

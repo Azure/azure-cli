@@ -6831,11 +6831,13 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     def test_sql_server_minimal_tls_version(self, resource_group):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         resource_group_location = "eastus"
         tls1_2 = "1.2"
         tls1_1 = "1.1"
+        tls1_3 = "1.3"
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} '
@@ -6854,7 +6856,24 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('minimalTlsVersion', tls1_1)])
+                     
+        # test update sql server with tls version as 1.3
+        self.cmd('sql server update -g {} --name {} --minimal-tls-version {} -i'
+                 .format(resource_group, server_name_1, tls1_3),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('minimalTlsVersion', tls1_3)])
 
+        # test create sql server is created with default tls 1.2 when minimalTlsVersion is not passed explicitly
+        self.cmd('sql server create -g {} --name {} '
+                 '--admin-user {} --admin-password {}'
+                 .format(resource_group, server_name_2, admin_login, admin_passwords[0]),
+                 checks=[
+                     JMESPathCheck('name', server_name_2),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('minimalTlsVersion', tls1_2)]).get_output_in_json()
 
 class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
     @ManagedInstancePreparer()

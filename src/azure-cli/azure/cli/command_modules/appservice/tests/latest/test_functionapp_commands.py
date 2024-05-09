@@ -27,7 +27,7 @@ WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
-FLEX_ASP_LOCATION_FUNCTIONAPP = 'eastus'
+FLEX_ASP_LOCATION_FUNCTIONAPP = 'eastasia'
 WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP = 'chinaeast'
 
 
@@ -457,11 +457,10 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
 
 class FunctionWorkloadProfile(ScenarioTest):
     @AllowLargeResponse(8192)
-    @ResourceGroupPreparer(location="westus")
+    @ResourceGroupPreparer(location='northeurope')
     @StorageAccountPreparer()
     def test_functionapp_workloadprofiles(self, resource_group, storage_account):
         
-        location = "NorthCentralUS(Stage)"
         functionapp_name = self.create_random_name(
             'functionapp', 32)
         managed_environment_name = self.create_random_name(
@@ -475,23 +474,31 @@ class FunctionWorkloadProfile(ScenarioTest):
             'wlp', 15
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location {} --enable-workload-profiles  --logs-destination none'.format(
+        self.cmd('containerapp env create --name {} --resource-group {} --location northeurope --enable-workload-profiles  --logs-destination none'.format(
             managed_environment_name,
             resource_group,
-            location,
         ))
-        
+
+        if self.is_live:
+            time.sleep(260)
+
         self.cmd('containerapp env workload-profile add --name {} --resource-group {} --workload-profile-type D4 -w {} --min-nodes 3 --max-nodes 6'.format(
             managed_environment_name,
             resource_group,
             workload_profile_name
         ))
-        
+
+        if self.is_live:
+            time.sleep(260)
+
         self.cmd('containerapp env workload-profile add --name {} --resource-group {} --workload-profile-type D4 -w {} --min-nodes 3 --max-nodes 6'.format(
             managed_environment_name,
             resource_group,
             workload_profile_name_2
         ))
+
+        if self.is_live:
+            time.sleep(260)
 
         self.cmd('functionapp create -g {} -n {} -s {} --functions-version 4 --runtime dotnet-isolated --environment {} --workload-profile-name {} --cpu 1.0 --memory 1.0Gi'.format(
             resource_group,
@@ -516,6 +523,9 @@ class FunctionWorkloadProfile(ScenarioTest):
             functionapp_name,
             workload_profile_name_2
         ))
+
+        if self.is_live:
+            time.sleep(1200)
 
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
             JMESPathCheck('resourceConfig.cpu', 0.75),
@@ -604,6 +614,8 @@ class FunctionappDaprConfig(ScenarioTest):
         )).assert_with_checks([
             JMESPathCheck('daprConfig', None)
         ])
+
+        time.sleep(1200)
 
         self.cmd('functionapp config container set -g {} -n {} --enable-dapr true --dapr-app-id daprappid --dal false'.format(
             resource_group,
@@ -727,8 +739,8 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(len(locations) == 13)
 
     def test_functionapp_list_flexconsumption_runtimes(self):
-        runtimes = self.cmd('functionapp list-flexconsumption-runtimes').get_output_in_json()
-        self.assertTrue(len(runtimes) == 8)
+        runtimes = self.cmd('functionapp list-flexconsumption-runtimes -l eastasia --runtime python').get_output_in_json()
+        self.assertTrue(len(runtimes) == 2)
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -743,6 +755,12 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['alwaysReady'][0]['name'] == 'http')
         self.assertTrue(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['alwaysReady'][0]['instanceCount'] == 10)
         self.assertTrue(len(functionapp['properties']['functionAppConfig']['scaleAndConcurrency']['alwaysReady']) == 1)
+
+        app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue('APPLICATIONINSIGHTS_ENABLE_AGENT' not in [
+                        kp['name'] for kp in app_set])
+        self.assertTrue('AzureWebJobsDashboard' not in [
+                        kp['name'] for kp in app_set])
 
         scale_config = self.cmd('functionapp scale config set -g {} -n {} --maximum-instance-count 200 --instance-memory 2048 --trigger-type http --trigger-settings perInstanceConcurrency=5'
                                .format(resource_group, functionapp_name)).get_output_in_json()
@@ -796,7 +814,6 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(runtime_config['version'] == '3.11')
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
     def test_functionapp_flex_deployment_config(self, resource_group):
         functionapp_name = self.create_random_name(
             'functionapp', 40)
@@ -810,7 +827,7 @@ class FunctionAppFlex(LiveScenarioTest):
         deployment_storage_account = self.cmd('storage account create -g {} -n {} -l {} --sku Standard_LRS'
                                               .format(resource_group, storage2_name, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
         deployment_account_blob_endpoint = deployment_storage_account['primaryEndpoints']['blob']
-        self.cmd('storage container create -g {} -n {} --account-name {} --public-access blob'
+        self.cmd('storage container create -g {} -n {} --account-name {}'
                  .format(resource_group, container_name, storage2_name))
 
         functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java --deployment-storage-auth-type storageAccountConnectionString'
@@ -841,10 +858,30 @@ class FunctionAppFlex(LiveScenarioTest):
 
         identity = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name)).get_output_in_json()
         deployment_config = self.cmd('functionapp deployment config set -g {} -n {} --deployment-storage-auth-type userAssignedIdentity --deployment-storage-auth-value {}'
-                                     .format(resource_group, functionapp_name, identity['id']))
+                                     .format(resource_group, functionapp_name, identity['id'])).get_output_in_json()
         self.assertTrue(deployment_config['storage']['authentication']['type'] == 'UserAssignedIdentity')
         self.assertTrue(deployment_config['storage']['authentication']['userAssignedIdentityResourceId'] == identity['id'])
         self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] is None)
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_vnet_integration(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java'
+                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account, vnet_name, subnet_name))
+
+        self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
+            resource_group, functionapp_name, vnet_name, subnet_name))
+
+        result = self.cmd('provider show -n Microsoft.App').get_output_in_json()
+        self.assertTrue(result['registrationState'] == 'Registered')
 
 
 class FunctionAppManagedEnvironment(ScenarioTest):
@@ -1355,7 +1392,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
                      "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~18')])
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~20')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1706,7 +1743,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|18')
+            JMESPathCheck('linuxFxVersion', 'Node|20')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
@@ -1743,7 +1780,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|18')
+            JMESPathCheck('linuxFxVersion', 'Node|20')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
@@ -2882,6 +2919,8 @@ class FunctionAppConfigTest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
             JMESPathCheck('powerShellVersion', '7.2')
         ])
+
+        time.sleep(60)
         self.cmd('functionapp config set -g {} -n {} --powershell-version 7.0'
                  .format(resource_group, functionapp_name)).assert_with_checks([
                      JMESPathCheck('powerShellVersion', '7.0')])

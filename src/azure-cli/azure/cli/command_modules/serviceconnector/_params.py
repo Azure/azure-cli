@@ -252,6 +252,7 @@ def add_opt_out_argument(context):
                      help='Whether to disable some configuration steps. '
                      'Use configinfo to disbale configuration information changes on source. '
                      'Use publicnetwork to disable public network access configuration.'
+                     'Use auth to skip auth configuration such as enabling managed identity and granting RBAC roles.'
                      )
 
 

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import re
 import time
 from knack.log import get_logger
 from knack.util import todict, CLIError
@@ -387,17 +388,24 @@ def is_packaged_installed(package_name):
 
 
 def get_object_id_of_current_user():
-    signed_in_user = run_cli_cmd('az account show').get('user')
+    signed_in_user_info = run_cli_cmd('az account show -o json')
+    if not isinstance(signed_in_user_info, dict):
+        raise CLIInternalError(
+            f"Can't parse login user information {signed_in_user_info}")
+    signed_in_user = signed_in_user_info.get('user')
     user_type = signed_in_user.get('type')
+    if not user_type or not signed_in_user.get('name'):
+        raise CLIInternalError(
+            f"Can't get user type or name from signed-in user {signed_in_user}")
     try:
         if user_type == 'user':
-            user_info = run_cli_cmd('az ad signed-in-user show')
+            user_info = run_cli_cmd('az ad signed-in-user show -o json')
             user_object_id = user_info.get('objectId') if user_info.get(
                 'objectId') else user_info.get('id')
             return user_object_id
         if user_type == 'servicePrincipal':
             user_info = run_cli_cmd(
-                f'az ad sp show --id {signed_in_user.get("name")}')
+                f'az ad sp show --id {signed_in_user.get("name")} -o json')
             user_object_id = user_info.get('id')
             return user_object_id
     except CLIInternalError as e:
@@ -409,7 +417,7 @@ def get_object_id_of_current_user():
 
 def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
                              user_identity_auth_info, system_identity_auth_info,
-                             service_principal_auth_info_secret, new_addon):
+                             service_principal_auth_info_secret, new_addon, auth_action=None, config_action=None):
     all_auth_info = []
     if secret_auth_info is not None:
         all_auth_info.append(secret_auth_info)
@@ -421,9 +429,15 @@ def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
         all_auth_info.append(system_identity_auth_info)
     if service_principal_auth_info_secret is not None:
         all_auth_info.append(service_principal_auth_info_secret)
+    if len(all_auth_info) == 0:
+        if auth_action == 'optOutAllAuth' and config_action == 'optOut':
+            return None
+        raise ValidationError('At least one auth info is needed')
     if not new_addon and len(all_auth_info) != 1:
         raise ValidationError('Only one auth info is needed')
     auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    if auth_info is not None and auth_action is not None:
+        auth_info.update({'auth_mode': auth_action})
     return auth_info
 
 
@@ -534,3 +548,25 @@ def get_secret_type_for_update(authInfo):
     if 'secretInfo' in authInfo:
         return authInfo['secretInfo']['secretType']
     return ''
+
+
+# Decorator for AKS configurations.
+def is_aks_linker_by_id(resource_id):
+    pattern = r'/subscriptions/([^/]+)/resourceGroups/([^/]+)/providers/Microsoft.ContainerService' + \
+        r'/managedClusters/([^/]+)/providers/Microsoft.ServiceLinker/linkers/([^/]+)'
+    return re.match(pattern, resource_id, re.IGNORECASE) is not None
+
+
+def get_aks_resource_name(linker):
+    secret_name = get_aks_resource_secret_name(linker["name"])
+    if linker["authInfo"] is not None and linker["authInfo"].get("authType") == "userAssignedIdentity" and \
+            not (linker["targetService"]["resourceProperties"] is not None and
+                 linker["targetService"]["resourceProperties"].get("connectAsKubernetesCsiDriver")):
+        service_account_name = f'sc-account-{linker["authInfo"].get("clientId")}'
+        return [secret_name, service_account_name]
+    return [secret_name]
+
+
+def get_aks_resource_secret_name(connection_name):
+    valid_name = re.sub(r'[^a-zA-Z0-9]', '', connection_name, flags=re.IGNORECASE)
+    return f'sc-{valid_name}-secret'

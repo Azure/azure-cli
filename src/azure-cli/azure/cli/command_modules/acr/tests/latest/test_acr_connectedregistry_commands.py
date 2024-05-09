@@ -51,7 +51,7 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
                  checks=self.check('dataEndpointEnabled', True))
 
         # Create a default connected registry.
-        self.cmd('acr connected-registry create -n {cr_name} -r {registry_name} --repository {repo_1} {repo_2} {repo_3}',
+        self.cmd('acr connected-registry create -n {cr_name} -r {registry_name} -m ReadWrite --repository {repo_1} {repo_2} {repo_3}',
                  checks=[self.check('name', '{cr_name}'),
                          self.check('mode', 'ReadWrite'),
                          self.check('logging.logLevel', 'Information'),
@@ -61,7 +61,7 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
         # Create a custom connected-registry with a previously created token.
         self.cmd('acr token create -r {registry_name} -n {syncToken} --repository {repo_1} content/read metadata/read --gateway {root_name} config/read config/write message/read message/write --no-passwords')
         self.cmd('acr token create -r {registry_name} -n {clientToken} --repository {repo_1} content/read --no-passwords')
-        self.cmd('acr connected-registry create -n {root_name} -r {registry_name} --sync-token {syncToken} -m ReadOnly --log-level Warning -s "{syncSchedule}" -w PT4H --client-tokens {clientToken} --notifications {notificationStr}',
+        self.cmd('acr connected-registry create -n {root_name} -r {registry_name} --sync-token {syncToken} --log-level Warning -s "{syncSchedule}" -w PT4H --client-tokens {clientToken} --notifications {notificationStr}',
                  checks=[self.check('name', '{root_name}'),
                          self.check('mode', 'ReadOnly'),
                          self.check('provisioningState', 'Succeeded'),

@@ -821,6 +821,10 @@ class AzCliCommandInvoker(CommandInvoker):
         if not cmd.cli_ctx.config.getboolean('clients', 'show_secrets_warning', False):
             return
 
+        from .constants import CREDENTIAL_WARNING_EXCLUSIVE_COMMANDS
+        if cmd.name in CREDENTIAL_WARNING_EXCLUSIVE_COMMANDS:
+            return
+
         from ..credential_helper import sensitive_data_detailed_warning_message, sensitive_data_warning_message
         sensitive_info = cmd.sensitive_info if hasattr(cmd, 'sensitive_info') else None
         if sensitive_info:
