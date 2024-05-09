@@ -298,7 +298,6 @@ def intelligent_experience(cmd, namespace, missing_args):
     '''Use local context and interactive inputs to get arg values
     '''
     cmd_arg_values = dict()
-    print(missing_args)
     # use commandline source/target resource args
     for arg in missing_args:
         if getattr(namespace, arg, None) is not None:
@@ -761,18 +760,24 @@ def apply_auth_args(cmd, namespace, arg_values):
                 if arg in arg_values:
                     setattr(namespace, arg, arg_values.get(arg, None))
                     if arg == 'workload_identity_auth_info':
-                        output = run_cli_cmd('az identity show --ids {}'.format(arg_values.get('workload_identity_auth_info')))
-                        if output:
-                            client_id = output.get('clientId')
-                            subs_id = arg_values.get('workload_identity_auth_info').split('/')[2]
-                        else:
-                            raise ValidationError('Invalid user identity resource ID for workload identity.')
-                        setattr(namespace, 'user_identity_auth_info',
-                                {
-                                    'client_id': client_id,
-                                    'subscription_id': subs_id,
-                                    'auth_type': 'userAssignedIdentity'
-                                    })
+                        apply_workload_identity(namespace, arg_values)
+
+
+def apply_workload_identity(namespace, arg_values):
+    output = run_cli_cmd('az identity show --ids {}'.format(
+        arg_values.get('workload_identity_auth_info')
+    ))
+    if output:
+        client_id = output.get('clientId')
+        subs_id = arg_values.get('workload_identity_auth_info').split('/')[2]
+    else:
+        raise ValidationError('Invalid user identity resource ID for workload identity.')
+    setattr(namespace, 'user_identity_auth_info',
+            {
+                'client_id': client_id,
+                'subscription_id': subs_id,
+                'auth_type': 'userAssignedIdentity'
+            })
 
 
 def apply_connection_name(namespace, arg_values):
