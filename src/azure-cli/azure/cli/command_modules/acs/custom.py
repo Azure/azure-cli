@@ -1175,7 +1175,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                 if data_collection_settings is not None:
                     raise ArgumentUsageError("--data-collection-settings can not be used without MSI auth.")
                 if ampls_resource_id is not None:
-                    raise ArgumentUsageError("--azure-monitor-private-link-scope-resource-id supported only in MSI auth mode.")
+                    raise ArgumentUsageError("--ampls_resource_id supported only in MSI auth mode.")
                 ensure_container_insights_for_monitoring(
                     cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id, resource_group_name, name, instance.location, aad_route=False)
 

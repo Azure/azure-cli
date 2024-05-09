@@ -366,7 +366,7 @@ def ensure_container_insights_for_monitoring(
         return None
 
     if (not is_private_cluster or not aad_route) and ampls_resource_id is not None:
-        raise ArgumentUsageError("--azure-monitor-private-link-scope-resource-id can only be used with private cluster in MSI mode.")
+        raise ArgumentUsageError("--ampls_resource_id can only be used with private cluster in MSI mode.")
 
     # workaround for this addon key which has been seen lowercased in the wild
     for key in list(addon.config):
