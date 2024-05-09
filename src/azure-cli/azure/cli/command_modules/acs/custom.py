@@ -566,7 +566,7 @@ def aks_create(
     enable_msi_auth_for_monitoring=True,
     enable_syslog=False,
     data_collection_settings=None,
-    azure_monitor_private_link_scope_resource_id=None,
+    ampls_resource_id=None,
     enable_high_log_scale_mode=False,
     aci_subnet_name=None,
     appgw_name=None,
@@ -1060,7 +1060,7 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
                 enable_syslog=False,
                 data_collection_settings=None,
                 is_private_cluster=False,
-                azure_monitor_private_link_scope_resource_id=None,
+                ampls_resource_id=None,
                 enable_high_log_scale_mode=False,
             )
     except TypeError:
@@ -1096,7 +1096,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       enable_msi_auth_for_monitoring=True,
                       enable_syslog=False,
                       data_collection_settings=None,
-                      azure_monitor_private_link_scope_resource_id=None,
+                      ampls_resource_id=None,
                       enable_high_log_scale_mode=False,
                       no_wait=False,):
     instance = client.get(resource_group_name, name)
@@ -1126,7 +1126,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               no_wait=no_wait,
                               enable_syslog=enable_syslog,
                               data_collection_settings=data_collection_settings,
-                              azure_monitor_private_link_scope_resource_id=azure_monitor_private_link_scope_resource_id,
+                              ampls_resource_id=ampls_resource_id,
                               enable_high_log_scale_mode=enable_high_log_scale_mode)
 
     enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
@@ -1159,7 +1159,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                         enable_syslog=enable_syslog,
                         data_collection_settings=data_collection_settings,
                         is_private_cluster=is_private_cluster,
-                        azure_monitor_private_link_scope_resource_id=azure_monitor_private_link_scope_resource_id,
+                        ampls_resource_id=ampls_resource_id,
                         enable_high_log_scale_mode=enable_high_log_scale_mode)
                 else:
                     raise ArgumentUsageError(
@@ -1174,7 +1174,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                         "--enable-high-log-scale-mode can not be used without MSI auth.")
                 if data_collection_settings is not None:
                     raise ArgumentUsageError("--data-collection-settings can not be used without MSI auth.")
-                if azure_monitor_private_link_scope_resource_id is not None:
+                if ampls_resource_id is not None:
                     raise ArgumentUsageError("--azure-monitor-private-link-scope-resource-id supported only in MSI auth mode.")
                 ensure_container_insights_for_monitoring(
                     cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id, resource_group_name, name, instance.location, aad_route=False)
@@ -1217,7 +1217,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    no_wait=False,
                    enable_syslog=False,
                    data_collection_settings=None,
-                   azure_monitor_private_link_scope_resource_id=None,
+                   ampls_resource_id=None,
                    enable_high_log_scale_mode=False):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
                                                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,

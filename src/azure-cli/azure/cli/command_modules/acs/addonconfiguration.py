@@ -347,7 +347,7 @@ def ensure_container_insights_for_monitoring(
     enable_syslog=False,
     data_collection_settings=None,
     is_private_cluster=False,
-    azure_monitor_private_link_scope_resource_id=None,
+    ampls_resource_id=None,
     enable_high_log_scale_mode=False,
 ):
     """
@@ -365,7 +365,7 @@ def ensure_container_insights_for_monitoring(
     if not addon.enabled:
         return None
 
-    if (not is_private_cluster or not aad_route) and azure_monitor_private_link_scope_resource_id is not None:
+    if (not is_private_cluster or not aad_route) and ampls_resource_id is not None:
         raise ArgumentUsageError("--azure-monitor-private-link-scope-resource-id can only be used with private cluster in MSI mode.")
 
     # workaround for this addon key which has been seen lowercased in the wild
@@ -432,7 +432,7 @@ def ensure_container_insights_for_monitoring(
         dataCollectionEndpointName = dataCollectionEndpointName[0:43]
         dce_resource_id = None
 
-        if enable_high_log_scale_mode or (azure_monitor_private_link_scope_resource_id is not None):
+        if enable_high_log_scale_mode or (ampls_resource_id is not None):
             dce_resource_id = (
                 f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
                 f"providers/Microsoft.Insights/dataCollectionEndpoints/{dataCollectionEndpointName}"
@@ -449,7 +449,7 @@ def ensure_container_insights_for_monitoring(
                     }
                 }
             }
-            if azure_monitor_private_link_scope_resource_id is not None:
+            if ampls_resource_id is not None:
                 dce_creation_body_common["properties"]["networkAcls"]["publicNetworkAccess"] = "Disabled"
             dce_creation_body_ = json.dumps(dce_creation_body_common)
             for _ in range(3):
@@ -678,7 +678,7 @@ def ensure_container_insights_for_monitoring(
             else:
                 raise error
             # create dce association
-            if enable_high_log_scale_mode or (azure_monitor_private_link_scope_resource_id is not None):
+            if enable_high_log_scale_mode or (ampls_resource_id is not None):
                 association_body = json.dumps(
                     {
                         "location": cluster_region,
@@ -704,7 +704,7 @@ def ensure_container_insights_for_monitoring(
                         error = e
                 else:
                     raise error
-                if azure_monitor_private_link_scope_resource_id is not None:
+                if ampls_resource_id is not None:
                     # link DCE to AMPLS
                     link_dce_ampls_body = json.dumps(
                         {
@@ -714,7 +714,7 @@ def ensure_container_insights_for_monitoring(
                         }
                     )
                     link_dce_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                        f"{azure_monitor_private_link_scope_resource_id}/scopedresources/{dataCollectionEndpointName}-connection?api-version=2021-07-01-preview"
+                        f"{ampls_resource_id}/scopedresources/{dataCollectionEndpointName}-connection?api-version=2021-07-01-preview"
 
                     for _ in range(3):
                         try:
@@ -740,7 +740,7 @@ def ensure_container_insights_for_monitoring(
                         }
                     )
                     link_ws_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                        f"{azure_monitor_private_link_scope_resource_id}/scopedresources/{workspace_name}-connection?api-version=2021-07-01-preview"
+                        f"{ampls_resource_id}/scopedresources/{workspace_name}-connection?api-version=2021-07-01-preview"
 
                     for _ in range(3):
                         try:

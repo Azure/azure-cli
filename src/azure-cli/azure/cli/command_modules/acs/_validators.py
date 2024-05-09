@@ -673,7 +673,7 @@ def sanitize_resource_id(resource_id):
 
 # pylint:disable=line-too-long
 def validate_azuremonitor_privatelinkscope_resourceid(namespace):
-    resource_id = namespace.azure_monitor_private_link_scope_resource_id
+    resource_id = namespace.ampls_resource_id
     if resource_id is None:
         return
     resource_id = sanitize_resource_id(resource_id)

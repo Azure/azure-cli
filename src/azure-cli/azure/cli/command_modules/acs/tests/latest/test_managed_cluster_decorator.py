@@ -7697,7 +7697,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             enable_syslog=None,
             data_collection_settings=None,
             is_private_cluster=None,
-            azure_monitor_private_link_scope_resource_id=None,
+            ampls_resource_id=None,
             enable_high_log_scale_mode=None,
         )
 
@@ -10973,7 +10973,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             enable_syslog=None,
             data_collection_settings=None,
             is_private_cluster=None,
-            azure_monitor_private_link_scope_resource_id=None,
+            ampls_resource_id=None,
             enable_high_log_scale_mode=None,
         )
 

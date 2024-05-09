@@ -2804,17 +2804,17 @@ class AKSManagedClusterContext(BaseAKSContext):
                 )
         return data_collection_settings_file_path
 
-    def get_azure_monitor_private_link_scope_resource_id(self) -> Union[str, None]:
-        """Obtain the value of azure_monitor_private_link_scope_resource_id.
+    def get_ampls_resource_id(self) -> Union[str, None]:
+        """Obtain the value of ampls_resource_id.
 
         :return: string or None
         """
         # read the original value passed by the command
-        azure_monitor_private_link_scope_resource_id = self.raw_param.get("azure_monitor_private_link_scope_resource_id")
+        ampls_resource_id = self.raw_param.get("ampls_resource_id")
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
-        return azure_monitor_private_link_scope_resource_id
+        return ampls_resource_id
 
     # pylint: disable=no-self-use
     def get_virtual_node_addon_os_type(self) -> str:
@@ -5933,7 +5933,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             enable_syslog=self.context.get_enable_syslog(),
             data_collection_settings=self.context.get_data_collection_settings(),
             is_private_cluster=self.context.get_enable_private_cluster(),
-            azure_monitor_private_link_scope_resource_id=self.context.get_azure_monitor_private_link_scope_resource_id(),
+            ampls_resource_id=self.context.get_ampls_resource_id(),
             enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
         )
         # set intermediate
@@ -6711,7 +6711,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     enable_syslog=self.context.get_enable_syslog(),
                     data_collection_settings=self.context.get_data_collection_settings(),
                     is_private_cluster=self.context.get_enable_private_cluster(),
-                    azure_monitor_private_link_scope_resource_id=self.context.get_azure_monitor_private_link_scope_resource_id(),
+                    ampls_resource_id=self.context.get_ampls_resource_id(),
                     enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
                 )
 
@@ -8385,7 +8385,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     enable_syslog=self.context.get_enable_syslog(),
                     data_collection_settings=self.context.get_data_collection_settings(),
                     is_private_cluster=self.context.get_enable_private_cluster(),
-                    azure_monitor_private_link_scope_resource_id=self.context.get_azure_monitor_private_link_scope_resource_id(),
+                    ampls_resource_id=self.context.get_ampls_resource_id(),
                     enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
                 )
 
