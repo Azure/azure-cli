@@ -493,7 +493,6 @@ class LBAddressPoolCreate(_LBAddressPoolBasicCreate):
         self.post_operations()
 
     def pre_operations(self):
-        from azure.mgmt.core.tools import is_valid_resource_id
         from azure.cli.core.aaz import AAZUndefined
 
         args = self.ctx.args
@@ -569,7 +568,6 @@ class LBAddressPoolUpdate(_LBAddressPoolUpdate):
         return args_schema
 
     def pre_operations(self):
-        from azure.mgmt.core.tools import is_valid_resource_id
         from azure.cli.core.aaz import AAZUndefined
 
         args = self.ctx.args
@@ -627,8 +625,6 @@ class LBAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
         return args_schema
 
     def pre_operations(self):
-        from azure.mgmt.core.tools import is_valid_resource_id
-
         args = self.ctx.args
         virtual_network = args.virtual_network.to_serialized_data()
         subnet = args.subnet.to_serialized_data()
@@ -665,8 +661,6 @@ class LBAddressPoolAddressUpdate(_LBAddressPoolAddressUpdate):
         return args_schema
 
     def pre_operations(self):
-        from azure.mgmt.core.tools import is_valid_resource_id
-
         args = self.ctx.args
         virtual_network = args.virtual_network.to_serialized_data()
         subnet = args.subnet.to_serialized_data()
