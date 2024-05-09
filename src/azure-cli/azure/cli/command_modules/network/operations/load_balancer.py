@@ -262,7 +262,7 @@ class LBRuleCreate(_LBRuleCreate):
                 args.frontend_ip_name = instance.properties.frontend_ip_configurations[0].id
             elif len(frontend_ip_configurations) > 1:
                 raise ArgumentUsageError(
-                    "Multiple FrontendIpConfigurations found in loadbalancer. Specify --frontend-ip-name explicitly.")
+                    "Multiple FrontendIpConfigurations found in loadbalancer. Specify --frontend-ip explicitly.")
         if not has_value(args.backend_pools):
             instance = self.ctx.vars.instance
             backend_address_pools = instance.properties.backend_address_pools
