@@ -226,7 +226,7 @@ parameters:
                                          Specify "--enable-msi-auth-for-monitoring" to use Managed Identity Auth.
                                          Specify "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled
                                          Specify "--data-collection-settings" to configure data collection settings
-                                         Specify "--ampls_resource_id" for private link. Note MSI must be enabled.
+                                         Specify "--ampls-resource-id" for private link. Note MSI must be enabled.
                                          Specify "--enable-high-log-scale-mode" to enable high log scale mode for container logs. Note MSI must be enabled.
                                          If monitoring addon is enabled --no-wait argument will have no effect
             - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
