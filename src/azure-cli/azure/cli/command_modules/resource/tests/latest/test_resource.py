@@ -5510,6 +5510,16 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
         with self.assertRaisesRegex(CLIError, "Can not use --parameters argument more than once when using a .bicepparam file"):
             self.cmd('deployment group create --resource-group {rg} --parameters {params1} --parameters {params2}')
 
+    def test_resource_deployment_with_misspelled_bicepparam_file(self):
+        self.kwargs.update({
+            'rg' : "exampleGroup",
+            # this doesn't get recognized as a bicepparam file
+            'params' : "./param.bicepparams",
+        })
+
+        with self.assertRaisesRegex(CLIError, "Please enter one of the following: template file, template spec, template url, or Bicep parameters file."):
+            self.cmd('deployment group create --resource-group {rg} --parameters {params}')
+
     def test_subscription_level_deployment_with_bicep(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({

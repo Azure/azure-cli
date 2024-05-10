@@ -51,6 +51,7 @@ class RESOURCE(Enum):
     WebPubSub = 'webpubsub'
     ConfluentKafka = 'confluent-cloud'
     AppInsights = 'app-insights'
+    CognitiveServices = 'cognitiveservices'
 
     @classmethod
     def value_of(cls, value):
@@ -147,6 +148,8 @@ TARGET_RESOURCES = {
     RESOURCE.WebPubSub: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.SignalRService/WebPubSub/{webpubsub}',
     RESOURCE.ConfluentKafka: '#',  # special target resource, no arm resource id
     RESOURCE.AppInsights: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/microsoft.insights/components/{appinsights}',
+
+    RESOURCE.CognitiveServices: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.CognitiveServices/accounts/{account}'
 }
 
 
@@ -635,6 +638,18 @@ TARGET_RESOURCES_PARAMS = {
             'help': 'Name of the app insights',
             'placeholder': 'MyAppInsights'
         }
+    },
+    RESOURCE.CognitiveServices: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the cognitive services',
+            'placeholder': 'CognitiveServicesRG'
+        },
+        'account': {
+            'options': ['--account'],
+            'help': 'Name of the cognitive services account',
+            'placeholder': 'MyAccount'
+        }
     }
 }
 
@@ -797,6 +812,8 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
+
+        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
     },
     RESOURCE.SpringCloud: {
         RESOURCE.Postgres: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -826,6 +843,8 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
+
+        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
     },
     RESOURCE.KubernetesCluster: {
         RESOURCE.Postgres: [AUTH_TYPE.Secret],
@@ -855,6 +874,8 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.WebPubSub: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
+
+        RESOURCE.CognitiveServices: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret]
     },
     RESOURCE.ContainerApp: {
         RESOURCE.Postgres: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -884,6 +905,8 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
+
+        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
     },
 }
 SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloud]
@@ -1130,6 +1153,11 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Nodejs,
             CLIENT_TYPE.Go,
             CLIENT_TYPE.Blank
+        ],
+        RESOURCE.CognitiveServices: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Blank
         ]
     }
 }
@@ -1146,4 +1174,4 @@ SUPPORTED_CLIENT_TYPE[RESOURCE.FunctionApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.Web
 class OPT_OUT_OPTION(Enum):
     PUBLIC_NETWORK = 'publicnetwork'
     CONFIGURATION_INFO = 'configinfo'
-    # AUTHENTICATION = 'auth'
+    AUTHENTICATION = 'auth'

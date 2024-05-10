@@ -42,7 +42,8 @@ from ._resource_config import (
     LOCAL_CONNECTION_RESOURCE,
     LOCAL_CONNECTION_PARAMS,
     SPRING_APP_DEPLOYMENT_RESOURCE,
-    WEB_APP_SLOT_RESOURCE
+    WEB_APP_SLOT_RESOURCE,
+    OPT_OUT_OPTION,
 )
 
 
@@ -282,6 +283,16 @@ def get_local_context_value(cmd, arg):
     return None
 
 
+def opt_out_auth(namespace):
+    '''Validate if config and auth are both opted out
+    '''
+    opt_out_list = namespace.opt_out_list
+    if opt_out_list is not None and \
+            OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list:
+        return True
+    return False
+
+
 def intelligent_experience(cmd, namespace, missing_args):
     '''Use local context and interactive inputs to get arg values
     '''
@@ -303,6 +314,9 @@ def intelligent_experience(cmd, namespace, missing_args):
             'auth_type': 'systemAssignedIdentity'
         }
         logger.warning('Auth info is not specified, use default one: --system-identity')
+        if opt_out_auth(namespace):
+            logger.warning('Auth info is only used to generate configurations. %s',
+                           'Skip enabling identity and role assignments.')
     elif 'user_account_auth_info' in missing_args:
         cmd_arg_values['user_account_auth_info'] = {
             'auth_type': 'userAccount'
@@ -424,6 +438,17 @@ def validate_target_resource_id(cmd, namespace):
         telemetry.set_exception(e, 'target-id-unsupported')
         raise e
 
+    return False
+
+
+def validate_opt_out_auth_and_config(namespace):
+    '''Validate if config and auth are both opted out
+    '''
+    opt_out_list = namespace.opt_out_list
+    if opt_out_list is not None and \
+            OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list and \
+            OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list:
+        return True
     return False
 
 
@@ -603,7 +628,8 @@ def validate_create_params(cmd, namespace):
     missing_args.update(get_missing_source_create_args(cmd, namespace))
     if not validate_target_resource_id(cmd, namespace):
         missing_args.update(get_missing_target_args(cmd))
-    missing_args.update(get_missing_auth_args(cmd, namespace))
+    if not validate_opt_out_auth_and_config(namespace):
+        missing_args.update(get_missing_auth_args(cmd, namespace))
     return missing_args
 
 

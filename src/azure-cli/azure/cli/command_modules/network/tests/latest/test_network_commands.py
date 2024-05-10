@@ -5676,6 +5676,17 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet} -n {subnet2}',
                  self.check('defaultOutboundAccess', False))
 
+    @ResourceGroupPreparer(name_prefix='cli_subnet_with_sharing_scope', location='westcentralus')
+    def test_network_subnet_with_sharing_scope(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1'
+        })
+        self.cmd('az network vnet create -g {rg} -n {vnet} -l westcentralus --address-prefixes 10.0.0.0/16')
+        self.cmd('az network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefixes 10.0.0.0/16 --default-outbound false --sharing-scope Tenant')
+        self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet} -n {subnet}',
+                 checks=self.check('sharingScope', 'Tenant'))
+
 
 class NetworkActiveActiveCrossPremiseScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
@@ -6923,7 +6934,7 @@ class NetworkExtendedLocation(ScenarioTest):
             'rg': resource_group,
             'lb': 'lb',
             'vnet': 'vnet',
-            'edge_name': 'microsoftrrdclab1',
+            'edge_name': 'microsoftdclabs1',
             'subnet1': 'subnet1',
             'subnet2': 'subnet2',
         })
