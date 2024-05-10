@@ -34,7 +34,7 @@ for ext in $output; do
     fi
 
     echo "Verifying extension:" $ext
-    az extension add -n $ext
+    az extension add -n $ext --allow-preview True
     if [ $? != 0 ]
     then
         exit_code=1
