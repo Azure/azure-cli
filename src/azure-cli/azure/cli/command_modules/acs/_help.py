@@ -318,7 +318,7 @@ parameters:
   - name: --data-collection-settings
     type: string
     short-summary: Path to JSON file containing data collection settings for Monitoring addon.
-  - name: --ampls_resource_id
+  - name: --ampls-resource-id
     type: string
     short-summary: Resource ID of Azure Monitor Private Link scope for Monitoring Addon.
   - name: --enable-high-log-scale-mode
