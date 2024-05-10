@@ -8057,7 +8057,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd += f'--enable-syslog ' if syslog_enabled else ''
         create_cmd += f'--data-collection-settings {data_collection_settings} ' if data_collection_settings else ''
         create_cmd += f'--enable-private-cluster ' if use_ampls else ''
-        create_cmd += f'--ampls_resource_id {ampls_resource_id} ' if use_ampls else ''
+        create_cmd += f'--ampls-resource-id {ampls_resource_id} ' if use_ampls else ''
         create_cmd += f'--enable-high-log-scale-mode ' if highlogscale_mode_enabled else ''
 
         response = self.cmd(create_cmd, checks=[
