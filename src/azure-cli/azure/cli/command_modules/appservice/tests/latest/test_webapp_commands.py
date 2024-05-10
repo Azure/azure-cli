@@ -2853,6 +2853,7 @@ class WebappOneDeployScenarioTest(ScenarioTest):
 
 
 class TrackRuntimeStatusTest(ScenarioTest):
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
     def test_webapp_disable_tracking_runtimestatus(self, resource_group):
         webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
