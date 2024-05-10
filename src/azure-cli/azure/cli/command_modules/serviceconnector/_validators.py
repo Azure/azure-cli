@@ -286,11 +286,10 @@ def get_local_context_value(cmd, arg):
 def opt_out_auth(namespace):
     '''Validate if config and auth are both opted out
     '''
-    if getattr(namespace, 'opt_out_list', None) is not None:
-        opt_out_list = namespace.opt_out_list
-        if opt_out_list is not None and \
-                OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list:
-            return True
+    opt_out_list = getattr(namespace, 'opt_out_list', None)
+    if opt_out_list is not None and \
+            OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list:
+        return True
     return False
 
 
@@ -444,12 +443,11 @@ def validate_target_resource_id(cmd, namespace):
 def validate_opt_out_auth_and_config(namespace):
     '''Validate if config and auth are both opted out
     '''
-    if getattr(namespace, 'opt_out_list', None) is not None:
-        opt_out_list = namespace.opt_out_list
-        if opt_out_list is not None and \
-                OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list and \
-                OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list:
-            return True
+    opt_out_list = getattr(namespace, 'opt_out_list', None)
+    if opt_out_list is not None and \
+            OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list and \
+            OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list:
+        return True
     return False
 
 
