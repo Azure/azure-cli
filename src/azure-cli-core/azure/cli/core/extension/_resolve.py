@@ -107,7 +107,7 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
     if not allow_preview:
         stable_candidates = list(filter(is_stable_from_metadata, candidates))
         if len(stable_candidates) == 0:
-            logger.warning(f"No suitable stable version of '{extension_name}' to install. Preview versions allowed")
+            logger.warning("No stable version of '%s' to install. Preview versions allowed", extension_name)
             allow_preview = True
 
     # Helper to curry predicate functions
