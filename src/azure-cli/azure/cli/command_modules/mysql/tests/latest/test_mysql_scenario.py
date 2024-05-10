@@ -128,7 +128,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=DEFAULT_PAIRED_LOCATION, additional_params='--enable-purge-protection true --retention-days 90')
     @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=DEFAULT_LOCATION, additional_params='--enable-purge-protection true --retention-days 90')
-    @unittest.skip('(AuthenticationError) The refresh token has expired or is invalid due to sign-in frequency checks by conditional access.')
     def test_mysql_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name):
         self._test_flexible_server_byok_mgmt('mysql', resource_group, vault_name, backup_vault_name)
 
