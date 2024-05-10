@@ -2487,6 +2487,8 @@ def update_ingress(cmd, name, resource_group_name, type=None, target_port=None, 
         ingress_def["allowInsecure"] = allow_insecure
 
     if "transport" in ingress_def and ingress_def["transport"] == "tcp":
+        # Client certificate mode can only be set for http transport.
+        ingress_def["clientCertificateMode"] = None
         if exposed_port is not None:
             ingress_def["exposedPort"] = exposed_port
     else:
