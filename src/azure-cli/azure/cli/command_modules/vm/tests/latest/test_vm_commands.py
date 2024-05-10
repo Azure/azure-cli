@@ -3707,6 +3707,10 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
             self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk')
         ])
+        self.cmd('vmss update --resource-group {rg} --name {vmss1} --ephemeral-os-disk true --ephemeral-option local --ephemeral-placement ResourceDisk --vm-sku Standard_DS4_v2', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'ResourceDisk')
+        ])
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk_placement')
