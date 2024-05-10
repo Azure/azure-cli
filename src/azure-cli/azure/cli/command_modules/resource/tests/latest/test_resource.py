@@ -93,15 +93,27 @@ class ResourceGroupScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
     def test_resource_group_force_deletion_type(self, resource_group):
+        self.kwargs.update({
+            'rg1': 'testrg',
+            'rg2': 'testrg2',
+        })
 
-        self.cmd('group create -n testrg -l westus --tag a=b c --managed-by test_admin', checks=[
-            self.check('name', 'testrg'),
+        self.cmd('group create -n {rg1} -l westus --tag a=b c --managed-by test_admin', checks=[
+            self.check('name', '{rg1}'),
             self.check('tags', {'a': 'b', 'c': ''}),
             self.check('managedBy', 'test_admin')
         ])
 
-        self.cmd('group delete -n testrg -f Microsoft.Compute/virtualMachines --yes')
-        self.cmd('group exists -n testrg',
+        self.cmd('group delete -n {rg1} -f Microsoft.Compute/virtualMachines --yes')
+        self.cmd('group exists -n {rg1}',
+                 checks=self.check('@', False))
+
+        self.cmd('group create -n {rg2} -l westus', checks=[
+            self.check('name', '{rg2}'),
+        ])
+
+        self.cmd('group delete -n {rg2} -f Microsoft.Databricks/workspaces --yes')
+        self.cmd('group exists -n {rg2}',
                  checks=self.check('@', False))
 
 
