@@ -398,6 +398,16 @@ event_hub_param_type = CLIArgumentType(
     help='The name of the event hub. If none is specified '
          'when providing event_hub_authorization_rule_id, the default event hub will be selected.')
 
+manual_cutover_param_type = CLIArgumentType(
+    options_list=['--manual-cutover'],
+    help='Whether to do manual cutover during Update SLO. Allowed when updating database to Hyperscale tier.',
+    arg_type=get_three_state_flag())
+
+perform_cutover_param_type = CLIArgumentType(
+    options_list=['--perform-cutover'],
+    help='Whether to perform cutover when updating database to Hyperscale tier is in progress.',
+    arg_type=get_three_state_flag())
+
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_S_Gen5_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
@@ -511,6 +521,11 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('encryption_protector_auto_rotation',
                      arg_type=database_encryption_protector_auto_rotation_param_type)
 
+    arg_ctx.argument('manual-cutover',
+                    arg_type=manual_cutover_param_type)
+
+    arg_ctx.argument('perform-cutover',
+                     arg_type=perform_cutover_param_type)
 
 def _configure_db_dw_create_params(
         arg_ctx,
@@ -613,7 +628,9 @@ def _configure_db_dw_create_params(
             'availability_zone',
             'encryption_protector_auto_rotation',
             'use_free_limit',
-            'free_limit_exhaustion_behavior'
+            'free_limit_exhaustion_behavior',
+            'manual_cutover',
+            'perform_cutover'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -696,6 +713,11 @@ def _configure_db_dw_create_params(
             CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP]:
         arg_ctx.ignore('collation', 'max_size_bytes')
 
+    # 'manual_cutover' and 'perform_cutover' are ignored when creating a database,
+    # as they are only applicable during update
+    if create_mode in [CreateMode]:
+        arg_ctx.ignore('manual_cutover', 'perform_cutover')
+
     if engine == Engine.dw:
         # Elastic pool is only for SQL DB.
         arg_ctx.ignore('elastic_pool_id')
@@ -757,6 +779,10 @@ def _configure_db_dw_create_params(
         arg_ctx.argument('zone_redundant',
                          options_list=['--zone-redundant'],
                          deprecate_info=arg_ctx.deprecate(hide=True))
+
+        # Manual-cutover and Perform-cutover are not valid for DataWarehouse
+        arg_ctx.ignore('manual_cutover')
+        arg_ctx.ignore('perform_cutover')
 
 
 # pylint: disable=too-many-statements
@@ -941,6 +967,12 @@ def load_arguments(self, _):
 
         c.argument('free_limit_exhaustion_behavior',
                    arg_type=database_free_limit_exhaustion_behavior)
+
+        c.argument('manual_cutover',
+                   arg_type=manual_cutover_param_type)
+
+        c.argument('perform_cutover',
+                   arg_type=perform_cutover_param_type)
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object
