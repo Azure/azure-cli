@@ -146,4 +146,4 @@ Current extension module has a combination of semantic scheme and extra metadata
 
 ## Extension Installation Upgrade
 
-To distinguish `stable-only` extension installation with `preview-included` extension installation, `--allow-preview` is added into `az extension add/update` and `az upgrade` and the `stable/preview` justification is made based on this extension versioning specification from CLI version `2.56.0`. Default value for `--allow-preview` is `True` for user compatibility and will be reset to `False` in next breaking change window (by Nov 2024).
+To distinguish `stable-only` extension installation with `preview-included` extension installation, `--allow-preview` is added into `az extension add/update` and `az upgrade` and the `stable/preview` justification is made based on this extension versioning specification from CLI version `2.56.0`. Default value for `--allow-preview` is `True` for user compatibility and will be reset to `False` in future breaking change window.
