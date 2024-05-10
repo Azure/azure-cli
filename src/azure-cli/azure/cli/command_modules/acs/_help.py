@@ -1038,7 +1038,7 @@ long-summary: |-
     - monitoring               : turn on Log Analytics monitoring. Requires "--workspace-resource-id".
                                  Requires "--enable-msi-auth-for-monitoring" for managed identity auth.
                                  Requires "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled.
-                                 Requires "--ampls_resource_id" for private link. Note MSI must be enabled.
+                                 Requires "--ampls-resource-id" for private link. Note MSI must be enabled.
                                  Requires "--enable-high-log-scale-mode" to enable high log scale mode for container logs. Note MSI must be enabled.
                                  If monitoring addon is enabled --no-wait argument will have no effect
     - virtual-node             : enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
