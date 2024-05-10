@@ -17,7 +17,7 @@ from azure.cli.command_modules.serviceconnector._resource_config import (
     TARGET_RESOURCES
 )
 from azure.cli.testsdk.preparers import ResourceGroupPreparer
-from ._test_utils import CredentialReplacer
+from ._test_utils import CredentialReplacer, ConfigCredentialReplacer
 resource_group = 'servicelinker-cli-test-group'
 
 
@@ -27,7 +27,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
     def __init__(self, method_name):
         super(LocalConnectionScenarioTest, self).__init__(
             method_name,
-            recording_processors=[CredentialReplacer()]
+            recording_processors=[CredentialReplacer(), ConfigCredentialReplacer()]
         )
 
 
@@ -1145,7 +1145,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         self.cmd(
             'connection list-support-types'.format(resource_group),
             checks=[
-                self.check('length(@)', 23),
+                self.check('length(@)', 24),
             ]
         ).get_output_in_json()
 
