@@ -5686,8 +5686,6 @@ def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name
     app = client.web_apps.get(resource_group_name, name)
     app_is_linux_webapp = is_linux_webapp(app)
     if not app_is_linux_webapp:
-        logger.warning("Deployment status tracking is currently only supported for linux webapps."
-                       " Resuming without tracking status.")
         response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                                      slot, timeout)
     else:
