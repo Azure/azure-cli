@@ -397,7 +397,7 @@ def ensure_container_insights_for_monitoring(
         workspace_name = workspace_resource_id.split("/")[8]
     except IndexError:
         raise AzCLIError(
-            "Could not locate workspace name in workspace-resource-id."
+            "Could not locate workspace name in --workspace-resource-id."
         )
 
     location = ""
