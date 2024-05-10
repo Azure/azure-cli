@@ -322,7 +322,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         self.wait_for_backup_initialized(account_name, pool_name, volume_name)
 
         backup = self.cmd("netappfiles account backup-vault backup show -g {rg} -a {account_name} -v {vault_name} --backup-name {backup_name}").get_output_in_json()
-        assert backup['provisioningState'] == "Succeeded"
+        assert backup['provisioningState'] == "Succeeded"        
         # create new volume and restore backup
         volume2_name = self.create_random_name(prefix='cli-vol-', length=24)
         self.create_volume(account_name, pool_name, volume2_name, volume_only=True, backup_id=backup['id'],
@@ -333,9 +333,11 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
 
         #assert volume2['dataProtection']['backup']['backupEnabled']
         assert volume2['provisioningState'] == "Succeeded"
+        if self.is_live or self.in_recording:
+            time.sleep(60)
         #self.wait_for_backup_created(account_name, vault_name, backup_name)
-        # There is an issue in generated code with deserializing this singleton GET, it will try to deseralize as list, remove comment when fixed
-        #self.wait_for_restore(account_name, pool_name, volume_name)
+        # There is an issue in generated code with deserializing this singleton GET, it will try to deserialize as list, remove comment when fixed
+        #self.wait_for_restore(account_name, pool_name, volume2_name)
         if self.is_live or self.in_recording:
             time.sleep(60)
 

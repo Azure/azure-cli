@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "netappfiles volume latest-restore-status current show",
 )
 class Show(AAZCommand):
-    """List the latest status of the restore for a volume
+    """Get the latest status of the restore for a volume
     """
 
     _aaz_info = {
@@ -91,7 +91,7 @@ class Show(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
     class BackupsGetVolumeLatestRestoreStatus(AAZHttpOperation):
