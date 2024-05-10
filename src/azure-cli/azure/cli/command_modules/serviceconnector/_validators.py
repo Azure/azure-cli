@@ -651,6 +651,7 @@ def validate_addon_params(cmd, namespace):
     missing_args = dict()
     if not validate_source_resource_id(cmd, namespace):
         missing_args.update(get_missing_source_args(cmd, namespace))
+    missing_args.update(get_missing_auth_args(cmd, namespace))
     return missing_args
 
 
@@ -820,6 +821,7 @@ def apply_addon_params(cmd, namespace, arg_values):
     '''Set addon command missing args
     '''
     apply_source_args(cmd, namespace, arg_values)
+    apply_auth_args(cmd, namespace, arg_values)
 
 
 def apply_update_params(cmd, namespace, arg_values):
