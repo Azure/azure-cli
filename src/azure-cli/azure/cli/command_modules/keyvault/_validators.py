@@ -264,7 +264,6 @@ def _fetch_default_cvm_policy(cli_ctx, vault_url):
         }
         return default_cvm_policy
     except Exception as ex:  # pylint: disable=broad-except
-        from azure.cli.core.azclierror import AzureInternalError
         raise AzureInternalError(f"Fail to fetch default cvm policy: {ex}")
 
 
