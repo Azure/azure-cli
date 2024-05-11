@@ -217,7 +217,8 @@ def _fetch_default_cvm_policy(cli_ctx, vault_url):
         location = None
         parsed_vault_url = vault_url.removeprefix('https://').split('.')
         if parsed_vault_url[1] == 'vault':
-            for vault in mgmt_client.vaults.list(filter=f"resourceType eq 'Microsoft.KeyVault/vaults' and name eq '{parsed_vault_url[0]}'"):
+            vault_name_filter = f"resourceType eq 'Microsoft.KeyVault/vaults' and name eq '{parsed_vault_url[0]}'"
+            for vault in mgmt_client.vaults.list(filter=vault_name_filter):
                 location = vault.location
                 break
         elif parsed_vault_url[1] == 'managedhsm':
@@ -234,7 +235,9 @@ def _fetch_default_cvm_policy(cli_ctx, vault_url):
         _endpoint = cli_ctx.cloud.endpoints.resource_manager
         if _endpoint.endswith('/'):
             _endpoint = _endpoint[:-1]
-        default_cvm_policy_url = f"{_endpoint}/subscriptions/{get_subscription_id(cli_ctx)}/providers/Microsoft.Attestation/Locations/{location}/defaultProvider?api-version=2020-10-01"
+        default_cvm_policy_url = f"{_endpoint}/subscriptions/{get_subscription_id(cli_ctx)}" \
+                                 f"/providers/Microsoft.Attestation/Locations/{location}" \
+                                 f"/defaultProvider?api-version=2020-10-01"
         response = send_raw_request(cli_ctx, 'get', default_cvm_policy_url)
         if response.status_code != 200:
             raise AzureInternalError(f"Fail to fetch default cvm policy from {default_cvm_policy_url}")
@@ -290,7 +293,9 @@ def process_key_release_policy(cmd, ns):
     KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     if default_cvm_policy:
-        vault_url = getattr(ns, 'hsm_name', None) or getattr(ns, 'vault_base_url', None) or getattr(ns, 'identifier', None)
+        vault_url = getattr(ns, 'hsm_name', None) or \
+                    getattr(ns, 'vault_base_url', None) or \
+                    getattr(ns, 'identifier', None)
         policy = _fetch_default_cvm_policy(cmd.cli_ctx, vault_url)
         ns.release_policy = KeyReleasePolicy(encoded_policy=json.dumps(policy).encode('utf-8'),
                                              immutable=immutable)
