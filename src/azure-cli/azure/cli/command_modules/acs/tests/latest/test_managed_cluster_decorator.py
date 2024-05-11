@@ -7731,6 +7731,10 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             create_dcr=False,
             create_dcra=True,
             enable_syslog=None,
+            data_collection_settings=None,
+            is_private_cluster=None,
+            ampls_resource_id=None,
+            enable_high_log_scale_mode=None,
         )
 
         dec_3 = AKSManagedClusterCreateDecorator(
@@ -11036,6 +11040,10 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             create_dcr=False,
             create_dcra=True,
             enable_syslog=None,
+            data_collection_settings=None,
+            is_private_cluster=None,
+            ampls_resource_id=None,
+            enable_high_log_scale_mode=None,
         )
 
         dec_3 = AKSManagedClusterUpdateDecorator(
@@ -11454,7 +11462,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_11.context.attach_mc(mc_11)
         with self.assertRaises(ArgumentUsageError):
             dec_11.update_azure_service_mesh_profile(mc_11)
-    
+
     def test_set_up_app_routing_profile(self):
         dec_1 = AKSManagedClusterCreateDecorator(
             self.cmd,
@@ -11490,7 +11498,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 name="Base",
                 tier="Premium")
         premiumCluster = self.models.ManagedCluster(
-            location="test_location", 
+            location="test_location",
             support_plan=None,
             sku=premiumSKU,
         )
@@ -11538,7 +11546,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 name="Base",
                 tier="Premium")
         ltsCluster = self.models.ManagedCluster(
-            location="test_location", 
+            location="test_location",
             sku=premiumSKU,
             support_plan="AKSLongTermSupport",
         )
@@ -11569,7 +11577,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(nonLTSClusterCalculated, expectedNonLTSCluster)
 
         normalCluster = self.models.ManagedCluster(
-            location="test_location", 
+            location="test_location",
             sku=self.models.ManagedClusterSKU(
                 name="Base",
                 tier="Standard"),
