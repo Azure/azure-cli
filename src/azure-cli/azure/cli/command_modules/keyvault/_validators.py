@@ -211,8 +211,6 @@ def validate_key_type(ns):
 def _fetch_default_cvm_policy(cli_ctx, vault_url):
     try:
         # get vault/hsm location
-        from azure.cli.core.azclierror import AzureInternalError, InvalidArgumentValueError
-        from azure.cli.core.commands.client_factory import get_mgmt_service_client
         mgmt_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT)
         location = None
         parsed_vault_url = vault_url.removeprefix('https://').split('.')
@@ -699,7 +697,6 @@ def validate_decryption(ns):
 
 
 def validate_key_create(cmd, ns):
-    from azure.cli.core.commands.validators import validate_tags
     validate_tags(ns)
     set_vault_base_url(ns)
     validate_keyvault_resource_id('key')(ns)

@@ -25,7 +25,8 @@ from azure.cli.command_modules.keyvault._transformers import (
 from azure.cli.command_modules.keyvault._format import transform_secret_list_table
 
 from azure.cli.command_modules.keyvault._validators import (
-    process_secret_set_namespace, validate_private_endpoint_connection_id, validate_role_assignment_args, validate_key_create)
+    process_secret_set_namespace, validate_key_create,
+    validate_private_endpoint_connection_id, validate_role_assignment_args)
 
 
 def transform_assignment_list(result):
