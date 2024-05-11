@@ -18,7 +18,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
-from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, AzureInternalError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
@@ -291,9 +291,9 @@ def process_key_release_policy(cmd, ns):
     KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     if default_cvm_policy:
-        vault_url = getattr(ns, 'hsm_name', None) or \
-                    getattr(ns, 'vault_base_url', None) or \
-                    getattr(ns, 'identifier', None)
+        vault_url = getattr(ns, 'hsm_name', None) or getattr(ns, 'vault_base_url', None)
+        if not vault_url:
+            vault_url = getattr(ns, 'identifier', None)
         policy = _fetch_default_cvm_policy(cmd.cli_ctx, vault_url)
         ns.release_policy = KeyReleasePolicy(encoded_policy=json.dumps(policy).encode('utf-8'),
                                              immutable=immutable)
