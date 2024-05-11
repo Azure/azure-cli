@@ -103,6 +103,7 @@ DEFAULT_CENTAURI_IMAGE = 'mcr.microsoft.com/azure-functions/dotnet7-quickstart-d
 ACR_IMAGE_SUFFIX = ".azurecr.io"
 
 RUNTIME_STATUS_TEXT_MAP = {
+    "BuildRequestReceived": "Received build request...",
     "BuildInProgress": "Building the app...",
     "BuildSuccessful": "Build successful.",
     "BuildFailed": "Build failed.",

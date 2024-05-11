@@ -2828,10 +2828,12 @@ class WebappOneDeployScenarioTest(ScenarioTest):
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --async true'.format(resource_group, webapp_name, war_file)).assert_with_checks([
-            JMESPathCheck('status', 4),
-            JMESPathCheck('deployer', 'OneDeploy'),
-            JMESPathCheck('message', 'OneDeploy'),
-            JMESPathCheck('complete', True)
+            JMESPathCheck('resourceGroup', resource_group),
+            JMESPathCheck('properties.errors', None),
+            JMESPathCheck('properties.numberOfInstancesFailed', '0'),
+            JMESPathCheck('properties.numberOfInstancesInProgress', '0'),
+            JMESPathCheck('properties.numberOfInstancesSuccessful', '1'),
+            JMESPathCheck('properties.status', 'RuntimeSuccessful'),
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_OneDeploy', location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -2851,6 +2853,23 @@ class WebappOneDeployScenarioTest(ScenarioTest):
 
 
 class TrackRuntimeStatusTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
+    def test_webapp_disable_tracking_runtimestatus(self, resource_group):
+        webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
+        plan_name = self.create_random_name('webapp-runtimestatus-plan', 40)
+        war_file = os.path.join(TEST_DIR, 'data', 'sample.war')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+        self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --track-status false --async'.format(resource_group, webapp_name, war_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'OneDeploy'),
+            JMESPathCheck('message', 'OneDeploy'),
+            JMESPathCheck('complete', True)
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
     def test_webapp_track_runtimestatus_runtimesucessful(self, resource_group):
         webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
@@ -2860,7 +2879,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
-        self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --async --track-status'.format(resource_group, webapp_name, war_file)).assert_with_checks([
+        self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --async'.format(resource_group, webapp_name, war_file)).assert_with_checks([
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('properties.errors', None),
             JMESPathCheck('properties.numberOfInstancesFailed', '0'),
@@ -2880,7 +2899,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
         with self.assertRaisesRegexp(CLIError, "Deployment failed because the build process failed"):
-            self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async --track-status'.format(resource_group, webapp_name, zip_file))
+            self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async'.format(resource_group, webapp_name, zip_file))
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
     def test_webapp_track_runtimestatus_runtimefailed(self, resource_group):
@@ -2892,7 +2911,21 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
         with self.assertRaisesRegexp(CLIError, "Deployment failed because the site failed to start within 10 mins."):
-            self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async --track-status'.format(resource_group, webapp_name, zip_file))
+            self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async'.format(resource_group, webapp_name, zip_file))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_deployment_source_configzip_runtimestatus', location='eastus')
+    def test_webapp_deployment_source_disable_tracking_runtimestatus(self, resource_group):
+        webapp_name = self.create_random_name('webapp-runtimestatus-test', 40)
+        plan_name = self.create_random_name('webapp-runtimestatus-plan', 40)
+        war_file = os.path.join(TEST_DIR, 'data', 'sample.war')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+        self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}" --track-status false'.format(resource_group, webapp_name, war_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('complete', True)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deployment_source_configzip_runtimestatus', location='eastus')
     def test_webapp_deployment_source_track_runtimestatus_runtimesucessful(self, resource_group):
@@ -2903,7 +2936,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
-        self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}" --track-status'.format(resource_group, webapp_name, war_file)).assert_with_checks([
+        self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, war_file)).assert_with_checks([
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('properties.errors', None),
             JMESPathCheck('properties.numberOfInstancesFailed', '0'),
@@ -2923,7 +2956,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
         with self.assertRaisesRegexp(CLIError, "Deployment failed because the build process failed"):
-            self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}" --track-status'.format(resource_group, webapp_name, zip_file))
+            self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deployment_source_configzip_runtimestatus', location='eastus')
     def test_webapp_deployment_source_track_runtimestatus_runtimefailed(self, resource_group):
@@ -2935,7 +2968,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
         with self.assertRaisesRegexp(CLIError, "Deployment failed because the site failed to start within 10 mins."):
-            self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}" --track-status'.format(resource_group, webapp_name, zip_file))
+            self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
 
 class DomainScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
