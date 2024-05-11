@@ -694,6 +694,8 @@ def validate_decryption(ns):
 
 
 def validate_key_create(cmd, ns):
+    from azure.cli.core.commands.validators import validate_tags
+    validate_tags(ns)
     set_vault_base_url(ns)
     validate_keyvault_resource_id('key')(ns)
     validate_key_type(ns)
