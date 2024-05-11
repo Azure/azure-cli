@@ -286,7 +286,7 @@ def get_local_context_value(cmd, arg):
 def opt_out_auth(namespace):
     '''Validate if config and auth are both opted out
     '''
-    opt_out_list = namespace.opt_out_list
+    opt_out_list = getattr(namespace, 'opt_out_list', None)
     if opt_out_list is not None and \
             OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list:
         return True
@@ -297,7 +297,6 @@ def intelligent_experience(cmd, namespace, missing_args):
     '''Use local context and interactive inputs to get arg values
     '''
     cmd_arg_values = dict()
-
     # use commandline source/target resource args
     for arg in missing_args:
         if getattr(namespace, arg, None) is not None:
@@ -444,7 +443,7 @@ def validate_target_resource_id(cmd, namespace):
 def validate_opt_out_auth_and_config(namespace):
     '''Validate if config and auth are both opted out
     '''
-    opt_out_list = namespace.opt_out_list
+    opt_out_list = getattr(namespace, 'opt_out_list', None)
     if opt_out_list is not None and \
             OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list and \
             OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list:
@@ -650,6 +649,7 @@ def validate_addon_params(cmd, namespace):
     missing_args = dict()
     if not validate_source_resource_id(cmd, namespace):
         missing_args.update(get_missing_source_args(cmd, namespace))
+    missing_args.update(get_missing_auth_args(cmd, namespace))
     return missing_args
 
 
@@ -758,6 +758,25 @@ def apply_auth_args(cmd, namespace, arg_values):
             for arg in AUTH_TYPE_PARAMS.get(auth_type):
                 if arg in arg_values:
                     setattr(namespace, arg, arg_values.get(arg, None))
+                    if arg == 'workload_identity_auth_info':
+                        apply_workload_identity(namespace, arg_values)
+
+
+def apply_workload_identity(namespace, arg_values):
+    output = run_cli_cmd('az identity show --ids {}'.format(
+        arg_values.get('workload_identity_auth_info')
+    ))
+    if output:
+        client_id = output.get('clientId')
+        subs_id = arg_values.get('workload_identity_auth_info').split('/')[2]
+    else:
+        raise ValidationError('Invalid user identity resource ID for workload identity.')
+    setattr(namespace, 'user_identity_auth_info',
+            {
+                'client_id': client_id,
+                'subscription_id': subs_id,
+                'auth_type': 'userAssignedIdentity'
+            })
 
 
 def apply_connection_name(namespace, arg_values):
@@ -800,6 +819,7 @@ def apply_addon_params(cmd, namespace, arg_values):
     '''Set addon command missing args
     '''
     apply_source_args(cmd, namespace, arg_values)
+    apply_auth_args(cmd, namespace, arg_values)
 
 
 def apply_update_params(cmd, namespace, arg_values):
