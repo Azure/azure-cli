@@ -142,7 +142,7 @@ def location_completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unu
 
 def load_arguments(self, _):
     with self.argument_context('cognitiveservices') as c:
-        c.argument('account_name', arg_type=name_arg_type, help='cognitive service account name',
+        c.argument('account_name', arg_type=name_arg_type, help='Cognitive Services account name.',
                    completer=get_resource_name_completion_list('Microsoft.CognitiveServices/accounts'))
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
                    completer=location_completer)
