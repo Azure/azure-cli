@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "security",
+    "security setting",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage your security posture with Microsoft Defender for Cloud.
+    """View your security settings.
     """
     pass
 
