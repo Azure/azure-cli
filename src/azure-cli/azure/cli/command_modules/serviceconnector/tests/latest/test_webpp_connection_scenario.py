@@ -1180,8 +1180,6 @@ class WebAppConnectionScenarioTest(ScenarioTest):
                 'webapp connection delete --id {} --yes'.format(conn.get('id')))
 
 
-
-
     @record_only()
     def test_webapp_storagequeue_e2e(self):
         self.kwargs.update({

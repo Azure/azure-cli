@@ -2487,6 +2487,8 @@ def update_ingress(cmd, name, resource_group_name, type=None, target_port=None, 
         ingress_def["allowInsecure"] = allow_insecure
 
     if "transport" in ingress_def and ingress_def["transport"] == "tcp":
+        # Client certificate mode can only be set for http transport.
+        ingress_def["clientCertificateMode"] = None
         if exposed_port is not None:
             ingress_def["exposedPort"] = exposed_port
     else:
@@ -4817,7 +4819,8 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
         managed_environment = create_containerapps_compose_environment(cmd,
                                                                        managed_env_name,
                                                                        env_rg,
-                                                                       tags=tags)
+                                                                       tags=tags,
+                                                                       location=location)
 
     compose_yaml = load_yaml_file(compose_file_path)
     parsed_compose_file = ComposeFile(compose_yaml)
