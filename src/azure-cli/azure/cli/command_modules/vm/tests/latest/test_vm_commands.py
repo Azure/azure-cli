@@ -1995,62 +1995,49 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
         ])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_ephemeral_os_disk_placement', location='westeurope')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_ephemeral_os_disk_placement')
     def test_vm_create_ephemeral_os_disk_placement(self, resource_group, resource_group_location):
         self.kwargs.update({
             'base': 'cli-test-vm-local-base',
             'vm': 'cli-test-vm-local-1',
             'vm_2': 'cli-test-vm-local-2',
-            'vm_3': 'cli-test-vm-local-3',
             'image': 'Canonical:UbuntuServer:18.04-LTS:latest',
             'ssh_key': TEST_SSH_KEY_PUB,
             'loc': resource_group_location,
             'user': 'user_1',
             'placement1': 'ResourceDisk',
             'placement2': 'CacheDisk',
-            'placement3': 'NvmeDisk',
         })
 
-        # # check base
-        # self.cmd('vm create -n {base} -g {rg} --image {image} --size Standard_DS4_v2 --location {loc} --ephemeral-os-disk --ephemeral-os-disk-placement {placement1} --admin-username {user}')
-        # self.cmd('vm show -g {rg} -n {base}', checks=[
-        #     self.check('provisioningState', 'Succeeded'),
-        #     self.check('storageProfile.osDisk.caching', 'ReadOnly'),
-        #     self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
-        #     self.check('storageProfile.osDisk.diffDiskSettings.placement', 'ResourceDisk'),
-        # ])
-        #
-        # # check that we can create a vm with ResourceDisk.
-        # self.cmd(
-        #     'vm create --resource-group {rg} --name {vm} --image {image} --size Standard_DS4_v2 --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk --ephemeral-os-disk-placement {placement1} --admin-username {user} --nsg-rule NONE')
-        #
-        # self.cmd('vm show -g {rg} -n {vm}', checks=[
-        #     self.check('provisioningState', 'Succeeded'),
-        #     self.check('storageProfile.osDisk.caching', 'ReadOnly'),
-        #     self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
-        #     self.check('storageProfile.osDisk.diffDiskSettings.placement', 'ResourceDisk'),
-        # ])
-        #
-        # # check that we can create a vm with CacheDisk.
-        # self.cmd(
-        #     'vm create --resource-group {rg} --name {vm_2} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk --ephemeral-os-disk-placement {placement2} --os-disk-caching ReadOnly --admin-username {user} --nsg-rule NONE')
-        # self.cmd('vm show -g {rg} -n {vm_2}', checks=[
-        #     self.check('provisioningState', 'Succeeded'),
-        #     self.check('storageProfile.osDisk.caching', 'ReadOnly'),
-        #     self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
-        #     self.check('storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk'),
-        #     self.check('osProfile.computerName', '{vm_2}'),  # check that --computer-name defaults to --name here.
-        # ])
+        # check base
+        self.cmd('vm create -n {base} -g {rg} --image {image} --size Standard_DS4_v2 --location {loc} --ephemeral-os-disk --ephemeral-os-disk-placement {placement1} --admin-username {user}')
+        self.cmd('vm show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.osDisk.caching', 'ReadOnly'),
+            self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('storageProfile.osDisk.diffDiskSettings.placement', 'ResourceDisk'),
+        ])
 
-        # check that we can create a vm with NvmeDisk.
+        # check that we can create a vm with ResourceDisk.
         self.cmd(
-            'vm create --resource-group {rg} --name {vm_3} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --size Standard_DS1_v2 '
-            '--ephemeral-os-disk --ephemeral-os-disk-placement {placement3} --os-disk-caching ReadOnly --admin-username {user} --nsg-rule NONE')
+            'vm create --resource-group {rg} --name {vm} --image {image} --size Standard_DS4_v2 --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk --ephemeral-os-disk-placement {placement1} --admin-username {user} --nsg-rule NONE')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.osDisk.caching', 'ReadOnly'),
+            self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('storageProfile.osDisk.diffDiskSettings.placement', 'ResourceDisk'),
+        ])
+
+        # check that we can create a vm with CacheDisk.
+        self.cmd(
+            'vm create --resource-group {rg} --name {vm_2} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk --ephemeral-os-disk-placement {placement2} --os-disk-caching ReadOnly --admin-username {user} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm_2}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('storageProfile.osDisk.caching', 'ReadOnly'),
             self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
-            self.check('storageProfile.osDisk.diffDiskSettings.placement', 'NvmeDisk'),
+            self.check('storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk'),
+            self.check('osProfile.computerName', '{vm_2}'),  # check that --computer-name defaults to --name here.
         ])
 
 
