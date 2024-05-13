@@ -12,16 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles volume backup create",
+    "netappfiles account backup-vault backup create",
 )
 class Create(AAZCommand):
-    """Create a backup for the volume
+    """Create a backup under the Backup Vault
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/backups/{}", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups/{}", "2023-11-01"],
         ]
     }
 
@@ -47,51 +47,27 @@ class Create(AAZCommand):
             help="The name of the NetApp account",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
             ),
         )
         _args_schema.backup_name = AAZStrArg(
-            options=["-b", "--name", "--backup-name"],
+            options=["-b", "-n", "--name", "--backup-name"],
             help="The name of the backup",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_.]{0,255}$",
             ),
         )
-        _args_schema.pool_name = AAZStrArg(
-            options=["-p", "--pool-name"],
-            help="The name of the capacity pool",
+        _args_schema.backup_vault_name = AAZStrArg(
+            options=["-v", "--backup-vault-name"],
+            help="The name of the Backup Vault",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-        )
-        _args_schema.volume_name = AAZStrArg(
-            options=["-n", "-v", "--volume-name"],
-            help="The name of the volume",
-            required=True,
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
-            ),
-        )
-
-        # define Arg Group "Body"
-
-        _args_schema = cls._args_schema
-        _args_schema.location = AAZResourceLocationArg(
-            arg_group="Body",
-            help="Resource location",
-            required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
         )
 
         # define Arg Group "Properties"
@@ -102,11 +78,22 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Label for backup",
         )
+        _args_schema.snapshot_name = AAZStrArg(
+            options=["--snapshot-name"],
+            arg_group="Properties",
+            help="The name of the snapshot",
+        )
         _args_schema.use_existing_snapshot = AAZBoolArg(
             options=["--use-existing-snapshot"],
             arg_group="Properties",
             help="Manual backup an already existing snapshot. This will always be false for scheduled backups and true/false for manual backups",
             default=False,
+        )
+        _args_schema.volume_resource_id = AAZResourceIdArg(
+            options=["--volume-resource-id"],
+            arg_group="Properties",
+            help="ResourceId used to identify the Volume",
+            required=True,
         )
         return cls._args_schema
 
@@ -157,7 +144,7 @@ class Create(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/backups/{backupName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/backupVaults/{backupVaultName}/backups/{backupName}",
                 **self.url_parameters
             )
 
@@ -181,7 +168,7 @@ class Create(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "poolName", self.ctx.args.pool_name,
+                    "backupVaultName", self.ctx.args.backup_vault_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -192,10 +179,6 @@ class Create(AAZCommand):
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
-                **self.serialize_url_param(
-                    "volumeName", self.ctx.args.volume_name,
-                    required=True,
-                ),
             }
             return parameters
 
@@ -203,7 +186,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -228,13 +211,14 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
 
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("label", AAZStrType, ".label")
+                properties.set_prop("snapshotName", AAZStrType, ".snapshot_name")
                 properties.set_prop("useExistingSnapshot", AAZBoolType, ".use_existing_snapshot")
+                properties.set_prop("volumeResourceId", AAZStrType, ".volume_resource_id", typ_kwargs={"flags": {"required": True}})
 
             return self.serialize_content(_content_value)
 
@@ -259,9 +243,6 @@ class Create(AAZCommand):
             _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.location = AAZStrType(
-                flags={"required": True},
-            )
             _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
             )
@@ -279,6 +260,10 @@ class Create(AAZCommand):
             properties = cls._schema_on_200_201.properties
             properties.backup_id = AAZStrType(
                 serialized_name="backupId",
+                flags={"read_only": True},
+            )
+            properties.backup_policy_resource_id = AAZStrType(
+                serialized_name="backupPolicyResourceId",
                 flags={"read_only": True},
             )
             properties.backup_type = AAZStrType(
@@ -301,12 +286,15 @@ class Create(AAZCommand):
             properties.size = AAZIntType(
                 flags={"read_only": True},
             )
+            properties.snapshot_name = AAZStrType(
+                serialized_name="snapshotName",
+            )
             properties.use_existing_snapshot = AAZBoolType(
                 serialized_name="useExistingSnapshot",
             )
-            properties.volume_name = AAZStrType(
-                serialized_name="volumeName",
-                flags={"read_only": True},
+            properties.volume_resource_id = AAZStrType(
+                serialized_name="volumeResourceId",
+                flags={"required": True},
             )
 
             system_data = cls._schema_on_200_201.system_data

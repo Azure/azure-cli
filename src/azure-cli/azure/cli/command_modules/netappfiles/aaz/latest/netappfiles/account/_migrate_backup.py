@@ -12,17 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles account backup delete",
-    confirmation="Are you sure you want to perform this operation?",
+    "netappfiles account migrate-backup",
 )
-class Delete(AAZCommand):
-    """Delete the specified Backup for a Netapp Account
+class MigrateBackup(AAZCommand):
+    """Migrate the backups under a NetApp account to backup vault
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/accountbackups/{}", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/migratebackups", "2023-11-01"],
         ]
     }
 
@@ -49,26 +48,27 @@ class Delete(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
-            ),
-        )
-        _args_schema.backup_name = AAZStrArg(
-            options=["-b", "--name", "--backup-name"],
-            help="The name of the backup",
-            required=True,
-            id_part="child_name_1",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_.]{0,255}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            required=True,
+        )
+
+        # define Arg Group "Body"
+
+        _args_schema = cls._args_schema
+        _args_schema.backup_vault_id = AAZStrArg(
+            options=["--backup-vault-id"],
+            arg_group="Body",
+            help="The ResourceId of the Backup Vault",
             required=True,
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.AccountBackupsDelete(ctx=self.ctx)()
+        yield self.BackupsUnderAccountMigrateBackups(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -79,7 +79,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class AccountBackupsDelete(AAZHttpOperation):
+    class BackupsUnderAccountMigrateBackups(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -89,25 +89,16 @@ class Delete(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200,
+                    self.on_200_201,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [200]:
+            if session.http_response.status_code in [200, 201]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [204]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_204,
+                    self.on_200_201,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
@@ -118,13 +109,13 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/accountBackups/{backupName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/migrateBackups",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "DELETE"
+            return "POST"
 
         @property
         def error_format(self):
@@ -135,10 +126,6 @@ class Delete(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "accountName", self.ctx.args.account_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "backupName", self.ctx.args.backup_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -156,21 +143,38 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
             return parameters
 
-        def on_200(self, session):
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+            }
+            return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("backupVaultId", AAZStrType, ".backup_vault_id", typ_kwargs={"flags": {"required": True}})
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
             pass
 
-        def on_204(self, session):
-            pass
+
+class _MigrateBackupHelper:
+    """Helper class for MigrateBackup"""
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
-
-
-__all__ = ["Delete"]
+__all__ = ["MigrateBackup"]

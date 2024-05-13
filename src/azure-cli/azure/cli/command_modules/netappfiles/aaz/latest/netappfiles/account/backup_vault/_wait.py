@@ -12,21 +12,15 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles volume backup restore-status",
+    "netappfiles account backup-vault wait",
 )
-class RestoreStatus(AAZCommand):
-    """Get volume's restore status
-
-    Get the status of the backup restore for a volume
-
-    :example: Get the status of the restore for a volume
-        az netappfiles volume backup restore-status  -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/restorestatus", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}", "2023-11-01"],
         ]
     }
 
@@ -55,36 +49,23 @@ class RestoreStatus(AAZCommand):
                 pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
             ),
         )
-        _args_schema.pool_name = AAZStrArg(
-            options=["-p", "--pool-name"],
-            help="The name of the capacity pool",
+        _args_schema.backup_vault_name = AAZStrArg(
+            options=["-n", "-v", "--name", "--backup-vault-name"],
+            help="The name of the Backup Vault",
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.volume_name = AAZStrArg(
-            options=["-n", "-v", "--name", "--volume-name"],
-            help="The name of the volume",
-            required=True,
-            id_part="child_name_2",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
-            ),
-        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.BackupsGetVolumeRestoreStatus(ctx=self.ctx)()
+        self.BackupVaultsGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -96,10 +77,10 @@ class RestoreStatus(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
 
-    class BackupsGetVolumeRestoreStatus(AAZHttpOperation):
+    class BackupVaultsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -113,7 +94,7 @@ class RestoreStatus(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/restoreStatus",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/backupVaults/{backupVaultName}",
                 **self.url_parameters
             )
 
@@ -133,7 +114,7 @@ class RestoreStatus(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "poolName", self.ctx.args.pool_name,
+                    "backupVaultName", self.ctx.args.backup_vault_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -144,10 +125,6 @@ class RestoreStatus(AAZCommand):
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
-                **self.serialize_url_param(
-                    "volumeName", self.ctx.args.volume_name,
-                    required=True,
-                ),
             }
             return parameters
 
@@ -155,7 +132,7 @@ class RestoreStatus(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -188,35 +165,61 @@ class RestoreStatus(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.error_message = AAZStrType(
-                serialized_name="errorMessage",
+            _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.healthy = AAZBoolType(
+            _schema_on_200.location = AAZStrType(
+                flags={"required": True},
+            )
+            _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.mirror_state = AAZStrType(
-                serialized_name="mirrorState",
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _schema_on_200.relationship_status = AAZStrType(
-                serialized_name="relationshipStatus",
+            _schema_on_200.tags = AAZDictType()
+            _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.total_transfer_bytes = AAZIntType(
-                serialized_name="totalTransferBytes",
+
+            properties = cls._schema_on_200.properties
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
                 flags={"read_only": True},
             )
-            _schema_on_200.unhealthy_reason = AAZStrType(
-                serialized_name="unhealthyReason",
-                flags={"read_only": True},
+
+            system_data = cls._schema_on_200.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
             )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
+
+            tags = cls._schema_on_200.tags
+            tags.Element = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _RestoreStatusHelper:
-    """Helper class for RestoreStatus"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
 
-__all__ = ["RestoreStatus"]
+__all__ = ["Wait"]

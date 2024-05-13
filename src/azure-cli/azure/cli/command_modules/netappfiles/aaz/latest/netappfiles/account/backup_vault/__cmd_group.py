@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "netappfiles volume backup",
+    "netappfiles account backup-vault",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Azure NetApp Files (ANF) Volume Backup Resources.
+    """Manage Azure NetApp Files (ANF) BackupVault Resources.
     """
     pass
 

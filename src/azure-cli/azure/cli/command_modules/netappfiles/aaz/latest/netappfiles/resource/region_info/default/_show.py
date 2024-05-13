@@ -12,15 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles account backup wait",
+    "netappfiles resource region-info default show",
 )
-class Wait(AAZWaitCommand):
-    """Place the CLI in a waiting state until a condition is met.
+class Show(AAZCommand):
+    """Get storage to network proximity and logical zone mapping information.
     """
 
     _aaz_info = {
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/accountbackups/{}", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/regioninfos/default", "2023-11-01"],
         ]
     }
 
@@ -40,32 +41,15 @@ class Wait(AAZWaitCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.account_name = AAZStrArg(
-            options=["-a", "--account-name"],
-            help="The name of the NetApp account",
+        _args_schema.location = AAZResourceLocationArg(
             required=True,
             id_part="name",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
-            ),
-        )
-        _args_schema.backup_name = AAZStrArg(
-            options=["-b", "--name", "--backup-name"],
-            help="The name of the backup",
-            required=True,
-            id_part="child_name_1",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_.]{0,255}$",
-            ),
-        )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            required=True,
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.AccountBackupsGet(ctx=self.ctx)()
+        self.NetAppResourceRegionInfosGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -77,10 +61,10 @@ class Wait(AAZWaitCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class AccountBackupsGet(AAZHttpOperation):
+    class NetAppResourceRegionInfosGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -94,7 +78,7 @@ class Wait(AAZWaitCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/accountBackups/{backupName}",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.NetApp/locations/{location}/regionInfos/default",
                 **self.url_parameters
             )
 
@@ -110,15 +94,7 @@ class Wait(AAZWaitCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "accountName", self.ctx.args.account_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "backupName", self.ctx.args.backup_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "location", self.ctx.args.location,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -132,7 +108,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -168,14 +144,11 @@ class Wait(AAZWaitCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.location = AAZStrType(
-                flags={"required": True},
-            )
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
             _schema_on_200.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
+                flags={"client_flatten": True},
             )
             _schema_on_200.system_data = AAZObjectType(
                 serialized_name="systemData",
@@ -186,36 +159,22 @@ class Wait(AAZWaitCommand):
             )
 
             properties = cls._schema_on_200.properties
-            properties.backup_id = AAZStrType(
-                serialized_name="backupId",
-                flags={"read_only": True},
+            properties.availability_zone_mappings = AAZListType(
+                serialized_name="availabilityZoneMappings",
             )
-            properties.backup_type = AAZStrType(
-                serialized_name="backupType",
-                flags={"read_only": True},
+            properties.storage_to_network_proximity = AAZStrType(
+                serialized_name="storageToNetworkProximity",
             )
-            properties.creation_date = AAZStrType(
-                serialized_name="creationDate",
-                flags={"read_only": True},
+
+            availability_zone_mappings = cls._schema_on_200.properties.availability_zone_mappings
+            availability_zone_mappings.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.availability_zone_mappings.Element
+            _element.availability_zone = AAZStrType(
+                serialized_name="availabilityZone",
             )
-            properties.failure_reason = AAZStrType(
-                serialized_name="failureReason",
-                flags={"read_only": True},
-            )
-            properties.label = AAZStrType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.size = AAZIntType(
-                flags={"read_only": True},
-            )
-            properties.use_existing_snapshot = AAZBoolType(
-                serialized_name="useExistingSnapshot",
-            )
-            properties.volume_name = AAZStrType(
-                serialized_name="volumeName",
-                flags={"read_only": True},
+            _element.is_available = AAZBoolType(
+                serialized_name="isAvailable",
             )
 
             system_data = cls._schema_on_200.system_data
@@ -241,8 +200,8 @@ class Wait(AAZWaitCommand):
             return cls._schema_on_200
 
 
-class _WaitHelper:
-    """Helper class for Wait"""
+class _ShowHelper:
+    """Helper class for Show"""
 
 
-__all__ = ["Wait"]
+__all__ = ["Show"]

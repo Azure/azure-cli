@@ -12,16 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles account backup list",
+    "netappfiles account backup-vault show",
 )
-class List(AAZCommand):
-    """List all Backups for a Netapp Account
+class Show(AAZCommand):
+    """Get the Backup Vault
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/accountbackups", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}", "2023-11-01"],
         ]
     }
 
@@ -45,6 +45,16 @@ class List(AAZCommand):
             options=["-a", "--account-name"],
             help="The name of the NetApp account",
             required=True,
+            id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+            ),
+        )
+        _args_schema.backup_vault_name = AAZStrArg(
+            options=["-n", "-v", "--name", "--backup-vault-name"],
+            help="The name of the Backup Vault",
+            required=True,
+            id_part="child_name_1",
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
             ),
@@ -56,7 +66,7 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.AccountBackupsList(ctx=self.ctx)()
+        self.BackupVaultsGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -68,10 +78,10 @@ class List(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class AccountBackupsList(AAZHttpOperation):
+    class BackupVaultsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -85,7 +95,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/accountBackups",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/backupVaults/{backupVaultName}",
                 **self.url_parameters
             )
 
@@ -105,6 +115,10 @@ class List(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
+                    "backupVaultName", self.ctx.args.backup_vault_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
@@ -119,7 +133,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -152,66 +166,34 @@ class List(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.value = AAZListType()
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType(
+            _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.location = AAZStrType(
+            _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
-            _element.name = AAZStrType(
+            _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
             )
-            _element.system_data = AAZObjectType(
+            _schema_on_200.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _element.type = AAZStrType(
+            _schema_on_200.tags = AAZDictType()
+            _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.value.Element.properties
-            properties.backup_id = AAZStrType(
-                serialized_name="backupId",
-                flags={"read_only": True},
-            )
-            properties.backup_type = AAZStrType(
-                serialized_name="backupType",
-                flags={"read_only": True},
-            )
-            properties.creation_date = AAZStrType(
-                serialized_name="creationDate",
-                flags={"read_only": True},
-            )
-            properties.failure_reason = AAZStrType(
-                serialized_name="failureReason",
-                flags={"read_only": True},
-            )
-            properties.label = AAZStrType()
+            properties = cls._schema_on_200.properties
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
-            properties.size = AAZIntType(
-                flags={"read_only": True},
-            )
-            properties.use_existing_snapshot = AAZBoolType(
-                serialized_name="useExistingSnapshot",
-            )
-            properties.volume_name = AAZStrType(
-                serialized_name="volumeName",
-                flags={"read_only": True},
-            )
 
-            system_data = cls._schema_on_200.value.Element.system_data
+            system_data = cls._schema_on_200.system_data
             system_data.created_at = AAZStrType(
                 serialized_name="createdAt",
             )
@@ -231,11 +213,14 @@ class List(AAZCommand):
                 serialized_name="lastModifiedByType",
             )
 
+            tags = cls._schema_on_200.tags
+            tags.Element = AAZStrType()
+
             return cls._schema_on_200
 
 
-class _ListHelper:
-    """Helper class for List"""
+class _ShowHelper:
+    """Helper class for Show"""
 
 
-__all__ = ["List"]
+__all__ = ["Show"]

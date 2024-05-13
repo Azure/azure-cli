@@ -12,16 +12,17 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles volume backup delete",
+    "netappfiles account backup-vault delete",
+    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Delete a backup of the volume
+    """Delete the specified Backup Vault
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/backups/{}", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}", "2023-11-01"],
         ]
     }
 
@@ -48,48 +49,26 @@ class Delete(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
             ),
         )
-        _args_schema.backup_name = AAZStrArg(
-            options=["-b", "--name", "--backup-name"],
-            help="The name of the backup",
-            required=True,
-            id_part="child_name_3",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_.]{0,255}$",
-            ),
-        )
-        _args_schema.pool_name = AAZStrArg(
-            options=["-p", "--pool-name"],
-            help="The name of the capacity pool",
+        _args_schema.backup_vault_name = AAZStrArg(
+            options=["-n", "-v", "--name", "--backup-vault-name"],
+            help="The name of the Backup Vault",
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.volume_name = AAZStrArg(
-            options=["-n", "-v", "--volume-name"],
-            help="The name of the volume",
-            required=True,
-            id_part="child_name_2",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
-            ),
-        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.BackupsDelete(ctx=self.ctx)()
+        yield self.BackupVaultsDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -100,7 +79,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class BackupsDelete(AAZHttpOperation):
+    class BackupVaultsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -110,16 +89,7 @@ class Delete(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
+                    self.on_200_201,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
@@ -133,13 +103,22 @@ class Delete(AAZCommand):
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
+            if session.http_response.status_code in [200, 201]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "location"},
+                    path_format_arguments=self.url_parameters,
+                )
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/backups/{backupName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/backupVaults/{backupVaultName}",
                 **self.url_parameters
             )
 
@@ -159,11 +138,7 @@ class Delete(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "backupName", self.ctx.args.backup_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "poolName", self.ctx.args.pool_name,
+                    "backupVaultName", self.ctx.args.backup_vault_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -174,10 +149,6 @@ class Delete(AAZCommand):
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
-                **self.serialize_url_param(
-                    "volumeName", self.ctx.args.volume_name,
-                    required=True,
-                ),
             }
             return parameters
 
@@ -185,16 +156,16 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
             return parameters
 
-        def on_200(self, session):
+        def on_204(self, session):
             pass
 
-        def on_204(self, session):
+        def on_200_201(self, session):
             pass
 
 

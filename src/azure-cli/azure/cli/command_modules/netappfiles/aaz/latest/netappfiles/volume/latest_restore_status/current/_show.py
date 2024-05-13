@@ -12,15 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles volume backup wait",
+    "netappfiles volume latest-restore-status current show",
 )
-class Wait(AAZWaitCommand):
-    """Place the CLI in a waiting state until a condition is met.
+class Show(AAZCommand):
+    """Get the latest status of the restore for a volume
     """
 
     _aaz_info = {
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/backups/{}", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/latestrestorestatus/current", "2023-11-01"],
         ]
     }
 
@@ -46,16 +47,7 @@ class Wait(AAZWaitCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
-            ),
-        )
-        _args_schema.backup_name = AAZStrArg(
-            options=["-b", "--name", "--backup-name"],
-            help="The name of the backup",
-            required=True,
-            id_part="child_name_3",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_.]{0,255}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
             ),
         )
         _args_schema.pool_name = AAZStrArg(
@@ -73,7 +65,7 @@ class Wait(AAZWaitCommand):
             required=True,
         )
         _args_schema.volume_name = AAZStrArg(
-            options=["-n", "-v", "--volume-name"],
+            options=["-v", "--volume-name"],
             help="The name of the volume",
             required=True,
             id_part="child_name_2",
@@ -87,7 +79,7 @@ class Wait(AAZWaitCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.BackupsGet(ctx=self.ctx)()
+        self.BackupsGetVolumeLatestRestoreStatus(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -99,10 +91,10 @@ class Wait(AAZWaitCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class BackupsGet(AAZHttpOperation):
+    class BackupsGetVolumeLatestRestoreStatus(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -116,7 +108,7 @@ class Wait(AAZWaitCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/backups/{backupName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/latestRestoreStatus/current",
                 **self.url_parameters
             )
 
@@ -133,10 +125,6 @@ class Wait(AAZWaitCommand):
             parameters = {
                 **self.serialize_url_param(
                     "accountName", self.ctx.args.account_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "backupName", self.ctx.args.backup_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -162,7 +150,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -195,84 +183,35 @@ class Wait(AAZWaitCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.id = AAZStrType(
+            _schema_on_200.error_message = AAZStrType(
+                serialized_name="errorMessage",
                 flags={"read_only": True},
             )
-            _schema_on_200.location = AAZStrType(
-                flags={"required": True},
-            )
-            _schema_on_200.name = AAZStrType(
+            _schema_on_200.healthy = AAZBoolType(
                 flags={"read_only": True},
             )
-            _schema_on_200.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
-            )
-            _schema_on_200.system_data = AAZObjectType(
-                serialized_name="systemData",
+            _schema_on_200.mirror_state = AAZStrType(
+                serialized_name="mirrorState",
                 flags={"read_only": True},
             )
-            _schema_on_200.type = AAZStrType(
+            _schema_on_200.relationship_status = AAZStrType(
+                serialized_name="relationshipStatus",
                 flags={"read_only": True},
             )
-
-            properties = cls._schema_on_200.properties
-            properties.backup_id = AAZStrType(
-                serialized_name="backupId",
+            _schema_on_200.total_transfer_bytes = AAZIntType(
+                serialized_name="totalTransferBytes",
                 flags={"read_only": True},
             )
-            properties.backup_type = AAZStrType(
-                serialized_name="backupType",
+            _schema_on_200.unhealthy_reason = AAZStrType(
+                serialized_name="unhealthyReason",
                 flags={"read_only": True},
-            )
-            properties.creation_date = AAZStrType(
-                serialized_name="creationDate",
-                flags={"read_only": True},
-            )
-            properties.failure_reason = AAZStrType(
-                serialized_name="failureReason",
-                flags={"read_only": True},
-            )
-            properties.label = AAZStrType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.size = AAZIntType(
-                flags={"read_only": True},
-            )
-            properties.use_existing_snapshot = AAZBoolType(
-                serialized_name="useExistingSnapshot",
-            )
-            properties.volume_name = AAZStrType(
-                serialized_name="volumeName",
-                flags={"read_only": True},
-            )
-
-            system_data = cls._schema_on_200.system_data
-            system_data.created_at = AAZStrType(
-                serialized_name="createdAt",
-            )
-            system_data.created_by = AAZStrType(
-                serialized_name="createdBy",
-            )
-            system_data.created_by_type = AAZStrType(
-                serialized_name="createdByType",
-            )
-            system_data.last_modified_at = AAZStrType(
-                serialized_name="lastModifiedAt",
-            )
-            system_data.last_modified_by = AAZStrType(
-                serialized_name="lastModifiedBy",
-            )
-            system_data.last_modified_by_type = AAZStrType(
-                serialized_name="lastModifiedByType",
             )
 
             return cls._schema_on_200
 
 
-class _WaitHelper:
-    """Helper class for Wait"""
+class _ShowHelper:
+    """Helper class for Show"""
 
 
-__all__ = ["Wait"]
+__all__ = ["Show"]
