@@ -952,12 +952,6 @@ jobs:
     matrix:
       ${{ each arch in parameters.architectures }}:
         # https://wiki.ubuntu.com/Releases
-        Bionic ${{ arch.name }}:
-          # 18.04
-          deb_system: ubuntu
-          distro: bionic
-          arch: ${{ arch.value }}
-          pool: ${{ arch.pool }}
         Focal ${{ arch.name }}:
           # 20.04
           deb_system: ubuntu
