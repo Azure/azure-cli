@@ -138,19 +138,19 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'volume_id': volume['id']
         })
-        backup_list = self.cmd("netappfiles account backup-vault backup list -g {rg} -a {account_name} -v {vault_name} --filter {volume_id}" ).get_output_in_json()
+        backup_list = self.cmd("netappfiles account backup-vault backup list -g {rg} -a {account_name} -v {vault_name} " ).get_output_in_json()
         assert len(backup_list) == 1
         
         # create second backup to test delete backup
         backup_name2 = self.create_random_name(prefix='cli-backup2-', length=24)        
         self.create_backup(account_name, pool_name, volume_name, backup_name2, vault_name, backup_only=True)
         self.wait_for_backup_created(account_name, vault_name, backup_name2)
-        backup_list = self.cmd("netappfiles account backup-vault backup list -g {rg} -a {account_name} -v {vault_name} --filter {volume_id}" ).get_output_in_json()
+        backup_list = self.cmd("netappfiles account backup-vault backup list -g {rg} -a {account_name} -v {vault_name} " ).get_output_in_json()
         assert len(backup_list) == 2
 
         # delete backup
         self.cmd("az netappfiles account backup-vault backup delete -g {rg} -a {account_name} -v {vault_name} --backup-name {first_backup_name} --yes" )
-        backup_list = self.cmd("netappfiles account backup-vault backup list -g {rg} -a {account_name} -v {vault_name} --filter {volume_id}" ).get_output_in_json()
+        backup_list = self.cmd("netappfiles account backup-vault backup list -g {rg} -a {account_name} -v {vault_name} " ).get_output_in_json()
         assert len(backup_list) == 1
 
         self.delete_backup(account_name, vault_name, backup_name2)
@@ -178,7 +178,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'volume_id': volume['id']
         })
-        backup_list = self.cmd("netappfiles account backup-vault backup list -g {rg} -a {account_name} -v {vault_name} --filter {volume_id}" ).get_output_in_json()
+        backup_list = self.cmd("netappfiles account backup-vault backup list -g {rg} -a {account_name} -v {vault_name} " ).get_output_in_json()
 
         assert len(backup_list) == 1
         self.wait_for_backup_created(account_name, vault_name, backup_name)
@@ -187,7 +187,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         backup_name2 = self.create_random_name(prefix='cli-backup-', length=24)
         self.create_backup(account_name, pool_name, volume_name, backup_name2, vault_name, backup_only=True)
 
-        backup_list = self.cmd("netappfiles account backup-vault backup list -g {rg} -a {account_name} -v {vault_name} --filter {volume_id}" ).get_output_in_json()
+        backup_list = self.cmd("netappfiles account backup-vault backup list -g {rg} -a {account_name} -v {vault_name} " ).get_output_in_json()
 
         assert len(backup_list) == 2
 
