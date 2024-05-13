@@ -1003,6 +1003,17 @@ def _prepare_template_uri_with_query_string(template_uri, input_query_string):
         raise InvalidArgumentValueError('Unable to parse parameter: {} .Make sure the value is formed correctly.'.format(input_query_string))
 
 
+def _get_parameter_count(parameters):
+    # parameters is a 2d array, because it's valid for a user to supply parameters in 2 formats:
+    # '--parameters foo=1 --parameters bar=2' or '--parameters foo=1 bar=2'
+    # if we try a simple len(parameters), this will return 1 for the latter case, which is incorrect
+    count = 0
+    for parameter_list in parameters:
+        count += len(parameter_list)
+
+    return count
+
+
 def _get_bicepparam_file_path(parameters):
     bicepparam_file_path = None
 
@@ -1066,7 +1077,7 @@ def _parse_bicepparam_file(cmd, template_file, parameters):
         raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version_bicepparam_compilation} or later.")
 
     minimum_supported_version_supplemental_param = "0.22.6"
-    if len(parameters) > 1 and not bicep_version_greater_than_or_equal_to(minimum_supported_version_supplemental_param):
+    if _get_parameter_count(parameters) > 1 and not bicep_version_greater_than_or_equal_to(minimum_supported_version_supplemental_param):
         raise ArgumentUsageError(f"Current version of Bicep CLI does not support supplemental parameters with .bicepparam file. Please upgrade Bicep CLI to {minimum_supported_version_supplemental_param} or later.")
 
     bicepparam_file = _get_bicepparam_file_path(parameters)
@@ -1076,7 +1087,7 @@ def _parse_bicepparam_file(cmd, template_file, parameters):
 
     template_content, template_spec_id, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, template_file)
 
-    if len(parameters) > 1:
+    if _get_parameter_count(parameters) > 1:
         template_obj = None
         if template_spec_id:
             template_obj = _load_template_spec_template(cmd, template_spec_id)
