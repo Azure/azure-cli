@@ -1541,6 +1541,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container set-permission') as c:
         c.ignore('signed_identifiers')
 
+    for item in ['set', 'show']:
+        with self.argument_context('storage container {}-permission'.format(item)) as c:
+            c.ignore('connection_string')
+            c.ignore('sas_token')
+
     with self.argument_context('storage container') as c:
         c.argument('account_name', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
         c.argument('resource_group_name', required=False, validator=process_resource_group)
