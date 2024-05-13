@@ -2781,6 +2781,21 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return enable_syslog
 
+    def get_enable_high_log_scale_mode(self) -> Union[bool, None]:
+        """Obtain the value of enable_high_log_scale_mode.
+
+        Note: The arg type of this parameter supports three states (True, False or None), but the corresponding default
+        value in entry function is not None.
+
+        :return: bool or None
+        """
+        # read the original value passed by the command
+        enable_high_log_scale_mode = self.raw_param.get("enable_high_log_scale_mode")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_high_log_scale_mode
+
     def get_data_collection_settings(self) -> Union[str, None]:
         """Obtain the value of data_collection_settings.
 
@@ -2797,6 +2812,18 @@ class AKSManagedClusterContext(BaseAKSContext):
                     )
                 )
         return data_collection_settings_file_path
+
+    def get_ampls_resource_id(self) -> Union[str, None]:
+        """Obtain the value of ampls_resource_id.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        ampls_resource_id = self.raw_param.get("ampls_resource_id")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return ampls_resource_id
 
     # pylint: disable=no-self-use
     def get_virtual_node_addon_os_type(self) -> str:
@@ -5944,7 +5971,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             create_dcr=True,
             create_dcra=False,
             enable_syslog=self.context.get_enable_syslog(),
-            data_collection_settings=self.context.get_data_collection_settings()
+            data_collection_settings=self.context.get_data_collection_settings(),
+            is_private_cluster=self.context.get_enable_private_cluster(),
+            ampls_resource_id=self.context.get_ampls_resource_id(),
+            enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
         )
         # set intermediate
         self.context.set_intermediate("monitoring_addon_enabled", True, overwrite_exists=True)
@@ -6744,6 +6774,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     create_dcr=False,
                     create_dcra=True,
                     enable_syslog=self.context.get_enable_syslog(),
+                    data_collection_settings=self.context.get_data_collection_settings(),
+                    is_private_cluster=self.context.get_enable_private_cluster(),
+                    ampls_resource_id=self.context.get_ampls_resource_id(),
+                    enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
                 )
 
         # ingress appgw addon
@@ -8449,6 +8483,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     create_dcr=False,
                     create_dcra=True,
                     enable_syslog=self.context.get_enable_syslog(),
+                    data_collection_settings=self.context.get_data_collection_settings(),
+                    is_private_cluster=self.context.get_enable_private_cluster(),
+                    ampls_resource_id=self.context.get_ampls_resource_id(),
+                    enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
                 )
 
         # ingress appgw addon

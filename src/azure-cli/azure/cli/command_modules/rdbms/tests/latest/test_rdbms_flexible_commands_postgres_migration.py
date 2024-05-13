@@ -40,8 +40,8 @@ class MigrationScenarioTest(ScenarioTest):
         self._test_server_migration('postgres')
 
     def test_postgres_flexible_server_onpremise_migration(self):
-        self._test_server_migration_onpremise('postgres', True, "b345de21-10e1-474d-8777-8956c9a6ca47")
-        self._test_server_migration_onpremise('postgres', False, "bf81e96c-bde0-4492-ba8d-b6dd508fb97c")
+        self._test_server_migration_onpremise('postgres', True, "1a50e116-8f35-4401-a573-6eda6f539e28")
+        self._test_server_migration_onpremise('postgres', False, "d703653c-3d00-4926-8d4f-4871fb7c7ff1")
 
     def _test_server_migration(self, database_engine):
         # Set this to True or False depending on whether we are in live mode or test mode
@@ -55,7 +55,7 @@ class MigrationScenarioTest(ScenarioTest):
         else:
             # Mock test mode values
             target_subscription_id = "00000000-0000-0000-0000-000000000000"
-            migration_name = "c5f30fd0-37e6-4ff0-a95e-1b95ed8012a6"
+            migration_name = "392a7b75-da70-4bb5-9a12-93c0ab771244"
 
         target_resource_group_name = "Sterling2MeruRG"
         target_server_name = "target-server-longhaul"

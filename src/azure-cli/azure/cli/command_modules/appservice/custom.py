@@ -676,7 +676,7 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
 
 
-def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=False):
+def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=True):
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot, track_status)
 
 
@@ -5686,8 +5686,6 @@ def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name
     app = client.web_apps.get(resource_group_name, name)
     app_is_linux_webapp = is_linux_webapp(app)
     if not app_is_linux_webapp:
-        logger.warning("Deployment status tracking is currently only supported for linux webapps."
-                       " Resuming without tracking status.")
         response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                                      slot, timeout)
     else:
@@ -6361,7 +6359,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
-              app_service_environment=None, track_status=False, basic_auth=""):
+              app_service_environment=None, track_status=True, basic_auth=""):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -6774,7 +6772,7 @@ def perform_onedeploy_webapp(cmd,
                              ignore_stack=None,
                              timeout=None,
                              slot=None,
-                             track_status=False):
+                             track_status=True):
     params = OneDeployParams()
 
     params.cmd = cmd

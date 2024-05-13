@@ -66,6 +66,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
     validate_azure_keyvault_kms_key_vault_resource_id,
     validate_azuremonitorworkspaceresourceid, validate_create_parameters,
+    validate_azuremonitor_privatelinkscope_resourceid,
     validate_credential_format, validate_defender_config_parameter,
     validate_defender_disable_and_enable_parameters, validate_eviction_policy,
     validate_grafanaresourceid, validate_host_group_id,
@@ -354,9 +355,11 @@ def load_arguments(self, _):
         # addons
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('workspace_resource_id')
-        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('enable_syslog', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('data_collection_settings', is_preview=True)
+        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag())
+        c.argument('enable_syslog', arg_type=get_three_state_flag())
+        c.argument('data_collection_settings')
+        c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
+        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag(), is_preview=True)
         c.argument('aci_subnet_name')
         c.argument('appgw_name', arg_group='Application Gateway')
         c.argument('appgw_subnet_cidr', arg_group='Application Gateway')
@@ -593,9 +596,11 @@ def load_arguments(self, _):
         c.argument('enable_sgxquotehelper', action='store_true')
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('rotation_poll_interval')
-        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('enable_syslog', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('data_collection_settings', is_preview=True)
+        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag())
+        c.argument('enable_syslog', arg_type=get_three_state_flag())
+        c.argument('data_collection_settings')
+        c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
+        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag(), is_preview=True)
 
     with self.argument_context('aks get-credentials', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
