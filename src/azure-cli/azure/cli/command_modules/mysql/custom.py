@@ -491,39 +491,41 @@ def flexible_server_import_create(cmd, client,
     create_mode = 'Create'
     if data_source_type.lower() == 'mysql_single':
         if mode.lower() == 'offline':
-            # Generating source_server_id from data_source depending on whether it is a server_name or resource_id
-            if not is_valid_resource_id(data_source):
-                if len(data_source.split('/')) == 1:
-                    source_server_id = resource_id(
-                        subscription=get_subscription_id(cmd.cli_ctx),
-                        resource_group=resource_group_name,
-                        namespace=provider,
-                        type='servers',
-                        name=data_source)
-                else:
-                    raise ValidationError('The provided data-source {} is invalid.'.format(data_source))
-            else:
-                source_server_id = data_source
-
-            single_server_client = cf_mysql_servers(cli_ctx=cmd.cli_ctx, _=None)
             create_mode = 'Migrate'
-            # Mapping the single server configuration to flexible server configuration
-            (tier, sku_name, location, storage_gb, auto_grow, backup_retention,
-             geo_redundant_backup, version, tags, public_access, administrator_login) = map_single_server_configuration(single_server_client=single_server_client,
-                                                                                                                        source_server_id=source_server_id,
-                                                                                                                        tier=tier,
-                                                                                                                        sku_name=sku_name,
-                                                                                                                        location=location,
-                                                                                                                        storage_gb=storage_gb,
-                                                                                                                        auto_grow=auto_grow,
-                                                                                                                        backup_retention=backup_retention,
-                                                                                                                        geo_redundant_backup=geo_redundant_backup,
-                                                                                                                        version=version,
-                                                                                                                        tags=tags,
-                                                                                                                        public_access=public_access,
-                                                                                                                        subnet=subnet,
-                                                                                                                        administrator_login=administrator_login,
-                                                                                                                        administrator_login_password=administrator_login_password)
+        elif mode.lower() == 'online':
+            create_mode = 'OnlineMigrate'
+        # Generating source_server_id from data_source depending on whether it is a server_name or resource_id
+        if not is_valid_resource_id(data_source):
+            if len(data_source.split('/')) == 1:
+                source_server_id = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=resource_group_name,
+                    namespace=provider,
+                    type='servers',
+                    name=data_source)
+            else:
+                raise ValidationError('The provided data-source {} is invalid.'.format(data_source))
+        else:
+            source_server_id = data_source
+
+        single_server_client = cf_mysql_servers(cli_ctx=cmd.cli_ctx, _=None)
+        # Mapping the single server configuration to flexible server configuration
+        (tier, sku_name, location, storage_gb, auto_grow, backup_retention,
+            geo_redundant_backup, version, tags, public_access, administrator_login) = map_single_server_configuration(single_server_client=single_server_client,
+                                                                                                                       source_server_id=source_server_id,
+                                                                                                                       tier=tier,
+                                                                                                                       sku_name=sku_name,
+                                                                                                                       location=location,
+                                                                                                                       storage_gb=storage_gb,
+                                                                                                                       auto_grow=auto_grow,
+                                                                                                                       backup_retention=backup_retention,
+                                                                                                                       geo_redundant_backup=geo_redundant_backup,
+                                                                                                                       version=version,
+                                                                                                                       tags=tags,
+                                                                                                                       public_access=public_access,
+                                                                                                                       subnet=subnet,
+                                                                                                                       administrator_login=administrator_login,
+                                                                                                                       administrator_login_password=administrator_login_password)
     elif data_source_type.lower() == 'azure_blob':
         (tier, sku_name, storage_gb, auto_grow, backup_retention,
          geo_redundant_backup, version, administrator_login) = get_default_flex_configuration(tier=tier,
@@ -1826,9 +1828,6 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
             administrator_login_password = None
             logger.warning("Changing administrator login name and password is currently not supported for single to flex migrations. "
                            "Please use source single server administrator login name and password to connect after migration.")
-
-        if not administrator_login:
-            administrator_login = source_single_server.administrator_login
 
         if not location:
             location = ''.join(source_single_server.location.lower().split())

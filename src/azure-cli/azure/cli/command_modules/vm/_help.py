@@ -2678,7 +2678,7 @@ examples:
 
 helps['vm user update'] = """
 type: command
-short-summary: Update a user account.
+short-summary: Update a user account for VM. You can use it to update password or ssh key value for VM user.
 long-summary: >
     This command uses VMAccessForLinux 1.5 for Linux operating system and VMAccessAgent 2.4 for Window operating system.
 parameters:
@@ -2795,6 +2795,10 @@ examples:
   - name: Create a Windows VMSS with patch mode 'Manual' (Currently patch mode 'AutomaticByPlatform' is not supported during VMSS creation as health extension which is required for 'AutomaticByPlatform' mode cannot be set during VMSS creation).
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image Win2019Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible
+  - name: Create a VMSS with specifying the security posture to be used for all virtual machines in the scale set.
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version} --security-posture-reference-id /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{version} \\
+            --security-posture-reference-exclude-extensions "c:\\tmp\\exclude_extensions.json"
 """
 
 helps['vmss deallocate'] = """
@@ -3318,6 +3322,10 @@ examples:
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.imageReference.id=imageID
   - name: Update a Linux VMSS to patch mode 'AutomaticByPlatform'.
     text: az vmss update -n MyVmss -g MyResourceGroup --set virtualMachineProfile.osProfile.linuxConfiguration.patchSettings.patchMode=AutomaticByPlatform
+  - name: Update a VMSS with specifying the security posture to be used for all virtual machines in the scale set.
+    text: >
+        az vmss update -n MyVmss -g MyResourceGroup --security-posture-reference-id /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{version} \\
+            --security-posture-reference-exclude-extensions "c:\\tmp\\exclude_extensions.json"
 """
 
 helps['vmss update-instances'] = """
@@ -3468,15 +3476,6 @@ examples:
     text: az capacity reservation group show -n ReservationGroupName -g MyResourceGroup --instance-view
 """
 
-helps['capacity reservation group list'] = """
-type: command
-short-summary: List the capacity reservation groups.
-examples:
-  - name: List the capacity reservation groups.
-    text: az capacity reservation group list -g MyResourceGroup
-  - name: List the capacity reservation groups containing VM instances and VMSS instance which are associated to capacity reservation group
-    text: az capacity reservation group list -g MyResourceGroup --vm-instance --vmss-instance
-"""
 
 helps['capacity reservation create'] = """
 type: command
