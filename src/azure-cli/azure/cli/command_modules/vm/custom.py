@@ -4680,10 +4680,10 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          release_note_uri=None, eula=None, description=None, location=None,
                          minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
                          disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None,
-                         hyper_v_generation='V1', features=None, architecture=None):
+                         hyper_v_generation='V2', features=None, architecture=None):
     logger.warning(
         "Starting Build (May) 2024, \"az sig image-definition create\" command will use the new default values "
-        "Hyper-V Generation: V2 and SecurityType: TrustedLaunchSuppoted."
+        "Hyper-V Generation: V2 and SecurityType: TrustedLaunchSupported."
     )
 
     # pylint: disable=line-too-long
@@ -4709,18 +4709,26 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     if features:
         from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT
         feature_list = []
+        security_type = None
         for item in features.split():
             try:
                 key, value = item.split('=', 1)
                 # create Non-Trusted Launch VM Image
                 # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
                 # after changing the default values to Trusted Launch VMs in the future.
+                if key == 'SecurityType':
+                    security_type = True
                 if key == 'SecurityType' and value == COMPATIBLE_SECURITY_TYPE_VALUE:
                     logger.warning(UPGRADE_SECURITY_HINT)
                     continue
                 feature_list.append(GalleryImageFeature(name=key, value=value))
             except ValueError:
                 raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
+        if security_type is None:
+            feature_list.append(GalleryImageFeature(name='SecurityType', value='TrustedLaunchSupported'))
+    if features is None:
+        feature_list = []
+        feature_list.append(GalleryImageFeature(name='SecurityType', value='TrustedLaunchSupported'))
 
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
                          os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
