@@ -1363,7 +1363,8 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
                   mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
                   target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None,
-                  target_subscription_id=None, storage_account_resource_group=None, restore_to_edge_zone=None):
+                  target_subscription_id=None, storage_account_resource_group=None, restore_to_edge_zone=None,
+                  tenant_id=None):
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     vault_location = vault.location
     vault_identity = vault.identity
@@ -1484,6 +1485,15 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                           polling=False).result()
 
         return cust_help.track_backup_crr_job(cmd.cli_ctx, result, azure_region, vault.id)
+
+    if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore"):
+        # Cross Tenant scenario
+        if tenant_id is not None:
+            client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                             aux_tenants=[tenant_id]).restores
+        trigger_restore_request.properties.resource_guard_operation_requests = [
+            cust_help.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore")]
 
     # Trigger restore
     result = client.begin_trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
