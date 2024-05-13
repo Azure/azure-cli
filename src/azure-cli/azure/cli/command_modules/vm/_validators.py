@@ -605,6 +605,26 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
+    if getattr(namespace, 'source_snapshots_or_disks', None) and \
+            getattr(namespace, 'source_snapshots_or_disks_size_gb', None):
+        if len(namespace.source_snapshots_or_disks) != len(namespace.source_snapshots_or_disks_size_gb):
+            raise ArgumentUsageError(
+                'Length of --source-snapshots-or-disks, --source-snapshots-or-disks-size-gb must be same.')
+    elif getattr(namespace, 'source_snapshots_or_disks', None) or \
+            getattr(namespace, 'source_snapshots_or_disks_size_gb', None):
+        raise ArgumentUsageError('usage error: --source-snapshots-or-disks and '
+                                 '--source-snapshots-or-disks-size-gb must be used together')
+
+    if getattr(namespace, 'source_disk_restore_point', None) and \
+            getattr(namespace, 'source_disk_restore_point_size_gb', None):
+        if len(namespace.source_disk_restore_point) != len(namespace.source_disk_restore_point_size_gb):
+            raise ArgumentUsageError(
+                'Length of --source-disk-restore-point, --source-disk-restore-point-size-gb must be same.')
+    elif getattr(namespace, 'source_disk_restore_point', None) or \
+            getattr(namespace, 'source_disk_restore_point_size_gb', None):
+        raise ArgumentUsageError('usage error: --source-disk-restore-point and '
+                                 '--source-disk-restore-point-size-gb must be used together')
+
     from ._vm_utils import normalize_disk_info
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
     vm_size = (getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
@@ -620,7 +640,12 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None),
                                               ephemeral_os_disk_placement=getattr(namespace, 'ephemeral_os_disk_placement', None),
                                               data_disk_delete_option=getattr(
-                                                  namespace, 'data_disk_delete_option', None))
+                                                  namespace, 'data_disk_delete_option', None),
+                                              source_snapshots_or_disks=getattr(namespace, 'source_snapshots_or_disks', None),
+                                              source_snapshots_or_disks_size_gb=getattr(namespace, 'source_snapshots_or_disks_size_gb', None),
+                                              source_disk_restore_point=getattr(namespace, 'source_disk_restore_point', None),
+                                              source_disk_restore_point_size_gb=getattr(namespace, 'source_disk_restore_point_size_gb', None)
+                                              )
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
