@@ -463,19 +463,20 @@ def check_language_runtime(cmd, resource_group_name, name):
     app = client.web_apps.get(resource_group_name, name)
     is_linux = app.reserved
     if is_functionapp(app):
-        is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
-        runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, is_linux)
-        runtime = runtime_info['app_runtime']
-        runtime_version = runtime_info['app_runtime_version']
-        functions_version = runtime_info['functionapp_version']
         try:
-            if not is_flex:
-                runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=is_linux, windows=(not is_linux))
-                runtime_helper.resolve(runtime, runtime_version, functions_version, is_linux)
-            else:
-                location = app.location
-                runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime, runtime_version)
-                runtime_helper.resolve(runtime, runtime_version)
+            is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+            runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, is_linux)
+            runtime = runtime_info['app_runtime']
+            runtime_version = runtime_info['app_runtime_version']
+            functions_version = runtime_info['functionapp_version']
+            if runtime and runtime_version:
+                if not is_flex:
+                    runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=is_linux, windows=(not is_linux))
+                    runtime_helper.resolve(runtime, runtime_version, functions_version, is_linux)
+                else:
+                    location = app.location
+                    runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime, runtime_version)
+                    runtime_helper.resolve(runtime, runtime_version)
         except ValidationError as e:
             logger.warning(e.error_msg)
 
@@ -8200,7 +8201,8 @@ def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux
 def _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, is_linux):
     if is_linux:
         if len(app_runtime.split('|')) < 2:
-            raise ValidationError(f"Runtime {app_runtime} is not supported.")
+            raise ValidationError("Could not detect runtime. To configure linuxFxVersion, "
+                                  "please visit https://aka.ms/linuxFxVersion")
         app_runtime_version = app_runtime.split('|')[1]
         app_runtime = app_runtime.split('|')[0].lower()
 
