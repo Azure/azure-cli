@@ -624,7 +624,7 @@ class TestAAZArg(unittest.TestCase):
         self.assertFalse(has_value(v.score))
 
         arg = schema.score.to_cmd_arg("score")
-        self.assertEqual(len(arg.choices), 4)
+        self.assertEqual(arg.choices, None)
         action = arg.type.settings["action"]
 
         dest_ops = AAZArgActionOperations()
@@ -727,7 +727,7 @@ class TestAAZArg(unittest.TestCase):
         self.assertFalse(has_value(v.score))
 
         arg = schema.score.to_cmd_arg("score")
-        self.assertEqual(len(arg.choices), 4)
+        self.assertEqual(arg.choices, None)
         action = arg.type.settings["action"]
 
         dest_ops = AAZArgActionOperations()
