@@ -3178,7 +3178,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_osimage_notification=None, max_surge=None, disable_integrity_monitoring_autoupgrade=False,
                 enable_hibernation=None, enable_proxy_agent=None, proxy_agent_mode=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
-                enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None):
+                enable_resilient_creation=None, enable_resilient_deletion=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3487,8 +3487,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_proxy_agent=enable_proxy_agent, proxy_agent_mode=proxy_agent_mode,
             security_posture_reference_id=security_posture_reference_id,
             security_posture_reference_exclude_extensions=security_posture_reference_exclude_extensions,
-            enable_resilient_vm_creation=enable_resilient_vm_creation,
-            enable_resilient_vm_deletion=enable_resilient_vm_deletion)
+            enable_resilient_vm_creation=enable_resilient_creation,
+            enable_resilient_vm_deletion=enable_resilient_deletion)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3917,7 +3917,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 enable_osimage_notification=None, custom_data=None, enable_hibernation=None,
                 security_type=None, enable_proxy_agent=None, proxy_agent_mode=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
-                max_surge=None, enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None, **kwargs):
+                max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4150,12 +4150,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
         vmss.virtual_machine_profile.security_posture_reference = security_posture_reference
 
-    if enable_resilient_vm_creation is not None or enable_resilient_vm_deletion is not None:
+    if enable_resilient_creation is not None or enable_resilient_deletion is not None:
         resiliency_policy = vmss.resiliency_policy
-        if enable_resilient_vm_creation is not None:
-            resiliency_policy.resilient_vm_creation_policy = {'enabled': enable_resilient_vm_creation}
-        if enable_resilient_vm_deletion is not None:
-            resiliency_policy.resilient_vm_deletion_policy = {'enabled': enable_resilient_vm_deletion}
+        if enable_resilient_creation is not None:
+            resiliency_policy.resilient_vm_creation_policy = {'enabled': enable_resilient_creation}
+        if enable_resilient_deletion is not None:
+            resiliency_policy.resilient_vm_deletion_policy = {'enabled': enable_resilient_deletion}
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)

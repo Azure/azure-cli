@@ -3628,12 +3628,12 @@ class VMSSCreateOptions(ScenarioTest):
             'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
             'sku': 'Standard_D1_v2',
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image {image} --vm-sku {sku} --admin-username vmtest --admin-password Test123456789# --enable-resilient-vm-creation --disable-overprovision --upgrade-policy-mode Manual --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --image {image} --vm-sku {sku} --admin-username vmtest --admin-password Test123456789# --enable-resilient-creation --disable-overprovision --upgrade-policy-mode Manual --orchestration-mode Uniform')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('resiliencyPolicy.resilientVmCreationPolicy.enabled', True),
         ])
 
-        self.cmd('vmss update -g {rg} -n {vmss} --enable-resilient-vm-deletion --enable-resilient-vm-creation false')
+        self.cmd('vmss update -g {rg} -n {vmss} --enable-resilient-deletion --enable-resilient-creation false')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('resiliencyPolicy.resilientVmCreationPolicy.enabled', False),
             self.check('resiliencyPolicy.resilientVmDeletionPolicy.enabled', True),
