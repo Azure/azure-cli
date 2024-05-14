@@ -1121,6 +1121,64 @@ class VMManagedDiskScenarioTest(ScenarioTest):
                      self.check('creationData.sourceResourceId', '{disk_restore_point_id}')
                  ])
 
+    @ResourceGroupPreparer('cli_test_vm_data_disk_creation_from_copy_and_restore', location='eastus2euap')
+    def test_vm_data_disk_creation_from_copy_and_restore(self):
+        self.kwargs.update({
+            'vm_name': self.create_random_name('vm_', length=15),
+            'vm_name2': self.create_random_name('vm_', length=15),
+            'collection_name': self.create_random_name('collection_', length=20),
+            'point_name': self.create_random_name('point_', length=15),
+            'disk_name1': self.create_random_name('disk_', length=15),
+            'disk_name2': self.create_random_name('disk_', length=15),
+            'disk_name3': self.create_random_name('disk_', length=15),
+            'disk_name4': self.create_random_name('disk_', length=15),
+            'disk_name5': self.create_random_name('disk_', length=15)
+        })
+
+        self.cmd('disk create -g {rg} -n {disk_name1} --size-gb 1 --sku Standard_LRS')
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --attach-data-disks {disk_name1} --admin-username rp_disk_test').get_output_in_json()
+        self.kwargs.update({
+            'vm_id': vm['id']
+        })
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}')
+        self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name}')
+        disk_restore_point = self.cmd('restore-point show --resource-group {rg} --collection-name {collection_name} --name {point_name}').get_output_in_json()
+        self.kwargs['disk_restore_point_id'] = disk_restore_point['sourceMetadata']['storageProfile']['dataDisks'][0]['diskRestorePoint']['id']
+
+        restore_disk = self.cmd('disk create --resource-group {rg} --name {disk_name2} --sku Standard_LRS --size-gb 5 --source {disk_restore_point_id}').get_output_in_json()
+        self.cmd('disk create --resource-group {rg} --name {disk_name3} --sku Standard_LRS --size-gb 5')
+        copy_disk = self.cmd('disk create --resource-group {rg} --name {disk_name4} --source {disk_name3} --sku Standard_LRS --size-gb 5').get_output_in_json()
+        copy_snapshot = self.cmd('snapshot create --resource-group {rg} --name {disk_name5} --source {disk_name3} --sku Standard_LRS --size-gb 5').get_output_in_json()
+
+        self.kwargs.update({
+            'copy_resource1_id': copy_disk['id'],
+            'copy_resource2_id': copy_snapshot['id']
+        })
+        self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-resource {copy_resource1_id} {copy_resource2_id} --source-resource-size 5 5 --source-disk-rp {disk_restore_point_id} --source-rp-size 5')
+        self.cmd('vm show -g {rg} -n {vm_name2}', checks=[
+            self.check('storageProfile.dataDisks[0].sourceResource.id', '{copy_resource1_id}'),
+            self.check('storageProfile.dataDisks[0].createOption', 'Copy'),
+            self.check('storageProfile.dataDisks[1].sourceResource.id', '{copy_resource2_id}'),
+            self.check('storageProfile.dataDisks[1].createOption', 'Copy'),
+            self.check('storageProfile.dataDisks[2].sourceResource.id', '{disk_restore_point_id}'),
+            self.check('storageProfile.dataDisks[2].createOption', 'Restore')
+        ])
+        message1 = 'Length of --source-snapshots-or-disks, --source-snapshots-or-disks-size-gb must be same.'
+        with self.assertRaisesRegex(ArgumentUsageError, message1):
+            self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-resource {copy_resource1_id} {copy_resource2_id} --source-resource-size 5 --source-disk-rp {disk_restore_point_id} --source-rp-size 5')
+
+        message2 = 'usage error: --source-snapshots-or-disks and --source-snapshots-or-disks-size-gb must be used together'
+        with self.assertRaisesRegex(ArgumentUsageError, message2):
+            self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-resource {copy_resource1_id} {copy_resource2_id}')
+
+        message3 = 'Length of --source-disk-restore-point, --source-disk-restore-point-size-gb must be same.'
+        with self.assertRaisesRegex(ArgumentUsageError, message3):
+            self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-disk-rp {disk_restore_point_id} --source-rp-size 5 5')
+
+        message4 = 'usage error: --source-disk-restore-point and --source-disk-restore-point-size-gb must be used together'
+        with self.assertRaisesRegex(ArgumentUsageError, message4):
+            self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-rp-size 5')
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_upload_')
     def test_vm_disk_upload(self, resource_group):
         self.kwargs.update({
