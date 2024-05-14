@@ -4153,9 +4153,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if enable_resilient_vm_creation is not None or enable_resilient_vm_deletion is not None:
         resiliency_policy = vmss.resiliency_policy
         if enable_resilient_vm_creation is not None:
-            resiliency_policy['resilientVMCreationPolicy'] = {'enabled': enable_resilient_vm_creation}
+            resiliency_policy.resilient_vm_creation_policy = {'enabled': enable_resilient_vm_creation}
         if enable_resilient_vm_deletion is not None:
-            resiliency_policy['resilientVMDeletionPolicy'] = {'enabled': enable_resilient_vm_deletion}
+            resiliency_policy.resilient_vm_deletion_policy = {'enabled': enable_resilient_vm_deletion}
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)

@@ -3630,13 +3630,13 @@ class VMSSCreateOptions(ScenarioTest):
         })
         self.cmd('vmss create --debug -g {rg} -n {vmss} --image {image} --vm-sku {sku} --admin-username vmtest --admin-password Test123456789# --enable-resilient-vm-creation --disable-overprovision --upgrade-policy-mode Manual --orchestration-mode Uniform')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-            self.check('resiliencyPolicy.resilientVMCreationPolicy.enabled', True),
+            self.check('resiliencyPolicy.resilientVmCreationPolicy.enabled', True),
         ])
 
         self.cmd('vmss update -g {rg} -n {vmss} --enable-resilient-vm-deletion --enable-resilient-vm-creation false')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-            self.check('resiliencyPolicy.resilientVMCreationPolicy.enabled', False),
-            self.check('resiliencyPolicy.resilientVMDeletionPolicy.enabled', True),
+            self.check('resiliencyPolicy.resilientVmCreationPolicy.enabled', False),
+            self.check('resiliencyPolicy.resilientVmDeletionPolicy.enabled', True),
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_with_max_surge')
