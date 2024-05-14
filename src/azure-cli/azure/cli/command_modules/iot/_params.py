@@ -96,8 +96,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                        arg_type=get_enum_type(AccessRightsDescription),
                        help='Access rights for the IoT Hub Device Provisioning Service. '
                             'Use space-separated list for multiple rights.')
+
+    with self.argument_context('iot dps policy create') as c:
             c.argument('primary_key', help='Primary SAS key value.')
             c.argument('secondary_key', help='Secondary SAS key value.')
+
+    with self.argument_context('iot dps policy update') as c:
+            c.argument('primary_key', help='Primary SAS key value. Set to empty string in order to regenerate a new primary key.')
+            c.argument('secondary_key', help='Secondary SAS key value. Set to empty string in order to regenerate a new secondary key.')
 
     with self.argument_context('iot dps linked-hub') as c:
         c.argument('linked_hub', options_list=['--linked-hub'], help='Host name of linked IoT Hub.')
