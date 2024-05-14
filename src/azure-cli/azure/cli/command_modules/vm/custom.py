@@ -4726,7 +4726,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                 raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
         if security_type is None:
             feature_list.append(GalleryImageFeature(name='SecurityType', value='TrustedLaunchSupported'))
-    if features is None:
+    if features is None and cmd.cli_ctx.cloud.profile == 'latest':
         feature_list = []
         feature_list.append(GalleryImageFeature(name='SecurityType', value='TrustedLaunchSupported'))
 
