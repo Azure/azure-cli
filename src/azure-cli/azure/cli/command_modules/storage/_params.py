@@ -1543,7 +1543,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['set', 'show']:
         with self.argument_context('storage container {}-permission'.format(item)) as c:
-            c.ignore('connection_string')
             c.ignore('sas_token')
 
     with self.argument_context('storage container') as c:
@@ -1585,7 +1584,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('start', type=get_datetime_type(False),
                    help='start UTC datetime (Y-m-d\'T\'H:M:S\'Z\'). Defaults to time of request.')
         c.argument('expiry', type=get_datetime_type(False), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
-        c.ignore('connection_string')
         c.ignore('sas_token')
 
     for item in ['create', 'delete', 'list', 'show', 'update']:
