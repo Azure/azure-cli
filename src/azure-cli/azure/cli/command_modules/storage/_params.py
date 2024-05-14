@@ -1543,6 +1543,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['set', 'show']:
         with self.argument_context('storage container {}-permission'.format(item)) as c:
+            c.extra('auth_mode', arg_type=get_enum_type(['key']),
+                    help='The mode in which to run the command. The legacy "key" mode will attempt to query for '
+                         'an account key if no authentication parameters for the account are provided. '
+                         'Environment variable: AZURE_STORAGE_AUTH_MODE')
             c.ignore('sas_token')
 
     with self.argument_context('storage container') as c:
@@ -1590,6 +1594,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         with self.argument_context('storage container policy {}'.format(item)) as c:
             c.extra('container_name', container_name_type, required=True)
             c.extra('lease', options_list='--lease-id', help='The container lease ID.')
+            c.extra('auth_mode', arg_type=get_enum_type(['key']),
+                    help='The mode in which to run the command. The legacy "key" mode will attempt to query for '
+                         'an account key if no authentication parameters for the account are provided. '
+                         'Environment variable: AZURE_STORAGE_AUTH_MODE')
 
     with self.argument_context('storage container generate-sas', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from .completers import get_storage_acl_name_completion_list
