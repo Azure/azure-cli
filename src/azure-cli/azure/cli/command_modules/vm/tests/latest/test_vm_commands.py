@@ -10757,6 +10757,31 @@ class ArchitectureScenarioTest(ScenarioTest):
             self.check('supportedCapabilities.architecture', 'Arm64')
         ])
 
+    @ResourceGroupPreparer(location='westus')
+    def test_sig_image_definition_default_value(self, resource_group):
+        self.kwargs.update({
+            'sig1': 'image1',
+            'gallery1': self.create_random_name('sig1', 10),
+            'gallery2': self.create_random_name("sig2", 10),
+        })
+        self.cmd('sig create -g {rg} --gallery-name {gallery1}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery1} --gallery-image-definition {sig1} '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1',
+                 checks=[
+                     self.check('features[0].name', 'SecurityType'),
+                     self.check('features[0].value', 'TrustedLaunchSupported'),
+                     self.check('hyperVGeneration', 'V2'),
+                 ])
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery2}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery2} --gallery-image-definition image --os-type linux -p publisher1 -f offer1 -s sku1 --features "IsAcceleratedNetworkSupported=true"', checks=[
+            self.check('features[0].name', 'IsAcceleratedNetworkSupported'),
+            self.check('features[0].value', 'true', False),
+            self.check('features[1].name', 'SecurityType'),
+            self.check('features[1].value', 'TrustedLaunchSupported'),
+            self.check('hyperVGeneration', 'V2'),
+        ])
+
 
 if __name__ == '__main__':
     unittest.main()
