@@ -2604,16 +2604,12 @@ def _validate_vm_vmss_create_ephemeral_placement(namespace):
 
 def _validate_vm_vmss_update_ephemeral_placement(cmd, namespace):  # pylint: disable=unused-argument
     size = getattr(namespace, 'size', None)
-    vm_sku = getattr(namespace, 'vm_sku', None)
     ephemeral_os_disk_placement = getattr(namespace, 'ephemeral_os_disk_placement', None)
     source = getattr(namespace, 'command').split()[0]
     if ephemeral_os_disk_placement:
         if source == 'vm' and not size:
             raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
                                      '--size is specified.')
-        if source == 'vmss' and not vm_sku:
-            raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
-                                     '--vm-sku is specified.')
 
 
 def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):

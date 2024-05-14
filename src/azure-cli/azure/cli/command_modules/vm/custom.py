@@ -3918,7 +3918,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 enable_osimage_notification=None, custom_data=None, enable_hibernation=None,
                 security_type=None, enable_proxy_agent=None, proxy_agent_mode=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
-                max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None, **kwargs):
+                max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None,
+                ephemeral_os_disk=None, ephemeral_os_disk_option=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4116,13 +4117,19 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         else:
             vmss.sku.name = vm_sku
 
-    if ephemeral_os_disk_placement is not None:
+    if ephemeral_os_disk_placement is not None or ephemeral_os_disk_option is not None:
         if vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings is not None:
             vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings.placement = \
                 ephemeral_os_disk_placement
+            vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings.option = \
+                ephemeral_os_disk_option
         else:
-            raise ValidationError("Please update the argument '--ephemeral-os-disk-placement' when "
-                                  "creating VMSS with the option '--ephemeral-os-disk true'")
+            DiffDiskSettings = cmd.get_models('DiffDiskSettings')
+            vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings = DiffDiskSettings(
+                option=ephemeral_os_disk_option, placement=ephemeral_os_disk_placement)
+
+    if ephemeral_os_disk is False:
+        vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings = {}
 
     if disk_controller_type is not None:
         vmss.virtual_machine_profile.storage_profile.disk_controller_type = disk_controller_type

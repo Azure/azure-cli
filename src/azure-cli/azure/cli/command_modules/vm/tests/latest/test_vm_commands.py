@@ -3767,6 +3767,40 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_ephemeral_os_disk', location='eastus2euap')
+    def test_vmss_update_ephemeral_os_disk(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('vmss', 10),
+            'vmss2': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vmss create --resource-group {rg} --name {vmss1} --image OpenLogic:CentOS:7.5:latest --ephemeral-os-disk --disable-overprovision --instance-count 2 --data-disk-sizes-gb 2 --storage-sku os=standard_lrs 0=premium_lrs --admin-username testuser1 --admin-password testPassword01! --orchestration-mode Uniform', checks=[
+            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk')
+        ])
+        self.cmd('vmss update --resource-group {rg} --name {vmss1} --ephemeral-os-disk false', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings', None)
+        ])
+        self.cmd('vmss update --resource-group {rg} --name {vmss1} --ephemeral-os-disk true --ephemeral-option local --ephemeral-placement CacheDisk ', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk')
+        ])
+        self.cmd('vmss update --resource-group {rg} --name {vmss1} --ephemeral-os-disk true --ephemeral-option local --ephemeral-placement ResourceDisk --vm-sku Standard_DS4_v2', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'ResourceDisk')
+        ])
+
+        self.cmd('vmss create --resource-group {rg} --name {vmss2} --image OpenLogic:CentOS:7.5:latest --ephemeral-os-disk --disable-overprovision --instance-count 2 --data-disk-sizes-gb 2 --storage-sku os=standard_lrs 0=premium_lrs --admin-username testuser1 --admin-password testPassword01! --orchestration-mode Uniform', checks=[
+            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk')
+        ])
+        self.cmd('vmss update --resource-group {rg} --name {vmss2} --ephemeral-os-disk false', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings', None)
+        ])
+        self.cmd('vmss update --resource-group {rg} --name {vmss2} --ephemeral-os-disk true --ephemeral-option local --ephemeral-placement ResourceDisk --vm-sku Standard_DS4_v2', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'ResourceDisk')
+        ])
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk_placement')
     def test_vmss_create_ephemeral_os_disk_placement(self, resource_group):
