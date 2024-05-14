@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor log-analytics workspace data-export",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage data export ruls for log analytics workspace.
+    """Manage data export rules for log analytics workspace.
     """
     pass
 
