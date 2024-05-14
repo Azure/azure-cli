@@ -34,8 +34,8 @@ examples:
     text: >
         az postgres flexible-server create --location northeurope --resource-group testGroup \\
           --name testserver --admin-user username --admin-password password \\
-          --sku-name Standard_B1ms --tier Burstable --public-access 153.24.26.117 --storage-size 128 \\
-          --tags "key=value" --version 13 --high-availability ZoneRedundant --zone 1 \\
+          --sku-name Standard_D2s_v3 --tier GeneralPurpose --public-access 153.24.26.117 --storage-size 128 \\
+          --tags "key=value" --version 16 --high-availability ZoneRedundant --zone 1 \\
           --standby-zone 3
   - name: >
       Create a PostgreSQL flexible server using Premium SSD v2 Disks.
@@ -821,8 +821,8 @@ helps['postgres flexible-server upgrade'] = """
 type: command
 short-summary: Upgrade the major version of a flexible server.
 examples:
-  - name: Upgrade server 'testsvr' to PostgreSQL major version 14.
-    text: az postgres flexible-server upgrade -g testgroup -n testsvr -v 14
+  - name: Upgrade server 'testsvr' to PostgreSQL major version 16.
+    text: az postgres flexible-server upgrade -g testgroup -n testsvr -v 16
 """
 
 helps['postgres flexible-server identity'] = """

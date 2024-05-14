@@ -112,7 +112,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
-        version = '12'
+        version = '16'
         storage_size = 128
         location = self.postgres_location
         sku_name = 'Standard_D2s_v3'
@@ -1033,7 +1033,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
         invalid_tier = self.create_random_name('tier', RANDOM_VARIABLE_MAX_LENGTH)
         valid_tier = 'GeneralPurpose'
         invalid_backup_retention = 40
-        version = 12
+        version = 16
         storage_size = 128
         location = self.postgres_location
         tier = 'Burstable'
@@ -1982,8 +1982,8 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
     def _test_flexible_server_upgrade_mgmt(self, database_engine, resource_group, public_access):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replica_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        current_version = '11'
-        new_version = '14'
+        current_version = '13'
+        new_version = '16'
         location = self.postgres_location
 
         create_command = '{} flexible-server create -g {} -n {} --tier GeneralPurpose --sku-name {} --location {} --version {} --yes'.format(
