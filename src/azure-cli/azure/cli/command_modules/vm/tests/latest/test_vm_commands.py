@@ -3621,6 +3621,24 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='test_vmss_with_resiliency_policy_', location='westus')
+    def test_vmss_with_resiliency_policy(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'sku': 'Standard_D1_v2',
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image {image} --vm-sku {sku} --admin-username vmtest --admin-password Test123456789# --enable-resilient-creation --disable-overprovision --upgrade-policy-mode Manual --orchestration-mode Uniform')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.resilientVmCreationPolicy.enabled', True),
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --enable-resilient-deletion --enable-resilient-creation false')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.resilientVmCreationPolicy.enabled', False),
+            self.check('resiliencyPolicy.resilientVmDeletionPolicy.enabled', True),
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_with_max_surge')
     def test_vmss_with_max_surge(self, resource_group):
         self.kwargs.update({
