@@ -1416,7 +1416,7 @@ def update_containerappjob_yaml(cmd, name, resource_group_name, file_name, from_
     yaml_containerappsjob = process_loaded_yaml(load_yaml_file(file_name))
     # check if the type is dict
     if not isinstance(yaml_containerappsjob, dict):
-        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid YAML spec.')
+        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-job-yaml for a valid YAML spec.')
 
     if not yaml_containerappsjob.get('name'):
         yaml_containerappsjob['name'] = name
@@ -1447,7 +1447,7 @@ def update_containerappjob_yaml(cmd, name, resource_group_name, file_name, from_
         deserializer = create_deserializer()
         containerappsjob_def = deserializer('ContainerAppsJob', yaml_containerappsjob)
     except DeserializationError as ex:
-        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid YAML spec.') from ex
+        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-job-yaml for a valid YAML spec.') from ex
 
     # Remove tags before converting from snake case to camel case, then re-add tags. We don't want to change the case of the tags. Need this since we're not using SDK
     tags = None
@@ -2487,6 +2487,8 @@ def update_ingress(cmd, name, resource_group_name, type=None, target_port=None, 
         ingress_def["allowInsecure"] = allow_insecure
 
     if "transport" in ingress_def and ingress_def["transport"] == "tcp":
+        # Client certificate mode can only be set for http transport.
+        ingress_def["clientCertificateMode"] = None
         if exposed_port is not None:
             ingress_def["exposedPort"] = exposed_port
     else:

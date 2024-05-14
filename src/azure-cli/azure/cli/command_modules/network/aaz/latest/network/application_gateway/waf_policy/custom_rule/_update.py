@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2022-11-01", "properties.customRules[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2023-11-01", "properties.customRules[]"],
         ]
     }
 
@@ -64,7 +64,7 @@ class Update(AAZCommand):
         _args_schema.action = AAZStrArg(
             options=["--action"],
             help="Action to take.",
-            enum={"Allow": "Allow", "Block": "Block", "Log": "Log"},
+            enum={"Allow": "Allow", "Block": "Block", "JSChallenge": "JSChallenge", "Log": "Log"},
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
@@ -150,7 +150,6 @@ class Update(AAZCommand):
         _element.values = AAZListArg(
             options=["values"],
             help="Space-separated list of values to match.",
-            nullable=True,
         )
         _element.variables = AAZListArg(
             options=["variables"],
@@ -304,7 +303,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -387,7 +386,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -477,7 +476,7 @@ class Update(AAZCommand):
 
             _elements = _builder.get(".matchConditions[]")
             if _elements is not None:
-                _elements.set_prop("matchValues", AAZListType, ".values")
+                _elements.set_prop("matchValues", AAZListType, ".values", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("matchVariables", AAZListType, ".variables", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("negationConditon", AAZBoolType, ".negate")
                 _elements.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
@@ -602,6 +601,7 @@ class _UpdateHelper:
         if cls._schema_application_gateway_header_configuration_read is not None:
             _schema.header_name = cls._schema_application_gateway_header_configuration_read.header_name
             _schema.header_value = cls._schema_application_gateway_header_configuration_read.header_value
+            _schema.header_value_matcher = cls._schema_application_gateway_header_configuration_read.header_value_matcher
             return
 
         cls._schema_application_gateway_header_configuration_read = _schema_application_gateway_header_configuration_read = AAZObjectType()
@@ -613,9 +613,20 @@ class _UpdateHelper:
         application_gateway_header_configuration_read.header_value = AAZStrType(
             serialized_name="headerValue",
         )
+        application_gateway_header_configuration_read.header_value_matcher = AAZObjectType(
+            serialized_name="headerValueMatcher",
+        )
+
+        header_value_matcher = _schema_application_gateway_header_configuration_read.header_value_matcher
+        header_value_matcher.ignore_case = AAZBoolType(
+            serialized_name="ignoreCase",
+        )
+        header_value_matcher.negate = AAZBoolType()
+        header_value_matcher.pattern = AAZStrType()
 
         _schema.header_name = cls._schema_application_gateway_header_configuration_read.header_name
         _schema.header_value = cls._schema_application_gateway_header_configuration_read.header_value
+        _schema.header_value_matcher = cls._schema_application_gateway_header_configuration_read.header_value_matcher
 
     _schema_application_gateway_ip_configuration_read = None
 
@@ -965,6 +976,10 @@ class _UpdateHelper:
         properties.private_ip_address = AAZStrType(
             serialized_name="privateIPAddress",
         )
+        properties.private_ip_address_prefix_length = AAZIntType(
+            serialized_name="privateIPAddressPrefixLength",
+            nullable=True,
+        )
         properties.private_ip_address_version = AAZStrType(
             serialized_name="privateIPAddressVersion",
         )
@@ -973,6 +988,7 @@ class _UpdateHelper:
         )
         properties.private_link_connection_properties = AAZObjectType(
             serialized_name="privateLinkConnectionProperties",
+            flags={"read_only": True},
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
@@ -1043,6 +1059,9 @@ class _UpdateHelper:
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
+        )
+        properties.sync_mode = AAZStrType(
+            serialized_name="syncMode",
         )
         properties.tunnel_interfaces = AAZListType(
             serialized_name="tunnelInterfaces",
@@ -1338,6 +1357,7 @@ class _UpdateHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_link_service = AAZObjectType(
@@ -1526,6 +1546,7 @@ class _UpdateHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_endpoint_location = AAZStrType(
@@ -1749,7 +1770,9 @@ class _UpdateHelper:
             _schema.type = cls._schema_private_endpoint_read.type
             return
 
-        cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType()
+        cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
         private_endpoint_read = _schema_private_endpoint_read
         private_endpoint_read.etag = AAZStrType(
@@ -2307,6 +2330,9 @@ class _UpdateHelper:
         properties.application_gateway_ip_configurations = AAZListType(
             serialized_name="applicationGatewayIPConfigurations",
         )
+        properties.default_outbound_access = AAZBoolType(
+            serialized_name="defaultOutboundAccess",
+        )
         properties.delegations = AAZListType()
         properties.ip_allocations = AAZListType(
             serialized_name="ipAllocations",
@@ -2360,6 +2386,9 @@ class _UpdateHelper:
         )
         properties.service_endpoints = AAZListType(
             serialized_name="serviceEndpoints",
+        )
+        properties.sharing_scope = AAZStrType(
+            serialized_name="sharingScope",
         )
 
         address_prefixes = _schema_subnet_read.properties.address_prefixes
@@ -2431,7 +2460,9 @@ class _UpdateHelper:
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
 
         private_endpoints = _schema_subnet_read.properties.private_endpoints
-        private_endpoints.Element = AAZObjectType()
+        private_endpoints.Element = AAZObjectType(
+            flags={"read_only": True},
+        )
         cls._build_schema_private_endpoint_read(private_endpoints.Element)
 
         resource_navigation_links = _schema_subnet_read.properties.resource_navigation_links
@@ -2878,6 +2909,10 @@ class _UpdateHelper:
         properties.custom_error_configurations = AAZListType(
             serialized_name="customErrorConfigurations",
         )
+        properties.default_predefined_ssl_policy = AAZStrType(
+            serialized_name="defaultPredefinedSslPolicy",
+            flags={"read_only": True},
+        )
         properties.enable_fips = AAZBoolType(
             serialized_name="enableFips",
         )
@@ -3277,6 +3312,9 @@ class _UpdateHelper:
             serialized_name="frontendPort",
         )
         cls._build_schema_sub_resource_read(properties.frontend_port)
+        properties.host_names = AAZListType(
+            serialized_name="hostNames",
+        )
         properties.protocol = AAZStrType()
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
@@ -3290,6 +3328,9 @@ class _UpdateHelper:
             serialized_name="sslProfile",
         )
         cls._build_schema_sub_resource_read(properties.ssl_profile)
+
+        host_names = _schema_web_application_firewall_policy_read.properties.application_gateways.Element.properties.listeners.Element.properties.host_names
+        host_names.Element = AAZStrType()
 
         load_distribution_policies = _schema_web_application_firewall_policy_read.properties.application_gateways.Element.properties.load_distribution_policies
         load_distribution_policies.Element = AAZObjectType()
@@ -3367,6 +3408,7 @@ class _UpdateHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_link_service_connection_state = AAZObjectType(
@@ -3707,6 +3749,7 @@ class _UpdateHelper:
 
         sku = _schema_web_application_firewall_policy_read.properties.application_gateways.Element.properties.sku
         sku.capacity = AAZIntType()
+        sku.family = AAZStrType()
         sku.name = AAZStrType()
         sku.tier = AAZStrType()
 
@@ -4062,6 +4105,7 @@ class _UpdateHelper:
         _element = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.match_conditions.Element
         _element.match_values = AAZListType(
             serialized_name="matchValues",
+            flags={"required": True},
         )
         _element.match_variables = AAZListType(
             serialized_name="matchVariables",
@@ -4209,6 +4253,9 @@ class _UpdateHelper:
         )
         policy_settings.file_upload_limit_in_mb = AAZIntType(
             serialized_name="fileUploadLimitInMb",
+        )
+        policy_settings.js_challenge_cookie_expiration_in_mins = AAZIntType(
+            serialized_name="jsChallengeCookieExpirationInMins",
         )
         policy_settings.log_scrubbing = AAZObjectType(
             serialized_name="logScrubbing",

@@ -952,12 +952,6 @@ jobs:
     matrix:
       ${{ each arch in parameters.architectures }}:
         # https://wiki.ubuntu.com/Releases
-        Bionic ${{ arch.name }}:
-          # 18.04
-          deb_system: ubuntu
-          distro: bionic
-          arch: ${{ arch.value }}
-          pool: ${{ arch.pool }}
         Focal ${{ arch.name }}:
           # 20.04
           deb_system: ubuntu
@@ -968,6 +962,13 @@ jobs:
           # 22.04
           deb_system: ubuntu
           distro: jammy
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
+
+        Noble ${{ arch.name }}:
+          # 24.04
+          deb_system: ubuntu
+          distro: noble
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
 
@@ -1029,6 +1030,11 @@ jobs:
         Jammy ${{ arch.name }}:
           deb_system: ubuntu
           distro: jammy
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
+        Noble ${{ arch.name }}:
+          deb_system: ubuntu
+          distro: noble
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
         Buster ${{ arch.name }}:
