@@ -94,6 +94,7 @@ class ImageTemplateTest(ScenarioTest):
             # self.cmd('role assignment create --assignee {identity_id} --role "{role_name}" --scope {scope}')
             self.cmd('role assignment create --assignee {identity_id} --role Contributor --scope {scope}')
 
+    @unittest.skip('The identity is genereated dynamically. Template file should contain it')
     @ResourceGroupPreparer(name_prefix='cli_test_image_builder_template_file_')
     def test_image_builder_template_file(self, resource_group):
         self._identity_role(resource_group)
@@ -657,12 +658,13 @@ class ImageTemplateTest(ScenarioTest):
                  ])
         self.cmd('image builder trigger delete --image-template-name {tmpl} -g {rg} --trigger-name {trigger} --yes')
 
+    @unittest.skip('https://github.com/Azure/azure-cli/issues/28677')
     @ResourceGroupPreparer(name_prefix='img_tmpl_identity_')
     def test_image_build_identity(self, resource_group):
         self._identity_role(resource_group)
 
         self.kwargs.update({
-            'img_src': 'CANONICAL:UBUNTUSERVER:18_04-LTS-GEN2:latest',
+            'img_src': LINUX_IMAGE_SOURCE,
             'gallery': self.create_random_name("sig_", 10),
             'sig1': 'image1',
             'tmpl': 'template01',
@@ -681,17 +683,22 @@ class ImageTemplateTest(ScenarioTest):
         # send put request using cached template object
         self.cmd('image builder update -n {tmpl} -g {rg}')
 
-        self.cmd('identity create -g {rg} -n ide2')
         ide_id = self.cmd('identity show -n {ide} -g {rg}').get_output_in_json()['id']
-        ide2_id = self.cmd('identity show -n ide2 -g {rg}').get_output_in_json()['id']
+
+        # remove identity
+        self.cmd('image builder identity remove -n {tmpl} -g {rg} --user-assigned --yes',
+                 checks=[
+                     self.check('type', 'None'),
+                     self.check('userAssignedIdentities', None)
+                 ])
 
         # assign identity
-        result = self.cmd('image builder identity assign -n {tmpl} -g {rg} --user-assigned {ide} ide2',
+        result = self.cmd('image builder identity assign -n {tmpl} -g {rg} --user-assigned {ide}',
                           checks=[
                               self.check('type', 'UserAssigned')
                           ]).get_output_in_json()
         result_identities = [x.lower() for x in result['userAssignedIdentities'].keys()]
-        self.assertEqual(result_identities, [ide_id.lower(), ide2_id.lower()])
+        self.assertEqual(result_identities, [ide_id.lower()])
 
         # show identity
         result = self.cmd('image builder identity show -n {tmpl} -g {rg}',
@@ -699,7 +706,21 @@ class ImageTemplateTest(ScenarioTest):
                               self.check('type', 'UserAssigned')
                           ]).get_output_in_json()
         result_identities = [x.lower() for x in result['userAssignedIdentities'].keys()]
-        self.assertEqual(result_identities, [ide_id.lower(), ide2_id.lower()])
+        self.assertEqual(result_identities, [ide_id.lower()])
+
+        # remove identity
+        self.cmd('image builder identity remove -n {tmpl} -g {rg} --user-assigned {ide} --yes',
+                 checks=[
+                     self.check('type', 'None'),
+                     self.check('userAssignedIdentities', None)
+                 ])
+
+        # show identity
+        self.cmd('image builder identity show -n {tmpl} -g {rg}',
+                 checks=[
+                     self.check('type', 'None'),
+                     self.check('userAssignedIdentities', None)
+                 ])
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_customizers')
     def test_image_builder_customizers(self, resource_group, resource_group_location):
