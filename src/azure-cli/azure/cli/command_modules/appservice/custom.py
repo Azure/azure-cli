@@ -4161,7 +4161,7 @@ class _FlexFunctionAppStackRuntimeHelper:
                             'isDefault': runtime_settings.get('isDefault', False),
                             'sku': sku,
                             'applicationInsights': runtime_settings['appInsightsSettings']['isSupported'],
-                            'endOfLifeDate': runtime_settings['endOfLifeDate'],
+                            'endOfLifeDate': runtime_settings.get('endOfLifeDate'),
                             'github_actions_properties': self.GithubActionsProperties(**github_actions_properties)
                         }
 
