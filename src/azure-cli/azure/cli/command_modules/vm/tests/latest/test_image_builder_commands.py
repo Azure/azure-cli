@@ -24,7 +24,7 @@ TEST_PWSH_SCRIPT_INLINE = [
     '"echo Azure-Image-Builder-Was-Here  > c:\\buildActions\\buildActionsOutput.txt"'
 ]
 
-LINUX_IMAGE_SOURCE = "Canonical:UbuntuServer:18.04-LTS:latest"
+LINUX_IMAGE_SOURCE = "Canonical:UbuntuServer:18_04-LTS-GEN2:latest"
 WIN_IMAGE_SOURCE = "MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest"
 INDEX_FILE = "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/exampleArtifacts/buildArtifacts/index.html"
 
@@ -146,7 +146,7 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} {script} --image-source {img_src} --identity {ide} --vnet {vnet} --subnet {subnet} --vm-size Standard_D1_v2 --os-disk-size 20 --defer',
                  checks=[
                      self.check('properties.source.offer', 'UbuntuServer'), self.check('properties.source.publisher', 'Canonical'),
-                     self.check('properties.source.sku', '18.04-LTS'), self.check('properties.source.version', 'latest'),
+                     self.check('properties.source.sku', '18_04-LTS-GEN2'), self.check('properties.source.version', 'latest'),
                      self.check('properties.source.type', 'PlatformImage'),
                      self.check('length(properties.customize)', 2),
 
@@ -187,7 +187,7 @@ class ImageTemplateTest(ScenarioTest):
                  checks=[
                      self.check('name', '{tmpl_01}'), self.check('provisioningState', 'Succeeded'),
                      self.check('source.offer', 'UbuntuServer'), self.check('source.publisher', 'Canonical'),
-                     self.check('source.sku', '18.04-LTS'), self.check('source.version', 'latest'),
+                     self.check('source.sku', '18_04-LTS-GEN2'), self.check('source.version', 'latest'),
                      self.check('source.type', 'PlatformImage'),
                      self.check('length(customize)', 2),
                      self.check('length(distribute)', 2),
@@ -235,7 +235,7 @@ class ImageTemplateTest(ScenarioTest):
             'loc': 'westus',
             'tmpl_01': 'template01',
             'tmpl_02': 'template02',
-            'img_src': 'CANONICAL:UBUNTUSERVER:18_04-LTS-GEN2:latest',
+            'img_src': LINUX_IMAGE_SOURCE,
             'script': TEST_SHELL_SCRIPT_URL,
             'gallery': self.create_random_name('gallery', 15),
             'image_def': 'def',
@@ -440,7 +440,7 @@ class ImageTemplateTest(ScenarioTest):
         subscription_id = self.get_subscription_id()
         self.kwargs.update({
             'tmpl_01': 'template01',
-            'img_src': 'CANONICAL:UBUNTUSERVER:18_04-LTS-GEN2:latest',
+            'img_src': LINUX_IMAGE_SOURCE,
             'script': TEST_SHELL_SCRIPT_URL,
             'sub': subscription_id,
             'gallery': self.create_random_name("sig1", 10),
@@ -513,7 +513,7 @@ class ImageTemplateTest(ScenarioTest):
 
         self.kwargs.update({
             'loc': resource_group_location,
-            'img_src': 'CANONICAL:UBUNTUSERVER:18_04-LTS-GEN2:latest',
+            'img_src': LINUX_IMAGE_SOURCE,
             'gallery': self.create_random_name("ib_sig", 10),
             'sig1': 'image1',
             'tmpl': 'template01',
@@ -566,7 +566,7 @@ class ImageTemplateTest(ScenarioTest):
         self._identity_role(resource_group)
 
         self.kwargs.update({
-            'img_src': 'CANONICAL:UBUNTUSERVER:18_04-LTS-GEN2:latest',
+            'img_src': LINUX_IMAGE_SOURCE,
             'gallery': self.create_random_name("ib_sig", 10),
             'sig1': 'image1',
             'tmpl': 'template01',
@@ -626,7 +626,7 @@ class ImageTemplateTest(ScenarioTest):
         self._identity_role(resource_group)
 
         self.kwargs.update({
-            'img_src': 'Canonical:UbuntuServer:18.04-LTS:latest',
+            'img_src': LINUX_IMAGE_SOURCE,
             'tmpl': 'template01',
             'script': TEST_SHELL_SCRIPT_URL,
             'img': 'new_img',
