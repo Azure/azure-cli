@@ -5,7 +5,7 @@
 import os
 import time
 
-from datetime import datetime
+from datetime import datetime, timezone
 from time import sleep
 from azure.cli.core.util import parse_proxy_resource_id
 from dateutil import parser
@@ -92,6 +92,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_georestore_mgmt(self, resource_group):
         self._test_flexible_server_georestore_mgmt('postgres', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_flexible_server_ssdv2_restore_mgmt(self, resource_group):
+        self._test_flexible_server_ssdv2_restore_mgmt('postgres', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -434,6 +439,52 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_config), checks=NoneCheck())
+
+
+    def _test_flexible_server_ssdv2_restore_mgmt(self, database_engine, resource_group):
+
+        location = 'eastus2euap'
+        source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        source_ssdv2_server = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-', 40)
+        target_server_ssdv2_migration = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-migrate-', 40)
+        target_server_ssdv2 = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-restore-', 40)
+        storage_type = 'PremiumV2_LRS'
+        iops = 3000
+        throughput = 125
+
+        # Restore to ssdv2
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access None --yes'.format(
+                 database_engine, resource_group, source_server, location))
+
+        # Restore to ssdv2
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --storage-type {} --iops {} --throughput {} --public-access None --yes'.format(
+                 database_engine, resource_group, source_ssdv2_server, location, storage_type, iops, throughput))
+
+        # Wait until snapshot is created
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
+
+        # Restore to ssdv2
+        restore_migration_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --storage-type {}'
+                                  .format(database_engine, resource_group, target_server_ssdv2_migration, source_server, storage_type)).get_output_in_json()
+        self.assertEqual(restore_migration_result['storage']['type'], storage_type)
+
+        # Restore ssdv2 server
+        restore_ssdv2_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
+                                  .format(database_engine, resource_group, target_server_ssdv2, source_ssdv2_server)).get_output_in_json()
+        self.assertEqual(restore_ssdv2_result['storage']['type'], storage_type)
+
+        # Delete servers
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, source_server), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, source_ssdv2_server), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_ssdv2_migration), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_ssdv2), checks=NoneCheck())
 
 
     def _test_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name=None):
