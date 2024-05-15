@@ -755,7 +755,7 @@ class SubscriptionFinder:
         # pylint: disable=too-many-statements
         all_subscriptions = []
         empty_tenants = []
-        mfa_tenants = []
+        interaction_required_tenants = []
 
         client = self._create_subscription_client(credential)
         # https://learn.microsoft.com/en-us/rest/api/resources/tenants/list
@@ -784,15 +784,12 @@ class SubscriptionFinder:
                 subscriptions = self.find_using_specific_tenant(tenant_id, specific_tenant_credential,
                                                                 tenant_id_description=t)
             except AuthenticationError as ex:
-                # because user creds went through the 'common' tenant, the error here must be
-                # tenant specific, like the account was disabled. For such errors, we will continue
-                # with other tenants.
-                msg = ex.error_msg
-                if 'AADSTS50076' in msg:
-                    # The tenant requires MFA and can't be accessed with home tenant's refresh token
-                    mfa_tenants.append(t)
-                else:
-                    logger.warning("Failed to authenticate %s due to error '%s'", t.tenant_id_name, ex)
+                # because user creds went through the 'organizations' tenant, the error here must be
+                # tenant specific, like the account was disabled, being blocked by MFA. For such errors,
+                # we continue with other tenants.
+                # As we don't check AADSTS error code, show the original error message for user's reference.
+                logger.warning("Silent authentication fails for tenant %s: %s", t.tenant_id_name, ex)
+                interaction_required_tenants.append(t)
                 continue
 
             if not subscriptions:
@@ -820,11 +817,11 @@ class SubscriptionFinder:
             for t in empty_tenants:
                 logger.warning("%s", t.tenant_id_name)
 
-        # Show warning for MFA tenants
-        if mfa_tenants:
-            logger.warning("The following tenants require Multi-Factor Authentication (MFA). "
+        # Show warning for InteractionRequired tenants
+        if interaction_required_tenants:
+            logger.warning("The following tenants require interactive authentication. "
                            "Use 'az login --tenant TENANT_ID' to explicitly login to a tenant.")
-            for t in mfa_tenants:
+            for t in interaction_required_tenants:
                 logger.warning("%s", t.tenant_id_name)
         return all_subscriptions
 
