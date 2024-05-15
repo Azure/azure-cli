@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from datetime import datetime, timedelta, timezone
 import azure.cli.command_modules.backup.custom_help as helper
+# pylint: disable=too-many-locals
 # pylint: disable=import-error
 # pylint: disable=unused-argument
 
