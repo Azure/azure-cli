@@ -25,6 +25,9 @@ MOCK_EXPIRES_ON_INT = 1630920323
 MOCK_EXPIRES_ON_DATETIME = datetime.datetime.fromtimestamp(MOCK_EXPIRES_ON_INT).strftime("%Y-%m-%d %H:%M:%S.%f")
 BEARER = 'Bearer'
 
+MOCK_TENANT_DISPLAY_NAME = 'TEST_TENANT_DISPLAY_NAME'
+MOCK_TENANT_DEFAULT_DOMAIN = 'test.onmicrosoft.com'
+
 
 class CredentialMock:
 
@@ -83,6 +86,9 @@ class TestProfile(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tenant_id = 'microsoft.com'
+        cls.tenant_display_name = MOCK_TENANT_DISPLAY_NAME
+        cls.tenant_default_domain = MOCK_TENANT_DEFAULT_DOMAIN
+
         cls.user1 = 'foo@foo.com'
         cls.user_identity_mock = {
             'username': cls.user1,
@@ -119,7 +125,24 @@ class TestProfile(unittest.TestCase):
                                          'type': 'user'
                                      }}]
 
-        # Dummy result of azure.cli.core._profile.SubscriptionFinder._find_using_specific_tenant
+        cls.subscription1_with_tenant_info_output = [{
+            'environmentName': 'AzureCloud',
+            'homeTenantId': 'microsoft.com',
+            'id': '1',
+            'isDefault': True,
+            'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
+                                 {'tenantId': '00000004-0000-0000-0000-000000000000'}],
+            'name': 'foo account',
+            'state': 'Enabled',
+            'tenantId': 'microsoft.com',
+            'tenantDisplayName': MOCK_TENANT_DISPLAY_NAME,
+            'tenantDefaultDomain': MOCK_TENANT_DEFAULT_DOMAIN,
+            'user': {
+                'name': 'foo@foo.com',
+                'type': 'user'
+            }}]
+
+        # Dummy result of azure.cli.core._profile.SubscriptionFinder.find_using_specific_tenant
         # It has home_tenant_id which is mapped from tenant_id. tenant_id now denotes token tenant.
         cls.subscription1 = SubscriptionStub(cls.id1,
                                              cls.display_name1,
@@ -127,6 +150,15 @@ class TestProfile(unittest.TestCase):
                                              tenant_id=cls.tenant_id,
                                              managed_by_tenants=cls.managed_by_tenants,
                                              home_tenant_id=cls.tenant_id)
+
+        # Dummy result of azure.cli.core._profile.SubscriptionFinder.find_using_common_tenant
+        # It also contains tenant information, compared to the result of find_using_specific_tenant
+        cls.subscription1_with_tenant_info = SubscriptionStub(
+            cls.id1, cls.display_name1, cls.state1,
+            tenant_id=cls.tenant_id, managed_by_tenants=cls.managed_by_tenants,
+            home_tenant_id=cls.tenant_id,
+            tenant_display_name=cls.tenant_display_name, tenant_default_domain=cls.tenant_default_domain)
+
         # Dummy result of azure.cli.core._profile.Profile._normalize_properties
         cls.subscription1_normalized = {
             'environmentName': 'AzureCloud',
@@ -295,7 +327,7 @@ class TestProfile(unittest.TestCase):
         # assert
         login_with_auth_code_mock.assert_called_once()
         get_user_credential_mock.assert_called()
-        self.assertEqual(self.subscription1_output, subs)
+        self.assertEqual(self.subscription1_with_tenant_info_output, subs)
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
@@ -315,7 +347,7 @@ class TestProfile(unittest.TestCase):
         subs = profile.login(True, None, None, False, None, use_device_code=True, allow_no_subscriptions=False)
 
         # assert
-        self.assertEqual(self.subscription1_output, subs)
+        self.assertEqual(self.subscription1_with_tenant_info_output, subs)
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
@@ -672,7 +704,7 @@ class TestProfile(unittest.TestCase):
         profile = Profile(cli_ctx=cli, storage=storage_mock)
         subs = profile.login(True, None, None, False, None)
 
-        self.assertEqual(self.subscription1_output, subs)
+        self.assertEqual(self.subscription1_with_tenant_info_output, subs)
 
     def test_normalize(self):
         cli = DummyCli()
@@ -1379,7 +1411,7 @@ class TestProfile(unittest.TestCase):
         all_subscriptions = finder.find_using_common_tenant(self.user1, credential)
 
         # subscriptions are correctly returned
-        self.assertEqual(all_subscriptions, [self.subscription1])
+        self.assertEqual(all_subscriptions, [self.subscription1_with_tenant_info])
 
         # With pytest, use -o log_cli=True to manually check the log
 
@@ -1420,7 +1452,8 @@ class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 
 class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, id, display_name, state, tenant_id, managed_by_tenants=[], home_tenant_id=None):  # pylint: disable=redefined-builtin
+    def __init__(self, id, display_name, state, tenant_id, managed_by_tenants=[], home_tenant_id=None,
+                 tenant_display_name=None, tenant_default_domain=None):  # pylint: disable=redefined-builtin
         policies = SubscriptionPolicies()
         policies.spending_limit = SpendingLimit.current_period_off
         policies.quota_id = 'some quota'
@@ -1434,9 +1467,14 @@ class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
         # for a _find_using_specific_tenant Subscription, tenant_id means token tenant id
         self.tenant_id = tenant_id
         self.managed_by_tenants = managed_by_tenants
-        # if home_tenant_id is None, this denotes a Subscription from SDK
+
+        # Below attributes are added by CLI. Without them, this denotes a Subscription from SDK
         if home_tenant_id:
             self.home_tenant_id = home_tenant_id
+        if tenant_display_name:
+            self.tenant_display_name = tenant_display_name
+        if tenant_default_domain:
+            self.tenant_default_domain = tenant_default_domain
 
 
 class ManagedByTenantStub(ManagedByTenant):  # pylint: disable=too-few-public-methods
@@ -1447,10 +1485,11 @@ class ManagedByTenantStub(ManagedByTenant):  # pylint: disable=too-few-public-me
 
 class TenantStub(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, tenant_id, display_name="DISPLAY_NAME"):
+    def __init__(self, tenant_id, display_name=MOCK_TENANT_DISPLAY_NAME, default_domain=MOCK_TENANT_DEFAULT_DOMAIN):
         self.tenant_id = tenant_id
         self.display_name = display_name
-        self.additional_properties = {'displayName': display_name}
+        self.default_domain = default_domain
+        self.additional_properties = {}
 
 
 class TestUtils(unittest.TestCase):

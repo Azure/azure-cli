@@ -24,10 +24,17 @@ logger = get_logger(__name__)
 _IS_DEFAULT_SUBSCRIPTION = 'isDefault'
 _SUBSCRIPTION_ID = 'id'
 _SUBSCRIPTION_NAME = 'name'
+
 # Tenant of the token which is used to list the subscription
 _TENANT_ID = 'tenantId'
-# Home tenant of the subscription, which maps to tenantId in 'Subscriptions - List REST API'
-# https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
+
+# More information on the token tenant. Maps to properties in 'Tenants - List' REST API
+# https://learn.microsoft.com/en-us/rest/api/resources/tenants/list
+_TENANT_DEFAULT_DOMAIN = 'tenantDefaultDomain'  # defaultDomain
+_TENANT_DISPLAY_NAME = 'tenantDisplayName'  # displayName
+
+# Home tenant of the subscription. Maps to tenantId in 'Subscriptions - List' REST API
+# https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/list
 _HOME_TENANT_ID = 'homeTenantId'
 _MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'
@@ -91,17 +98,27 @@ def _get_cloud_console_token_endpoint():
     return os.environ.get('MSI_ENDPOINT')
 
 
-def _attach_token_tenant(subscription, tenant):
-    """Attach the token tenant ID to the subscription as tenant_id, so that CLI knows which token should be used
+def _attach_token_tenant(subscription, tenant, tenant_id_description=None):
+    """Attach the token tenant information to the subscription. CLI uses tenant_id to know which token should be used
     to access the subscription.
 
     This function supports multiple APIs:
-      - v2016_06_01's Subscription doesn't have tenant_id
-      - v2019_11_01's Subscription has tenant_id representing the home tenant ID. It will mapped to home_tenant_id
+      - v2016_06_01: Subscription doesn't have tenant_id
+      - v2022_12_01:
+        - Subscription has tenant_id representing the home tenant ID, mapped to home_tenant_id
+        - TenantIdDescription has default_domain, mapped to tenant_default_domain
+        - TenantIdDescription has display_name, mapped to tenant_display_name
     """
     if hasattr(subscription, "tenant_id"):
         setattr(subscription, 'home_tenant_id', subscription.tenant_id)
     setattr(subscription, 'tenant_id', tenant)
+
+    # Attach tenant_default_domain, if available
+    if tenant_id_description and hasattr(tenant_id_description, "default_domain"):
+        setattr(subscription, 'tenant_default_domain', tenant_id_description.default_domain)
+    # Attach display_name, if available
+    if tenant_id_description and hasattr(tenant_id_description, "display_name"):
+        setattr(subscription, 'tenant_display_name', tenant_id_description.display_name)
 
 
 # pylint: disable=too-many-lines,too-many-instance-attributes,unused-argument
@@ -133,6 +150,7 @@ class Profile:
               use_device_code=False,
               allow_no_subscriptions=False,
               use_cert_sn_issuer=None,
+              show_progress=False,
               **kwargs):
         """
         For service principal, `password` is a dict returned by ServicePrincipalAuth.build_credential
@@ -159,6 +177,11 @@ class Profile:
                 identity.login_with_service_principal(username, password, scopes=scopes)
 
         # We have finished login. Let's find all subscriptions.
+        if show_progress:
+            message = ('Retrieving subscriptions for the selection...' if tenant else
+                       'Retrieving tenants and subscriptions for the selection...')
+            print(f"\n{message}")
+
         if user_identity:
             username = user_identity['username']
 
@@ -732,9 +755,10 @@ class SubscriptionFinder:
         # pylint: disable=too-many-statements
         all_subscriptions = []
         empty_tenants = []
-        mfa_tenants = []
+        interaction_required_tenants = []
 
         client = self._create_subscription_client(credential)
+        # https://learn.microsoft.com/en-us/rest/api/resources/tenants/list
         tenants = client.tenants.list()
 
         for t in tenants:
@@ -756,17 +780,16 @@ class SubscriptionFinder:
             specific_tenant_credential = identity.get_user_credential(username)
 
             try:
-                subscriptions = self.find_using_specific_tenant(tenant_id, specific_tenant_credential)
+
+                subscriptions = self.find_using_specific_tenant(tenant_id, specific_tenant_credential,
+                                                                tenant_id_description=t)
             except AuthenticationError as ex:
-                # because user creds went through the 'common' tenant, the error here must be
-                # tenant specific, like the account was disabled. For such errors, we will continue
-                # with other tenants.
-                msg = ex.error_msg
-                if 'AADSTS50076' in msg:
-                    # The tenant requires MFA and can't be accessed with home tenant's refresh token
-                    mfa_tenants.append(t)
-                else:
-                    logger.warning("Failed to authenticate %s due to error '%s'", t.tenant_id_name, ex)
+                # because user creds went through the 'organizations' tenant, the error here must be
+                # tenant specific, like the account was disabled, being blocked by MFA. For such errors,
+                # we continue with other tenants.
+                # As we don't check AADSTS error code, show the original error message for user's reference.
+                logger.warning("Silent authentication fails for tenant %s: %s", t.tenant_id_name, ex)
+                interaction_required_tenants.append(t)
                 continue
 
             if not subscriptions:
@@ -794,20 +817,25 @@ class SubscriptionFinder:
             for t in empty_tenants:
                 logger.warning("%s", t.tenant_id_name)
 
-        # Show warning for MFA tenants
-        if mfa_tenants:
-            logger.warning("The following tenants require Multi-Factor Authentication (MFA). "
+        # Show warning for InteractionRequired tenants
+        if interaction_required_tenants:
+            logger.warning("The following tenants require interactive authentication. "
                            "Use 'az login --tenant TENANT_ID' to explicitly login to a tenant.")
-            for t in mfa_tenants:
+            for t in interaction_required_tenants:
                 logger.warning("%s", t.tenant_id_name)
         return all_subscriptions
 
-    def find_using_specific_tenant(self, tenant, credential):
+    def find_using_specific_tenant(self, tenant, credential, tenant_id_description=None):
+        """List subscriptions that can be accessed from a specific tenant.
+        If called from find_using_common_tenant, tenant_id_description is TenantIdDescription retrieved from
+        'Tenants - List' REST API. If directly called, tenant_id_description is None.
+        """
         client = self._create_subscription_client(credential)
+        # https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/list
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
         for s in subscriptions:
-            _attach_token_tenant(s, tenant)
+            _attach_token_tenant(s, tenant, tenant_id_description=tenant_id_description)
             all_subscriptions.append(s)
         self.tenants.append(tenant)
         return all_subscriptions
@@ -840,6 +868,11 @@ def _transform_subscription_for_multiapi(s, s_dict):
     """
     if hasattr(s, 'home_tenant_id'):
         s_dict[_HOME_TENANT_ID] = s.home_tenant_id
+    if hasattr(s, 'tenant_default_domain'):
+        s_dict[_TENANT_DEFAULT_DOMAIN] = s.tenant_default_domain
+    if hasattr(s, 'tenant_display_name'):
+        s_dict[_TENANT_DISPLAY_NAME] = s.tenant_display_name
+
     if hasattr(s, 'managed_by_tenants'):
         if s.managed_by_tenants is None:
             s_dict[_MANAGED_BY_TENANTS] = None

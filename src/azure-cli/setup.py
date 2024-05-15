@@ -146,6 +146,9 @@ DEPENDENCIES = [
     'semver==2.13.0',
     'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
+    # Even though knack already depends on tabulate, profile module directly uses it for interactive subscription
+    # selection
+    'tabulate',
     'urllib3',
     'websocket-client~=1.3.1',
     'xmltodict~=0.12'
