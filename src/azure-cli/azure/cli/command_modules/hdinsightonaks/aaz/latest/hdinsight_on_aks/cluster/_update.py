@@ -803,9 +803,6 @@ class Update(AAZCommand):
             options=["--flink-storage-uri"],
             arg_group="FlinkProfile",
             help="Storage account uri which is used for savepoint and checkpoint state.",
-            fmt=AAZStrArgFormat(
-                pattern="^(\w{4,5})://(.*)@(.*).\b(blob|dfs)\b.*$",
-            ),
         )
         _args_schema.flink_storage_key = AAZStrArg(
             options=["--flink-storage-key"],
