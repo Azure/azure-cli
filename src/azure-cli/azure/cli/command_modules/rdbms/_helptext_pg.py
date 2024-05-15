@@ -586,6 +586,12 @@ examples:
     text: >
       az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
         --migration-name testmigration --properties "migrationConfig.json"
+  - name: >
+      Start a private endpoint enabled migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file.
+      Use --migrationRuntimeResourceId to define the migration runtime server that is responsible for migrating data between source and target server.
+    text: >
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration
+      --properties "migrationConfig.json" --migrationRuntimeResourceId /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testsourcemigration
 """
 
 helps['postgres flexible-server migration list'] = """

@@ -1,0 +1,1304 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_resiliency_policy_000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001","name":"test_vmss_with_resiliency_policy_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_vmss_with_resiliency_policy","date":"2024-05-14T02:26:33Z","module":"vm"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '412'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:26:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 0285C518D3BC4FA8B49FD035EECBEED5 Ref B: MAA201060516023 Ref C: 2024-05-14T02:26:40Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions?$top=1&$orderby=name%20desc&api-version=2024-03-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"14393.6897.240406\"\
+        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2016-Datacenter/Versions/14393.6897.240406\"\
+        \r\n  }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '310'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:26:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43995
+      x-msedge-ref:
+      - 'Ref A: 7801CCF71F2A48A6B1C8A8A695A1235F Ref B: MAA201060513031 Ref C: 2024-05-14T02:26:40Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions/14393.6897.240406?api-version=2024-03-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n \
+        \   \"architecture\": \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n\
+        \    \"disallowed\": {\r\n      \"vmDiskType\": \"None\"\r\n    },\r\n   \
+        \ \"automaticOSUpgradeProperties\": {\r\n      \"automaticOSUpgradeSupported\"\
+        : true\r\n    },\r\n    \"imageDeprecationStatus\": {\r\n      \"imageState\"\
+        : \"Active\"\r\n    },\r\n    \"features\": [\r\n      {\r\n        \"name\"\
+        : \"IsAcceleratedNetworkSupported\",\r\n        \"value\": \"True\"\r\n  \
+        \    },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n     \
+        \   \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\"\
+        ,\r\n        \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\"\
+        : {\r\n      \"operatingSystem\": \"Windows\",\r\n      \"sizeInBytes\": 136367309312\r\
+        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"westus\"\
+        ,\r\n  \"name\": \"14393.6897.240406\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2016-Datacenter/Versions/14393.6897.240406\"\
+        \r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1047'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:26:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73995
+      x-msedge-ref:
+      - 'Ref A: 5D98E969596F444E8C296AF1A37D7AE6 Ref B: MAA201060516023 Ref C: 2024-05-14T02:26:41Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/virtualNetworks?api-version=2022-01-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:26:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 187C8AABC6044CF5916E58FE3D52E982 Ref B: MAA201060516045 Ref C: 2024-05-14T02:26:43Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions?$top=1&$orderby=name%20desc&api-version=2024-03-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"14393.6897.240406\"\
+        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2016-Datacenter/Versions/14393.6897.240406\"\
+        \r\n  }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '310'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:26:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15998,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43994
+      x-msedge-ref:
+      - 'Ref A: AF4259A0183740E2B9D7932D25F85A70 Ref B: MAA201060513035 Ref C: 2024-05-14T02:26:44Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions/14393.6897.240406?api-version=2024-03-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n \
+        \   \"architecture\": \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n\
+        \    \"disallowed\": {\r\n      \"vmDiskType\": \"None\"\r\n    },\r\n   \
+        \ \"automaticOSUpgradeProperties\": {\r\n      \"automaticOSUpgradeSupported\"\
+        : true\r\n    },\r\n    \"imageDeprecationStatus\": {\r\n      \"imageState\"\
+        : \"Active\"\r\n    },\r\n    \"features\": [\r\n      {\r\n        \"name\"\
+        : \"IsAcceleratedNetworkSupported\",\r\n        \"value\": \"True\"\r\n  \
+        \    },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n     \
+        \   \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\"\
+        ,\r\n        \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\"\
+        : {\r\n      \"operatingSystem\": \"Windows\",\r\n      \"sizeInBytes\": 136367309312\r\
+        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"westus\"\
+        ,\r\n  \"name\": \"14393.6897.240406\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2016-Datacenter/Versions/14393.6897.240406\"\
+        \r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1047'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:26:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12998,Microsoft.Compute/GetVMImageFromLocation30Min;73994
+      x-msedge-ref:
+      - 'Ref A: 5D05B849FDC5476AB3941251744E1AD3 Ref B: MAA201060514037 Ref C: 2024-05-14T02:26:45Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions?$top=1&$orderby=name%20desc&api-version=2024-03-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"14393.6897.240406\"\
+        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2016-Datacenter/Versions/14393.6897.240406\"\
+        \r\n  }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '310'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:26:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15997,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43993
+      x-msedge-ref:
+      - 'Ref A: 2FA7ADA502E249D29AF27A8E477F9886 Ref B: MAA201060513023 Ref C: 2024-05-14T02:26:46Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions/14393.6897.240406?api-version=2024-03-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n \
+        \   \"architecture\": \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n\
+        \    \"disallowed\": {\r\n      \"vmDiskType\": \"None\"\r\n    },\r\n   \
+        \ \"automaticOSUpgradeProperties\": {\r\n      \"automaticOSUpgradeSupported\"\
+        : true\r\n    },\r\n    \"imageDeprecationStatus\": {\r\n      \"imageState\"\
+        : \"Active\"\r\n    },\r\n    \"features\": [\r\n      {\r\n        \"name\"\
+        : \"IsAcceleratedNetworkSupported\",\r\n        \"value\": \"True\"\r\n  \
+        \    },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n     \
+        \   \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\"\
+        ,\r\n        \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\"\
+        : {\r\n      \"operatingSystem\": \"Windows\",\r\n      \"sizeInBytes\": 136367309312\r\
+        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"westus\"\
+        ,\r\n  \"name\": \"14393.6897.240406\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2016-Datacenter/Versions/14393.6897.240406\"\
+        \r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1047'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:26:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12997,Microsoft.Compute/GetVMImageFromLocation30Min;73993
+      x-msedge-ref:
+      - 'Ref A: 1F2778EEBC1D4BA1913F5D7D5BBD01F5 Ref B: MAA201060516035 Ref C: 2024-05-14T02:26:47Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"adminPassword": {"type": "securestring",
+      "metadata": {"description": "Secure adminPassword"}}}, "variables": {}, "resources":
+      [{"name": "vmss000002VNET", "type": "Microsoft.Network/virtualNetworks", "location":
+      "westus", "apiVersion": "2015-06-15", "dependsOn": [], "tags": {}, "properties":
+      {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}, "subnets": [{"name":
+      "vmss000002Subnet", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}, {"apiVersion":
+      "2022-01-01", "type": "Microsoft.Network/publicIPAddresses", "name": "vmss000002LBPublicIP",
+      "location": "westus", "tags": {}, "dependsOn": [], "properties": {"publicIPAllocationMethod":
+      "Static"}, "sku": {"name": "Standard"}}, {"type": "Microsoft.Network/loadBalancers",
+      "name": "vmss000002LB", "location": "westus", "tags": {}, "apiVersion": "2022-01-01",
+      "dependsOn": ["Microsoft.Network/virtualNetworks/vmss000002VNET", "Microsoft.Network/publicIpAddresses/vmss000002LBPublicIP"],
+      "properties": {"backendAddressPools": [{"name": "vmss000002LBBEPool"}], "frontendIPConfigurations":
+      [{"name": "loadBalancerFrontEnd", "properties": {"publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/publicIPAddresses/vmss000002LBPublicIP"}}}],
+      "loadBalancingRules": [{"name": "LBRule", "properties": {"frontendIPConfiguration":
+      {"id": "[concat(resourceId(''Microsoft.Network/loadBalancers'', ''vmss000002LB''),
+      ''/frontendIPConfigurations/'', ''loadBalancerFrontEnd'')]"}, "backendAddressPool":
+      {"id": "[concat(resourceId(''Microsoft.Network/loadBalancers'', ''vmss000002LB''),
+      ''/backendAddressPools/'', ''vmss000002LBBEPool'')]"}, "protocol": "tcp", "frontendPort":
+      80, "backendPort": 80, "enableFloatingIP": false, "idleTimeoutInMinutes": 5}}]},
+      "sku": {"name": "Standard"}}, {"type": "Microsoft.Network/networkSecurityGroups",
+      "name": "vmss000002NSG", "apiVersion": "2015-06-15", "location": "westus", "tags":
+      {}, "dependsOn": [], "properties": {"securityRules": [{"name": "default-allow-ssh",
+      "properties": {"protocol": "Tcp", "sourcePortRange": "*", "destinationPortRange":
+      "22", "sourceAddressPrefix": "*", "destinationAddressPrefix": "*", "access":
+      "Allow", "priority": 1000, "direction": "Inbound"}}]}}, {"type": "Microsoft.Network/loadBalancers/inboundNatRules",
+      "apiVersion": "2022-01-01", "name": "vmss000002LB/NatRule", "location": "westus",
+      "properties": {"frontendIPConfiguration": {"id": "[concat(resourceId(''Microsoft.Network/loadBalancers'',
+      ''vmss000002LB''), ''/frontendIPConfigurations/'', ''loadBalancerFrontEnd'')]"},
+      "backendAddressPool": {"id": "[concat(resourceId(''Microsoft.Network/loadBalancers'',
+      ''vmss000002LB''), ''/backendAddressPools/'', ''vmss000002LBBEPool'')]"}, "backendPort":
+      3389, "frontendPortRangeStart": "50000", "frontendPortRangeEnd": "50119", "protocol":
+      "tcp", "idleTimeoutInMinutes": 5}, "dependsOn": ["[concat(''Microsoft.Network/loadBalancers/'',
+      ''vmss000002LB'')]"]}, {"type": "Microsoft.Compute/virtualMachineScaleSets",
+      "name": "vmss000002", "location": "westus", "tags": {}, "apiVersion": "2024-03-01",
+      "dependsOn": ["Microsoft.Network/virtualNetworks/vmss000002VNET", "Microsoft.Network/loadBalancers/vmss000002LB",
+      "Microsoft.Network/networkSecurityGroups/vmss000002NSG"], "properties": {"overprovision":
+      false, "upgradePolicy": {"mode": "Manual", "rollingUpgradePolicy": {}, "automaticOSUpgradePolicy":
+      {}}, "singlePlacementGroup": null, "resiliencyPolicy": {"resilientVMCreationPolicy":
+      {"enabled": true}}, "virtualMachineProfile": {"storageProfile": {"osDisk": {"createOption":
+      "FromImage", "caching": "ReadWrite", "managedDisk": {"storageAccountType": null}},
+      "imageReference": {"publisher": "MicrosoftWindowsServer", "offer": "WindowsServer",
+      "sku": "2016-Datacenter", "version": "latest"}}, "osProfile": {"computerNamePrefix":
+      "vmsslfe14", "adminUsername": "vmtest", "adminPassword": "[parameters(''adminPassword'')]"},
+      "networkProfile": {"networkInterfaceConfigurations": [{"name": "vmsslfe14Nic",
+      "properties": {"ipConfigurations": [{"name": "vmsslfe14IPConfig", "properties":
+      {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet"},
+      "loadBalancerBackendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB/backendAddressPools/vmss000002LBBEPool"}]}}],
+      "networkSecurityGroup": {"id": "[resourceId(''Microsoft.Network/networkSecurityGroups'',
+      ''vmss000002NSG'')]"}, "primary": "true"}}]}}, "orchestrationMode": "Uniform"},
+      "sku": {"name": "Standard_D1_v2", "capacity": 2}}], "outputs": {"VMSS": {"type":
+      "object", "value": "[reference(resourceId(''Microsoft.Compute/virtualMachineScaleSets'',
+      ''vmss000002''),providers(''Microsoft.Compute'', ''virtualMachineScaleSets'').apiVersions[0])]"}}},
+      "parameters": {"adminPassword": {"value": "Test123456789#"}}, "mode": "incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '5203'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Resources/deployments/vmss_deploy_5fW82G65K5Y1NieQeC4DBwUWW0tbReRr","name":"vmss_deploy_5fW82G65K5Y1NieQeC4DBwUWW0tbReRr","type":"Microsoft.Resources/deployments","properties":{"templateHash":"9891493229975123615","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2024-05-14T02:26:59.4429321Z","duration":"PT0.0002014S","correlationId":"4101eea7-ab6e-45fb-8cf3-e728414f1f85","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"loadBalancers","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"loadBalancers/inboundNatRules","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss000002VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/publicIPAddresses/vmss000002LBPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vmss000002LBPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss000002LB"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss000002LB"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB/inboundNatRules/NatRule","resourceType":"Microsoft.Network/loadBalancers/inboundNatRules","resourceName":"vmss000002LB/NatRule"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss000002VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss000002LB"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/networkSecurityGroups/vmss000002NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vmss000002NSG"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss000002"}]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Resources/deployments/vmss_deploy_5fW82G65K5Y1NieQeC4DBwUWW0tbReRr/operationStatuses/08584859532695835606?api-version=2022-09-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '3505'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:27:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: EDEDC3343172433AB67B8251914D5A8F Ref B: MAA201060515029 Ref C: 2024-05-14T02:26:49Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584859532695835606?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:27:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 2D7D25C68C6E417789BB2F0B105E77FF Ref B: MAA201060515029 Ref C: 2024-05-14T02:27:02Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584859532695835606?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:27:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: F518E3D49B4B44B6B2A654911C6331E1 Ref B: MAA201060515029 Ref C: 2024-05-14T02:27:33Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584859532695835606?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:28:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: C3CFB073E0C54FD3B4090B9223E10267 Ref B: MAA201060515029 Ref C: 2024-05-14T02:28:05Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584859532695835606?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:28:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 21C1AA73D5694B36A5F71104917523D8 Ref B: MAA201060515029 Ref C: 2024-05-14T02:28:37Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584859532695835606?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:29:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 19D6ABCC99464437ABD72A0CD15D5DF0 Ref B: MAA201060515029 Ref C: 2024-05-14T02:29:08Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --admin-username --admin-password --enable-resilient-creation
+        --disable-overprovision --upgrade-policy-mode --orchestration-mode
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Resources/deployments/vmss_deploy_5fW82G65K5Y1NieQeC4DBwUWW0tbReRr","name":"vmss_deploy_5fW82G65K5Y1NieQeC4DBwUWW0tbReRr","type":"Microsoft.Resources/deployments","properties":{"templateHash":"9891493229975123615","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2024-05-14T02:29:02.661593Z","duration":"PT2M3.2188623S","correlationId":"4101eea7-ab6e-45fb-8cf3-e728414f1f85","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"loadBalancers","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"loadBalancers/inboundNatRules","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss000002VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/publicIPAddresses/vmss000002LBPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vmss000002LBPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss000002LB"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss000002LB"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB/inboundNatRules/NatRule","resourceType":"Microsoft.Network/loadBalancers/inboundNatRules","resourceName":"vmss000002LB/NatRule"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss000002VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss000002LB"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/networkSecurityGroups/vmss000002NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vmss000002NSG"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss000002"}],"outputs":{"vmss":{"type":"Object","value":{"singlePlacementGroup":true,"orchestrationMode":"Uniform","upgradePolicy":{"mode":"Manual","rollingUpgradePolicy":{"maxBatchInstancePercent":20,"maxUnhealthyInstancePercent":20,"maxUnhealthyUpgradedInstancePercent":20,"pauseTimeBetweenBatches":"PT0S","maxSurge":false,"rollbackFailedInstancesOnPolicyBreach":false},"automaticOSUpgradePolicy":{"enableAutomaticOSUpgrade":false,"useRollingUpgradePolicy":false,"disableAutomaticRollback":false}},"resiliencyPolicy":{"resilientVMCreationPolicy":{"enabled":true}},"virtualMachineProfile":{"osProfile":{"computerNamePrefix":"vmsslfe14","adminUsername":"vmtest","windowsConfiguration":{"provisionVMAgent":true,"enableAutomaticUpdates":true},"secrets":[],"allowExtensionOperations":true,"requireGuestProvisionSignal":true},"storageProfile":{"osDisk":{"osType":"Windows","createOption":"FromImage","caching":"ReadWrite","managedDisk":{"storageAccountType":"Standard_LRS"},"diskSizeGB":127},"imageReference":{"publisher":"MicrosoftWindowsServer","offer":"WindowsServer","sku":"2016-Datacenter","version":"latest"}},"networkProfile":{"networkInterfaceConfigurations":[{"name":"vmsslfe14Nic","properties":{"primary":true,"disableTcpStateTracking":false,"networkSecurityGroup":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/networkSecurityGroups/vmss000002NSG"},"dnsSettings":{"dnsServers":[]},"enableIPForwarding":false,"ipConfigurations":[{"name":"vmsslfe14IPConfig","properties":{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet"},"privateIPAddressVersion":"IPv4","loadBalancerBackendAddressPools":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB/backendAddressPools/vmss000002LBBEPool"}]}}]}}]},"timeCreated":"2024-05-14T02:27:16.757783+00:00"},"provisioningState":"Succeeded","overprovision":false,"doNotRunExtensionsOnOverprovisionedVMs":false,"uniqueId":"5eee88ca-521b-4686-8cbb-4c1392a01f84","platformFaultDomainCount":5,"timeCreated":"2024-05-14T02:27:16.757783+00:00"}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB/inboundNatRules/NatRule"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/networkSecurityGroups/vmss000002NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/publicIPAddresses/vmss000002LBPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6946'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:29:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 334F180851CB492EAA72DF2338720CF1 Ref B: MAA201060515029 Ref C: 2024-05-14T02:29:10Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002?api-version=2024-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vmss000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\"\
+        : \"westus\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\"\
+        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"singlePlacementGroup\": true,\r\n    \"orchestrationMode\": \"\
+        Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\": \"Manual\",\r\n\
+        \      \"rollingUpgradePolicy\": {\r\n        \"maxBatchInstancePercent\"\
+        : 20,\r\n        \"maxUnhealthyInstancePercent\": 20,\r\n        \"maxUnhealthyUpgradedInstancePercent\"\
+        : 20,\r\n        \"pauseTimeBetweenBatches\": \"PT0S\",\r\n        \"maxSurge\"\
+        : false,\r\n        \"rollbackFailedInstancesOnPolicyBreach\": false\r\n \
+        \     },\r\n      \"automaticOSUpgradePolicy\": {\r\n        \"enableAutomaticOSUpgrade\"\
+        : false,\r\n        \"useRollingUpgradePolicy\": false,\r\n        \"disableAutomaticRollback\"\
+        : false\r\n      }\r\n    },\r\n    \"resiliencyPolicy\": {\r\n      \"resilientVMCreationPolicy\"\
+        : {\r\n        \"enabled\": true\r\n      }\r\n    },\r\n    \"virtualMachineProfile\"\
+        : {\r\n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmsslfe14\"\
+        ,\r\n        \"adminUsername\": \"vmtest\",\r\n        \"windowsConfiguration\"\
+        : {\r\n          \"provisionVMAgent\": true,\r\n          \"enableAutomaticUpdates\"\
+        : true\r\n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\"\
+        : true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n \
+        \     \"storageProfile\": {\r\n        \"osDisk\": {\r\n          \"osType\"\
+        : \"Windows\",\r\n          \"createOption\": \"FromImage\",\r\n         \
+        \ \"caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\n        \
+        \    \"storageAccountType\": \"Standard_LRS\"\r\n          },\r\n        \
+        \  \"diskSizeGB\": 127\r\n        },\r\n        \"imageReference\": {\r\n\
+        \          \"publisher\": \"MicrosoftWindowsServer\",\r\n          \"offer\"\
+        : \"WindowsServer\",\r\n          \"sku\": \"2016-Datacenter\",\r\n      \
+        \    \"version\": \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\"\
+        : {\"networkInterfaceConfigurations\":[{\"name\":\"vmsslfe14Nic\",\"properties\"\
+        :{\"primary\":true,\"disableTcpStateTracking\":false,\"networkSecurityGroup\"\
+        :{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/networkSecurityGroups/vmss000002NSG\"\
+        },\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\"\
+        :[{\"name\":\"vmsslfe14IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet\"\
+        },\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB/backendAddressPools/vmss000002LBBEPool\"\
+        }]}}]}}]},\r\n      \"timeCreated\": \"2024-05-14T02:27:16.757783+00:00\"\r\
+        \n    },\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"overprovision\"\
+        : false,\r\n    \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n   \
+        \ \"uniqueId\": \"5eee88ca-521b-4686-8cbb-4c1392a01f84\",\r\n    \"platformFaultDomainCount\"\
+        : 5,\r\n    \"timeCreated\": \"2024-05-14T02:27:16.757783+00:00\"\r\n  }\r\
+        \n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3317'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:29:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2396,Microsoft.Compute/GetVMScaleSetResource;32
+      x-msedge-ref:
+      - 'Ref A: E7693277F4784659969468AB3B1477DC Ref B: MAA201060514019 Ref C: 2024-05-14T02:29:13Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --enable-resilient-deletion --enable-resilient-creation
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002?api-version=2024-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vmss000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\"\
+        : \"westus\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\"\
+        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"singlePlacementGroup\": true,\r\n    \"orchestrationMode\": \"\
+        Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\": \"Manual\",\r\n\
+        \      \"rollingUpgradePolicy\": {\r\n        \"maxBatchInstancePercent\"\
+        : 20,\r\n        \"maxUnhealthyInstancePercent\": 20,\r\n        \"maxUnhealthyUpgradedInstancePercent\"\
+        : 20,\r\n        \"pauseTimeBetweenBatches\": \"PT0S\",\r\n        \"maxSurge\"\
+        : false,\r\n        \"rollbackFailedInstancesOnPolicyBreach\": false\r\n \
+        \     },\r\n      \"automaticOSUpgradePolicy\": {\r\n        \"enableAutomaticOSUpgrade\"\
+        : false,\r\n        \"useRollingUpgradePolicy\": false,\r\n        \"disableAutomaticRollback\"\
+        : false\r\n      }\r\n    },\r\n    \"resiliencyPolicy\": {\r\n      \"resilientVMCreationPolicy\"\
+        : {\r\n        \"enabled\": true\r\n      }\r\n    },\r\n    \"virtualMachineProfile\"\
+        : {\r\n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmsslfe14\"\
+        ,\r\n        \"adminUsername\": \"vmtest\",\r\n        \"windowsConfiguration\"\
+        : {\r\n          \"provisionVMAgent\": true,\r\n          \"enableAutomaticUpdates\"\
+        : true\r\n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\"\
+        : true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n \
+        \     \"storageProfile\": {\r\n        \"osDisk\": {\r\n          \"osType\"\
+        : \"Windows\",\r\n          \"createOption\": \"FromImage\",\r\n         \
+        \ \"caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\n        \
+        \    \"storageAccountType\": \"Standard_LRS\"\r\n          },\r\n        \
+        \  \"diskSizeGB\": 127\r\n        },\r\n        \"imageReference\": {\r\n\
+        \          \"publisher\": \"MicrosoftWindowsServer\",\r\n          \"offer\"\
+        : \"WindowsServer\",\r\n          \"sku\": \"2016-Datacenter\",\r\n      \
+        \    \"version\": \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\"\
+        : {\"networkInterfaceConfigurations\":[{\"name\":\"vmsslfe14Nic\",\"properties\"\
+        :{\"primary\":true,\"disableTcpStateTracking\":false,\"networkSecurityGroup\"\
+        :{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/networkSecurityGroups/vmss000002NSG\"\
+        },\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\"\
+        :[{\"name\":\"vmsslfe14IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet\"\
+        },\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB/backendAddressPools/vmss000002LBBEPool\"\
+        }]}}]}}]},\r\n      \"timeCreated\": \"2024-05-14T02:27:16.757783+00:00\"\r\
+        \n    },\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"overprovision\"\
+        : false,\r\n    \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n   \
+        \ \"uniqueId\": \"5eee88ca-521b-4686-8cbb-4c1392a01f84\",\r\n    \"platformFaultDomainCount\"\
+        : 5,\r\n    \"timeCreated\": \"2024-05-14T02:27:16.757783+00:00\"\r\n  }\r\
+        \n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3317'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:29:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2395,Microsoft.Compute/GetVMScaleSetResource;31
+      x-msedge-ref:
+      - 'Ref A: B4F774DDCB3048B08BE589E0FA2A9554 Ref B: MAA201060513029 Ref C: 2024-05-14T02:29:14Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"location": "westus", "tags": {}, "sku": {"name": "Standard_D1_v2", "tier":
+      "Standard", "capacity": 2}, "properties": {"upgradePolicy": {"mode": "Manual",
+      "rollingUpgradePolicy": {"maxBatchInstancePercent": 20, "maxUnhealthyInstancePercent":
+      20, "maxUnhealthyUpgradedInstancePercent": 20, "pauseTimeBetweenBatches": "PT0S",
+      "rollbackFailedInstancesOnPolicyBreach": false, "maxSurge": false}, "automaticOSUpgradePolicy":
+      {"enableAutomaticOSUpgrade": false, "disableAutomaticRollback": false, "useRollingUpgradePolicy":
+      false}}, "virtualMachineProfile": {"osProfile": {"computerNamePrefix": "vmsslfe14",
+      "adminUsername": "vmtest", "windowsConfiguration": {"provisionVMAgent": true,
+      "enableAutomaticUpdates": true}, "secrets": [], "allowExtensionOperations":
+      true, "requireGuestProvisionSignal": true}, "storageProfile": {"osDisk": {"caching":
+      "ReadWrite", "createOption": "FromImage", "diskSizeGB": 127, "osType": "Windows",
+      "managedDisk": {"storageAccountType": "Standard_LRS"}}}, "networkProfile": {"networkInterfaceConfigurations":
+      [{"name": "vmsslfe14Nic", "properties": {"primary": true, "disableTcpStateTracking":
+      false, "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/networkSecurityGroups/vmss000002NSG"},
+      "dnsSettings": {"dnsServers": []}, "ipConfigurations": [{"name": "vmsslfe14IPConfig",
+      "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet"},
+      "privateIPAddressVersion": "IPv4", "loadBalancerBackendAddressPools": [{"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB/backendAddressPools/vmss000002LBBEPool"}]}}],
+      "enableIPForwarding": false}}]}}, "overprovision": false, "doNotRunExtensionsOnOverprovisionedVMs":
+      false, "singlePlacementGroup": true, "platformFaultDomainCount": 5, "orchestrationMode":
+      "Uniform", "resiliencyPolicy": {"resilientVMCreationPolicy": {"enabled": false},
+      "resilientVMDeletionPolicy": {"enabled": true}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2251'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --enable-resilient-deletion --enable-resilient-creation
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002?api-version=2024-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vmss000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\"\
+        : \"westus\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\"\
+        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"singlePlacementGroup\": true,\r\n    \"orchestrationMode\": \"\
+        Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\": \"Manual\",\r\n\
+        \      \"rollingUpgradePolicy\": {\r\n        \"maxBatchInstancePercent\"\
+        : 20,\r\n        \"maxUnhealthyInstancePercent\": 20,\r\n        \"maxUnhealthyUpgradedInstancePercent\"\
+        : 20,\r\n        \"pauseTimeBetweenBatches\": \"PT0S\",\r\n        \"maxSurge\"\
+        : false,\r\n        \"rollbackFailedInstancesOnPolicyBreach\": false\r\n \
+        \     },\r\n      \"automaticOSUpgradePolicy\": {\r\n        \"enableAutomaticOSUpgrade\"\
+        : false,\r\n        \"useRollingUpgradePolicy\": false,\r\n        \"disableAutomaticRollback\"\
+        : false\r\n      }\r\n    },\r\n    \"resiliencyPolicy\": {\r\n      \"resilientVMCreationPolicy\"\
+        : {\r\n        \"enabled\": false\r\n      },\r\n      \"resilientVMDeletionPolicy\"\
+        : {\r\n        \"enabled\": true\r\n      }\r\n    },\r\n    \"virtualMachineProfile\"\
+        : {\r\n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmsslfe14\"\
+        ,\r\n        \"adminUsername\": \"vmtest\",\r\n        \"windowsConfiguration\"\
+        : {\r\n          \"provisionVMAgent\": true,\r\n          \"enableAutomaticUpdates\"\
+        : true\r\n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\"\
+        : true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n \
+        \     \"storageProfile\": {\r\n        \"osDisk\": {\r\n          \"osType\"\
+        : \"Windows\",\r\n          \"createOption\": \"FromImage\",\r\n         \
+        \ \"caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\n        \
+        \    \"storageAccountType\": \"Standard_LRS\"\r\n          },\r\n        \
+        \  \"diskSizeGB\": 127\r\n        },\r\n        \"imageReference\": {\r\n\
+        \          \"publisher\": \"MicrosoftWindowsServer\",\r\n          \"offer\"\
+        : \"WindowsServer\",\r\n          \"sku\": \"2016-Datacenter\",\r\n      \
+        \    \"version\": \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\"\
+        : {\"networkInterfaceConfigurations\":[{\"name\":\"vmsslfe14Nic\",\"properties\"\
+        :{\"primary\":true,\"disableTcpStateTracking\":false,\"networkSecurityGroup\"\
+        :{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/networkSecurityGroups/vmss000002NSG\"\
+        },\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\"\
+        :[{\"name\":\"vmsslfe14IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet\"\
+        },\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB/backendAddressPools/vmss000002LBBEPool\"\
+        }]}}]}}]},\r\n      \"timeCreated\": \"2024-05-14T02:27:16.757783+00:00\"\r\
+        \n    },\r\n    \"provisioningState\": \"Updating\",\r\n    \"overprovision\"\
+        : false,\r\n    \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n   \
+        \ \"uniqueId\": \"5eee88ca-521b-4686-8cbb-4c1392a01f84\",\r\n    \"platformFaultDomainCount\"\
+        : 5,\r\n    \"timeCreated\": \"2024-05-14T02:27:16.757783+00:00\"\r\n  }\r\
+        \n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/211f2d07-a7b7-4619-ba10-2d22b8bf32a9?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2024-03-01&t=638512505636759316&c=MIIHKjCCBhKgAwIBAgITHgR0uRvpB9QGBrVnGgAABHS5GzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwNTAxMjEzMzA1WhcNMjUwNDI2MjEzMzA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMWV9ZucXWP0iSfMxP4MXfBW3crpNAMbJ5-E8kXN0t7w4LRC6nOOI8I0odywcD_X0YmkL4mEhwbuH2cxIwRpYzzUOA34IcpF0oGND62KpmWw38aE9cy5MnJqdSq6VVel1YvEUoOzwkhZ4dVaBF-6Iw3Ag8Fm4H_08p6egnzXVTXdRGmUKX674Pp2kD5WHczMMupT_U-URdNnAkFIsOnYVdEDtNKg3x2oA8QtP4hd3y9iI0lIfiDhLsK3yLMNA28ctns_qsfxfxoE_pG7H6CipxysXebKe1VEd0OeZF2LJb9JY1KS9_oj5FbKN0VqDyz8jftZhMbgiVURaGssRxIbnxkCAwEAAaOCBBcwggQTMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQBo4YYCssK_vQSnguwrNmfpJFeSDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIzPQ234mECpNLGUjEc5gZV-w0T1Pl8Wtfv-TcKZNc002ZG5ODdy9juSL1d8704XNQVjBwLhXUsoXOc8pho30kdofBC59bM-UIHww8UvPfyYIefXNImHL94_inzOA7LSbnC6u4VRkzHpXeD2FmiTSikLUuLrRyDIAyH-BP_LVFIPjHtzb-4wP3Hg9n-xgHmfct6G7531aOPEIPWIe4OClRpiK7l-njX8JyoplWl7eEfnXKqkhVFiWKPEDcQdix49UAeQxykrMTjYaK23EOv0otYWm7bHbkBU084VSYlPbceAxcWbqwzuaQOl1CzYJQSEqFsAd0ATKyCuLw1PvPf1EW0&s=gQC9mg700ZtdDC6gMZ20cVn7-uWaU3DBq83K11OX_qYktV2JNZkSZLX7UPTLBnUUuNh2uznJy_3Hu_TDbrJ2wervke6GRHsHR7gZl8J7jhobhVPzPOn5sfTpmKw12lE84_9YMFcQeu5nEhVArFx-IdGDULVPIyDY7jd_NMK4e9J7ZN7hBzlE4sh758R1sHp0cGUPRea_-g0VQCqDy8N1dc0bKEDYFD-OAVsV_dZZhQqUPd56VAKiqXX6HdV1o4UTQd7TiTp13KM1tBceCe8i1p3IssHGVFuCKS7TSYWDXt6wVc8P1q3JSQOkQvmwGV5YEv0VrYq1vhm8Rgwi83Raqw&h=k4RDQrUabLTgwAX1EVAS6tGDYAbThrThojYID4Ehyic
+      cache-control:
+      - no-cache
+      content-length:
+      - '3390'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:29:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/CreateVMScaleSetSubscriptionMaximum;374,Microsoft.Compute/CreateVMScaleSetResource;11,Microsoft.Compute/VMScaleSetBatchedVMRequestsSubscriptionMaximum;6000,Microsoft.Compute/VmssQueuedVMOperations;0
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-ms-request-charge:
+      - '0'
+      x-msedge-ref:
+      - 'Ref A: 8F3027CF2C0C473CB1CF5E73971D0B1A Ref B: MAA201060516021 Ref C: 2024-05-14T02:29:15Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --enable-resilient-deletion --enable-resilient-creation
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/211f2d07-a7b7-4619-ba10-2d22b8bf32a9?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2024-03-01&t=638512505636759316&c=MIIHKjCCBhKgAwIBAgITHgR0uRvpB9QGBrVnGgAABHS5GzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwNTAxMjEzMzA1WhcNMjUwNDI2MjEzMzA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMWV9ZucXWP0iSfMxP4MXfBW3crpNAMbJ5-E8kXN0t7w4LRC6nOOI8I0odywcD_X0YmkL4mEhwbuH2cxIwRpYzzUOA34IcpF0oGND62KpmWw38aE9cy5MnJqdSq6VVel1YvEUoOzwkhZ4dVaBF-6Iw3Ag8Fm4H_08p6egnzXVTXdRGmUKX674Pp2kD5WHczMMupT_U-URdNnAkFIsOnYVdEDtNKg3x2oA8QtP4hd3y9iI0lIfiDhLsK3yLMNA28ctns_qsfxfxoE_pG7H6CipxysXebKe1VEd0OeZF2LJb9JY1KS9_oj5FbKN0VqDyz8jftZhMbgiVURaGssRxIbnxkCAwEAAaOCBBcwggQTMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQBo4YYCssK_vQSnguwrNmfpJFeSDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIzPQ234mECpNLGUjEc5gZV-w0T1Pl8Wtfv-TcKZNc002ZG5ODdy9juSL1d8704XNQVjBwLhXUsoXOc8pho30kdofBC59bM-UIHww8UvPfyYIefXNImHL94_inzOA7LSbnC6u4VRkzHpXeD2FmiTSikLUuLrRyDIAyH-BP_LVFIPjHtzb-4wP3Hg9n-xgHmfct6G7531aOPEIPWIe4OClRpiK7l-njX8JyoplWl7eEfnXKqkhVFiWKPEDcQdix49UAeQxykrMTjYaK23EOv0otYWm7bHbkBU084VSYlPbceAxcWbqwzuaQOl1CzYJQSEqFsAd0ATKyCuLw1PvPf1EW0&s=gQC9mg700ZtdDC6gMZ20cVn7-uWaU3DBq83K11OX_qYktV2JNZkSZLX7UPTLBnUUuNh2uznJy_3Hu_TDbrJ2wervke6GRHsHR7gZl8J7jhobhVPzPOn5sfTpmKw12lE84_9YMFcQeu5nEhVArFx-IdGDULVPIyDY7jd_NMK4e9J7ZN7hBzlE4sh758R1sHp0cGUPRea_-g0VQCqDy8N1dc0bKEDYFD-OAVsV_dZZhQqUPd56VAKiqXX6HdV1o4UTQd7TiTp13KM1tBceCe8i1p3IssHGVFuCKS7TSYWDXt6wVc8P1q3JSQOkQvmwGV5YEv0VrYq1vhm8Rgwi83Raqw&h=k4RDQrUabLTgwAX1EVAS6tGDYAbThrThojYID4Ehyic
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2024-05-14T02:29:23.1971965+00:00\",\r\n  \"\
+        endTime\": \"2024-05-14T02:29:23.5565643+00:00\",\r\n  \"status\": \"Succeeded\"\
+        ,\r\n  \"name\": \"211f2d07-a7b7-4619-ba10-2d22b8bf32a9\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:29:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationResource;44,Microsoft.Compute/GetOperationSubscriptionMaximum;14997
+      x-msedge-ref:
+      - 'Ref A: D6F7E7E1D4894ED9AD58447F58FD6E43 Ref B: MAA201060516021 Ref C: 2024-05-14T02:29:23Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --enable-resilient-deletion --enable-resilient-creation
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002?api-version=2024-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vmss000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\"\
+        : \"westus\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\"\
+        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"singlePlacementGroup\": true,\r\n    \"orchestrationMode\": \"\
+        Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\": \"Manual\",\r\n\
+        \      \"rollingUpgradePolicy\": {\r\n        \"maxBatchInstancePercent\"\
+        : 20,\r\n        \"maxUnhealthyInstancePercent\": 20,\r\n        \"maxUnhealthyUpgradedInstancePercent\"\
+        : 20,\r\n        \"pauseTimeBetweenBatches\": \"PT0S\",\r\n        \"maxSurge\"\
+        : false,\r\n        \"rollbackFailedInstancesOnPolicyBreach\": false\r\n \
+        \     },\r\n      \"automaticOSUpgradePolicy\": {\r\n        \"enableAutomaticOSUpgrade\"\
+        : false,\r\n        \"useRollingUpgradePolicy\": false,\r\n        \"disableAutomaticRollback\"\
+        : false\r\n      }\r\n    },\r\n    \"resiliencyPolicy\": {\r\n      \"resilientVMCreationPolicy\"\
+        : {\r\n        \"enabled\": false\r\n      },\r\n      \"resilientVMDeletionPolicy\"\
+        : {\r\n        \"enabled\": true\r\n      }\r\n    },\r\n    \"virtualMachineProfile\"\
+        : {\r\n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmsslfe14\"\
+        ,\r\n        \"adminUsername\": \"vmtest\",\r\n        \"windowsConfiguration\"\
+        : {\r\n          \"provisionVMAgent\": true,\r\n          \"enableAutomaticUpdates\"\
+        : true\r\n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\"\
+        : true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n \
+        \     \"storageProfile\": {\r\n        \"osDisk\": {\r\n          \"osType\"\
+        : \"Windows\",\r\n          \"createOption\": \"FromImage\",\r\n         \
+        \ \"caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\n        \
+        \    \"storageAccountType\": \"Standard_LRS\"\r\n          },\r\n        \
+        \  \"diskSizeGB\": 127\r\n        },\r\n        \"imageReference\": {\r\n\
+        \          \"publisher\": \"MicrosoftWindowsServer\",\r\n          \"offer\"\
+        : \"WindowsServer\",\r\n          \"sku\": \"2016-Datacenter\",\r\n      \
+        \    \"version\": \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\"\
+        : {\"networkInterfaceConfigurations\":[{\"name\":\"vmsslfe14Nic\",\"properties\"\
+        :{\"primary\":true,\"disableTcpStateTracking\":false,\"networkSecurityGroup\"\
+        :{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/networkSecurityGroups/vmss000002NSG\"\
+        },\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\"\
+        :[{\"name\":\"vmsslfe14IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet\"\
+        },\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB/backendAddressPools/vmss000002LBBEPool\"\
+        }]}}]}}]},\r\n      \"timeCreated\": \"2024-05-14T02:27:16.757783+00:00\"\r\
+        \n    },\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"overprovision\"\
+        : false,\r\n    \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n   \
+        \ \"uniqueId\": \"5eee88ca-521b-4686-8cbb-4c1392a01f84\",\r\n    \"platformFaultDomainCount\"\
+        : 5,\r\n    \"timeCreated\": \"2024-05-14T02:27:16.757783+00:00\"\r\n  }\r\
+        \n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3391'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:29:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2393,Microsoft.Compute/GetVMScaleSetResource;29
+      x-msedge-ref:
+      - 'Ref A: 3C5244B0009041F0BCB4A9A68DFE9A8E Ref B: MAA201060516021 Ref C: 2024-05-14T02:29:24Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002?api-version=2024-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vmss000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\"\
+        : \"westus\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\"\
+        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"singlePlacementGroup\": true,\r\n    \"orchestrationMode\": \"\
+        Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\": \"Manual\",\r\n\
+        \      \"rollingUpgradePolicy\": {\r\n        \"maxBatchInstancePercent\"\
+        : 20,\r\n        \"maxUnhealthyInstancePercent\": 20,\r\n        \"maxUnhealthyUpgradedInstancePercent\"\
+        : 20,\r\n        \"pauseTimeBetweenBatches\": \"PT0S\",\r\n        \"maxSurge\"\
+        : false,\r\n        \"rollbackFailedInstancesOnPolicyBreach\": false\r\n \
+        \     },\r\n      \"automaticOSUpgradePolicy\": {\r\n        \"enableAutomaticOSUpgrade\"\
+        : false,\r\n        \"useRollingUpgradePolicy\": false,\r\n        \"disableAutomaticRollback\"\
+        : false\r\n      }\r\n    },\r\n    \"resiliencyPolicy\": {\r\n      \"resilientVMCreationPolicy\"\
+        : {\r\n        \"enabled\": false\r\n      },\r\n      \"resilientVMDeletionPolicy\"\
+        : {\r\n        \"enabled\": true\r\n      }\r\n    },\r\n    \"virtualMachineProfile\"\
+        : {\r\n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmsslfe14\"\
+        ,\r\n        \"adminUsername\": \"vmtest\",\r\n        \"windowsConfiguration\"\
+        : {\r\n          \"provisionVMAgent\": true,\r\n          \"enableAutomaticUpdates\"\
+        : true\r\n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\"\
+        : true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n \
+        \     \"storageProfile\": {\r\n        \"osDisk\": {\r\n          \"osType\"\
+        : \"Windows\",\r\n          \"createOption\": \"FromImage\",\r\n         \
+        \ \"caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\n        \
+        \    \"storageAccountType\": \"Standard_LRS\"\r\n          },\r\n        \
+        \  \"diskSizeGB\": 127\r\n        },\r\n        \"imageReference\": {\r\n\
+        \          \"publisher\": \"MicrosoftWindowsServer\",\r\n          \"offer\"\
+        : \"WindowsServer\",\r\n          \"sku\": \"2016-Datacenter\",\r\n      \
+        \    \"version\": \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\"\
+        : {\"networkInterfaceConfigurations\":[{\"name\":\"vmsslfe14Nic\",\"properties\"\
+        :{\"primary\":true,\"disableTcpStateTracking\":false,\"networkSecurityGroup\"\
+        :{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/networkSecurityGroups/vmss000002NSG\"\
+        },\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\"\
+        :[{\"name\":\"vmsslfe14IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet\"\
+        },\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_resiliency_policy_000001/providers/Microsoft.Network/loadBalancers/vmss000002LB/backendAddressPools/vmss000002LBBEPool\"\
+        }]}}]}}]},\r\n      \"timeCreated\": \"2024-05-14T02:27:16.757783+00:00\"\r\
+        \n    },\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"overprovision\"\
+        : false,\r\n    \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n   \
+        \ \"uniqueId\": \"5eee88ca-521b-4686-8cbb-4c1392a01f84\",\r\n    \"platformFaultDomainCount\"\
+        : 5,\r\n    \"timeCreated\": \"2024-05-14T02:27:16.757783+00:00\"\r\n  }\r\
+        \n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3391'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 May 2024 02:29:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2392,Microsoft.Compute/GetVMScaleSetResource;28
+      x-msedge-ref:
+      - 'Ref A: DA92B044942B47588AA82686AF22F240 Ref B: MAA201060513047 Ref C: 2024-05-14T02:29:26Z'
+    status:
+      code: 200
+      message: ''
+version: 1

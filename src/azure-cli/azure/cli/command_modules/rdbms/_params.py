@@ -980,6 +980,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Supported Migration Option. Default is ValidateAndMigrate.', choices=['Validate', 'ValidateAndMigrate', 'Migrate'], default='ValidateAndMigrate')
                     c.argument('tags', tags_type)
                     c.argument('location', arg_type=get_location_type(self.cli_ctx))
+                    c.argument('migrationInstanceResourceId', options_list=['--migrationRuntimeResourceId', '-r'], required=False,
+                               help='For private endpoint migrations, this ID will be responsible for migrating data between source and target server.')
                 elif scope == "show":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')

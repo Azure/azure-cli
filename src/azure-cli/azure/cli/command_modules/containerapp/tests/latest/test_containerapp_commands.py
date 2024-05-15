@@ -573,6 +573,104 @@ class ContainerappIngressTests(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
+    def test_containerapp_ingress_update_http_to_tcp(self, resource_group):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        env_name = self.create_random_name(prefix='env', length=24)
+        vnet = self.create_random_name(prefix='name', length=24)
+
+        self.cmd(f"az network vnet create --address-prefixes '14.0.0.0/23' -g {resource_group} -n {vnet}")
+        sub_id = self.cmd(f"az network vnet subnet create --address-prefixes '14.0.0.0/23' --delegations Microsoft.App/environments -n sub -g {resource_group} --vnet-name {vnet}").get_output_in_json()["id"]
+
+        self.cmd(f'containerapp env create -g {resource_group} -n {env_name} --logs-destination none  --internal-only -s {sub_id}')
+
+        containerapp_env = self.cmd(f'containerapp env show -g {resource_group} -n {env_name}').get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() == "waiting":
+            time.sleep(5)
+            containerapp_env = self.cmd(f'containerapp env show -g {resource_group} -n {env_name}').get_output_in_json()
+
+        self.cmd(f'containerapp env show -n {env_name} -g {resource_group}', checks=[
+            JMESPathCheck('name', env_name),
+            JMESPathCheck('properties.vnetConfiguration.internal', True),
+        ])
+        containerapp_file_name = f"{self._testMethodName}_containerapp.yml"
+        # create containerapp transport: http, with clientCertificateMode
+        containerapp_yaml_text = f"""
+                                location: {TEST_LOCATION}
+                                type: Microsoft.App/containerApps
+                                tags:
+                                    tagname: value
+                                properties:
+                                  environmentId: {containerapp_env["id"]}
+                                  configuration:
+                                    activeRevisionsMode: Multiple
+                                    ingress:
+                                      external: true
+                                      allowInsecure: false
+                                      clientCertificateMode: Require
+                                      targetPort: 80
+                                      transport: http
+                                  template:
+                                    revisionSuffix: myrevision
+                                    containers:
+                                      - image: nginx
+                                        name: nginx
+                                        env:
+                                          - name: HTTP_PORT
+                                            value: 80
+                                        command:
+                                          - npm
+                                          - start
+                                        resources:
+                                          cpu: 0.5
+                                          memory: 1Gi
+                                    scale:
+                                      minReplicas: 1
+                                      maxReplicas: 3
+                                """
+        write_test_file(containerapp_file_name, containerapp_yaml_text)
+        ca_name = self.create_random_name(prefix='yaml', length=24)
+        self.cmd(
+            f'containerapp create -n {ca_name} -g {resource_group} --environment {env_name} --yaml {containerapp_file_name}')
+
+        self.cmd(f'containerapp show -g {resource_group} -n {ca_name}', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.configuration.ingress.external", True),
+            JMESPathCheck("properties.configuration.ingress.clientCertificateMode", "Require"),
+            JMESPathCheck("properties.environmentId", containerapp_env["id"]),
+            JMESPathCheck("properties.template.revisionSuffix", "myrevision"),
+            JMESPathCheck("properties.template.containers[0].name", "nginx"),
+            JMESPathCheck("properties.template.scale.minReplicas", 1),
+            JMESPathCheck("properties.template.scale.maxReplicas", 3)
+        ])
+        clean_up_test_file(containerapp_file_name)
+
+        self.cmd('containerapp ingress show -g {} -n {}'.format(resource_group, ca_name, env_name), checks=[
+            JMESPathCheck('external', True),
+            JMESPathCheck('targetPort', 80),
+            JMESPathCheck('transport', "Http"),
+        ])
+
+        self.cmd('containerapp ingress update -g {} -n {} --type external --target-port 6379 --exposed-port 6379 --transport tcp'.format(resource_group, ca_name), checks=[
+            JMESPathCheck('external', True),
+            JMESPathCheck('targetPort', 6379),
+            JMESPathCheck('transport', "Tcp"),
+            JMESPathCheck('exposedPort', 6379),
+            JMESPathCheck('clientCertificateMode', None),
+        ])
+
+        self.cmd('containerapp ingress enable -g {} -n {} --type internal --target-port 81 --allow-insecure --transport http2'.format(resource_group, ca_name, env_name))
+
+        self.cmd('containerapp ingress show -g {} -n {}'.format(resource_group, ca_name, env_name), checks=[
+            JMESPathCheck('external', False),
+            JMESPathCheck('targetPort', 81),
+            JMESPathCheck('allowInsecure', True),
+            JMESPathCheck('transport', "Http2"),
+        ])
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="northeurope")
     def test_containerapp_ip_restrictions(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
@@ -640,6 +738,48 @@ class ContainerappIngressTests(ScenarioTest):
         self.cmd('containerapp ingress access-restriction list -g {} -n {}'.format(resource_group, ca_name), checks=[
             JMESPathCheck('length(@)', 0),
         ])
+        # test update ip restriction with yaml without rule name
+        containerapp_yaml_text = f"""
+    properties:
+        configuration:
+            ingress:
+              ipSecurityRestrictions:
+              - action: Allow
+                description: test
+                ipAddressRange: 1.0.0.0/23
+              - action: Allow
+                description: test
+                ipAddressRange: 1.0.0.0/23
+    """
+        containerapp_file_name = f"{self._testMethodName}_containerapp.yml"
+
+        write_test_file(containerapp_file_name, containerapp_yaml_text)
+        self.cmd(f'containerapp update -n {ca_name} -g {resource_group} --yaml {containerapp_file_name}', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck('length(properties.configuration.ingress.ipSecurityRestrictions)', 2),
+            JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].name", None),
+            JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].description", "test"),
+            JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].ipAddressRange", "1.0.0.0/23"),
+            JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[1].name", None),
+            JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[1].description", "test"),
+            JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[1].ipAddressRange", "1.0.0.0/23"),
+        ])
+
+        self.cmd(
+            'containerapp ingress access-restriction set -g {} -n {} --rule-name name2 --ip-address 192.168.1.1/8 --description "Description here." --action Allow'.format(
+                resource_group, ca_name), checks=[
+                JMESPathCheck("[0].name", None),
+                JMESPathCheck("[0].description", "test"),
+                JMESPathCheck("[0].ipAddressRange", "1.0.0.0/23"),
+                JMESPathCheck("[1].name", None),
+                JMESPathCheck("[1].description", "test"),
+                JMESPathCheck("[1].ipAddressRange", "1.0.0.0/23"),
+                JMESPathCheck('[2].name', "name2"),
+                JMESPathCheck('[2].description', "Description here."),
+                JMESPathCheck('[2].ipAddressRange', "192.168.1.1/8"),
+                JMESPathCheck('[2].action', "Allow"),
+            ])
+        clean_up_test_file(containerapp_file_name)
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")

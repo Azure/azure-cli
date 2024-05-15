@@ -66,6 +66,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
     validate_azure_keyvault_kms_key_vault_resource_id,
     validate_azuremonitorworkspaceresourceid, validate_create_parameters,
+    validate_azuremonitor_privatelinkscope_resourceid,
     validate_credential_format, validate_defender_config_parameter,
     validate_defender_disable_and_enable_parameters, validate_eviction_policy,
     validate_grafanaresourceid, validate_host_group_id,
@@ -142,6 +143,7 @@ node_os_disk_types = [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]
 node_mode_types = [CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER]
 node_os_skus_create = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER]
 node_os_skus = node_os_skus_create + [CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022]
+node_os_skus_update = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER]
 scale_down_modes = [CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]
 
 # consts for ManagedCluster
@@ -353,9 +355,11 @@ def load_arguments(self, _):
         # addons
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('workspace_resource_id')
-        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('enable_syslog', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('data_collection_settings', is_preview=True)
+        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag())
+        c.argument('enable_syslog', arg_type=get_three_state_flag())
+        c.argument('data_collection_settings')
+        c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
+        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag(), is_preview=True)
         c.argument('aci_subnet_name')
         c.argument('appgw_name', arg_group='Application Gateway')
         c.argument('appgw_subnet_cidr', arg_group='Application Gateway')
@@ -592,9 +596,11 @@ def load_arguments(self, _):
         c.argument('enable_sgxquotehelper', action='store_true')
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('rotation_poll_interval')
-        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('enable_syslog', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('data_collection_settings', is_preview=True)
+        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag())
+        c.argument('enable_syslog', arg_type=get_three_state_flag())
+        c.argument('data_collection_settings')
+        c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
+        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag(), is_preview=True)
 
     with self.argument_context('aks get-credentials', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
@@ -742,6 +748,7 @@ def load_arguments(self, _):
         c.argument('scale_down_mode', arg_type=get_enum_type(scale_down_modes))
         c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
+        c.argument('os_sku', arg_type=get_enum_type(node_os_skus_update), validator=validate_os_sku)
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)

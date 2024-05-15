@@ -8,14 +8,15 @@ import unittest
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.testsdk import (
     ScenarioTest,
-    record_only
+    record_only,
+    live_only
 )
 from azure.cli.command_modules.serviceconnector._resource_config import (
     RESOURCE,
     SOURCE_RESOURCES,
     TARGET_RESOURCES
 )
-from ._test_utils import CredentialReplacer
+from ._test_utils import CredentialReplacer, ConfigCredentialReplacer
 
 
 @unittest.skip('Need containerapp extension installed')
@@ -25,7 +26,7 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
     def __init__(self, method_name):
         super(ContainerAppConnectionScenarioTest, self).__init__(
             method_name,
-            recording_processors=[CredentialReplacer()]
+            recording_processors=[CredentialReplacer(), ConfigCredentialReplacer()]
         )
 
 
@@ -86,21 +87,31 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
     def test_containerapp_mysql_e2e_kvsecret(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
-            'source_resource_group': 'servicelinker-test-linux-group',
+            'source_resource_group': 'clitest',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'app': 'servicelinker-containerapp',
+            'app': 'servicelinker-cli-aca-test',
             'server': 'servicelinker-mysql',
-            'database': 'mysqlDB'
+            'database': 'mysqlDB',
+            'vault': 'clitest-kv'
         })
 
         # prepare password
         user = 'servicelinker'
-        keyvaultUri = "https://cupertino-kv-test.vault.azure.net/secrets/TestDbPassword"
+        keyvaultUri = "https://clitest-kv.vault.azure.net/secrets/TestPassword"
 
         # prepare params
         name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.ContainerApp).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.Mysql).format(**self.kwargs)
+        keyvault_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(
+            subscription=self.kwargs.get('subscription'),
+            target_resource_group='clitest',
+            vault=self.kwargs.get('vault')
+        )
+        
+		# create key vault connection first
+        self.cmd('containerapp connection create keyvault --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type none -c {}'.format(name + 'kv', source_id, keyvault_id, self.default_container_name))
 
         # create connection, test clientType=None
         self.cmd('containerapp connection create mysql --connection {} --source-id {} --target-id {} '
@@ -110,24 +121,25 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
         connections = self.cmd(
             'containerapp connection list --source-id {}'.format(source_id),
             checks = [
-                self.check('length(@)', 1),
-                self.check('[0].authInfo.authType', 'secret'),
-                self.check('[0].clientType', 'none')
+                self.check('length(@)', 2),
+                self.check('[-1].authInfo.authType', 'secret'),
+                self.check('[-1].clientType', 'none')
             ]
         ).get_output_in_json()
-        connection_id = connections[0].get('id')
-
-        # delete connection
-        self.cmd('containerapp connection delete --id {} --yes'.format(connection_id))
+        
+        for connection in connections:
+            connection_id = connection.get('id')
+            # delete connection
+            self.cmd('containerapp connection delete --id {} --yes'.format(connection_id))
 
 
     # @record_only()
     def test_containerapp_storageblob_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
-            'source_resource_group': 'servicelinker-test-linux-group',
+            'source_resource_group': 'clitest',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'app': 'servicelinker-storage-aca',
+            'app': 'servicelinker-cli-aca-test',
             'account': 'servicelinkerstorage'
         })
 
@@ -167,27 +179,32 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('containerapp connection delete --id {} --yes'.format(connection_id))
 
-    # @record_only()
+
+    @live_only()
     def test_containerapp_postgres_flexible_e2e_secretstore(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
-            'source_resource_group': 'servicelinker-test-linux-group',
+            'source_resource_group': 'clitest',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'app': 'testkvref',
-            'server': 'serviceconnector-pg-flex',
+            'app': 'servicelinker-cli-aca-test',
+            'server': 'servicelinker-flexiblepostgresql',
             'database': 'postgres',
-            'vault': 'sc-kv-reader'
+            'vault': 'clitest-kv'
         })
 
         # prepare password
         user = 'servicelinker'
-        password = self.cmd('keyvault secret show --vault-name cupertino-kv-test -n TestDbPassword').get_output_in_json().get('value')
+        password = self.cmd('keyvault secret show --vault-name clitest-kv -n TestPassword').get_output_in_json().get('value')
 
         # prepare params
         name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.ContainerApp).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.PostgresFlexible).format(**self.kwargs)
-        keyvault_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
+        keyvault_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(
+            subscription=self.kwargs.get('subscription'),
+            target_resource_group='clitest',
+            vault=self.kwargs.get('vault')
+        )
 
         # create connection
         self.cmd('containerapp connection create postgres-flexible --connection {} --source-id {} --target-id {} '
