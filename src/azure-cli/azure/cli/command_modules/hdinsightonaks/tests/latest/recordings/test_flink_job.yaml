@@ -1,0 +1,51 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsight-on-aks cluster job list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --cluster-pool-name -g
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.11.9 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hilocli-test/providers/Microsoft.HDInsight/clusterpools/hilopoolwus3/clusters/cli-flink12/jobs?api-version=2024-05-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hilocli-test/providers/Microsoft.HDInsight/clusterpools/hilopoolwus3/clusters/cli-flink12/jobs/job-af3-4507-8edd-0b75ad7ac602","properties":{"jobType":"FlinkJob","runId":"job-af3-4507-8edd-0b75ad7ac602","jobName":"test","jobJarDirectory":"abfs://flinkdemo125dfsuoi@flinkdemo125stuoi.dfs.core.windows.net/jars","jarName":"FlinkJobDemo-1.0-SNAPSHOT.jar","action":"NEW","entryClass":"org.example.SleepJob","flinkConfiguration":{"parallelism":"1"},"status":"JOB_LAUNCH_FAILED","jobOutput":"Job
+        execution failed. \nFailed to download jar","actionResult":"FAILED"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '645'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 May 2024 07:04:17 GMT
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 827e5b46-571e-48c6-940d-be34bddc027e
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-msedge-ref:
+      - 'Ref A: AD2A1C65D0B349158746174C53415224 Ref B: MAA201060514035 Ref C: 2024-05-15T07:04:15Z'
+    status:
+      code: 200
+      message: OK
+version: 1
