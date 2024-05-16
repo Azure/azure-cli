@@ -788,7 +788,7 @@ class SubscriptionFinder:
                 # tenant specific, like the account was disabled, being blocked by MFA. For such errors,
                 # we continue with other tenants.
                 # As we don't check AADSTS error code, show the original error message for user's reference.
-                logger.warning("Silent authentication fails for tenant %s: %s", t.tenant_id_name, ex)
+                logger.warning("Authentication failed against tenant %s: %s", t.tenant_id_name, ex)
                 interaction_required_tenants.append(t)
                 continue
 
@@ -813,14 +813,14 @@ class SubscriptionFinder:
         # Show warning for empty tenants
         if empty_tenants:
             logger.warning("The following tenants don't contain accessible subscriptions. "
-                           "Use 'az login --allow-no-subscriptions' to have tenant level access.")
+                           "Use `az login --allow-no-subscriptions` to have tenant level access.")
             for t in empty_tenants:
                 logger.warning("%s", t.tenant_id_name)
 
         # Show warning for InteractionRequired tenants
         if interaction_required_tenants:
-            logger.warning("The following tenants require interactive authentication. "
-                           "Use 'az login --tenant TENANT_ID' to explicitly login to a tenant.")
+            logger.warning("If you need to access subscriptions in the following tenants, please use "
+                           "`az login --tenant TENANT_ID`.")
             for t in interaction_required_tenants:
                 logger.warning("%s", t.tenant_id_name)
         return all_subscriptions
