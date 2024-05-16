@@ -10,10 +10,10 @@ Release History
 
 * [BREAKING CHANGE] `az aks create`: Specifying `--enable-managed-identity` and `--service-principal`/`--client-secret` at the same time will cause a `MutuallyExclusiveArgumentError` (#28906)
 * [BREAKING CHANGE] `az aks create`: Change the default value of option `--enable-managed-identity` from `True` to `False` (#28906)
-* `aks mesh upgrade rollback/complete`: Add `--yes` parameter to support not prompting the users to confirm the operation (#28820)
-* `az aks`: Add `SecurityPatch` option to `--node-os-upgrade-channel` parameter of create and update commands (#28869)
+* `az aks mesh upgrade rollback/complete`: Add `--yes` parameter to support not prompting the users to confirm the operation (#28820)
+* `az aks create/update`: Add `SecurityPatch` option to `--node-os-upgrade-channel` parameter (#28869)
 * `az aks create/update`: Add new parameter `--enable-cost-analysis` to enable exporting Kubernetes namespace and deployment details to the Cost Analysis views (#28813)
-* `az aks create`: When options `--service-principal` and `--client-secret` are not specified at the same time, CLI will backfill the value of `--enable-managed-identity` to `True` to maintain the same behavior as before (that is, create an cluster with managed system assigned identity by default) (#28906)
+* `az aks create`: Backfill the value of `--enable-managed-identity` to `True`  when options `--service-principal` and `--client-secret` are not specified at the same time (#28906)
 * `az aks nodepool update`: Add option `--os-sku` to support updating os sku in place (#28907)
 * `az aks create`: Add `--ampls-resource-id` and `--enable-high-log-scale-mode` optional parameters for Monitoring Addon (#28426)
 * `az aks enable-addons`: Add `--ampls-resource-id` and `--enable-high-log-scale-mode` optional parameters (#28426)
@@ -53,8 +53,8 @@ Release History
 * `az vmss create/update`: Add new option `NvmeDisk` for `--ephemeral-os-disk-placement` parameter (#28947)
 * `az vm create`: Add new parameters `--source-snapshots-or-disks` and `--source-snapshots-or-disks-size-gb` to support implicit disk creation from snapshot and disk (#28949)
 * `az vm create`: Add new parameters `--source-disk-restore-point` and `--source-disk-restore-point-size-gb` to support implicit disk creation from disk restore point (#28949)
-* `az vmss update`: Add new parameters `--ephemeral-os-disk` to support in-place mutual migration of VMSS from ephemeral to non-ephemeral OS disk (#28928)
-* `az vmss update`: Add new parameters `--ephemeral-option` to support setting ephemeral disk setting (#28928)
+* `az vmss update`: Add new parameter `--ephemeral-os-disk` to support in-place mutual migration of VMSS from ephemeral to non-ephemeral OS disk (#28928)
+* `az vmss update`: Add new parameter `--ephemeral-option` to support setting ephemeral disk setting (#28928)
 
 **Compute Diagnostic**
 
@@ -64,7 +64,7 @@ Release History
 
 * `az containerapp create/update`: Fix `--scale-rule-tcp-concurrency` for TCP scale rule (#28889)
 * `az containerapp compose create`: Fix issue where the environment's location is not resolved from `--location` (#28920)
-* Fix #28864: `az containerapp ingress update`:  Fix updating transport from http to tcp with `--transport tcp` (#28930)
+* Fix #28864: `az containerapp ingress update`: Fix updating transport from http to tcp with `--transport tcp` (#28930)
 * `az containerapp compose create`: Fix variable mixing issue when `--compose-file-path` contains multiple services (#28922)
 * Fix #28380: `az containerapp ingress access-restriction set`: Fix `KeyError` when `name` not exists (#28755)
 
@@ -76,7 +76,7 @@ Release History
 **NetAppFiles**
 
 * [BREAKING CHANGE] `az account backup`: Replace backup commands with backup-vault commands (#28890)
-* [BREAKING CHANGE] `az volume volume backup status`: Remove `volume backup status` command, replace with `az netappfiles volume latest-backup-status show` (#28890)
+* [BREAKING CHANGE] `az volume backup status`: Remove `volume backup status` command, replace with `az netappfiles volume latest-backup-status show` (#28890)
 * `az netappfiles account backup-vault`: Add backup vault command group (#28890)
 * `az netappfiles volume latest-backup-status show`: Add command to get latest backup status (#28890)
 * `az netappfiles volume latest-restore-status show`: Add command to get latest backup status (#28890)
@@ -87,18 +87,18 @@ Release History
 
 * [BREAKING CHANGE] `az network dns zone`: Deprecate `--zone-type`, `registration-vnets` and `resolution-vnets` (#28640)
 * `az network vnet subnet`: Add parameter `--sharing-scope` (#28752)
-* `az network private-endpoint-connnection`: Add Microsoft.App/managedEnvironment for private endpoint connections (#28794)
+* `az network private-endpoint-connnection`: Add `Microsoft.App/managedEnvironment` for private endpoint connections (#28794)
 * Fix #28615: `az network application-gateway address-pool update`: Race condition in concurrent scenario (#28777)
 * Fix #28705: `az network lb rule`: Authentication token not being generated (#28840)
 
 **Packaging**
 
 * Add Ubuntu 24.04 Noble Numbat support (#28888)
-* Drop Ubuntu 18.04 support (#28942)
+* [BREAKING CHANGE] Drop Ubuntu 18.04 support (#28942)
 
 **Profile**
 
-* `az login`: Introduce login experience v2. See more details at https://go.microsoft.com/fwlink/?linkid=2271236 (#28910)
+* `az login`: Introduce login experience v2. For more details, see https://go.microsoft.com/fwlink/?linkid=2271236 (#28910)
 
 **RDBMS**
 
@@ -111,7 +111,7 @@ Release History
 
 **Service Connector**
 
-* `az aks connection list/show': Add kubernetes resource name (#28887)
+* `az aks connection list/show`: Add kubernetes resource name (#28887)
 * `az source connection create cognitiveservices`: Support OpenAI/AIServices/CognitiveServices as target (#28852)
 * `az webapp connection list`: Fix interactive input (#28918)
 
