@@ -39,7 +39,7 @@ Release History
 * [BREAKING CHANGE] `az stack group/sub/mg create/delete`: Remove the deprecated `--delete-all`, `--delete-resources`, and `--delete-resource-groups` flags. Use the `--action-on-unmanage`/`--aou` parameter instead (#28605)
 * `az group delete`: Add new option `Microsoft.Databricks/workspaces` for `--force-deletion-types` parameter (#28940)
 * `az deployment`: Support inline parameters with `.bicepparam` in single `--parameters` argument (#28826)
-* `az stack group/sub/mg validate`: Add new `validate` command to preform preflight validation on a stack deployment. (#28605)
+* `az stack group/sub/mg validate`: Add new `validate` command to preform preflight validation on a stack deployment (#28605)
 * `az stack group/sub create`: Validation of a stack will now occur before a stack is created or updated (#28605)
 * `az stack group/sub/mg create/delete`: Action on unmanage behavior for stack managed management groups can now be configured (#28605)
 * `az stack group/sub/mg create`: The correlation ID of the create operation is now returned as a property of the stack (#28605)
