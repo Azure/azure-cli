@@ -25,7 +25,7 @@ Release History
 * [BREAKING CHANGE] `az webapp deployment source config-zip`: Use deployment status API for deployment output for Linux Web Apps (#28921)
 * `az functionapp scale config always-ready`: Set alwaysReady property to empty array if it is null (#28892)
 * `az functionapp`: Update messaging for flex function apps (#28812)
-* `az functionapp deployment source config-zip`: Users with no Microsoft.Web/serverFarm read privileges should still be able to deploy function apps (#28899)
+* `az functionapp deployment source config-zip`: Allow users with no Microsoft.Web/serverFarm read privileges to deploy function apps (#28899)
 * `az webapp list`: Fix the bug `--show-details` fails while resource group name is not specified (#28901)
 * `az webapp list-runtimes/create/up`: Add Java 21 support (#28801)
 * `az functionapp create`: Use stacks API netFrameworkVersion value instead of the default value from the Python SDK (#28825)
@@ -36,14 +36,14 @@ Release History
 
 **ARM**
 
-* [BREAKING CHANGE] `az stack group/sub/mg create/delete`: Remove the deprecated `--delete-all`, `--delete-resources`, and `--delete-resource-groups` flags. Use the `--action-on-unmanage <value>`/`--aou <value>` parameter instead. Previously with no `--delete-*` flags specified, the default behavior was "detachAll" which can be represented with `--action-on-unmanage detachAll` (#28605)
+* [BREAKING CHANGE] `az stack group/sub/mg create/delete`: Remove the deprecated `--delete-all`, `--delete-resources`, and `--delete-resource-groups` flags. Use the `--action-on-unmanage`/`--aou` parameter instead (#28605)
 * `az group delete`: Add new option `Microsoft.Databricks/workspaces` for `--force-deletion-types` parameter (#28940)
 * `az deployment`: Support inline parameters with `.bicepparam` in single `--parameters` argument (#28826)
 * `az stack group/sub/mg validate`: Add new `validate` command to preform preflight validation on a stack deployment. (#28605)
-* `az stack group/sub create`: Validation of a stack will now occur before a stack is created or updated. This is the same operation carried out by `az stack <scope> validate`. This will come to `az stack mg create` in a future bugfix release. (#28605)
-* `az stack group/sub/mg create/delete`: Action on unmanage behavior for stack managed management groups can now be configured. (#28605)
+* `az stack group/sub create`: Validation of a stack will now occur before a stack is created or updated (#28605)
+* `az stack group/sub/mg create/delete`: Action on unmanage behavior for stack managed management groups can now be configured (#28605)
 * `az stack group/sub/mg create`: The correlation ID of the create operation is now returned as a property of the stack (#28605)
-* `az stack group/sub/mg create/delete`: Add new flag `--bypass-stack-out-of-sync-error`/`--bse` that will bypass errors related to the resource list of a stack being out of sync. (#28605)
+* `az stack group/sub/mg create/delete`: Add new flag `--bypass-stack-out-of-sync-error`/`--bse` that will bypass errors related to the resource list of a stack being out of sync (#28605)
 
 **Compute**
 
