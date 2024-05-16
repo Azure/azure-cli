@@ -81,7 +81,7 @@ Release History
 * `az netappfiles volume latest-backup-status show`: Add command to get latest backup status (#28890)
 * `az netappfiles volume latest-restore-status show`: Add command to get latest backup status (#28890)
 * `az netappfiles resource region-info list`: Add command to list region specific information (#28890)
-* `az netappfiles resource region-info default show`: Add command to Get storage to network proximity and logical zone mapping information (#28890)
+* `az netappfiles resource region-info default show`: Add command to get storage to network proximity and logical zone mapping information (#28890)
 
 **Network**
 
