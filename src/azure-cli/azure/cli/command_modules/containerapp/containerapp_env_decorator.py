@@ -123,13 +123,9 @@ class ContainerAppEnvDecorator(BaseResource):
 
         if is_p2p_encryption_enabled is not None:
             safe_set(self.managed_env_def, "properties", "peerTrafficConfiguration", "encryption", "enabled", value=is_p2p_encryption_enabled)
-            if is_p2p_encryption_enabled is False:  # keep the two properties consistent.
-                safe_set(self.managed_env_def, "properties", "peerAuthentication", "mtls", "enabled", value=False)
 
         if is_mtls_enabled is not None:
             safe_set(self.managed_env_def, "properties", "peerAuthentication", "mtls", "enabled", value=is_mtls_enabled)
-            if is_mtls_enabled is True:  # keep the two properties consistent.
-                safe_set(self.managed_env_def, "properties", "peerTrafficConfiguration", "encryption", "enabled", value=True)
 
 
 class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
@@ -160,6 +156,10 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         location = validate_environment_location(self.cmd, location)
         _ensure_location_allowed(self.cmd, location, CONTAINER_APPS_RP, "managedEnvironments")
         self.set_argument_location(location)
+
+        # validate mtls and p2p traffic encryption
+        if self.get_argument_p2p_encryption_enabled() is False and self.get_argument_mtls_enabled() is True:
+            raise ValidationError("Cannot use '--enable-mtls' with '--enable-peer-to-peer-encryption False'")
 
     def create(self):
         try:
@@ -288,6 +288,10 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
             if not self.get_argument_logs_customer_id() or not self.get_argument_logs_key():
                 raise ValidationError(
                     "Must provide --logs-workspace-id and --logs-workspace-key if updating logs destination to type 'log-analytics'.")
+
+        # validate mtls and p2p traffic encryption
+        if self.get_argument_p2p_encryption_enabled() is False and self.get_argument_mtls_enabled() is True:
+            raise ValidationError("Cannot use '--enable-mtls' with '--enable-peer-to-peer-encryption False'")
 
     def construct_payload(self):
         try:
