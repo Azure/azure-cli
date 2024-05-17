@@ -21,22 +21,8 @@ class NodeProfile:
     VMSize: str     # The virtual machine SKU.
 
 
-@dataclass
-class SecretReference:
-    secret_name: str    
-    reference_name: str
-    type: str
-    version: str = ""
-
-
 # Create a node profile with SKU and worker count.
 def create_compute_node_profile(count, node_type, vm_size):
     node_profile = NodeProfile(count, node_type, vm_size)
     nodes = [repr(node_profile.__dict__).replace(" ", "")]
     return nodes
-
-
-# Create a reference to provide a secret to store the password for accessing the database.
-def create_secret_reference(secret_name, reference_name, version=None):
-    secret_reference = SecretReference(secret_name, reference_name, "Secret", version)
-    return repr(secret_reference.__dict__).replace(" ", "")

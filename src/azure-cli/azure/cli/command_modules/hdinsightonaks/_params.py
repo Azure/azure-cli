@@ -17,11 +17,3 @@ def load_arguments(self, _):  # pylint: disable=unused-argument
                    help='The node type.', required=True)
         c.argument('vm_size',
                    help='The virtual machine SKU.', required=True)
-
-    with self.argument_context('hdinsight-on-aks cluster secret create') as c:
-        c.argument('secret_name',
-                   help='The secret name in the key vault.', required=True)
-        c.argument('reference_name',
-                   help='The reference name of the secret to be used in service configs.', required=True)
-        c.argument('version',
-                   help='The version of the secret in key vault.')

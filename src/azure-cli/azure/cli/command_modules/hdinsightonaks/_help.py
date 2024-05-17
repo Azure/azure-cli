@@ -19,13 +19,3 @@ helps['hdinsight-on-aks cluster node-profile create'] = """
 type: command
 short-summary: Create a node profile with SKU and worker count.
 """
-
-helps['hdinsight-on-aks cluster secret'] = """
-type: group
-short-summary: Manage secret reference.
-"""
-
-helps['hdinsight-on-aks cluster secret create'] = """
-type: command
-short-summary: Create a reference to provide a secret to store the password for accessing the database.
-"""
