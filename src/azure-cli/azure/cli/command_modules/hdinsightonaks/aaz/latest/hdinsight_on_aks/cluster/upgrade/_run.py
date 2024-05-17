@@ -18,7 +18,7 @@ class Run(AAZCommand):
     """Upgrade a cluster.
 
     :example: Upgrade a cluster, use command 'az hdinsight-on-aks cluster upgrade list' get upgrades list.
-        az hdinsight-on-aks cluster upgrade run --cluster-pool-name {poolName} -g {rg} --cluster-name {clusterName} --hotfix-upgrade component-name=$upgrades[0]["componentName"] target-build-number=$upgrades[0]["targetBuildNumber"] target-cluster-version=$upgrades[0]["targetClusterVersion"] target-oss-version= $upgrades[0]["targetOssVersion"]
+        az hdinsight-on-aks cluster upgrade run -g {resourcesGroup} --cluster-pool-name {poolName} --cluster-name {clusterName} --hotfix-upgrade component-name={componentName} target-build-number={targetBuildNumber} target-cluster-version={targetClusterVersion} target-oss-version={targetOssVersion}
     """
 
     _aaz_info = {

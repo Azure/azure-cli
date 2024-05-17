@@ -16,6 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Manage(AAZCommand):
     """Library management operations on HDInsight on AKS cluster.
+
+    :example: Install maven library 'azure-resourcemanager-hdinsight-containers' to the cluster.
+        az hdinsight-on-aks cluster library manage --cluster-name {clustername} -g {resourcesGroup} --cluster-pool-name {clusterpoolname} --action install --libraries '[{maven:{group-id:com.azure.resourcemanager,name:azure-resourcemanager-hdinsight-containers,version:1.0.0-beta.2}}]'
+
+    :example: Uninstall library 'azure-resourcemanager-hdinsight-containers' from the cluster.
+        az hdinsight-on-aks cluster library manage --cluster-name {clustername} -g {resourcesGroup} --cluster-pool-name {clusterpoolname} --action uninstall --libraries '[{maven:{group-id:com.azure.resourcemanager,name:azure-resourcemanager-hdinsight-containers,version:1.0.0-beta.2}}]'
+
+    :example: Install pypi library 'Pandas' to the cluster.
+        az hdinsight-on-aks cluster library manage --cluster-name {clustername} -g {resourcesGroup} --cluster-pool-name {clusterpoolname} --action install --libraries '[{pypi:{name:pandas}}]'
     """
 
     _aaz_info = {

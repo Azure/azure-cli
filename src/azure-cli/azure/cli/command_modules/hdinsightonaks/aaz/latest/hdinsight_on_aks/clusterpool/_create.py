@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "hdinsight-on-aks clusterpool create",
-    is_preview=True,
 )
 class Create(AAZCommand):
     """Create a cluster pool.

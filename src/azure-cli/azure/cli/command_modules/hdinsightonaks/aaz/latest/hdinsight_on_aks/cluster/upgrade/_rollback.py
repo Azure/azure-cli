@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Rollback(AAZCommand):
     """Manual rollback upgrade for a cluster.
+
+    :example: Rollback the upgrade to a cluster.
+        az hdinsight-on-aks cluster upgrade rollback -g {resourcesGroup} --cluster-pool-name {poolName} --cluster-name {clusterName} --upgrade-history {history string}
     """
 
     _aaz_info = {

@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "hdinsight-on-aks clusterpool list",
-    is_preview=True,
 )
 class List(AAZCommand):
     """List the list of Cluster Pools within a Subscription.

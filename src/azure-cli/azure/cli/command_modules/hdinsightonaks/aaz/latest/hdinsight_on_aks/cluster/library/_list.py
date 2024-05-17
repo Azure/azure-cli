@@ -16,6 +16,12 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List all libraries of HDInsight on AKS cluster.
+
+    :example: List all custom libraries on the cluster.
+        az hdinsight-on-aks cluster library list --cluster-name {clustername} -g {resourcesGroup} --cluster-pool-name {clusterpoolname} --debug --category custom
+
+    :example: List all predefined libraries on the cluster.
+        az hdinsight-on-aks cluster library list --cluster-name {clustername} -g {resourcesGroup} --cluster-pool-name {clusterpoolname} --debug --category predefined
     """
 
     _aaz_info = {

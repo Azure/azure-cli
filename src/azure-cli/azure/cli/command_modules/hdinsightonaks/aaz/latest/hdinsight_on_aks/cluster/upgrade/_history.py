@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class History(AAZCommand):
     """List a list of upgrade history.
+
+    :example: List the upgrade records of the cluster.
+        az hdinsight-on-aks cluster upgrade history -g {resourcesGroup} --cluster-pool-name {poolName} --cluster-name {clusterName}
     """
 
     _aaz_info = {

@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "hdinsight-on-aks clusterpool update",
-    is_preview=True,
 )
 class Update(AAZCommand):
     """Update a cluster pool.

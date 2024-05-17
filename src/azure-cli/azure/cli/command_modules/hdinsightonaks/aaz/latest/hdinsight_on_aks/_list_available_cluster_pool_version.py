@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "hdinsight-on-aks list-available-cluster-pool-version",
-    is_preview=True,
 )
 class ListAvailableClusterPoolVersion(AAZCommand):
     """List a list of available cluster pool versions.

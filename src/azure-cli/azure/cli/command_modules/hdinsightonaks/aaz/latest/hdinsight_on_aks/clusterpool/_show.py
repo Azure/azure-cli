@@ -13,12 +13,11 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "hdinsight-on-aks clusterpool show",
-    is_preview=True,
 )
 class Show(AAZCommand):
     """Get a cluster pool.
 
-    :example: Gets a cluster pool.
+    :example: Get the clusterpool.
         az hdinsight-on-aks clusterpool show -g {RG} -n {poolName}
     """
 
