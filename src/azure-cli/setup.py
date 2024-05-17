@@ -88,7 +88,6 @@ DEPENDENCIES = [
     'azure-mgmt-eventhub~=10.1.0',
     'azure-mgmt-extendedlocation==1.0.0b2',
     'azure-mgmt-hdinsight~=9.0.0',
-    'azure-mgmt-hdinsightonaks==1.0.0',
     'azure-mgmt-imagebuilder~=1.3.0',
     'azure-mgmt-iotcentral~=10.0.0b1',
     'azure-mgmt-iothub==3.0.0',
