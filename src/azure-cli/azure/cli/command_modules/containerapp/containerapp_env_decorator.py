@@ -101,7 +101,7 @@ class ContainerAppEnvDecorator(BaseResource):
 
     def get_argument_mtls_enabled(self):
         return self.get_param("mtls_enabled")
-    
+
     def get_argument_p2p_encryption_enabled(self):
         return self.get_param("p2p_encryption_enabled")
 
