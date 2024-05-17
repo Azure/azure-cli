@@ -757,10 +757,15 @@ class TestAAZArg(unittest.TestCase):
         self.assertEqual(v.score, None)
         
         # extension value
-        action.setup_operations(dest_ops, "1234")
-        self.assertEqual(len(dest_ops._ops), 5)
-        dest_ops.apply(v, "score")
-        self.assertEqual(v.score, 1234.0)
+        from unittest import mock
+        with mock.patch('azure.cli.core.aaz._arg.logger') as mock_logger:
+            action.setup_operations(dest_ops, "1234")
+            self.assertEqual(len(dest_ops._ops), 5)
+            dest_ops.apply(v, "score")
+            self.assertEqual(v.score, 1234.0)
+            call_args = mock_logger.warning.call_args
+            self.assertEqual("Use extended value '%s' outside choices %s.", call_args[0][0])
+            self.assertEqual("1234.0", call_args[0][1])
 
         # extension invalid value
         with self.assertRaises(azclierror.InvalidArgumentValueError):
