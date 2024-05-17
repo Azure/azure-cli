@@ -278,12 +278,6 @@ class Update(AAZCommand):
             arg_group="ClusterProfile",
             help="True if log analytics is enabled for the cluster, otherwise false.",
         )
-        _args_schema.managed_identity_profile = AAZObjectArg(
-            options=["--managed-identity-profile"],
-            arg_group="ClusterProfile",
-            help="This property is required by Trino, Spark and Flink cluster but is optional for Kafka cluster.",
-            nullable=True,
-        )
         _args_schema.oss_version = AAZStrArg(
             options=["--oss-version"],
             arg_group="ClusterProfile",
@@ -387,42 +381,6 @@ class Update(AAZCommand):
             options=["data-disk-type"],
             help="Managed Disk Type.",
             enum={"Premium_SSD_LRS": "Premium_SSD_LRS", "Premium_SSD_ZRS": "Premium_SSD_ZRS", "Premium_SSD_v2_LRS": "Premium_SSD_v2_LRS", "Standard_HDD_LRS": "Standard_HDD_LRS", "Standard_SSD_LRS": "Standard_SSD_LRS", "Standard_SSD_ZRS": "Standard_SSD_ZRS"},
-        )
-
-        managed_identity_profile = cls._args_schema.managed_identity_profile
-        managed_identity_profile.identity_list = AAZListArg(
-            options=["identity-list"],
-            help="The list of managed identity.",
-        )
-
-        identity_list = cls._args_schema.managed_identity_profile.identity_list
-        identity_list.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.managed_identity_profile.identity_list.Element
-        _element.client_id = AAZStrArg(
-            options=["client-id"],
-            help="ClientId of the managed identity.",
-            fmt=AAZStrArgFormat(
-                pattern="^[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?$",
-            ),
-        )
-        _element.object_id = AAZStrArg(
-            options=["object-id"],
-            help="ObjectId of the managed identity.",
-            fmt=AAZStrArgFormat(
-                pattern="^[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?$",
-            ),
-        )
-        _element.resource_id = AAZResourceIdArg(
-            options=["resource-id"],
-            help="ResourceId of the managed identity.",
-        )
-        _element.type = AAZStrArg(
-            options=["type"],
-            help="The type of managed identity.",
-            enum={"cluster": "cluster", "internal": "internal", "user": "user"},
         )
 
         ranger_plugin_profile = cls._args_schema.ranger_plugin_profile
@@ -874,6 +832,45 @@ class Update(AAZCommand):
             arg_group="LogAnalyticsProfile",
             help="True if metrics are enabled, otherwise false.",
             nullable=True,
+        )
+
+        # define Arg Group "ManagedIdentityProfile"
+
+        _args_schema = cls._args_schema
+        _args_schema.identity_list = AAZListArg(
+            options=["--identity-list"],
+            arg_group="ManagedIdentityProfile",
+            help="The list of managed identity.",
+        )
+
+        identity_list = cls._args_schema.identity_list
+        identity_list.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.identity_list.Element
+        _element.client_id = AAZStrArg(
+            options=["client-id"],
+            help="ClientId of the managed identity.",
+            fmt=AAZStrArgFormat(
+                pattern="^[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?$",
+            ),
+        )
+        _element.object_id = AAZStrArg(
+            options=["object-id"],
+            help="ObjectId of the managed identity.",
+            fmt=AAZStrArgFormat(
+                pattern="^[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?$",
+            ),
+        )
+        _element.resource_id = AAZResourceIdArg(
+            options=["resource-id"],
+            help="ResourceId of the managed identity.",
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+            help="The type of managed identity.",
+            enum={"cluster": "cluster", "internal": "internal", "user": "user"},
         )
 
         # define Arg Group "PrometheusProfile"
@@ -1405,7 +1402,7 @@ class Update(AAZCommand):
                 cluster_profile.set_prop("kafkaProfile", AAZObjectType, ".kafka_profile")
                 cluster_profile.set_prop("llapProfile", AAZFreeFormDictType, ".llap_profile")
                 cluster_profile.set_prop("logAnalyticsProfile", AAZObjectType)
-                cluster_profile.set_prop("managedIdentityProfile", AAZObjectType, ".managed_identity_profile")
+                cluster_profile.set_prop("managedIdentityProfile", AAZObjectType)
                 cluster_profile.set_prop("ossVersion", AAZStrType, ".oss_version", typ_kwargs={"flags": {"required": True}})
                 cluster_profile.set_prop("prometheusProfile", AAZObjectType)
                 cluster_profile.set_prop("rangerPluginProfile", AAZObjectType, ".ranger_plugin_profile")

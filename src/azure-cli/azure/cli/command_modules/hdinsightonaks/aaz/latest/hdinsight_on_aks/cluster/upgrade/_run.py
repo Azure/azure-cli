@@ -69,33 +69,35 @@ class Run(AAZCommand):
             arg_group="Properties",
             blank={},
         )
-        _args_schema.cluster_in_place_upgrade_properties = AAZObjectArg(
-            options=["--cluster-in-place-upgrade-properties"],
+        _args_schema.in_place_upgrade = AAZObjectArg(
+            options=["--in-place-upgrade"],
             arg_group="Properties",
+            help="Properties of in-place upgrading cluster.",
         )
         _args_schema.hotfix_upgrade = AAZObjectArg(
             options=["--hotfix-upgrade"],
             arg_group="Properties",
+            help="Properties of upgrading cluster's hotfix.",
         )
         _args_schema.patch_version_upgrade = AAZObjectArg(
             options=["--patch-version-upgrade"],
             arg_group="Properties",
         )
 
-        cluster_in_place_upgrade_properties = cls._args_schema.cluster_in_place_upgrade_properties
-        cluster_in_place_upgrade_properties.component_name = AAZStrArg(
+        in_place_upgrade = cls._args_schema.in_place_upgrade
+        in_place_upgrade.component_name = AAZStrArg(
             options=["component-name"],
             help="Name of component to be upgraded.",
         )
-        cluster_in_place_upgrade_properties.target_build_number = AAZStrArg(
+        in_place_upgrade.target_build_number = AAZStrArg(
             options=["target-build-number"],
             help="Target build number of component to be upgraded.",
         )
-        cluster_in_place_upgrade_properties.target_cluster_version = AAZStrArg(
+        in_place_upgrade.target_cluster_version = AAZStrArg(
             options=["target-cluster-version"],
             help="Target cluster version of component to be upgraded.",
         )
-        cluster_in_place_upgrade_properties.target_oss_version = AAZStrArg(
+        in_place_upgrade.target_oss_version = AAZStrArg(
             options=["target-oss-version"],
             help="Target OSS version of component to be upgraded.",
         )
@@ -252,7 +254,7 @@ class Run(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_const("upgradeType", "AKSPatchUpgrade", AAZStrType, ".aks_patch_upgrade", typ_kwargs={"flags": {"required": True}})
-                properties.set_const("upgradeType", "ClusterInPlaceUpgradeProperties", AAZStrType, ".cluster_in_place_upgrade_properties", typ_kwargs={"flags": {"required": True}})
+                properties.set_const("upgradeType", "ClusterInPlaceUpgradeProperties", AAZStrType, ".in_place_upgrade", typ_kwargs={"flags": {"required": True}})
                 properties.set_const("upgradeType", "HotfixUpgrade", AAZStrType, ".hotfix_upgrade", typ_kwargs={"flags": {"required": True}})
                 properties.set_const("upgradeType", "PatchVersionUpgrade", AAZStrType, ".patch_version_upgrade", typ_kwargs={"flags": {"required": True}})
                 properties.discriminate_by("upgradeType", "AKSPatchUpgrade")
@@ -262,10 +264,10 @@ class Run(AAZCommand):
 
             disc_cluster_in_place_upgrade_properties = _builder.get(".properties{upgradeType:ClusterInPlaceUpgradeProperties}")
             if disc_cluster_in_place_upgrade_properties is not None:
-                disc_cluster_in_place_upgrade_properties.set_prop("componentName", AAZStrType, ".cluster_in_place_upgrade_properties.component_name")
-                disc_cluster_in_place_upgrade_properties.set_prop("targetBuildNumber", AAZStrType, ".cluster_in_place_upgrade_properties.target_build_number")
-                disc_cluster_in_place_upgrade_properties.set_prop("targetClusterVersion", AAZStrType, ".cluster_in_place_upgrade_properties.target_cluster_version")
-                disc_cluster_in_place_upgrade_properties.set_prop("targetOssVersion", AAZStrType, ".cluster_in_place_upgrade_properties.target_oss_version")
+                disc_cluster_in_place_upgrade_properties.set_prop("componentName", AAZStrType, ".in_place_upgrade.component_name")
+                disc_cluster_in_place_upgrade_properties.set_prop("targetBuildNumber", AAZStrType, ".in_place_upgrade.target_build_number")
+                disc_cluster_in_place_upgrade_properties.set_prop("targetClusterVersion", AAZStrType, ".in_place_upgrade.target_cluster_version")
+                disc_cluster_in_place_upgrade_properties.set_prop("targetOssVersion", AAZStrType, ".in_place_upgrade.target_oss_version")
 
             disc_hotfix_upgrade = _builder.get(".properties{upgradeType:HotfixUpgrade}")
             if disc_hotfix_upgrade is not None:
