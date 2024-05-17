@@ -18,14 +18,3 @@ def load_command_table(self, _):  # pylint: disable=unused-argument
     with self.command_group('hdinsight-on-aks', hdinsightonaks_cluster_sdk) as g:
         g.command('cluster node-profile create', 'create_compute_node_profile')
         
-    with self.command_group('hdinsight-on-aks cluster job', hdinsightonaks_cluster_sdk) as g:
-        g.command('wait', 'wait_for_job')
-
-    with self.command_group('hdinsight-on-aks cluster library', hdinsightonaks_cluster_sdk) as g:
-        g.command('wait', 'wait_for_job')
-
-    with self.command_group('hdinsight-on-aks cluster upgrade', hdinsightonaks_cluster_sdk) as g:
-        g.command('wait', 'wait_for_job')
-
-    with self.command_group('hdinsight-on-aks clusterpool upgrade', hdinsightonaks_cluster_sdk) as g:
-        g.command('wait', 'wait_for_job')
