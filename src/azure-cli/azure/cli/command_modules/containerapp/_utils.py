@@ -1189,7 +1189,7 @@ def safe_get(model, *keys, default=None):
         if model is None:
             return default
     value = model.get(keys[-1], default)
-    return default if not value else value
+    return default if value is None else value
 
 
 def safe_set(model, *keys, value):
