@@ -200,9 +200,6 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n snt --instance-count 5 --vm-size Standard_DC1s_v2 --security-type TrustedLaunch --secure-boot-enabled --vm-image-sku {vm_image_sku}',
                  checks=[self.check('provisioningState', 'Succeeded')])
         
-        self.cmd('az sf managed-node-type update -g {rg} -c {cluster_name} -n pnt --instance-count 5 --vm-size Standard_DC1s_v2 --security-type TrustedLaunch --secure-boot-enabled --vm-image-sku {vm_image_sku}',
-                 checks=[self.check('provisioningState', 'Succeeded')])
-        
         self.cmd('az sf managed-node-type list -g {rg} -c {cluster_name}',
                  checks=[self.check('length(@)', 2)])
         

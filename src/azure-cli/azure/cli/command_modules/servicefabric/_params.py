@@ -324,7 +324,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('vm_size', help='The size of virtual machines in the pool. All virtual machines in a pool are the same size.', default='Standard_D2')
         c.argument('vm_image_publisher', help='The publisher of the Azure Virtual Machines Marketplace image.', default='MicrosoftWindowsServer')
         c.argument('vm_image_offer', help='The offer type of the Azure Virtual Machines Marketplace image.', default='WindowsServer')
-        c.argument('vm_image_sku', help='The SKU of the Azure Virtual Machines Marketplace image.', default='2019-Datacenter')
+        c.argument('vm_image_sku', help='The SKU of the Azure Virtual Machines Marketplace image.', default='2022-Datacenter')
         c.argument('vm_image_version', help='The version of the Azure Virtual Machines Marketplace image. ', default='latest')
         c.argument('capacity', arg_type=capacity)
         c.argument('placement_property', arg_type=placement_property)
