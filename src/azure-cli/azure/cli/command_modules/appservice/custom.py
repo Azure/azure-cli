@@ -463,19 +463,20 @@ def check_language_runtime(cmd, resource_group_name, name):
     app = client.web_apps.get(resource_group_name, name)
     is_linux = app.reserved
     if is_functionapp(app):
-        is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
-        runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, is_linux)
-        runtime = runtime_info['app_runtime']
-        runtime_version = runtime_info['app_runtime_version']
-        functions_version = runtime_info['functionapp_version']
         try:
-            if not is_flex:
-                runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=is_linux, windows=(not is_linux))
-                runtime_helper.resolve(runtime, runtime_version, functions_version, is_linux)
-            else:
-                location = app.location
-                runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime, runtime_version)
-                runtime_helper.resolve(runtime, runtime_version)
+            is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+            runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, is_linux)
+            runtime = runtime_info['app_runtime']
+            runtime_version = runtime_info['app_runtime_version']
+            functions_version = runtime_info['functionapp_version']
+            if runtime and runtime_version:
+                if not is_flex:
+                    runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=is_linux, windows=(not is_linux))
+                    runtime_helper.resolve(runtime, runtime_version, functions_version, is_linux)
+                else:
+                    location = app.location
+                    runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime, runtime_version)
+                    runtime_helper.resolve(runtime, runtime_version)
         except ValidationError as e:
             logger.warning(e.error_msg)
 
@@ -676,7 +677,7 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
 
 
-def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=False):
+def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=True):
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot, track_status)
 
 
@@ -3973,7 +3974,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         if default_java_version:
             container_settings = default_java_version.stack_settings.windows_container_settings
             # TODO get the API to return java versions in a more parseable way
-            for java_version in ["1.8", "11", "17"]:
+            for java_version in ["1.8", "11", "17", "21"]:
                 java_container = container_settings.java_container
                 container_version = container_settings.java_container_version
                 if container_version.upper() == "SE":
@@ -4025,7 +4026,8 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         default_java_version_linux = next(iter(minor_java_versions), None)
         if default_java_version_linux:
             linux_container_settings = default_java_version_linux.stack_settings.linux_container_settings
-            runtimes = [(linux_container_settings.additional_properties.get("java17Runtime"), "17"),
+            runtimes = [(linux_container_settings.additional_properties.get("java21Runtime"), "21"),
+                        (linux_container_settings.additional_properties.get("java17Runtime"), "17"),
                         (linux_container_settings.java11_runtime, "11"),
                         (linux_container_settings.java8_runtime, "8")]
             for runtime_name, version in [(r, v) for (r, v) in runtimes if r is not None]:
@@ -4936,6 +4938,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     else:
         functionapp_def.kind = 'functionapp'
 
+    if site_config_dict.additional_properties:
+        for prop, value in site_config_dict.additional_properties.items():
+            snake_case_prop = _convert_camel_to_snake_case(prop)
+            setattr(site_config, snake_case_prop, value)
+
     # set site configs
     for prop, value in site_config_dict.as_dict().items():
         snake_case_prop = _convert_camel_to_snake_case(prop)
@@ -4993,10 +5000,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.location = location
 
         functionapp_def.managed_environment_id = managed_environment.id
-
-    # temporary workaround for dotnet-isolated linux consumption apps
-    if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
-        site_config.linux_fx_version = ''
 
     # adding app settings
     for app_setting, value in app_settings_dict.items():
@@ -5686,8 +5689,6 @@ def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name
     app = client.web_apps.get(resource_group_name, name)
     app_is_linux_webapp = is_linux_webapp(app)
     if not app_is_linux_webapp:
-        logger.warning("Deployment status tracking is currently only supported for linux webapps."
-                       " Resuming without tracking status.")
         response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                                      slot, timeout)
     else:
@@ -6361,7 +6362,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
-              app_service_environment=None, track_status=False, basic_auth=""):
+              app_service_environment=None, track_status=True, basic_auth=""):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -6774,7 +6775,7 @@ def perform_onedeploy_webapp(cmd,
                              ignore_stack=None,
                              timeout=None,
                              slot=None,
-                             track_status=False):
+                             track_status=True):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -8200,7 +8201,8 @@ def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux
 def _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, is_linux):
     if is_linux:
         if len(app_runtime.split('|')) < 2:
-            raise ValidationError(f"Runtime {app_runtime} is not supported.")
+            raise ValidationError("Could not detect runtime. To configure linuxFxVersion, "
+                                  "please visit https://aka.ms/linuxFxVersion")
         app_runtime_version = app_runtime.split('|')[1]
         app_runtime = app_runtime.split('|')[0].lower()
 

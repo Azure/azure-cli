@@ -165,7 +165,7 @@ examples:
 
 helps['sql db import'] = """
 type: command
-short-summary: Imports a bacpac into an existing database.
+short-summary: Imports a bacpac into a new database, or an existing empty database.
 examples:
   - name: Get an SAS key for use in import operation.
     text: |

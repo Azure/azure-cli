@@ -67,3 +67,21 @@ class AzureNetAppFilesResourceServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles check-quota-availability -g {rg} -l {loc} --type {resourceType} --name {resourceName}", checks=[
             self.check('isAvailable', True),
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_resource_regioninfo_', additional_tags={'owner': 'cli_test'})
+    def test_region_info_list(self):
+        self.kwargs.update({
+            'loc': LOCATION
+        })
+
+        region_info_list = self.cmd("az netappfiles resource region-info list -l {loc}").get_output_in_json()
+        assert len(region_info_list) == 1
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_resource_regioninfo_', additional_tags={'owner': 'cli_test'})
+    def test_region_info_show(self):
+        self.kwargs.update({
+            'loc': LOCATION
+        })
+
+        region_info = self.cmd("az netappfiles resource region-info default show -l {loc}").get_output_in_json()
+        assert region_info['name'] == LOCATION+ '/default'
