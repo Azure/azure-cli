@@ -716,7 +716,7 @@ def _configure_db_dw_create_params(
 
     # 'manual_cutover' and 'perform_cutover' are ignored when creating a database,
     # as they are only applicable during update
-    if create_mode in [CreateMode]:
+    if create_mode in CreateMode:
         arg_ctx.ignore('manual_cutover', 'perform_cutover')
 
     if engine == Engine.dw:
