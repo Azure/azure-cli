@@ -613,18 +613,18 @@ helps['sf managed-node-type vm-extension add'] = """
 type: command
 short-summary: Add an extension to the node type.
 examples:
-  - name: Add bg extension.
+  - name: Add custom script vm extension.
     text: >
-        az sf managed-node-type vm-extension add -g testRG -c testCluster -n snt --extension-name csetest --publisher Microsoft.Compute --extension-type BGInfo --type-handler-version 2.1 --auto-upgrade-minor-version
+        az sf managed-node-type vm-extension add -g testRG -c testCluster -n snt --extension-name  testextension --publisher Microsoft.Compute --extension-type CustomScriptExtension --type-handler-version 1.10 --auto-upgrade-minor-version --setup-order BeforeSFRuntime --provision-after-extension Microsoft.Azure.Geneva.GenevaMonitoring
 """
 
-helps['sf managed-node-type vm-extension delete'] = """
+helps['sf managed-node-type vm-extension update'] = """
 type: command
-short-summary: Delete an extension to the node type.
+short-summary: update existing vm extension on the node type.
 examples:
-  - name: Delete extension by name.
+  - name: update extension.
     text: >
-        az sf managed-node-type vm-extension delete -g testRG -c testCluster -n snt --extension-name csetest
+        az sf managed-node-type vm-extension update -g testrg -c testcluster -n pnt --extension-name testextension --type-handler-version 2.1 --auto-upgrade-minor-version --force-update-tag forced-update --setup-order BeforeSFRuntime --provision-after-extension Microsoft.Azure.Geneva.GenevaMonitoring
 """
 
 helps['sf managed-node-type vm-secret'] = """
