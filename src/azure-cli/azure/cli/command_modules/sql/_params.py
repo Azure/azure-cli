@@ -522,10 +522,11 @@ def _configure_db_dw_params(arg_ctx):
                      arg_type=database_encryption_protector_auto_rotation_param_type)
 
     arg_ctx.argument('manual-cutover',
-                    arg_type=manual_cutover_param_type)
+                     arg_type=manual_cutover_param_type)
 
     arg_ctx.argument('perform-cutover',
                      arg_type=perform_cutover_param_type)
+
 
 def _configure_db_dw_create_params(
         arg_ctx,
