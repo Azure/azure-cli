@@ -148,7 +148,6 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns zone create -n {zone} -g {rg}')
         self.cmd('network dns zone list -g {rg}',
                  checks=self.check('length(@)', 1))
-
         base_record_sets = 2
         self.cmd('network dns zone show -n {zone} -g {rg}',
                  checks=self.check('numberOfRecordSets', base_record_sets))
@@ -319,7 +318,7 @@ class DnsScenarioTest(ScenarioTest):
 
         self.cmd('network dns zone delete -g {rg} -n {child_zone_name} -y',
                  checks=self.is_empty())
-        
+
     @ResourceGroupPreparer(name_prefix='cli_test_dnssec')
     def test_dns_dnssec(self, resource_group):
         self.kwargs["zone"] = "myzone.com"
@@ -327,7 +326,6 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns dnssec-config create -g {rg} -z {zone}', checks=self.check('provisioningState', 'Succeeded'))
         self.cmd('network dns dnssec-config show -g {rg} -z {zone}', checks=self.check('length(signingKeys)', 2))
         self.cmd('network dns dnssec-config delete -g {rg} -z {zone} -y', checks=self.is_empty())
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_dns_alias')
     def test_dns_alias(self, resource_group):
@@ -348,7 +346,7 @@ class DnsScenarioTest(ScenarioTest):
                      self.check("targetResource.id.contains(@, '{tm}')", True),
                      self.check('trafficManagementProfile.id', None)
                  ]).get_output_in_json()
-        
+
         references = self.cmd('az network dns list-references --parameters {tm_id}',
                  checks=self.check('length(dnsResourceReferences)', 1)).get_output_in_json()
 
@@ -391,6 +389,64 @@ class DnsScenarioTest(ScenarioTest):
                      self.check('trafficManagementProfile.id', None),
                      self.check('targetResource.id', None)
                  ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dns_zone_update')
+    def test_dns_zone_update(self, resource_group):
+        self.kwargs['zone'] = 'myzonex.com'
+
+        self.cmd('network dns zone create -n {zone} -g {rg}')
+        self.cmd('network dns zone update -n {zone} -g {rg} --tags tag1=foo',
+                 checks=self.check('tags.tag1', 'foo'))
+        self.cmd('network dns zone update -n {zone} -g {rg} --set tags.tag1=bar --set tags.tag2=foo',
+                 checks=[
+                     self.check('tags.tag1', 'bar'),
+                     self.check('tags.tag2', 'foo')
+                ])
+        self.cmd('network dns zone update -n {zone} -g {rg} --remove tags.tag1',
+                 checks=self.check('tags.tag1', None))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dns_zone_commands_with_dnssec_zone')
+    def test_dns_zone_commands_with_dnssec_zone(self, resource_group):
+        self.kwargs['zone'] = 'myzonex.com'
+
+        self.cmd('network dns zone create -n {zone} -g {rg}')
+        self.cmd('network dns dnssec-config create -g {rg} -z {zone}', checks=self.check('provisioningState', 'Succeeded'))
+
+        self.cmd('network dns zone create -n {zone} -g {rg} --tags "foo=bar"',
+                 checks=[
+                     self.check('tags.foo', 'bar'),
+                     self.check('length(signingKeys)', 2)
+                ])
+        self.cmd('network dns zone update -n {zone} -g {rg} --set tags.tag1=bar --set tags.tag2=foo',
+                 checks=[
+                     self.check('tags.tag1', 'bar'),
+                     self.check('tags.tag2', 'foo'),
+                     self.check('length(signingKeys)', 2)
+                ])
+        self.cmd('network dns zone update -n {zone} -g {rg} --remove tags.tag1',
+                 checks=[
+                     self.check('tags.tag1', None),
+                     self.check('tags.tag2', 'foo'),
+                     self.check('length(signingKeys)', 2)
+                ])
+        self.cmd('network dns zone show -n {zone} -g {rg}',
+                 checks=self.check('length(signingKeys)', 2))
+        self.cmd('network dns zone delete -g {rg} -n {zone} -y',
+                 checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dns_zone_update_if_match')
+    def test_dns_zone_update_if_match(self, resource_group):
+        self.kwargs['zone'] = 'myzonex.com'
+
+        create_response = self.cmd('network dns zone create -n {zone} -g {rg}').get_output_in_json()
+        self.kwargs['etag'] = create_response['etag']
+        self.cmd('network dns zone update -n {zone} -g {rg} --if-match {etag} --tags tag1=foo',
+                 checks=self.check('tags.tag1', 'foo'))
+
+        self.kwargs['etag'] = 'dummy'
+        from azure.core.exceptions import HttpResponseError
+        with self.assertRaisesRegex(HttpResponseError, 'PreconditionFailed'):
+            self.cmd('network dns zone update -n {zone} -g {rg} --if-match {etag} --tags tag2=foo')
 
 
 class DnsParseZoneFiles(unittest.TestCase):

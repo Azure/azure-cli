@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.60.0"
+VERSION = "2.61.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -74,7 +74,7 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
     'azure-mgmt-cognitiveservices~=13.5.0',
-    'azure-mgmt-compute~=30.6.0',
+    'azure-mgmt-compute~=31.0.0',
     'azure-mgmt-containerinstance==10.1.0',
     'azure-mgmt-containerregistry==10.3.0',
     'azure-mgmt-containerservice~=30.0.0',
@@ -105,18 +105,18 @@ DEPENDENCIES = [
     'azure-mgmt-netapp~=10.1.0',
     'azure-mgmt-policyinsights==1.1.0b4',
     'azure-mgmt-privatedns~=1.0.0',
-    'azure-mgmt-rdbms~=10.2.0b14',
+    'azure-mgmt-rdbms~=10.2.0b16',
     'azure-mgmt-recoveryservicesbackup~=9.1.0',
     'azure-mgmt-recoveryservices~=3.0.0',
     'azure-mgmt-redis~=14.3.0',
     'azure-mgmt-redhatopenshift~=1.4.0',
-    'azure-mgmt-resource==23.1.0b2',
+    'azure-mgmt-resource==23.1.1',
     'azure-mgmt-search~=9.0',
-    'azure-mgmt-security==5.0.0',
+    'azure-mgmt-security==6.0.0',
     'azure-mgmt-servicebus~=8.2.0',
     'azure-mgmt-servicefabricmanagedclusters==2.0.0b6',
     'azure-mgmt-servicelinker==1.2.0b2',
-    'azure-mgmt-servicefabric~=1.0.0',
+    'azure-mgmt-servicefabric~=2.1.0',
     'azure-mgmt-signalr==2.0.0b1',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
     'azure-mgmt-sql==4.0.0b16',
@@ -146,6 +146,9 @@ DEPENDENCIES = [
     'semver==2.13.0',
     'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
+    # Even though knack already depends on tabulate, profile module directly uses it for interactive subscription
+    # selection
+    'tabulate',
     'urllib3',
     'websocket-client~=1.3.1',
     'xmltodict~=0.12'
