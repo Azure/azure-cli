@@ -504,30 +504,31 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         location = self.postgres_location
         backup_location = self.postgres_backup_location
         replication_role = 'AsyncReplica'
+        scope = '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group)
 
+        # Create identity and assign role
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                        .format(key_name, vault_name)).get_output_in_json()
 
         identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_name, location)).get_output_in_json()
+        self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( identity['principalId'], scope))
+        self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( identity['principalId'], scope))
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                 .format(resource_group, vault_name, identity['principalId']))
-
+        # Create backup identity and assign role
         backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                                   .format(backup_key_name, backup_vault_name)).get_output_in_json()
 
         backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
+        self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( backup_identity['principalId'], scope))
+        self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( backup_identity['principalId'], scope))
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                    .format(resource_group, backup_vault_name, backup_identity['principalId']))
-        
+        # Create identity 2 and assign role
         key_2 = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                             .format(key_2_name, vault_name)).get_output_in_json()
 
         identity_2 = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_2_name, location)).get_output_in_json()
-
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                    .format(resource_group, vault_name, identity_2['principalId']))
+        self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( identity_2['principalId'], scope))
+        self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( identity_2['principalId'], scope))
 
         def invalid_input_tests():
             # key or identity only
