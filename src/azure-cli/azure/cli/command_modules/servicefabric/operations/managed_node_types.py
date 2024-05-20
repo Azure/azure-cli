@@ -66,7 +66,7 @@ def create_node_type(cmd,
         vm_image_offer = "WindowsServer"
 
     if vm_image_sku is None:
-        vm_image_sku = "2019-Datacenter"
+        vm_image_sku = "2022-Datacenter"
 
     if vm_image_version is None:
         vm_image_version = "latest"
