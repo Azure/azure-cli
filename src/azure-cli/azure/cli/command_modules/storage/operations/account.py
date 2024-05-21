@@ -395,7 +395,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, upgrade_to_storagev2=None,
                            yes=None, publish_ipv6_endpoint=None):
-    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
+    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet, Kind = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet', 'Kind')
 
@@ -678,10 +678,10 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if enable_local_user is not None:
         params.is_local_user_enabled = enable_local_user
 
-    if publishIpv6Endpoint is not None:
+    if publish_ipv6_endpoint is not None:
         DualStackEndpointPreference = cmd.get_models('DualStackEndpointPreference')
         params.dual_stack_endpoint_preference = DualStackEndpointPreference(
-            publish_ipv6_endpoint=publishIpv6Endpoint
+            publish_ipv6_endpoint=publish_ipv6_endpoint
         )
 
     return params
@@ -775,7 +775,7 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
     if ipv6_address:
         to_remove = [ip_network(x) for x in ipv6_address]
         rules.ipv6_rules = list(filter(lambda x: all(ip_network(x.ip_address_or_range) != i for i in to_remove),
-                                     rules.ipv6_rules))
+                                       rules.ipv6_rules))
 
     if resource_id:
         rules.resource_access_rules = [x for x in rules.resource_access_rules if
