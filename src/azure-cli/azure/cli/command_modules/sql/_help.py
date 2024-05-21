@@ -539,6 +539,10 @@ examples:
     text: az sql db update -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
   - name: Update exhaustion behavior of free limit database to BillOverUsage
     text: az sql db update -g mygroup -s myserver -n mydb --free-limit-exhaustion-behavior BillOverUsage
+  - name: Update a database to Hyperscale edition, 2 vcores with Gen5 hardware, with manual cutover option
+    text: az sql db update -g mygroup -s myserver -n mydb --edition Hyperscale --service-objective HS_Gen5_2 --manual-cutover
+  - name: Trigger cutover with perform cutover option when update database to Hyperscale edition is in progress
+    text: az sql db update -g mygroup -s myserver -n mydb --perform-cutover
 
 """
 
