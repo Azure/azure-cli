@@ -102,6 +102,9 @@ class ContainerAppEnvDecorator(BaseResource):
     def get_argument_mtls_enabled(self):
         return self.get_param("mtls_enabled")
 
+    def get_argument_p2p_encryption_enabled(self):
+        return self.get_param("p2p_encryption_enabled")
+
     def get_argument_workload_profile_type(self):
         return self.get_param("workload_profile_type")
 
@@ -113,6 +116,16 @@ class ContainerAppEnvDecorator(BaseResource):
 
     def get_argument_max_nodes(self):
         return self.get_param("max_nodes")
+
+    def set_up_peer_to_peer_encryption(self):
+        is_p2p_encryption_enabled = self.get_argument_p2p_encryption_enabled()
+        is_mtls_enabled = self.get_argument_mtls_enabled()
+
+        if is_p2p_encryption_enabled is not None:
+            safe_set(self.managed_env_def, "properties", "peerTrafficConfiguration", "encryption", "enabled", value=is_p2p_encryption_enabled)
+
+        if is_mtls_enabled is not None:
+            safe_set(self.managed_env_def, "properties", "peerAuthentication", "mtls", "enabled", value=is_mtls_enabled)
 
 
 class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
@@ -143,6 +156,10 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         location = validate_environment_location(self.cmd, location)
         _ensure_location_allowed(self.cmd, location, CONTAINER_APPS_RP, "managedEnvironments")
         self.set_argument_location(location)
+
+        # validate mtls and p2p traffic encryption
+        if self.get_argument_p2p_encryption_enabled() is False and self.get_argument_mtls_enabled() is True:
+            raise ValidationError("Cannot use '--enable-mtls' with '--enable-peer-to-peer-encryption False'")
 
     def create(self):
         try:
@@ -190,8 +207,7 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         # Vnet
         self.set_up_vnet_configuration()
 
-        if self.get_argument_mtls_enabled() is not None:
-            safe_set(self.managed_env_def, "properties", "peerAuthentication", "mtls", "enabled", value=self.get_argument_mtls_enabled())
+        self.set_up_peer_to_peer_encryption()
 
     def set_up_workload_profiles(self):
         if self.get_argument_enable_workload_profiles():
@@ -273,6 +289,10 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
                 raise ValidationError(
                     "Must provide --logs-workspace-id and --logs-workspace-key if updating logs destination to type 'log-analytics'.")
 
+        # validate mtls and p2p traffic encryption
+        if self.get_argument_p2p_encryption_enabled() is False and self.get_argument_mtls_enabled() is True:
+            raise ValidationError("Cannot use '--enable-mtls' with '--enable-peer-to-peer-encryption False'")
+
     def construct_payload(self):
         try:
             r = self.client.show(cmd=self.cmd, resource_group_name=self.get_argument_resource_group_name(), name=self.get_argument_name())
@@ -293,8 +313,7 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
         # workload Profiles
         self.set_up_workload_profiles(r)
 
-        if self.get_argument_mtls_enabled() is not None:
-            safe_set(self.managed_env_def, "properties", "peerAuthentication", "mtls", "enabled", value=self.get_argument_mtls_enabled())
+        self.set_up_peer_to_peer_encryption()
 
     def set_up_app_log_configuration(self):
         logs_destination = self.get_argument_logs_destination()

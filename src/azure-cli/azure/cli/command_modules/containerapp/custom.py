@@ -831,6 +831,7 @@ def create_managed_environment(cmd,
                                certificate_password=None,
                                enable_workload_profiles=True,
                                mtls_enabled=None,
+                               p2p_encryption_enabled=None,
                                no_wait=False):
     raw_parameters = locals()
     containerapp_env_create_decorator = ContainerAppEnvCreateDecorator(
@@ -865,6 +866,7 @@ def update_managed_environment(cmd,
                                min_nodes=None,
                                max_nodes=None,
                                mtls_enabled=None,
+                               p2p_encryption_enabled=None,
                                no_wait=False):
     raw_parameters = locals()
     containerapp_env_update_decorator = ContainerAppEnvUpdateDecorator(
