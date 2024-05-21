@@ -371,6 +371,14 @@ class Create(AAZCommand):
                 minimum=0,
             ),
         )
+        policy_settings.js_challenge_cookie_expiration_in_mins = AAZIntArg(
+            options=["jscce-in-mins", "js-challenge-cookie-expiration-in-mins"],
+            help="Web Application Firewall JavaScript Challenge Cookie Expiration time in minutes.",
+            fmt=AAZIntArgFormat(
+                maximum=1440,
+                minimum=5,
+            ),
+        )
         policy_settings.log_scrubbing = AAZObjectArg(
             options=["log-scrubbing"],
             help="To scrub sensitive log fields",
@@ -673,6 +681,7 @@ class Create(AAZCommand):
                 policy_settings.set_prop("customBlockResponseBody", AAZStrType, ".custom_body")
                 policy_settings.set_prop("customBlockResponseStatusCode", AAZIntType, ".custom_status_code")
                 policy_settings.set_prop("fileUploadLimitInMb", AAZIntType, ".file_upload_limit_in_mb")
+                policy_settings.set_prop("jsChallengeCookieExpirationInMins", AAZIntType, ".js_challenge_cookie_expiration_in_mins")
                 policy_settings.set_prop("logScrubbing", AAZObjectType, ".log_scrubbing")
                 policy_settings.set_prop("maxRequestBodySizeInKb", AAZIntType, ".max_request_body_size_in_kb")
                 policy_settings.set_prop("mode", AAZStrType, ".mode")
