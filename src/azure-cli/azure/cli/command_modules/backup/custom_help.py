@@ -50,7 +50,9 @@ operation_name_map = {"deleteProtection": rsc_type + "/backupFabrics/protectionC
                       "RecoveryServicesStopProtection": rsc_type +
                       "/backupFabrics/protectionContainers/protectedItems/write#stopProtectionWithRetainData",
                       "RecoveryServicesRestore": rsc_type +
-                      "/backupFabrics/protectionContainers/protectedItems/recoveryPoints/restore/action"}
+                      "/backupFabrics/protectionContainers/protectedItems/recoveryPoints/restore/action",
+                      "RecoveryServicesModifyEncryptionSettings": rsc_type +
+                      "/write#modifyEncryptionSettings"}
 
 # Client Utilities
 
