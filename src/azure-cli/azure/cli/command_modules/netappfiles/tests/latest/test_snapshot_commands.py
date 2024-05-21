@@ -68,7 +68,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         assert len(snapshot_list) == 1
 
         # delete snapshot
-        self.cmd("az netappfiles snapshot delete -g {rg} -a %s -p %s -v %s -s %s" %
+        self.cmd("az netappfiles snapshot delete -g {rg} -a %s -p %s -v %s -s %s -y" %
                  (account_name, pool_name, volume_name, snapshot_name))
         snapshot_list = self.cmd("az netappfiles snapshot list -g {rg} -a %s -p %s -v %s" %
                                  (account_name, pool_name, volume_name)).get_output_in_json()
@@ -99,7 +99,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         snapshot = self.cmd("az netappfiles snapshot show -g {rg} -a %s -p %s -v %s -s %s" %
                             (account_name, pool_name, volume_name, snapshot_name)).get_output_in_json()
         restored_volume = self.create_volume(account_name, pool_name, restored_volume_name,
-                                             snapshot_id=snapshot["snapshotId"], volume_only=volume_only)
+                                             snapshot_id=snapshot['id'], volume_only=volume_only)
         assert restored_volume['name'] == account_name + '/' + pool_name + '/' + restored_volume_name
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
@@ -125,7 +125,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         snapshot = self.cmd("az netappfiles snapshot show -g {rg} -a %s -p %s -v %s -s %s" %
                             (account_name, pool_name, volume_name, snapshot_name)).get_output_in_json()
         self.cmd("az netappfiles volume revert -g {rg} -a %s -p %s -v %s -s %s" %
-                 (account_name, pool_name, volume_name, snapshot["snapshotId"]))
+                 (account_name, pool_name, volume_name, snapshot['id']))
         snapshot_list = self.cmd("az netappfiles snapshot list -g {rg} -a %s -p %s -v %s" %
                                  (account_name, pool_name, volume_name)).get_output_in_json()
         assert len(snapshot_list) == 1

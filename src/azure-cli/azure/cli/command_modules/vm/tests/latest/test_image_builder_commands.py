@@ -28,6 +28,7 @@ WIN_IMAGE_SOURCE = "MicrosoftWindowsServer:WindowsServer:2019-Datacenter:2019.0.
 INDEX_FILE = "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/exampleArtifacts/buildArtifacts/index.html"
 
 
+@unittest.skip("https://github.com/Azure/azure-cli/issues/28909")
 class ImageTemplateTest(ScenarioTest):
     def _assign_ib_permissions(self, rg):   # need to manually give IB service permission to add image to grou
         subscription_id = self.get_subscription_id()
@@ -658,6 +659,7 @@ class ImageTemplateTest(ScenarioTest):
                  ])
         self.cmd('image builder trigger delete --image-template-name {tmpl} -g {rg} --trigger-name {trigger} --yes')
 
+    @unittest.skip('https://github.com/Azure/azure-cli/issues/28677')
     @ResourceGroupPreparer(name_prefix='img_tmpl_identity_')
     def test_image_build_identity(self, resource_group):
         self._identity_role(resource_group)

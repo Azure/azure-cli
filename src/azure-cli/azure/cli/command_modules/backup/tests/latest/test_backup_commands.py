@@ -131,30 +131,26 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         storage_model_types = [e.value for e in StorageType]
-        vault_properties = self.cmd('backup vault backup-properties show -n {vault1} -g {rg} --query [0]', checks=[
-            JMESPathCheckExists("contains({}, properties.storageModelType)".format(storage_model_types)),
-            self.check('properties.storageTypeState', 'Unlocked'),
-            self.check('resourceGroup', '{rg}')
-        ]).get_output_in_json()
+        vault_properties_redundancy = self.cmd('backup vault show -n {vault1} -g {rg} --query "properties.redundancySettings"').get_output_in_json()
 
-        if vault_properties['properties']['storageModelType'] == StorageType.geo_redundant.value:
+        if vault_properties_redundancy['standardTierStorageRedundancy'] == StorageType.geo_redundant.value:
             new_storage_model = StorageType.locally_redundant.value
         else:
             new_storage_model = StorageType.geo_redundant.value
 
         self.kwargs['model'] = new_storage_model
-        self.cmd('backup vault backup-properties set -n {vault1} -g {rg} --backup-storage-redundancy {model}')
+        self.cmd('backup vault update -n {vault1} -g {rg} --backup-storage-redundancy {model}')
         time.sleep(300)
-        self.cmd('backup vault backup-properties show -n {vault1} -g {rg} --query [0]', checks=[
-            self.check('properties.storageModelType', new_storage_model)
+        self.cmd('backup vault show -n {vault1} -g {rg} --query "properties.redundancySettings"', checks=[
+            self.check('standardTierStorageRedundancy', new_storage_model)
         ])
 
         new_storage_model = StorageType.zone_redundant.value
-        self.kwargs['model'] = StorageType.zone_redundant.value
-        self.cmd('backup vault backup-properties set -n {vault1} -g {rg} --backup-storage-redundancy {model}')
+        self.kwargs['model'] = new_storage_model
+        self.cmd('backup vault update -n {vault1} -g {rg} --backup-storage-redundancy {model}')
         time.sleep(300)
-        self.cmd('backup vault backup-properties show -n {vault1} -g {rg} --query [0]', checks=[
-            self.check('properties.storageModelType', new_storage_model)
+        self.cmd('backup vault show -n {vault1} -g {rg} --query "properties.redundancySettings"', checks=[
+            self.check('standardTierStorageRedundancy', new_storage_model)
         ])
 
         self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --hybrid-backup-security-features Disable', checks=[
@@ -767,8 +763,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
            'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
            'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name
        })
-       self.cmd('backup vault backup-properties set -g {rg} -n {vault} --cross-region-restore-flag true', checks=[
-           self.check("properties.crossRegionRestoreFlag", True)
+       self.cmd('backup vault update -g {rg} -n {vault} --cross-region-restore-flag Enabled', checks=[
+           self.check('properties.redundancySettings.crossRegionRestore', 'Enabled')
        ]).get_output_in_json()
        time.sleep(300)
 
@@ -815,8 +811,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name
         })
 
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --cross-region-restore-flag true', checks=[
-            self.check("properties.crossRegionRestoreFlag", True)
+        self.cmd('backup vault update -g {rg} -n {vault} --cross-region-restore-flag Enabled', checks=[
+            self.check('properties.redundancySettings.crossRegionRestore', 'Enabled')
         ]).get_output_in_json()
         time.sleep(300)
 
@@ -1400,12 +1396,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # associate vault with an already present resource guard
         self.cmd('backup vault resource-guard-mapping update -g {rg} -n {vault} --resource-guard-id {resource_graph}', checks=[
             self.check('name', 'VaultProxy'),
-            self.check('length(properties.resourceGuardOperationDetails)', 6)
+            self.check('length(properties.resourceGuardOperationDetails)', 9)
         ])
 
         self.cmd('backup vault resource-guard-mapping show -g {rg} -n {vault}', checks=[
             self.check('name', 'VaultProxy'),
-            self.check('length(properties.resourceGuardOperationDetails)', 6)
+            self.check('length(properties.resourceGuardOperationDetails)', 9)
         ])
 
         # Try disabling soft delete

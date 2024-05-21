@@ -41,10 +41,11 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
         while containerapp_env["properties"]["provisioningState"].lower() in ["waiting", "inprogress"]:
             time.sleep(5)
             containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
-        time.sleep(30)
+        time.sleep(60)
 
         self.cmd('containerapp env show -n {} -g {}'.format(env, resource_group), checks=[
             JMESPathCheck('name', env),
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
             JMESPathCheck('properties.workloadProfiles[0].name', "Consumption", case_sensitive=False),
             JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
         ])
@@ -63,7 +64,13 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
         while containerapp_env["properties"]["provisioningState"].lower() in ["waiting", "inprogress"]:
             time.sleep(5)
             containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
-        time.sleep(30)
+        time.sleep(60)
+        self.cmd('containerapp env show -n {} -g {}'.format(env, resource_group), checks=[
+            JMESPathCheck('name', env),
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck('properties.workloadProfiles[0].name', "Consumption", case_sensitive=False),
+            JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
+        ])
 
         self.cmd("az containerapp env workload-profile show -g {} -n {} --workload-profile-name my-d4 ".format(resource_group, env), checks=[
             JMESPathCheck("properties.name", "my-d4"),
@@ -79,7 +86,13 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
         while containerapp_env["properties"]["provisioningState"].lower() in ["waiting", "inprogress"]:
             time.sleep(5)
             containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
-        time.sleep(30)
+        time.sleep(60)
+        self.cmd('containerapp env show -n {} -g {}'.format(env, resource_group), checks=[
+            JMESPathCheck('name', env),
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck('properties.workloadProfiles[0].name', "Consumption", case_sensitive=False),
+            JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
+        ])
 
         self.cmd("az containerapp env workload-profile show -g {} -n {} --workload-profile-name my-d4 ".format(resource_group, env), checks=[
             JMESPathCheck("properties.name", "my-d4"),
@@ -202,9 +215,18 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
         env = self.create_random_name(prefix='env', length=24)
         app = self.create_random_name(prefix='yaml', length=24)
 
-        self.cmd('containerapp env create -g {} -n {} --location {}  --logs-destination none --enable-workload-profiles'.format(resource_group, env, TEST_LOCATION))
+        containerapp_env = self.cmd('containerapp env create -g {} -n {} --location {}  --logs-destination none --enable-workload-profiles'.format(resource_group, env, TEST_LOCATION)).get_output_in_json()
+        while containerapp_env["properties"]["provisioningState"].lower() in ["waiting", "inprogress"]:
+            time.sleep(5)
+            containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
+        time.sleep(120)
 
-        containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
+        self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env), checks=[
+            JMESPathCheck('name', env),
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck('properties.workloadProfiles[0].name', "Consumption", case_sensitive=False),
+            JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
+        ]).get_output_in_json()
 
         workload_profile_name = "my-e16"
 
@@ -216,6 +238,13 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
             time.sleep(5)
             containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
         time.sleep(30)
+
+        self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env), checks=[
+            JMESPathCheck('name', env),
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck('properties.workloadProfiles[0].name', "Consumption", case_sensitive=False),
+            JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
+        ]).get_output_in_json()
 
         self.cmd("az containerapp env workload-profile show -g {} -n {} --workload-profile-name my-e16 ".format(resource_group, env), checks=[
             JMESPathCheck("properties.name", workload_profile_name),
@@ -295,7 +324,7 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
         clean_up_test_file(containerapp_file_name_01)
         clean_up_test_file(containerapp_file_name_02)
         self.cmd('containerapp delete -g {} -n {} --yes'.format(resource_group, app), expect_failure=False)
-        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env), expect_failure=False)
+        self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env), expect_failure=False)
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus")
@@ -318,6 +347,7 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
 
         self.cmd('containerapp env show -n {} -g {}'.format(env, resource_group), checks=[
             JMESPathCheck('name', env),
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
             JMESPathCheck('properties.workloadProfiles[0].name', "Consumption", case_sensitive=False),
             JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
         ])
@@ -434,8 +464,22 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
             JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
         ])
 
-        self.cmd('containerapp env create -g {} -n {} --enable-workload-profiles false --logs-destination none'.format(resource_group, env), expect_failure=True)
-        self.cmd('containerapp env create -g {} -n {} -w false --logs-destination none'.format(resource_group, env), expect_failure=True)
+        self.cmd('containerapp env create -g {} -n {} --enable-workload-profiles false --logs-destination none'.format(
+            resource_group, env), expect_failure=False, checks=[
+            JMESPathCheck("name", env),
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("length(properties.workloadProfiles)", 1),
+            JMESPathCheck('properties.workloadProfiles[0].name', "Consumption", case_sensitive=False),
+            JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
+        ])
+        self.cmd('containerapp env create -g {} -n {} -w false --logs-destination none'.format(resource_group, env).format(
+            resource_group, env), expect_failure=False, checks=[
+            JMESPathCheck("name", env),
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("length(properties.workloadProfiles)", 1),
+            JMESPathCheck('properties.workloadProfiles[0].name', "Consumption", case_sensitive=False),
+            JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
+        ])
 
         self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env), expect_failure=False)
 

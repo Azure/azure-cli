@@ -1849,6 +1849,51 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account migration show -n default -g {rg} --account-name {sa}',
                  checks=[JMESPathCheck('migrationStatus', 'SubmittedForConversion')])
 
+    @ResourceGroupPreparer(location='eastus')
+    def test_storage_account_upgrade_to_storagev2(self, resource_group):
+        self.kwargs.update({
+            'sastorage': self.create_random_name('sa', 24),
+            'sastoragewithtier': self.create_random_name('sa', 24),
+            'sablobstorage': self.create_random_name('sa', 24),
+            'sablobstoragewithtier': self.create_random_name('sa', 24),
+            'sastoragev2': self.create_random_name('sa', 24)
+        })
+        # Storagev1
+        self.cmd('az storage account create --kind Storage -n {sastorage} -g {rg}',
+                 checks=[JMESPathCheck('kind', 'Storage'),
+                         JMESPathCheck('accessTier', None)])
+        self.cmd('az storage account update --upgrade-to-storagev2 -n {sastorage} -g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Hot')])
+
+        self.cmd('az storage account create --kind Storage -n {sastoragewithtier} -g {rg}')
+        self.cmd('az storage account update --upgrade-to-storagev2 --access-tier Cool -n {sastoragewithtier} '
+                 '-g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Cool')])
+        # BlobStorage
+        self.cmd('az storage account create --kind BlobStorage --access-tier Cool -n {sablobstorage} -g {rg}',
+                 checks=[JMESPathCheck('kind', 'BlobStorage'),
+                         JMESPathCheck('accessTier', 'Cool')])
+        self.cmd('az storage account update --upgrade-to-storagev2 -n {sablobstorage} -g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Hot')])
+
+        self.cmd('az storage account create --kind Storage -n {sablobstoragewithtier} -g {rg}')
+        self.cmd('az storage account update --upgrade-to-storagev2 --access-tier Cool -n {sablobstoragewithtier} '
+                 '-g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Cool')])
+
+        # StorageV2
+        self.cmd('az storage account create -n {sastoragev2} -g {rg}',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Hot')])
+        self.cmd('az storage account update --access-tier Cool -n {sastoragev2} -g {rg} -y',
+                 checks=[JMESPathCheck('accessTier', 'Cool')])
+
+
+
 
 class RoleScenarioTest(LiveScenarioTest):
     def run_under_service_principal(self):

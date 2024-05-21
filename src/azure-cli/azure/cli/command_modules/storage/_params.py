@@ -518,6 +518,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
+        c.argument('upgrade_to_storagev2', arg_type=get_three_state_flag(),
+                   help='Upgrade Storage Account Kind to StorageV2.')
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(), min_api='2023-01-01',
                    arg_group='IPv6 Endpoint',
                    help='A boolean flag which indicates whether IPv6 storage endpoints are to be published.')
@@ -1549,6 +1552,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container set-permission') as c:
         c.ignore('signed_identifiers')
 
+    for item in ['set', 'show']:
+        with self.argument_context('storage container {}-permission'.format(item)) as c:
+            c.extra('auth_mode', arg_type=get_enum_type(['key']),
+                    help='The mode in which to run the command. The legacy "key" mode will attempt to query for '
+                         'an account key if no authentication parameters for the account are provided. '
+                         'Environment variable: AZURE_STORAGE_AUTH_MODE')
+            c.ignore('sas_token')
+
     with self.argument_context('storage container') as c:
         c.argument('account_name', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
         c.argument('resource_group_name', required=False, validator=process_resource_group)
@@ -1588,11 +1599,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('start', type=get_datetime_type(False),
                    help='start UTC datetime (Y-m-d\'T\'H:M:S\'Z\'). Defaults to time of request.')
         c.argument('expiry', type=get_datetime_type(False), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
+        c.ignore('sas_token')
 
     for item in ['create', 'delete', 'list', 'show', 'update']:
         with self.argument_context('storage container policy {}'.format(item)) as c:
             c.extra('container_name', container_name_type, required=True)
             c.extra('lease', options_list='--lease-id', help='The container lease ID.')
+            c.extra('auth_mode', arg_type=get_enum_type(['key']),
+                    help='The mode in which to run the command. The legacy "key" mode will attempt to query for '
+                         'an account key if no authentication parameters for the account are provided. '
+                         'Environment variable: AZURE_STORAGE_AUTH_MODE')
 
     with self.argument_context('storage container generate-sas', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from .completers import get_storage_acl_name_completion_list

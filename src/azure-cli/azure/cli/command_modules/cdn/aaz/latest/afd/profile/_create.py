@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2024-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2024-02-01"],
         ]
     }
 
@@ -99,6 +99,11 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.log_scrubbing = AAZObjectArg(
+            options=["--log-scrubbing"],
+            arg_group="Properties",
+            help="Defines rules that scrub sensitive fields in the Azure Front Door profile logs.",
+        )
         _args_schema.origin_response_timeout_seconds = AAZIntArg(
             options=["--origin-response-timeout-seconds"],
             arg_group="Properties",
@@ -106,6 +111,43 @@ class Create(AAZCommand):
             fmt=AAZIntArgFormat(
                 minimum=16,
             ),
+        )
+
+        log_scrubbing = cls._args_schema.log_scrubbing
+        log_scrubbing.scrubbing_rules = AAZListArg(
+            options=["scrubbing-rules"],
+            help="List of log scrubbing rules applied to the Azure Front Door profile logs.",
+        )
+        log_scrubbing.state = AAZStrArg(
+            options=["state"],
+            help="State of the log scrubbing config. Default value is Enabled.",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+
+        scrubbing_rules = cls._args_schema.log_scrubbing.scrubbing_rules
+        scrubbing_rules.Element = AAZObjectArg()
+
+        _element = cls._args_schema.log_scrubbing.scrubbing_rules.Element
+        _element.match_variable = AAZStrArg(
+            options=["match-variable"],
+            help="The variable to be scrubbed from the logs.",
+            required=True,
+            enum={"QueryStringArgNames": "QueryStringArgNames", "RequestIPAddress": "RequestIPAddress", "RequestUri": "RequestUri"},
+        )
+        _element.selector = AAZStrArg(
+            options=["selector"],
+            help="When matchVariable is a collection, operator used to specify which elements in the collection this rule applies to.",
+        )
+        _element.selector_match_operator = AAZStrArg(
+            options=["selector-match-operator"],
+            help="When matchVariable is a collection, operate on the selector to specify which elements in the collection this rule applies to.",
+            required=True,
+            enum={"EqualsAny": "EqualsAny"},
+        )
+        _element.state = AAZStrArg(
+            options=["state"],
+            help="Defines the state of a log scrubbing rule. Default value is enabled.",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
 
         # define Arg Group "Sku"
@@ -200,7 +242,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-02-01",
                     required=True,
                 ),
             }
@@ -242,7 +284,24 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("logScrubbing", AAZObjectType, ".log_scrubbing")
                 properties.set_prop("originResponseTimeoutSeconds", AAZIntType, ".origin_response_timeout_seconds")
+
+            log_scrubbing = _builder.get(".properties.logScrubbing")
+            if log_scrubbing is not None:
+                log_scrubbing.set_prop("scrubbingRules", AAZListType, ".scrubbing_rules")
+                log_scrubbing.set_prop("state", AAZStrType, ".state")
+
+            scrubbing_rules = _builder.get(".properties.logScrubbing.scrubbingRules")
+            if scrubbing_rules is not None:
+                scrubbing_rules.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.logScrubbing.scrubbingRules[]")
+            if _elements is not None:
+                _elements.set_prop("matchVariable", AAZStrType, ".match_variable", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("selector", AAZStrType, ".selector")
+                _elements.set_prop("selectorMatchOperator", AAZStrType, ".selector_match_operator", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("state", AAZStrType, ".state")
 
             sku = _builder.get(".sku")
             if sku is not None:
@@ -364,6 +423,9 @@ class _CreateHelper:
             serialized_name="frontDoorId",
             flags={"read_only": True},
         )
+        properties.log_scrubbing = AAZObjectType(
+            serialized_name="logScrubbing",
+        )
         properties.origin_response_timeout_seconds = AAZIntType(
             serialized_name="originResponseTimeoutSeconds",
         )
@@ -378,6 +440,27 @@ class _CreateHelper:
 
         extended_properties = _schema_profile_read.properties.extended_properties
         extended_properties.Element = AAZStrType()
+
+        log_scrubbing = _schema_profile_read.properties.log_scrubbing
+        log_scrubbing.scrubbing_rules = AAZListType(
+            serialized_name="scrubbingRules",
+        )
+        log_scrubbing.state = AAZStrType()
+
+        scrubbing_rules = _schema_profile_read.properties.log_scrubbing.scrubbing_rules
+        scrubbing_rules.Element = AAZObjectType()
+
+        _element = _schema_profile_read.properties.log_scrubbing.scrubbing_rules.Element
+        _element.match_variable = AAZStrType(
+            serialized_name="matchVariable",
+            flags={"required": True},
+        )
+        _element.selector = AAZStrType()
+        _element.selector_match_operator = AAZStrType(
+            serialized_name="selectorMatchOperator",
+            flags={"required": True},
+        )
+        _element.state = AAZStrType()
 
         sku = _schema_profile_read.sku
         sku.name = AAZStrType()

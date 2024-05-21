@@ -99,10 +99,11 @@ WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
     'powershell': 'FunctionApp/windows-powershell-functionapp-on-azure.yml',
 }
 
-DEFAULT_CENTAURI_IMAGE = 'mcr.microsoft.com/azure-functions/dotnet7-quickstart-demo:1.0'
+DEFAULT_CENTAURI_IMAGE = 'mcr.microsoft.com/azure-functions/dotnet8-quickstart-demo:1.0'
 ACR_IMAGE_SUFFIX = ".azurecr.io"
 
 RUNTIME_STATUS_TEXT_MAP = {
+    "BuildRequestReceived": "Received build request...",
     "BuildInProgress": "Building the app...",
     "BuildSuccessful": "Build successful.",
     "BuildFailed": "Build failed.",
@@ -137,46 +138,7 @@ LANGUAGE_EOL_DEPRECATION_NOTICES = {
     "node|16": "https://azure.microsoft.com/en-us/updates/node16support/"
 }
 
-FLEX_RUNTIMES = [
-    {
-        'runtime': 'dotnet-isolated',
-        'version': '8.0'
-    },
-    {
-        'runtime': 'java',
-        'version': '17'
-    },
-    {
-        'runtime': 'java',
-        'version': '11'
-    },
-    {
-        'runtime': 'node',
-        'version': '20'
-    },
-    {
-        'runtime': 'node',
-        'version': '18'
-    },
-    {
-        'runtime': 'python',
-        'version': '3.11'
-    },
-    {
-        'runtime': 'python',
-        'version': '3.10'
-    },
-    {
-        'runtime': 'powershell',
-        'version': '7.2'
-    }
-]
-
 FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
-
-DEFAULT_INSTANCE_SIZE = 2048
-
-DEFAULT_MAXIMUM_INSTANCE_COUNT = 100
 
 DEPLOYMENT_STORAGE_AUTH_TYPES = ['SystemAssignedIdentity', 'UserAssignedIdentity', 'StorageAccountConnectionString']
 
