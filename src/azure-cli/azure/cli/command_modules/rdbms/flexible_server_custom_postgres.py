@@ -183,7 +183,7 @@ def flexible_server_restore(cmd, client,
                             source_server, restore_point_in_time=None, zone=None, no_wait=False,
                             subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                             private_dns_zone_arguments=None, geo_redundant_backup=None,
-                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, yes=False):
+                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, storage_type=None, yes=False):
 
     server_name = server_name.lower()
 
@@ -199,6 +199,8 @@ def flexible_server_restore(cmd, client,
             raise ValueError('The provided source server {} is invalid.'.format(source_server))
     else:
         source_server_id = source_server
+
+    instance = client.get(resource_group_name, source_server)
 
     restore_point_in_time = validate_and_format_restore_point_in_time(restore_point_in_time)
 
@@ -220,12 +222,15 @@ def flexible_server_restore(cmd, client,
 
         pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
+        storage = postgresql_flexibleservers.models.Storage(type=storage_type if instance.storage.type != "PremiumV2_LRS" else None)
+
         parameters = postgresql_flexibleservers.models.Server(
             location=location,
             point_in_time_utc=restore_point_in_time,
             source_server_resource_id=source_server_id,  # this should be the source server name, not id
             create_mode="PointInTimeRestore",
-            availability_zone=zone
+            availability_zone=zone,
+            storage=storage
         )
 
         if source_server_object.network.public_network_access == 'Disabled' and any((vnet, subnet)):

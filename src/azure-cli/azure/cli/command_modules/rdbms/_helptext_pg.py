@@ -300,6 +300,8 @@ examples:
     text: >
       az postgres flexible-server restore --resource-group testGroup --name testserverNew \\
         --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
+  - name: Restore 'testserver' to current point-in-time as a new server 'testserverNew' using Premium SSD v2 Disks by setting storage type to "PremiumV2_LRS"
+    text: az postgres flexible-server restore --resource-group testGroup --name testserverNew --source-server testserver --storage-type PremiumV2_LRS
 """
 
 helps['postgres flexible-server restart'] = """
