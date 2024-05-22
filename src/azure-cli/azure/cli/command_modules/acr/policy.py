@@ -161,7 +161,7 @@ def acr_config_authentication_as_arm_show(cmd,
 
     AzureADAuthenticationAsArmPolicy = cmd.get_models('AzureADAuthenticationAsArmPolicy')
     policies = registry.policies
-    aadAuth_policy = policies.azure_ad_authentication_as_arm_policy if policies else AzureADAuthenticationAsArmPolicy()
+    aadAuth_policy = policies.azure_ad_authentication_as_arm_policy if policies and hasattr(policies, 'azure_ad_authentication_as_arm_policy') else AzureADAuthenticationAsArmPolicy
 
     return aadAuth_policy
 
