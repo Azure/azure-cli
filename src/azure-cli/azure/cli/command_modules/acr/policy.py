@@ -162,11 +162,12 @@ def acr_config_authentication_as_arm_show(cmd,
     AzureADAuthenticationAsArmPolicy = cmd.get_models('AzureADAuthenticationAsArmPolicy')
     policies = registry.policies
 
-    # On AzureStackHub, the 2019-05-01 API version is still in use, so we need to check if the 'azure_ad_authentication_as_arm_policy' attribute exists before we invoke it
-    aadAuth_policy = policies.azure_ad_authentication_as_arm_policy if policies and hasattr(policies, 'azure_ad_authentication_as_arm_policy') else AzureADAuthenticationAsArmPolicy
-
-    return aadAuth_policy
-
+    # On AzureStackHub, the 2019-05-01 API version is still in use, so we need to check if the
+    # 'azure_ad_authentication_as_arm_policy' attribute exists before we invoke it
+    if policies and hasattr(policies, 'azure_ad_authentication_as_arm_policy'):
+        return policies.azure_ad_authentication_as_arm_policy
+    else:
+        return AzureADAuthenticationAsArmPolicy
 
 def acr_config_authentication_as_arm_update(cmd,
                                             client,
