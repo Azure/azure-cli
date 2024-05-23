@@ -15,22 +15,25 @@ class SecurityCenterSecurityContactsTests(ScenarioTest):
         previous_contacts_count = len(security_contacts)
         assert previous_contacts_count >= 0
 
-        self.cmd('az security contact create -n default1 --email john@contoso.com --alert-notifications off --alerts-admins off')
-
+        contact = self.cmd('az security contact create -n default --emails john@contoso.com --phone 214-275-4038 --notifications-by-role state=On roles=[Owner,ServiceAdmin] --alert-notifications state=On minimalSeverity=Low').get_output_in_json()
+        
+        assert contact["name"] == "default"
+        assert contact["emails"] == "john@contoso.com"
+        
         security_contacts = self.cmd('az security contact list').get_output_in_json()
-        assert len(security_contacts) >= 0
+        assert len(security_contacts) > 0
 
-        contact = self.cmd('az security contact show -n default1').get_output_in_json()
+        contact = self.cmd('az security contact show -n default').get_output_in_json()
 
-        assert contact["email"] == "john@contoso.com"
+        assert contact["emails"] == "john@contoso.com"
 
-        self.cmd('az security contact create -n default1 --email lisa@contoso.com --alert-notifications off --alerts-admins off')
+        contact = self.cmd('az security contact create -n default --emails john@contoso.com;lisa@contoso.com --phone 214-275-4038 --notifications-by-role state=On roles=[Owner,ServiceAdmin] --alert-notifications state=On minimalSeverity=Low').get_output_in_json()
 
-        contact = self.cmd('az security contact show -n default1').get_output_in_json()
+        contact = self.cmd('az security contact show -n default').get_output_in_json()
 
-        assert contact["email"] == "lisa@contoso.com"
+        assert contact["emails"] == "john@contoso.com;lisa@contoso.com"
 
-        self.cmd('az security contact delete -n default1')
+        self.cmd('az security contact delete -n default --yes')
 
         security_contacts = self.cmd('az security contact list').get_output_in_json()
         assert len(security_contacts) == previous_contacts_count

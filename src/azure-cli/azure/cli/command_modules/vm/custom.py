@@ -899,7 +899,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               enable_integrity_monitoring=False,
               os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
               disk_controller_type=None, disable_integrity_monitoring_autoupgrade=False, enable_proxy_agent=None,
-              proxy_agent_mode=None):
+              proxy_agent_mode=None, source_snapshots_or_disks=None, source_snapshots_or_disks_size_gb=None,
+              source_disk_restore_point=None, source_disk_restore_point_size_gb=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -3177,7 +3178,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 regular_priority_percentage=None, disk_controller_type=None, nat_rule_name=None,
                 enable_osimage_notification=None, max_surge=None, disable_integrity_monitoring_autoupgrade=False,
                 enable_hibernation=None, enable_proxy_agent=None, proxy_agent_mode=None,
-                security_posture_reference_id=None, security_posture_reference_exclude_extensions=None):
+                security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
+                enable_resilient_creation=None, enable_resilient_deletion=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3485,7 +3487,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_hibernation=enable_hibernation, enable_auto_os_upgrade=enable_auto_os_upgrade,
             enable_proxy_agent=enable_proxy_agent, proxy_agent_mode=proxy_agent_mode,
             security_posture_reference_id=security_posture_reference_id,
-            security_posture_reference_exclude_extensions=security_posture_reference_exclude_extensions)
+            security_posture_reference_exclude_extensions=security_posture_reference_exclude_extensions,
+            enable_resilient_vm_creation=enable_resilient_creation,
+            enable_resilient_vm_deletion=enable_resilient_deletion)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3914,7 +3918,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 enable_osimage_notification=None, custom_data=None, enable_hibernation=None,
                 security_type=None, enable_proxy_agent=None, proxy_agent_mode=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
-                max_surge=None, **kwargs):
+                max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None,
+                ephemeral_os_disk=None, ephemeral_os_disk_option=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4112,13 +4117,19 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         else:
             vmss.sku.name = vm_sku
 
-    if ephemeral_os_disk_placement is not None:
+    if ephemeral_os_disk_placement is not None or ephemeral_os_disk_option is not None:
         if vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings is not None:
             vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings.placement = \
                 ephemeral_os_disk_placement
+            vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings.option = \
+                ephemeral_os_disk_option
         else:
-            raise ValidationError("Please update the argument '--ephemeral-os-disk-placement' when "
-                                  "creating VMSS with the option '--ephemeral-os-disk true'")
+            DiffDiskSettings = cmd.get_models('DiffDiskSettings')
+            vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings = DiffDiskSettings(
+                option=ephemeral_os_disk_option, placement=ephemeral_os_disk_placement)
+
+    if ephemeral_os_disk is False:
+        vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings = {}
 
     if disk_controller_type is not None:
         vmss.virtual_machine_profile.storage_profile.disk_controller_type = disk_controller_type
@@ -4146,6 +4157,13 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             security_posture_reference.exclude_extensions = security_posture_reference_exclude_extensions
 
         vmss.virtual_machine_profile.security_posture_reference = security_posture_reference
+
+    if enable_resilient_creation is not None or enable_resilient_deletion is not None:
+        resiliency_policy = vmss.resiliency_policy
+        if enable_resilient_creation is not None:
+            resiliency_policy.resilient_vm_creation_policy = {'enabled': enable_resilient_creation}
+        if enable_resilient_deletion is not None:
+            resiliency_policy.resilient_vm_deletion_policy = {'enabled': enable_resilient_deletion}
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
@@ -4680,10 +4698,10 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          release_note_uri=None, eula=None, description=None, location=None,
                          minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
                          disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None,
-                         hyper_v_generation='V1', features=None, architecture=None):
+                         hyper_v_generation='V2', features=None, architecture=None):
     logger.warning(
         "Starting Build (May) 2024, \"az sig image-definition create\" command will use the new default values "
-        "Hyper-V Generation: V2 and SecurityType: TrustedLaunchSuppoted."
+        "Hyper-V Generation: V2 and SecurityType: TrustedLaunchSupported."
     )
 
     # pylint: disable=line-too-long
@@ -4709,18 +4727,26 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     if features:
         from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT
         feature_list = []
+        security_type = None
         for item in features.split():
             try:
                 key, value = item.split('=', 1)
                 # create Non-Trusted Launch VM Image
                 # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
                 # after changing the default values to Trusted Launch VMs in the future.
+                if key == 'SecurityType':
+                    security_type = True
                 if key == 'SecurityType' and value == COMPATIBLE_SECURITY_TYPE_VALUE:
                     logger.warning(UPGRADE_SECURITY_HINT)
                     continue
                 feature_list.append(GalleryImageFeature(name=key, value=value))
             except ValueError:
                 raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
+        if security_type is None:
+            feature_list.append(GalleryImageFeature(name='SecurityType', value='TrustedLaunchSupported'))
+    if features is None and cmd.cli_ctx.cloud.profile == 'latest':
+        feature_list = []
+        feature_list.append(GalleryImageFeature(name='SecurityType', value='TrustedLaunchSupported'))
 
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
                          os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,

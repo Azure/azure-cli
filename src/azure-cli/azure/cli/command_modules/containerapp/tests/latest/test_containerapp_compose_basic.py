@@ -5,7 +5,7 @@
 import os
 import unittest  # pylint: disable=unused-import
 
-from azure.cli.testsdk import (ResourceGroupPreparer, LogAnalyticsWorkspacePreparer)
+from azure.cli.testsdk import (ResourceGroupPreparer, LogAnalyticsWorkspacePreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.command_modules.containerapp.tests.latest.common import (
     ContainerappComposePreviewScenarioTest,  # pylint: disable=unused-import
@@ -53,4 +53,53 @@ services:
             self.check('[] | length(@)', 1),
         ])
         self.cmd(f'containerapp delete -n foo -g {resource_group} --yes', expect_failure=False)
+        clean_up_test_file(compose_file_name)
+
+    # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
+    # During create an environment, it created a log workspace with a random name, which cause the test cannot find the match Url
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
+    def test_containerapp_compose_create_environment_to_target_location(self, resource_group):
+        location = "East US"
+        app = self.create_random_name(prefix='composeapp', length=24)
+        env = self.create_random_name(prefix='env', length=24)
+        compose_text = f"""
+services:
+  {app}:
+    image: smurawski/printenv:latest
+"""
+        compose_file_name = f"{self._testMethodName}_compose.yml"
+        write_test_file(compose_file_name, compose_text)
+
+        self.kwargs.update({
+            'environment': env,
+            'location': location,
+            'compose': compose_file_name,
+        })
+
+        command_string = 'containerapp compose create'
+        command_string += ' --compose-file-path {compose}'
+        command_string += ' --resource-group {rg}'
+        command_string += ' --environment {environment}'
+        command_string += ' --location "{location}"'
+        self.cmd(command_string, checks=[
+            self.check('[].name', [app]),
+            self.check('[] | length(@)', 1),
+        ])
+        env_json = self.cmd(f'containerapp env show -g {resource_group} -n {env}', checks=[
+            JMESPathCheck("name", env),
+            JMESPathCheck("resourceGroup", resource_group),
+            JMESPathCheck("location", location),
+            JMESPathCheck("properties.provisioningState", "Succeeded")
+        ]).get_output_in_json()
+
+        self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+            JMESPathCheck("name", app),
+            JMESPathCheck("resourceGroup", resource_group),
+            JMESPathCheck("location", location),
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.environmentId", env_json.get("id")),
+        ])
+        self.cmd(f'containerapp delete -n {app} -g {resource_group} --yes', expect_failure=False)
+        self.cmd(f'containerapp env delete -n {env} -g {resource_group} --yes --no-wait', expect_failure=False)
         clean_up_test_file(compose_file_name)

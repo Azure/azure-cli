@@ -174,7 +174,7 @@ def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pyli
         logger.warning("Upgrading extensions")
         if allow_preview is None:
             logger.warning("Default enabled including preview versions for extension installation now. "
-                           "Disabled in May 2024. "
+                           "Disabled in future release. "
                            "Use '--allow-preview-extensions true' to enable it specifically if needed. "
                            "Use '--allow-preview-extensions false' to install stable version only. ")
             allow_preview = True
@@ -267,6 +267,7 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
     styled_text = [
         (Style.PRIMARY, placeholder.format("White", "Primary text color")),
         (Style.SECONDARY, placeholder.format("Grey", "Secondary text color")),
+        (Style.HIGHLIGHT, placeholder.format("Cyan", "Highlight text color")),
         (Style.IMPORTANT, placeholder.format("Magenta", "Important text color")),
         (Style.ACTION, placeholder.format(
             "Blue", "Commands, parameters, and system inputs (White in legacy powershell terminal)")),

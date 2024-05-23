@@ -336,6 +336,30 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
             JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_on_windows_app_service_dotnet_with_runtime_version(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(
+            prefix='functionapp-windows', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet-isolated --runtime-version 8 --functions-version 4'
+                 .format(resource_group, functionapp, plan, storage_account))
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('netFrameworkVersion', 'v8.0')])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_app_service_dotnet_with_runtime_version(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(
+            prefix='functionapp-linux', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet-isolated --runtime-version 8 --functions-version 4'
+                 .format(resource_group, functionapp, plan, storage_account))
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOTNET-ISOLATED|8.0')])
+
 
 class FunctionUpdatePlan(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
@@ -592,6 +616,23 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
 
+    @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_consumption_linux_dotnet_isolated(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapplinuxconsumption', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --runtime dotnet-isolated --runtime-version 8 --functions-version 4'
+                 .format(resource_group, functionapp_name, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('reserved', True),
+                     JMESPathCheck('kind', 'functionapp,linux'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOTNET-ISOLATED|8.0')])
+
 
 class FunctionappDaprConfig(ScenarioTest):
     @ResourceGroupPreparer(location='northeurope')
@@ -614,6 +655,8 @@ class FunctionappDaprConfig(ScenarioTest):
         )).assert_with_checks([
             JMESPathCheck('daprConfig', None)
         ])
+
+        time.sleep(1200)
 
         self.cmd('functionapp config container set -g {} -n {} --enable-dapr true --dapr-app-id daprappid --dal false'.format(
             resource_group,
@@ -737,8 +780,8 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(len(locations) == 13)
 
     def test_functionapp_list_flexconsumption_runtimes(self):
-        runtimes = self.cmd('functionapp list-flexconsumption-runtimes').get_output_in_json()
-        self.assertTrue(len(runtimes) == 8)
+        runtimes = self.cmd('functionapp list-flexconsumption-runtimes -l eastasia --runtime python').get_output_in_json()
+        self.assertTrue(len(runtimes) == 2)
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1186,6 +1229,9 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                      JMESPathCheck('name', functionapp_name),
                      JMESPathPatternCheck('hostNames[0]', functionapp_name + ".+" + 'azurecontainerapps.io')])
         
+        if self.is_live:
+            time.sleep(260)
+
         self.cmd('functionapp config container set -g {} -n {} --min-replicas 1 --max-replicas 10'
                  .format(resource_group, functionapp_name))
 
@@ -1390,7 +1436,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
                      "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~18')])
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~20')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1741,7 +1787,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|18')
+            JMESPathCheck('linuxFxVersion', 'Node|20')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
@@ -1778,7 +1824,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|18')
+            JMESPathCheck('linuxFxVersion', 'Node|20')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(

@@ -1742,7 +1742,7 @@ def ensure_workload_profile_supported(cmd, env_name, env_rg, workload_profile_na
 def set_ip_restrictions(ip_restrictions, ip_restriction_name, ip_address_range, description, action):
     updated = False
     for e in ip_restrictions:
-        if ip_restriction_name.lower() == e["name"].lower():
+        if e.get("name") and ip_restriction_name.lower() == e["name"].lower():
             e["description"] = description
             e["ipAddressRange"] = ip_address_range
             e["action"] = action
