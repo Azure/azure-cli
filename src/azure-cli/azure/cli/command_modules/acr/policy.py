@@ -166,8 +166,9 @@ def acr_config_authentication_as_arm_show(cmd,
     # 'azure_ad_authentication_as_arm_policy' attribute exists before we invoke it
     if policies and hasattr(policies, 'azure_ad_authentication_as_arm_policy'):
         return policies.azure_ad_authentication_as_arm_policy
-    else:
-        return AzureADAuthenticationAsArmPolicy
+
+    return AzureADAuthenticationAsArmPolicy
+
 
 def acr_config_authentication_as_arm_update(cmd,
                                             client,
