@@ -777,14 +777,14 @@ helps['containerapp job registry set'] = """
     - name: Configure a Container App Job to use a registry.
       text: |
           az containerapp job registry set -n my-containerapp-job -g MyResourceGroup \\
-              --server MyExistingContainerappRegistry.azurecr.io --username MyRegistryUsername --password MyRegistryPassword
+              --server MyContainerappJobRegistry.azurecr.io --username MyRegistryUsername --password MyRegistryPassword
 """
 
-helps['containerapp registry remove'] = """
+helps['containerapp job registry remove'] = """
     type: command
-    short-summary: Remove a container registry's details.
+    short-summary: Remove a container registry's details in a Container App Job.
     examples:
-    - name: Remove a registry from a Containerapp.
+    - name: Remove a registry from a Container App Job.
       text: |
           az containerapp job registry remove -n my-containerapp -g MyResourceGroup --server MyContainerappRegistry.azurecr.io
 """
