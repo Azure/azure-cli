@@ -2569,13 +2569,14 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
         # randomly update some properties
         self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
-                 '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention',
+                 '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention --js-cookie-exp-time 100',
                  checks=[
                      self.check('policySettings.fileUploadLimitInMb', 64),
                      self.check('policySettings.maxRequestBodySizeInKb', 128),
                      self.check('policySettings.mode', 'Prevention'),
                      self.check('policySettings.requestBodyCheck', False),
-                     self.check('policySettings.state', 'Enabled')
+                     self.check('policySettings.state', 'Enabled'),
+                     self.check('policySettings.jsChallengeCookieExpirationInMins', 100)
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_setting_v2_')
