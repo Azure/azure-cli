@@ -91,8 +91,8 @@ class Update(AAZCommand):
                 minimum=0,
             ),
         )
-        _args_schema.js_challenge_cookie_expiration_in_mins = AAZIntArg(
-            options=["--jscce-in-mins", "--js-challenge-cookie-expiration-in-mins"],
+        _args_schema.js_cookie_exp_time = AAZIntArg(
+            options=["--js-cookie-exp-time"],
             help="Web Application Firewall JavaScript Challenge Cookie Expiration time in minutes.",
             nullable=True,
             fmt=AAZIntArgFormat(
@@ -418,7 +418,7 @@ class Update(AAZCommand):
             _builder.set_prop("customBlockResponseStatusCode", AAZIntType, ".custom_status_code")
             _builder.set_prop("fileUploadEnforcement", AAZBoolType, ".file_upload_enforcement")
             _builder.set_prop("fileUploadLimitInMb", AAZIntType, ".file_upload_limit_in_mb")
-            _builder.set_prop("jsChallengeCookieExpirationInMins", AAZIntType, ".js_challenge_cookie_expiration_in_mins")
+            _builder.set_prop("jsChallengeCookieExpirationInMins", AAZIntType, ".js_cookie_exp_time")
             _builder.set_prop("logScrubbing", AAZObjectType)
             _builder.set_prop("maxRequestBodySizeInKb", AAZIntType, ".max_request_body_size_in_kb")
             _builder.set_prop("mode", AAZStrType, ".mode")
