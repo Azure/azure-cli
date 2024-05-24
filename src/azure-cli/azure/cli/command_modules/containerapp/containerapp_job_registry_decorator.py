@@ -229,4 +229,3 @@ class ContainerAppJobRegistrySetDecorator(ContainerAppJobRegistryDecorator):
     def set(self):
         r = self.send_update()
         return safe_get(r, "properties", "configuration", "registries")
-
