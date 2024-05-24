@@ -438,7 +438,8 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     # Get protectable item.
     protectable_item_object = protectable_item
     protectable_item_type = protectable_item_object.properties.protectable_item_type
-    if protectable_item_type.lower() not in ["sqldatabase", "sqlinstance", "saphanadatabase", "saphanasystem", "saphanadbinstance"]:
+    if protectable_item_type.lower() not in ["sqldatabase", "sqlinstance", "saphanadatabase",
+                                             "saphanasystem", "saphanadbinstance"]:
         raise CLIError(
             """
             Protectable Item must be of type SQLDataBase, HANADatabase, HANAInstance, SAPHanaDBInstance, or SQLInstance.
@@ -754,10 +755,11 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
             identity_arm_id=identity_arm_id,
             user_assigned_identity_properties=user_assigned_identity_properties
         )
-        
+
         setattr(trigger_restore_properties, 'snapshot_restore_parameters', snapshot_restore_parameters)
         setattr(trigger_restore_properties, 'target_resource_group_name', target_resource_group_name)
-        setattr(trigger_restore_properties, 'user_assigned_managed_identity_details', user_assigned_managed_identity_details)
+        setattr(trigger_restore_properties, 'user_assigned_managed_identity_details',
+                user_assigned_managed_identity_details)
 
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
