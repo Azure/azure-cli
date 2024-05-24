@@ -872,16 +872,10 @@ class ContainerAppsJobClient():
         r = send_raw_request(cmd.cli_ctx, "PATCH", request_url, body=json.dumps(containerapp_job_envelope))
 
         if no_wait:
-            return r.json()
+            return
         elif r.status_code == 202:
-            url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/jobs/{}?api-version={}"
-            request_url = url_fmt.format(
-                management_hostname.strip('/'),
-                sub_id,
-                resource_group_name,
-                name,
-                cls.api_version)
-            response = poll_results(cmd, request_url)
+            operation_url = r.headers.get(HEADER_LOCATION)
+            response = poll_results(cmd, operation_url)
             if response is None:
                 raise ResourceNotFoundError("Could not find a container App Job")
             else:
