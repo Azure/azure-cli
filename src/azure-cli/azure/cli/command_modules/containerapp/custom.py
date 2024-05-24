@@ -87,6 +87,8 @@ from ._constants import (MAXIMUM_SECRET_LENGTH, MICROSOFT_SECRET_SETTING_NAME, F
                          GOOGLE_SECRET_SETTING_NAME, TWITTER_SECRET_SETTING_NAME, APPLE_SECRET_SETTING_NAME, CONTAINER_APPS_RP,
                          NAME_INVALID, NAME_ALREADY_EXISTS, ACR_IMAGE_SUFFIX, HELLO_WORLD_IMAGE, LOG_TYPE_SYSTEM, LOG_TYPE_CONSOLE,
                          MANAGED_CERTIFICATE_RT, PRIVATE_CERTIFICATE_RT, PENDING_STATUS, SUCCEEDED_STATUS, CONTAINER_APPS_SDK_MODELS)
+from .containerapp_job_registry_decorator import ContainerAppJobRegistryDecorator, ContainerAppJobRegistrySetDecorator, \
+    ContainerAppJobRegistryRemoveDecorator
 
 logger = get_logger(__name__)
 
@@ -3249,6 +3251,70 @@ def set_secrets_job(cmd, name, resource_group_name, secrets,
         return r["properties"]["configuration"]["secrets"]
     except Exception as e:
         handle_raw_exception(e)
+
+
+def show_registry_job(cmd, name, resource_group_name, server):
+    raw_parameters = locals()
+
+    containerapp_job_registry_decorator = ContainerAppJobRegistryDecorator(
+        cmd=cmd,
+        client=ContainerAppsJobClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_job_registry_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
+    containerapp_job_registry_decorator.validate_arguments()
+
+    r = containerapp_job_registry_decorator.show()
+    return r
+
+
+def list_registry_job(cmd, name, resource_group_name):
+    raw_parameters = locals()
+
+    containerapp_job_registry_decorator = ContainerAppJobRegistryDecorator(
+        cmd=cmd,
+        client=ContainerAppsJobClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_job_registry_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
+    containerapp_job_registry_decorator.validate_arguments()
+
+    r = containerapp_job_registry_decorator.list()
+    return r
+
+
+def set_registry_job(cmd, name, resource_group_name, server, username=None, password=None, disable_warnings=False, identity=None, no_wait=False):
+    raw_parameters = locals()
+
+    containerapp_job_registry_set_decorator = ContainerAppJobRegistrySetDecorator(
+        cmd=cmd,
+        client=ContainerAppsJobClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_job_registry_set_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
+    containerapp_job_registry_set_decorator.validate_arguments()
+    containerapp_job_registry_set_decorator.construct_payload()
+    r = containerapp_job_registry_set_decorator.set()
+    return r
+
+
+def remove_registry_job(cmd, name, resource_group_name, server, no_wait=False):
+    raw_parameters = locals()
+
+    containerapp_job_registry_remove_decorator = ContainerAppJobRegistryRemoveDecorator(
+        cmd=cmd,
+        client=ContainerAppsJobClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_job_registry_remove_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
+    containerapp_job_registry_remove_decorator.validate_arguments()
+    containerapp_job_registry_remove_decorator.construct_payload()
+    r = containerapp_job_registry_remove_decorator.remove()
+    return r
 
 
 def enable_dapr(cmd, name, resource_group_name,

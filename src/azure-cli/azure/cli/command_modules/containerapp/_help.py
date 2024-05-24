@@ -746,6 +746,49 @@ helps['containerapp job execution show'] = """
       text: az containerapp job execution show -n my-containerapp-job -g MyResourceGroup --job-execution-name MyContainerAppJob-66v9xh0
 """
 
+# Container App Job Registry Commands
+helps['containerapp job registry'] = """
+    type: group
+    short-summary: Commands to manage container registry information of a Container App Job.
+"""
+
+helps['containerapp job registry show'] = """
+    type: command
+    short-summary: Show details of a container registry from a Container App Job.
+    examples:
+    - name: Show the details of a container registry.
+      text: |
+          az containerapp job registry show -n my-containerapp-job -g MyResourceGroup --server MyContainerappJobRegistry.azurecr.io
+"""
+
+helps['containerapp job registry list'] = """
+    type: command
+    short-summary: List container registries configured in a Container App Job.
+    examples:
+    - name: List container registries configured in a Container App Job.
+      text: |
+          az containerapp job registry list -n my-containerapp-job -g MyResourceGroup
+"""
+
+helps['containerapp job registry set'] = """
+    type: command
+    short-summary: Add or update a container registry's details in a Container App Job.
+    examples:
+    - name: Configure a Container App Job to use a registry.
+      text: |
+          az containerapp job registry set -n my-containerapp-job -g MyResourceGroup \\
+              --server MyExistingContainerappRegistry.azurecr.io --username MyRegistryUsername --password MyRegistryPassword
+"""
+
+helps['containerapp registry remove'] = """
+    type: command
+    short-summary: Remove a container registry's details.
+    examples:
+    - name: Remove a registry from a Containerapp.
+      text: |
+          az containerapp job registry remove -n my-containerapp -g MyResourceGroup --server MyContainerappRegistry.azurecr.io
+"""
+
 # Certificates Commands
 helps['containerapp env certificate'] = """
     type: group

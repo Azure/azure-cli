@@ -72,6 +72,12 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_managed_identity_job', confirmation=True, supports_no_wait=True, exception_handler=ex_handler_factory())
         g.custom_show_command('show', 'show_managed_identity_job')
 
+    with self.command_group('containerapp job registry') as g:
+        g.custom_command('set', 'set_registry_job', exception_handler=ex_handler_factory())
+        g.custom_show_command('show', 'show_registry_job')
+        g.custom_command('list', 'list_registry_job')
+        g.custom_command('remove', 'remove_registry_job', exception_handler=ex_handler_factory())
+
     with self.command_group('containerapp env dapr-component') as g:
         g.custom_command('list', 'list_dapr_components')
         g.custom_show_command('show', 'show_dapr_component')
