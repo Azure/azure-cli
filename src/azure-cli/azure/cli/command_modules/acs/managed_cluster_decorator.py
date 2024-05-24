@@ -76,6 +76,10 @@ from azure.cli.command_modules.acs.agentpool_decorator import (
     AKSAgentPoolModels,
     AKSAgentPoolUpdateDecorator,
 )
+from azure.cli.command_modules.acs.azurecontainerstorage.acstor_ops import (
+    perform_disable_azure_container_storage,
+    perform_enable_azure_container_storage,
+)
 from azure.cli.command_modules.acs.azuremonitormetrics.azuremonitorprofile import (
     ensure_azure_monitor_profile_prerequisites
 )
@@ -311,6 +315,9 @@ class AKSManagedClusterContext(BaseAKSContext):
                 "ensure_cluster_identity_permission_on_kubelet_identity"
             ] = ensure_cluster_identity_permission_on_kubelet_identity
             external_functions["subnet_role_assignment_exists"] = subnet_role_assignment_exists
+            # azure container storage functions
+            external_functions["perform_enable_azure_container_storage"] = perform_enable_azure_container_storage
+            external_functions["perform_disable_azure_container_storage"] = perform_disable_azure_container_storage
             self.__external_functions = SimpleNamespace(**external_functions)
         return self.__external_functions
 
@@ -1603,11 +1610,9 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         enable_managed_identity = self.raw_param.get("enable_managed_identity")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object
-        read_from_mc = False
         if self.decorator_mode == DecoratorMode.CREATE:
             if self.mc and self.mc.identity:
                 enable_managed_identity = check_is_msi_cluster(self.mc)
-                read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
         if read_only:
@@ -1615,15 +1620,26 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         # dynamic completion for create mode only
         if self.decorator_mode == DecoratorMode.CREATE:
+            # if user does not specify service principal or client secret,
+            # backfill the value of enable_managed_identity to True
             (
                 service_principal,
                 client_secret,
             ) = self._get_service_principal_and_client_secret(read_only=True)
-            if not read_from_mc and service_principal and client_secret:
-                enable_managed_identity = False
+            if not (service_principal or client_secret) and not enable_managed_identity:
+                enable_managed_identity = True
 
         # validation
         if enable_validation:
+            if self.decorator_mode == DecoratorMode.CREATE:
+                (
+                    service_principal,
+                    client_secret,
+                ) = self._get_service_principal_and_client_secret(read_only=True)
+                if (service_principal or client_secret) and enable_managed_identity:
+                    raise MutuallyExclusiveArgumentError(
+                        "Cannot specify --enable-managed-identity and --service-principal/--client-secret at same time"
+                    )
             if not enable_managed_identity and self._get_assign_identity(enable_validation=False):
                 raise RequiredArgumentMissingError(
                     "--assign-identity can only be specified when --enable-managed-identity is specified"
@@ -2765,6 +2781,21 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return enable_syslog
 
+    def get_enable_high_log_scale_mode(self) -> Union[bool, None]:
+        """Obtain the value of enable_high_log_scale_mode.
+
+        Note: The arg type of this parameter supports three states (True, False or None), but the corresponding default
+        value in entry function is not None.
+
+        :return: bool or None
+        """
+        # read the original value passed by the command
+        enable_high_log_scale_mode = self.raw_param.get("enable_high_log_scale_mode")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_high_log_scale_mode
+
     def get_data_collection_settings(self) -> Union[str, None]:
         """Obtain the value of data_collection_settings.
 
@@ -2781,6 +2812,18 @@ class AKSManagedClusterContext(BaseAKSContext):
                     )
                 )
         return data_collection_settings_file_path
+
+    def get_ampls_resource_id(self) -> Union[str, None]:
+        """Obtain the value of ampls_resource_id.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        ampls_resource_id = self.raw_param.get("ampls_resource_id")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return ampls_resource_id
 
     # pylint: disable=no-self-use
     def get_virtual_node_addon_os_type(self) -> str:
@@ -4209,6 +4252,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
     def _handle_upgrade_asm(self, new_profile: ServiceMeshProfile) -> Tuple[ServiceMeshProfile, bool]:
         mesh_upgrade_command = self.raw_param.get("mesh_upgrade_command", None)
+        supress_confirmation = self.raw_param.get("yes", False)
         updated = False
 
         # deal with mesh upgrade commands
@@ -4238,9 +4282,10 @@ class AKSManagedClusterContext(BaseAKSContext):
                     f"Please ensure all data plane workloads have been rolled over to revision {revision_to_keep} "
                     "so that they are still part of the mesh.\nAre you sure you want to proceed?"
                 )
-                if prompt_y_n(msg, default="y"):
-                    new_profile.istio.revisions.remove(revision_to_remove)
-                    updated = True
+                if not supress_confirmation and not prompt_y_n(msg, default="n"):
+                    raise DecoratorEarlyExitException()
+                new_profile.istio.revisions.remove(revision_to_remove)
+                updated = True
             elif (
                 mesh_upgrade_command == CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START and
                 requested_revision is not None
@@ -5307,6 +5352,37 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return self.raw_param.get("upgrade_override_until")
 
+    def _get_enable_cost_analysis(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_cost_analysis.
+        When enabled, if both enable_cost_analysis and disable_cost_analysis are
+        specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        enable_cost_analysis = self.raw_param.get("enable_cost_analysis")
+
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_cost_analysis and self.get_disable_cost_analysis():
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-cost-analysis and --disable-cost-analysis at the same time."
+                )
+
+        return enable_cost_analysis
+
+    def get_enable_cost_analysis(self) -> bool:
+        """Obtain the value of enable_cost_analysis.
+        :return: bool
+        """
+        return self._get_enable_cost_analysis(enable_validation=True)
+
+    def get_disable_cost_analysis(self) -> bool:
+        """Obtain the value of disable_cost_analysis.
+        :return: bool
+        """
+        # Note: No need to check for mutually exclusive parameter with enable-cost-analysis here
+        # because it's already checked in _get_enable_cost_analysis
+        return self.raw_param.get("disable_cost_analysis")
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -5895,7 +5971,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             create_dcr=True,
             create_dcra=False,
             enable_syslog=self.context.get_enable_syslog(),
-            data_collection_settings=self.context.get_data_collection_settings()
+            data_collection_settings=self.context.get_data_collection_settings(),
+            is_private_cluster=self.context.get_enable_private_cluster(),
+            ampls_resource_id=self.context.get_ampls_resource_id(),
+            enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
         )
         # set intermediate
         self.context.set_intermediate("monitoring_addon_enabled", True, overwrite_exists=True)
@@ -6322,6 +6401,66 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc.auto_scaler_profile = cluster_autoscaler_profile
         return mc
 
+    def set_up_azure_container_storage(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up azure container storage for the Managed Cluster object
+        :return: ManagedCluster
+        """
+        self._ensure_mc(mc)
+        # read the azure container storage values passed
+        pool_type = self.context.raw_param.get("enable_azure_container_storage")
+        enable_azure_container_storage = pool_type is not None
+        if enable_azure_container_storage:
+            pool_name = self.context.raw_param.get("storage_pool_name")
+            pool_option = self.context.raw_param.get("storage_pool_option")
+            pool_sku = self.context.raw_param.get("storage_pool_sku")
+            pool_size = self.context.raw_param.get("storage_pool_size")
+            if not mc.agent_pool_profiles:
+                raise UnknownError("Encountered an unexpected error while getting the agent pools from the cluster.")
+            agentpool = mc.agent_pool_profiles[0]
+            agentpool_details = []
+            pool_details = {}
+            pool_details["name"] = agentpool.name
+            pool_details["vm_size"] = agentpool.vm_size
+            agentpool_details.append(pool_details)
+            # Marking the only agentpool name as the valid nodepool for
+            # installing Azure Container Storage during `az aks create`
+            nodepool_list = agentpool.name
+
+            from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                validate_enable_azure_container_storage_params
+            )
+            validate_enable_azure_container_storage_params(
+                pool_type,
+                pool_name,
+                pool_sku,
+                pool_option,
+                pool_size,
+                nodepool_list,
+                agentpool_details,
+                False,
+                False,
+                False,
+                False,
+                False,
+            )
+
+            # Setup Azure Container Storage labels on the nodepool
+            from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
+                CONST_ACSTOR_IO_ENGINE_LABEL_KEY,
+                CONST_ACSTOR_IO_ENGINE_LABEL_VAL
+            )
+            nodepool_labels = agentpool.node_labels
+            if nodepool_labels is None:
+                nodepool_labels = {}
+            nodepool_labels[CONST_ACSTOR_IO_ENGINE_LABEL_KEY] = CONST_ACSTOR_IO_ENGINE_LABEL_VAL
+            agentpool.node_labels = nodepool_labels
+
+            # set intermediates
+            self.context.set_intermediate("enable_azure_container_storage", True, overwrite_exists=True)
+            self.context.set_intermediate("azure_container_storage_nodepools", nodepool_list, overwrite_exists=True)
+
+        return mc
+
     def set_up_sku(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up sku (uptime sla) for the ManagedCluster object.
 
@@ -6424,6 +6563,29 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def set_up_cost_analysis(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_cost_analysis():
+            if mc.metrics_profile is None:
+                mc.metrics_profile = self.models.ManagedClusterMetricsProfile()
+            if mc.metrics_profile.cost_analysis is None:
+                mc.metrics_profile.cost_analysis = self.models.ManagedClusterCostAnalysis()
+
+            # set enabled
+            mc.metrics_profile.cost_analysis.enabled = True
+
+        # Default is disabled so no need to worry about that here
+
+        return mc
+
+    def set_up_metrics_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        mc = self.set_up_cost_analysis(mc)
+
+        return mc
+
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
@@ -6498,6 +6660,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_azure_monitor_profile(mc)
         # set up azure service mesh profile
         mc = self.set_up_azure_service_mesh_profile(mc)
+        # set up for azure container storage
+        mc = self.set_up_azure_container_storage(mc)
+        # set up metrics profile
+        mc = self.set_up_metrics_profile(mc)
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
             mc = self._restore_defaults_in_mc(mc)
@@ -6522,14 +6688,20 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         need_grant_vnet_permission_to_cluster_identity = self.context.get_intermediate(
             "need_post_creation_vnet_permission_granting", default_value=False
         )
+        enable_azure_container_storage = self.context.get_intermediate(
+            "enable_azure_container_storage",
+            default_value=False
+        )
 
+        # pylint: disable=too-many-boolean-expressions
         if (
             monitoring_addon_enabled or
             ingress_appgw_addon_enabled or
             virtual_node_addon_enabled or
             azuremonitormetrics_addon_enabled or
             (enable_managed_identity and attach_acr) or
-            need_grant_vnet_permission_to_cluster_identity
+            need_grant_vnet_permission_to_cluster_identity or
+            enable_azure_container_storage
         ):
             return True
         return False
@@ -6602,6 +6774,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     create_dcr=False,
                     create_dcra=True,
                     enable_syslog=self.context.get_enable_syslog(),
+                    data_collection_settings=self.context.get_data_collection_settings(),
+                    is_private_cluster=self.context.get_enable_private_cluster(),
+                    ampls_resource_id=self.context.get_ampls_resource_id(),
+                    enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
                 )
 
         # ingress appgw addon
@@ -6654,6 +6830,54 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 self.__raw_parameters,
                 self.context.get_disable_azure_monitor_metrics(),
                 True
+            )
+
+        # enable azure container storage
+        enable_azure_container_storage = self.context.get_intermediate("enable_azure_container_storage")
+        if enable_azure_container_storage:
+            if cluster.identity_profile is None or cluster.identity_profile["kubeletidentity"] is None:
+                logger.warning(
+                    "Unexpected error getting kubelet's identity for the cluster. "
+                    "Unable to perform the azure container storage operation."
+                )
+                return
+
+            # Get the node_resource_group from the cluster object since
+            # `mc` in `context` still doesn't have the updated node_resource_group.
+            if cluster.node_resource_group is None:
+                logger.warning(
+                    "Unexpected error getting cluster's node resource group. "
+                    "Unable to perform the azure container storage operation."
+                )
+                return
+
+            pool_name = self.context.raw_param.get("storage_pool_name")
+            pool_type = self.context.raw_param.get("enable_azure_container_storage")
+            pool_option = self.context.raw_param.get("storage_pool_option")
+            pool_sku = self.context.raw_param.get("storage_pool_sku")
+            pool_size = self.context.raw_param.get("storage_pool_size")
+            kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
+            node_resource_group = cluster.node_resource_group
+            agent_pool_vm_sizes = []
+            if len(cluster.agent_pool_profiles) > 0:
+                # Cluster creation has only 1 agentpool
+                agentpool_profile = cluster.agent_pool_profiles[0]
+                agent_pool_vm_sizes.append(agentpool_profile.vm_size)
+
+            self.context.external_functions.perform_enable_azure_container_storage(
+                self.cmd,
+                self.context.get_subscription_id(),
+                self.context.get_resource_group_name(),
+                self.context.get_name(),
+                node_resource_group,
+                kubelet_identity_object_id,
+                pool_name,
+                pool_type,
+                pool_size,
+                pool_sku,
+                pool_option,
+                agent_pool_vm_sizes,
+                True,
             )
 
     def put_mc(self, mc: ManagedCluster) -> ManagedCluster:
@@ -7002,15 +7226,23 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
                 CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
             ]:
-                raise InvalidArgumentValueError("Invalid outbound type, supported values are loadBalancer,"
-                                                " managedNATGateway, userAssignedNATGateway and userDefinedRouting.")
+                raise InvalidArgumentValueError(
+                    "Invalid outbound type, supported values are loadBalancer, managedNATGateway and "
+                    "userDefinedRouting. Please refer to "
+                    "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype#updating-outboundtype-after-cluster-creation "  # pylint:disable=line-too-long
+                    "for more details."
+                )
             if vnet_subnet_id is not None and outboundType not in [
                 CONST_OUTBOUND_TYPE_LOAD_BALANCER,
                 CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
                 CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
             ]:
-                raise InvalidArgumentValueError("Invalid outbound type, supported values are loadBalancer,"
-                                                " managedNATGateway, userAssignedNATGateway and userDefinedRouting.")
+                raise InvalidArgumentValueError(
+                    "Invalid outbound type, supported values are loadBalancer, userAssignedNATGateway and "
+                    "userDefinedRouting. Please refer to "
+                    "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype#updating-outboundtype-after-cluster-creation "  # pylint:disable=line-too-long
+                    "for more details."
+                )
             mc.network_profile.outbound_type = outboundType
         return mc
 
@@ -7864,6 +8096,230 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    # pylint: disable=too-many-statements,too-many-locals
+    def update_azure_container_storage(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update azure container storage for the Managed Cluster object
+        :return: ManagedCluster
+        """
+        self._ensure_mc(mc)
+        # read the azure container storage values passed
+        enable_pool_type = self.context.raw_param.get("enable_azure_container_storage")
+        disable_pool_type = self.context.raw_param.get("disable_azure_container_storage")
+        enable_azure_container_storage = enable_pool_type is not None
+        disable_azure_container_storage = disable_pool_type is not None
+        nodepool_list = self.context.raw_param.get("azure_container_storage_nodepools")
+        if enable_azure_container_storage and disable_azure_container_storage:
+            raise MutuallyExclusiveArgumentError(
+                'Conflicting flags. Cannot set --enable-azure-container-storage '
+                'and --disable-azure-container-storage together.'
+            )
+
+        # pylint: disable=too-many-nested-blocks
+        if enable_azure_container_storage or disable_azure_container_storage:
+            # Require the agent pool profiles for azure container storage
+            # operations. Raise exception if not found.
+            if not mc.agent_pool_profiles:
+                raise UnknownError(
+                    "Encounter an unexpected error while getting agent pool profiles from the cluster "
+                    "in the process of updating agentpool profile."
+                )
+            pool_name = self.context.raw_param.get("storage_pool_name")
+            pool_option = self.context.raw_param.get("storage_pool_option")
+            pool_sku = self.context.raw_param.get("storage_pool_sku")
+            pool_size = self.context.raw_param.get("storage_pool_size")
+            agentpool_details = []
+            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_extension_installed_and_cluster_configs
+            (
+                is_extension_installed,
+                is_azureDisk_enabled,
+                is_elasticSan_enabled,
+                is_ephemeralDisk_localssd_enabled,
+                is_ephemeralDisk_nvme_enabled,
+                current_core_value,
+            ) = get_extension_installed_and_cluster_configs(
+                self.cmd,
+                self.context.get_resource_group_name(),
+                self.context.get_name(),
+                mc.agent_pool_profiles,
+            )
+
+            if enable_azure_container_storage:
+                from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
+                    CONST_ACSTOR_IO_ENGINE_LABEL_KEY,
+                    CONST_ACSTOR_IO_ENGINE_LABEL_VAL
+                )
+                labelled_nodepool_arr = []
+                for agentpool in mc.agent_pool_profiles:
+                    pool_details = {}
+                    pool_details["vm_size"] = agentpool.vm_size
+                    node_name = agentpool.name
+                    pool_details["name"] = node_name
+                    if agentpool.node_labels is not None:
+                        node_labels = agentpool.node_labels
+                        if node_labels is not None and \
+                           node_labels.get(CONST_ACSTOR_IO_ENGINE_LABEL_KEY) is not None and \
+                           node_name is not None:
+                            labelled_nodepool_arr.append(node_name)
+                        pool_details["node_labels"] = node_labels
+                    agentpool_details.append(pool_details)
+
+                # Incase of a new installation, if the nodepool list is not defined
+                # then check for all the nodepools which are marked with acstor io-engine
+                # labels and include them for installation. If none of the nodepools are
+                # labelled, either pick nodepool1 as default, or if only
+                # one nodepool exists, choose the only nodepool by default.
+                if not is_extension_installed:
+                    if nodepool_list is None:
+                        nodepool_list = "nodepool1"
+                        if len(labelled_nodepool_arr) > 0:
+                            nodepool_list = ','.join(labelled_nodepool_arr)
+                        elif len(agentpool_details) == 1:
+                            pool_detail = agentpool_details[0]
+                            nodepool_list = pool_detail.get("name")
+
+                from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                    validate_enable_azure_container_storage_params
+                )
+                validate_enable_azure_container_storage_params(
+                    enable_pool_type,
+                    pool_name,
+                    pool_sku,
+                    pool_option,
+                    pool_size,
+                    nodepool_list,
+                    agentpool_details,
+                    is_extension_installed,
+                    is_azureDisk_enabled,
+                    is_elasticSan_enabled,
+                    is_ephemeralDisk_localssd_enabled,
+                    is_ephemeralDisk_nvme_enabled,
+                )
+
+                # If the extension is already installed,
+                # we expect that the Azure Container Storage
+                # nodes are already labelled. Use those label
+                # to generate the nodepool_list.
+                if is_extension_installed:
+                    nodepool_list = ','.join(labelled_nodepool_arr)
+                else:
+                    # Set Azure Container Storage labels on the required nodepools.
+                    nodepool_list_arr = nodepool_list.split(',')
+                    for agentpool in mc.agent_pool_profiles:
+                        labels = agentpool.node_labels
+                        if agentpool.name in nodepool_list_arr:
+                            if labels is None:
+                                labels = {}
+                            labels[CONST_ACSTOR_IO_ENGINE_LABEL_KEY] = CONST_ACSTOR_IO_ENGINE_LABEL_VAL
+                        else:
+                            # Remove residual Azure Container Storage labels
+                            # from any other nodepools where its not intended
+                            if labels is not None:
+                                labels.pop(CONST_ACSTOR_IO_ENGINE_LABEL_KEY, None)
+                        agentpool.node_labels = labels
+
+                # set intermediates
+                self.context.set_intermediate("azure_container_storage_nodepools", nodepool_list, overwrite_exists=True)
+                self.context.set_intermediate("enable_azure_container_storage", True, overwrite_exists=True)
+            if disable_azure_container_storage:
+                from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                    validate_disable_azure_container_storage_params
+                )
+                validate_disable_azure_container_storage_params(
+                    disable_pool_type,
+                    pool_name,
+                    pool_sku,
+                    pool_option,
+                    pool_size,
+                    nodepool_list,
+                    is_extension_installed,
+                    is_azureDisk_enabled,
+                    is_elasticSan_enabled,
+                    is_ephemeralDisk_localssd_enabled,
+                    is_ephemeralDisk_nvme_enabled,
+                )
+                pre_disable_validate = False
+
+                msg = (
+                    "Disabling Azure Container Storage will forcefully delete all the storagepools in the cluster and "
+                    "affect the applications using these storagepools. Forceful deletion of storagepools can also "
+                    "lead to leaking of storage resources which are being consumed. Do you want to validate whether "
+                    "any of the storagepools are being used before disabling Azure Container Storage?"
+                )
+
+                from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
+                    CONST_ACSTOR_ALL,
+                )
+                if disable_pool_type != CONST_ACSTOR_ALL:
+                    msg = (
+                        f"Disabling Azure Container Storage for storagepool type {disable_pool_type} "
+                        "will forcefully delete all the storagepools of the same type and affect the "
+                        "applications using these storagepools. Forceful deletion of storagepools can "
+                        "also lead to leaking of storage resources which are being consumed. Do you want to "
+                        f"validate whether any of the storagepools of type {disable_pool_type} are being used "
+                        "before disabling Azure Container Storage?"
+                    )
+                if self.context.get_yes() or prompt_y_n(msg, default="y"):
+                    pre_disable_validate = True
+
+                # set intermediate
+                self.context.set_intermediate("disable_azure_container_storage", True, overwrite_exists=True)
+                self.context.set_intermediate(
+                    "pre_disable_validate_azure_container_storage",
+                    pre_disable_validate,
+                    overwrite_exists=True
+                )
+
+            # Set intermediates
+            self.context.set_intermediate("is_extension_installed", is_extension_installed, overwrite_exists=True)
+            self.context.set_intermediate("is_azureDisk_enabled", is_azureDisk_enabled, overwrite_exists=True)
+            self.context.set_intermediate("is_elasticSan_enabled", is_elasticSan_enabled, overwrite_exists=True)
+            self.context.set_intermediate(
+                "is_ephemeralDisk_nvme_enabled",
+                is_ephemeralDisk_nvme_enabled,
+                overwrite_exists=True
+            )
+            self.context.set_intermediate(
+                "is_ephemeralDisk_localssd_enabled",
+                is_ephemeralDisk_localssd_enabled,
+                overwrite_exists=True
+            )
+            self.context.set_intermediate("current_core_value", current_core_value, overwrite_exists=True)
+
+        return mc
+
+    def update_cost_analysis(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_cost_analysis():
+            if mc.metrics_profile is None:
+                mc.metrics_profile = self.models.ManagedClusterMetricsProfile()
+            if mc.metrics_profile.cost_analysis is None:
+                mc.metrics_profile.cost_analysis = self.models.ManagedClusterCostAnalysis()
+
+            # set enabled
+            mc.metrics_profile.cost_analysis.enabled = True
+
+        if self.context.get_disable_cost_analysis():
+            if mc.metrics_profile is None:
+                mc.metrics_profile = self.models.ManagedClusterMetricsProfile()
+            if mc.metrics_profile.cost_analysis is None:
+                mc.metrics_profile.cost_analysis = self.models.ManagedClusterCostAnalysis()
+
+            # set disabled
+            mc.metrics_profile.cost_analysis.enabled = False
+
+        return mc
+
+    def update_metrics_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Updates the metricsProfile field of the managed cluster
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        mc = self.update_cost_analysis(mc)
+
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -7931,8 +8387,12 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_k8s_support_plan(mc)
         # update azure monitor metrics profile
         mc = self.update_azure_monitor_profile(mc)
+        # update azure container storage
+        mc = self.update_azure_container_storage(mc)
         # update cluster upgrade settings
         mc = self.update_upgrade_settings(mc)
+        # update metrics profile
+        mc = self.update_metrics_profile(mc)
         return mc
 
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:
@@ -7951,14 +8411,20 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         enable_azure_keyvault_secrets_provider_addon = self.context.get_enable_kv() or (
             mc.addon_profiles and mc.addon_profiles.get(CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME) and
             mc.addon_profiles[CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME].enabled)
-
+        enable_azure_container_storage = self.context.get_intermediate(
+            "enable_azure_container_storage", default_value=False
+        )
+        disable_azure_container_storage = self.context.get_intermediate(
+            "disable_azure_container_storage", default_value=False
+        )
         # pylint: disable=too-many-boolean-expressions
         if (
             monitoring_addon_enabled or
             ingress_appgw_addon_enabled or
             virtual_node_addon_enabled or
             (enable_managed_identity and attach_acr) or
-            (keyvault_id and enable_azure_keyvault_secrets_provider_addon)
+            (keyvault_id and enable_azure_keyvault_secrets_provider_addon) or
+            (enable_azure_container_storage or disable_azure_container_storage)
         ):
             return True
         return False
@@ -8017,6 +8483,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     create_dcr=False,
                     create_dcra=True,
                     enable_syslog=self.context.get_enable_syslog(),
+                    data_collection_settings=self.context.get_data_collection_settings(),
+                    is_private_cluster=self.context.get_enable_private_cluster(),
+                    ampls_resource_id=self.context.get_ampls_resource_id(),
+                    enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
                 )
 
         # ingress appgw addon
@@ -8052,6 +8522,79 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     subscription_id=self.context.get_subscription_id(),
                     is_service_principal=False,
                 )
+
+        enable_azure_container_storage = self.context.get_intermediate("enable_azure_container_storage")
+        disable_azure_container_storage = self.context.get_intermediate("disable_azure_container_storage")
+        is_extension_installed = self.context.get_intermediate("is_extension_installed")
+        is_azureDisk_enabled = self.context.get_intermediate("is_azureDisk_enabled")
+        is_elasticSan_enabled = self.context.get_intermediate("is_elasticSan_enabled")
+        is_ephemeralDisk_localssd_enabled = self.context.get_intermediate("is_ephemeralDisk_localssd_enabled")
+        is_ephemeralDisk_nvme_enabled = self.context.get_intermediate("is_ephemeralDisk_nvme_enabled")
+        current_core_value = self.context.get_intermediate("current_core_value")
+        pool_option = self.context.raw_param.get("storage_pool_option")
+
+        # enable azure container storage
+        if enable_azure_container_storage:
+            if cluster.identity_profile is None or cluster.identity_profile["kubeletidentity"] is None:
+                logger.warning(
+                    "Unexpected error getting kubelet's identity for the cluster."
+                    "Unable to perform azure container storage operation."
+                )
+                return
+            pool_name = self.context.raw_param.get("storage_pool_name")
+            pool_type = self.context.raw_param.get("enable_azure_container_storage")
+            pool_sku = self.context.raw_param.get("storage_pool_sku")
+            pool_size = self.context.raw_param.get("storage_pool_size")
+            nodepool_list = self.context.get_intermediate("azure_container_storage_nodepools")
+            kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
+            acstor_nodepool_skus = []
+            for agentpool_profile in cluster.agent_pool_profiles:
+                if agentpool_profile.name in nodepool_list:
+                    acstor_nodepool_skus.append(agentpool_profile.vm_size)
+
+            self.context.external_functions.perform_enable_azure_container_storage(
+                self.cmd,
+                self.context.get_subscription_id(),
+                self.context.get_resource_group_name(),
+                self.context.get_name(),
+                self.context.get_node_resource_group(),
+                kubelet_identity_object_id,
+                pool_name,
+                pool_type,
+                pool_size,
+                pool_sku,
+                pool_option,
+                acstor_nodepool_skus,
+                False,
+                is_extension_installed,
+                is_azureDisk_enabled,
+                is_elasticSan_enabled,
+                is_ephemeralDisk_localssd_enabled,
+                is_ephemeralDisk_nvme_enabled,
+                current_core_value,
+            )
+
+        # disable azure container storage
+        if disable_azure_container_storage:
+            pool_type = self.context.raw_param.get("disable_azure_container_storage")
+            kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
+            pre_disable_validate = self.context.get_intermediate("pre_disable_validate_azure_container_storage")
+            self.context.external_functions.perform_disable_azure_container_storage(
+                self.cmd,
+                self.context.get_subscription_id(),
+                self.context.get_resource_group_name(),
+                self.context.get_name(),
+                self.context.get_node_resource_group(),
+                kubelet_identity_object_id,
+                pre_disable_validate,
+                pool_type,
+                pool_option,
+                is_elasticSan_enabled,
+                is_azureDisk_enabled,
+                is_ephemeralDisk_localssd_enabled,
+                is_ephemeralDisk_nvme_enabled,
+                current_core_value,
+            )
 
         # attach keyvault to app routing addon
         from azure.cli.command_modules.keyvault.custom import set_policy

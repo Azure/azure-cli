@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command_group(
     "security",
-    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
     """Manage your security posture with Microsoft Defender for Cloud.

@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2024-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2024-02-01"],
         ]
     }
 
@@ -60,6 +60,12 @@ class Update(AAZCommand):
         # define Arg Group "Profile"
 
         _args_schema = cls._args_schema
+        _args_schema.identity = AAZObjectArg(
+            options=["--identity"],
+            arg_group="Profile",
+            help="Managed service identity (system assigned and/or user assigned identities).",
+            nullable=True,
+        )
         _args_schema.location = AAZResourceLocationArg(
             arg_group="Profile",
             help="Resource location.",
@@ -74,6 +80,24 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        identity = cls._args_schema.identity
+        identity.type = AAZStrArg(
+            options=["type"],
+            help="Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).",
+            enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
+        )
+        identity.user_assigned_identities = AAZDictArg(
+            options=["user-assigned-identities"],
+            help="The set of user assigned identities associated with the resource. The userAssignedIdentities dictionary keys will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}. The dictionary values can be empty objects ({}) in requests.",
+            nullable=True,
+        )
+
+        user_assigned_identities = cls._args_schema.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectArg(
+            nullable=True,
+            blank={},
+        )
+
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg(
             nullable=True,
@@ -82,6 +106,12 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.log_scrubbing = AAZObjectArg(
+            options=["--log-scrubbing"],
+            arg_group="Properties",
+            help="Defines rules that scrub sensitive fields in the Azure Front Door profile logs.",
+            nullable=True,
+        )
         _args_schema.origin_response_timeout_seconds = AAZIntArg(
             options=["--origin-response-timeout-seconds"],
             arg_group="Properties",
@@ -90,6 +120,47 @@ class Update(AAZCommand):
             fmt=AAZIntArgFormat(
                 minimum=16,
             ),
+        )
+
+        log_scrubbing = cls._args_schema.log_scrubbing
+        log_scrubbing.scrubbing_rules = AAZListArg(
+            options=["scrubbing-rules"],
+            help="List of log scrubbing rules applied to the Azure Front Door profile logs.",
+            nullable=True,
+        )
+        log_scrubbing.state = AAZStrArg(
+            options=["state"],
+            help="State of the log scrubbing config. Default value is Enabled.",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+
+        scrubbing_rules = cls._args_schema.log_scrubbing.scrubbing_rules
+        scrubbing_rules.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.log_scrubbing.scrubbing_rules.Element
+        _element.match_variable = AAZStrArg(
+            options=["match-variable"],
+            help="The variable to be scrubbed from the logs.",
+            enum={"QueryStringArgNames": "QueryStringArgNames", "RequestIPAddress": "RequestIPAddress", "RequestUri": "RequestUri"},
+        )
+        _element.selector = AAZStrArg(
+            options=["selector"],
+            help="When matchVariable is a collection, operator used to specify which elements in the collection this rule applies to.",
+            nullable=True,
+        )
+        _element.selector_match_operator = AAZStrArg(
+            options=["selector-match-operator"],
+            help="When matchVariable is a collection, operate on the selector to specify which elements in the collection this rule applies to.",
+            enum={"EqualsAny": "EqualsAny"},
+        )
+        _element.state = AAZStrArg(
+            options=["state"],
+            help="Defines the state of a log scrubbing rule. Default value is enabled.",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
 
         # define Arg Group "Sku"
@@ -182,7 +253,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-02-01",
                     required=True,
                 ),
             }
@@ -281,7 +352,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-02-01",
                     required=True,
                 ),
             }
@@ -339,14 +410,41 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
+            _builder.set_prop("identity", AAZObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
+            identity = _builder.get(".identity")
+            if identity is not None:
+                identity.set_prop("type", AAZStrType, ".type", typ_kwargs={"flags": {"required": True}})
+                identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identities")
+
+            user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
+            if user_assigned_identities is not None:
+                user_assigned_identities.set_elements(AAZObjectType, ".")
+
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("logScrubbing", AAZObjectType, ".log_scrubbing")
                 properties.set_prop("originResponseTimeoutSeconds", AAZIntType, ".origin_response_timeout_seconds")
+
+            log_scrubbing = _builder.get(".properties.logScrubbing")
+            if log_scrubbing is not None:
+                log_scrubbing.set_prop("scrubbingRules", AAZListType, ".scrubbing_rules")
+                log_scrubbing.set_prop("state", AAZStrType, ".state")
+
+            scrubbing_rules = _builder.get(".properties.logScrubbing.scrubbingRules")
+            if scrubbing_rules is not None:
+                scrubbing_rules.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.logScrubbing.scrubbingRules[]")
+            if _elements is not None:
+                _elements.set_prop("matchVariable", AAZStrType, ".match_variable", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("selector", AAZStrType, ".selector")
+                _elements.set_prop("selectorMatchOperator", AAZStrType, ".selector_match_operator", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("state", AAZStrType, ".state")
 
             sku = _builder.get(".sku")
             if sku is not None:
@@ -456,6 +554,9 @@ class _UpdateHelper:
             serialized_name="frontDoorId",
             flags={"read_only": True},
         )
+        properties.log_scrubbing = AAZObjectType(
+            serialized_name="logScrubbing",
+        )
         properties.origin_response_timeout_seconds = AAZIntType(
             serialized_name="originResponseTimeoutSeconds",
         )
@@ -470,6 +571,27 @@ class _UpdateHelper:
 
         extended_properties = _schema_profile_read.properties.extended_properties
         extended_properties.Element = AAZStrType()
+
+        log_scrubbing = _schema_profile_read.properties.log_scrubbing
+        log_scrubbing.scrubbing_rules = AAZListType(
+            serialized_name="scrubbingRules",
+        )
+        log_scrubbing.state = AAZStrType()
+
+        scrubbing_rules = _schema_profile_read.properties.log_scrubbing.scrubbing_rules
+        scrubbing_rules.Element = AAZObjectType()
+
+        _element = _schema_profile_read.properties.log_scrubbing.scrubbing_rules.Element
+        _element.match_variable = AAZStrType(
+            serialized_name="matchVariable",
+            flags={"required": True},
+        )
+        _element.selector = AAZStrType()
+        _element.selector_match_operator = AAZStrType(
+            serialized_name="selectorMatchOperator",
+            flags={"required": True},
+        )
+        _element.state = AAZStrType()
 
         sku = _schema_profile_read.sku
         sku.name = AAZStrType()

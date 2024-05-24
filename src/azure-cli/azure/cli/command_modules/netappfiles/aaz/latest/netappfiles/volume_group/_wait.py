@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2023-11-01"],
         ]
     }
 
@@ -134,7 +134,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -197,9 +197,6 @@ class Wait(AAZWaitCommand):
             )
             group_meta_data.application_type = AAZStrType(
                 serialized_name="applicationType",
-            )
-            group_meta_data.deployment_spec_id = AAZStrType(
-                serialized_name="deploymentSpecId",
             )
             group_meta_data.global_placement_rules = AAZListType(
                 serialized_name="globalPlacementRules",
@@ -424,10 +421,22 @@ class Wait(AAZWaitCommand):
             )
 
             data_protection = cls._schema_on_200.properties.volumes.Element.properties.data_protection
+            data_protection.backup = AAZObjectType()
             data_protection.replication = AAZObjectType()
             data_protection.snapshot = AAZObjectType()
             data_protection.volume_relocation = AAZObjectType(
                 serialized_name="volumeRelocation",
+            )
+
+            backup = cls._schema_on_200.properties.volumes.Element.properties.data_protection.backup
+            backup.backup_policy_id = AAZStrType(
+                serialized_name="backupPolicyId",
+            )
+            backup.backup_vault_id = AAZStrType(
+                serialized_name="backupVaultId",
+            )
+            backup.policy_enforced = AAZBoolType(
+                serialized_name="policyEnforced",
             )
 
             replication = cls._schema_on_200.properties.volumes.Element.properties.data_protection.replication

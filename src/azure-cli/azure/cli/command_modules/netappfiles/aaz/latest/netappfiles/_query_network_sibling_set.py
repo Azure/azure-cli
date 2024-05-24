@@ -18,12 +18,15 @@ class QueryNetworkSiblingSet(AAZCommand):
     """Describe a network sibling set
 
     Get details of the specified network sibling set
+
+    :example: Query network sibling set
+        az netappfiles query-network-sibling-set -l westus2 --network-sibling-set-id {SIBLIING_SET_ID} --subnet-id {SUBNET_ID}
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/querynetworksiblingset", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/querynetworksiblingset", "2023-11-01"],
         ]
     }
 
@@ -131,7 +134,7 @@ class QueryNetworkSiblingSet(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }

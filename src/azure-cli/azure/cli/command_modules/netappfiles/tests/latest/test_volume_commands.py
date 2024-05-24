@@ -120,7 +120,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume_list = self.cmd("netappfiles volume list --resource-group {rg} --account-name %s --pool-name %s" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 1
 
-        self.cmd("az netappfiles volume delete --resource-group {rg} --account-name %s --pool-name %s --volume-name %s --force" % (account_name, pool_name, volume_name))
+        self.cmd("az netappfiles volume delete --resource-group {rg} --account-name %s --pool-name %s --volume-name %s --force --yes" % (account_name, pool_name, volume_name))
         volume_list = self.cmd("netappfiles volume list --resource-group {rg} -a %s -p %s" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 0
 
@@ -150,7 +150,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s" % (rg, account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, file_path, vnet_name, subnet_id)).get_output_in_json()
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
 
-        self.cmd("az netappfiles volume delete --resource-group %s --account-name %s --pool-name %s --volume-name %s" % (rg, account_name, pool_name, volume_name))
+        self.cmd("az netappfiles volume delete --resource-group %s --account-name %s --pool-name %s --volume-name %s --yes" % (rg, account_name, pool_name, volume_name))
         self.cmd("az group delete --yes -n %s" % (subnet_rg))
 
     @serial_test()
@@ -225,7 +225,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume_list = self.cmd("netappfiles volume list --resource-group {rg} -a '%s' -p '%s'" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 2
 
-        self.cmd("az netappfiles volume delete -g {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name1))
+        self.cmd("az netappfiles volume delete -g {rg} -a %s -p %s -v %s --yes" % (account_name, pool_name, volume_name1))
         volume_list = self.cmd("netappfiles volume list -g {rg} -a '%s' -p '%s'" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 1
 
@@ -569,4 +569,4 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
             'networkFeatures':'Standard'
         })
 
-        networkSiblingSet = self.cmd("az netappfiles update-network-sibling-set -l {loc} --subnet-id {subnet_id} --network-sibling-set-id {networkSiblingSetId} --network-sibling-set-state-id {networkSiblingSetStateId} --network-features {networkFeatures}").get_output_in_json()
+        networkSiblingSet = self.cmd("az netappfiles update-network-sibling-set -l {loc} --subnet-id {subnet_id} --network-sibling-set-id {networkSiblingSetId} --network-sibling-set-state-id='{networkSiblingSetStateId}' --network-features {networkFeatures}").get_output_in_json()

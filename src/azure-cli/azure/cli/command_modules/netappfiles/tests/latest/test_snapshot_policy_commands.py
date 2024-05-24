@@ -99,7 +99,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         assert len(snapshot_policy_list) == 1
 
         # delete snapshot policy
-        self.cmd("az netappfiles snapshot policy delete -g {rg} -a %s --snapshot-policy-name %s" %
+        self.cmd("az netappfiles snapshot policy delete -g {rg} -a %s --snapshot-policy-name %s -y" %
                  (account_name, snapshot_policy_name))
 
         # create snapshot policy using short parameter names and validate result
@@ -130,7 +130,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         assert snapshot_policy['tags']['Tag1'] == 'Value1'
 
         # delete snapshot policy
-        self.cmd("az netappfiles snapshot policy delete -g {rg} -a %s --snapshot-policy-name %s" %
+        self.cmd("az netappfiles snapshot policy delete -g {rg} -a %s --snapshot-policy-name %s -y" %
                  (account_name, snapshot_policy_name))
 
         # validate snapshot policy doesn't exist
@@ -161,7 +161,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
 
         # delete all snapshot policies
         for snapshot_policy_name in snapshot_policies:
-            self.cmd("az netappfiles snapshot policy delete -g {rg} -a %s --snapshot-policy-name %s" %
+            self.cmd("az netappfiles snapshot policy delete -g {rg} -a %s --snapshot-policy-name %s -y" %
                      (account_name, snapshot_policy_name))
 
         # validate that no snapshot policies exist
@@ -179,8 +179,10 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         snapshot_policy_name = self.create_random_name(prefix='cli-sn-pol-', length=16)
         hourly_snapshots = 1
         hourly_minute = 10
-        self.cmd("az netappfiles snapshot policy create -g {rg} -a %s --snapshot-policy-name %s -l %s -u %s --hourly-minute %s" %
-                 (account_name, snapshot_policy_name, LOCATION, hourly_snapshots, hourly_minute)).get_output_in_json()
+        daily_minute = 20
+        daily_hour = 2
+        self.cmd("az netappfiles snapshot policy create -g {rg} -a %s --snapshot-policy-name %s -l %s -u %s --hourly-minute %s --daily-minute %s --daily-hour %s" %
+                 (account_name, snapshot_policy_name, LOCATION, hourly_snapshots, hourly_minute, daily_minute, daily_hour)).get_output_in_json()
 
         # get snapshot policy by name and validate
         snapshot_policy = self.cmd("az netappfiles snapshot policy show -g {rg} -a %s --snapshot-policy-name %s" %

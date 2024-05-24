@@ -524,7 +524,7 @@ def aks_create(
     disable_public_fqdn=False,
     service_principal=None,
     client_secret=None,
-    enable_managed_identity=True,
+    enable_managed_identity=False,
     assign_identity=None,
     assign_kubelet_identity=None,
     enable_aad=False,
@@ -566,6 +566,8 @@ def aks_create(
     enable_msi_auth_for_monitoring=True,
     enable_syslog=False,
     data_collection_settings=None,
+    ampls_resource_id=None,
+    enable_high_log_scale_mode=False,
     aci_subnet_name=None,
     appgw_name=None,
     appgw_subnet_cidr=None,
@@ -619,11 +621,19 @@ def aks_create(
     ksm_metric_annotations_allow_list=None,
     grafana_resource_id=None,
     enable_windows_recording_rules=False,
+    # azure container storage
+    enable_azure_container_storage=None,
+    storage_pool_name=None,
+    storage_pool_size=None,
+    storage_pool_sku=None,
+    storage_pool_option=None,
     # misc
     yes=False,
     no_wait=False,
     aks_custom_headers=None,
     node_public_ip_tags=None,
+    # metrics profile
+    enable_cost_analysis=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -761,10 +771,21 @@ def aks_update(
     grafana_resource_id=None,
     enable_windows_recording_rules=False,
     disable_azure_monitor_metrics=False,
+    # azure container storage
+    enable_azure_container_storage=None,
+    disable_azure_container_storage=None,
+    storage_pool_name=None,
+    storage_pool_size=None,
+    storage_pool_sku=None,
+    storage_pool_option=None,
+    azure_container_storage_nodepools=None,
     # misc
     yes=False,
     no_wait=False,
     aks_custom_headers=None,
+    # metrics profile
+    enable_cost_analysis=False,
+    disable_cost_analysis=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1043,6 +1064,9 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
                 create_dcra=True,
                 enable_syslog=False,
                 data_collection_settings=None,
+                is_private_cluster=False,
+                ampls_resource_id=None,
+                enable_high_log_scale_mode=False,
             )
     except TypeError:
         pass
@@ -1077,6 +1101,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       enable_msi_auth_for_monitoring=True,
                       enable_syslog=False,
                       data_collection_settings=None,
+                      ampls_resource_id=None,
+                      enable_high_log_scale_mode=False,
                       no_wait=False,):
     instance = client.get(resource_group_name, name)
     msi_auth = False
@@ -1085,6 +1111,10 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
     else:
         enable_msi_auth_for_monitoring = False
     subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    is_private_cluster = False
+    if instance.api_server_access_profile and instance.api_server_access_profile.enable_private_cluster:
+        is_private_cluster = True
 
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id,
@@ -1100,7 +1130,9 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               rotation_poll_interval=rotation_poll_interval,
                               no_wait=no_wait,
                               enable_syslog=enable_syslog,
-                              data_collection_settings=data_collection_settings)
+                              data_collection_settings=data_collection_settings,
+                              ampls_resource_id=ampls_resource_id,
+                              enable_high_log_scale_mode=enable_high_log_scale_mode)
 
     enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
         and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
@@ -1130,7 +1162,10 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                         create_dcr=True,
                         create_dcra=True,
                         enable_syslog=enable_syslog,
-                        data_collection_settings=data_collection_settings)
+                        data_collection_settings=data_collection_settings,
+                        is_private_cluster=is_private_cluster,
+                        ampls_resource_id=ampls_resource_id,
+                        enable_high_log_scale_mode=enable_high_log_scale_mode)
                 else:
                     raise ArgumentUsageError(
                         "--enable-msi-auth-for-monitoring can not be used on clusters with service principal auth.")
@@ -1139,8 +1174,13 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                 if enable_syslog:
                     raise ArgumentUsageError(
                         "--enable-syslog can not be used without MSI auth.")
+                if enable_high_log_scale_mode:
+                    raise ArgumentUsageError(
+                        "--enable-high-log-scale-mode can not be used without MSI auth.")
                 if data_collection_settings is not None:
                     raise ArgumentUsageError("--data-collection-settings can not be used without MSI auth.")
+                if ampls_resource_id is not None:
+                    raise ArgumentUsageError("--ampls-resource-id supported only in MSI auth mode.")
                 ensure_container_insights_for_monitoring(
                     cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id, resource_group_name, name, instance.location, aad_route=False)
 
@@ -1181,7 +1221,9 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    rotation_poll_interval=None,
                    no_wait=False,
                    enable_syslog=False,
-                   data_collection_settings=None,):
+                   data_collection_settings=None,
+                   ampls_resource_id=None,
+                   enable_high_log_scale_mode=False):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
                                                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                 operation_group='managed_clusters')
@@ -2286,6 +2328,7 @@ def aks_agentpool_add(
     allowed_host_ports=None,
     asg_ids=None,
     node_public_ip_tags=None,
+    disable_windows_outbound_nat=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2333,6 +2376,7 @@ def aks_agentpool_update(
     aks_custom_headers=None,
     allowed_host_ports=None,
     asg_ids=None,
+    os_sku=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2883,12 +2927,15 @@ def aks_mesh_upgrade_complete(
         cmd,
         client,
         resource_group_name,
-        name):
+        name,
+        yes=False
+):
     return _aks_mesh_update(
         cmd,
         client,
         resource_group_name,
         name,
+        yes=yes,
         mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE)
 
 
@@ -2896,13 +2943,15 @@ def aks_mesh_upgrade_rollback(
         cmd,
         client,
         resource_group_name,
-        name
+        name,
+        yes=False
 ):
     return _aks_mesh_update(
         cmd,
         client,
         resource_group_name,
         name,
+        yes=yes,
         mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK)
 
 
@@ -2922,6 +2971,7 @@ def _aks_mesh_update(
         disable_ingress_gateway=None,
         ingress_gateway_type=None,
         revision=None,
+        yes=False,
         mesh_upgrade_command=None,
 ):
     raw_parameters = locals()

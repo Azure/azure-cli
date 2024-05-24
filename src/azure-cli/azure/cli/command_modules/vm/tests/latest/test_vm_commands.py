@@ -821,19 +821,26 @@ class TestSnapShotAccess(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_snapshot_access_')
     def test_snapshot_access(self, resource_group):
         self.kwargs.update({
-            'snapshot': 'snapshot'
+            'snapshot1': 'snapshot1',
+            'snapshot2': 'snapshot2',
         })
         
-        self.cmd('snapshot create -n {snapshot} -g {rg} --size-gb 1', checks=self.check('diskState', 'Unattached'))
-        self.cmd('snapshot grant-access --duration-in-seconds 600 -n {snapshot} -g {rg}')
-        self.cmd('snapshot show -n {snapshot} -g {rg}', checks=self.check('diskState', 'ActiveSAS'))
+        self.cmd('snapshot create -n {snapshot1} -g {rg} --size-gb 1', checks=self.check('diskState', 'Unattached'))
+        self.cmd('snapshot grant-access --duration-in-seconds 600 -n {snapshot1} -g {rg}')
+        self.cmd('snapshot show -n {snapshot1} -g {rg}', checks=self.check('diskState', 'ActiveSAS'))
         self.cmd('snapshot list -g {rg}',
                  checks=[
                      self.check('length(@)', '1'),
                      self.check('[0].diskState', 'ActiveSAS'),
                  ])
-        self.cmd('snapshot revoke-access -n {snapshot} -g {rg}')
-        self.cmd('snapshot show -n {snapshot} -g {rg}', checks=self.check('diskState', 'Unattached'))
+        self.cmd('snapshot revoke-access -n {snapshot1} -g {rg}')
+        self.cmd('snapshot show -n {snapshot1} -g {rg}', checks=self.check('diskState', 'Unattached'))
+
+        self.cmd('snapshot create -n {snapshot2} -g {rg} --size-gb 1', checks=self.check('diskState', 'Unattached'))
+        self.cmd('snapshot grant-access --duration-in-seconds 600 -n {snapshot2} -g {rg} --file-format VHDX')
+        self.cmd('snapshot show -n {snapshot2} -g {rg}', checks=self.check('diskState', 'ActiveSAS'))
+        self.cmd('snapshot revoke-access -n {snapshot2} -g {rg}')
+        self.cmd('snapshot show -n {snapshot2} -g {rg}', checks=self.check('diskState', 'Unattached'))
 
     @ResourceGroupPreparer(name_prefix='test_snapshot_create_with_source_blob_uri')
     def test_snapshot_create_with_source_blob_uri(self, resource_group):
@@ -1114,6 +1121,64 @@ class VMManagedDiskScenarioTest(ScenarioTest):
                      self.check('creationData.sourceResourceId', '{disk_restore_point_id}')
                  ])
 
+    @ResourceGroupPreparer('cli_test_vm_data_disk_creation_from_copy_and_restore', location='eastus2euap')
+    def test_vm_data_disk_creation_from_copy_and_restore(self):
+        self.kwargs.update({
+            'vm_name': self.create_random_name('vm_', length=15),
+            'vm_name2': self.create_random_name('vm_', length=15),
+            'collection_name': self.create_random_name('collection_', length=20),
+            'point_name': self.create_random_name('point_', length=15),
+            'disk_name1': self.create_random_name('disk_', length=15),
+            'disk_name2': self.create_random_name('disk_', length=15),
+            'disk_name3': self.create_random_name('disk_', length=15),
+            'disk_name4': self.create_random_name('disk_', length=15),
+            'disk_name5': self.create_random_name('disk_', length=15)
+        })
+
+        self.cmd('disk create -g {rg} -n {disk_name1} --size-gb 1 --sku Standard_LRS')
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --attach-data-disks {disk_name1} --admin-username rp_disk_test').get_output_in_json()
+        self.kwargs.update({
+            'vm_id': vm['id']
+        })
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}')
+        self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name}')
+        disk_restore_point = self.cmd('restore-point show --resource-group {rg} --collection-name {collection_name} --name {point_name}').get_output_in_json()
+        self.kwargs['disk_restore_point_id'] = disk_restore_point['sourceMetadata']['storageProfile']['dataDisks'][0]['diskRestorePoint']['id']
+
+        restore_disk = self.cmd('disk create --resource-group {rg} --name {disk_name2} --sku Standard_LRS --size-gb 5 --source {disk_restore_point_id}').get_output_in_json()
+        self.cmd('disk create --resource-group {rg} --name {disk_name3} --sku Standard_LRS --size-gb 5')
+        copy_disk = self.cmd('disk create --resource-group {rg} --name {disk_name4} --source {disk_name3} --sku Standard_LRS --size-gb 5').get_output_in_json()
+        copy_snapshot = self.cmd('snapshot create --resource-group {rg} --name {disk_name5} --source {disk_name3} --sku Standard_LRS --size-gb 5').get_output_in_json()
+
+        self.kwargs.update({
+            'copy_resource1_id': copy_disk['id'],
+            'copy_resource2_id': copy_snapshot['id']
+        })
+        self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-resource {copy_resource1_id} {copy_resource2_id} --source-resource-size 5 5 --source-disk-rp {disk_restore_point_id} --source-rp-size 5')
+        self.cmd('vm show -g {rg} -n {vm_name2}', checks=[
+            self.check('storageProfile.dataDisks[0].sourceResource.id', '{copy_resource1_id}'),
+            self.check('storageProfile.dataDisks[0].createOption', 'Copy'),
+            self.check('storageProfile.dataDisks[1].sourceResource.id', '{copy_resource2_id}'),
+            self.check('storageProfile.dataDisks[1].createOption', 'Copy'),
+            self.check('storageProfile.dataDisks[2].sourceResource.id', '{disk_restore_point_id}'),
+            self.check('storageProfile.dataDisks[2].createOption', 'Restore')
+        ])
+        message1 = 'Length of --source-snapshots-or-disks, --source-snapshots-or-disks-size-gb must be same.'
+        with self.assertRaisesRegex(ArgumentUsageError, message1):
+            self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-resource {copy_resource1_id} {copy_resource2_id} --source-resource-size 5 --source-disk-rp {disk_restore_point_id} --source-rp-size 5')
+
+        message2 = 'usage error: --source-snapshots-or-disks and --source-snapshots-or-disks-size-gb must be used together'
+        with self.assertRaisesRegex(ArgumentUsageError, message2):
+            self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-resource {copy_resource1_id} {copy_resource2_id}')
+
+        message3 = 'Length of --source-disk-restore-point, --source-disk-restore-point-size-gb must be same.'
+        with self.assertRaisesRegex(ArgumentUsageError, message3):
+            self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-disk-rp {disk_restore_point_id} --source-rp-size 5 5')
+
+        message4 = 'usage error: --source-disk-restore-point and --source-disk-restore-point-size-gb must be used together'
+        with self.assertRaisesRegex(ArgumentUsageError, message4):
+            self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-rp-size 5')
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_upload_')
     def test_vm_disk_upload(self, resource_group):
         self.kwargs.update({
@@ -1185,7 +1250,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk4': 'd4',
             'disk5': 'd5',
             'disk6': 'd6',
-            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202311010',
+            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202403080',
             'image2': 'image2',
             'g1': self.create_random_name('g1', 20),
             'vm': 'vm1'
@@ -2335,6 +2400,7 @@ class VMMonitorTestCreateWindows(ScenarioTest):
 
 class VMMonitorTestUpdateLinux(ScenarioTest):
 
+    @live_only() # Test playback fails and the live-only flag will be removed once it is addressed
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_update_with_workspace_linux', location='eastus')
     def test_vm_update_with_workspace_linux(self, resource_group):
@@ -2655,6 +2721,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
 
 class VMSSExtensionImageTest(ScenarioTest):
 
+    @live_only()  # https://github.com/Azure/azure-cli/issues/28678
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension_image_')
     def test_vmss_extension_image(self, resource_group):
@@ -3612,16 +3679,59 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='test_vmss_with_resiliency_policy_', location='westus')
+    def test_vmss_with_resiliency_policy(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'sku': 'Standard_D1_v2',
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image {image} --vm-sku {sku} --admin-username vmtest --admin-password Test123456789# --enable-resilient-creation --disable-overprovision --upgrade-policy-mode Manual --orchestration-mode Uniform')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.resilientVmCreationPolicy.enabled', True),
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --enable-resilient-deletion --enable-resilient-creation false')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.resilientVmCreationPolicy.enabled', False),
+            self.check('resiliencyPolicy.resilientVmDeletionPolicy.enabled', True),
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_with_max_surge')
     def test_vmss_with_max_surge(self, resource_group):
         self.kwargs.update({
             'vmss': self.create_random_name('vmss', 10)
         })
-        self.cmd(
-            'vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --upgrade-policy-mode Manual --max-surge true --disable-overprovision --orchestration-mode Uniform',
-            checks=[
-                self.check('vmss.upgradePolicy.rollingUpgradePolicy.maxSurge', True)
-            ])
+        self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --upgrade-policy-mode Manual --max-surge true --disable-overprovision --orchestration-mode Uniform', checks=[
+            self.check('vmss.upgradePolicy.rollingUpgradePolicy.maxSurge', True),
+        ])
+        self.cmd('vmss update -n {vmss} -g {rg} --max-surge false', checks=[
+            self.check('upgradePolicy.rollingUpgradePolicy.maxSurge', False),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_with_auto_os_upgrade_', location='eastus2euap')
+    def test_vmss_with_auto_os_upgrade(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+            'image': 'MicrosoftWindowsServer:WindowsServer:2022-Datacenter:latest',
+            'admin_username': 'TestUser',
+            'admin_password': 'Test123456789#',
+            'sku': 'Standard_A1',
+            'lb': self.create_random_name('lb', 10),
+            'lbrule': 'lbrule',
+            'probe': self.create_random_name('probe', 15),
+        })
+
+        # set up a LB with the probe for Automatic upgrade
+        self.cmd('network lb create -g {rg} -n {lb}')
+        self.cmd('network lb probe create -g {rg} --lb-name {lb} -n {probe} --protocol Tcp --port 80')
+        self.cmd('network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
+
+        self.cmd('vmss create --debug -n {vmss} -g {rg} --image {image} --upgrade-policy-mode Automatic --enable-auto-os-upgrade --orchestration-mode Uniform --load-balancer {lb} --admin-username {admin_username} --admin-password {admin_password} --vm-sku {sku} --health-probe {probe}',
+                 checks=[
+                     self.check('vmss.upgradePolicy.automaticOSUpgradePolicy.enableAutomaticOSUpgrade', True),
+                     self.check('vmss.upgradePolicy.mode', 'Automatic'),
+                 ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk')
     def test_vmss_create_ephemeral_os_disk(self, resource_group):
@@ -3655,6 +3765,40 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
             self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_ephemeral_os_disk', location='eastus2euap')
+    def test_vmss_update_ephemeral_os_disk(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('vmss', 10),
+            'vmss2': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vmss create --resource-group {rg} --name {vmss1} --image OpenLogic:CentOS:7.5:latest --ephemeral-os-disk --disable-overprovision --instance-count 2 --data-disk-sizes-gb 2 --storage-sku os=standard_lrs 0=premium_lrs --admin-username testuser1 --admin-password testPassword01! --orchestration-mode Uniform', checks=[
+            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk')
+        ])
+        self.cmd('vmss update --resource-group {rg} --name {vmss1} --ephemeral-os-disk false', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings', None)
+        ])
+        self.cmd('vmss update --resource-group {rg} --name {vmss1} --ephemeral-os-disk true --ephemeral-option local --ephemeral-placement CacheDisk ', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk')
+        ])
+        self.cmd('vmss update --resource-group {rg} --name {vmss1} --ephemeral-os-disk true --ephemeral-option local --ephemeral-placement ResourceDisk --vm-sku Standard_DS4_v2', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'ResourceDisk')
+        ])
+
+        self.cmd('vmss create --resource-group {rg} --name {vmss2} --image OpenLogic:CentOS:7.5:latest --ephemeral-os-disk --disable-overprovision --instance-count 2 --data-disk-sizes-gb 2 --storage-sku os=standard_lrs 0=premium_lrs --admin-username testuser1 --admin-password testPassword01! --orchestration-mode Uniform', checks=[
+            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk')
+        ])
+        self.cmd('vmss update --resource-group {rg} --name {vmss2} --ephemeral-os-disk false', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings', None)
+        ])
+        self.cmd('vmss update --resource-group {rg} --name {vmss2} --ephemeral-os-disk true --ephemeral-option local --ephemeral-placement ResourceDisk --vm-sku Standard_DS4_v2', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'ResourceDisk')
         ])
 
     @AllowLargeResponse()
@@ -4005,6 +4149,21 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('upgradePolicy.rollingUpgradePolicy.maxUnhealthyInstancePercent', maxUUIP),
             self.check('upgradePolicy.rollingUpgradePolicy.pauseTimeBetweenBatches', PTB),
             self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_set_rolling_upgrade_policy_during_creation', location='eastus')
+    def test_vmss_set_rolling_upgrade_policy_during_creation(self):
+        self.kwargs.update({
+            'linux_vmss': self.create_random_name('vmss', 10),
+            'windows_vmss': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vmss create -g {rg} -n {linux_vmss} --image ubuntu2204 --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --orchestration-mode Uniform --admin-username clitester1 --admin-password Testqwer1234!', checks=[
+            self.check('vmss.upgradePolicy.mode', 'Rolling'),
+            self.check('vmss.virtualMachineProfile.extensionProfile.extensions[0].name', 'ApplicationHealthLinux')
+        ])
+        self.cmd('vmss create -g {rg} -n {windows_vmss} --image Win2022Datacenter --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --orchestration-mode Uniform --admin-username clitester1 --admin-password Testqwer1234!', checks=[
+            self.check('vmss.upgradePolicy.mode', 'Rolling'),
+            self.check('vmss.virtualMachineProfile.extensionProfile.extensions[0].name', 'ApplicationHealthWindows')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_', location='westus')
@@ -5771,7 +5930,8 @@ class VMGalleryImage(ScenarioTest):
             checks=[
                 self.check('location', resource_group_location),
                 self.check('name', self.kwargs['version1']),
-                self.check('provisioningState', 'Succeeded')
+                self.check('provisioningState', 'Succeeded'),
+                self.check('storageProfile.source.virtualMachineId', '{vm_id}')
             ]).get_output_in_json()['id']
 
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image2} '
@@ -6284,7 +6444,10 @@ class VMGalleryImage(ScenarioTest):
 
         self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
         time.sleep(60)  # service end latency
+        self.cmd('snapshot delete -g {rg} -n {snapshot1}')
+        self.cmd('disk delete -g {rg} -n {disk1} -y')
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        time.sleep(60)
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_specialized_', location='eastus2')
@@ -6482,7 +6645,7 @@ class VMGalleryImage(ScenarioTest):
                      self.check('location', resource_group_location),
                      self.check('name', '{version}'),
                      self.check('provisioningState', 'Succeeded'),
-                     self.check('storageProfile.source.id', '{vm_id}'),
+                     self.check('storageProfile.source.virtualMachineId', '{vm_id}')
                  ])
         if self.is_live:
             time.sleep(30)
@@ -6498,7 +6661,7 @@ class VMGalleryImage(ScenarioTest):
                      self.check('location', resource_group_location),
                      self.check('name', '{version}'),
                      self.check('provisioningState', 'Succeeded'),
-                     self.check('storageProfile.source.id', '{vm_id}'),
+                     self.check('storageProfile.source.virtualMachineId', '{vm_id}'),
                  ])
         if self.is_live:
             time.sleep(30)
@@ -9069,6 +9232,23 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
         ])
 
 
+class VMSSSecurityPostureScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_security_posture_reference_', location='eastus2euap')
+    def test_vmss_security_posture_reference(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('clitestvmss1', 20),
+            'security_posture_reference_id': '/internal/Providers/Microsoft.Compute/galleries/SecurityPostureGallery-uiualhwjibht/securityPostures/VMSSUniformLinux/versions/1.0.0'
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username sdk-test-admin --orchestration-mode Uniform '
+                 '--security-posture-reference-id {security_posture_reference_id}')
+
+        self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
+            self.check('virtualMachineProfile.securityPostureReference.id', '{security_posture_reference_id}')
+        ])
+
+
 class VMDiskLogicalSectorSize(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_logical_sector_size_')
@@ -9906,6 +10086,29 @@ class CapacityReservationScenarioTest(ScenarioTest):
             time.sleep(60)
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
 
+    @record_only()  # Some special subscriptions can test it.
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_sharing_profile', location='westEurope')
+    def test_capacity_reservation_sharing_profile(self, resource_group):
+
+        self.kwargs.update({
+            'reservation_group_1': self.create_random_name('reservation_group_', 30),
+            'reservation_group_2': self.create_random_name('reservation_group_', 30),
+            'sub_id': '/subscriptions/00000000-0000-0000-0000-000000000000'
+        })
+        self.cmd('capacity reservation group create -n {reservation_group_1} -g {rg} --sharing-profile {sub_id} subscriptions/00000000-0000-0000-0000-000000000000 -l westEurope')
+        self.cmd('capacity reservation group create -n {reservation_group_2} -g {rg} -l westEurope')
+        self.cmd('capacity reservation group update -n {reservation_group_2} -g {rg} --sharing-profile {sub_id}')
+        self.cmd('capacity reservation group update -n {reservation_group_1} -g {rg} --sharing-profile')
+        self.cmd('capacity reservation group create -n {reservation_group_2} -g {rg} --sharing-profile {sub_id} 00000000-0000-0000-0000-000000000000 -l westEurope')
+
+    @record_only()  # Some special subscriptions can test it.
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_query_params', location='westEurope')
+    def test_capacity_reservation_list_query_params(self, resource_group):
+
+        self.cmd('capacity reservation group list --resource-ids-only all')
+        self.cmd('capacity reservation group list --resource-ids-only CreatedInSubscription')
+        self.cmd('capacity reservation group list --resource-ids-only SharedWithSubscription')
+
 
 class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
@@ -10245,6 +10448,22 @@ class DiskRPTestScenario(ScenarioTest):
         self.cmd('snapshot create -g {rg} -n {snapshot1} --source {snapshot} --incremental true -l eastus2euap', checks=[
             self.check('creationData.createOption', 'CopyStart')
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_snapshot_create_with_bandwidth_copy_speed1_', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='cli_test_snapshot_create_with_bandwidth_copy_speed2_', location='centraluseuap', key='rg2')
+    def test_snapshot_create_with_bandwidth_copy_speed(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10),
+            'snapshot': self.create_random_name('snap', 10),
+            'snapshot1': self.create_random_name('snap', 10),
+        })
+        # Create a random empty disk
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 200 -l eastus2euap')
+        # Create a snapshot A from a empty disk with createOption as "Copy"
+        self.kwargs['source'] = self.cmd('snapshot create -g {rg} -n {snapshot} --source {disk} -l eastus2euap --incremental true').get_output_in_json()['id']
+        # Create a snapshot B in different region with createOption as "CopyStart" with snapshot A as source
+        self.cmd('snapshot create -g {rg2} -n {snapshot1} --copy-start true --incremental true --source {source} -l centraluseuap --bandwidth-copy-speed Enhanced',
+                 self.check('creationData.provisionedBandwidthCopySpeed', 'Enhanced'))
 
     @ResourceGroupPreparer(name_prefix='cli_snapshot_ultra_ssd', location='eastus2euap')
     def test_snapshot_ultra_ssd(self, resource_group):
@@ -10628,6 +10847,31 @@ class ArchitectureScenarioTest(ScenarioTest):
         ])
         self.cmd('snapshot update -n {snap_name} -g {rg} --architecture Arm64', checks=[
             self.check('supportedCapabilities.architecture', 'Arm64')
+        ])
+
+    @ResourceGroupPreparer(location='westus')
+    def test_sig_image_definition_default_value(self, resource_group):
+        self.kwargs.update({
+            'sig1': 'image1',
+            'gallery1': self.create_random_name('sig1', 10),
+            'gallery2': self.create_random_name("sig2", 10),
+        })
+        self.cmd('sig create -g {rg} --gallery-name {gallery1}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery1} --gallery-image-definition {sig1} '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1',
+                 checks=[
+                     self.check('features[0].name', 'SecurityType'),
+                     self.check('features[0].value', 'TrustedLaunchSupported'),
+                     self.check('hyperVGeneration', 'V2'),
+                 ])
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery2}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery2} --gallery-image-definition image --os-type linux -p publisher1 -f offer1 -s sku1 --features "IsAcceleratedNetworkSupported=true"', checks=[
+            self.check('features[0].name', 'IsAcceleratedNetworkSupported'),
+            self.check('features[0].value', 'true', False),
+            self.check('features[1].name', 'SecurityType'),
+            self.check('features[1].value', 'TrustedLaunchSupported'),
+            self.check('hyperVGeneration', 'V2'),
         ])
 
 

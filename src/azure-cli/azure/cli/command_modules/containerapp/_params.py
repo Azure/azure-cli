@@ -157,6 +157,7 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp env', arg_group='Dapr') as c:
         c.argument('instrumentation_key', options_list=['--dapr-instrumentation-key'], help='Application Insights instrumentation key used by Dapr to export Service to Service communication telemetry')
+        c.argument('dapr_connection_string', options_list=['--dapr-connection-string', '-d'], help='Application Insights connection string used by Dapr to export service to service communication telemetry.')
 
     with self.argument_context('containerapp env', arg_group='Virtual Network') as c:
         c.argument('infrastructure_subnet_resource_id', options_list=['--infrastructure-subnet-resource-id', '-s'], help='Resource ID of a subnet for infrastructure components and user app containers.')
@@ -172,6 +173,9 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp env', arg_group='Peer Authentication') as c:
         c.argument('mtls_enabled', arg_type=get_three_state_flag(), options_list=['--enable-mtls'], help='Boolean indicating if mTLS peer authentication is enabled for the environment.')
+
+    with self.argument_context('containerapp env', arg_group='Peer Traffic Configuration') as c:
+        c.argument('p2p_encryption_enabled', arg_type=get_three_state_flag(), options_list=['--enable-peer-to-peer-encryption'], help='Boolean indicating whether the peer-to-peer traffic encryption is enabled for the environment.')
 
     with self.argument_context('containerapp env create') as c:
         c.argument('zone_redundant', options_list=["--zone-redundant", "-z"], help="Enable zone redundancy on the environment. Cannot be used without --infrastructure-subnet-resource-id. If used with --location, the subnet's location must match")

@@ -3,6 +3,23 @@
 Release History
 ===============
 
+2.61.0
+++++++
+* Resolve CVE-2024-34064 (#28895)
+* [BREAKING CHANGE] `az login`: Use WAM as the default authentication method on Windows. For more details, see https://go.microsoft.com/fwlink/?linkid=2271136 (#28841)
+* `aaz`: Support extended values in `AAZArgEnum` (#28850)
+* Add `tenantDefaultDomain` and `tenantDisplayName` properties to login contexts (shown by `az account list`) (#28910)
+* Prompt for interactive authentication for all silent authentication failures (#28966)
+
+2.60.0
+++++++
+* Fix #28737: Fix token cache for service principal authentication (#28747)
+* Resolve CVE-2023-3651 (#28735)
+
+2.59.0
+++++++
+* Minor fixes
+
 2.58.0
 ++++++
 * [BREAKING CHANGE] `az login`: Replace `allow_broker` with `enable_broker_on_windows` (#27726)

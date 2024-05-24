@@ -164,12 +164,14 @@ def is_sku_available(cmd, sku_info, zone):
     return is_available
 
 
-# pylint: disable=too-many-statements, too-many-branches
+# pylint: disable=too-many-statements, too-many-branches, too-many-locals
 def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
                         os_disk_caching=None, data_disk_cachings=None, size='',
                         ephemeral_os_disk=False, ephemeral_os_disk_placement=None,
-                        data_disk_delete_option=None):
+                        data_disk_delete_option=None, source_snapshots_or_disks=None,
+                        source_snapshots_or_disks_size_gb=None, source_disk_restore_point=None,
+                        source_disk_restore_point_size_gb=None):
     from msrestazure.tools import is_valid_resource_id
     from ._validators import validate_delete_options
     is_lv_size = re.search('_L[0-9]+s', size, re.I)
@@ -185,6 +187,10 @@ def normalize_disk_info(image_data_disks=None,
     attach_data_disks = attach_data_disks or []
     data_disk_sizes_gb = data_disk_sizes_gb or []
     image_data_disks = image_data_disks or []
+    source_snapshots_or_disks = source_snapshots_or_disks or []
+    source_snapshots_or_disks_size_gb = source_snapshots_or_disks_size_gb or []
+    source_disk_restore_point = source_disk_restore_point or []
+    source_disk_restore_point_size_gb = source_disk_restore_point_size_gb or []
 
     if data_disk_delete_option:
         if attach_data_disks:
@@ -231,6 +237,46 @@ def normalize_disk_info(image_data_disks=None,
         }
         if isinstance(data_disk_delete_option, str):
             info[i]['deleteOption'] = data_disk_delete_option
+
+    # add copy data disks
+    i = 0
+    source_resource_copy = list(source_snapshots_or_disks)
+    source_resource_copy_size = list(source_snapshots_or_disks_size_gb)
+    while source_resource_copy:
+        while i in used_luns:
+            i += 1
+
+        used_luns.add(i)
+
+        info[i] = {
+            'lun': i,
+            'createOption': 'copy',
+            'managedDisk': {'storageAccountType': None},
+            'diskSizeGB': source_resource_copy_size.pop(0),
+            'sourceResource': {
+                'id': source_resource_copy.pop(0)
+            }
+        }
+
+    # add restore data disks
+    i = 0
+    source_resource_restore = list(source_disk_restore_point)
+    source_resource_restore_size = list(source_disk_restore_point_size_gb)
+    while source_resource_restore:
+        while i in used_luns:
+            i += 1
+
+        used_luns.add(i)
+
+        info[i] = {
+            'lun': i,
+            'createOption': 'restore',
+            'managedDisk': {'storageAccountType': None},
+            'diskSizeGB': source_resource_restore_size.pop(0),
+            'sourceResource': {
+                'id': source_resource_restore.pop(0)
+            }
+        }
 
     # update storage skus for managed data disks
     if storage_sku is not None:

@@ -42,17 +42,17 @@ az storage blob show --name $blobName --container-name $containerName --connecti
 
 By specifying `--sas-token $sasToken` or `--connection-string $connectionString` configured using shared access signature (SAS), CLI can get a signed URI including a token that indicates how the resources may be accessed by the client.
 
-Here's an example of getting properties of a blob in a storage account with sas token:
+Here's an example of getting properties of a blob in a storage account with SAS token:
 ```
-# Generate a sas (Shared access signature) token
+# Generate a SAS (Shared access signature) token
 az storage account/container/blob/share/fs/queue/table generate-sas
 # Get blob properties with sas token
 az storage blob show --name $blobName --container-name $containerName --account-name $accountName --sas-token $sasToken
 ```
 
-Here's an example of getting properties of a blob in a storage account with connection string configured using sas:
+Here's an example of getting properties of a blob in a storage account with connection string configured using SAS:
 ```
-# Generate a sas (Shared access signature) token
+# Generate a SAS (Shared access signature) token
 az storage account/container/blob/share/fs/queue/table generate-sas
 # Configure a connection string(Each service endpoint is optional, although the connection string must contain at least one.)
 connectionString="BlobEndpoint=${blobEndpoint};QueueEndpoint=${queueEndpoint};TableEndpoint=${tableEndpoint};FileEndpoint=${fileEndpoint};SharedAccessSignature=${sasToken}"
@@ -69,6 +69,6 @@ If no `--auth-mode` or `--account-key` or `--sas-token` or `--connection-string`
 Then CLI will proceed the data plane requests with the account key queried before.
 
 ## See More
-* [Azure control plane and data plane](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/control-plane-and-data-plane)
-* [Authorize access to data in Azure Storage](https://docs.microsoft.com/en-us/azure/storage/common/authorize-data-access)
-* [Configure Azure Storage connection strings](https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string)
+* [Azure control plane and data plane](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/control-plane-and-data-plane)
+* [Authorize access to data in Azure Storage](https://learn.microsoft.com/en-us/azure/storage/common/authorize-data-access)
+* [Configure Azure Storage connection strings](https://learn.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string)

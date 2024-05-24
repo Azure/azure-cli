@@ -245,7 +245,7 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv export', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
-        c.argument('export_as_reference', options_list=['--export-as-reference', '-r'], is_preview=True, arg_type=get_three_state_flag(), validator=validate_export_as_reference,
+        c.argument('export_as_reference', options_list=['--export-as-reference', '-r'], arg_type=get_three_state_flag(), validator=validate_export_as_reference,
                    help="Export key-values as App Configuration references. For more information, see https://docs.microsoft.com/en-us/azure/app-service/app-service-configuration-references")
 
     with self.argument_context('appconfig kv set') as c:
