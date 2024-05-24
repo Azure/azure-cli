@@ -10,14 +10,21 @@ from azure.core.exceptions import HttpResponseError
 
 
 def get_amw_region(cmd, azure_monitor_workspace_resource_id):
-    from msrestazure.tools import parse_resource_id
-    # region of MAC can be different from region of RG so find the location of the azure_monitor_workspace_resource_id
+    import re
+    # Define the allowed characters in the final string
+    allowed_chars = re.compile(r'[^a-zA-Z0-9\-_\(\)\.]')
+
+    # Parse the resource ID to extract details
     parsed_dict = parse_resource_id(azure_monitor_workspace_resource_id)
     resources = get_resources_client(cmd.cli_ctx, parsed_dict["subscription"])
     try:
+        # Retrieve the resource information
         resource = resources.get_by_id(
             azure_monitor_workspace_resource_id, MAC_API)
-        return resource.location.lower()
+        # Get the location and filter it to include only allowed characters
+        location = resource.location.lower()
+        filtered_location = allowed_chars.sub('', location)
+        return filtered_location
     except HttpResponseError as ex:
         raise ex
 
