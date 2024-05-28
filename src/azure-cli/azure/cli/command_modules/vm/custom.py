@@ -3919,7 +3919,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 security_type=None, enable_proxy_agent=None, proxy_agent_mode=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                 max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None,
-                ephemeral_os_disk=None, ephemeral_os_disk_option=None, **kwargs):
+                ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4164,6 +4164,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             resiliency_policy.resilient_vm_creation_policy = {'enabled': enable_resilient_creation}
         if enable_resilient_deletion is not None:
             resiliency_policy.resilient_vm_deletion_policy = {'enabled': enable_resilient_deletion}
+
+    if zones is not None:
+        vmss.zones = zones
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
