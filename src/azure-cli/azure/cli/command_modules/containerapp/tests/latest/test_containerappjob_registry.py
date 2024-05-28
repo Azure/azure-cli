@@ -26,7 +26,7 @@ class ContainerAppJobsRegistryOperationsTest(ScenarioTest):
 
     @ResourceGroupPreparer(location="northeurope")
     @AllowLargeResponse()
-    def test_containerapp_registry_curd(self, resource_group):
+    def test_containerappjob_registry_crud(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         job = self.create_random_name(prefix='app', length=24)
