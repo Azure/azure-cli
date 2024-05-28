@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, consider-using-f-string, logging-format-interpolation, inconsistent-return-statements, broad-except, bare-except, too-many-statements, too-many-locals, too-many-boolean-expressions, too-many-branches, too-many-nested-blocks, pointless-statement, expression-not-assigned, unbalanced-tuple-unpacking, unsupported-assignment-operation
-# pylint: disable=super-with-arguments, too-many-instance-attributes, no-else-return, no-self-use, useless-return, reimported, redefined-outer-name, no-else-raise
+# pylint: disable=super-with-arguments, too-many-instance-attributes, no-else-return, no-self-use, useless-return, reimported, redefined-outer-name, no-else-raise, too-few-public-methods
 
 import json
 import time
