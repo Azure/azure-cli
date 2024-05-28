@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, consider-using-f-string, logging-format-interpolation, inconsistent-return-statements, broad-except, bare-except, too-many-statements, too-many-locals, too-many-boolean-expressions, too-many-branches, too-many-nested-blocks, pointless-statement, expression-not-assigned, unbalanced-tuple-unpacking, unsupported-assignment-operation
-# pylint: disable=super-with-arguments, too-many-instance-attributes, no-else-return, no-self-use, useless-return, reimported, redefined-outer-name, no-else-raise
+# pylint: disable=super-with-arguments, too-many-instance-attributes, no-else-return, no-self-use, useless-return, reimported, redefined-outer-name, no-else-raise, too-few-public-methods
 
 import json
 import time
@@ -1397,4 +1397,17 @@ class AuthClient():
         request_url = f"{management_hostname}subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.App/containerApps/{container_app_name}/authConfigs/{auth_config_name}?api-version={cls.api_version}"
 
         r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+        return r.json()
+
+
+class SubscriptionClient():
+    api_version = CURRENT_API_VERSION
+
+    @classmethod
+    def show_custom_domain_verification_id(cls, cmd):
+        management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
+        sub_id = get_subscription_id(cmd.cli_ctx)
+        request_url = f"{management_hostname}subscriptions/{sub_id}/providers/Microsoft.App/getCustomDomainVerificationId?api-version={cls.api_version}"
+
+        r = send_raw_request(cmd.cli_ctx, "POST", request_url)
         return r.json()
