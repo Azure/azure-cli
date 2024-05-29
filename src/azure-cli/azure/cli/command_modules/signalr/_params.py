@@ -34,7 +34,9 @@ logger = get_logger(__name__)
 def load_arguments(self, _):
     signalr_name_type = CLIArgumentType(options_list='--signalr-name', help='Name of the SignalR.', id_part='name')
     signalr_custom_domain_name_type = CLIArgumentType(help='Name of the custom domain.', id_part='child_name_1')
-    signalr_custom_certificate_name_type = CLIArgumentType(help='Name of the custom certificate.', id_part='child_name_2')
+    signalr_custom_certificate_name_type = CLIArgumentType(
+        help='Name of the custom certificate.', id_part='child_name_2')
+    signalr_replica_name_type = CLIArgumentType(help='Name of the replica.', id_part='child_name_1')
 
     with self.argument_context('signalr') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -134,4 +136,25 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('keyvault_base_uri', help="Key vault base URI. For example, `https://contoso.vault.azure.net`.")
             c.argument('keyvault_secret_name', help="Key vault secret name where certificate is stored.")
-            c.argument('keyvault_secret_version', help="Key vault secret version where certificate is stored. If empty, will use latest version.")
+            c.argument('keyvault_secret_version',
+                       help="Key vault secret version where certificate is stored. If empty, will use latest version.")
+
+    # Replica
+    for scope in ['signalr replica create',
+                  'signalr replica list',
+                  'signalr replica delete',
+                  'signalr replica show']:
+        with self.argument_context(scope) as c:
+            c.argument('sku', help='The sku name of the replica. Currently allowed values: Premium_P1')
+            c.argument('unit_count', help='The number of signalr service unit count', type=int)
+            c.argument('replica_name', signalr_replica_name_type)
+
+    for scope in ['signalr replica create',
+                  'signalr replica list']:
+        with self.argument_context(scope) as c:
+            c.argument('signalr_name', signalr_name_type, id_part=None)
+
+    for scope in ['signalr replica show',
+                  'signalr replica delete']:
+        with self.argument_context(scope) as c:
+            c.argument('signalr_name', signalr_name_type)

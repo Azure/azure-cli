@@ -95,6 +95,9 @@ from ._util import (
 
 logger = get_logger(__name__)
 
+BACKUP_STORAGE_ACCESS_TIERS = ["hot",
+                               "archive"]
+
 ###############################################
 #                Common funcs                 #
 ###############################################
@@ -644,6 +647,7 @@ class SqlServerMinimalTlsVersionType(Enum):
     tls_1_0 = "1.0"
     tls_1_1 = "1.1"
     tls_1_2 = "1.2"
+    tls_1_3 = "1.3"
 
 
 class ResourceIdType(Enum):
@@ -675,6 +679,11 @@ class ComputeModelType(str, Enum):
 
     provisioned = "Provisioned"
     serverless = "Serverless"
+
+
+class FreeLimitExhaustionBehavior(str, Enum):
+    auto_pause = "AutoPause"
+    bill_over_usage = "BillOverUsage"
 
 
 class AlwaysEncryptedEnclaveType(str, Enum):
@@ -801,6 +810,28 @@ def _get_managed_instance_resource_id(
         resource_group=resource_group_name,
         namespace='Microsoft.Sql', type='managedInstances',
         name=managed_instance_name))
+
+
+def _get_managed_instance_pool_resource_id(
+        cli_ctx,
+        resource_group_name,
+        instance_pool_name,
+        subscription_id=None):
+    '''
+    Gets instance pool resource id in this Azure environment.
+    '''
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import resource_id
+
+    if instance_pool_name:
+        return (resource_id(
+            subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Sql', type='instancePools',
+            name=instance_pool_name))
+
+    return instance_pool_name
 
 
 def db_show_conn_str(
@@ -1084,6 +1115,7 @@ def _db_dw_create(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Creates a DB (with any create mode) or DW.
@@ -1137,6 +1169,8 @@ def _db_dw_create(
     kwargs['keys'] = _get_database_keys(keys)
     kwargs['encryption_protector'] = encryption_protector
 
+    kwargs['encryption_protector_auto_rotation'] = encryption_protector_auto_rotation
+
     # Create
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        server_name=dest_db.server_name,
@@ -1186,6 +1220,7 @@ def db_create(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Creates a DB (with 'Default' create mode.)
@@ -1214,6 +1249,7 @@ def db_create(
         user_assigned_identity_id=user_assigned_identity_id,
         keys=keys,
         encryption_protector=encryption_protector,
+        encryption_protector_auto_rotation=encryption_protector_auto_rotation,
         **kwargs)
 
 
@@ -1246,6 +1282,7 @@ def db_copy(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Copies a DB (i.e. create with 'Copy' create mode.)
@@ -1288,6 +1325,7 @@ def db_copy(
         user_assigned_identity_id=user_assigned_identity_id,
         keys=keys,
         encryption_protector=encryption_protector,
+        encryption_protector_auto_rotation=encryption_protector_auto_rotation,
         **kwargs)
 
 
@@ -1306,6 +1344,7 @@ def db_create_replica(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Creates a secondary replica DB (i.e. create with 'Secondary' create mode.)
@@ -1351,6 +1390,7 @@ def db_create_replica(
         user_assigned_identity_id=user_assigned_identity_id,
         keys=keys,
         encryption_protector=encryption_protector,
+        encryption_protector_auto_rotation=encryption_protector_auto_rotation,
         **kwargs)
 
 
@@ -1399,6 +1439,7 @@ def db_restore(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Restores an existing or deleted DB (i.e. create with 'Restore'
@@ -1436,6 +1477,7 @@ def db_restore(
         user_assigned_identity_id=user_assigned_identity_id,
         keys=keys,
         encryption_protector=encryption_protector,
+        encryption_protector_auto_rotation=encryption_protector_auto_rotation,
         **kwargs)
 
 
@@ -1717,7 +1759,10 @@ def db_update(  # pylint: disable=too-many-locals
         keys=None,
         encryption_protector=None,
         federated_client_id=None,
-        keys_to_remove=None):
+        keys_to_remove=None,
+        encryption_protector_auto_rotation=None,
+        use_free_limit=None,
+        free_limit_exhaustion_behavior=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1822,9 +1867,8 @@ def db_update(  # pylint: disable=too-many-locals
     #####
     # Per DB CMK properties
     #####
-    if assign_identity:
-        if user_assigned_identity_id is not None:
-            instance.identity = _get_database_identity(user_assigned_identity_id)
+    if assign_identity and (user_assigned_identity_id is not None):
+        instance.identity = _get_database_identity(user_assigned_identity_id)
 
     if keys is not None or keys_to_remove is not None:
         instance.keys = _get_database_keys_for_update(keys, keys_to_remove)
@@ -1836,6 +1880,15 @@ def db_update(  # pylint: disable=too-many-locals
         instance.federated_client_id = federated_client_id
 
     instance.availability_zone = None
+
+    if encryption_protector_auto_rotation is not None:
+        instance.encryption_protector_auto_rotation = encryption_protector_auto_rotation
+
+    if use_free_limit is not None:
+        instance.use_free_limit = use_free_limit
+
+    if free_limit_exhaustion_behavior:
+        instance.free_limit_exhaustion_behavior = free_limit_exhaustion_behavior
 
     return instance
 
@@ -2951,6 +3004,8 @@ def update_long_term_retention(
         monthly_retention=None,
         yearly_retention=None,
         week_of_year=None,
+        make_backups_immutable=None,
+        backup_storage_access_tier=None,
         **kwargs):
     '''
     Updates long term retention for managed database
@@ -2961,6 +3016,17 @@ def update_long_term_retention(
     if yearly_retention and not week_of_year:
         raise CLIError('Please specify week of year for yearly retention.')
 
+    if make_backups_immutable:
+        confirmation = prompt_y_n("""Immutable LTR backups can't be changed or deleted.
+         You'll be charged for LTR backups for the full retention period.
+         Do you want to proceed?""")
+        if not confirmation:
+            return
+
+    if backup_storage_access_tier and backup_storage_access_tier.lower() not in BACKUP_STORAGE_ACCESS_TIERS:
+        raise CLIError('Please specify a valid backup storage access tier type for backup storage access tier.'
+                       'See \'--help\' for more details.')
+
     kwargs['weekly_retention'] = weekly_retention
 
     kwargs['monthly_retention'] = monthly_retention
@@ -2968,6 +3034,10 @@ def update_long_term_retention(
     kwargs['yearly_retention'] = yearly_retention
 
     kwargs['week_of_year'] = week_of_year
+
+    kwargs['make_backups_immutable'] = make_backups_immutable
+
+    kwargs['backup_storage_access_tier'] = backup_storage_access_tier
 
     policy = client.begin_create_or_update(
         database_name=database_name,
@@ -3170,6 +3240,7 @@ def restore_long_term_retention_backup(
         target_database_name,
         target_server_name,
         target_resource_group_name,
+        sku,
         assign_identity=False,
         user_assigned_identity_id=None,
         keys=None,
@@ -3188,10 +3259,23 @@ def restore_long_term_retention_backup(
     if not long_term_retention_backup_resource_id:
         raise CLIError('Please specify a long term retention backup.')
 
+    backup_name = long_term_retention_backup_resource_id.split("/")[-1].split(";")
+    if len(backup_name) == 3 and backup_name[-1] != "Hot":
+        raise CLIError('Restore operation on "' + backup_name[-1] + '" backup is not allowed. '
+                       'Only "Hot" backups can be restored')
+
     kwargs['location'] = _get_server_location(
         cmd.cli_ctx,
         server_name=target_server_name,
         resource_group_name=target_resource_group_name)
+
+    # If sku.name is not specified, resolve the requested sku name
+    # using capabilities.
+    kwargs['sku'] = _find_db_sku_from_capabilities(
+        cmd.cli_ctx,
+        kwargs['location'],
+        sku,
+        compute_model=kwargs['compute_model'])
 
     kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
@@ -3882,6 +3966,9 @@ def instance_pool_create(
     kwargs['sku'] = _find_instance_pool_sku_from_capabilities(
         cmd.cli_ctx, kwargs['location'], sku)
 
+    kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
+        cmd.cli_ctx, kwargs['maintenance_configuration_id'])
+
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        instance_pool_name=instance_pool_name,
                        resource_group_name=resource_group_name,
@@ -3889,13 +3976,33 @@ def instance_pool_create(
 
 
 def instance_pool_update(
+        cmd,
         instance,
+        vcores=None,
+        tier=None,
+        family=None,
+        maintenance_configuration_id=None,
+        license_type=None,
         tags=None):
     '''
     Updates a instance pool
     '''
 
-    instance.tags = tags
+    instance.tags = (tags or instance.tags)
+    instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
+        cmd.cli_ctx, maintenance_configuration_id or instance.maintenance_configuration_id)
+
+    instance.v_cores = (vcores or instance.v_cores)
+    instance.license_type = (license_type or instance.license_type)
+
+    instance.sku.name = None
+    instance.sku.tier = (tier or instance.sku.tier)
+    instance.sku.family = (family or instance.sku.family)
+
+    instance.sku = _find_instance_pool_sku_from_capabilities(
+        cmd.cli_ctx,
+        instance.location,
+        instance.sku)
 
     return instance
 
@@ -3943,6 +4050,7 @@ def server_create(
         client,
         resource_group_name,
         server_name,
+        minimal_tls_version=None,
         assign_identity=False,
         no_wait=False,
         enable_public_network=None,
@@ -3975,6 +4083,11 @@ def server_create(
         kwargs['restrict_outbound_network_access'] = (
             ServerNetworkAccessFlag.ENABLED if restrict_outbound_network_access
             else ServerNetworkAccessFlag.DISABLED)
+
+    if minimal_tls_version is not None:
+        kwargs['minimal_tls_version'] = minimal_tls_version
+    else:
+        kwargs['minimal_tls_version'] = SqlServerMinimalTlsVersionType.tls_1_2
 
     kwargs['key_id'] = key_id
     kwargs['federated_client_id'] = federated_client_id
@@ -4069,6 +4182,7 @@ def server_update(
     # Apply params to instance
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
+
     instance.minimal_tls_version = (
         minimal_tls_version or instance.minimal_tls_version)
 
@@ -4833,6 +4947,7 @@ def managed_instance_create(
         external_admin_name=None,
         service_principal_type=None,
         zone_redundant=None,
+        instance_pool_name=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -4887,6 +5002,8 @@ def managed_instance_create(
         azure_ad_only_authentication=ad_only,
         tenant_id=tenant_id)
 
+    kwargs['instance_pool_id'] = _get_managed_instance_pool_resource_id(cmd.cli_ctx, resource_group_name, instance_pool_name)
+
     # Create
     return client.begin_create_or_update(
         managed_instance_name=managed_instance_name,
@@ -4931,9 +5048,10 @@ def managed_instance_get(
     return client.get(resource_group_name, managed_instance_name, expand)
 
 
-def managed_instance_update(
+def managed_instance_update(  # pylint: disable=too-many-locals
         cmd,
         instance,
+        resource_group_name,
         administrator_login_password=None,
         license_type=None,
         vcores=None,
@@ -4954,7 +5072,10 @@ def managed_instance_update(
         virtual_network_subnet_id=None,
         yes=None,
         service_principal_type=None,
-        zone_redundant=None):
+        zone_redundant=None,
+        instance_pool_name=None,
+        database_format=None,
+        pricing_model=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -5023,6 +5144,15 @@ def managed_instance_update(
 
     if zone_redundant is not None:
         instance.zone_redundant = zone_redundant
+
+    if instance_pool_name is not None:
+        instance.instance_pool_id = _get_managed_instance_pool_resource_id(cmd.cli_ctx, resource_group_name, instance_pool_name)
+
+    if database_format is not None:
+        instance.database_format = database_format
+
+    if pricing_model is not None:
+        instance.pricing_model = pricing_model
 
     return instance
 
@@ -6339,7 +6469,8 @@ def failover_group_failover(
         resource_group_name,
         server_name,
         failover_group_name,
-        allow_data_loss=False):
+        allow_data_loss=False,
+        try_planned_before_forced_failover=False):
     '''
     Failover a failover group.
     '''
@@ -6353,7 +6484,9 @@ def failover_group_failover(
         return
 
     # Choose which failover method to use
-    if allow_data_loss:
+    if try_planned_before_forced_failover:
+        failover_func = client.begin_try_planned_before_forced_failover
+    elif allow_data_loss:
         failover_func = client.begin_force_failover_allow_data_loss
     else:
         failover_func = client.begin_failover

@@ -3,6 +3,49 @@
 Release History
 ===============
 
+2.60.0
+++++++
+* Fix #28737: Fix token cache for service principal authentication (#28747)
+* Resolve CVE-2023-3651 (#28735)
+
+2.59.0
+++++++
+* Minor fixes
+
+2.58.0
+++++++
+* [BREAKING CHANGE] `az login`: Replace `allow_broker` with `enable_broker_on_windows` (#27726)
+
+2.57.0
+++++++
+* `aaz`: Handle null value when deserialize output (#28253)
+* Add warning for customers when there're credentials in cli output if this feature has been turned on through `az config set clients.show_secrets_warning=True` (#27929)
+
+2.56.0
+++++++
+* Minor fixes
+
+2.55.0
+++++++
+* Minor fixes
+
+2.54.0
+++++++
+* `aaz`: Support data-plane clients (#27617)
+* [PREVIEW] Support disabling instance discovery by running `az config set core.instance_discovery=false` (#27494)
+
+2.53.1
+++++++
+* No changes
+
+2.53.0
+++++++
+* `aaz`: Fix command name case issue for aaz command table lazy load (#27344)
+
+2.52.0
+++++++
+* `aaz`: Support `configured_default` for `AAZBaseArg` (#27205)
+
 2.51.0
 ++++++
 * `aaz`: Add `--max-items` and `--next-token` for pagination (#26710)

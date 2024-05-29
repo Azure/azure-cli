@@ -14,7 +14,9 @@ from ._delete import *
 from ._get_schema import *
 from ._get_shared_keys import *
 from ._list import *
+from ._list_available_service_tier import *
 from ._list_deleted_workspaces import *
+from ._list_link_target import *
 from ._list_management_groups import *
 from ._list_usages import *
 from ._show import *

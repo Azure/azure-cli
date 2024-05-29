@@ -9,6 +9,7 @@ from random import randint
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import get_file_json
 from azure.mgmt.web.models import SkuDescription
 
@@ -28,6 +29,11 @@ def _resource_client_factory(cli_ctx, **_):
 def web_client_factory(cli_ctx, **_):
     from azure.mgmt.web import WebSiteManagementClient
     return get_mgmt_service_client(cli_ctx, WebSiteManagementClient)
+
+
+def log_analytics_client_factory(cli_ctx, **_):
+    from azure.mgmt.loganalytics import LogAnalyticsManagementClient
+    return get_mgmt_service_client(cli_ctx, LogAnalyticsManagementClient)
 
 
 def zip_contents_from_dir(dirPath, lang):
@@ -474,6 +480,53 @@ def generate_default_app_name(cmd):
     if not generated_name:
         raise CLIError("Unable to generate a default name for webapp. Please specify webapp name using --name flag")
     return generated_name
+
+
+def get_region_mapping(location):
+    import requests
+    region_mapping_url = 'https://appinsights.azureedge.net/portal/regionMapping.json'
+    response = requests.get(region_mapping_url)
+    res_dict = response.json()
+    return res_dict.get('regions').get(location).get('laRegionCode')
+
+
+def get_resource_group(cmd, name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    resource_groups = rcf.resource_groups.list()
+    return next((rg for rg in resource_groups if rg.name == name), None)
+
+
+def get_or_create_default_resource_group(cmd, location):
+    region_code = get_region_mapping(location)
+    resource_group_name = "DefaultResourceGroup-{}".format(region_code)
+    resource_group = get_resource_group(cmd, resource_group_name)
+    if resource_group is None:
+        resource_group = create_resource_group(cmd, resource_group_name, location)
+    return resource_group
+
+
+def get_workspace(cmd, name):
+    log_client = log_analytics_client_factory(cmd.cli_ctx)
+    workspaces = log_client.workspaces.list()
+    return next((w for w in workspaces if w.name == name), None)
+
+
+def get_or_create_default_workspace(cmd, location, resource_group):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.core.exceptions import HttpResponseError
+    log_client = log_analytics_client_factory(cmd.cli_ctx)
+    sub_id = get_subscription_id(cmd.cli_ctx)
+    region_code = get_region_mapping(location)
+    workspace_name = "DefaultWorkspace-{}-{}".format(sub_id, region_code)
+    try:
+        workspace = log_client.workspaces.get(resource_group, workspace_name)
+    except HttpResponseError:
+        workspace_properties = {
+            "location": location
+        }
+        poller = log_client.workspaces.begin_create_or_update(resource_group, workspace_name, workspace_properties)
+        workspace = LongRunningOperation(cmd.cli_ctx)(poller)
+    return workspace
 
 
 # region Add the project references for dotnet webapp in zip archive

@@ -13,10 +13,15 @@ if "%CLI_VERSION%"=="" (
     echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
     goto ERROR
 )
-
+@REM ARCH can be x86 or x64
 if "%ARCH%"=="" (
     set ARCH=x86
 )
+@REM TARGET can be msi or zip
+if "%TARGET%"=="" (
+    set TARGET=msi
+)
+
 if "%ARCH%"=="x86" (
     set PYTHON_ARCH=win32
 ) else if "%ARCH%"=="x64" (
@@ -25,7 +30,7 @@ if "%ARCH%"=="x86" (
     echo Please set ARCH to "x86" or "x64"
     goto ERROR
 )
-set PYTHON_VERSION=3.10.10
+set PYTHON_VERSION=3.11.8
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-%PYTHON_ARCH%.zip"
@@ -71,20 +76,22 @@ if exist %REPO_ROOT%\privates (
     copy %REPO_ROOT%\privates\*.whl %TEMP_SCRATCH_FOLDER%
 )
 
-REM ensure wix is available
-if exist %WIX_DIR% (
-    echo Using existing Wix at %WIX_DIR%
-)
-if not exist %WIX_DIR% (
-    mkdir %WIX_DIR%
-    pushd %WIX_DIR%
-    echo Downloading Wix.
-    curl --output wix-archive.zip %WIX_DOWNLOAD_URL%
-    unzip wix-archive.zip
-    if %errorlevel% neq 0 goto ERROR
-    del wix-archive.zip
-    echo Wix downloaded and extracted successfully.
-    popd
+if "%TARGET%" == "msi" (
+    REM ensure wix is available
+    if exist %WIX_DIR% (
+        echo Using existing Wix at %WIX_DIR%
+    )
+    if not exist %WIX_DIR% (
+        mkdir %WIX_DIR%
+        pushd %WIX_DIR%
+        echo Downloading Wix.
+        curl --output wix-archive.zip %WIX_DOWNLOAD_URL%
+        unzip wix-archive.zip
+        if %errorlevel% neq 0 goto ERROR
+        del wix-archive.zip
+        echo Wix downloaded and extracted successfully.
+        popd
+    )
 )
 
 REM ensure Python is available
@@ -136,18 +143,27 @@ if %errorlevel% neq 0 goto ERROR
 
 pushd %BUILDING_DIR%
 %BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\compact_aaz.py
+if %errorlevel% neq 0 goto ERROR
 %BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
+if %errorlevel% neq 0 goto ERROR
 %BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\trim_sdk.py
+if %errorlevel% neq 0 goto ERROR
 popd
 
 REM Remove pywin32 help file to reduce size.
 del %BUILDING_DIR%\Lib\site-packages\PyWin32.chm
 
-echo Creating the wbin (Windows binaries) folder that will be added to the path...
-mkdir %BUILDING_DIR%\wbin
-copy %REPO_ROOT%\build_scripts\windows\scripts\az.cmd %BUILDING_DIR%\wbin\
-copy %REPO_ROOT%\build_scripts\windows\scripts\azps.ps1 %BUILDING_DIR%\wbin\
-copy %REPO_ROOT%\build_scripts\windows\scripts\az %BUILDING_DIR%\wbin\
+if "%TARGET%"=="msi" (
+    REM Creating the wbin (Windows binaries) folder that will be added to the path...
+    mkdir %BUILDING_DIR%\wbin
+    copy %REPO_ROOT%\build_scripts\windows\scripts\az_msi.cmd %BUILDING_DIR%\wbin\az.cmd
+    copy %REPO_ROOT%\build_scripts\windows\scripts\azps.ps1 %BUILDING_DIR%\wbin\
+    copy %REPO_ROOT%\build_scripts\windows\scripts\az %BUILDING_DIR%\wbin\
+) else (
+    REM Creating the bin folder that will be added to the path...
+    mkdir %BUILDING_DIR%\bin
+    copy %REPO_ROOT%\build_scripts\windows\scripts\az_zip.cmd %BUILDING_DIR%\bin\az.cmd
+)
 if %errorlevel% neq 0 goto ERROR
 copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
 copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING_DIR%
@@ -173,6 +189,7 @@ for /f %%f in ('dir /b /s *.pyc') do (
         REM Delete __init__.pyc
         del %%~f
     ) ELSE (
+        REM pip source code is required when install packages from source code
         echo --SKIP !PARENT_DIR! under pip
     )
 )
@@ -192,14 +209,18 @@ for /d %%d in ("azure*.dist-info") do (
 )
 popd
 
+
+if "%TARGET%"=="msi" (
+    echo Building MSI...
+    msbuild /t:rebuild /p:Configuration=Release /p:Platform=%ARCH% %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
+) else (
+    echo Building ZIP...
+    "%ProgramFiles%\7-Zip\7z.exe" a -tzip "%OUTPUT_DIR%\Microsoft Azure CLI.zip" "%BUILDING_DIR%\*"
+)
+
 if %errorlevel% neq 0 goto ERROR
 
-echo Building MSI...
-msbuild /t:rebuild /p:Configuration=Release /p:Platform=%ARCH% %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
-
-if %errorlevel% neq 0 goto ERROR
-
-echo %OUTPUT_DIR%
+echo Output Dir: %OUTPUT_DIR%
 
 goto END
 

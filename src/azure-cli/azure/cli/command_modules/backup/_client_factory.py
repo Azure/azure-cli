@@ -127,6 +127,10 @@ def backup_protected_items_crr_cf(cli_ctx, *_):
     return _backup_passive_client_factory(cli_ctx).backup_protected_items_crr
 
 
+def deleted_protection_containers_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).deleted_protection_containers
+
+
 def backup_operation_statuses_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_operation_statuses
 

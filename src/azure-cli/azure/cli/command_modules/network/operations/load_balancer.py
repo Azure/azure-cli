@@ -446,6 +446,7 @@ class LBAddressPoolCreate(_LBAddressPoolBasicCreate):
         args_schema.backend_addresses.Element.name._required = True
         args_schema.backend_addresses.Element.ip_address._required = True
         args_schema.backend_addresses.Element.frontend_ip_address._registered = False
+        args_schema.vnet_id._registered = False
         return args_schema
 
     def _execute_operations(self):
@@ -465,8 +466,12 @@ class LBAddressPoolCreate(_LBAddressPoolBasicCreate):
 
     def pre_operations(self):
         from azure.mgmt.core.tools import is_valid_resource_id
+        from azure.cli.core.aaz import AAZUndefined
 
         args = self.ctx.args
+        if has_value(args.sync_mode) and has_value(args.vnet):
+            args.vnet_id = args.vnet
+            args.vnet = AAZUndefined
         if has_value(args.backend_addresses):
             for backend_address in args.backend_addresses:
                 if not has_value(backend_address.admin_state) and has_value(args.admin_state):
@@ -532,12 +537,17 @@ class LBAddressPoolUpdate(_LBAddressPoolUpdate):
         args_schema.backend_addresses.Element.name._nullable = False
         args_schema.backend_addresses.Element.ip_address._nullable = False
         args_schema.backend_addresses.Element.frontend_ip_address._registered = False
+        args_schema.vnet_id._registered = False
         return args_schema
 
     def pre_operations(self):
         from azure.mgmt.core.tools import is_valid_resource_id
+        from azure.cli.core.aaz import AAZUndefined
 
         args = self.ctx.args
+        if has_value(args.sync_mode) and has_value(args.vnet):
+            args.vnet_id = args.vnet
+            args.vnet = AAZUndefined
         if has_value(args.backend_addresses) and args.backend_addresses.to_serialized_data() is not None:
             for backend_address in args.backend_addresses:
                 if not has_value(backend_address.admin_state) and has_value(args.admin_state):

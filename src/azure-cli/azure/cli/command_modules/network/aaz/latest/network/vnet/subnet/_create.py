@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2023-11-01"],
         ]
     }
 
@@ -69,6 +69,10 @@ class Create(AAZCommand):
             options=["--address-prefixes"],
             help="Space-separated list of address prefixes in CIDR format.",
         )
+        _args_schema.default_outbound_access = AAZBoolArg(
+            options=["--default-outbound", "--default-outbound-access"],
+            help="Set this property to false to disable default outbound connectivity for all VMs in the subnet. This property can only be set at the time of subnet creation and cannot be updated for an existing subnet.",
+        )
         _args_schema.delegated_services = AAZListArg(
             options=["--delegated-services"],
             help="Space-separated list of services to whom the subnet should be delegated, e.g., `Microsoft.Sql/servers`.",
@@ -85,14 +89,14 @@ class Create(AAZCommand):
             ),
         )
         _args_schema.private_endpoint_network_policies = AAZStrArg(
-            options=["--private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet.",
+            options=["--ple-network-policies", "--private-endpoint-network-policies"],
+            help="Manage network policies for private endpoint.",
             default="Disabled",
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+            enum={"Disabled": "Disabled", "Enabled": "Enabled", "NetworkSecurityGroupEnabled": "NetworkSecurityGroupEnabled", "RouteTableEnabled": "RouteTableEnabled"},
         )
         _args_schema.private_link_service_network_policies = AAZStrArg(
-            options=["--private-link-service-network-policies"],
-            help="Disable private link service network policies on the subnet.",
+            options=["--pls-network-policies", "--private-link-service-network-policies"],
+            help="Manage network policy for private link service.",
             default="Enabled",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
@@ -110,6 +114,11 @@ class Create(AAZCommand):
         _args_schema.endpoints = AAZListArg(
             options=["--endpoints"],
             help="An array of service endpoints.",
+        )
+        _args_schema.sharing_scope = AAZStrArg(
+            options=["--sharing-scope"],
+            help="Set this property to Tenant to allow sharing subnet with other subscriptions in your AAD tenant. This property can only be set if defaultOutboundAccess is set to false, both properties can only be set if subnet is empty.",
+            enum={"DelegatedServices": "DelegatedServices", "Tenant": "Tenant"},
         )
 
         address_prefixes = cls._args_schema.address_prefixes
@@ -370,7 +379,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -402,6 +411,7 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
                 properties.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+                properties.set_prop("defaultOutboundAccess", AAZBoolType, ".default_outbound_access")
                 properties.set_prop("delegations", AAZListType, ".delegated_services")
                 properties.set_prop("natGateway", AAZObjectType)
                 properties.set_prop("networkSecurityGroup", AAZObjectType)
@@ -410,6 +420,7 @@ class Create(AAZCommand):
                 properties.set_prop("routeTable", AAZObjectType)
                 properties.set_prop("serviceEndpointPolicies", AAZListType, ".policies")
                 properties.set_prop("serviceEndpoints", AAZListType, ".endpoints")
+                properties.set_prop("sharingScope", AAZStrType, ".sharing_scope")
 
             address_prefixes = _builder.get(".properties.addressPrefixes")
             if address_prefixes is not None:
@@ -810,6 +821,10 @@ class _CreateHelper:
         properties.private_ip_address = AAZStrType(
             serialized_name="privateIPAddress",
         )
+        properties.private_ip_address_prefix_length = AAZIntType(
+            serialized_name="privateIPAddressPrefixLength",
+            nullable=True,
+        )
         properties.private_ip_address_version = AAZStrType(
             serialized_name="privateIPAddressVersion",
         )
@@ -927,9 +942,16 @@ class _CreateHelper:
             serialized_name="provisioningState",
             flags={"read_only": True},
         )
+        properties.sync_mode = AAZStrType(
+            serialized_name="syncMode",
+        )
         properties.tunnel_interfaces = AAZListType(
             serialized_name="tunnelInterfaces",
         )
+        properties.virtual_network = AAZObjectType(
+            serialized_name="virtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.virtual_network)
 
         backend_ip_configurations = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.backend_ip_configurations
         backend_ip_configurations.Element = AAZObjectType()
@@ -1172,6 +1194,12 @@ class _CreateHelper:
         properties.auxiliary_mode = AAZStrType(
             serialized_name="auxiliaryMode",
         )
+        properties.auxiliary_sku = AAZStrType(
+            serialized_name="auxiliarySku",
+        )
+        properties.disable_tcp_state_tracking = AAZBoolType(
+            serialized_name="disableTcpStateTracking",
+        )
         properties.dns_settings = AAZObjectType(
             serialized_name="dnsSettings",
         )
@@ -1401,6 +1429,10 @@ class _CreateHelper:
             serialized_name="privateEndpoint",
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
+        properties.private_endpoint_location = AAZStrType(
+            serialized_name="privateEndpointLocation",
+            flags={"read_only": True},
+        )
         properties.private_link_service_connection_state = AAZObjectType(
             serialized_name="privateLinkServiceConnectionState",
         )
@@ -1511,6 +1543,7 @@ class _CreateHelper:
             flags={"read_only": True},
         )
         _element.id = AAZStrType()
+        _element.identity = AAZObjectType()
         _element.location = AAZStrType()
         _element.name = AAZStrType(
             flags={"read_only": True},
@@ -1520,6 +1553,33 @@ class _CreateHelper:
         )
         _element.tags = AAZDictType()
         _element.type = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        identity = _schema_network_security_group_read.properties.flow_logs.Element.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType()
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_network_security_group_read.properties.flow_logs.Element.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
+
+        _element = _schema_network_security_group_read.properties.flow_logs.Element.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
             flags={"read_only": True},
         )
 
@@ -1914,20 +1974,20 @@ class _CreateHelper:
         cls._build_schema_public_ip_address_read(properties.service_public_ip_address)
 
         ddos_settings = _schema_public_ip_address_read.properties.ddos_settings
-        ddos_settings.ddos_custom_policy = AAZObjectType(
-            serialized_name="ddosCustomPolicy",
+        ddos_settings.ddos_protection_plan = AAZObjectType(
+            serialized_name="ddosProtectionPlan",
         )
-        cls._build_schema_sub_resource_read(ddos_settings.ddos_custom_policy)
-        ddos_settings.protected_ip = AAZBoolType(
-            serialized_name="protectedIP",
-        )
-        ddos_settings.protection_coverage = AAZStrType(
-            serialized_name="protectionCoverage",
+        cls._build_schema_sub_resource_read(ddos_settings.ddos_protection_plan)
+        ddos_settings.protection_mode = AAZStrType(
+            serialized_name="protectionMode",
         )
 
         dns_settings = _schema_public_ip_address_read.properties.dns_settings
         dns_settings.domain_name_label = AAZStrType(
             serialized_name="domainNameLabel",
+        )
+        dns_settings.domain_name_label_scope = AAZStrType(
+            serialized_name="domainNameLabelScope",
         )
         dns_settings.fqdn = AAZStrType()
         dns_settings.reverse_fqdn = AAZStrType(
@@ -2074,7 +2134,9 @@ class _CreateHelper:
         properties.direction = AAZStrType(
             flags={"required": True},
         )
-        properties.priority = AAZIntType()
+        properties.priority = AAZIntType(
+            flags={"required": True},
+        )
         properties.protocol = AAZStrType(
             flags={"required": True},
         )
@@ -2172,7 +2234,10 @@ class _CreateHelper:
             serialized_name="addressPrefixes",
         )
         properties.application_gateway_ip_configurations = AAZListType(
-            serialized_name="applicationGatewayIpConfigurations",
+            serialized_name="applicationGatewayIPConfigurations",
+        )
+        properties.default_outbound_access = AAZBoolType(
+            serialized_name="defaultOutboundAccess",
         )
         properties.delegations = AAZListType()
         properties.ip_allocations = AAZListType(
@@ -2227,6 +2292,9 @@ class _CreateHelper:
         )
         properties.service_endpoints = AAZListType(
             serialized_name="serviceEndpoints",
+        )
+        properties.sharing_scope = AAZStrType(
+            serialized_name="sharingScope",
         )
 
         address_prefixes = _schema_subnet_read.properties.address_prefixes

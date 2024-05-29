@@ -8,10 +8,7 @@ from azure.cli.core.commands import DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import (
     deployment_validate_table_format, handle_template_based_exception)
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.profiles import ResourceType
 
-from azure.cli.command_modules.network._client_factory import (
-    cf_dns_mgmt_record_sets, cf_dns_mgmt_zones)
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_zone_table_output, transform_public_ip_create_output,
@@ -35,21 +32,6 @@ NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
 
 # pylint: disable=too-many-locals, too-many-statements
 def load_command_table(self, _):
-
-    # region Command Types
-    network_dns_zone_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.dns.operations#ZonesOperations.{}',
-        client_factory=cf_dns_mgmt_zones,
-        resource_type=ResourceType.MGMT_NETWORK_DNS
-    )
-
-    network_dns_record_set_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.dns.operations#RecordSetsOperations.{}',
-        client_factory=cf_dns_mgmt_record_sets,
-        resource_type=ResourceType.MGMT_NETWORK_DNS
-    )
-    # endregion
-
     # region NetworkRoot
     with self.command_group('network'):
         from azure.cli.command_modules.network.custom import UsagesList
@@ -211,24 +193,23 @@ def load_command_table(self, _):
     from .operations.dns import DNSListReferences
     self.command_table["network dns list-references"] = DNSListReferences(loader=self)
 
-    with self.command_group('network dns zone', network_dns_zone_sdk) as g:
+    with self.command_group('network dns zone') as g:
         g.custom_command('import', 'import_zone')
         g.custom_command('export', 'export_zone')
         g.custom_command('create', 'create_dns_zone', table_transformer=transform_dns_zone_table_output)
-        g.generic_update_command('update', custom_func_name='update_dns_zone')
 
     supported_records = ['a', 'aaaa', 'ds', 'mx', 'ns', 'ptr', 'srv', 'tlsa', 'txt', 'caa']
     experimental_records = ['ds', 'tlsa']
     for record in supported_records:
         is_experimental = record in experimental_records
-        with self.command_group('network dns record-set {}'.format(record), network_dns_record_set_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS, is_experimental=is_experimental) as g:
+        with self.command_group('network dns record-set {}'.format(record), is_experimental=is_experimental) as g:
             g.custom_command('add-record', 'add_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
             g.custom_command('remove-record', 'remove_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
 
-    with self.command_group('network dns record-set soa', network_dns_record_set_sdk) as g:
+    with self.command_group('network dns record-set soa') as g:
         g.custom_command('update', 'update_dns_soa_record', transform=transform_dns_record_set_output)
 
-    with self.command_group('network dns record-set cname', network_dns_record_set_sdk) as g:
+    with self.command_group('network dns record-set cname') as g:
         g.custom_command('set-record', 'add_dns_cname_record', transform=transform_dns_record_set_output)
         g.custom_command('remove-record', 'remove_dns_cname_record', transform=transform_dns_record_set_output)
 
@@ -673,11 +654,13 @@ def load_command_table(self, _):
 
     # region VirtualNetworkGateways
     with self.command_group('network vnet-gateway'):
-        from .custom import VnetGatewayCreate, VnetGatewayUpdate, VnetGatewayVpnConnectionsDisconnect
+        from .custom import VnetGatewayCreate, VnetGatewayUpdate, VnetGatewayVpnConnectionsDisconnect, VNetGatewayShow, VNetGatewayList
         from .aaz.latest.network.vnet_gateway import ListBgpPeerStatus, ListAdvertisedRoutes, ListLearnedRoutes
         self.command_table['network vnet-gateway create'] = VnetGatewayCreate(loader=self)
         self.command_table['network vnet-gateway update'] = VnetGatewayUpdate(loader=self)
         self.command_table['network vnet-gateway disconnect-vpn-connections'] = VnetGatewayVpnConnectionsDisconnect(loader=self)
+        self.command_table["network vnet-gateway show"] = VNetGatewayShow(loader=self)
+        self.command_table["network vnet-gateway list"] = VNetGatewayList(loader=self)
         self.command_table['network vnet-gateway list-bgp-peer-status'] = ListBgpPeerStatus(loader=self, table_transformer=transform_vnet_gateway_bgp_peer_table)
         self.command_table['network vnet-gateway list-advertised-routes'] = ListAdvertisedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
         self.command_table['network vnet-gateway list-learned-routes'] = ListLearnedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)

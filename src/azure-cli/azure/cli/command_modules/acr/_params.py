@@ -118,11 +118,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('identity', help="Use assigned managed identity resource id or name if in the same resource group")
         c.argument('key_encryption_key', help="Key vault key uri. To enable automated rotation, provide a version-less key uri. For manual rotation, provide a versioned key uri.")
 
+    with self.argument_context('acr create') as c:
+        c.argument('allow_metadata_search', arg_type=get_three_state_flag(), is_preview=True, help="Enable or disable the metadata-search feature for the registry. If not specified, this is set to disabled by default.")
+
     with self.argument_context('acr update', arg_group='Network Rule') as c:
         c.argument('data_endpoint_enabled', get_three_state_flag(), help="Enable dedicated data endpoint for client firewall configuration")
 
     with self.argument_context('acr update') as c:
         c.argument('anonymous_pull_enabled', get_three_state_flag(), help="Enable registry-wide pull from unauthenticated clients")
+
+    with self.argument_context('acr update') as c:
+        c.argument('allow_metadata_search', arg_type=get_three_state_flag(), is_preview=True, help="Enable or disable the metadata-search feature for the registry.")
 
     with self.argument_context('acr import') as c:
         c.argument('source_image', options_list=['--source'], help="Source image name or fully qualified source containing the registry login server. If `--registry` is used, `--source` will always be interpreted as a source image, even if it contains the login server.")
@@ -168,6 +174,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('list_enabled', help='Indicates whether this item shows in list operation results.', arg_type=get_three_state_flag())
         c.argument('read_enabled', help='Indicates whether read operation is allowed.', arg_type=get_three_state_flag())
         c.argument('write_enabled', help='Indicates whether write or delete operation is allowed.', arg_type=get_three_state_flag())
+
+    with self.argument_context('acr artifact-streaming') as c:
+        c.argument('repository', help="The name of the repository.", required=True)
+        c.argument('image', arg_type=image_by_tag_or_digest_type, required=True)
+        c.argument('enable_streaming', help="Indicates whether artifact streaming is enabled for a repository.", required=True, arg_type=get_three_state_flag())
+
+    with self.argument_context('acr artifact-streaming operation') as c:
+        c.argument('repository', help="The name of the repository.", required=False)
+        c.argument('image', arg_type=image_by_tag_or_digest_type, required=False)
+        c.argument('operation_id', options_list=['--id'], required=False, help="The ID returned when creating a streaming artifact.")
 
     with self.argument_context('acr manifest') as c:
         c.argument('registry_name', options_list=['--registry', '-r'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr', validator=validate_registry_name)
@@ -430,8 +446,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('description', options_list=['--description'], help='Description for the scope map. Maximum 256 characters are allowed.', required=False)
         c.argument('scope_map_name', options_list=['--name', '-n'], help='The name of the scope map.', required=True)
 
-    repo_valid_actions = "Valid actions are {}".format({action.value for action in RepoScopeMapActions})
-    gateway_valid_actions = "Valid actions are {}".format({action.value for action in GatewayScopeMapActions})
+    # Action strings generated this way to ensure consistent ordering each time the help text is generated.
+    repo_valid_actions = "Valid actions are {}".format(sorted(action.value for action in RepoScopeMapActions))
+    gateway_valid_actions = "Valid actions are {}".format(sorted(action.value for action in GatewayScopeMapActions))
     with self.argument_context('acr scope-map update') as c:
         c.argument('add_repository', options_list=['--add-repository', c.deprecate(target='--add', redirect='--add-repository', hide=True)], nargs='+', action='append', required=False,
                    help='repository permissions to be added. Use the format "--add-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
@@ -525,7 +542,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr connected-registry create') as c:
         c.argument('log_level', help='Set the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False, default="Information")
-        c.argument('mode', arg_type=get_enum_type(['ReadOnly', 'ReadWrite']), options_list=['--mode', '-m'], help='Determine the access it will have when synchronized.', required=False, default="ReadWrite")
+        c.argument('mode', arg_type=get_enum_type(['ReadOnly', 'ReadWrite']), options_list=['--mode', '-m'], help='Determine the access it will have when synchronized.', required=False, default="ReadOnly")
         c.argument('client_token_list', options_list=['--client-tokens'], nargs='+', help='Specify the client access to the repositories in the connected registry. It can be in the format [TOKEN_NAME01] [TOKEN_NAME02]...')
         c.argument('sync_window', options_list=['--sync-window', '-w'], help='Required parameter if --sync-schedule is present. Used to determine the schedule duration. Uses ISO 8601 duration format.')
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False, default="* * * * *")

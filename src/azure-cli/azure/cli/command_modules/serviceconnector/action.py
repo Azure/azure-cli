@@ -24,12 +24,17 @@ class AddCustomizedKeys(argparse.Action):
             raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
 
 
+def is_k8s_source(command_name):
+    source_name = command_name.split(' ')[0]
+    return source_name.lower() == "aks"
+
+
 class AddSecretAuthInfo(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string)
+        action = self.get_action(values, option_string, namespace.command)
         namespace.secret_auth_info = action
 
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+    def get_action(self, values, option_string, command_name):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
@@ -49,11 +54,17 @@ class AddSecretAuthInfo(argparse.Action):
                     'value': v[0]
                 }
             elif kl == 'secret-uri':
+                if is_k8s_source(command_name):
+                    raise ValidationError('`secret-uri` not supported. ' +
+                                          'Service Connector does not support secrets from Key Vault for AKS.')
                 d['secret_info'] = {
                     'secret_type': 'keyVaultSecretUri',
                     'value': v[0]
                 }
             elif kl == 'secret-name':
+                if is_k8s_source(command_name):
+                    raise ValidationError('`secret-name` not supported. ' +
+                                          'Service Connector does not support secrets from Key Vault for AKS.')
                 d['secret_info'] = {
                     'secret_type': 'keyVaultSecretReference',
                     'name': v[0]
@@ -88,12 +99,17 @@ class AddSecretAuthInfoAuto(argparse.Action):
         return d
 
 
+def is_mysql_target(command_name):
+    target_name = command_name.split(' ')[-1]
+    return target_name.lower() == "mysql-flexible"
+
+
 class AddUserAssignedIdentityAuthInfo(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string)
+        action = self.get_action(values, option_string, namespace.command)
         namespace.user_identity_auth_info = action
 
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+    def get_action(self, values, option_string, command_name):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
@@ -109,22 +125,26 @@ class AddUserAssignedIdentityAuthInfo(argparse.Action):
                 d['client_id'] = v[0]
             elif kl == 'subs-id':
                 d['subscription_id'] = v[0]
+            elif is_mysql_target(command_name) and kl == 'mysql-identity-id':
+                d['mysql-identity-id'] = v[0]
             else:
                 raise ValidationError('Unsupported Key {} is provided for parameter --user-identity. All '
-                                      'possible keys are: client-id, subs-id'.format(k))
-        if len(d) != 2:
-            raise ValidationError('Required keys missing for parameter --user-identity. '
-                                  'All possible keys are: client-id, subs-id')
+                                      'possible keys are: client-id, subs-id{}'.format(
+                                          k, ', mysql-identity-id' if is_mysql_target(command_name) else ''))
+
+        if 'client_id' not in d or 'subscription_id' not in d:
+            raise ValidationError(
+                'Required keys missing for parameter --user-identity: client-id, subs-id')
         d['auth_type'] = 'userAssignedIdentity'
         return d
 
 
 class AddSystemAssignedIdentityAuthInfo(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string)
+        action = self.get_action(values, option_string, namespace.command)
         namespace.system_identity_auth_info = action
 
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+    def get_action(self, values, option_string, command_name):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
@@ -135,7 +155,7 @@ class AddSystemAssignedIdentityAuthInfo(argparse.Action):
         d = {}
         for k in properties:
             v = properties[k]
-            if k.lower() == 'mysql-identity-id':
+            if is_mysql_target(command_name) and k.lower() == 'mysql-identity-id':
                 d['mysql-identity-id'] = v[0]
             else:
                 raise ValidationError('Unsupported Key {} is provided for parameter --system-identity')
@@ -173,10 +193,10 @@ class AddUserAccountAuthInfo(argparse.Action):
 
 class AddServicePrincipalAuthInfo(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string)
+        action = self.get_action(values, option_string, namespace.command)
         namespace.service_principal_auth_info_secret = action
 
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+    def get_action(self, values, option_string, command_name):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
@@ -194,9 +214,12 @@ class AddServicePrincipalAuthInfo(argparse.Action):
                 d['principal_id'] = v[0]
             elif kl == 'secret':
                 d['secret'] = v[0]
+            elif is_mysql_target(command_name) and kl == 'mysql-identity-id':
+                d['mysql-identity-id'] = v[0]
             else:
-                raise ValidationError('Unsupported Key {} is provided for parameter --service-principal. All possible '
-                                      'keys are: client-id, object-id, secret'.format(k))
+                raise ValidationError('Unsupported Key {} is provided for parameter --service-principal. Possible '
+                                      'keys are: client-id, object-id, secret{}'.format(
+                                          k, ', mysql-identity-id' if is_mysql_target(command_name) else ''))
         if 'client_id' not in d or 'secret' not in d:
             raise ValidationError('Required keys missing for parameter --service-principal. '
                                   'Required keys are: client-id, secret')
@@ -212,4 +235,38 @@ class AddServicePrincipalAuthInfo(argparse.Action):
                                       'object-id=XX secret=XX'.format(d['client_id']))
 
         d['auth_type'] = 'servicePrincipalSecret'
+        return d
+
+
+class AddWorkloadIdentityAuthInfo(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        # convert into user identity
+        namespace.user_identity_auth_info = action
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        try:
+            # --workload-identity <user-identity-resource-id>
+            properties = defaultdict(list)
+            if len(values) != 1:
+                raise ValidationError(
+                    'Invalid number of values for --workload-identity <USER-IDENTITY-RESOURCE-ID>')
+            properties['user-identity-resource-id'] = values[0]
+        except ValueError:
+            raise ValidationError('Usage error: {} [VALUE]'.format(option_string))
+
+        d = {}
+        if 'user-identity-resource-id' in properties:
+            from ._utils import run_cli_cmd
+            output = run_cli_cmd('az identity show --ids {}'.format(properties['user-identity-resource-id']))
+            if output:
+                d['client_id'] = output.get('clientId')
+                d['subscription_id'] = properties['user-identity-resource-id'].split('/')[2]
+            else:
+                raise ValidationError('Invalid user identity resource ID.')
+        else:
+            raise ValidationError('Required values missing for parameter --workload-identity: \
+                                  user-identity-resource-id')
+
+        d['auth_type'] = 'userAssignedIdentity'
         return d

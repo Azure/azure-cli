@@ -34,14 +34,11 @@ from azure.cli.command_modules.network._completers import (
 from azure.cli.command_modules.network._actions import (
     TrustedClientCertificateCreate,
     SslProfilesCreate, AddMappingRequest, WAFRulesCreate)
-from azure.cli.core.profiles import ResourceType
+from azure.cli.command_modules.network.custom import RULESET_VERSION
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
 def load_arguments(self, _):
-
-    ZoneType = self.get_models('ZoneType', resource_type=ResourceType.MGMT_NETWORK_DNS)
-
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     nic_type = CLIArgumentType(options_list='--nic-name', metavar='NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
     nsg_name_type = CLIArgumentType(options_list='--nsg-name', metavar='NAME', help='Name of the network security group.')
@@ -59,7 +56,6 @@ def load_arguments(self, _):
         options_list=['--zone', '-z'],
         nargs='+',
         help='Space-separated list of availability zones into which to provision the resource.',
-        choices=['1', '2', '3']
     )
     edge_zone = CLIArgumentType(help='The name of edge zone.')
 
@@ -228,9 +224,9 @@ def load_arguments(self, _):
                    help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
                    options_list='--version',
-                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1', '3.2']),
+                   arg_type=get_enum_type(RULESET_VERSION.values()),
                    help='The version of the web application firewall rule set type. '
-                        '0.1 is used for Microsoft_BotManagerRuleSet')
+                        '0.1 and 1.0 are used for Microsoft_BotManagerRuleSet.')
 
     with self.argument_context('network application-gateway waf-policy policy-setting') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None,
@@ -299,24 +295,6 @@ def load_arguments(self, _):
     with self.argument_context('network dns zone') as c:
         c.argument('zone_name', name_arg_type)
         c.ignore('location')
-
-        c.argument('zone_type', help='Type of DNS zone to create.', deprecate_info=c.deprecate(hide=True), arg_type=get_enum_type(ZoneType))
-
-        c.argument('registration_vnets',
-                   arg_group='Private Zone',
-                   nargs='+',
-                   help='Space-separated names or IDs of virtual networks that register hostnames in this DNS zone. '
-                        'Number of private DNS zones with virtual network auto-registration enabled is 1. '
-                        'If you need to increase this limit, please contact Azure Support: '
-                        'https://docs.microsoft.com/en-us/azure/azure-subscription-service-limits',
-                   deprecate_info=c.deprecate(hide=True),
-                   validator=get_vnet_validator('registration_vnets'))
-        c.argument('resolution_vnets',
-                   arg_group='Private Zone',
-                   nargs='+',
-                   help='Space-separated names or IDs of virtual networks that resolve records in this DNS zone.',
-                   deprecate_info=c.deprecate(hide=True),
-                   validator=get_vnet_validator('resolution_vnets'))
 
     with self.argument_context('network dns zone import') as c:
         c.argument('file_name', options_list=['--file-name', '-f'], type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
@@ -463,7 +441,7 @@ def load_arguments(self, _):
     with self.argument_context('network lb create') as c:
         c.argument('frontend_ip_zone', zone_type, options_list=['--frontend-ip-zone'], help='used to create internal facing Load balancer')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
-        c.argument('sku', help='Load balancer SKU', arg_type=get_enum_type(['Basic', 'Gateway', 'Standard'], default='basic'))
+        c.argument('sku', help='Load balancer SKU', arg_type=get_enum_type(['Basic', 'Gateway', 'Standard'], default='Standard'))
         c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network lb create', arg_group='Public IP') as c:
@@ -623,7 +601,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network public-ip create') as c:
         c.argument('name', completer=None)
-        c.argument('sku', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard"]))
+        c.argument('sku', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard"]), default="Standard")
         c.argument('tier', help='Tier of a public IP address SKU and Global tier is only supported for standard SKU public IP addresses', arg_type=get_enum_type(["Regional", "Global"]))
         c.ignore('dns_name_type')
         c.argument('edge_zone', edge_zone)

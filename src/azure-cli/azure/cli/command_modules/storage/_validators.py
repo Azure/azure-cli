@@ -8,7 +8,7 @@ import os
 import argparse
 from ipaddress import ip_network
 
-from azure.cli.core.commands.validators import validate_key_value_pairs
+from azure.cli.core.commands.validators import validate_key_value_pairs, validate_tags
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.cli.core.azclierror import UnrecognizedArgumentError
@@ -400,6 +400,8 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
         prefix = cmd.command_kwargs['resource_type'].value[0]
         if valid_file_source and (ns.get('container_name', None) or not same_account):
             dir_name, file_name = os.path.split(path) if path else (None, '')
+            if dir_name == '':
+                dir_name = None
             if is_storagev2(prefix):
                 source_sas = create_short_lived_file_sas_v2(cmd, source_account_name, source_account_key, share,
                                                             dir_name, file_name)
@@ -1250,6 +1252,7 @@ def process_blob_upload_batch_parameters(cmd, namespace):
     get_content_setting_validator(t_blob_content_settings, update=False)(cmd, namespace)
     add_progress_callback(cmd, namespace)
     blob_tier_validator_track2(cmd, namespace)
+    validate_tags(namespace)
 
 
 def process_blob_delete_batch_parameters(cmd, namespace):

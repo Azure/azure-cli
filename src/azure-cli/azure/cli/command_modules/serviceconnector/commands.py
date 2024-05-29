@@ -7,6 +7,7 @@ from azure.cli.core.commands import CliCommandType
 from knack.log import get_logger
 from ._transformers import (
     transform_support_types,
+    transform_linkers_properties,
     transform_linker_properties,
     transform_validation_result,
     transform_local_linker_properties
@@ -41,10 +42,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         # if source resource is released as an extension, load our command groups
         # only when the extension is installed
         if should_load_source(source):
+            is_preview_source = (source == RESOURCE.KubernetesCluster)
 
             with self.command_group('{} connection'.format(source.value), connection_type,
-                                    client_factory=cf_linker) as og:
-                og.custom_command('list', 'connection_list')
+                                    client_factory=cf_linker, is_preview=is_preview_source) as og:
+                og.custom_command('list', 'connection_list', transform=transform_linkers_properties)
                 og.custom_show_command('show', 'connection_show', transform=transform_linker_properties)
                 og.custom_command('delete', 'connection_delete', confirmation=True, supports_no_wait=True)
                 og.custom_command('list-configuration', 'connection_list_configuration')

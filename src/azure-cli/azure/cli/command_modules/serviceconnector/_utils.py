@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import re
 import time
 from knack.log import get_logger
 from knack.util import todict, CLIError
@@ -199,7 +200,8 @@ def auto_register(func, *args, **kwargs):
         raise ex
 
 
-def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id):
+def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id,
+                                                       scope=None):  # Resource.ContainerApp
     from ._validators import get_source_resource_name
 
     logger.warning('get valid key vault reference connection')
@@ -229,6 +231,8 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
             "id": key_vault_id
         },
         'auth_info': auth_info,
+        # Container App container name
+        'scope': scope,
         # Key Vault Configuration are same across all client types
         'client_type': CLIENT_TYPE.Dotnet,
     }
@@ -246,77 +250,132 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
 
 
 def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_connections):
-    auth_type = 'systemAssignedIdentity'
-    client_id = None
-    subscription_id = None
+    if source_name == RESOURCE.WebApp:
+        return get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_connections)
 
+    if source_name == RESOURCE.ContainerApp:
+        return get_auth_if_no_valid_key_vault_connection_for_containerapp(key_vault_connections)
+
+    # any connection with csi enabled is a valid connection
+    if source_name == RESOURCE.KubernetesCluster:
+        for connection in key_vault_connections:
+            if connection.get('targetService', dict()).get(
+                    'resourceProperties', dict()).get('connectAsKubernetesCsiDriver'):
+                return
+        return {'authType': 'userAssignedIdentity'}
+
+    # other source types
     if key_vault_connections:
-        from msrestazure.tools import (
-            is_valid_resource_id
-        )
+        logger.warning('key vault reference connection: %s',
+                       key_vault_connections[0].get('id'))
+        return
 
-        # https://docs.microsoft.com/azure/app-service/app-service-key-vault-references
-        if source_name == RESOURCE.WebApp:
+    return {'authType': 'systemAssignedIdentity'}
+
+
+# https://docs.microsoft.com/azure/app-service/app-service-key-vault-references
+def get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_connections):
+    from msrestazure.tools import (
+        is_valid_resource_id
+    )
+
+    try:
+        webapp = run_cli_cmd(
+            'az rest -u {}?api-version=2020-09-01 -o json'.format(source_id))
+        reference_identity = webapp.get(
+            'properties').get('keyVaultReferenceIdentity')
+    except Exception as e:
+        raise ValidationError('{}. Unable to get "properties.keyVaultReferenceIdentity" from {}.'
+                              'Please check your source id is correct.'.format(e, source_id))
+
+    if is_valid_resource_id(reference_identity):  # User Identity
+        auth_type = 'userAssignedIdentity'
+        segments = parse_resource_id(reference_identity)
+        subscription_id = segments.get('subscription')
+        try:
+            identity = webapp.get('identity').get(
+                'userAssignedIdentities').get(reference_identity)
+            client_id = identity.get('clientId')
+        except Exception:  # pylint: disable=broad-except
             try:
-                webapp = run_cli_cmd(
-                    'az rest -u {}?api-version=2020-09-01 -o json'.format(source_id))
-                reference_identity = webapp.get(
-                    'properties').get('keyVaultReferenceIdentity')
-            except Exception as e:
-                raise ValidationError('{}. Unable to get "properties.keyVaultReferenceIdentity" from {}.'
-                                      'Please check your source id is correct.'.format(e, source_id))
+                identity = run_cli_cmd(
+                    'az identity show --ids {} -o json'.format(reference_identity))
+                client_id = identity.get('clientId')
+            except Exception:  # pylint: disable=broad-except
+                pass
+        if not subscription_id or not client_id:
+            raise ValidationError('Unable to get subscriptionId or clientId'
+                                  'of the keyVaultReferenceIdentity {}'.format(reference_identity))
+        for connection in key_vault_connections:
+            auth_info = connection.get('authInfo')
+            if auth_info.get('clientId') == client_id and auth_info.get('subscriptionId') == subscription_id:
+                logger.warning(
+                    'key vault reference connection: %s', connection.get('id'))
+                return
+        return {'authType': auth_type, 'clientId': client_id, 'subscriptionId': subscription_id}
 
-            if is_valid_resource_id(reference_identity):  # User Identity
-                auth_type = 'userAssignedIdentity'
-                segments = parse_resource_id(reference_identity)
-                subscription_id = segments.get('subscription')
-                try:
-                    identity = webapp.get('identity').get(
-                        'userAssignedIdentities').get(reference_identity)
-                    client_id = identity.get('clientId')
-                except Exception:  # pylint: disable=broad-except
-                    try:
-                        identity = run_cli_cmd(
-                            'az identity show --ids {} -o json'.format(reference_identity))
-                        client_id = identity.get('clientId')
-                    except Exception:  # pylint: disable=broad-except
-                        pass
-                if not subscription_id or not client_id:
-                    raise ValidationError('Unable to get subscriptionId or clientId'
-                                          'of the keyVaultReferenceIdentity {}'.format(reference_identity))
-                for connection in key_vault_connections:
-                    auth_info = connection.get('authInfo')
-                    if auth_info.get('clientId') == client_id and auth_info.get('subscriptionId') == subscription_id:
-                        logger.warning(
-                            'key vault reference connection: %s', connection.get('id'))
-                        return
-            else:  # System Identity
-                for connection in key_vault_connections:
-                    if connection.get('authInfo').get('authType') == auth_type:
-                        logger.warning(
-                            'key vault reference connection: %s', connection.get('id'))
-                        return
+    # System Identity
+    auth_type = 'systemAssignedIdentity'
+    for connection in key_vault_connections:
+        if connection.get('authInfo').get('authType') == auth_type:
+            logger.warning(
+                'key vault reference connection: %s', connection.get('id'))
+            return
+    return {'authType': auth_type}
 
-        # any connection with csi enabled is a valid connection
-        elif source_name == RESOURCE.KubernetesCluster:
-            for connection in key_vault_connections:
-                if connection.get('target_service', dict()).get(
-                        'resource_properties', dict()).get('connect_as_kubernetes_csi_driver'):
-                    return
-            return {'authType': 'userAssignedIdentity'}
 
-        else:
-            logger.warning('key vault reference connection: %s',
-                           key_vault_connections[0].get('id'))
+def get_auth_if_no_valid_key_vault_connection_for_containerapp(key_vault_connections):
+    auth_type = 'systemAssignedIdentity'  # Use system identity by default
+    for connection in key_vault_connections:
+        if connection.get('authInfo').get('authType') == auth_type:
+            logger.warning(
+                'key vault reference connection: %s', connection.get('id'))
+            return
+    return {'authType': auth_type}
+
+
+def create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id,
+                                              scope=None):  # Resource.ContainerApp
+    from ._validators import get_source_resource_name
+
+    logger.warning('looking for valid app configuration connections')
+    for connection in client.list(resource_uri=source_id):
+        connection = todict(connection)
+        if connection.get('targetService', dict()).get('id') == app_config_id:
+            logger.warning('Valid app configuration connection found.')
             return
 
-    auth_info = {
-        'authType': auth_type
+    logger.warning('no valid app configuration connection found. Creating with system identity...')
+
+    from ._resource_config import (
+        CLIENT_TYPE
+    )
+
+    connection_name = generate_random_string(prefix='appconfig_')
+    parameters = {
+        'target_service': {
+            "type": "AzureResource",
+            "id": app_config_id
+        },
+        'auth_info': {
+            'authType': 'systemAssignedIdentity'
+        },
+        # Container App container name
+        'scope': scope,
+        'client_type': CLIENT_TYPE.Blank,
     }
-    if client_id and subscription_id:
-        auth_info['clientId'] = client_id
-        auth_info['subscriptionId'] = subscription_id
-    return auth_info
+
+    source_name = get_source_resource_name(cmd)
+    if source_name == RESOURCE.KubernetesCluster:
+        parameters['target_service']['resource_properties'] = {
+            'type': 'KeyVault',
+            'connect_as_kubernetes_csi_driver': True,
+        }
+
+    return auto_register(client.begin_create_or_update,
+                         resource_uri=source_id,
+                         linker_name=connection_name,
+                         parameters=parameters)
 
 
 def is_packaged_installed(package_name):
@@ -329,17 +388,24 @@ def is_packaged_installed(package_name):
 
 
 def get_object_id_of_current_user():
-    signed_in_user = run_cli_cmd('az account show').get('user')
+    signed_in_user_info = run_cli_cmd('az account show -o json')
+    if not isinstance(signed_in_user_info, dict):
+        raise CLIInternalError(
+            f"Can't parse login user information {signed_in_user_info}")
+    signed_in_user = signed_in_user_info.get('user')
     user_type = signed_in_user.get('type')
+    if not user_type or not signed_in_user.get('name'):
+        raise CLIInternalError(
+            f"Can't get user type or name from signed-in user {signed_in_user}")
     try:
         if user_type == 'user':
-            user_info = run_cli_cmd('az ad signed-in-user show')
+            user_info = run_cli_cmd('az ad signed-in-user show -o json')
             user_object_id = user_info.get('objectId') if user_info.get(
                 'objectId') else user_info.get('id')
             return user_object_id
         if user_type == 'servicePrincipal':
             user_info = run_cli_cmd(
-                f'az ad sp show --id {signed_in_user.get("name")}')
+                f'az ad sp show --id {signed_in_user.get("name")} -o json')
             user_object_id = user_info.get('id')
             return user_object_id
     except CLIInternalError as e:
@@ -351,7 +417,7 @@ def get_object_id_of_current_user():
 
 def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
                              user_identity_auth_info, system_identity_auth_info,
-                             service_principal_auth_info_secret, new_addon):
+                             service_principal_auth_info_secret, new_addon, auth_action=None, config_action=None):
     all_auth_info = []
     if secret_auth_info is not None:
         all_auth_info.append(secret_auth_info)
@@ -363,9 +429,15 @@ def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
         all_auth_info.append(system_identity_auth_info)
     if service_principal_auth_info_secret is not None:
         all_auth_info.append(service_principal_auth_info_secret)
+    if len(all_auth_info) == 0:
+        if auth_action == 'optOutAllAuth' and config_action == 'optOut':
+            return None
+        raise ValidationError('At least one auth info is needed')
     if not new_addon and len(all_auth_info) != 1:
         raise ValidationError('Only one auth info is needed')
     auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    if auth_info is not None and auth_action is not None:
+        auth_info.update({'auth_mode': auth_action})
     return auth_info
 
 
@@ -462,18 +534,39 @@ Learn more at https://spring.io/projects/spring-cloud-azure#overview"
     return warning_message
 
 
-def decorate_springboot_cosmossql_config(configs):
-    is_springboot_cosmossql = False
-    require_update = True
+# LinkerResource Model is converted into dict in update flow,
+# which conflicts with the default behavior of creation wrt the key name format.
+def get_auth_type_for_update(authInfo):
+    if 'auth_type' in authInfo:
+        return authInfo['auth_type']
+    return authInfo['authType']
 
-    for config in configs.configurations:
-        if config.name.startswith("azure.cosmos."):
-            is_springboot_cosmossql = True
-            config.note = "This configuration property is used in Spring Cloud Azure version 3.x and below."
-        elif config.name.startswith("spring.cloud.azure.cosmos."):
-            is_springboot_cosmossql = True
-            require_update = False
-            config.note = "This configuration property is used in Spring Cloud Azure version 4.0 and above."
 
-    if is_springboot_cosmossql:
-        logger.warning(springboot_migration_warning(require_update=require_update))
+def get_secret_type_for_update(authInfo):
+    if 'secret_info' in authInfo:
+        return authInfo['secret_info']['secret_type']
+    if 'secretInfo' in authInfo:
+        return authInfo['secretInfo']['secretType']
+    return ''
+
+
+# Decorator for AKS configurations.
+def is_aks_linker_by_id(resource_id):
+    pattern = r'/subscriptions/([^/]+)/resourceGroups/([^/]+)/providers/Microsoft.ContainerService' + \
+        r'/managedClusters/([^/]+)/providers/Microsoft.ServiceLinker/linkers/([^/]+)'
+    return re.match(pattern, resource_id, re.IGNORECASE) is not None
+
+
+def get_aks_resource_name(linker):
+    secret_name = get_aks_resource_secret_name(linker["name"])
+    if linker["authInfo"] is not None and linker["authInfo"].get("authType") == "userAssignedIdentity" and \
+            not (linker["targetService"]["resourceProperties"] is not None and
+                 linker["targetService"]["resourceProperties"].get("connectAsKubernetesCsiDriver")):
+        service_account_name = f'sc-account-{linker["authInfo"].get("clientId")}'
+        return [secret_name, service_account_name]
+    return [secret_name]
+
+
+def get_aks_resource_secret_name(connection_name):
+    valid_name = re.sub(r'[^a-zA-Z0-9]', '', connection_name, flags=re.IGNORECASE)
+    return f'sc-{valid_name}-secret'

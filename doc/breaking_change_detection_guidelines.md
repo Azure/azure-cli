@@ -2,13 +2,13 @@
 
 ## Overview
 
-Azure cli provides two types of tools to help users and developers check cli changes: one is a command line tool called [command-change](https://github.com/Azure/azure-cli-extensions/blob/main/src/command-change/README.md), the other is [azure-cli-diff-site](https://azure-cli-diff-site.azurewebsites.net/) that wraps the command line tool into a site with a more user-friendly interface. 
+Azure CLI provides command line tool to help users and developers check CLI changes: [command-change](https://github.com/Azure/azure-cli-extensions/blob/main/src/command-change/README.md) 
 
 There are two categories of breaking change detection users can check for Azure CLI: [version-diff](https://github.com/Azure/azure-cli-extensions/blob/main/src/command-change/README.md#version-diff) and [meta-diff](https://github.com/Azure/azure-cli-extensions/blob/main/src/command-change/README.md#meta-diff) .
 
-#### Prerequisite for command line tool
+#### Prerequisite
 
-Install cli extension `command-change`
+Install CLI extension `command-change`
 
 ```
 az extension add --name command-change
@@ -16,7 +16,7 @@ az extension add --name command-change
 
 ### version-diff
 
-Users can check the differences between two cli releases, like `2.47.0` and `2.49.0`, by typing following command:
+Users can check the differences between two CLI releases, like `2.47.0` and `2.49.0`, by typing following command:
 ```
 az command-change version-diff --base-version 2.47.0 --diff-version 2.49.0
 ```
@@ -31,7 +31,7 @@ Normally, the pulled list of version diffs is quite long, so a better usage way 
 az command-change version-diff --base-version 2.47.0 --diff-version 2.49.0 --target-module monitor --output-type csv --version-diff-file filename-a
 ```
 
-When `version-diff` command runs, it will download the corresponding metadata files of all modules for chosen cli versions and store them in current working directory, one module a file called `az_module_meta.json`, which can be used in the following `meta-diff` command
+When `version-diff` command runs, it will download the corresponding metadata files of all modules for chosen CLI versions and store them in current working directory, one module a file called `az_module_meta.json`, which can be used in the following `meta-diff` command
 
 
 ### meta-diff
@@ -43,15 +43,6 @@ az command-change meta-diff --base-meta-file fileA --diff-meta-file fileB
 ```
 
 By the way, both these two commands can add `--only-break` to just pull the break change list if needed.
-
-
-
-### azure-cli-diff-site
-
-This site works the same way as the command line tool:
-
-![azure-cli-diff-site](assets/azure-cli-diff-site.gif)
-
 
 
 ### Analysis
@@ -77,5 +68,5 @@ The diff result will be organized as a combination of following basic structure:
 - `rule_link_url`: corresponding change rule docs. For full rule doc, please refer to [this link](https://github.com/Azure/azure-cli/tree/dev/doc/breaking_change_rules)
 - `rule_message`: detailed change info message
 - `rule_name`: abbreviation of rules
-- `suggest_message`: it's used for developers of CI when a pull request is made to cli code repo.
+- `suggest_message`: it's used for developers of CI when a pull request is made to CLI code repo.
 

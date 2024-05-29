@@ -128,13 +128,13 @@ def load_command_table(self, _):
                                                                cf_configstore_operations,
                                                                featurefilter_entry_format)) as g:
         g.custom_command('add', 'add_filter')
-        g.custom_command('update', 'update_filter', is_preview=True)
+        g.custom_command('update', 'update_filter')
         g.custom_command('delete', 'delete_filter')
         g.custom_show_command('show', 'show_filter')
         g.custom_command('list', 'list_filter')
 
     # Snapshot Commands
-    with self.command_group('appconfig snapshot', configstore_snapshot_util, is_preview=True) as g:
+    with self.command_group('appconfig snapshot', configstore_snapshot_util) as g:
         g.command('create', 'create_snapshot')
         g.show_command('show', 'show_snapshot')
         g.command('list', 'list_snapshots')
