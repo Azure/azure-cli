@@ -315,6 +315,11 @@ class VolumeCreate(_VolumeCreate):
             minimum=100
         )
 
+        args_schema.coolness_period._fmt = AAZIntArgFormat(
+            maximum=183,
+            minimum=2,
+        )
+
         # The API does only support setting Basic and Standard
         args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=False)
 
@@ -437,6 +442,11 @@ class VolumeUpdate(_VolumeUpdate):
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
             maximum=2400,
             minimum=100,
+        )
+        
+        args_schema.coolness_period._fmt = AAZIntArgFormat(
+            maximum=183,
+            minimum=2,
         )
 
         return args_schema
