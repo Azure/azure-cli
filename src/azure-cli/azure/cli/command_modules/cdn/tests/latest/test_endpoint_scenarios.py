@@ -10,7 +10,7 @@ from azure.mgmt.cdn.models import SkuName
 
 
 class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_endpoint_crud(self, resource_group):
         profile_name = 'profile123'
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)

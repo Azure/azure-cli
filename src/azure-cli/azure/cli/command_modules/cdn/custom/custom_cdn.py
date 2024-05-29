@@ -604,6 +604,8 @@ class CDNEndpointUpdate(_CDNEndpointUpdate):
             'profile_name': args.profile_name,
             'endpoint_name': args.endpoint_name
         })
+        existing_location = None if 'location' not in existing else existing['location']
+        args.location = existing_location
         if has_value(args.default_origin_group):
             if '/' not in args.default_origin_group.to_serialized_data():
                 args.default_origin_group = f'/subscriptions/{self.ctx.subscription_id}' \
