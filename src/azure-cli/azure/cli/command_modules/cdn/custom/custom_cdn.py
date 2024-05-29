@@ -94,6 +94,10 @@ class CDNProfileCreate(_AFDProfileCreate):
         args_schema.location._registered = False
         return args_schema
 
+    def pre_operations(self):
+        args = self.ctx.args
+        args.location = 'global'
+
 
 class CDNProfileUpdate(_AFDProfileUpdate):
     @classmethod
