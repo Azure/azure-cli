@@ -541,6 +541,7 @@ def load_arguments(self, _):
         c.argument('exclude_kbs_requiring_reboot', arg_type=get_three_state_flag(), help="Filter out KBs that don't have a reboot behavior of 'NeverReboots' when this is set. Applicable to Windows VM only")
         c.argument('package_name_masks_to_include', nargs='+', help='Space-separated list of packages to include in the patch operation. Format: packageName_packageVersion. Applicable to Linux VM only')
         c.argument('package_name_masks_to_exclude', nargs='+', help='Space-separated list of packages to exclude in the patch operation. Format: packageName_packageVersion. Applicable to Linux VM only')
+        c.argument('max_patch_publish_date', arg_type=get_datetime_type(help='ISO 8601 time value for install patch that were published on or before this given max published date.'))
 
     with self.argument_context('vm disk') as c:
         c.argument('vm_name', options_list=['--vm-name'], id_part=None, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
