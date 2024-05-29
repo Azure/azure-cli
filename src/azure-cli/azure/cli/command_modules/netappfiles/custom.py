@@ -443,7 +443,7 @@ class VolumeUpdate(_VolumeUpdate):
             maximum=2400,
             minimum=100,
         )
-        
+
         args_schema.coolness_period._fmt = AAZIntArgFormat(
             maximum=183,
             minimum=2,
