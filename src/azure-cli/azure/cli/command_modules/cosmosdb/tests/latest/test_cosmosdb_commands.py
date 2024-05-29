@@ -2809,7 +2809,7 @@ class CosmosDBTests(ScenarioTest):
 
         acc_create = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName=eastus2 failoverPriority=0 isZoneRedundant=False')
 
-        service_create = self.cmd('az cosmosdb service create -a {acc} -g {rg} --name "sqlDedicatedGateway" --count 1 --size "Cosmos.D4s" ').get_output_in_json()
+        service_create = self.cmd('az cosmosdb service create -a {acc} -g {rg} --name "sqlDedicatedGateway" --count 1 --size "Cosmos.D4s" --gateway-type IntegratedCache').get_output_in_json()
         assert service_create["name"] == "sqlDedicatedGateway"
 
         service_update = self.cmd('az cosmosdb service update -a {acc} -g {rg} --name "sqlDedicatedGateway" --count 2 --size "Cosmos.D4s" ').get_output_in_json()
