@@ -1734,7 +1734,7 @@ def db_list(
     return client.list_by_server(resource_group_name=resource_group_name, server_name=server_name)
 
 
-def db_update(  # pylint: disable=too-many-locals
+def db_update(  # pylint: disable=too-many-locals, too-many-branches
         cmd,
         instance,
         server_name,
@@ -1762,7 +1762,9 @@ def db_update(  # pylint: disable=too-many-locals
         keys_to_remove=None,
         encryption_protector_auto_rotation=None,
         use_free_limit=None,
-        free_limit_exhaustion_behavior=None):
+        free_limit_exhaustion_behavior=None,
+        manual_cutover=None,
+        perform_cutover=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1845,6 +1847,12 @@ def db_update(  # pylint: disable=too-many-locals
 
     if preferred_enclave_type is not None:
         instance.preferred_enclave_type = preferred_enclave_type
+
+    if manual_cutover is not None:
+        instance.manual_cutover = manual_cutover
+
+    if perform_cutover is not None:
+        instance.perform_cutover = perform_cutover
 
     # Set storage_account_type even if storage_acount_type is None
     # Otherwise, empty value defaults to current storage_account_type

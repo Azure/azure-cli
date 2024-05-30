@@ -339,6 +339,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                  'Must set iops and throughput if using PremiumV2_LRS.'
         )
 
+        storage_type_restore_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['PremiumV2_LRS']),
+            options_list=['--storage-type'],
+            help='Storage type for the new server. Allowed value is PremiumV2_LRS. Default value is none.'
+        )
+
         auto_scale_iops_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--auto-scale-iops'],
@@ -621,6 +627,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
                 c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
                 c.argument('backup_byok_key', arg_type=backup_key_arg_type)
+                c.argument('storage_type', default=None, arg_type=storage_type_restore_arg_type)
 
         with self.argument_context('{} flexible-server geo-restore'. format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)

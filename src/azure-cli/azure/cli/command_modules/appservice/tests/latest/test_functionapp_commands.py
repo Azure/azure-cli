@@ -1229,6 +1229,9 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                      JMESPathCheck('name', functionapp_name),
                      JMESPathPatternCheck('hostNames[0]', functionapp_name + ".+" + 'azurecontainerapps.io')])
         
+        if self.is_live:
+            time.sleep(260)
+
         self.cmd('functionapp config container set -g {} -n {} --min-replicas 1 --max-replicas 10'
                  .format(resource_group, functionapp_name))
 

@@ -48,7 +48,9 @@ operation_name_map = {"deleteProtection": rsc_type + "/backupFabrics/protectionC
                       "disableSoftDelete": rsc_type + "/backupconfig/write",
                       "RecoveryServicesDisableImmutability": rsc_type + "/write#reduceImmutabilityState",
                       "RecoveryServicesStopProtection": rsc_type +
-                      "/backupFabrics/protectionContainers/protectedItems/write#stopProtectionWithRetainData"}
+                      "/backupFabrics/protectionContainers/protectedItems/write#stopProtectionWithRetainData",
+                      "RecoveryServicesRestore": rsc_type +
+                      "/backupFabrics/protectionContainers/protectedItems/recoveryPoints/restore/action"}
 
 # Client Utilities
 

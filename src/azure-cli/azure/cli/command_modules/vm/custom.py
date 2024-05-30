@@ -3919,7 +3919,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 security_type=None, enable_proxy_agent=None, proxy_agent_mode=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                 max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None,
-                ephemeral_os_disk=None, ephemeral_os_disk_option=None, **kwargs):
+                ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4164,6 +4164,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             resiliency_policy.resilient_vm_creation_policy = {'enabled': enable_resilient_creation}
         if enable_resilient_deletion is not None:
             resiliency_policy.resilient_vm_deletion_policy = {'enabled': enable_resilient_deletion}
+
+    if zones is not None:
+        vmss.zones = zones
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
@@ -5324,9 +5327,9 @@ def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_na
 
 # region install patches
 def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_duration, reboot_setting, classifications_to_include_win=None, classifications_to_include_linux=None, kb_numbers_to_include=None, kb_numbers_to_exclude=None,
-                       exclude_kbs_requiring_reboot=None, package_name_masks_to_include=None, package_name_masks_to_exclude=None, no_wait=False):
+                       exclude_kbs_requiring_reboot=None, package_name_masks_to_include=None, package_name_masks_to_exclude=None, max_patch_publish_date=None, no_wait=False):
     VMInstallPatchesParameters, WindowsParameters, LinuxParameters = cmd.get_models('VirtualMachineInstallPatchesParameters', 'WindowsParameters', 'LinuxParameters')
-    windows_parameters = WindowsParameters(classifications_to_include=classifications_to_include_win, kb_numbers_to_inclunde=kb_numbers_to_include, kb_numbers_to_exclude=kb_numbers_to_exclude, exclude_kbs_requirig_reboot=exclude_kbs_requiring_reboot)
+    windows_parameters = WindowsParameters(classifications_to_include=classifications_to_include_win, kb_numbers_to_inclunde=kb_numbers_to_include, kb_numbers_to_exclude=kb_numbers_to_exclude, exclude_kbs_requirig_reboot=exclude_kbs_requiring_reboot, max_patch_publish_date=max_patch_publish_date)
     linux_parameters = LinuxParameters(classifications_to_include=classifications_to_include_linux, package_name_masks_to_include=package_name_masks_to_include, package_name_masks_to_exclude=package_name_masks_to_exclude)
     install_patches_input = VMInstallPatchesParameters(maximum_duration=maximum_duration, reboot_setting=reboot_setting, linux_parameters=linux_parameters, windows_parameters=windows_parameters)
 

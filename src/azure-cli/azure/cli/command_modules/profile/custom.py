@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import sys
 
 from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
@@ -28,6 +29,17 @@ _CLOUD_CONSOLE_LOGOUT_WARNING = ("Logout successful. Re-login to your initial Cl
                                  " 'az login --identity'. Login with a new identity with 'az login'.")
 _CLOUD_CONSOLE_LOGIN_WARNING = ("Cloud Shell is automatically authenticated under the initial account signed-in with."
                                 " Run 'az login' only if you need to use a different account")
+
+
+LOGIN_ANNOUNCEMENT = (
+    "[Announcements]\n"
+    "With the new Azure CLI login experience, you can select the subscription you want to use more easily. "
+    "Learn more about it and its configuration at https://go.microsoft.com/fwlink/?linkid=2271236\n\n"
+    "If you encounter any problem, please open an issue at https://aka.ms/azclibug\n")
+
+LOGIN_OUTPUT_WARNING = (
+    "[Warning] The login output has been updated. Please be aware that it no longer displays the full list of "
+    "available subscriptions by default.\n")
 
 
 def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefined-builtin
@@ -136,6 +148,13 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         from azure.cli.core.auth.identity import ServicePrincipalAuth
         password = ServicePrincipalAuth.build_credential(password, client_assertion, use_cert_sn_issuer)
 
+    login_experience_v2 = cmd.cli_ctx.config.getboolean('core', 'login_experience_v2', fallback=True)
+    # Send login_experience_v2 config to telemetry
+    from azure.cli.core.telemetry import set_login_experience_v2
+    set_login_experience_v2(login_experience_v2)
+
+    select_subscription = interactive and sys.stdin.isatty() and sys.stdout.isatty() and login_experience_v2
+
     subscriptions = profile.login(
         interactive,
         username,
@@ -145,7 +164,21 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         scopes=scopes,
         use_device_code=use_device_code,
         allow_no_subscriptions=allow_no_subscriptions,
-        use_cert_sn_issuer=use_cert_sn_issuer)
+        use_cert_sn_issuer=use_cert_sn_issuer,
+        show_progress=select_subscription)
+
+    # Launch interactive account selection. No JSON output.
+    if select_subscription:
+        from ._subscription_selector import SubscriptionSelector
+        from azure.cli.core._profile import _SUBSCRIPTION_ID
+
+        selected = SubscriptionSelector(subscriptions)()
+        profile.set_active_subscription(selected[_SUBSCRIPTION_ID])
+
+        print(LOGIN_ANNOUNCEMENT)
+        logger.warning(LOGIN_OUTPUT_WARNING)
+        return
+
     all_subscriptions = list(subscriptions)
     for sub in all_subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)

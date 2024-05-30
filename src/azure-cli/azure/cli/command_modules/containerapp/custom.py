@@ -42,7 +42,8 @@ from ._clients import (
     StorageClient,
     AuthClient,
     WorkloadProfileClient,
-    ContainerAppsJobClient
+    ContainerAppsJobClient,
+    SubscriptionClient
 )
 from ._github_oauth import get_github_access_token
 from ._models import (
@@ -795,6 +796,15 @@ def list_containerapp(cmd, resource_group_name=None, managed_env=None):
     return containerapp_list_decorator.list()
 
 
+def show_custom_domain_verification_id(cmd):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        r = SubscriptionClient.show_custom_domain_verification_id(cmd)
+        return r
+    except CLIError as e:
+        handle_raw_exception(e)
+
+
 def delete_containerapp(cmd, name, resource_group_name, no_wait=False):
     raw_parameters = locals()
     containerapp_base_decorator = BaseContainerAppDecorator(
@@ -831,6 +841,7 @@ def create_managed_environment(cmd,
                                certificate_password=None,
                                enable_workload_profiles=True,
                                mtls_enabled=None,
+                               p2p_encryption_enabled=None,
                                no_wait=False):
     raw_parameters = locals()
     containerapp_env_create_decorator = ContainerAppEnvCreateDecorator(
@@ -865,6 +876,7 @@ def update_managed_environment(cmd,
                                min_nodes=None,
                                max_nodes=None,
                                mtls_enabled=None,
+                               p2p_encryption_enabled=None,
                                no_wait=False):
     raw_parameters = locals()
     containerapp_env_update_decorator = ContainerAppEnvUpdateDecorator(
