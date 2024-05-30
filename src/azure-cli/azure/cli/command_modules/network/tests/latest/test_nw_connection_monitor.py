@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
+import json
 
 from knack.util import CLIError
 
@@ -79,53 +80,53 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor show -l {location} -n {cmv2}')
         self.cmd('network watcher connection-monitor show -l {location} -n cmv2-01')
 
-    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
-    @AllowLargeResponse()
-    def test_nw_connection_monitor_v2_endpoint(self, resource_group, resource_group_location):
-        self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
+    # @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
+    # @AllowLargeResponse()
+    # def test_nw_connection_monitor_v2_endpoint(self, resource_group, resource_group_location):
+    #     self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
 
-        self.cmd('network vnet create -g {rg} --name cmv2-vnet --subnet-name subnet1 --address-prefix 10.0.0.0/24')
-        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name cmv2-vnet --name subnet1').get_output_in_json()
-        self.kwargs.update({
-            'cm_subnet_endpoint': 'cm_subnet_endpoint',
-            'subnet_id': subnet['id']
-        })
+    #     self.cmd('network vnet create -g {rg} --name cmv2-vnet --subnet-name subnet1 --address-prefix 10.0.0.0/24')
+    #     subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name cmv2-vnet --name subnet1').get_output_in_json()
+    #     self.kwargs.update({
+    #         'cm_subnet_endpoint': 'cm_subnet_endpoint',
+    #         'subnet_id': subnet['id']
+    #     })
 
-        # add an endpoint as source
-        self.cmd('network watcher connection-monitor endpoint add '
-                 '--connection-monitor {cmv2} '
-                 '--location {location} '
-                 '--source-test-groups {test_group} '
-                 '--name {cm_subnet_endpoint} '
-                 '--resource-id {subnet_id} '
-                 '--type AzureSubnet '
-                 '--address-exclude 10.0.0.25 '
-                 '--coverage-level BelowAverage')
+    #     # add an endpoint as source
+    #     self.cmd('network watcher connection-monitor endpoint add '
+    #              '--connection-monitor {cmv2} '
+    #              '--location {location} '
+    #              '--source-test-groups {test_group} '
+    #              '--name {cm_subnet_endpoint} '
+    #              '--resource-id {subnet_id} '
+    #              '--type AzureSubnet '
+    #              '--address-exclude 10.0.0.25 '
+    #              '--coverage-level BelowAverage')
 
-        # add an endpoint as destination
-        self.cmd('network watcher connection-monitor endpoint add '
-                 '--connection-monitor {cmv2} '
-                 '--location {location} '
-                 '--dest-test-groups {test_group} '
-                 '--name Github '
-                 '--address github.com '
-                 '--type ExternalAddress')
+    #     # add an endpoint as destination
+    #     self.cmd('network watcher connection-monitor endpoint add '
+    #              '--connection-monitor {cmv2} '
+    #              '--location {location} '
+    #              '--dest-test-groups {test_group} '
+    #              '--name Github '
+    #              '--address github.com '
+    #              '--type ExternalAddress')
 
-        self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
-                 checks=self.check('length(@)', 4))
-        self.cmd('network watcher connection-monitor endpoint show '
-                 '--connection-monitor {cmv2} '
-                 '--location {location} '
-                 '--name Github')
+    #     self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
+    #              checks=self.check('length(@)', 4))
+    #     self.cmd('network watcher connection-monitor endpoint show '
+    #              '--connection-monitor {cmv2} '
+    #              '--location {location} '
+    #              '--name Github')
 
-        # remove one
-        self.cmd('network watcher connection-monitor endpoint remove '
-                 '--connection-monitor {cmv2} '
-                 '--location {location} '
-                 '--name {cm_subnet_endpoint} '
-                 '--test-groups DefaultTestGroup ')
-        self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
-                 checks=self.check('length(@)', 3))
+    #     # remove one
+    #     self.cmd('network watcher connection-monitor endpoint remove '
+    #              '--connection-monitor {cmv2} '
+    #              '--location {location} '
+    #              '--name {cm_subnet_endpoint} '
+    #              '--test-groups DefaultTestGroup ')
+    #     self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
+    #              checks=self.check('length(@)', 3))
 
     @unittest.skip('PathNotSupportedInBothHTTPConfigurationAndAddress')
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
@@ -336,3 +337,321 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                         self.check('name', '{cmv2}'),
                         self.check('outputs[0].workspaceSettings.workspaceResourceId', '{workspace_id}')
                     ])
+        
+#   ------------------------------ My Tests --------------------------------------------
+        
+
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
+    @AllowLargeResponse()
+    def test_nw_connection_monitor_v2_output1(self, resource_group, resource_group_location):
+        self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
+        
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'cmv2': 'CMv2-01',
+            'test_group': 'DefaultTestGroup',
+            'workspace_name': self.create_random_name('clitest', 20)
+        })
+        
+        vm1_info = self._prepare_vm(resource_group, 'vm1')
+
+        workspace = self.cmd('monitor log-analytics workspace create '
+                             '-g {rg} '
+                             '--location {location} '
+                             '--workspace-name {workspace_name} ').get_output_in_json()
+        
+        print(workspace)
+
+        self.kwargs.update({
+            'vm1_id': vm1_info['id'],
+            'workspace_id': workspace['id']
+        })
+
+        #create an output ob
+        # value returned after creation is equal to the workspace_id or not
+        output=self.cmd('network watcher connection-monitor output add '
+                '--type Workspace '
+                '--workspace-id {workspace_id} ')
+        
+        print(output)
+        print(type(output))
+        
+        self.check('output.workspaceResourceId', '{workspace_id}')
+
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
+    @AllowLargeResponse()
+    def test_nw_connection_monitor_v2_endpoint1(self, resource_group, resource_group_location):
+        #self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
+
+        # self.cmd('network vnet create -g {rg} --name cmv2-vnet --subnet-name subnet1 --address-prefix 10.0.0.0/24')
+        # subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name cmv2-vnet --name subnet1').get_output_in_json()
+        # self.kwargs.update({
+        #     'cm_subnet_endpoint': 'subnet1',
+        #     'subnet_id': subnet['id']
+        # })
+
+        # print(subnet)
+
+        output=self.cmd('network watcher connection-monitor endpoint add '
+                '--name CdmTest '
+                '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/srisa-rg/providers/Microsoft.Compute/virtualMachines/CdmTest '
+                '--type AzureVM ').get_output_in_json()
+        self.check('name','CdmTest')
+
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
+    @AllowLargeResponse()
+    def test_nw_connection_monitor_v2_test_configuration1(self, resource_group, resource_group_location):
+        #self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
+
+        self.kwargs.update({
+            'location':'eastus'
+        })
+
+        output = self.cmd('network watcher connection-monitor test-configuration add '
+                 '--name testconfig '
+                 '--frequency 120 '
+                 '--protocol Tcp ').get_output_in_json()
+        
+        
+        self.check('name', 'testconfig')
+                
+        
+        print(output)
+
+
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
+    @AllowLargeResponse()
+    def test_nw_connection_monitor_v2_test_group1(self, resource_group, resource_group_location):
+        #self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
+
+
+        #creating 1st endpoint
+        # self.cmd('network vnet create -g {rg} --name cmv2-vnet --subnet-name subnet1 --address-prefix 10.0.0.0/24')
+        # subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name cmv2-vnet --name subnet1').get_output_in_json()
+        # self.kwargs.update({
+        #     'cm_subnet_endpoint': 'subnet1',
+        #     'subnet_id': subnet['id']
+        # })
+
+        # self.kwargs.update({
+        #     'location': 'eastus'
+        # })
+
+        # endpoint11=self.cmd('network watcher connection-monitor endpoint add '
+        #         '--name Bing '
+        #         '--address bing.com '
+        #         '--type ExternalAddress ').get_output_in_json()
+
+        print("---------------ABC-----------------------")
+        #print(endpoint11)
+        print("----------------AAA----------------------")
+       
+
+        endpoint1=self.cmd('network watcher connection-monitor endpoint add '
+                '--name Bing '
+                '--address bing.com '
+                '--type ExternalAddress ').get_output_in_json()
+        
+        print("e1=",endpoint1)
+        
+
+    #     for key in endpoint1.keys():
+    # # Replace whitespace characters with single quotes wrapped whitespace
+    #      endpoint1[key] = endpoint1[key].replace(' ', "' '")
+        
+        #endpoint1 = {key.strip(): value.strip() for key, value in endpoint1.items()}
+        
+       # print(endpoint1)
+        
+        #creating 2nd endpoint
+        # self.cmd('network vnet create -g {rg} --name cmv2-vnet --subnet-name subnet2 --address-prefix 10.0.1.0/24')
+        # subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name cmv2-vnet --name subnet2').get_output_in_json()
+        # self.kwargs.update({
+        #     'cm_subnet_endpoint': 'subnet2',
+        #     'subnet_id': subnet['id']
+        # })
+
+        endpoint2=self.cmd('network watcher connection-monitor endpoint add '
+                '--name Github '
+                '--address github.com '
+                '--type ExternalAddress ').get_output_in_json()
+        
+        #print(endpoint2)
+
+
+        #creating 3rd endpoint
+        # self.cmd('network vnet create -g {rg} --name cmv2-vnet --subnet-name subnet3 --address-prefix 10.0.2.0/24')
+        # subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name cmv2-vnet --name subnet3').get_output_in_json()
+        # self.kwargs.update({
+        #     'cm_subnet_endpoint': 'subnet3',
+        #     'subnet_id': subnet['id']
+        # })
+
+        # endpoint3=self.cmd('network watcher connection-monitor endpoint add '
+        #         '--name Google '
+        #         '--address gogle.com '
+        #         '--type ExternalAddress ').get_output_in_json()
+        
+        #print(type(endpoint3))
+
+
+        #creating a test configuration
+
+        tc1 = self.cmd('network watcher connection-monitor test-configuration add '
+                 '--name testconfig1 '
+                 '--frequency 120 '
+                 '--protocol Tcp ').get_output_in_json()
+        
+        #print("tc1=",type(tc1))
+        
+        #tc1_str = json.dumps(tc1)
+
+        # tc21 = self.cmd('network watcher connection-monitor test-configuration add '
+        #          '--location eastus '
+        #          '--name testconfig2 '
+        #          '--frequency 120 '
+        #          '--protocol http ')
+        # print("tc21=",tc21)
+        
+        # tc2 = self.cmd('network watcher connection-monitor test-configuration add '
+        #          '--name testconfig2 '
+        #          '--frequency 120 '
+        #          '--protocol http ').get_output_in_json()
+        
+        # address1 = endpoint1['address']
+        #endpoint1['address'] = str(endpoint1['address']).replace('{', '').replace('}', '')
+        # address2 = endpoint2['address']
+        # address3 = endpoint3['address']
+
+        #print("tc2=",type(tc2))
+        
+        #tc2_str = json.dumps(tc2)
+        
+        #creating a test group
+        # tc1_str = '{"location": "' + tc1['location'] + '", "name": "' + tc1['name'] + '", "frequency": ' + tc1['frequency'] + ', "protocol": "' + tc1['protocol'] + '"}'
+        # tc2_str = '{"location": "' + tc2['location'] + '", "name": "' + tc2['name'] + '", "frequency": ' + tc2['frequency'] + ', "protocol": "' + tc2['protocol'] + '"}'
+
+        # self.kwargs.update({
+        #     # 'command':'az network watcher connection-monitor test-group add',
+        #     # "address": json.dumps(endpoint1['address']),
+        #     'name':'testgroup1'
+        #     # 'endpoint1': json.dumps(endpoint1),
+        #     # 'endpoint2': json.dumps(endpoint2),
+        #     # 'endpoint3': json.dumps(endpoint3),
+        #     # 'tc1': json.dumps(tc1),
+        #     # 'tc2': json.dumps(tc2)  
+        # })
+
+        # print("log=",self.kwargs)
+
+        # sources = [self.kwargs['endpoint1'], self.kwargs['endpoint2']]
+        # destinations = self.kwargs['endpoint3']
+        # test_configurations = [self.kwargs['tc1'], self.kwargs['tc2']]
+        
+        # # Convert the dictionaries to JSON strings
+        # endpoint1_str = json.dumps(endpoint1)
+    
+        # endpoint2_str = json.dumps(endpoint2)
+        # endpoint3_str = json.dumps(endpoint3)
+        # tc1_str = json.dumps(tc1)
+        # tc2_str = json.dumps(tc2)
+
+        # Insert the JSON strings directly into the command
+        # self.cmd('network watcher connection-monitor test-group add '
+        #         '--location {location} '
+        #         '--name testgroup1 '
+        #         '--sources ' + endpoint1_str + ' ' + endpoint2_str + ' '
+        #         '--destinations ' + endpoint3_str + ' '
+        #         '--test-configurations ' + tc1_str + ' ' + tc2_str, checks=[
+        #             self.check('location', self.kwargs['location']),
+        #             self.check('sources', [endpoint1_str, endpoint2_str])
+        #         ])
+        
+        # self.cmd('network watcher connection-monitor test-group add '
+        #  '--location {location} '
+        #  '--name testgroup1 '
+        #  '--sources "{endpoint1}" "{endpoint2}" '
+        #  '--destinations "{endpoint3}" '
+        #  '--test-configurations "{tc1}" "{tc2}"', checks=[
+        #     self.check('location', self.kwargs['location']),
+        #     self.check('sources', [self.kwargs['endpoint1'], self.kwargs['endpoint2']])
+        # ])
+
+        # if not all([self.kwargs['endpoint1'], self.kwargs['endpoint2'], self.kwargs['endpoint3'], self.kwargs['tc1'], self.kwargs['tc2']]):
+        #     print("One or more of the JSON strings are empty.")
+        # else:
+        #     self.cmd('network watcher connection-monitor test-group add '
+        #         '--location {location} '
+        #         '--name testgroup1 '
+        #         '--sources "{endpoint1}" "{endpoint2}" '
+        #         '--destinations "{endpoint3}" '
+        #         '--test-configurations "{tc1}" "{tc2}"', checks=[
+        #             self.check('location', self.kwargs['location']),
+        #             self.check('sources', [self.kwargs['endpoint1'], self.kwargs['endpoint2']])
+        #         ])
+
+        # self.cmd('network watcher connection-monitor test-group add '
+        #          '--location {location} '
+        #          '--name testgroup1 '
+        #          '--sources "{endpoint1}" "{endpoint2}" '
+        #          '--destinations "{endpoint3}" '
+        #          '--test-configurations "{tc1}" "{tc2}" '.format(**self.kwargs) , checks=[
+        #                 self.check('location', '{location}'),
+        #                 self.check('sources', sources)
+        #             ])  
+
+
+        # self.cmd("network watcher connection-monitor test-group add "
+        #         "--location {location} "
+        #         '--name testgroup1 '
+        #         "--sources [{{name: Bing, address: bing.com, type: ExternalAddress}}, {{name: Github, address: github.com, type: ExternalAddress}}]",
+        #         "--destinations [{{name:Google, address:google.com, type:ExternalAddress}}] "
+        #         "--test-configurations [{{location:{location},name:testconfig1,protocol:Http,frequency:120}},{{location:{location},name:testconfig2,protocol:Tcp,frequency:120}}]", 
+        #             self.check('location', '{location}')
+        #             #self.check('sources', [self.kwargs['endpoint1'], self.kwargs['endpoint2']])
+        #         )
+
+        # self.kwargs.update({
+        #     'name':'tg1',
+        #     'name1':'Bing',
+        #     'address':'bing.com',
+        #     'type':'ExternalAddress',
+        #     'name2':'Google',
+        #     'address2':'google.com',
+        #     'name3':'testconfig1',
+        #     'protocol':'Http',
+        #     'frequency':'120'
+        # })
+        self.kwargs.update({
+            'endpoint1': endpoint1,
+            'endpoint2': endpoint2,
+            'tc1': tc1
+        })
+
+        # print(self.kwargs)
+        
+        # output=self.cmd("network watcher connection-monitor test-group add "
+        #  '--name tg1 '
+        #  "--sources [{'endpoint_name':'Bing','address':'bing.com',type:'ExternalAddress'}] "
+        #  "--destinations [{'name2':'Google','address':'google.com','type':'ExternalAddress'}] "
+        #  "--test-configurations [{'name3':'testconfig1','protocol':'Http','frequency':'120'}] ").get_output_in_json()
+        output=self.cmd("network watcher connection-monitor test-group add "
+         '--name tg1 '
+         "--sources [{endpoint1}] "
+         "--destinations [{endpoint2}] "
+         "--test-configurations [{tc1}] ")
+        print(output)
+        self.check('name','tg1')
+        # except json.JSONDecodeError:
+        #     print("error")
+
+        
+
+        
+
+
+
+
+                
+        

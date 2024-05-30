@@ -43,9 +43,9 @@ class AAZSimpleType(AAZBaseType):
 
             data = data._data
 
-        assert self.DataType is not None
-        if not isinstance(data, self.DataType):
-            raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+        # assert self.DataType is not None
+        # if not isinstance(data, self.DataType):
+        #     raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
 
         return data
 
@@ -369,6 +369,11 @@ class AAZListType(AAZBaseType):
 
     @Element.setter
     def Element(self, value):
+
+        if isinstance(value,dict):
+            value = AAZDictType()
+            value.Element = value
+
         if self._element is None:
             assert isinstance(value, AAZBaseType)
             self._element = value

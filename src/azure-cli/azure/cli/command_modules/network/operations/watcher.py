@@ -52,6 +52,8 @@ from ..aaz.latest.network.watcher.connection_monitor.test_configuration import A
 from ..aaz.latest.network.watcher.connection_monitor.test_group import Add as _WatcherConnectionMonitorTestGroupAdd, \
     Show as _WatcherConnectionMonitorTestGroupShow, List as _WatcherConnectionMonitorTestGroupList
 
+import copy
+
 logger = get_logger(__name__)
 
 
@@ -568,30 +570,30 @@ def process_nw_cm_v2_create_namespace(cmd):
     args = cmd.ctx.args
     validate_tags(args)
     if not has_value(args.location):  # location is None only occurs in creating a V2 connection monitor
-        endpoint_source_resource_id = args.endpoint_source_resource_id.to_serialized_data()
+        # endpoint_source_resource_id = args.endpoint_source_resource_id.to_serialized_data()
         from azure.mgmt.resource import ResourceManagementClient
         # parse and verify endpoint_source_resource_id
-        if not has_value(args.endpoint_source_resource_id):
-            raise ValidationError('usage error: --location/--endpoint-source-resource-id '
-                                  'is required to create a V2 connection monitor')
-        if is_valid_resource_id(endpoint_source_resource_id) is False:
-            raise ValidationError('usage error: "{}" is not a valid resource id'.format(endpoint_source_resource_id))
+        # if not has_value(args.endpoint_source_resource_id):
+        #     raise ValidationError('usage error: --location/--endpoint-source-resource-id '
+        #                           'is required to create a V2 connection monitor')
+        # if is_valid_resource_id(endpoint_source_resource_id) is False:
+        #     raise ValidationError('usage error: "{}" is not a valid resource id'.format(endpoint_source_resource_id))
 
-        resource = parse_resource_id(endpoint_source_resource_id)
-        resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
-        resource_api_version = _resolve_api_version(resource_client,
-                                                    resource['namespace'],
-                                                    resource['resource_parent'],
-                                                    resource['resource_type'])
-        resource = resource_client.resources.get_by_id(endpoint_source_resource_id, resource_api_version)
+        # resource = parse_resource_id(endpoint_source_resource_id)
+        # resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
+        # resource_api_version = _resolve_api_version(resource_client,
+        #                                             resource['namespace'],
+        #                                             resource['resource_parent'],
+        #                                             resource['resource_type'])
+        # resource = resource_client.resources.get_by_id(endpoint_source_resource_id, resource_api_version)
 
-        args.location = resource.location
-        if not has_value(args.location):
-            raise ValidationError("Can not get location from --endpoint-source-resource-id")
+        # args.location = resource.location
+        # if not has_value(args.location):
+        #     raise ValidationError("Can not get location from --endpoint-source-resource-id")
 
-    if not has_value(args.test_config_protocol):
-        raise ValidationError('usage error: --protocol is required to create a test '
-                              'configuration for V2 connection monitor')
+    # if not has_value(args.test_config_protocol):
+    #     raise ValidationError('usage error: --protocol is required to create a test '
+    #                           'configuration for V2 connection monitor')
 
     if has_value(args.output_type) and not has_value(args.workspace_ids):
         raise ValidationError('usage error: --output-type is specified but no other resource id provided')
@@ -602,76 +604,76 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.network_watcher_name._registered = False
-        args_schema.network_watcher_name._required = False
-        args_schema.resource_group._required = False
+        args_schema.network_watcher_name._registered = True
+        args_schema.network_watcher_name._required = True
+        args_schema.resource_group._required = True
 
         args_schema.auto_start._registered = False
         args_schema.monitoring_interval_in_seconds._registered = False
-        args_schema.source._registered = False
-        args_schema.destination._registered = False
-        args_schema.endpoints._registered = False
-        args_schema.test_configurations._registered = False
-        args_schema.test_groups._registered = False
+        # args_schema.source._registered = False
+        # args_schema.destination._registered = False
+        # args_schema.endpoints._registered = False
+        args_schema.test_groups.Element.testConfigurations._registered = True
+        args_schema.test_groups._registered = True
         args_schema.outputs._registered = False
 
         # V2 Endpoint
-        args_schema.endpoint_dest_address = AAZStrArg(
-            options=["--endpoint-dest-address"],
-            help="Address of the destination of connection monitor endpoint (IP or domain name)",
-            arg_group="V2 Endpoint",
-        )
-        args_schema.endpoint_dest_coverage_level = AAZStrArg(
-            options=["--endpoint-dest-coverage-level"],
-            help="Test coverage for the endpoint.",
-            enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage",
-                  "Default": "Default", "Full": "Full", "Low": "Low"},
-            arg_group="V2 Endpoint"
-        )
-        args_schema.endpoint_dest_name = AAZStrArg(
-            options=["--endpoint-dest-name"],
-            help="The name of the destination of connection monitor endpoint. "
-                 "If you are creating a V2 Connection Monitor, it's required.",
-            required=True,
-            arg_group="V2 Endpoint"
-        )
-        args_schema.endpoint_dest_resource_id = AAZStrArg(
-            options=["--endpoint-dest-resource-id"],
-            help="Resource ID of the destination of connection monitor endpoint.",
-            arg_group="V2 Endpoint",
-        )
-        args_schema.endpoint_dest_type = AAZStrArg(
-            options=["--endpoint-dest-type"],
-            help="The endpoint type.",
-            enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM",
-                  "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress",
-                  "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
-            arg_group="V2 Endpoint"
-        )
-        args_schema.endpoint_source_address = AAZStrArg(
-            options=["--endpoint-source-address"],
-            help="Address of the source of connection monitor endpoint (IP or domain name).",
-            arg_group="V2 Endpoint",
-        )
-        args_schema.endpoint_source_coverage_level = AAZStrArg(
-            options=["--endpoint-source-coverage-level"],
-            help="Test coverage for the endpoint.",
-            enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage",
-                  "Default": "Default", "Full": "Full", "Low": "Low"},
-            arg_group="V2 Endpoint"
-        )
+        # args_schema.endpoint_dest_address = AAZStrArg(
+        #     options=["--endpoint-dest-address"],
+        #     help="Address of the destination of connection monitor endpoint (IP or domain name)",
+        #     arg_group="V2 Endpoint",
+        # )
+        # args_schema.endpoint_dest_coverage_level = AAZStrArg(
+        #     options=["--endpoint-dest-coverage-level"],
+        #     help="Test coverage for the endpoint.",
+        #     enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage",
+        #           "Default": "Default", "Full": "Full", "Low": "Low"},
+        #     arg_group="V2 Endpoint"
+        # )
+        # args_schema.endpoint_dest_name = AAZStrArg(
+        #     options=["--endpoint-dest-name"],
+        #     help="The name of the destination of connection monitor endpoint. "
+        #          "If you are creating a V2 Connection Monitor, it's required.",
+        #     required=True,
+        #     arg_group="V2 Endpoint"
+        # )
+        # args_schema.endpoint_dest_resource_id = AAZStrArg(
+        #     options=["--endpoint-dest-resource-id"],
+        #     help="Resource ID of the destination of connection monitor endpoint.",
+        #     arg_group="V2 Endpoint",
+        # )
+        # args_schema.endpoint_dest_type = AAZStrArg(
+        #     options=["--endpoint-dest-type"],
+        #     help="The endpoint type.",
+        #     enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM",
+        #           "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress",
+        #           "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
+        #     arg_group="V2 Endpoint"
+        # )
+        # args_schema.endpoint_source_address = AAZStrArg(
+        #     options=["--endpoint-source-address"],
+        #     help="Address of the source of connection monitor endpoint (IP or domain name).",
+        #     arg_group="V2 Endpoint",
+        # )
+        # args_schema.endpoint_source_coverage_level = AAZStrArg(
+        #     options=["--endpoint-source-coverage-level"],
+        #     help="Test coverage for the endpoint.",
+        #     enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage",
+        #           "Default": "Default", "Full": "Full", "Low": "Low"},
+        #     arg_group="V2 Endpoint"
+        # )
         args_schema.endpoint_source_name = AAZStrArg(
             options=["--endpoint-source-name"],
             help="The name of the source of connection monitor endpoint. "
                  "If you are creating a V2 Connection Monitor, it's required.",
-            required=True,
+            required=False,
             arg_group="V2 Endpoint",
         )
         args_schema.endpoint_source_resource_id = AAZStrArg(
             options=["--endpoint-source-resource-id"],
             help="Resource ID of the source of connection monitor endpoint. "
                  "If endpoint is intended to used as source, this option is required.",
-            required=True,
+            required=False,
             arg_group="V2 Endpoint",
         )
         args_schema.endpoint_source_type = AAZStrArg(
@@ -698,13 +700,13 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         args_schema.workspace_ids.Element = AAZStrArg()
 
         # V2 Test Configuration
-        args_schema.test_config_name = AAZStrArg(
-            options=["--test-config-name"],
-            help="The name of the connection monitor test configuration. "
-                 "If you are creating a V2 Connection Monitor, it's required.",
-            required=True,
-            arg_group="V2 Test Configuration",
-        )
+        # args_schema.test_config_name = AAZStrArg(
+        #     options=["--test-config-name"],
+        #     help="The name of the connection monitor test configuration. "
+        #          "If you are creating a V2 Connection Monitor, it's required.",
+        #     required=False,
+        #     arg_group="V2 Test Configuration",
+        # )
         args_schema.test_config_frequency = AAZIntArg(
             options=["--frequency"],
             help="The frequency of test evaluation, in seconds.",
@@ -760,6 +762,12 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             arg_group="V2 Test Configuration",
             enum={"Http": "Http", "Icmp": "Icmp", "Tcp": "Tcp"},
         )
+        # args_schema.protocol = AAZStrArg(
+        #     options=["--protocol"],
+        #     help='The protocol to use in test evaluation.',
+        #     arg_group="V2 Test Configuration",
+        #     enum={"Http": "Http", "Icmp": "Icmp", "Tcp": "Tcp"},
+        # )
 
         args_schema.test_config_tcp_disable_trace_route = AAZBoolArg(
             options=["--tcp-disable-trace-route"],
@@ -809,64 +817,301 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         args = self.ctx.args
 
         # deal with endpoint
-        src_endpoint = {
-            "name": args.endpoint_source_name,
-            "resource_id": args.endpoint_source_resource_id,
-            "address": args.endpoint_source_address,
-            "type": args.endpoint_source_type,
-            "coverage_level": args.endpoint_source_coverage_level
-        }
-        dst_endpoint = {
-            "name": args.endpoint_dest_name,
-            "resource_id": args.endpoint_dest_resource_id,
-            "address": args.endpoint_dest_address,
-            "type": args.endpoint_dest_type,
-            "coverage_level": args.endpoint_dest_coverage_level
-        }
+        src_endpoints = [
+            {
+            "name": src.name,
+            "resource_id": src.resourceId,
+            "address": src.address,
+            "type": src.type,
+            #"coverage_level": args.endpoint_source_coverage_level
+            }
+             
+            for test_group in args.test_groups
+            for src in test_group["sources"]
+        ]
+        dst_endpoints = [
+            {
+            "name": dst.name,
+            "resource_id": dst.resourceId,
+            "address": dst.address,
+            "type": dst.type,
+            #"coverage_level": args.endpoint_source_coverage_level
+            }
+
+            for test_group in args.test_groups
+            for dst in test_group["destinations"]
+        ]
 
         # deal with test configuration
-        test_config = {
-            "name": args.test_config_name,
-            "test_frequency_sec": args.test_config_frequency,
-            "protocol": args.test_config_protocol,
-            "preferred_ip_version": args.test_config_preferred_ip_version,
-        }
-        if has_value(args.test_config_threshold_failed_percent) or \
-                has_value(args.test_config_threshold_round_trip_time):
-            test_config['success_threshold'] = {
-                "checks_failed_percent": args.test_config_threshold_failed_percent,
-                "round_trip_time_ms": args.test_config_threshold_round_trip_time
-            }
-        if args.test_config_protocol == "Tcp":
-            tcp_config = {
-                "port": args.test_config_tcp_port,
-                "destination_port_behavior": args.test_config_tcp_port_behavior,
-                "disable_trace_route": args.test_config_tcp_disable_trace_route,
-            }
-            test_config['tcp_configuration'] = tcp_config
-        elif args.test_config_protocol == "Icmp":
-            icmp_config = {"disable_trace_route": args.test_config_icmp_disable_trace_route}
-            test_config['icmp_configuration'] = icmp_config
-        elif args.test_config_protocol == "Http":
-            http_config = {
-                "port": args.test_config_http_port,
-                "method": args.test_config_http_method,
-                "path": args.test_config_http_path,
-                "valid_status_code_ranges": args.test_config_http_valid_status_codes,
-                "prefer_https": args.test_config_http_prefer_https,
-            }
-            test_config['http_configuration'] = http_config
-        else:
-            raise ValidationError('Unsupported protocol: "{}" for test configuration'.format(args.test_config_protocol))
+
+        test_configs = []
+        for test_group in args.test_groups:
+            for test_config in test_group["testConfigurations"]:
+                config = {
+                    "name": test_config["name"] if test_config["name"] is not None else None,
+                    "test_frequency_sec": test_config["frequency"] if test_config["frequency"] is not None else None,
+                    "protocol": test_config["protocol"] if test_config["protocol"] is not None else None,
+                    "location": test_config["location"] if test_config["location"] is not None else None,
+                    "preferred_ip_version": test_config["preferred_ip_version"] if test_config["preferred_ip_version"] is not None else None,
+                    "success_threshold": test_config["success_threshold"] if test_config["success_threshold"] is not None else None,
+                }
+
+            if test_config["protocol"] == "Http" and test_config["httpConfiguration"] is not None:
+
+                valid_status_code_ranges = test_config["httpConfiguration"]["validStatusCodeRanges"] if test_config["httpConfiguration"]["validStatusCodeRanges"] is not None else []
+                print("test_config=",type(valid_status_code_ranges))
+                request_headers = test_config["httpConfiguration"]["requestHeaders"] if test_config["httpConfiguration"]["requestHeaders"] is not None else []
+
+                http_config = {
+                    "method": test_config["http_configuration"]["method"] if test_config["http_configuration"]["method"] is not None else None,
+                    "path": test_config["http_configuration"]["path"] if test_config["http_configuration"]["path"] is not None else None,
+                    "port": test_config["http_configuration"]["port"] if test_config["http_configuration"]["port"] is not None else None,
+                    "prefer_https": test_config["http_configuration"]["prefer_https"] if test_config["http_configuration"]["prefer_https"] is not None else None,
+                    "request_headers": [],
+                    # if test_config["http_configuration"]["valid_status_code_ranges"] is not None:
+                    #    for code in valid_status_codes:
+                    #    data["httpConfiguration"]["valid_status_code_ranges"].append(code)
+                    "valid_status_code_ranges":[]
+                    # "valid_status_code_ranges": test_config["http_configuration"]["valid_status_code_ranges"] if test_config["http_configuration"]["valid_status_code_ranges"] is not None else None,
+                }
+
+                for code in valid_status_code_ranges:
+                    http_config["valid_status_code_ranges"].append(code)
+                #print(type(http_config["valid_status_code_ranges"]))
+                for header in request_headers:
+                    http_config["request_headers"].append(header)
+                
+
+                config['http_configuration'] = http_config
+            elif test_config["protocol"] == "Icmp" and test_config["icmp_configuration"] is not None:
+                icmp_config = {
+                    "disable_trace_route": test_config["icmp_configuration"]["disable_trace_route"] if test_config["icmp_configuration"]["disable_trace_route"] is not None else None,
+                }
+                config['icmp_configuration'] = icmp_config
+            elif test_config["protocol"] == "Tcp" and test_config["tcp_configuration"] is not None:
+                tcp_config = {
+                    "destination_port_behavior": test_config["tcp_configuration"]["destination_port_behavior"] if test_config["tcp_configuration"]["destination_port_behavior"] is not None else None,
+                    "disable_trace_route": test_config["tcp_configuration"]["disable_trace_route"] if test_config["tcp_configuration"]["disable_trace_route"] is not None else None,
+                    "port": test_config["tcp_configuration"]["port"] if test_config["tcp_configuration"]["port"] is not None else None,
+                }
+                config['tcp_configuration'] = tcp_config
+            else:
+                raise ValidationError('Unsupported protocol: "{}" for test configuration'.format(test_config["protocol"]))
+
+            test_configs.append(config)
+
+
+        # test_configs = []
+        # for test_group in args.test_groups:
+        #     for test_config in test_group["testConfigurations"]:
+        #         config = {
+        #             "name": test_config["name"],
+        #             "test_frequency_sec": test_config["frequency"],
+        #             "protocol": test_config["protocol"],
+        #             #"preferred_ip_version": args.test_config_preferred_ip_version,
+        #         }
+
+        #         if has_value(test_config["threshold_failed_percent"]) or \
+        #                 has_value(test_config["threshold_round_trip_time"]):
+        #             config['success_threshold'] = {
+        #                 "checks_failed_percent": test_config["threshold_failed_percent"],
+        #                 "round_trip_time_ms": test_config["threshold_round_trip_time"]
+        #             }
+
+        #         if test_config["protocol"] == "Tcp":
+        #             tcp_config = {
+        #                 "port": test_config["tcp_port"],
+        #                 "destination_port_behavior": test_config["tcp_port_behavior"],
+        #                 "disable_trace_route": test_config["tcp_disable_trace_route"],
+        #             }
+        #             config['tcp_configuration'] = tcp_config
+        #         elif test_config["protocol"] == "Icmp":
+        #             icmp_config = {"disable_trace_route": test_config["icmp_disable_trace_route"]}
+        #             config['icmp_configuration'] = icmp_config
+        #         elif test_config["protocol"] == "Http":
+        #             http_config = {
+        #                 "port": test_config["http_port"],
+        #                 "method": test_config["http_method"],
+        #                 "path": test_config["http_path"],
+        #                 "valid_status_code_ranges": test_config["http_valid_status_codes"],
+        #                 "prefer_https": test_config["http_prefer_https"],
+        #             }
+        #             config['http_configuration'] = http_config
+        #         else:
+        #             raise ValidationError('Unsupported protocol: "{}" for test configuration'.format(test_config.protocol))
+
+        #         test_configs.append(config)
+
+            # if has_value(test_config["test_config_threshold_failed_percent"]) or \
+            #         has_value(test_config["test_config_threshold_round_trip_time"]):
+            #     test_config['success_threshold'] = {
+            #         "checks_failed_percent": test_config["test_config_threshold_failed_percent"],
+            #         "round_trip_time_ms": test_config["test_config_threshold_round_trip_time"]
+            #     }
+            # if test_config["test_config_protocol"] == "Tcp":
+            #     tcp_config = {
+            #         "port": test_config["test_config_tcp_port"],
+            #         "destination_port_behavior": test_config["test_config_tcp_port_behavior"],
+            #         "disable_trace_route": test_config["test_config_tcp_disable_trace_route"],
+            #     }
+            #    test_config['tcp_configuration'] = tcp_config
+            # elif test_config["test_config_protocol"] == "Icmp":
+            #     icmp_config = {"disable_trace_route": test_config["test_config_icmp_disable_trace_route"]}
+            #     test_config['icmp_configuration'] = icmp_config
+            # elif test_config["test_config_protocol"] == "Http":
+            #     http_config = {
+            #         "port": test_config["test_config_http_port"],
+            #         "method": test_config["test_config_http_method"],
+            #         "path": test_config["test_config_http_path"],
+            #         "valid_status_code_ranges": test_config["test_config_http_valid_status_codes"],
+            #         "prefer_https": test_config["test_config_http_prefer_https"],
+            #     }
+            #     test_config['http_configuration'] = http_config
+            # else:
+            #     raise ValidationError('Unsupported protocol: "{}" for test configuration'.format(args.test_config_protocol))
 
         # deal with test group
-        test_group = {
-            "name": args.test_group_name,
-            "disable": args.test_group_disable,
-            "test-configurations": [tc['name'] for tc in [test_config]],
-            "sources": [e['name'] for e in [src_endpoint]],
-            "destinations": [e['name'] for e in [dst_endpoint]]
-        }
+        # Extract only the 'name' field from source endpoints
+        # src_endpoints_names = [
+        #     {"name": src['name']}  # Extract only the 'name' field
+        #     for test_group in args.test_groups
+        #     for src in test_group["sources"]
+        # ]
+
+        seen = set()
+        unique_endpoints = []
+        for endpoint in args.endpoints:
+            # Convert the dictionary to a string and check if it's seen before
+            endpoint_name = str(endpoint['name'])
+            if endpoint_name not in seen:
+                unique_endpoints.append(endpoint)
+                seen.add(endpoint_name)
+        args.endpoints = unique_endpoints
+
+
+        src_endpoints_names = [
+            {"name": src['name']}  # Extract only the 'name' field
+            for test_group in args.test_groups
+            for src in test_group["sources"]
+        ]
+
+        seen_names = set()
+        unique_sources=[]
+        for src in src_endpoints_names:
+            src_name = str(src['name'])
+            if src_name not in seen_names:
+                unique_sources.append(src['name'])
+                seen_names.add(src_name)
+
+        # Extract only the 'name' field from destination endpoints
+        dst_endpoints_names = [
+            {"name": dst['name']}  # Extract only the 'name' field
+            for test_group in args.test_groups
+            for dst in test_group["destinations"]
+        ]
+
+        seen_names = set()
+        unique_dst = []
+        for dst in dst_endpoints_names:
+            dst_name = str(dst['name'])
+            if dst_name not in seen_names:
+                unique_dst.append(dst['name'])
+                seen_names.add(dst_name)
+
+        test_config_names = [
+            {"name": tc['name']}
+            for test_group in args.test_groups
+            for tc in test_group["testConfigurations"]
+        ]
+
+        seen_names = set()
+        unique_testconfig = []
+        for tc in test_config_names:
+            tc_name = str(tc['name'])
+            if tc_name not in seen_names:
+                unique_testconfig.append(tc['name'])
+                seen_names.add(tc_name)
+
+        test_groups=[]
+
+        for test_group in args.test_groups:
+            test_group = {
+                "name": test_group['testGroupName'],
+                #"disable": test_group['test_group_disable'],
+                "test-configurations": [{'name': e} for e in unique_testconfig],
+                "sources": [{'name': e} for e in unique_sources],
+                "destinations": [{'name': e} for e in unique_dst]
+            }
+
+            test_groups.append(test_group)
+
+        # for test_group in args.test_groups:
+        #     test_group = {
+        #         "name": test_group['testGroupName'],
+        #         #"disable": test_group['test_group_disable'],
+        #         "test-configurations": [tc['name'] for tc in test_configs],
+        #         "sources": [e['name'] for e in src_endpoints],
+        #         "destinations": [e['name'] for e in dst_endpoints]
+        #     }
+            
+
+#         test_groups = [
+#     {
+#         "name": test_group['testGroupName'],
+#         #"disable": test_group['test_group_disable'],
+#         "test-configurations": [
+#             {
+#                 "name": tc['name'],
+#             }
+
+#             for tc in test_configs if tc['name'] in test_group["testConfigurations"]
+#         ],
+#         #"test-configurations": [tc['name'] for tc in test_configs],
+#         "sources": [
+#             {
+#                 "name": src['name'],
+#                 # "resource_id": src['resource_id'],
+#                 # "address": src['address'],
+#                 # "type": src['type'],
+#                 # #"coverage_level": src['coverage_level']
+#             }
+#             for src in src_endpoints if src['name'] in test_group["sources"]
+#         ],
+#         "destinations": [
+#             {
+#                 "name": dst['name'],
+#                 # "resource_id": dst['resource_id'],
+#                 # "address": dst['address'],
+#                 # "type": dst['type'],
+#                 # #"coverage_level": dst['coverage_level']
+#             }
+#             for dst in dst_endpoints if dst['name'] in test_group["destinations"]
+#         ]
+#     }
+#     for test_group in args.test_groups
+#    ]
+
+        
+        # test_groups = [
+        #         {
+        #         "name": test_group['testGroupName'],
+        #         #"disable": test_group_args.test_group_disable,
+        #        # "test-configurations": [tc['name'] for tc in test_configs],
+        #         "sources": [e['name'] for e in [src_endpoints]],
+        #         "destinations": [e['name'] for e in [dst_endpoints]]
+        #        }
+        #     for test_group in args.test_groups
+        
+        #     ]
+        # test_groups.append(test_group)
+
+        # test_group = {
+        #     "name": args.test_group_name,
+        #     "disable": args.test_group_disable,
+        #     "test-configurations": [tc['name'] for tc in [test_config]],
+        #     "sources": [e['name'] for e in [src_endpoints]],
+        #     "destinations": [e['name'] for e in [dst_endpoints]]
+        # }
 
         # If 'workspace_ids' option is specified but 'output_type' is not
         # then still it should be implicit that 'output-type' is 'Workspace'
@@ -886,9 +1131,36 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
                 args.outputs.append(output)
         else:
             args.outputs = []
-        args.endpoints = [src_endpoint, dst_endpoint]
-        args.test_configurations = [test_config]
-        args.test_groups = [test_group]
+        args.endpoints = src_endpoints + dst_endpoints
+        
+        #removing duplicate endpoints
+        seen = set()
+        unique_endpoints = []
+        for endpoint in args.endpoints:
+            # Convert the dictionary to a string and check if it's seen before
+            endpoint_name = str(endpoint['name'])
+            if endpoint_name not in seen:
+                unique_endpoints.append(endpoint)
+                seen.add(endpoint_name)
+        args.endpoints = unique_endpoints
+
+
+        print(args.test_configurations)
+        args.test_configurations = test_configs
+        #removing duplicate test-configurations
+        seen = set()
+        unique_testconfigs = []
+        for test_config in args.test_configurations:
+            # Convert the dictionary to a string and check if it's seen before
+            test_config_name = str(test_config['name'])
+            if test_config_name not in seen:
+                unique_testconfigs.append(test_config)
+                seen.add(test_config_name)
+        args.test_configurations = unique_testconfigs
+
+        print(args.test_configurations)
+        args.test_groups = test_groups
+        print("hi")
 
 
 class WatcherConnectionMonitorStart(_WatcherConnectionMonitorStart):
@@ -1410,14 +1682,15 @@ class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
+        args_schema.workspace_id.registered = True
 
-        args_schema.output_type._required = True
+        args_schema.output_type._required = False
         args_schema.location = AAZResourceLocationArg(
             options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
-            required=True,
+            required=False,
         )
         return args_schema
 
@@ -1425,7 +1698,7 @@ class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
         args = self.ctx.args
         if has_value(args.output_type) and not has_value(args.workspace_id):
             raise ValidationError('usage error: --type is specified but no other resource id provided')
-        get_network_watcher_from_location(self)
+    # get_network_watcher_from_location(self)
 
 
 class WatcherConnectionMonitorOutputList(_WatcherConnectionMonitorOutputList):
@@ -1475,6 +1748,9 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
+        args_schema.address._required = False
+        args_schema.address._registered = True
+        args_schema.endpoint_name._registered = True
 
         args_schema.filter_items._registered = False
         args_schema.filter_type._registered = False
@@ -1486,7 +1762,7 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
-            required=True
+            required=False
         )
         args_schema.address_exclude = AAZListArg(
             options=["--address-exclude"],
@@ -1503,54 +1779,58 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
         args_schema.dest_test_groups = AAZListArg(
             options=["--dest-test-groups"],
             help="Space-separated list of names for test group to reference as destination.",
-            arg_group="V2 Test Group"
+            arg_group="V2 Test Group",
+            required = False
         )
         args_schema.dest_test_groups.Element = AAZStrArg()
 
         args_schema.source_test_groups = AAZListArg(
             options=["--source-test-groups"],
             help="Space-separated list of names for test group to reference as source.",
-            arg_group="V2 Test Group"
+            arg_group="V2 Test Group",
+            required = False
         )
         args_schema.source_test_groups.Element = AAZStrArg()
         return args_schema
 
     def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.dest_test_groups) or has_value(args.source_test_groups):
-            dest_test_groups, source_test_groups = args.dest_test_groups, args.source_test_groups
-            if dest_test_groups is None and source_test_groups is None:
-                raise ValidationError('usage error: endpoint has to be referenced from at least one existing '
-                                      'test group via --dest-test-groups/--source-test-groups')
-        get_network_watcher_from_location(self)
+        pass
+        #args = self.ctx.args
+        # if has_value(args.dest_test_groups) or has_value(args.source_test_groups):
+        #     dest_test_groups, source_test_groups = args.dest_test_groups, args.source_test_groups
+        #     if dest_test_groups is None and source_test_groups is None:
+        #         raise ValidationError('usage error: endpoint has to be referenced from at least one existing '
+        #                               'test group via --dest-test-groups/--source-test-groups')
+        #get_network_watcher_from_location(self)
 
-        args.scope_include = assign_aaz_list_arg(
-            args.scope_include,
-            args.address_include,
-            element_transformer=lambda _, tmp_ip: {"address": tmp_ip}
-        )
+        # args.scope_include = assign_aaz_list_arg(
+        #     args.scope_include,
+        #     args.address_include,
+        #     element_transformer=lambda _, tmp_ip: {"address": tmp_ip}
+        # )
 
-        args.scope_exclude = assign_aaz_list_arg(
-            args.scope_exclude,
-            args.address_exclude,
-            element_transformer=lambda _, tmp_ip: {"address": tmp_ip}
-        )
+        # args.scope_exclude = assign_aaz_list_arg(
+        #     args.scope_exclude,
+        #     args.address_exclude,
+        #     element_transformer=lambda _, tmp_ip: {"address": tmp_ip}
+        # )
 
     def pre_instance_create(self):
-        args = self.ctx.args
-        name = args.endpoint_name.to_serialized_data()
-        instance = self.ctx.vars.instance
-        src_test_groups = set()
-        dst_test_groups = set()
-        if has_value(args.source_test_groups):
-            src_test_groups = set(args.source_test_groups.to_serialized_data())
-        if has_value(args.dest_test_groups):
-            dst_test_groups = set(args.dest_test_groups.to_serialized_data())
-        for test_group in instance.properties.test_groups:
-            if test_group.name.to_serialized_data() in src_test_groups:
-                test_group.sources.append(name)
-            if test_group.name.to_serialized_data() in dst_test_groups:
-                test_group.destinations.append(name)
+        pass
+        # args = self.ctx.args
+        # name = args.endpoint_name.to_serialized_data()
+        # instance = self.ctx.vars.instance
+        # src_test_groups = set()
+        # dst_test_groups = set()
+        # if has_value(args.source_test_groups):
+        #     src_test_groups = set(args.source_test_groups.to_serialized_data())
+        # if has_value(args.dest_test_groups):
+        #     dst_test_groups = set(args.dest_test_groups.to_serialized_data())
+        # for test_group in instance.properties.test_groups:
+        #     if test_group.name.to_serialized_data() in src_test_groups:
+        #         test_group.sources.append(name)
+        #     if test_group.name.to_serialized_data() in dst_test_groups:
+        #         test_group.destinations.append(name)
 
 
 class WatcherConnectionMonitorEndpointShow(_WatcherConnectionMonitorEndpointShow):
@@ -1653,14 +1933,17 @@ class WatcherConnectionMonitorTestConfigurationAdd(_MonitorTestConfigurationAdd)
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
+        args_schema.http_request_headers._required = False
         args_schema.http_request_headers._registered = False
+        
 
         args_schema.location = AAZResourceLocationArg(
             options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
-            required=True,
+            required=False,
+            registered=True
         )
         args_schema.http_request_header = AAZDictArg(
             options=["--http-request-header"],
@@ -1672,24 +1955,25 @@ class WatcherConnectionMonitorTestConfigurationAdd(_MonitorTestConfigurationAdd)
         args_schema.test_groups = AAZListArg(
             options=["--test-groups"],
             help="Space-separated list of names of test group which only need to be affected if specified.",
-            required=True,
+            required=False,
         )
-        args_schema.test_groups.Element = AAZStrArg()
+       # args_schema.test_groups.Element = AAZStrArg()
         return args_schema
 
     def pre_operations(self):
-        get_network_watcher_from_location(self)
+        #get_network_watcher_from_location(self)
+        pass
 
     def pre_instance_create(self):
         args = self.ctx.args
         name = args.test_configuration_name.to_serialized_data()
 
-        if has_value(args.http_request_header):
-            for tmp_name, val in args.http_request_header.items():
-                args.http_request_headers.append({
-                    "name": tmp_name,
-                    "value": val,
-                })
+        # if has_value(args.http_request_header):
+        #     for tmp_name, val in args.http_request_header.items():
+        #         args.http_request_headers.append({
+        #             "name": tmp_name,
+        #             "value": val,
+        #         })
 
         instance = self.ctx.vars.instance
         if has_value(args.test_groups):
@@ -1796,57 +2080,63 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
+        args_schema.watcher_rg._required = False
+        args_schema.test_group_name._registered = True
+        args_schema.test_group_name._required = True
 
-        args_schema.destinations._registered = False
-        args_schema.destinations._required = False
-        args_schema.sources._registered = False
-        args_schema.sources._required = False
-        args_schema.test_configurations._registered = False
-        args_schema.test_configurations._required = False
+
+        args_schema.destinations._registered = True
+        args_schema.destinations._required = True
+        args_schema.sources._registered = True
+        args_schema.sources._required = True
+        args_schema.test_configurations._registered = True
+        args_schema.test_configurations._required = True
+        args_schema.sources.Element.address._registered = True
+    
 
         args_schema.location = AAZResourceLocationArg(
             options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
-            required=True,
+            required=False,
         )
         # V2 Endpoint
-        args_schema.endpoint_dest_name = AAZStrArg(
-            options=["--endpoint-dest-name"],
-            help="The name of the destination of connection monitor endpoint. "
-                 "If you are creating a V2 Connection Monitor, it's required.",
-            arg_group="V2 Endpoint",
-            required=True
-        )
-        args_schema.endpoint_source_name = AAZStrArg(
-            options=["--endpoint-source-name"],
-            help="The name of the source of connection monitor endpoint. "
-                 "If you are creating a V2 Connection Monitor, it's required.",
-            arg_group="V2 Endpoint",
-            required=True
-        )
-        args_schema.endpoint_dest_address = AAZStrArg(
-            options=["--endpoint-dest-address"],
-            help="Address of the destination of connection monitor endpoint (IP or domain name)",
-            arg_group="V2 Endpoint",
-        )
-        args_schema.endpoint_dest_resource_id = AAZStrArg(
-            options=["--endpoint-dest-resource-id"],
-            help="Resource ID of the destination of connection monitor endpoint.",
-            arg_group="V2 Endpoint",
-        )
-        args_schema.endpoint_source_address = AAZStrArg(
-            options=["--endpoint-source-address"],
-            help="Address of the source of connection monitor endpoint (IP or domain name).",
-            arg_group="V2 Endpoint",
-        )
-        args_schema.endpoint_source_resource_id = AAZStrArg(
-            options=["--endpoint-source-resource-id"],
-            help="Resource ID of the source of connection monitor endpoint. "
-                 "If endpoint is intended to used as source, this option is required.",
-            arg_group="V2 Endpoint",
-        )
+        # args_schema.endpoint_dest_name = AAZStrArg(
+        #     options=["--endpoint-dest-name"],
+        #     help="The name of the destination of connection monitor endpoint. "
+        #          "If you are creating a V2 Connection Monitor, it's required.",
+        #     arg_group="V2 Endpoint",
+        #     required=False
+        # )
+        # args_schema.endpoint_source_name = AAZStrArg(
+        #     options=["--endpoint-source-name"],
+        #     help="The name of the source of connection monitor endpoint. "
+        #          "If you are creating a V2 Connection Monitor, it's required.",
+        #     arg_group="V2 Endpoint",
+        #     required=False
+        # )
+        # args_schema.endpoint_dest_address = AAZStrArg(
+        #     options=["--endpoint-dest-address"],
+        #     help="Address of the destination of connection monitor endpoint (IP or domain name)",
+        #     arg_group="V2 Endpoint",
+        # )
+        # args_schema.endpoint_dest_resource_id = AAZStrArg(
+        #     options=["--endpoint-dest-resource-id"],
+        #     help="Resource ID of the destination of connection monitor endpoint.",
+        #     arg_group="V2 Endpoint",
+        # )
+        # args_schema.endpoint_source_address = AAZStrArg(
+        #     options=["--endpoint-source-address"],
+        #     help="Address of the source of connection monitor endpoint (IP or domain name).",
+        #     arg_group="V2 Endpoint",
+        # )
+        # args_schema.endpoint_source_resource_id = AAZStrArg(
+        #     options=["--endpoint-source-resource-id"],
+        #     help="Resource ID of the source of connection monitor endpoint. "
+        #          "If endpoint is intended to used as source, this option is required.",
+        #     arg_group="V2 Endpoint",
+        # )
 
         # V2 Test Configuration
         args_schema.test_config_name = AAZStrArg(
@@ -1854,7 +2144,7 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
             help="The name of the connection monitor test configuration. "
                  "If you are creating a V2 Connection Monitor, it's required.",
             arg_group="V2 Test Configuration",
-            required=True
+            required=False
         )
         args_schema.test_config_frequency = AAZStrArg(
             options=["--frequency"],
@@ -1935,7 +2225,8 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
         return args_schema
 
     def pre_operations(self):
-        get_network_watcher_from_location(self)
+        #get_network_watcher_from_location(self)
+        pass
 
     # pylint: disable=too-many-boolean-expressions
     def pre_instance_create(self):

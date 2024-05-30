@@ -217,10 +217,24 @@ class AAZShortHandSyntaxParser:
             raise AAZInvalidShorthandSyntaxError(remain, idx, 1, f"Miss end quota character: {quote}")
         return result, idx
 
+    # @classmethod
+    # def split_partial_value(cls, v):
+    #     """ split 'Partial Value' format """
+    #     assert isinstance(v, str)
+    #     match = cls.partial_value_key_pattern.fullmatch(v)
+    #     if not match:
+    #         key = None
+    #     else:
+    #         key = match[1]
+    #         v = match[len(match.regs) - 1]
+    #     key_parts = cls.parse_partial_value_key(key)
+    #     return key, key_parts, v
+
     @classmethod
     def split_partial_value(cls, v):
         """ split 'Partial Value' format """
-        assert isinstance(v, str)
+        if not isinstance(v, str):
+            v = str(v)
         match = cls.partial_value_key_pattern.fullmatch(v)
         if not match:
             key = None

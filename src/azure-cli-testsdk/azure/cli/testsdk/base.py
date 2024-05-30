@@ -38,7 +38,8 @@ class CheckerMixin(object):
 
     def _apply_kwargs(self, val):
         try:
-            return val.format(**self.kwargs)
+            val = val.format(**self.kwargs)
+            return val
         except AttributeError:
             return val
         except KeyError as ex:
