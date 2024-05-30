@@ -1052,6 +1052,10 @@ class Add(AAZCommand):
             if arg_index is not None:
                 # The next element in sys.argv is the value of the argument
                 arg = sys.argv[arg_index + 1]
+                print("arg=",arg)
+                if isinstance(arg, list):
+                    arg = arg[0]
+                print("arg2=",arg)
                 # Replace single quotes with double quotes to make it a valid JSON string
                 arg = arg.replace("'", '"')
                 # Parse the string into a list of dictionaries
@@ -1077,20 +1081,24 @@ class Add(AAZCommand):
             destinations_list = self.parse_arg(destinations_index)
             sources_list = self.parse_arg(sources_index)
             test_configurations_list = self.parse_arg(test_configurations_index)
-
+            
+            print("destinations_index=", destinations_index)
             print("destinations_list=", destinations_list)
             print("sources_list=", sources_list)
             print("test_configurations_list=", test_configurations_list)
 
             data ={
                 "testGroupName" : str(self.ctx.args.test_group_name),
-                "sources" : sources_list,
-                "destinations" : destinations_list,
-                "testConfigurations" : test_configurations_list
+                "sources" : [sources_list],
+                "destinations" : [destinations_list],
+                "testConfigurations" : [test_configurations_list]
             }
 
+            data_str = str(data)
+            data_str = data_str.replace(" ","")
+            return data_str
 
-            ob = json.dumps(data)
-            return json.loads(ob)
+            # ob = json.dumps(data)
+            # return json.loads(ob)
 
 __all__ = ["Add"]
