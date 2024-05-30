@@ -1432,7 +1432,8 @@ def _create_migration(logging_name, client, subscription_id, resource_group_name
         overwrite_dbs_in_target=get_enum_value_true_false(get_case_insensitive_key_value("OverwriteDbsInTarget", parameter_keys, parameters), "OverwriteDbsInTarget"),
         source_type=source_type,
         migration_option=migration_option,
-        ssl_mode=ssl_mode)
+        ssl_mode=ssl_mode,
+        migration_instance_resource_id=migrationInstanceResourceId)
 
     return client.create(subscription_id, resource_group_name, target_db_server_name, migration_name, migration_parameters)
 
