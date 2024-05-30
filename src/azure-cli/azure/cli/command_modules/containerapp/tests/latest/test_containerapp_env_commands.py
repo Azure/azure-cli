@@ -514,3 +514,37 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         self.cmd('containerapp env create -g {} -n {} --logs-destination none -d "Endpoint=https://foo.azconfig.io;Id=osOX-l9-s0:sig;InstrumentationKey=00000000000000000000000000000000000000000000"'.format(resource_group, env_name), expect_failure=False)
 
         self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env_name), expect_failure=False)
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="northeurope")
+    def test_containerapp_env_usages(self, resource_group):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        result = self.cmd('containerapp list-usages').get_output_in_json()
+        usages = result["value"]
+        self.assertEqual(len(usages), 1)
+        self.assertEqual(usages[0]["name"]["value"], "ManagedEnvironmentCount")
+        self.assertGreater(usages[0]["limit"], 0)
+        self.assertGreaterEqual(usages[0]["usage"], 0)
+
+        env_name = self.create_random_name(prefix='containerapp-e2e-env', length=24)
+
+        self.cmd('containerapp env create -g {} -n {} --logs-destination none'.format(resource_group, env_name))
+
+        containerapp_env = self.cmd(
+            'containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() == "waiting":
+            time.sleep(5)
+            containerapp_env = self.cmd(
+                'containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        self.cmd('containerapp env show -n {} -g {}'.format(env_name, resource_group), checks=[
+            JMESPathCheck('name', env_name)
+        ])
+
+        result = self.cmd('containerapp env list-usages --id {}'.format(containerapp_env["id"])).get_output_in_json()
+        usages = result["value"]
+        self.assertEqual(len(usages), 3)
+        self.assertGreater(usages[0]["limit"], 0)
+        self.assertGreaterEqual(usages[0]["usage"], 0)
