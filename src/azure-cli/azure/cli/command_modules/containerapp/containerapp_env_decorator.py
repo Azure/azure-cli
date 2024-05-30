@@ -321,14 +321,15 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
         if logs_destination:
             logs_destination = None if logs_destination == "none" else logs_destination
             safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "destination", value=logs_destination)
+            if logs_destination is None:
+                safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", value=None)
 
-        if logs_destination == "log-analytics":
-            safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", "customerId",
-                     value=self.get_argument_logs_customer_id())
-            safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", "sharedKey",
-                     value=self.get_argument_logs_key())
-        elif logs_destination:
+        if logs_destination == "azure-monitor":
             safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", value=None)
+
+        if self.get_argument_logs_customer_id() and self.get_argument_logs_key():
+            safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", "customerId", value=self.get_argument_logs_customer_id())
+            safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", "sharedKey", value=self.get_argument_logs_key())
 
     def set_up_custom_domain_configuration(self):
         if self.get_argument_hostname():
