@@ -790,7 +790,7 @@ import json
 
 
 @register_command(
-    "network watcher connection-monitor test-configuration add",
+    "network watcher connection-monitor test-configuration create",
     is_preview=True,
 )
 class Add(AAZCommand):

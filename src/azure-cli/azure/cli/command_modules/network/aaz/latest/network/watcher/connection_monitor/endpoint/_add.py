@@ -768,20 +768,18 @@ import json
 
 
 @register_command(
-    "network watcher connection-monitor endpoint add",
+    "network watcher connection-monitor endpoint create",
     is_preview=True,
 )
 class Add(AAZCommand):
-    """Add an endpoint to a connection monitor.
+    """Create a connection monitor endpoint object.
 
-    :example: Add an external address as a destination endpoint
-        az network watcher connection-monitor endpoint add --connection-monitor MyConnectionMonitor --location westus --name MyExternalEndpoint --address "bing.com" --dest-test-groups DefaultTestGroup --type ExternalAddress
+    :example: Create an external address as a destination endpoint
+        az network watcher connection-monitor endpoint create --name Google --type ExternalAddress --address google.com
 
     :example: Add an Azure VM as a source endpoint
-        az network watcher connection-monitor endpoint add --connection-monitor MyConnectionMonitor --location westus --name MyVMEndpoint --resource-id MyVMResourceID --source-test-groups DefaultTestGroup --type AzureVM
+        az network watcher connection-monitor endpoint create --name MyVm --type AzureVM --resource-id MyResourceId
 
-    :example: Add a Subnet as a source endpoint with addresses excluded
-        az network watcher connection-monitor endpoint add --connection-monitor MyConnectionMonitor --location westus --name MySubnetEndpoint --resource-id MySubnetID --source-test-groups DefaultTestGroup --type AzureSubnet --address-exclude 10.0.0.25 10.0.0.30 --coverage-level BelowAverage
     """
 
     _aaz_info = {

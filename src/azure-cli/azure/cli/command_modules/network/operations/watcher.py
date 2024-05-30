@@ -700,13 +700,6 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         args_schema.workspace_ids.Element = AAZStrArg()
 
         # V2 Test Configuration
-        # args_schema.test_config_name = AAZStrArg(
-        #     options=["--test-config-name"],
-        #     help="The name of the connection monitor test configuration. "
-        #          "If you are creating a V2 Connection Monitor, it's required.",
-        #     required=False,
-        #     arg_group="V2 Test Configuration",
-        # )
         args_schema.test_config_frequency = AAZIntArg(
             options=["--frequency"],
             help="The frequency of test evaluation, in seconds.",
@@ -762,12 +755,6 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             arg_group="V2 Test Configuration",
             enum={"Http": "Http", "Icmp": "Icmp", "Tcp": "Tcp"},
         )
-        # args_schema.protocol = AAZStrArg(
-        #     options=["--protocol"],
-        #     help='The protocol to use in test evaluation.',
-        #     arg_group="V2 Test Configuration",
-        #     enum={"Http": "Http", "Icmp": "Icmp", "Tcp": "Tcp"},
-        # )
 
         args_schema.test_config_tcp_disable_trace_route = AAZBoolArg(
             options=["--tcp-disable-trace-route"],
@@ -823,7 +810,6 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             "resource_id": src.resourceId,
             "address": src.address,
             "type": src.type,
-            #"coverage_level": args.endpoint_source_coverage_level
             }
              
             for test_group in args.test_groups
@@ -835,7 +821,6 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             "resource_id": dst.resourceId,
             "address": dst.address,
             "type": dst.type,
-            #"coverage_level": args.endpoint_source_coverage_level
             }
 
             for test_group in args.test_groups
@@ -868,16 +853,12 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
                     "port": test_config["http_configuration"]["port"] if test_config["http_configuration"]["port"] is not None else None,
                     "prefer_https": test_config["http_configuration"]["prefer_https"] if test_config["http_configuration"]["prefer_https"] is not None else None,
                     "request_headers": [],
-                    # if test_config["http_configuration"]["valid_status_code_ranges"] is not None:
-                    #    for code in valid_status_codes:
-                    #    data["httpConfiguration"]["valid_status_code_ranges"].append(code)
                     "valid_status_code_ranges":[]
-                    # "valid_status_code_ranges": test_config["http_configuration"]["valid_status_code_ranges"] if test_config["http_configuration"]["valid_status_code_ranges"] is not None else None,
                 }
 
                 for code in valid_status_code_ranges:
                     http_config["valid_status_code_ranges"].append(code)
-                #print(type(http_config["valid_status_code_ranges"]))
+                
                 for header in request_headers:
                     http_config["request_headers"].append(header)
                 
@@ -900,83 +881,6 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
 
             test_configs.append(config)
 
-
-        # test_configs = []
-        # for test_group in args.test_groups:
-        #     for test_config in test_group["testConfigurations"]:
-        #         config = {
-        #             "name": test_config["name"],
-        #             "test_frequency_sec": test_config["frequency"],
-        #             "protocol": test_config["protocol"],
-        #             #"preferred_ip_version": args.test_config_preferred_ip_version,
-        #         }
-
-        #         if has_value(test_config["threshold_failed_percent"]) or \
-        #                 has_value(test_config["threshold_round_trip_time"]):
-        #             config['success_threshold'] = {
-        #                 "checks_failed_percent": test_config["threshold_failed_percent"],
-        #                 "round_trip_time_ms": test_config["threshold_round_trip_time"]
-        #             }
-
-        #         if test_config["protocol"] == "Tcp":
-        #             tcp_config = {
-        #                 "port": test_config["tcp_port"],
-        #                 "destination_port_behavior": test_config["tcp_port_behavior"],
-        #                 "disable_trace_route": test_config["tcp_disable_trace_route"],
-        #             }
-        #             config['tcp_configuration'] = tcp_config
-        #         elif test_config["protocol"] == "Icmp":
-        #             icmp_config = {"disable_trace_route": test_config["icmp_disable_trace_route"]}
-        #             config['icmp_configuration'] = icmp_config
-        #         elif test_config["protocol"] == "Http":
-        #             http_config = {
-        #                 "port": test_config["http_port"],
-        #                 "method": test_config["http_method"],
-        #                 "path": test_config["http_path"],
-        #                 "valid_status_code_ranges": test_config["http_valid_status_codes"],
-        #                 "prefer_https": test_config["http_prefer_https"],
-        #             }
-        #             config['http_configuration'] = http_config
-        #         else:
-        #             raise ValidationError('Unsupported protocol: "{}" for test configuration'.format(test_config.protocol))
-
-        #         test_configs.append(config)
-
-            # if has_value(test_config["test_config_threshold_failed_percent"]) or \
-            #         has_value(test_config["test_config_threshold_round_trip_time"]):
-            #     test_config['success_threshold'] = {
-            #         "checks_failed_percent": test_config["test_config_threshold_failed_percent"],
-            #         "round_trip_time_ms": test_config["test_config_threshold_round_trip_time"]
-            #     }
-            # if test_config["test_config_protocol"] == "Tcp":
-            #     tcp_config = {
-            #         "port": test_config["test_config_tcp_port"],
-            #         "destination_port_behavior": test_config["test_config_tcp_port_behavior"],
-            #         "disable_trace_route": test_config["test_config_tcp_disable_trace_route"],
-            #     }
-            #    test_config['tcp_configuration'] = tcp_config
-            # elif test_config["test_config_protocol"] == "Icmp":
-            #     icmp_config = {"disable_trace_route": test_config["test_config_icmp_disable_trace_route"]}
-            #     test_config['icmp_configuration'] = icmp_config
-            # elif test_config["test_config_protocol"] == "Http":
-            #     http_config = {
-            #         "port": test_config["test_config_http_port"],
-            #         "method": test_config["test_config_http_method"],
-            #         "path": test_config["test_config_http_path"],
-            #         "valid_status_code_ranges": test_config["test_config_http_valid_status_codes"],
-            #         "prefer_https": test_config["test_config_http_prefer_https"],
-            #     }
-            #     test_config['http_configuration'] = http_config
-            # else:
-            #     raise ValidationError('Unsupported protocol: "{}" for test configuration'.format(args.test_config_protocol))
-
-        # deal with test group
-        # Extract only the 'name' field from source endpoints
-        # src_endpoints_names = [
-        #     {"name": src['name']}  # Extract only the 'name' field
-        #     for test_group in args.test_groups
-        #     for src in test_group["sources"]
-        # ]
 
         seen = set()
         unique_endpoints = []
@@ -1037,7 +941,6 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         for test_group in args.test_groups:
             test_group = {
                 "name": test_group['testGroupName'],
-                #"disable": test_group['test_group_disable'],
                 "test-configurations": [{'name': e} for e in unique_testconfig],
                 "sources": [{'name': e} for e in unique_sources],
                 "destinations": [{'name': e} for e in unique_dst]
@@ -1045,73 +948,6 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
 
             test_groups.append(test_group)
 
-        # for test_group in args.test_groups:
-        #     test_group = {
-        #         "name": test_group['testGroupName'],
-        #         #"disable": test_group['test_group_disable'],
-        #         "test-configurations": [tc['name'] for tc in test_configs],
-        #         "sources": [e['name'] for e in src_endpoints],
-        #         "destinations": [e['name'] for e in dst_endpoints]
-        #     }
-            
-
-#         test_groups = [
-#     {
-#         "name": test_group['testGroupName'],
-#         #"disable": test_group['test_group_disable'],
-#         "test-configurations": [
-#             {
-#                 "name": tc['name'],
-#             }
-
-#             for tc in test_configs if tc['name'] in test_group["testConfigurations"]
-#         ],
-#         #"test-configurations": [tc['name'] for tc in test_configs],
-#         "sources": [
-#             {
-#                 "name": src['name'],
-#                 # "resource_id": src['resource_id'],
-#                 # "address": src['address'],
-#                 # "type": src['type'],
-#                 # #"coverage_level": src['coverage_level']
-#             }
-#             for src in src_endpoints if src['name'] in test_group["sources"]
-#         ],
-#         "destinations": [
-#             {
-#                 "name": dst['name'],
-#                 # "resource_id": dst['resource_id'],
-#                 # "address": dst['address'],
-#                 # "type": dst['type'],
-#                 # #"coverage_level": dst['coverage_level']
-#             }
-#             for dst in dst_endpoints if dst['name'] in test_group["destinations"]
-#         ]
-#     }
-#     for test_group in args.test_groups
-#    ]
-
-        
-        # test_groups = [
-        #         {
-        #         "name": test_group['testGroupName'],
-        #         #"disable": test_group_args.test_group_disable,
-        #        # "test-configurations": [tc['name'] for tc in test_configs],
-        #         "sources": [e['name'] for e in [src_endpoints]],
-        #         "destinations": [e['name'] for e in [dst_endpoints]]
-        #        }
-        #     for test_group in args.test_groups
-        
-        #     ]
-        # test_groups.append(test_group)
-
-        # test_group = {
-        #     "name": args.test_group_name,
-        #     "disable": args.test_group_disable,
-        #     "test-configurations": [tc['name'] for tc in [test_config]],
-        #     "sources": [e['name'] for e in [src_endpoints]],
-        #     "destinations": [e['name'] for e in [dst_endpoints]]
-        # }
 
         # If 'workspace_ids' option is specified but 'output_type' is not
         # then still it should be implicit that 'output-type' is 'Workspace'
@@ -1144,8 +980,6 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
                 seen.add(endpoint_name)
         args.endpoints = unique_endpoints
 
-
-        print(args.test_configurations)
         args.test_configurations = test_configs
         #removing duplicate test-configurations
         seen = set()
@@ -1158,9 +992,8 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
                 seen.add(test_config_name)
         args.test_configurations = unique_testconfigs
 
-        print(args.test_configurations)
         args.test_groups = test_groups
-        print("hi")
+        
 
 
 class WatcherConnectionMonitorStart(_WatcherConnectionMonitorStart):

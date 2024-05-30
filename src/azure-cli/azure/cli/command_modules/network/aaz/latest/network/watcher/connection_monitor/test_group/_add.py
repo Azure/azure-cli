@@ -689,20 +689,15 @@ import sys
 import re
 
 @register_command(
-    "network watcher connection-monitor test-group add",
+    "network watcher connection-monitor test-group create",
     is_preview=True,
 )
 class Add(AAZCommand):
-    """Add a test group along with new-added/existing endpoint and test configuration to a connection monitor.
+    """Create a test group object using endpoints and test configurations.
 
-    :example: Add a test group along with existing endpoint and test configuration via their names
-        az network watcher connection-monitor test-group add --connection-monitor MyConnectionMonitor --location westus --name MyHTTPTestGroup --endpoint-source-name MySourceEndpoint --endpoint-dest-name MyDestinationEndpoint --test-config-name MyTestConfiguration
+    :example: Create a test group along with existing endpoint and test configuration via their names
+        az network watcher connection-monitor test-group create --name MyTestGroup --sources [$src1 $src2] --destinations [$dst1] --test-configurations [$test1 $test2]
 
-    :example: Add a test group long with new-added source endpoint and existing test configuration via its name
-        az network watcher connection-monitor test-group add --connection-monitor MyConnectionMonitor --location westus --name MyAccessibilityTestGroup --endpoint-source-name MySourceEndpoint --endpoint-source-resource-id MyLogAnalysisWorkspaceID --endpoint-dest-name MyExistingDestinationEndpoint --test-config-name MyExistingTestConfiguration
-
-    :example: Add a test group along with new-added endpoints and test configuration
-        az network watcher connection-monitor test-group add --connection-monitor MyConnectionMonitor --location westus --name MyAccessibilityTestGroup --endpoint-source-name MySourceEndpoint --endpoint-source-resource-id MyVMResourceID --endpoint-dest-name bing --endpoint-dest-address bing.com --test-config-name MyNewTestConfiguration --protocol Tcp --tcp-port 4096
     """
 
     _aaz_info = {
@@ -791,14 +786,61 @@ class Add(AAZCommand):
             help="The endpoint type.  Allowed values: AzureArcVM, AzureSubnet, AzureVM, AzureVMSS, AzureVNet, ExternalAddress, MMAWorkspaceMachine, MMAWorkspaceNetwork.",
             enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM", "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress", "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
         )
+        destinations.Element.coverage_level = AAZStrArg(
+            options=["--coverage-level"],
+            help="Test coverage for the endpoint. Allowed values: AboveAverage, Average, BelowAverage, Default, Full, Low",
+            enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage", "Default": "Default", "Full": "Full", "Low": "Low"},
+        )
+        destinations.Element.filter_items = AAZListArg(
+            options=["--filter-items"],
+            help="List of property=value pairs to define filter items. Property currently include: type, address. Property value of type supports 'AgentAddress' only now.",
+        )
+        destinations.Element.filter_type = AAZStrArg(
+            options=["--filter-type"],
+            help="The behavior of the endpoint filter. Currently only 'Include' is supported.  Allowed values: Include.",
+            enum={"Include": "Include"},
+        )
+        destinations.Element.scope_exclude = AAZListArg(
+            options=["--scope-exclude"],
+            help="List of items which needs to be excluded from the endpoint scope.",
+        )
+        destinations.Element.scope_include = AAZListArg(
+            options=["--scope-include"],
+            help="List of items which needs to be included to the endpoint scope.",
+        )
 
-        # _element = cls._args_schema.destinations.Element
-        # _element.name = AAZStrArg(
-        # )
-        # _element.resource_id = AAZStrArg(
-        # )
-        # _element.type = AAZStrArg(
-        # )
+        filter_items = cls._args_schema.destinations.Element.filter_items
+        filter_items.Element = AAZObjectArg()
+
+        _element = cls._args_schema.destinations.Element.filter_items.Element
+        _element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the filter item.",
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+            help="The type of item included in the filter. Currently only 'AgentAddress' is supported.",
+            enum={"AgentAddress": "AgentAddress"},
+        )
+
+        scope_exclude = cls._args_schema.destinations.Element.scope_exclude
+        scope_exclude.Element = AAZObjectArg()
+
+        _element = cls._args_schema.destinations.Element.scope_exclude.Element
+        _element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
+        )
+
+        scope_include = cls._args_schema.destinations.Element.scope_include
+        scope_include.Element = AAZObjectArg()
+
+        _element = cls._args_schema.destinations.Element.scope_include.Element
+        _element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
+        )
+
 
         sources = cls._args_schema.sources
         sources.Element = AAZObjectArg()
@@ -819,6 +861,60 @@ class Add(AAZCommand):
             options=["--type"],
             help="The endpoint type.  Allowed values: AzureArcVM, AzureSubnet, AzureVM, AzureVMSS, AzureVNet, ExternalAddress, MMAWorkspaceMachine, MMAWorkspaceNetwork.",
             enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM", "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress", "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
+        )
+        sources.Element.coverage_level = AAZStrArg(
+            options=["--coverage-level"],
+            help="Test coverage for the endpoint. Allowed values: AboveAverage, Average, BelowAverage, Default, Full, Low",
+            enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage", "Default": "Default", "Full": "Full", "Low": "Low"},
+        )
+        sources.Element.filter_items = AAZListArg(
+            options=["--filter-items"],
+            help="List of property=value pairs to define filter items. Property currently include: type, address. Property value of type supports 'AgentAddress' only now.",
+        )
+        sources.Element.filter_type = AAZStrArg(
+            options=["--filter-type"],
+            help="The behavior of the endpoint filter. Currently only 'Include' is supported.  Allowed values: Include.",
+            enum={"Include": "Include"},
+        )
+        sources.Element.scope_exclude = AAZListArg(
+            options=["--scope-exclude"],
+            help="List of items which needs to be excluded from the endpoint scope.",
+        )
+        sources.Element.scope_include = AAZListArg(
+            options=["--scope-include"],
+            help="List of items which needs to be included to the endpoint scope.",
+        )
+
+        filter_items = cls._args_schema.sources.Element.filter_items
+        filter_items.Element = AAZObjectArg()
+
+        _element = cls._args_schema.sources.Element.filter_items.Element
+        _element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the filter item.",
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+            help="The type of item included in the filter. Currently only 'AgentAddress' is supported.",
+            enum={"AgentAddress": "AgentAddress"},
+        )
+
+        scope_exclude = cls._args_schema.sources.Element.scope_exclude
+        scope_exclude.Element = AAZObjectArg()
+
+        _element = cls._args_schema.sources.Element.scope_exclude.Element
+        _element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
+        )
+
+        scope_include = cls._args_schema.sources.Element.scope_include
+        scope_include.Element = AAZObjectArg()
+
+        _element = cls._args_schema.sources.Element.scope_include.Element
+        _element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
         )
 
         # define Arg Group "V2 Test Configuration"
@@ -965,114 +1061,72 @@ class Add(AAZCommand):
     class SubresourceSelector(AAZJsonSelector):
 
         def _get(self):
-            # result = self.ctx.vars.instance
-            # result = result.properties.testGroups
-            # filters = enumerate(result)
-            # filters = filter(
-            #     lambda e: e[1].name == self.ctx.args.test_group_name,
-            #     filters
-            # )
-            # idx = next(filters)[0]
-            # return result[idx]
             pass
 
         def _set(self, value):
-            # result = self.ctx.vars.instance
-            # result = result.properties.testGroups
-            # filters = enumerate(result)
-            # filters = filter(
-            #     lambda e: e[1].name == self.ctx.args.test_group_name,
-            #     filters
-            # )
-            # idx = next(filters, [len(result)])[0]
-            # result[idx] = value
-            # return
             pass
 
     class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
 
-        # def __init__(self,ctx):
-        #     super().__init__(ctx)
-        #     destinations_index = sys.argv.index('--destinations') if '--destinations' in sys.argv else None
-        #     sources_index = sys.argv.index('--sources') if '--sources' in sys.argv else None
-        #     test_configurations_index = sys.argv.index('--test-configurations') if '--test-configurations' in sys.argv else None
-
-        #     self.destinations_list = self.parse_arg(destinations_index)
-        #     self.sources_list = self.parse_arg(sources_index)
-        #     self.test_configurations_list = self.parse_arg(test_configurations_index)
-
         def __call__(self, *args, **kwargs):
-            #return self.ctx.selectors.subresource.set(self._create_instance())
             return self._create_instance()
-        
-        
-        def aaz_content_builder_to_dict(self, builder):
-             result = {}
-             result['name'] = builder.get('destinations[0].name')
-             result['sources'] = builder.get('sources')
-             result['testConfigurations'] = builder.get('testConfigurations')
-             return result
-
-        def aaz_content_builder_to_json(self, builder):
-            builder_dict = self.aaz_content_builder_to_dict(builder)
-            return json.dumps(builder_dict)
 
         
 
-            #The first argument is the name of the property, the second argument is the type of the property, the third argument is the key to access the property, 
-            #and the fourth argument is a dictionary of additional arguments for the type.
-            # _builder.set_prop("destinations", AAZListType, ".destinations", typ_kwargs={"flags": {"required": True}})
-            # _builder.set_prop("disable", AAZBoolType, ".disable")
-            # _builder.set_prop("name", AAZStrType, ".test_group_name", typ_kwargs={"flags": {"required": True}})
-            # _builder.set_prop("sources", AAZListType, ".sources", typ_kwargs={"flags": {"required": True}})
-            # _builder.set_prop("testConfigurations", AAZListType, ".test_configurations", typ_kwargs={"flags": {"required": True}})
+        # def parse_arg(self,arg_index):
+        #     if arg_index is not None:
+        #         # The next element in sys.argv is the value of the argument
+        #         arg = sys.argv[arg_index + 1]
+        #         print("arg=",arg)
+        #         if isinstance(arg, list):
+        #             arg = arg[0]
+        #         print("arg2=",arg)
+        #         # Replace single quotes with double quotes to make it a valid JSON string
+        #         arg = arg.replace("'", '"')
+        #         # Parse the string into a list of dictionaries
+        #         try:
+        #             arg_list = json.loads(arg)
+        #         except json.JSONDecodeError as e:
+        #             print(f"Failed to parse argument: {e}")
+        #             arg_list = []
+        #         return arg_list
+        #     return []
 
-            # destinations = _builder.get(".destinations")
-            # if destinations is not None:
-            #     destinations.set_elements(AAZObjectType, ".")
-            #     # destinations_dict = destinations.build()
-            #     print("destinations=", destinations)
+        import json
 
-            # sources = _builder.get(".sources")
-            # if sources is not None:
-            #     sources.set_elements(AAZObjectType, ".")
-
-            # test_configurations = _builder.get(".testConfigurations")
-            # if test_configurations is not None:
-            #     test_configurations.set_elements(AAZObjectType, ".")
-            #     print('Test config:', test_configurations)
-
-            # #print(_instance_value)
-
-            # return _instance_value
-
-        
-
-        def parse_arg(self,arg_index):
+        def parse_arg(self, arg_index):
             if arg_index is not None:
                 # The next element in sys.argv is the value of the argument
                 arg = sys.argv[arg_index + 1]
-                print("arg=",arg)
+                print("arg=", arg)
+
+                # If arg is a list, convert each string in the list to a dictionary
                 if isinstance(arg, list):
-                    arg = arg[0]
-                print("arg2=",arg)
-                # Replace single quotes with double quotes to make it a valid JSON string
-                arg = arg.replace("'", '"')
-                # Parse the string into a list of dictionaries
-                try:
-                    arg_list = json.loads(arg)
-                except json.JSONDecodeError as e:
-                    print(f"Failed to parse argument: {e}")
                     arg_list = []
+                    for s in arg:
+                        # Replace single quotes with double quotes to make it a valid JSON string
+                        s = s.replace("'", '"')
+                        # Parse the string into a dictionary
+                        try:
+                            arg_dict = json.loads(s)
+                            arg_list.append(arg_dict)
+                        except json.JSONDecodeError as e:
+                            print(f"Failed to parse argument: {e}")
+                else:
+                    # If arg is not a list, just replace single quotes with double quotes and parse it
+                    arg = arg.replace("'", '"')
+                    try:
+                        arg_list = json.loads(arg)
+                    except json.JSONDecodeError as e:
+                        print(f"Failed to parse argument: {e}")
+                        arg_list = []
+
                 return arg_list
+
             return []
 
 
         def _create_instance(self):
-            _instance_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType
-            )
 
             destinations_index = sys.argv.index('--destinations') if '--destinations' in sys.argv else None
             sources_index = sys.argv.index('--sources') if '--sources' in sys.argv else None
@@ -1082,23 +1136,21 @@ class Add(AAZCommand):
             sources_list = self.parse_arg(sources_index)
             test_configurations_list = self.parse_arg(test_configurations_index)
             
-            print("destinations_index=", destinations_index)
+            print("sources_index=", sources_index)
             print("destinations_list=", destinations_list)
             print("sources_list=", sources_list)
             print("test_configurations_list=", test_configurations_list)
 
             data ={
                 "testGroupName" : str(self.ctx.args.test_group_name),
-                "sources" : [sources_list],
-                "destinations" : [destinations_list],
-                "testConfigurations" : [test_configurations_list]
+                "sources" : sources_list,
+                "destinations" : destinations_list,
+                "testConfigurations" : test_configurations_list
             }
 
             data_str = str(data)
             data_str = data_str.replace(" ","")
             return data_str
 
-            # ob = json.dumps(data)
-            # return json.loads(ob)
 
 __all__ = ["Add"]
