@@ -67,7 +67,7 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_secrets_job', confirmation=True, exception_handler=ex_handler_factory())
         g.custom_command('set', 'set_secrets_job', exception_handler=ex_handler_factory())
 
-    with self.command_group('containerapp job identity') as g:
+    with self.command_group('containerapp job identity', is_preview=True) as g:
         g.custom_command('assign', 'assign_managed_identity_job', supports_no_wait=True, exception_handler=ex_handler_factory())
         g.custom_command('remove', 'remove_managed_identity_job', confirmation=True, supports_no_wait=True, exception_handler=ex_handler_factory())
         g.custom_show_command('show', 'show_managed_identity_job')

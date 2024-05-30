@@ -21,8 +21,8 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class ContainerAppJobsRegistryOperationsTest(ScenarioTest):
-    # def __init__(self, *arg, **kwargs):
-    #     super().__init__(*arg, random_config_dir=True, **kwargs)
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
 
     @ResourceGroupPreparer(location="northeurope")
     @AllowLargeResponse()
