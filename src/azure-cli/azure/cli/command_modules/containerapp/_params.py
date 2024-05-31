@@ -480,3 +480,12 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp job identity remove') as c:
         c.argument('user_assigned', nargs='*', help="Space-separated user identities. If no user identities are specified, all user identities will be removed.")
+
+    with self.argument_context('containerapp job registry') as c:
+        c.argument('server', help="The container registry server, e.g. myregistry.azurecr.io")
+        c.argument('username', help='The username of the registry. If using Azure Container Registry, we will try to infer the credentials if not supplied')
+        c.argument('password', help='The password of the registry. If using Azure Container Registry, we will try to infer the credentials if not supplied')
+        c.argument('identity', help="The managed identity with which to authenticate to the Azure Container Registry (instead of username/password). Use 'system' for a system-defined identity or a resource id for a user-defined identity. The managed identity should have been assigned acrpull permissions on the ACR before deployment (use 'az role assignment create --role acrpull ...').")
+
+    with self.argument_context('containerapp job registry list') as c:
+        c.argument('name', id_part=None)
