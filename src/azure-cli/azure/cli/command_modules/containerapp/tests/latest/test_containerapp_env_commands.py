@@ -77,6 +77,16 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             JMESPathCheck('properties.appLogsConfiguration.destination', "log-analytics"),
             JMESPathCheck('properties.appLogsConfiguration.logAnalyticsConfiguration.customerId', laworkspace_customer_id),
         ])
+        # update env log destination to none
+        self.cmd('containerapp env update -g {} -n {} --logs-destination none'.format(resource_group, env_name), checks=[
+            JMESPathCheck('properties.appLogsConfiguration.destination', None),
+        ])
+        # update env log destination from log-analytics to none
+        self.cmd('containerapp env update -g {} -n {} --logs-workspace-id {} --logs-workspace-key {} --logs-destination log-analytics'.format(
+            resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key), checks=[
+            JMESPathCheck('properties.appLogsConfiguration.destination', "log-analytics"),
+            JMESPathCheck('properties.appLogsConfiguration.logAnalyticsConfiguration.customerId', laworkspace_customer_id),
+        ])
 
         storage_account_name = self.create_random_name(prefix='cappstorage', length=24)
         storage_account = self.cmd('storage account create -g {} -n {}  --https-only'.format(resource_group, storage_account_name)).get_output_in_json()["id"]
