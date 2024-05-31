@@ -119,6 +119,24 @@ helps['containerapp list'] = """
           az containerapp list -g MyResourceGroup
 """
 
+helps['containerapp list-usages'] = """
+    type: command
+    short-summary: List usages of subscription level quotas in specific region.
+    examples:
+    - name: List usages of  quotas in specific region.
+      text: |
+          az containerapp list-usages -l eastus
+"""
+
+helps['containerapp env list-usages'] = """
+    type: command
+    short-summary: List usages of quotas for specific managed environment.
+    examples:
+    - name: List usages of quotas for specific managed environment.
+      text: |
+          az containerapp env list-usages -n MyEnv -g MyResourceGroup
+"""
+
 helps['containerapp exec'] = """
     type: command
     short-summary: Open an SSH-like interactive shell within a container app replica

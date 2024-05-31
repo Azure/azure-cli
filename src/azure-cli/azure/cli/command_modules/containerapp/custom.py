@@ -805,6 +805,24 @@ def show_custom_domain_verification_id(cmd):
         handle_raw_exception(e)
 
 
+def list_usages(cmd, location):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        r = SubscriptionClient.list_usages(cmd, location)
+        return r
+    except CLIError as e:
+        handle_raw_exception(e)
+
+
+def list_environment_usages(cmd, resource_group_name, name):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        r = ManagedEnvironmentClient.list_usages(cmd, resource_group_name, name)
+        return r
+    except CLIError as e:
+        handle_raw_exception(e)
+
+
 def delete_containerapp(cmd, name, resource_group_name, no_wait=False):
     raw_parameters = locals()
     containerapp_base_decorator = BaseContainerAppDecorator(
