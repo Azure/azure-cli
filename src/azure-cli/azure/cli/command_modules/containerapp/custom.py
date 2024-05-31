@@ -84,10 +84,14 @@ from ._utils import (_validate_subscription_registered,
 from ._validators import validate_revision_suffix
 from ._ssh_utils import (SSH_DEFAULT_ENCODING, WebSocketConnection, read_ssh, get_stdin_writer, SSH_CTRL_C_MSG,
                          SSH_BACKUP_ENCODING)
-from ._constants import (MAXIMUM_SECRET_LENGTH, MICROSOFT_SECRET_SETTING_NAME, FACEBOOK_SECRET_SETTING_NAME, GITHUB_SECRET_SETTING_NAME,
-                         GOOGLE_SECRET_SETTING_NAME, TWITTER_SECRET_SETTING_NAME, APPLE_SECRET_SETTING_NAME, CONTAINER_APPS_RP,
-                         NAME_INVALID, NAME_ALREADY_EXISTS, ACR_IMAGE_SUFFIX, HELLO_WORLD_IMAGE, LOG_TYPE_SYSTEM, LOG_TYPE_CONSOLE,
-                         MANAGED_CERTIFICATE_RT, PRIVATE_CERTIFICATE_RT, PENDING_STATUS, SUCCEEDED_STATUS, CONTAINER_APPS_SDK_MODELS)
+from ._constants import (MAXIMUM_SECRET_LENGTH, MICROSOFT_SECRET_SETTING_NAME, FACEBOOK_SECRET_SETTING_NAME,
+                         GITHUB_SECRET_SETTING_NAME,
+                         GOOGLE_SECRET_SETTING_NAME, TWITTER_SECRET_SETTING_NAME, APPLE_SECRET_SETTING_NAME,
+                         CONTAINER_APPS_RP,
+                         NAME_INVALID, NAME_ALREADY_EXISTS, ACR_IMAGE_SUFFIX, HELLO_WORLD_IMAGE, LOG_TYPE_SYSTEM,
+                         LOG_TYPE_CONSOLE,
+                         MANAGED_CERTIFICATE_RT, PRIVATE_CERTIFICATE_RT, PENDING_STATUS, SUCCEEDED_STATUS,
+                         CONTAINER_APPS_SDK_MODELS, BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME)
 
 logger = get_logger(__name__)
 
@@ -4172,7 +4176,7 @@ def update_aad_settings(cmd, resource_group_name, name,
         registration["clientSecretSettingName"] = client_secret_setting_name
     if client_secret is not None:
         registration["clientSecretSettingName"] = MICROSOFT_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{MICROSOFT_SECRET_SETTING_NAME}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{MICROSOFT_SECRET_SETTING_NAME}={client_secret}"], no_wait=False, disable_max_length=True)
     if client_secret_setting_name is not None or client_secret is not None:
         fields = ["clientSecretCertificateThumbprint", "clientSecretCertificateSubjectAlternativeName", "clientSecretCertificateIssuer"]
         for field in [f for f in fields if registration.get(f)]:
@@ -4283,7 +4287,7 @@ def update_facebook_settings(cmd, resource_group_name, name,
         registration["appSecretSettingName"] = app_secret_setting_name
     if app_secret is not None:
         registration["appSecretSettingName"] = FACEBOOK_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{FACEBOOK_SECRET_SETTING_NAME}={app_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{FACEBOOK_SECRET_SETTING_NAME}={app_secret}"], no_wait=False, disable_max_length=True)
     if graph_api_version is not None:
         existing_auth["identityProviders"]["facebook"]["graphApiVersion"] = graph_api_version
     if scopes is not None:
@@ -4358,7 +4362,7 @@ def update_github_settings(cmd, resource_group_name, name,
         registration["clientSecretSettingName"] = client_secret_setting_name
     if client_secret is not None:
         registration["clientSecretSettingName"] = GITHUB_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{GITHUB_SECRET_SETTING_NAME}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{GITHUB_SECRET_SETTING_NAME}={client_secret}"], no_wait=False, disable_max_length=True)
     if scopes is not None:
         existing_auth["identityProviders"]["gitHub"]["login"]["scopes"] = scopes.split(",")
     if client_id is not None or client_secret is not None or client_secret_setting_name is not None:
@@ -4435,7 +4439,7 @@ def update_google_settings(cmd, resource_group_name, name,
         registration["clientSecretSettingName"] = client_secret_setting_name
     if client_secret is not None:
         registration["clientSecretSettingName"] = GOOGLE_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{GOOGLE_SECRET_SETTING_NAME}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{GOOGLE_SECRET_SETTING_NAME}={client_secret}"], no_wait=False, disable_max_length=True)
     if scopes is not None:
         existing_auth["identityProviders"]["google"]["login"]["scopes"] = scopes.split(",")
     if allowed_token_audiences is not None:
@@ -4508,7 +4512,7 @@ def update_twitter_settings(cmd, resource_group_name, name,
         registration["consumerSecretSettingName"] = consumer_secret_setting_name
     if consumer_secret is not None:
         registration["consumerSecretSettingName"] = TWITTER_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{TWITTER_SECRET_SETTING_NAME}={consumer_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{TWITTER_SECRET_SETTING_NAME}={consumer_secret}"], no_wait=False, disable_max_length=True)
     if consumer_key is not None or consumer_secret is not None or consumer_secret_setting_name is not None:
         existing_auth["identityProviders"]["twitter"]["registration"] = registration
     try:
@@ -4578,7 +4582,7 @@ def update_apple_settings(cmd, resource_group_name, name,
         registration["clientSecretSettingName"] = client_secret_setting_name
     if client_secret is not None:
         registration["clientSecretSettingName"] = APPLE_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{APPLE_SECRET_SETTING_NAME}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{APPLE_SECRET_SETTING_NAME}={client_secret}"], no_wait=False, disable_max_length=True)
     if scopes is not None:
         existing_auth["identityProviders"]["apple"]["login"]["scopes"] = scopes.split(",")
     if client_id is not None or client_secret is not None or client_secret_setting_name is not None:
@@ -4737,7 +4741,7 @@ def update_openid_connect_provider_settings(cmd, resource_group_name, name, prov
     if client_secret is not None:
         final_client_secret_setting_name = get_oidc_client_setting_app_setting_name(provider_name)
         registration["clientSecretSettingName"] = final_client_secret_setting_name
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{final_client_secret_setting_name}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{final_client_secret_setting_name}={client_secret}"], no_wait=False, disable_max_length=True)
     if openid_configuration is not None:
         registration["openIdConnectConfiguration"]["wellKnownOpenIdConfiguration"] = openid_configuration
     if scopes is not None:
@@ -4780,7 +4784,9 @@ def update_auth_config(cmd, resource_group_name, name, set_string=None, enabled=
                        runtime_version=None, config_file_path=None, unauthenticated_client_action=None,
                        redirect_provider=None, require_https=None,
                        proxy_convention=None, proxy_custom_host_header=None,
-                       proxy_custom_proto_header=None, excluded_paths=None):
+                       proxy_custom_proto_header=None, excluded_paths=None,
+                       token_store=None, sas_url_secret=None, sas_url_secret_name=None,
+                       yes=False):
     raw_parameters = locals()
     containerapp_auth_decorator = ContainerAppAuthDecorator(
         cmd=cmd,
@@ -4790,6 +4796,11 @@ def update_auth_config(cmd, resource_group_name, name, set_string=None, enabled=
     )
 
     containerapp_auth_decorator.construct_payload()
+    # Set secretes will add a secret to the containerapp
+    if containerapp_auth_decorator.get_argument_token_store() and containerapp_auth_decorator.get_argument_sas_url_secret() is not None:
+        set_secrets(cmd, name, resource_group_name, secrets=[
+            f"{BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME}={containerapp_auth_decorator.get_argument_sas_url_secret()}"],
+                    no_wait=False, disable_max_length=True)
     return containerapp_auth_decorator.create_or_update()
 
 

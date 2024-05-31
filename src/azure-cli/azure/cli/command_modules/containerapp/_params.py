@@ -372,6 +372,10 @@ def load_arguments(self, _):
         c.argument('consumer_secret_setting_name', options_list=['--consumer-secret-name', '--secret-name'], help='The consumer secret name that contains the app secret.')
         c.argument('provider_name', required=True, help='The name of the custom OpenID Connect provider.')
         c.argument('openid_configuration', help='The endpoint that contains all the configuration endpoints for the provider.')
+        c.argument('token_store', arg_type=get_three_state_flag(), help='Boolean indicating if token store is enabled for the app.')
+        c.argument('sas_url_secret', help='The blob storage SAS URL to be used for token store.')
+        c.argument('sas_url_secret_name', help='The secret name that contains blob storage SAS URL to be used for token store.')
+
         # auth update
         c.argument('set_string', options_list=['--set'], help='Value of a specific field within the configuration settings for the Azure App Service Authentication / Authorization feature.')
         c.argument('config_file_path', help='The path of the config file containing auth settings if they come from a file.')
