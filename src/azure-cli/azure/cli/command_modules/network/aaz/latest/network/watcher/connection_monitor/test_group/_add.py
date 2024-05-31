@@ -686,10 +686,9 @@
 from azure.cli.core.aaz import *
 import json
 import sys
-import re
 
 @register_command(
-    "network watcher connection-monitor test-group create",
+    "network watcher connection-monitor test-group add",
     is_preview=True,
 )
 class Add(AAZCommand):
@@ -1071,28 +1070,6 @@ class Add(AAZCommand):
         def __call__(self, *args, **kwargs):
             return self._create_instance()
 
-        
-
-        # def parse_arg(self,arg_index):
-        #     if arg_index is not None:
-        #         # The next element in sys.argv is the value of the argument
-        #         arg = sys.argv[arg_index + 1]
-        #         print("arg=",arg)
-        #         if isinstance(arg, list):
-        #             arg = arg[0]
-        #         print("arg2=",arg)
-        #         # Replace single quotes with double quotes to make it a valid JSON string
-        #         arg = arg.replace("'", '"')
-        #         # Parse the string into a list of dictionaries
-        #         try:
-        #             arg_list = json.loads(arg)
-        #         except json.JSONDecodeError as e:
-        #             print(f"Failed to parse argument: {e}")
-        #             arg_list = []
-        #         return arg_list
-        #     return []
-
-        import json
 
         def parse_arg(self, arg_index):
             if arg_index is not None:
@@ -1136,10 +1113,10 @@ class Add(AAZCommand):
             sources_list = self.parse_arg(sources_index)
             test_configurations_list = self.parse_arg(test_configurations_index)
             
-            print("sources_index=", sources_index)
-            print("destinations_list=", destinations_list)
-            print("sources_list=", sources_list)
-            print("test_configurations_list=", test_configurations_list)
+            # print("sources_index=", sources_index)
+            # print("destinations_list=", destinations_list)
+            # print("sources_list=", sources_list)
+            # print("test_configurations_list=", test_configurations_list)
 
             data ={
                 "testGroupName" : str(self.ctx.args.test_group_name),

@@ -81,53 +81,53 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor show -l {location} -n {cmv2}')
         self.cmd('network watcher connection-monitor show -l {location} -n cmv2-01')
 
-    # @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
-    # @AllowLargeResponse()
-    # def test_nw_connection_monitor_v2_endpoint(self, resource_group, resource_group_location):
-    #     self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
+    @AllowLargeResponse()
+    def test_nw_connection_monitor_v2_endpoint(self, resource_group, resource_group_location):
+        self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
 
-    #     self.cmd('network vnet create -g {rg} --name cmv2-vnet --subnet-name subnet1 --address-prefix 10.0.0.0/24')
-    #     subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name cmv2-vnet --name subnet1').get_output_in_json()
-    #     self.kwargs.update({
-    #         'cm_subnet_endpoint': 'cm_subnet_endpoint',
-    #         'subnet_id': subnet['id']
-    #     })
+        self.cmd('network vnet create -g {rg} --name cmv2-vnet --subnet-name subnet1 --address-prefix 10.0.0.0/24')
+        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name cmv2-vnet --name subnet1').get_output_in_json()
+        self.kwargs.update({
+            'cm_subnet_endpoint': 'cm_subnet_endpoint',
+            'subnet_id': subnet['id']
+        })
 
-    #     # add an endpoint as source
-    #     self.cmd('network watcher connection-monitor endpoint add '
-    #              '--connection-monitor {cmv2} '
-    #              '--location {location} '
-    #              '--source-test-groups {test_group} '
-    #              '--name {cm_subnet_endpoint} '
-    #              '--resource-id {subnet_id} '
-    #              '--type AzureSubnet '
-    #              '--address-exclude 10.0.0.25 '
-    #              '--coverage-level BelowAverage')
+        # add an endpoint as source
+        self.cmd('network watcher connection-monitor endpoint add '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--source-test-groups {test_group} '
+                 '--name {cm_subnet_endpoint} '
+                 '--resource-id {subnet_id} '
+                 '--type AzureSubnet '
+                 '--address-exclude 10.0.0.25 '
+                 '--coverage-level BelowAverage')
 
-    #     # add an endpoint as destination
-    #     self.cmd('network watcher connection-monitor endpoint add '
-    #              '--connection-monitor {cmv2} '
-    #              '--location {location} '
-    #              '--dest-test-groups {test_group} '
-    #              '--name Github '
-    #              '--address github.com '
-    #              '--type ExternalAddress')
+        # add an endpoint as destination
+        self.cmd('network watcher connection-monitor endpoint add '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--dest-test-groups {test_group} '
+                 '--name Github '
+                 '--address github.com '
+                 '--type ExternalAddress')
 
-    #     self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
-    #              checks=self.check('length(@)', 4))
-    #     self.cmd('network watcher connection-monitor endpoint show '
-    #              '--connection-monitor {cmv2} '
-    #              '--location {location} '
-    #              '--name Github')
+        self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
+                 checks=self.check('length(@)', 4))
+        self.cmd('network watcher connection-monitor endpoint show '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--name Github')
 
-    #     # remove one
-    #     self.cmd('network watcher connection-monitor endpoint remove '
-    #              '--connection-monitor {cmv2} '
-    #              '--location {location} '
-    #              '--name {cm_subnet_endpoint} '
-    #              '--test-groups DefaultTestGroup ')
-    #     self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
-    #              checks=self.check('length(@)', 3))
+        # remove one
+        self.cmd('network watcher connection-monitor endpoint remove '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--name {cm_subnet_endpoint} '
+                 '--test-groups DefaultTestGroup ')
+        self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
+                 checks=self.check('length(@)', 3))
 
     @unittest.skip('PathNotSupportedInBothHTTPConfigurationAndAddress')
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
@@ -411,46 +411,6 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.check('name', 'testconfig')
                 
 
-
-    # @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
-    # @AllowLargeResponse()
-    # def test_nw_connection_monitor_v2_test_group1(self, resource_group, resource_group_location):
-
-    #     endpoint1=self.cmd('network watcher connection-monitor endpoint add '
-    #             '--name Bing '
-    #             '--address bing.com '
-    #             '--type ExternalAddress ')
-    #     print("e1=",endpoint1)
-        
-    #     endpoint2=self.cmd('network watcher connection-monitor endpoint add '
-    #             '--name Github '
-    #             '--address github.com '
-    #             '--type ExternalAddress ')
-        
-    #     #creating a test configuration
-
-    #     tc1 = self.cmd('network watcher connection-monitor test-configuration add '
-    #              '--name testconfig1 '
-    #              '--frequency 120 '
-    #              '--protocol Tcp ')
-        
-    #     self.kwargs.update({
-    #         'endpoint1': endpoint1,
-    #         'endpoint2': endpoint2,
-    #         'tc1': tc1
-    #     })
-
-    #     self.cmd("network watcher connection-monitor test-group add "
-    #      '--name tg1 '
-    #      "--sources [{endpoint1}] "
-    #      "--destinations [{endpoint2}] "
-    #      "--test-configurations [{tc1}] ")
-        
-    #     self.check('name','tg1')
-
-
-#from azure.cli.testsdk import ResourceGroupPreparer, AllowLargeResponse
-
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_test_group1(self, resource_group, resource_group_location):
@@ -486,7 +446,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         original_argv = sys.argv
 
         # Set sys.argv to your test case
-        sys.argv = ['network watcher connection-monitor test-group add', '--sources', endpoint1,endpoint2, '--destinations',endpoint2, '--test-configurations', tc1]
+        sys.argv = ['network watcher connection-monitor test-group add', '--sources', [endpoint1,endpoint2], '--destinations', [endpoint2], '--test-configurations', [tc1]]
 
         tg1=self.cmd("network watcher connection-monitor test-group add "
          '--name tg1 '
@@ -513,8 +473,13 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                 '--type AzureVNet ').get_output_in_json()
         
         endpoint2=self.cmd('network watcher connection-monitor endpoint add '
-                '--name Github1 '
+                '--name Github '
                 '--address github.com '
+                '--type ExternalAddress ').get_output_in_json()
+        
+        endpoint3=self.cmd('network watcher connection-monitor endpoint add '
+                '--name Google '
+                '--address google.com '
                 '--type ExternalAddress ').get_output_in_json()
         
         print("e1=",endpoint1)
@@ -531,15 +496,20 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                   '--http-valid-status-codes [200,201] '
                   '--http-port 80 ').get_output_in_json()
         
-        print("tc1=",tc1)
-
-        endpoint1_json = json.dumps(endpoint1)
-        endpoint2_json = json.dumps(endpoint2)
+        tc2 = self.cmd('network watcher connection-monitor test-configuration add '
+                '--name testconfig2 '
+                '--frequency 120 '
+                 '--protocol Http '
+                  '--http-method Get '
+                  '--http-valid-status-codes [200,201] '
+                  '--http-port 80 ').get_output_in_json()
 
         self.kwargs.update({
             'endpoint1': endpoint1,
             'endpoint2': endpoint2,
-            'tc1': tc1
+            'endpoint3': endpoint3,
+            'tc1': tc1,
+            'tc2': tc2
         })
         
         # Backup sys.argv
@@ -548,13 +518,19 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         # Set sys.argv to your test case
         
         
-        sys.argv = ['network watcher connection-monitor test-group create', '--sources', [endpoint1,endpoint2], '--destinations', [endpoint2], '--test-configurations', [tc1]]
+        sys.argv = ['network watcher connection-monitor test-group add', '--sources', [endpoint1,endpoint2], '--destinations', [endpoint2,endpoint3], '--test-configurations', [tc1,tc2]]
         
-        tg1=self.cmd("network watcher connection-monitor test-group create "
+        tg1=self.cmd("network watcher connection-monitor test-group add "
         '--name tg1 '
         '--sources "[{endpoint1},{endpoint2}]" '
-        '--destinations "[{endpoint2}]" '
-        '--test-configurations "[{tc1}]" ').get_output_in_json()
+        '--destinations "[{endpoint2},{endpoint3}]" '
+        '--test-configurations "[{tc1},{tc2}]" ').get_output_in_json()
+
+        tg2=self.cmd("network watcher connection-monitor test-group add "
+        '--name tg2 '
+        '--sources "[{endpoint1},{endpoint3}]" '
+        '--destinations "[{endpoint2},{endpoint3}]" '
+        '--test-configurations "[{tc1},{tc2}]" ').get_output_in_json()
         
         print("tg1=",tg1)
 
@@ -562,19 +538,20 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         sys.argv = original_argv
 
         self.kwargs.update({
-            'tg1': tg1
+            'tg1': tg1,
+            'tg2': tg2
         })
 
 
         original_argv = sys.argv
-        sys.argv = ['test_nw_connection_monitor.py', '--test-groups', tg1]
+        sys.argv = ['test_nw_connection_monitor.py', '--test-groups', [tg1,tg2]]
 
         self.cmd('network watcher connection-monitor create '
                 '--name cmv2-01 '
                 '--network-watcher-name kumamtestnw '
                 '--resource-group kumamtestrg '
                 '--location eastus2 '
-                "--test-groups  [{tg1}] ").get_output_in_json()
+                '--test-groups  "[{tg1},{tg2}]" ').get_output_in_json()
 
         sys.argv = original_argv
 

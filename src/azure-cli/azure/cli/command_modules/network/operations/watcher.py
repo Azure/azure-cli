@@ -1790,23 +1790,15 @@ class WatcherConnectionMonitorTestConfigurationAdd(_MonitorTestConfigurationAdd)
             help="Space-separated list of names of test group which only need to be affected if specified.",
             required=False,
         )
-       # args_schema.test_groups.Element = AAZStrArg()
         return args_schema
 
     def pre_operations(self):
-        #get_network_watcher_from_location(self)
         pass
 
     def pre_instance_create(self):
         args = self.ctx.args
         name = args.test_configuration_name.to_serialized_data()
 
-        # if has_value(args.http_request_header):
-        #     for tmp_name, val in args.http_request_header.items():
-        #         args.http_request_headers.append({
-        #             "name": tmp_name,
-        #             "value": val,
-        #         })
 
         instance = self.ctx.vars.instance
         if has_value(args.test_groups):
@@ -1934,43 +1926,7 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
                  "using `az configure --defaults location=<location>`.",
             required=False,
         )
-        # V2 Endpoint
-        # args_schema.endpoint_dest_name = AAZStrArg(
-        #     options=["--endpoint-dest-name"],
-        #     help="The name of the destination of connection monitor endpoint. "
-        #          "If you are creating a V2 Connection Monitor, it's required.",
-        #     arg_group="V2 Endpoint",
-        #     required=False
-        # )
-        # args_schema.endpoint_source_name = AAZStrArg(
-        #     options=["--endpoint-source-name"],
-        #     help="The name of the source of connection monitor endpoint. "
-        #          "If you are creating a V2 Connection Monitor, it's required.",
-        #     arg_group="V2 Endpoint",
-        #     required=False
-        # )
-        # args_schema.endpoint_dest_address = AAZStrArg(
-        #     options=["--endpoint-dest-address"],
-        #     help="Address of the destination of connection monitor endpoint (IP or domain name)",
-        #     arg_group="V2 Endpoint",
-        # )
-        # args_schema.endpoint_dest_resource_id = AAZStrArg(
-        #     options=["--endpoint-dest-resource-id"],
-        #     help="Resource ID of the destination of connection monitor endpoint.",
-        #     arg_group="V2 Endpoint",
-        # )
-        # args_schema.endpoint_source_address = AAZStrArg(
-        #     options=["--endpoint-source-address"],
-        #     help="Address of the source of connection monitor endpoint (IP or domain name).",
-        #     arg_group="V2 Endpoint",
-        # )
-        # args_schema.endpoint_source_resource_id = AAZStrArg(
-        #     options=["--endpoint-source-resource-id"],
-        #     help="Resource ID of the source of connection monitor endpoint. "
-        #          "If endpoint is intended to used as source, this option is required.",
-        #     arg_group="V2 Endpoint",
-        # )
-
+        
         # V2 Test Configuration
         args_schema.test_config_name = AAZStrArg(
             options=["--test-config-name"],
@@ -2058,7 +2014,6 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
         return args_schema
 
     def pre_operations(self):
-        #get_network_watcher_from_location(self)
         pass
 
     # pylint: disable=too-many-boolean-expressions

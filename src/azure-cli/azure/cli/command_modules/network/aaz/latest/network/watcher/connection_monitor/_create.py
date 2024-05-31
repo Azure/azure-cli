@@ -1931,58 +1931,6 @@ class Create(AAZCommand):
             if test_configurations is not None:
                 test_configurations.set_elements(AAZStrType, ".name")
 
-            # _elements = _builder.get(".properties.testGroups[].testConfigurations[]")
-            # if _elements is not None:
-            #     _elements.set_prop("httpConfiguration", AAZObjectType, ".http_configuration")
-            #     _elements.set_prop("icmpConfiguration", AAZObjectType, ".icmp_configuration")
-            #     _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
-            #     _elements.set_prop("preferredIPVersion", AAZStrType, ".preferred_ip_version")
-            #     _elements.set_prop("protocol", AAZStrType, ".protocol", typ_kwargs={"flags": {"required": True}})
-            #     _elements.set_prop("successThreshold", AAZObjectType, ".success_threshold")
-            #     _elements.set_prop("tcpConfiguration", AAZObjectType, ".tcp_configuration")
-            #     _elements.set_prop("testFrequencySec", AAZIntType, ".test_frequency_sec")
-
-            # http_configuration = _builder.get(".properties.testConfigurations[].httpConfiguration")
-            # if http_configuration is not None:
-            #     http_configuration.set_prop("method", AAZStrType, ".method")
-            #     http_configuration.set_prop("path", AAZStrType, ".path")
-            #     http_configuration.set_prop("port", AAZIntType, ".port")
-            #     http_configuration.set_prop("preferHTTPS", AAZBoolType, ".prefer_https")
-            #     http_configuration.set_prop("requestHeaders", AAZListType, ".request_headers")
-            #     http_configuration.set_prop("validStatusCodeRanges", AAZListType, ".valid_status_code_ranges")
-
-            # request_headers = _builder.get(".properties.testConfigurations[].httpConfiguration.requestHeaders")
-            # if request_headers is not None:
-            #     request_headers.set_elements(AAZObjectType, ".")
-
-            # _elements = _builder.get(".properties.testConfigurations[].httpConfiguration.requestHeaders[]")
-            # if _elements is not None:
-            #     _elements.set_prop("name", AAZStrType, ".name")
-            #     _elements.set_prop("value", AAZStrType, ".value")
-
-            # valid_status_code_ranges = _builder.get(".properties.testConfigurations[].httpConfiguration.validStatusCodeRanges")
-            # if valid_status_code_ranges is not None:
-            #     valid_status_code_ranges.set_elements(AAZStrType, ".")
-
-            # icmp_configuration = _builder.get(".properties.testConfigurations[].icmpConfiguration")
-            # if icmp_configuration is not None:
-            #     icmp_configuration.set_prop("disableTraceRoute", AAZBoolType, ".disable_trace_route")
-
-            # success_threshold = _builder.get(".properties.testConfigurations[].successThreshold")
-            # if success_threshold is not None:
-            #     success_threshold.set_prop("checksFailedPercent", AAZIntType, ".checks_failed_percent")
-            #     success_threshold.set_prop("roundTripTimeMs", AAZFloatType, ".round_trip_time_ms")
-
-            # tcp_configuration = _builder.get(".properties.testConfigurations[].tcpConfiguration")
-            # if tcp_configuration is not None:
-            #     tcp_configuration.set_prop("destinationPortBehavior", AAZStrType, ".destination_port_behavior")
-            #     tcp_configuration.set_prop("disableTraceRoute", AAZBoolType, ".disable_trace_route")
-            #     tcp_configuration.set_prop("port", AAZIntType, ".port")
-
-            # tags = _builder.get(".tags")
-            # if tags is not None:
-            #     tags.set_elements(AAZStrType, ".")
-
 
             return self.serialize_content(_content_value)
 

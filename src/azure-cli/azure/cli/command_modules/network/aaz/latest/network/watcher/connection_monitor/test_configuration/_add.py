@@ -814,7 +814,6 @@ class Add(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-       # self.SubresourceSelector(ctx=self.ctx, name="subresource")
         return self.InstanceCreateByJson(ctx=self.ctx)()
 
     _args_schema = None
@@ -962,16 +961,9 @@ class Add(AAZCommand):
         )
         return cls._args_schema
 
-    def _execute_operations(self):
-        #self.pre_operations()
-        #self.ConnectionMonitorsGet(ctx=self.ctx)()
-        #self.pre_instance_create()
+    def _execute_operations(self):  
         result = self.InstanceCreateByJson(ctx=self.ctx)()
         return json.loads(result)
-        # self.post_instance_create(self.ctx.selectors.subresource.required())
-        #yield self.ConnectionMonitorsCreateOrUpdate(ctx=self.ctx)()
-        #self.ctx.set_var("test_configuration_instance", instance)
-        # self.post_operations()
 
     @register_callback
     def pre_operations(self):
@@ -995,35 +987,15 @@ class Add(AAZCommand):
     class SubresourceSelector(AAZJsonSelector):
 
         def _get(self):
-        #     result = self.ctx.vars.instance
-        #     result = result.properties.testConfigurations
-        #     filters = enumerate(result)
-        #     filters = filter(
-        #         lambda e: e[1].name == self.ctx.args.test_configuration_name,
-        #         filters
-        #     )
-        #     idx = next(filters)[0]
-        #     return result[idx]
             pass
 
         def _set(self, value):
-        #     result = self.ctx.vars.instance
-        #     result = result.properties.testConfigurations
-        #     filters = enumerate(result)
-        #     filters = filter(
-        #         lambda e: e[1].name == self.ctx.args.test_configuration_name,
-        #         filters
-        #     )
-        #     idx = next(filters, [len(result)])[0]
-        #     result[idx] = value
-        #     return
             pass
 
     class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
       
 
       def __call__(self, *args, **kwargs):
-            #self.ctx.selectors.subresource.set(self._create_instance())
             return self._create_instance()
        
       def clean_dict(self,d):
@@ -1052,28 +1024,7 @@ class Add(AAZCommand):
               "tcpConfiguration": {}
 
           }
-        
-        # ob = json.dumps(data)
-        
-        # return json.loads(ob)
-
-        # config_dict = {
-        #     "name": self.ctx.args.test_configuration_name,
-        #     "protocol": self.ctx.args.protocol,
-        #     "preferredIPVersion": self.ctx.args.preferred_ip_version,
-        #     "testFrequencySec": self.ctx.args.frequency,
-        #     "httpConfiguration": {},
-        #     "icmpConfiguration": {},
-        #     "successThreshold": {},
-        #     "tcpConfiguration": {}
-        # }
-
-        #config_dict["name"] = getattr(self.ctx.args, "test_configuration_name", None)
-
-    # Populate httpConfiguration
-        # print(type(self.ctx.args))
-
-        
+         
         if hasattr(self.ctx.args, "http_method") or hasattr(self.ctx.args, "http_path") or hasattr(self.ctx.args, "http_port") or hasattr(self.ctx.args, "http_prefer_https") or hasattr(self.ctx.args, "http_request_headers") or hasattr(self.ctx.args, "http_valid_status_codes"):
             data["httpConfiguration"]["method"] = getattr(self.ctx.args, "http_method", None)
             data["httpConfiguration"]["path"] = getattr(self.ctx.args, "http_path", None)
@@ -1081,8 +1032,6 @@ class Add(AAZCommand):
             data["httpConfiguration"]["prefer_https"] = getattr(self.ctx.args, "http_prefer_https", None)
             data["httpConfiguration"]["request_headers"] = []
             data["httpConfiguration"]["valid_status_code_ranges"] = []
-            
-            # data["httpConfiguration"]["validStatusCodeRanges"] = getattr(self.ctx.args, "http_valid_status_codes", [])
 
             if hasattr(self.ctx.args, "http_valid_status_codes"):
                 valid_status_codes = getattr(self.ctx.args, "http_valid_status_codes",[])
@@ -1115,23 +1064,17 @@ class Add(AAZCommand):
             data["tcpConfiguration"]["disable_trace_route"] = getattr(self.ctx.args, "tcp_disable_trace_route", None)
             data["tcpConfiguration"]["port"] = getattr(self.ctx.args, "tcp_port", None)
 
-    #     # data = {
-    #     #       "location":str(self.ctx.args.location),
-    #     #       "name":str(self.ctx.args.test_configuration_name),
-    #     #       "protocol":str(self.ctx.args.protocol),
-    #     #       "frequency":str(self.ctx.args.frequency)
-    #     #   }
+    
         
         print(data)
-    #     #print(config_dict)
 
-
+        #removing null and undefined fields from data
         data = {k: v for k, v in data.items() if v is not None and v != 'Undefined' and (not isinstance(v, dict) or any(v.values()))}
         data = self.clean_dict(data)
-        print("After cleaning",data)
         data_str = str(data)
+
+        #removing spaces
         data_str = data_str.replace(" ", "")
-        print("After removing spaces",data_str)
         
         return data_str
 
