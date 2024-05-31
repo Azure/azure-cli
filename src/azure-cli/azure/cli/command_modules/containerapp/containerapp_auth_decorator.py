@@ -92,11 +92,6 @@ class ContainerAppAuthDecorator(BaseResource):
                 'Usage Error: only blob storage token store is supported. --sas-url-secret and --sas-url-secret-name should provide exactly one when token store is enabled')
         if self.get_argument_sas_url_secret() is not None and self.get_argument_sas_url_secret_name() is not None:
             raise ArgumentUsageError('Usage Error: --sas-url-secret and --sas-url-secret-name cannot both be set')
-        if self.get_argument_sas_url_secret() is not None and not self.get_argument_yes():
-            msg = 'Configuring --sas-url-secret will add a secret to the containerapp. Are you sure you want to continue?'
-            if not prompt_y_n(msg, default="n"):
-                raise ArgumentUsageError(
-                    'Usage Error: --sas-url-secret cannot be used without agreeing to add secret to the containerapp.')
 
         sas_url_setting_name = BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME
         if self.get_argument_sas_url_secret_name() is not None:
