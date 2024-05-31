@@ -827,6 +827,7 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
         c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch"]), min_api='2020-06-01', help='Specify the security type of the virtual machine scale set.')
+        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch", "Standard"]), min_api='2023-07-01', help='Specify the security type of the virtual machine scale set.')
         c.argument('security_posture_reference_id', min_api='2023-03-01',
                    options_list=['--security-posture-reference-id', '--security-posture-id'],
                    help='The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest')
