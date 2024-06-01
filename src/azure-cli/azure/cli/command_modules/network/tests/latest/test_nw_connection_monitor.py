@@ -556,6 +556,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         sys.argv = original_argv
 
         self.check('name','cmv2-01')
+        self.check('location','eastus2')
 
 
 

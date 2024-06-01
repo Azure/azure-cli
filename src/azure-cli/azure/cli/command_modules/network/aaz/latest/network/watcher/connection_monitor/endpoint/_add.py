@@ -768,7 +768,7 @@ import json
 
 
 @register_command(
-    "network watcher connection-monitor endpoint create",
+    "network watcher connection-monitor endpoint add",
     is_preview=True,
 )
 class Add(AAZCommand):

@@ -45,7 +45,7 @@ from ..aaz.latest.network.watcher.connection_monitor.endpoint import Show as _Wa
     Remove as _WatcherConnectionMonitorEndpointRemove, List as _WatcherConnectionMonitorEndpointList, \
     Add as _WatcherConnectionMonitorEndpointAdd
 
-from ..aaz.latest.network.watcher.connection_monitor.test_configuration import Add as _MonitorTestConfigurationAdd, \
+from ..aaz.latest.network.watcher.connection_monitor.test_configuration import Create as _MonitorTestConfigurationAdd, \
     Show as _MonitorTestConfigurationShow, List as _MonitorTestConfigurationList, \
     Remove as _MonitorTestConfigurationRemove
 
