@@ -473,12 +473,12 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                 '--type AzureVNet ').get_output_in_json()
         
         endpoint2=self.cmd('network watcher connection-monitor endpoint add '
-                '--name Github '
+                '--name Github1 '
                 '--address github.com '
                 '--type ExternalAddress ').get_output_in_json()
         
         endpoint3=self.cmd('network watcher connection-monitor endpoint add '
-                '--name Google '
+                '--name Google1 '
                 '--address google.com '
                 '--type ExternalAddress ').get_output_in_json()
         
@@ -544,14 +544,15 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
 
 
         original_argv = sys.argv
-        sys.argv = ['test_nw_connection_monitor.py', '--test-groups', [tg1,tg2]]
+        sys.argv = ['network watcher connection-monitor create', '--test-groups', [tg1,tg2]]
 
-        self.cmd('network watcher connection-monitor create '
+        cm=self.cmd('network watcher connection-monitor create '
                 '--name cmv2-01 '
                 '--network-watcher-name kumamtestnw '
                 '--resource-group kumamtestrg '
                 '--location eastus2 '
                 '--test-groups  "[{tg1},{tg2}]" ').get_output_in_json()
+        
 
         sys.argv = original_argv
 
