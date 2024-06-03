@@ -1569,7 +1569,7 @@
 
 
 
-
+#-----------------------------------------MY CODE -------------------------------------------
 
 
 from azure.cli.core.aaz import *
@@ -1663,11 +1663,13 @@ class Add(AAZCommand):
 
             print("JSON object:", data)
 
-            ob = json.dumps(data)
-            return json.loads(ob)
-            
 
-           
+            ob = str(data)
+            return ob
+
+            # ob = json.dumps(data)
+            # return json.loads(ob)
+                      
 
 __all__ = ["Add"]
 

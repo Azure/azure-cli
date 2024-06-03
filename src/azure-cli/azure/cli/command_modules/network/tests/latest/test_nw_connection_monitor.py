@@ -346,7 +346,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_output1(self, resource_group, resource_group_location):
-        self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
+        #self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
         
         self.kwargs.update({
             'rg': resource_group,
@@ -356,7 +356,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
             'workspace_name': self.create_random_name('clitest', 20)
         })
         
-        vm1_info = self._prepare_vm(resource_group, 'vm1')
+        #vm1_info = self._prepare_vm(resource_group, 'vm1')
 
         workspace = self.cmd('monitor log-analytics workspace create '
                              '-g {rg} '
@@ -366,7 +366,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         print(workspace)
 
         self.kwargs.update({
-            'vm1_id': vm1_info['id'],
+            #'vm1_id': vm1_info['id'],
             'workspace_id': workspace['id']
         })
 
@@ -374,7 +374,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         # value returned after creation is equal to the workspace_id or not
         output=self.cmd('network watcher connection-monitor output add '
                 '--type Workspace '
-                '--workspace-id {workspace_id} ')
+                '--workspace-id {workspace_id} ').get_output_in_json()
         
         print(output)
         print(type(output))
