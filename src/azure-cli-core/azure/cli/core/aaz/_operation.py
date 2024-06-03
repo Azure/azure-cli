@@ -313,6 +313,7 @@ class AAZHttpOperation(AAZOperation):
                 self.content, self.form_content, None)
 
         elif self.method in ("PUT", "POST", "HEAD", "PATCH",):
+            print("content=",self.content)
             request = self.client._request(
                 self.method, self.url, self.query_parameters, self.header_parameters,
                 self.content, self.form_content, self.stream_content)

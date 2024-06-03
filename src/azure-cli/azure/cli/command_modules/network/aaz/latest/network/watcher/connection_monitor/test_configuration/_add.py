@@ -790,10 +790,10 @@ import json
 
 
 @register_command(
-    "network watcher connection-monitor test-configuration create",
+    "network watcher connection-monitor test-configuration add",
     is_preview=True,
 )
-class Create(AAZCommand):
+class Add(AAZCommand):
     """Add a test configuration to a connection monitor.
 
     :example: Add a test configuration with HTTP supported
@@ -1066,7 +1066,7 @@ class Create(AAZCommand):
 
     
         
-        print(data)
+        #print(data)
 
         #removing null and undefined fields from data
         data = {k: v for k, v in data.items() if v is not None and v != 'Undefined' and (not isinstance(v, dict) or any(v.values()))}
@@ -1079,5 +1079,14 @@ class Create(AAZCommand):
         return data_str
 
 
-__all__ = ["Create"]
+__all__ = ["Add"]
+
+
+
+
+
+
+
+
+
 

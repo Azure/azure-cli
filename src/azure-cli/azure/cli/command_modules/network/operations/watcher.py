@@ -45,7 +45,7 @@ from ..aaz.latest.network.watcher.connection_monitor.endpoint import Show as _Wa
     Remove as _WatcherConnectionMonitorEndpointRemove, List as _WatcherConnectionMonitorEndpointList, \
     Add as _WatcherConnectionMonitorEndpointAdd
 
-from ..aaz.latest.network.watcher.connection_monitor.test_configuration import Create as _MonitorTestConfigurationAdd, \
+from ..aaz.latest.network.watcher.connection_monitor.test_configuration import Add as _MonitorTestConfigurationAdd, \
     Show as _MonitorTestConfigurationShow, List as _MonitorTestConfigurationList, \
     Remove as _MonitorTestConfigurationRemove
 
@@ -841,45 +841,45 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
                     "success_threshold": test_config["success_threshold"] if test_config["success_threshold"] is not None else None,
                 }
 
-            if test_config["protocol"] == "Http" and test_config["httpConfiguration"] is not None:
+                if test_config["protocol"] == "Http" and test_config["httpConfiguration"] is not None:
 
-                valid_status_code_ranges = test_config["httpConfiguration"]["validStatusCodeRanges"] if test_config["httpConfiguration"]["validStatusCodeRanges"] is not None else []
-                print("test_config=",type(valid_status_code_ranges))
-                request_headers = test_config["httpConfiguration"]["requestHeaders"] if test_config["httpConfiguration"]["requestHeaders"] is not None else []
+                    valid_status_code_ranges = test_config["httpConfiguration"]["validStatusCodeRanges"] if test_config["httpConfiguration"]["validStatusCodeRanges"] is not None else []
+                    print("test_config=",type(valid_status_code_ranges))
+                    request_headers = test_config["httpConfiguration"]["requestHeaders"] if test_config["httpConfiguration"]["requestHeaders"] is not None else []
 
-                http_config = {
-                    "method": test_config["http_configuration"]["method"] if test_config["http_configuration"]["method"] is not None else None,
-                    "path": test_config["http_configuration"]["path"] if test_config["http_configuration"]["path"] is not None else None,
-                    "port": test_config["http_configuration"]["port"] if test_config["http_configuration"]["port"] is not None else None,
-                    "prefer_https": test_config["http_configuration"]["prefer_https"] if test_config["http_configuration"]["prefer_https"] is not None else None,
-                    "request_headers": [],
-                    "valid_status_code_ranges":[]
-                }
+                    http_config = {
+                        "method": test_config["http_configuration"]["method"] if test_config["http_configuration"]["method"] is not None else None,
+                        "path": test_config["http_configuration"]["path"] if test_config["http_configuration"]["path"] is not None else None,
+                        "port": test_config["http_configuration"]["port"] if test_config["http_configuration"]["port"] is not None else None,
+                        "prefer_https": test_config["http_configuration"]["prefer_https"] if test_config["http_configuration"]["prefer_https"] is not None else None,
+                        "request_headers": [],
+                        "valid_status_code_ranges":[]
+                    }
 
-                for code in valid_status_code_ranges:
-                    http_config["valid_status_code_ranges"].append(code)
-                
-                for header in request_headers:
-                    http_config["request_headers"].append(header)
-                
+                    for code in valid_status_code_ranges:
+                        http_config["valid_status_code_ranges"].append(code)
+                    
+                    for header in request_headers:
+                        http_config["request_headers"].append(header)
+                    
 
-                config['http_configuration'] = http_config
-            elif test_config["protocol"] == "Icmp" and test_config["icmp_configuration"] is not None:
-                icmp_config = {
-                    "disable_trace_route": test_config["icmp_configuration"]["disable_trace_route"] if test_config["icmp_configuration"]["disable_trace_route"] is not None else None,
-                }
-                config['icmp_configuration'] = icmp_config
-            elif test_config["protocol"] == "Tcp" and test_config["tcp_configuration"] is not None:
-                tcp_config = {
-                    "destination_port_behavior": test_config["tcp_configuration"]["destination_port_behavior"] if test_config["tcp_configuration"]["destination_port_behavior"] is not None else None,
-                    "disable_trace_route": test_config["tcp_configuration"]["disable_trace_route"] if test_config["tcp_configuration"]["disable_trace_route"] is not None else None,
-                    "port": test_config["tcp_configuration"]["port"] if test_config["tcp_configuration"]["port"] is not None else None,
-                }
-                config['tcp_configuration'] = tcp_config
-            else:
-                raise ValidationError('Unsupported protocol: "{}" for test configuration'.format(test_config["protocol"]))
+                    config['http_configuration'] = http_config
+                elif test_config["protocol"] == "Icmp" and test_config["icmp_configuration"] is not None:
+                    icmp_config = {
+                        "disable_trace_route": test_config["icmp_configuration"]["disable_trace_route"] if test_config["icmp_configuration"]["disable_trace_route"] is not None else None,
+                    }
+                    config['icmp_configuration'] = icmp_config
+                elif test_config["protocol"] == "Tcp" and test_config["tcp_configuration"] is not None:
+                    tcp_config = {
+                        "destination_port_behavior": test_config["tcp_configuration"]["destination_port_behavior"] if test_config["tcp_configuration"]["destination_port_behavior"] is not None else None,
+                        "disable_trace_route": test_config["tcp_configuration"]["disable_trace_route"] if test_config["tcp_configuration"]["disable_trace_route"] is not None else None,
+                        "port": test_config["tcp_configuration"]["port"] if test_config["tcp_configuration"]["port"] is not None else None,
+                    }
+                    config['tcp_configuration'] = tcp_config
+                else:
+                    raise ValidationError('Unsupported protocol: "{}" for test configuration'.format(test_config["protocol"]))
 
-            test_configs.append(config)
+                test_configs.append(config)
 
 
         seen = set()
@@ -993,6 +993,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         args.test_configurations = unique_testconfigs
 
         args.test_groups = test_groups
+        print("testgroups=",args.test_groups)
         
 
 

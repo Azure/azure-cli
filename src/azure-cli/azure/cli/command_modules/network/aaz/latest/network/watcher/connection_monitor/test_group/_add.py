@@ -1075,7 +1075,7 @@ class Add(AAZCommand):
             if arg_index is not None:
                 # The next element in sys.argv is the value of the argument
                 arg = sys.argv[arg_index + 1]
-                print("arg=", arg)
+                #print("arg=", arg)
 
                 # If arg is a list, convert each string in the list to a dictionary
                 if isinstance(arg, list):
