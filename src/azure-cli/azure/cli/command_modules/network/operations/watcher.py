@@ -893,62 +893,6 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         args.endpoints = unique_endpoints
 
 
-        # src_endpoints_names = [
-        #     {"name": src['name']}  # Extract only the 'name' field
-        #     for test_group in args.test_groups
-        #     for src in test_group["sources"]
-        # ]
-
-        # seen_names = set()
-        # unique_sources=[]
-        # for src in src_endpoints_names:
-        #     src_name = str(src['name'])
-        #     if src_name not in seen_names:
-        #         unique_sources.append(src['name'])
-        #         seen_names.add(src_name)
-
-        # # Extract only the 'name' field from destination endpoints
-        # dst_endpoints_names = [
-        #     {"name": dst['name']}  # Extract only the 'name' field
-        #     for test_group in args.test_groups
-        #     for dst in test_group["destinations"]
-        # ]
-
-        # seen_names = set()
-        # unique_dst = []
-        # for dst in dst_endpoints_names:
-        #     dst_name = str(dst['name'])
-        #     if dst_name not in seen_names:
-        #         unique_dst.append(dst['name'])
-        #         seen_names.add(dst_name)
-
-        # test_config_names = [
-        #     {"name": tc['name']}
-        #     for test_group in args.test_groups
-        #     for tc in test_group["testConfigurations"]
-        # ]
-
-        # seen_names = set()
-        # unique_testconfig = []
-        # for tc in test_config_names:
-        #     tc_name = str(tc['name'])
-        #     if tc_name not in seen_names:
-        #         unique_testconfig.append(tc['name'])
-        #         seen_names.add(tc_name)
-
-        # test_groups=[]
-
-        # for test_group in args.test_groups:
-        #     test_group = {
-        #         "name": test_group['testGroupName'],
-        #         "test-configurations": [{'name': e} for e in unique_testconfig],
-        #         "sources": [{'name': e} for e in unique_sources],
-        #         "destinations": [{'name': e} for e in unique_dst]
-        #     }
-
-        #     test_groups.append(test_group)
-
-
         test_groups=[]
 
         for test_group in args.test_groups:
