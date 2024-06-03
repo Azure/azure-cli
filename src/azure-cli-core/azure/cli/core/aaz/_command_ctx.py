@@ -83,10 +83,6 @@ class AAZCommandCtx:
             self._vars_schema[name] = schema_builder()
         self.vars[name] = data
 
-    def set_output_var(self,name,data, schema_builder=None):
-        self.output_vars={}
-        self.output_vars[name] = data
-
     @staticmethod
     def get_error_format(name):
         if name is None:

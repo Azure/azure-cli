@@ -94,6 +94,9 @@ class AAZContentBuilder:
         sub_args = []
         for value, arg in zip(self._values, self._args):
             schema = value._schema
+
+            #If typ is callable (i.e., it's a class or a function that returns an instance of a class), it's called with typ_kwargs as arguments if they are provided, otherwise it's called without arguments.
+#          If typ is not callable, it's assumed to be an instance of a type and is directly assigned to the Element attribute of the schema.
             if schema._element is None:
                 if callable(typ):
                    schema.Element = typ(**typ_kwargs) if typ_kwargs else typ()

@@ -900,28 +900,11 @@ class Add(AAZCommand):
     class SubresourceSelector(AAZJsonSelector):
 
         def _get(self):
-        #     result = self.ctx.vars.instance
-        #     result = result.properties.endpoints
-        #     filters = enumerate(result)
-        #     filters = filter(
-        #         lambda e: e[1].name == self.ctx.args.endpoint_name,
-        #         filters
-        #     )
-        #     idx = next(filters)[0]
-        #     return result[idx]
+        
           pass
 
-        # def _set(self, value):
-        #     result = self.ctx.vars.instance
-        #     result = result.properties.endpoints
-        #     filters = enumerate(result)
-        #     filters = filter(
-        #         lambda e: e[1].name == self.ctx.args.endpoint_name,
-        #         filters
-        #     )
-        #     idx = next(filters, [len(result)])[0]
-        #     result[idx] = value
-        #     return
+        def _set(self, value):
+       
           pass
 
 
@@ -931,11 +914,24 @@ class Add(AAZCommand):
             #self.ctx.selectors.subresource.set(self._create_instance())
            return self._create_instance()
         
-        def clean_dict(self,d):
+        # def clean_dict(self,d):
+        #     clean = {}
+        #     for k, v in d.items():
+        #         if isinstance(v, dict):
+        #             v = self.clean_dict(v)
+        #         elif isinstance(v, str):
+        #             v = v.strip()
+        #         if v not in [None, 'Undefined', {}, '']:
+        #             clean[k] = v
+        #     return clean
+
+        def clean_dict(self, d):
             clean = {}
             for k, v in d.items():
                 if isinstance(v, dict):
                     v = self.clean_dict(v)
+                    if not any(v.values()):  # if all values in the dictionary are considered "empty", skip this key-value pair
+                        continue
                 elif isinstance(v, str):
                     v = v.strip()
                 if v not in [None, 'Undefined', {}, '']:
@@ -997,7 +993,8 @@ class Add(AAZCommand):
            # print(data)
             # json_string = json.dumps(data, separators=(',', ':'))
             # print("string=",json_string)
-            data = {k: v for k, v in data.items() if v is not None and v != 'Undefined' and (not isinstance(v, dict) or any(v.values()))}
+            #It keeps a key-value pair if: The value v is not None.The value v is not the string 'Undefined'.The value v is not an empty dictionary.
+            #data = {k: v for k, v in data.items() if v is not None and v != 'Undefined' and (not isinstance(v, dict) or any(v.values()))}
             data = self.clean_dict(data)
             #print("After cleaning",data)
             data_str = str(data)
@@ -1005,302 +1002,6 @@ class Add(AAZCommand):
            # print("After removing spaces",data_str)
 
             return data_str
-        
-        
-
-
-
-            #print("ID=",str(self.ctx.args.resource_id))
-
-            # if self.ctx.args.endpoint_name is not None:
-            #     data["name"] = str(self.ctx.args.endpoint_name)
-            # # if self.ctx.args.resource_id is not None and self.ctx.args.resource_id != ' Undefined':
-            # #     data["resourceId"] = str(self.ctx.args.resource_id)
-            # if self.ctx.args.type is not None:
-            #     data["type"] = str(self.ctx.args.type)
-            # if self.ctx.args.address is not None:
-            #     data["address"] = str(self.ctx.args.address)
-
-
-            # print("JSON object: ",data)
-            
-        #     ob = json.dumps(data)
-        #    # print("instance=",_instance_value)
-        #     print("ob=",json.loads(ob))
-        #     return json.loads(ob)
-            
-
-
-# class _AddHelper:
-#     """Helper class for Add"""
-
-#     _schema_connection_monitor_endpoint_scope_item_read = None
-
-#     @classmethod
-#     def _build_schema_connection_monitor_endpoint_scope_item_read(cls, _schema):
-#         if cls._schema_connection_monitor_endpoint_scope_item_read is not None:
-#             _schema.address = cls._schema_connection_monitor_endpoint_scope_item_read.address
-#             return
-
-#         cls._schema_connection_monitor_endpoint_scope_item_read = _schema_connection_monitor_endpoint_scope_item_read = AAZObjectType()
-
-#         connection_monitor_endpoint_scope_item_read = _schema_connection_monitor_endpoint_scope_item_read
-#         connection_monitor_endpoint_scope_item_read.address = AAZStrType()
-
-#         _schema.address = cls._schema_connection_monitor_endpoint_scope_item_read.address
-
-#     _schema_connection_monitor_result_read = None
-
-#     @classmethod
-#     def _build_schema_connection_monitor_result_read(cls, _schema):
-#         if cls._schema_connection_monitor_result_read is not None:
-#             _schema.etag = cls._schema_connection_monitor_result_read.etag
-#             _schema.id = cls._schema_connection_monitor_result_read.id
-#             _schema.location = cls._schema_connection_monitor_result_read.location
-#             _schema.name = cls._schema_connection_monitor_result_read.name
-#             _schema.properties = cls._schema_connection_monitor_result_read.properties
-#             _schema.tags = cls._schema_connection_monitor_result_read.tags
-#             _schema.type = cls._schema_connection_monitor_result_read.type
-#             return
-
-#         cls._schema_connection_monitor_result_read = _schema_connection_monitor_result_read = AAZObjectType()
-
-#         connection_monitor_result_read = _schema_connection_monitor_result_read
-#         connection_monitor_result_read.etag = AAZStrType(
-#             flags={"read_only": True},
-#         )
-#         connection_monitor_result_read.id = AAZStrType(
-#             flags={"read_only": True},
-#         )
-#         connection_monitor_result_read.location = AAZStrType()
-#         connection_monitor_result_read.name = AAZStrType(
-#             flags={"read_only": True},
-#         )
-#         connection_monitor_result_read.properties = AAZObjectType(
-#             flags={"client_flatten": True},
-#         )
-#         connection_monitor_result_read.tags = AAZDictType()
-#         connection_monitor_result_read.type = AAZStrType(
-#             flags={"read_only": True},
-#         )
-
-#         properties = _schema_connection_monitor_result_read.properties
-#         properties.auto_start = AAZBoolType(
-#             serialized_name="autoStart",
-#         )
-#         properties.connection_monitor_type = AAZStrType(
-#             serialized_name="connectionMonitorType",
-#             flags={"read_only": True},
-#         )
-#         properties.destination = AAZObjectType()
-#         properties.endpoints = AAZListType()
-#         properties.monitoring_interval_in_seconds = AAZIntType(
-#             serialized_name="monitoringIntervalInSeconds",
-#         )
-#         properties.monitoring_status = AAZStrType(
-#             serialized_name="monitoringStatus",
-#             flags={"read_only": True},
-#         )
-#         properties.notes = AAZStrType()
-#         properties.outputs = AAZListType()
-#         properties.provisioning_state = AAZStrType(
-#             serialized_name="provisioningState",
-#             flags={"read_only": True},
-#         )
-#         properties.source = AAZObjectType()
-#         properties.start_time = AAZStrType(
-#             serialized_name="startTime",
-#             flags={"read_only": True},
-#         )
-#         properties.test_configurations = AAZListType(
-#             serialized_name="testConfigurations",
-#         )
-#         properties.test_groups = AAZListType(
-#             serialized_name="testGroups",
-#         )
-
-#         destination = _schema_connection_monitor_result_read.properties.destination
-#         destination.address = AAZStrType()
-#         destination.port = AAZIntType()
-#         destination.resource_id = AAZStrType(
-#             serialized_name="resourceId",
-#         )
-
-#         endpoints = _schema_connection_monitor_result_read.properties.endpoints
-#         endpoints.Element = AAZObjectType()
-
-#         _element = _schema_connection_monitor_result_read.properties.endpoints.Element
-#         _element.address = AAZStrType()
-#         _element.coverage_level = AAZStrType(
-#             serialized_name="coverageLevel",
-#         )
-#         _element.filter = AAZObjectType()
-#         _element.name = AAZStrType(
-#             flags={"required": True},
-#         )
-#         _element.resource_id = AAZStrType(
-#             serialized_name="resourceId",
-#         )
-#         _element.scope = AAZObjectType()
-#         _element.type = AAZStrType()
-
-#         filter = _schema_connection_monitor_result_read.properties.endpoints.Element.filter
-#         filter.items = AAZListType()
-#         filter.type = AAZStrType()
-
-#         items = _schema_connection_monitor_result_read.properties.endpoints.Element.filter.items
-#         items.Element = AAZObjectType()
-
-#         _element = _schema_connection_monitor_result_read.properties.endpoints.Element.filter.items.Element
-#         _element.address = AAZStrType()
-#         _element.type = AAZStrType()
-
-#         scope = _schema_connection_monitor_result_read.properties.endpoints.Element.scope
-#         scope.exclude = AAZListType()
-#         scope.include = AAZListType()
-
-#         exclude = _schema_connection_monitor_result_read.properties.endpoints.Element.scope.exclude
-#         exclude.Element = AAZObjectType()
-#         cls._build_schema_connection_monitor_endpoint_scope_item_read(exclude.Element)
-
-#         include = _schema_connection_monitor_result_read.properties.endpoints.Element.scope.include
-#         include.Element = AAZObjectType()
-#         cls._build_schema_connection_monitor_endpoint_scope_item_read(include.Element)
-
-#         outputs = _schema_connection_monitor_result_read.properties.outputs
-#         outputs.Element = AAZObjectType()
-
-#         _element = _schema_connection_monitor_result_read.properties.outputs.Element
-#         _element.type = AAZStrType()
-#         _element.workspace_settings = AAZObjectType(
-#             serialized_name="workspaceSettings",
-#         )
-
-#         workspace_settings = _schema_connection_monitor_result_read.properties.outputs.Element.workspace_settings
-#         workspace_settings.workspace_resource_id = AAZStrType(
-#             serialized_name="workspaceResourceId",
-#         )
-
-#         source = _schema_connection_monitor_result_read.properties.source
-#         source.port = AAZIntType()
-#         source.resource_id = AAZStrType(
-#             serialized_name="resourceId",
-#             flags={"required": True},
-#         )
-
-#         test_configurations = _schema_connection_monitor_result_read.properties.test_configurations
-#         test_configurations.Element = AAZObjectType()
-
-#         _element = _schema_connection_monitor_result_read.properties.test_configurations.Element
-#         _element.http_configuration = AAZObjectType(
-#             serialized_name="httpConfiguration",
-#         )
-#         _element.icmp_configuration = AAZObjectType(
-#             serialized_name="icmpConfiguration",
-#         )
-#         _element.name = AAZStrType(
-#             flags={"required": True},
-#         )
-#         _element.preferred_ip_version = AAZStrType(
-#             serialized_name="preferredIPVersion",
-#         )
-#         _element.protocol = AAZStrType(
-#             flags={"required": True},
-#         )
-#         _element.success_threshold = AAZObjectType(
-#             serialized_name="successThreshold",
-#         )
-#         _element.tcp_configuration = AAZObjectType(
-#             serialized_name="tcpConfiguration",
-#         )
-#         _element.test_frequency_sec = AAZIntType(
-#             serialized_name="testFrequencySec",
-#         )
-
-#         http_configuration = _schema_connection_monitor_result_read.properties.test_configurations.Element.http_configuration
-#         http_configuration.method = AAZStrType()
-#         http_configuration.path = AAZStrType()
-#         http_configuration.port = AAZIntType()
-#         http_configuration.prefer_https = AAZBoolType(
-#             serialized_name="preferHTTPS",
-#         )
-#         http_configuration.request_headers = AAZListType(
-#             serialized_name="requestHeaders",
-#         )
-#         http_configuration.valid_status_code_ranges = AAZListType(
-#             serialized_name="validStatusCodeRanges",
-#         )
-
-#         request_headers = _schema_connection_monitor_result_read.properties.test_configurations.Element.http_configuration.request_headers
-#         request_headers.Element = AAZObjectType()
-
-#         _element = _schema_connection_monitor_result_read.properties.test_configurations.Element.http_configuration.request_headers.Element
-#         _element.name = AAZStrType()
-#         _element.value = AAZStrType()
-
-#         valid_status_code_ranges = _schema_connection_monitor_result_read.properties.test_configurations.Element.http_configuration.valid_status_code_ranges
-#         valid_status_code_ranges.Element = AAZStrType()
-
-#         icmp_configuration = _schema_connection_monitor_result_read.properties.test_configurations.Element.icmp_configuration
-#         icmp_configuration.disable_trace_route = AAZBoolType(
-#             serialized_name="disableTraceRoute",
-#         )
-
-#         success_threshold = _schema_connection_monitor_result_read.properties.test_configurations.Element.success_threshold
-#         success_threshold.checks_failed_percent = AAZIntType(
-#             serialized_name="checksFailedPercent",
-#         )
-#         success_threshold.round_trip_time_ms = AAZFloatType(
-#             serialized_name="roundTripTimeMs",
-#         )
-
-#         tcp_configuration = _schema_connection_monitor_result_read.properties.test_configurations.Element.tcp_configuration
-#         tcp_configuration.destination_port_behavior = AAZStrType(
-#             serialized_name="destinationPortBehavior",
-#         )
-#         tcp_configuration.disable_trace_route = AAZBoolType(
-#             serialized_name="disableTraceRoute",
-#         )
-#         tcp_configuration.port = AAZIntType()
-
-#         test_groups = _schema_connection_monitor_result_read.properties.test_groups
-#         test_groups.Element = AAZObjectType()
-
-#         _element = _schema_connection_monitor_result_read.properties.test_groups.Element
-#         _element.destinations = AAZListType(
-#             flags={"required": True},
-#         )
-#         _element.disable = AAZBoolType()
-#         _element.name = AAZStrType(
-#             flags={"required": True},
-#         )
-#         _element.sources = AAZListType(
-#             flags={"required": True},
-#         )
-#         _element.test_configurations = AAZListType(
-#             serialized_name="testConfigurations",
-#             flags={"required": True},
-#         )
-
-#         destinations = _schema_connection_monitor_result_read.properties.test_groups.Element.destinations
-#         destinations.Element = AAZStrType()
-
-#         sources = _schema_connection_monitor_result_read.properties.test_groups.Element.sources
-#         sources.Element = AAZStrType()
-
-#         test_configurations = _schema_connection_monitor_result_read.properties.test_groups.Element.test_configurations
-#         test_configurations.Element = AAZStrType()
-
-#         tags = _schema_connection_monitor_result_read.tags
-#         tags.Element = AAZStrType()
-
-#         _schema.etag = cls._schema_connection_monitor_result_read.etag
-#         _schema.id = cls._schema_connection_monitor_result_read.id
-#         _schema.location = cls._schema_connection_monitor_result_read.location
-#         _schema.name = cls._schema_connection_monitor_result_read.name
-#         _schema.properties = cls._schema_connection_monitor_result_read.properties
-#         _schema.tags = cls._schema_connection_monitor_result_read.tags
-#         _schema.type = cls._schema_connection_monitor_result_read.type
 
 
 __all__ = ["Add"]

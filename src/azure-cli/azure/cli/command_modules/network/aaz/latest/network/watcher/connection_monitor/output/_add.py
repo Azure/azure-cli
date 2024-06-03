@@ -1667,8 +1667,6 @@ class Add(AAZCommand):
             ob = str(data)
             return ob
 
-            # ob = json.dumps(data)
-            # return json.loads(ob)
                       
 
 __all__ = ["Add"]

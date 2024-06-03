@@ -3,9 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
-import json
 import sys
-import time
+
 
 from knack.util import CLIError
 

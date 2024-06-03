@@ -390,27 +390,6 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
         
-        #values = json.loads(values.replace("'", '"'))
-        
-        
-        # if isinstance(values, list) and all(isinstance(v, str) for v in values):
-        #     # Join the strings into a single string
-        #     values_str = ' '.join(values)
-        #     values_str = re.sub(r'(\b[\w\.]+\b)', r'"\1"', values_str)
-        #     # Replace single quotes with double quotes to make it a valid JSON string
-        #     values_str = values_str.replace("'", '"')
-        #     values_str = values_str.replace('} {', '}, {')
-        #     # Split the string into separate dictionary strings
-        #     values_str = '[' + values_str + ']'
-        #     #dict_strs = values_str.split('},')
-        #     # Parse each dictionary string into a dictionary
-        #     try:
-        #         values = json.loads(values_str)
-        #         #values = [json.loads(ds + '}') for ds in dict_strs if ds]
-        #         #values = [json.loads('[' + ds + '}]') for ds in dict_strs if ds]
-        #         #values = [json.loads(ds + '}') for ds in dict_strs if ds]
-        #     except json.JSONDecodeError:
-        #         raise ValueError(f"Failed to parse '{option_string}' argument: {values_str}")
            
         if isinstance(values, list) and all(isinstance(d, dict) for d in values):
         # Handle list of dictionaries

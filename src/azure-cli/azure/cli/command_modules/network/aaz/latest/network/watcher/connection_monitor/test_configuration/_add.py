@@ -787,6 +787,7 @@
 
 from azure.cli.core.aaz import *
 import json
+from azure.cli.core.aaz import AAZUndefined
 
 
 @register_command(
@@ -999,7 +1000,7 @@ class Add(AAZCommand):
             return self._create_instance()
        
       def clean_dict(self,d):
-            from azure.cli.core.aaz import AAZUndefined
+            
             clean = {}
             for k, v in d.items():
                 if isinstance(v, dict):
@@ -1009,6 +1010,7 @@ class Add(AAZCommand):
                 if v not in [None, 'Undefined', {}, '', AAZUndefined,[]]:
                     clean[k] = v
             return clean
+
 
       def _create_instance(self):
 
