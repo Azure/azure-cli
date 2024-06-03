@@ -979,7 +979,6 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         args.test_configurations = unique_testconfigs
 
         args.test_groups = test_groups
-        print("testgroups=",args.test_groups)
         
 
 
