@@ -4867,9 +4867,7 @@ def update_auth_config(cmd, resource_group_name, name, set_string=None, enabled=
             if not prompt_y_n(msg, default="n"):
                 raise ArgumentUsageError(
                     'Usage Error: --sas-url-secret cannot be used without agreeing to add secret to the containerapp.')
-        set_secrets(cmd, name, resource_group_name, secrets=[
-            f"{BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME}={containerapp_auth_decorator.get_argument_sas_url_secret()}"],
-                    no_wait=False, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME}={containerapp_auth_decorator.get_argument_sas_url_secret()}"], no_wait=False, disable_max_length=True)
     return containerapp_auth_decorator.create_or_update()
 
 
