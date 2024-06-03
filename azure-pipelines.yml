@@ -719,6 +719,10 @@ jobs:
 
   - bash: |
       set -ev
+      # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS-12 image
+      # See: https://github.com/Azure/azure-cli/issues/29054
+      python_version=3.11
+      brew unlink python@$python_version && brew link --overwrite python@$python_version
       
       echo == Remove pre-installed azure-cli ==
       brew uninstall azure-cli
