@@ -3,12 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, broad-exception-caught, bare-except, too-many-boolean-expressions, useless-parent-delegation, expression-not-assigned
-
 from typing import Any, Dict
 
 from azure.cli.core.commands import AzCliCommand
+from azure.cli.core.azclierror import ArgumentUsageError
 
 from ._client_factory import handle_raw_exception
+from ._constants import BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME
+from ._utils import safe_set
 from .base_resource import BaseResource
 
 
@@ -72,6 +74,30 @@ class ContainerAppAuthDecorator(BaseResource):
                                                                    self.get_argument_proxy_convention(), self.get_argument_proxy_custom_host_header(),
                                                                    self.get_argument_proxy_custom_proto_header())
 
+        self.set_up_token_store()
+
+    def set_up_token_store(self):
+        if self.get_argument_token_store() is None:
+            return
+
+        if self.get_argument_token_store() is False:
+            safe_set(self.existing_auth, "login", "tokenStore", "enabled", value=False)
+            return
+
+        safe_set(self.existing_auth, "login", "tokenStore", "enabled", value=True)
+
+        if self.get_argument_sas_url_secret() is None and self.get_argument_sas_url_secret_name() is None:
+            raise ArgumentUsageError(
+                'Usage Error: only blob storage token store is supported. --sas-url-secret and --sas-url-secret-name should provide exactly one when token store is enabled')
+        if self.get_argument_sas_url_secret() is not None and self.get_argument_sas_url_secret_name() is not None:
+            raise ArgumentUsageError('Usage Error: --sas-url-secret and --sas-url-secret-name cannot both be set')
+
+        sas_url_setting_name = BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME
+        if self.get_argument_sas_url_secret_name() is not None:
+            sas_url_setting_name = self.get_argument_sas_url_secret_name()
+        safe_set(self.existing_auth, "login", "tokenStore", "azureBlobStorage", "sasUrlSettingName",
+                 value=sas_url_setting_name)
+
     def create_or_update(self):
         try:
             return self.client.create_or_update(cmd=self.cmd, resource_group_name=self.get_argument_resource_group_name(),
@@ -112,3 +138,15 @@ class ContainerAppAuthDecorator(BaseResource):
 
     def get_argument_excluded_paths(self):
         return self.get_param("excluded_paths")
+
+    def get_argument_token_store(self):
+        return self.get_param("token_store")
+
+    def get_argument_sas_url_secret(self):
+        return self.get_param("sas_url_secret")
+
+    def get_argument_sas_url_secret_name(self):
+        return self.get_param("sas_url_secret_name")
+
+    def get_argument_yes(self):
+        return self.get_param("yes")
