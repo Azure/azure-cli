@@ -3832,15 +3832,22 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
     return [r for r in result if 'ipAddress' in r and r['ipAddress']]
 
 
-def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
+def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None,
+                 force_update_os_disk_for_ephemeral=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids:
         VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
         instance_ids = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
         return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage_all, resource_group_name,
                            vm_scale_set_name, instance_ids)
-
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage, resource_group_name, vm_scale_set_name)
+    if force_update_os_disk_for_ephemeral is not None:
+        VirtualMachineScaleSetReimageParameters = cmd.get_models('VirtualMachineScaleSetReimageParameters')
+        vm_scale_set_reimage_input = VirtualMachineScaleSetReimageParameters(
+            force_force_update_os_disk_for_ephemeral_for_ephemeral=force_update_os_disk_for_ephemeral)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage,
+                           resource_group_name, vm_scale_set_name, vm_scale_set_reimage_input)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage,
+                       resource_group_name, vm_scale_set_name)
 
 
 def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):

@@ -9166,6 +9166,19 @@ class VMSSReimageScenarioTest(ScenarioTest):
         self.cmd('vmss reimage -g {rg} -n {vmss} --instance-ids {instance_id1} {instance_id2}')
         self.cmd('vmss reimage -g {rg} -n {vmss}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_reimage_force_update_os_disk_for_ephemeral', location='eastus2euap')
+    def test_vmss_reimage_force_update_os_disk_for_ephemeral(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vmss create --resource-group {rg} --name {vmss} --image OpenLogic:CentOS:7.5:latest --ephemeral-os-disk --disable-overprovision --instance-count 2 --data-disk-sizes-gb 2 --storage-sku os=standard_lrs 0=premium_lrs --admin-username testuser1 --admin-password testPassword01! --orchestration-mode Uniform',
+            checks=[
+                self.check('vmss.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+                self.check('vmss.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk')
+            ])
+        self.cmd('vmss reimage -g {rg} -n {vmss} --update-os-disk')
+
+
 
 class VMSSHKeyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_ssh_key_')
