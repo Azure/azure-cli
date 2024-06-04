@@ -74,9 +74,6 @@ class ContainerAppAuthDecorator(BaseResource):
                                                                    self.get_argument_proxy_convention(), self.get_argument_proxy_custom_host_header(),
                                                                    self.get_argument_proxy_custom_proto_header())
 
-        self.set_up_token_store()
-
-    def set_up_token_store(self):
         if self.get_argument_token_store() is None:
             return
 
