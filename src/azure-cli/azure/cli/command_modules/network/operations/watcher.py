@@ -860,7 +860,10 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
                         http_config["valid_status_code_ranges"].append(code)
                     
                     for header in request_headers:
-                        http_config["request_headers"].append(header)
+                        http_config["request_headers"].append({
+                            "name": header["name"],
+                            "value": header["value"]
+                        })
                     
 
                     config['http_configuration'] = http_config
@@ -1754,7 +1757,7 @@ class WatcherConnectionMonitorTestConfigurationAdd(_MonitorTestConfigurationAdd)
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
         args_schema.http_request_headers._required = False
-        args_schema.http_request_headers._registered = False
+        args_schema.http_request_headers._registered = True
         
 
         args_schema.location = AAZResourceLocationArg(

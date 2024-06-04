@@ -270,8 +270,8 @@ class Add(AAZCommand):
             request_headers = getattr(self.ctx.args, "http_request_headers", [])
             for header in request_headers:
                 data["httpConfiguration"]["request_headers"].append({
-                    "name": header.get("name"),
-                    "value": header.get("value")
+                    "name": header['name'],
+                    "value": header['value']
                 })
 
     # Populate icmpConfiguration
