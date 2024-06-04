@@ -3843,7 +3843,7 @@ def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None,
     if force_update_os_disk_for_ephemeral is not None:
         VirtualMachineScaleSetReimageParameters = cmd.get_models('VirtualMachineScaleSetReimageParameters')
         vm_scale_set_reimage_input = VirtualMachineScaleSetReimageParameters(
-            force_force_update_os_disk_for_ephemeral_for_ephemeral=force_update_os_disk_for_ephemeral)
+            force_update_os_disk_for_ephemeral=force_update_os_disk_for_ephemeral)
         return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage,
                            resource_group_name, vm_scale_set_name, vm_scale_set_reimage_input)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage,
