@@ -186,38 +186,29 @@ class Add(AAZCommand):
 
     # Populate filter
             if hasattr(self.ctx.args, "filter_items") or hasattr(self.ctx.args, "filter_type"):
-                data["filter"]["items"] = getattr(self.ctx.args, "filter_items", [])
-                data["filter"]["type"] = getattr(self.ctx.args, "filter_type", None)
+                data["filter"]["items"] = []
+                data["filter"]["type"] = "Include"
 
         # Populate filter items
             if hasattr(self.ctx.args, "filter_items"):
                 filter_items = getattr(self.ctx.args, "filter_items", [])
                 for item in filter_items:
-                    if isinstance(item, dict) and "address" in item and "type" in item:
                         data["filter"]["items"].append({
-                            "address": item.get("address"),
-                            "type": item.get("type")
+                            "address": item['address'],
+                            "type": item['type']
                         })
 
            # Populate scope
-            if hasattr(self.ctx.args, "scope_exclude") or hasattr(self.ctx.args, "scope_include"):
-                data["scope"]["exclude"] = getattr(self.ctx.args, "scope_exclude", [])
-                data["scope"]["include"] = getattr(self.ctx.args, "scope_include", [])
-
-            # Populate scope exclude
-            if hasattr(self.ctx.args, "scope_exclude"):
+            if hasattr(self.ctx.args, "scope_exclude") and self.ctx.args.scope_exclude:
+                data["scope"]["exclude"] = []
                 scope_exclude = getattr(self.ctx.args, "scope_exclude", [])
                 for exclude_item in scope_exclude:
-                    if isinstance(exclude_item, dict) and "address" in exclude_item:
-                        data["scope"]["exclude"].append({
-                            "address": exclude_item.get("address")
-                        })
-
-            # Populate scope include
-            if hasattr(self.ctx.args, "scope_include"):
+                        data["scope"]["exclude"].append(exclude_item['address'])
+            
+            if hasattr(self.ctx.args, "scope_include") and self.ctx.args.scope_include:
+                data["scope"]["include"] = []
                 scope_include = getattr(self.ctx.args, "scope_include", [])
                 for include_item in scope_include:
-                    if isinstance(include_item, dict) and "address" in include_item:
                         data["scope"]["include"].append({
                             "address": include_item.get("address")
                         })

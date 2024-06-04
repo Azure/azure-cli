@@ -472,6 +472,32 @@ class Create(AAZCommand):
             help=" id of destination endpoint address"
         )
 
+        _element.filter = AAZObjectArg()
+
+# Define the 'type' and 'items' fields inside 'filter'
+        _element.filter.type = AAZStrArg(
+            options=["--filter-type"],
+            help="The behavior of the endpoint filter. Currently only 'Include' is supported.  Allowed values: Include.",
+            enum={"Include": "Include"},
+        )
+
+        _element.filter.items = AAZListArg(
+            options=["--filter-items"],
+            help="List of items which needs to be included in the filter.",
+        )
+
+        # Define the 'type' and 'address' fields inside 'items.Element'
+        _element.filter.items.Element = AAZObjectArg()
+        _element.filter.items.Element.type = AAZStrArg(
+            options=["type"],
+            help="The type of item included in the filter. Currently only 'AgentAddress' is supported.",
+            enum={"AgentAddress": "AgentAddress"},
+        )
+        _element.filter.items.Element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the filter item.",
+        )
+
 
         sources = cls._args_schema.test_groups.Element.sources
         sources.Element = AAZObjectArg()
@@ -493,6 +519,33 @@ class Create(AAZCommand):
             options=["resource-id"],
             help=" id of source endpoint address"
         )
+
+        _element.filter = AAZObjectArg()
+
+# Define the 'type' and 'items' fields inside 'filter'
+        _element.filter.type = AAZStrArg(
+            options=["--filter-type"],
+            help="The behavior of the endpoint filter. Currently only 'Include' is supported.  Allowed values: Include.",
+            enum={"Include": "Include"},
+        )
+
+        _element.filter.items = AAZListArg(
+            options=["--filter-items"],
+            help="List of items which needs to be included in the filter.",
+        )
+
+        # Define the 'type' and 'address' fields inside 'items.Element'
+        _element.filter.items.Element = AAZObjectArg()
+        _element.filter.items.Element.type = AAZStrArg(
+            options=["type"],
+            help="The type of item included in the filter. Currently only 'AgentAddress' is supported.",
+            enum={"AgentAddress": "AgentAddress"},
+        )
+        _element.filter.items.Element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the filter item.",
+        )
+
 
         testConfigurations = cls._args_schema.test_groups.Element.testConfigurations
         testConfigurations.Element = AAZObjectArg()

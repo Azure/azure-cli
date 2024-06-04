@@ -8,6 +8,7 @@
 # pylint: skip-file
 # flake8: noqa
 
+
 from azure.cli.core.aaz import *
 import json
 import sys
@@ -132,6 +133,40 @@ class Add(AAZCommand):
             options=["--scope-include"],
             help="List of items which needs to be included to the endpoint scope.",
         )
+        destinations.Element.filter = AAZObjectArg()
+
+        # Define the 'type' and 'items' fields inside 'filter'
+        destinations.Element.filter.type = AAZStrArg(
+            options=["--filter-type"],
+            help="The behavior of the endpoint filter. Currently only 'Include' is supported.  Allowed values: Include.",
+            enum={"Include": "Include"},
+        )
+
+        destinations.Element.filter.items = AAZListArg(
+            options=["--filter-items"],
+            help="List of items which needs to be included in the filter.",
+        )
+
+        # Define the 'type' and 'address' fields inside 'items.Element'
+        destinations.Element.filter.items.Element = AAZObjectArg()
+        destinations.Element.filter.items.Element.type = AAZStrArg(
+            options=["type"],
+            help="The type of item included in the filter. Currently only 'AgentAddress' is supported.",
+            enum={"AgentAddress": "AgentAddress"},
+        )
+        destinations.Element.filter.items.Element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the filter item.",
+        )
+
+
+
+
+
+
+
+
+
 
         filter_items = cls._args_schema.destinations.Element.filter_items
         filter_items.Element = AAZObjectArg()
@@ -207,6 +242,31 @@ class Add(AAZCommand):
         sources.Element.scope_include = AAZListArg(
             options=["--scope-include"],
             help="List of items which needs to be included to the endpoint scope.",
+        )
+        sources.Element.filter = AAZObjectArg()
+
+# Define the 'type' and 'items' fields inside 'filter'
+        sources.Element.filter.type = AAZStrArg(
+            options=["--filter-type"],
+            help="The behavior of the endpoint filter. Currently only 'Include' is supported.  Allowed values: Include.",
+            enum={"Include": "Include"},
+        )
+
+        sources.Element.filter.items = AAZListArg(
+            options=["--filter-items"],
+            help="List of items which needs to be included in the filter.",
+        )
+
+        # Define the 'type' and 'address' fields inside 'items.Element'
+        sources.Element.filter.items.Element = AAZObjectArg()
+        sources.Element.filter.items.Element.type = AAZStrArg(
+            options=["type"],
+            help="The type of item included in the filter. Currently only 'AgentAddress' is supported.",
+            enum={"AgentAddress": "AgentAddress"},
+        )
+        sources.Element.filter.items.Element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the filter item.",
         )
 
         filter_items = cls._args_schema.sources.Element.filter_items

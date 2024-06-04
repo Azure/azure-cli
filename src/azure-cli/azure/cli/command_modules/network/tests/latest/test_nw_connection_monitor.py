@@ -383,11 +383,21 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_endpoint1(self, resource_group, resource_group_location):
+        
+        self.kwargs.update({
+            'filter1': {'type':'AgentAddress','address':'npmuser'}
+        })
+        # self.cmd('network watcher connection-monitor endpoint add '
+        #         '--name CdmTest '
+        #         '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/srisa-rg/providers/Microsoft.Compute/virtualMachines/CdmTest '
+        #         '--type AzureVM '
+        #         '--scope-exclude "[{val1},{val2}]" ').get_output_in_json()
 
         self.cmd('network watcher connection-monitor endpoint add '
                 '--name CdmTest '
                 '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/srisa-rg/providers/Microsoft.Compute/virtualMachines/CdmTest '
-                '--type AzureVM ').get_output_in_json()
+                '--type AzureVM '
+                '--filter-items "[{filter1}]" ').get_output_in_json()
         self.check('name','CdmTest')
 
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
@@ -417,11 +427,20 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_test_group1(self, resource_group, resource_group_location):
+        
+        # self.kwargs.update({
+        #     'val1':{'address':'10.0.0.25'},
+        #     'val2':{'address':'10.0.0.30'}
+        # })
+        self.kwargs.update({
+            'filter1': {'type':'AgentAddress','address':'npmuser'}
+        })
 
         endpoint1=self.cmd('network watcher connection-monitor endpoint add '
                 '--name Bing '
                 '--address bing.com '
-                '--type ExternalAddress ').get_output_in_json()
+                '--type ExternalAddress '
+                '--filter-items "[{filter1}]" ').get_output_in_json()
         print("e1=",endpoint1)
         
         endpoint2=self.cmd('network watcher connection-monitor endpoint add '
@@ -816,10 +835,15 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     # create a V2 connection monitor with HTTP, TCP and ICMP configuration and request headers in http test configuration
     #self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
 
+        self.kwargs.update({
+                'filter1': {'type':'AgentAddress','address':'npmuser'}
+            })
+
         endpoint14=self.cmd('network watcher connection-monitor endpoint add '
                 '--name aks-private-vnet '
                 '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/aks-private-rg/providers/Microsoft.Network/virtualNetworks/aks-private-vnet '
-                '--type AzureVNet ').get_output_in_json()
+                '--type AzureVNet '
+                '--filter-items "[{filter1}]" ').get_output_in_json()
         
 
         endpoint24=self.cmd('network watcher connection-monitor endpoint add '

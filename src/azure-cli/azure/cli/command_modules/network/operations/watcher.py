@@ -810,6 +810,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             "resource_id": src.resourceId,
             "address": src.address,
             "type": src.type,
+            "filter":src.filter
             }
              
             for test_group in args.test_groups
@@ -821,6 +822,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             "resource_id": dst.resourceId,
             "address": dst.address,
             "type": dst.type,
+            "filter":dst.filter
             }
 
             for test_group in args.test_groups
@@ -1575,10 +1577,10 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
         args_schema.address._registered = True
         args_schema.endpoint_name._registered = True
 
-        args_schema.filter_items._registered = False
-        args_schema.filter_type._registered = False
-        args_schema.scope_exclude._registered = False
-        args_schema.scope_include._registered = False
+        args_schema.filter_items._registered = True
+        args_schema.filter_type._registered = True
+        args_schema.scope_exclude._registered = True
+        args_schema.scope_include._registered = True
 
         args_schema.location = AAZResourceLocationArg(
             options=["-l", "--location"],
