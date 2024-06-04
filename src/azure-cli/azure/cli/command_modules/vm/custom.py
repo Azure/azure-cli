@@ -4048,6 +4048,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 }
             }
         elif security_type == 'Standard':
+            if prev_security_type == 'TrustedLaunch':
+                logger.warning('Turning off Trusted launch disables foundational security for your VMs. '
+                               'For more information, visit https://aka.ms/TrustedLaunch')
             vmss.virtual_machine_profile.security_profile = {
                 'securityType': security_type,
                 'uefiSettings': None
