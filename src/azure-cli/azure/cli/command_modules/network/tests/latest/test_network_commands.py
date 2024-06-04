@@ -3623,10 +3623,28 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         self.cmd('network cross-region-lb create -g {rg} -n {lb}')
 
         self.cmd('network cross-region-lb address-pool create -g {rg} --lb-name {lb} -n {address_pool} '
-                 '--backend-address name={backend_address1} frontend-ip-address={regional_lb_frontend_ip_address1} ',
-                 checks=self.check('name', self.kwargs['address_pool']))
+                 '--backend-address name={backend_address1} frontend-ip-address={regional_lb_frontend_ip_address1} '
+                 '--admin-state Up',
+                 checks=[self.check('name', self.kwargs['address_pool']),
+                         self.check('loadBalancerBackendAddresses[0].adminState', 'Up'),
+                         ])
 
-        self.cmd('network cross-region-lb address-pool address add -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2} --frontend-ip-address {regional_lb_frontend_ip_address2}', checks=self.check('name', self.kwargs['address_pool']))
+        self.cmd('network cross-region-lb address-pool update -g {rg} --lb-name {lb} -n {address_pool} '
+                 '--backend-address name={backend_address1} frontend-ip-address={regional_lb_frontend_ip_address1} admin-state=Down',
+                 checks=[self.check('name', self.kwargs['address_pool']),
+                         self.check('loadBalancerBackendAddresses[0].adminState', 'Down'),
+                         ])
+
+        self.cmd('network cross-region-lb address-pool address add -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2} --frontend-ip-address {regional_lb_frontend_ip_address2} --admin-state Down',
+                 checks=[self.check('name', self.kwargs['address_pool']),
+                         self.check('loadBalancerBackendAddresses[1].adminState', 'Down'),
+                         ])
+
+        self.cmd(
+            'network cross-region-lb address-pool address update -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2} --admin-state Up',
+            checks=[self.check('name', self.kwargs['address_pool']),
+                    self.check('loadBalancerBackendAddresses[1].adminState', 'Up'),
+                    ])
 
         self.cmd('network cross-region-lb address-pool address remove -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2}')
 
