@@ -3004,11 +3004,11 @@ def _aks_mesh_update(
         # skip the warning incase upgrade is in progress
         service_mesh_profile = mc.service_mesh_profile
         if (
-            service_mesh_profile
-            and service_mesh_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_ISTIO
-            and service_mesh_profile.istio
-            and service_mesh_profile.istio.revisions
-            and len(service_mesh_profile.istio.revisions) == 1
+            service_mesh_profile and
+            service_mesh_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_ISTIO and
+            service_mesh_profile.istio and
+            service_mesh_profile.istio.revisions and
+            len(service_mesh_profile.istio.revisions) == 1
         ):
             revision = service_mesh_profile.istio.revisions[0]
             supported_revisions = _aks_mesh_get_supported_revisions(cmd, client, mc.location)
