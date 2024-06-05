@@ -221,8 +221,7 @@ class AAZShortHandSyntaxParser:
     @classmethod
     def split_partial_value(cls, v):
         """ split 'Partial Value' format """
-        if not isinstance(v, str):
-            v = str(v)
+        assert isinstance(v,str)
         match = cls.partial_value_key_pattern.fullmatch(v)
         if not match:
             key = None
