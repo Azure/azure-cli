@@ -621,6 +621,7 @@ class Create(AAZCommand):
             options=["--enable-coord-debug", "--coordinator-debug-enabled"],
             arg_group="Coordinator",
             help="The flag that if enable coordinator HA, uses multiple coordinator replicas with auto failover, one per each head node. Default: false.",
+            default=True,
         )
 
         # define Arg Group "FlinkProfile"
