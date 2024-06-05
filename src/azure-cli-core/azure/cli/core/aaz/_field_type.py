@@ -42,6 +42,10 @@ class AAZSimpleType(AAZBaseType):
                 return AAZValuePatch.build(self)
 
             data = data._data
+            
+        assert self.DataType is not None
+        if not isinstance(data, self.DataType):
+            raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
 
         return data
 

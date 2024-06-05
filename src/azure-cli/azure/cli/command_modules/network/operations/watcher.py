@@ -769,7 +769,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             for test_config in test_group["testConfigurations"]:
                 config = {
                     "name": test_config["name"] if test_config["name"] is not None else None,
-                    "test_frequency_sec": test_config["frequency"] if test_config["frequency"] is not None else None,
+                    "test_frequency_sec": int(str(test_config["frequency"] if test_config["frequency"] is not None else None)),
                     "protocol": test_config["protocol"] if test_config["protocol"] is not None else None,
                     "location": test_config["location"] if test_config["location"] is not None else None,
                     "preferred_ip_version": test_config["preferred_ip_version"] if test_config["preferred_ip_version"] is not None else None,
@@ -779,7 +779,6 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
                 if test_config["protocol"] == "Http" and test_config["httpConfiguration"] is not None:
 
                     valid_status_code_ranges = test_config["httpConfiguration"]["validStatusCodeRanges"] if test_config["httpConfiguration"]["validStatusCodeRanges"] is not None else []
-                    print("test_config=",type(valid_status_code_ranges))
                     request_headers = test_config["httpConfiguration"]["requestHeaders"] if test_config["httpConfiguration"]["requestHeaders"] is not None else []
 
                     http_config = {
@@ -917,7 +916,6 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         args.test_configurations = unique_testconfigs
 
         args.test_groups = test_groups
-        print("hi")
         
 
 
