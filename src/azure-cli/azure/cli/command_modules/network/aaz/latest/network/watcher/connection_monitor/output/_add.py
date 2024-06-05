@@ -30,7 +30,6 @@ class Add(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         return self.InstanceCreateByJson(ctx=self.ctx)()
 
     _args_schema = None
@@ -42,21 +41,6 @@ class Add(AAZCommand):
         cls._args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         _args_schema = cls._args_schema
-        _args_schema.connection_monitor = AAZStrArg(
-            options=["--connection-monitor"],
-            help="Connection monitor name.",
-            required=False,
-        )
-        _args_schema.watcher_name = AAZStrArg(
-            options=["--watcher-name"],
-            help="The name of the Network Watcher resource.",
-            required=False,
-        )
-        _args_schema.watcher_rg = AAZResourceGroupNameArg(
-            options=["-g", "--watcher-rg"],
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
-            required=False,
-        )
         _args_schema.output_index = AAZIntArg(
             options=["--output-index"],
             help="output-index",
@@ -75,18 +59,9 @@ class Add(AAZCommand):
         return cls._args_schema
         
 
-    class SubresourceSelector(AAZJsonSelector):
-
-        def _get(self):
-            pass
-
-        def _set(self, value):
-            pass
-
     class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
         
         def __call__(self, *args, **kwargs):
-            #self.ctx.selectors.subresource.set(self._create_instance())
             return self._create_instance()
 
         def _create_instance(self):

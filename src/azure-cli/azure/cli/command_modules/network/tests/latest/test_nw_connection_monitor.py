@@ -904,15 +904,12 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     # create a V2 connection monitor with HTTP, TCP and ICMP configuration and request headers in http test configuration
     #self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
 
-        self.kwargs.update({
-                'filter1': {'type':'AgentAddress','address':'npmuser'}
-            })
 
         endpoint14=self.cmd('network watcher connection-monitor endpoint add '
                 '--name aks-private-vnet '
                 '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/aks-private-rg/providers/Microsoft.Network/virtualNetworks/aks-private-vnet '
                 '--type AzureVNet '
-                '--filter-items "[{filter1}]" ').get_output_in_json()
+                '--coverage-level BelowAverage ').get_output_in_json()
         
 
         endpoint24=self.cmd('network watcher connection-monitor endpoint add '
