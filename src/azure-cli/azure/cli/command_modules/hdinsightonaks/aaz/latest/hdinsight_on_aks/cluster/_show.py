@@ -917,9 +917,15 @@ class Show(AAZCommand):
             _ShowHelper._build_schema_trino_debug_config_read(worker.debug)
 
             compute_profile = cls._schema_on_200.properties.compute_profile
+            compute_profile.availability_zones = AAZListType(
+                serialized_name="availabilityZones",
+            )
             compute_profile.nodes = AAZListType(
                 flags={"required": True},
             )
+
+            availability_zones = cls._schema_on_200.properties.compute_profile.availability_zones
+            availability_zones.Element = AAZStrType()
 
             nodes = cls._schema_on_200.properties.compute_profile.nodes
             nodes.Element = AAZObjectType()

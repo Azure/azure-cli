@@ -17,12 +17,23 @@ from azure.cli.core.aaz import *
 class Create(AAZCommand):
     """Create a cluster.
 
-    :example: Create a Trino cluster. need use az hdinsight-on-aks cluster node-profile create $node frist.
-        az hdinsight-on-aks cluster node-profile create --count 5 --node-type Worker --vm-size Standard_D8d_v5
-        az hdinsightonaks cluster create -n {clustername} --cluster-pool-name {clusterpoolname} -g {resourcesGroup} -l {location} --assigned-identity-object-id {00000000-0000-0000-0000-000000000000} --assigned-identity-client-id {00000000-0000-0000-0000-000000000000} --authorization-user-id {00000000-0000-0000-0000-000000000000} --assigned-identity-id {/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/yourmsi} --cluster-type Trino --cluster-version {1.0.6} --oss-version {0.410.0} --nodes $node-profile
+    :example: Create a simple Trino cluster.
+        az az hdinsight-on-aks cluster create -n {clustername} --cluster-pool-name {clusterpoolname} -g {resourcesGroup} -l {location}--cluster-type trino --cluster-version {1.2.0} --oss-version {0.440.0} --node '[{"count":2,"type":"worker","vm-size":"Standard_D8d_v5"}]' --identity-list '[{"client-id":"00000000-0000-0000-0000-000000000000","object-id":"00000000-0000-0000-0000-000000000000","resource-id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourcesGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/yourmsi","type":"cluster"}]' --authorization-user-id "00000000-0000-0000-0000-000000000000"
 
-    :example: Create a Flink cluster.
-        az hdinsight-on-aks cluster create  -n {clustername} --cluster-pool-name {clusterpoolname} -g {RG} -l {westus3} --assigned-identity-object-id {00000000-0000-0000-0000-000000000000} --assigned-identity-client-id {00000000-0000-0000-0000-000000000000} --authorization-user-id {00000000-0000-0000-0000-000000000000} --assigned-identity-id {/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/yourmsi} --cluster-type Flink --cluster-version {flinkversion} --oss-version {flinkossversion} --nodes {nodes} --flink-storage-uri {storageUri} --job-manager-cpu {1} --job-manager-memory {2000} --task-manager-cpu {6} --task-manager-memory {49016}
+    :example: Create a simple Flink cluster.
+        az hdinsight-on-aks cluster create -n {clustername} --cluster-pool-name {clusterpoolname} -g {resourcesGroup} -l {location}--cluster-type flink --flink-storage-uri {abfs://container@yourstorage.dfs.core.windows.net/} --cluster-version {1.2.0} --oss-version {1.17.0} --node '[{"count":5,"type":"worker","vm-size":"Standard_D8d_v5"}]' --identity-list '[{"client-id":"00000000-0000-0000-0000-000000000000","object-id":"00000000-0000-0000-0000-000000000000","resource-id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourcesGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/yourmsi","type":"cluster"}]' --authorization-user-id "00000000-0000-0000-0000-000000000000" --job-manager-cpu {1} --job-manager-memory {2000} --task-manager-cpu {6} --task-manager-memory {49016}
+
+    :example: Create a simple Spark cluster.
+        az hdinsight-on-aks cluster create -n {clustername} --cluster-pool-name {clusterpoolname} -g {resourcesGroup} -l {location}--cluster-type spark --spark-storage-url {abfs://container@yourstorage.dfs.core.windows.net/} --cluster-version {1.2.0} --oss-version {3.4.1} --node '[{"count":2,"type":"worker","vm-size":"Standard_D8d_v5"}]' --identity-list '[{"client-id":"00000000-0000-0000-0000-000000000000","object-id":"00000000-0000-0000-0000-000000000000","resource-id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourcesGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/yourmsi","type":"cluster"}]' --authorization-user-id "00000000-0000-0000-0000-000000000000"
+
+    :example: Create a simple Kafka cluster.
+        az az hdinsight-on-aks cluster create -n {clustername} --cluster-pool-name {clusterpoolname} -g {resourcesGroup} -l {location}--cluster-type kafka --cluster-version {1.2.0} --oss-version {3.6.0} --node '[{"count":2,"type":"worker","vm-size":"Standard_D8d_v5"}]' --identity-list '[{"client-id":"00000000-0000-0000-0000-000000000000","object-id":"00000000-0000-0000-0000-000000000000","resource-id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourcesGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/yourmsi","type":"cluster"}]' --authorization-user-id "00000000-0000-0000-0000-000000000000" --kafka-profile '{"disk-storage":{"data-disk-size":8,"data-disk-type":"Standard_SSD_LRS"}}'
+
+    :example: Create a Spark cluster with custom hive metastore.
+        az hdinsight-on-aks cluster create -n {clustername} --cluster-pool-name {clusterpoolname} -g {resourcesGroup} -l {location}--cluster-type spark --spark-storage-url {abfs://container@yourstorage.dfs.core.windows.net/} --cluster-version {1.2.0} --oss-version {3.4.1} --node '[{"count":2,"type":"worker","vm-size":"Standard_D8d_v5"}]' --identity-list '[{"client-id":"00000000-0000-0000-0000-000000000000","object-id":"00000000-0000-0000-0000-000000000000","resource-id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourcesGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/yourmsi","type":"cluster"}]' --authorization-user-id "00000000-0000-0000-0000-000000000000"  --secret-reference '[{reference-name:sqlpassword,secret-name:sqlpassword,type:Secret}]' --key-vault-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourcesGroup/providers/Microsoft.KeyVault/vaults/CLIKV --spark-hive-kv-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourcesGroup/providers/Microsoft.KeyVault/vaults/CLIKV --spark-db-auth-mode SqlAuth --spark-hive-db-name {sparkhms} --spark-hive-db-secret {sqlpassword} --spark-hive-db-server {yourserver.database.windows.net} --spark-hive-db-user {username}
+
+    :example: Create a Flink cluster with availability zones.
+        az hdinsight-on-aks cluster create -n {clustername} --cluster-pool-name {clusterpoolname} -g {resourcesGroup} -l {location}--cluster-type flink --flink-storage-uri {abfs://container@yourstorage.dfs.core.windows.net/} --cluster-version {1.2.0} --oss-version {1.17.0} --node '[{"count":5,"type":"worker","vm-size":"Standard_D8d_v5"}]' --identity-list '[{"client-id":"00000000-0000-0000-0000-000000000000","object-id":"00000000-0000-0000-0000-000000000000","resource-id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourcesGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/yourmsi","type":"cluster"}]' --authorization-user-id "00000000-0000-0000-0000-000000000000" --job-manager-cpu {1} --job-manager-memory {2000} --task-manager-cpu {6} --task-manager-memory {49016} --availability-zones [1,2]
     """
 
     _aaz_info = {
@@ -564,11 +575,19 @@ class Create(AAZCommand):
         # define Arg Group "ComputeProfile"
 
         _args_schema = cls._args_schema
+        _args_schema.availability_zones = AAZListArg(
+            options=["--availability-zones"],
+            arg_group="ComputeProfile",
+            help="The list of Availability zones to use for AKS VMSS nodes.",
+        )
         _args_schema.nodes = AAZListArg(
             options=["--nodes"],
             arg_group="ComputeProfile",
             help="The nodes definitions.",
         )
+
+        availability_zones = cls._args_schema.availability_zones
+        availability_zones.Element = AAZStrArg()
 
         nodes = cls._args_schema.nodes
         nodes.Element = AAZObjectArg()
@@ -621,7 +640,6 @@ class Create(AAZCommand):
             options=["--enable-coord-debug", "--coordinator-debug-enabled"],
             arg_group="Coordinator",
             help="The flag that if enable coordinator HA, uses multiple coordinator replicas with auto failover, one per each head node. Default: false.",
-            default=True,
         )
 
         # define Arg Group "FlinkProfile"
@@ -1648,7 +1666,12 @@ class Create(AAZCommand):
 
             compute_profile = _builder.get(".properties.computeProfile")
             if compute_profile is not None:
+                compute_profile.set_prop("availabilityZones", AAZListType, ".availability_zones")
                 compute_profile.set_prop("nodes", AAZListType, ".nodes", typ_kwargs={"flags": {"required": True}})
+
+            availability_zones = _builder.get(".properties.computeProfile.availabilityZones")
+            if availability_zones is not None:
+                availability_zones.set_elements(AAZStrType, ".")
 
             nodes = _builder.get(".properties.computeProfile.nodes")
             if nodes is not None:
@@ -2438,9 +2461,15 @@ class Create(AAZCommand):
             _CreateHelper._build_schema_trino_debug_config_read(worker.debug)
 
             compute_profile = cls._schema_on_200_201.properties.compute_profile
+            compute_profile.availability_zones = AAZListType(
+                serialized_name="availabilityZones",
+            )
             compute_profile.nodes = AAZListType(
                 flags={"required": True},
             )
+
+            availability_zones = cls._schema_on_200_201.properties.compute_profile.availability_zones
+            availability_zones.Element = AAZStrType()
 
             nodes = cls._schema_on_200_201.properties.compute_profile.nodes
             nodes.Element = AAZObjectType()

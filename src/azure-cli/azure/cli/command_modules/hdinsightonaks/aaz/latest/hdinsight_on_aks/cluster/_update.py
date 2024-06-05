@@ -629,10 +629,21 @@ class Update(AAZCommand):
         # define Arg Group "ComputeProfile"
 
         _args_schema = cls._args_schema
+        _args_schema.availability_zones = AAZListArg(
+            options=["--availability-zones"],
+            arg_group="ComputeProfile",
+            help="The list of Availability zones to use for AKS VMSS nodes.",
+            nullable=True,
+        )
         _args_schema.nodes = AAZListArg(
             options=["--nodes"],
             arg_group="ComputeProfile",
             help="The nodes definitions.",
+        )
+
+        availability_zones = cls._args_schema.availability_zones
+        availability_zones.Element = AAZStrArg(
+            nullable=True,
         )
 
         nodes = cls._args_schema.nodes
@@ -1808,7 +1819,12 @@ class Update(AAZCommand):
 
             compute_profile = _builder.get(".properties.computeProfile")
             if compute_profile is not None:
+                compute_profile.set_prop("availabilityZones", AAZListType, ".availability_zones")
                 compute_profile.set_prop("nodes", AAZListType, ".nodes", typ_kwargs={"flags": {"required": True}})
+
+            availability_zones = _builder.get(".properties.computeProfile.availabilityZones")
+            if availability_zones is not None:
+                availability_zones.set_elements(AAZStrType, ".")
 
             nodes = _builder.get(".properties.computeProfile.nodes")
             if nodes is not None:
@@ -2609,9 +2625,15 @@ class _UpdateHelper:
         cls._build_schema_trino_debug_config_read(worker.debug)
 
         compute_profile = _schema_cluster_read.properties.compute_profile
+        compute_profile.availability_zones = AAZListType(
+            serialized_name="availabilityZones",
+        )
         compute_profile.nodes = AAZListType(
             flags={"required": True},
         )
+
+        availability_zones = _schema_cluster_read.properties.compute_profile.availability_zones
+        availability_zones.Element = AAZStrType()
 
         nodes = _schema_cluster_read.properties.compute_profile.nodes
         nodes.Element = AAZObjectType()
