@@ -75,7 +75,7 @@ def ensure_azure_monitor_profile_prerequisites(
     create_flow=False
 ):
     cloud_name = cmd.cli_ctx.cloud.name
-    if cloud_name.lower() == "usnat" or cloud_name.lower() == "usdod":
+    if cloud_name.lower() == "ussec" or cloud_name.lower() == "usdod":
         grafana_resource_id = raw_parameters.get("grafana_resource_id")
         if grafana_resource_id is not None:
             if grafana_resource_id != "":
