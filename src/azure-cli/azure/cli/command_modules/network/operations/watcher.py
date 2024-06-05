@@ -572,28 +572,6 @@ def process_nw_cm_v2_create_namespace(cmd):
     if not has_value(args.location):  # location is None only occurs in creating a V2 connection monitor
         # endpoint_source_resource_id = args.endpoint_source_resource_id.to_serialized_data()
         from azure.mgmt.resource import ResourceManagementClient
-        # parse and verify endpoint_source_resource_id
-        # if not has_value(args.endpoint_source_resource_id):
-        #     raise ValidationError('usage error: --location/--endpoint-source-resource-id '
-        #                           'is required to create a V2 connection monitor')
-        # if is_valid_resource_id(endpoint_source_resource_id) is False:
-        #     raise ValidationError('usage error: "{}" is not a valid resource id'.format(endpoint_source_resource_id))
-
-        # resource = parse_resource_id(endpoint_source_resource_id)
-        # resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
-        # resource_api_version = _resolve_api_version(resource_client,
-        #                                             resource['namespace'],
-        #                                             resource['resource_parent'],
-        #                                             resource['resource_type'])
-        # resource = resource_client.resources.get_by_id(endpoint_source_resource_id, resource_api_version)
-
-        # args.location = resource.location
-        # if not has_value(args.location):
-        #     raise ValidationError("Can not get location from --endpoint-source-resource-id")
-
-    # if not has_value(args.test_config_protocol):
-    #     raise ValidationError('usage error: --protocol is required to create a test '
-    #                           'configuration for V2 connection monitor')
 
     if has_value(args.output_type) and not has_value(args.workspace_ids):
         raise ValidationError('usage error: --output-type is specified but no other resource id provided')
@@ -610,58 +588,11 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
 
         args_schema.auto_start._registered = False
         args_schema.monitoring_interval_in_seconds._registered = False
-        # args_schema.source._registered = False
-        # args_schema.destination._registered = False
-        # args_schema.endpoints._registered = False
         args_schema.test_groups.Element.testConfigurations._registered = True
         args_schema.test_groups._registered = True
         args_schema.outputs._registered = False
 
-        # V2 Endpoint
-        # args_schema.endpoint_dest_address = AAZStrArg(
-        #     options=["--endpoint-dest-address"],
-        #     help="Address of the destination of connection monitor endpoint (IP or domain name)",
-        #     arg_group="V2 Endpoint",
-        # )
-        # args_schema.endpoint_dest_coverage_level = AAZStrArg(
-        #     options=["--endpoint-dest-coverage-level"],
-        #     help="Test coverage for the endpoint.",
-        #     enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage",
-        #           "Default": "Default", "Full": "Full", "Low": "Low"},
-        #     arg_group="V2 Endpoint"
-        # )
-        # args_schema.endpoint_dest_name = AAZStrArg(
-        #     options=["--endpoint-dest-name"],
-        #     help="The name of the destination of connection monitor endpoint. "
-        #          "If you are creating a V2 Connection Monitor, it's required.",
-        #     required=True,
-        #     arg_group="V2 Endpoint"
-        # )
-        # args_schema.endpoint_dest_resource_id = AAZStrArg(
-        #     options=["--endpoint-dest-resource-id"],
-        #     help="Resource ID of the destination of connection monitor endpoint.",
-        #     arg_group="V2 Endpoint",
-        # )
-        # args_schema.endpoint_dest_type = AAZStrArg(
-        #     options=["--endpoint-dest-type"],
-        #     help="The endpoint type.",
-        #     enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM",
-        #           "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress",
-        #           "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
-        #     arg_group="V2 Endpoint"
-        # )
-        # args_schema.endpoint_source_address = AAZStrArg(
-        #     options=["--endpoint-source-address"],
-        #     help="Address of the source of connection monitor endpoint (IP or domain name).",
-        #     arg_group="V2 Endpoint",
-        # )
-        # args_schema.endpoint_source_coverage_level = AAZStrArg(
-        #     options=["--endpoint-source-coverage-level"],
-        #     help="Test coverage for the endpoint.",
-        #     enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage",
-        #           "Default": "Default", "Full": "Full", "Low": "Low"},
-        #     arg_group="V2 Endpoint"
-        # )
+        
         args_schema.endpoint_source_name = AAZStrArg(
             options=["--endpoint-source-name"],
             help="The name of the source of connection monitor endpoint. "
@@ -810,7 +741,8 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             "resource_id": src.resourceId,
             "address": src.address,
             "type": src.type,
-            "filter":src.filter
+            "coverageLevel":src.coverageLevel,
+            "scope":src.scope
             }
              
             for test_group in args.test_groups
@@ -822,7 +754,8 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             "resource_id": dst.resourceId,
             "address": dst.address,
             "type": dst.type,
-            "filter":dst.filter
+            "coverageLevel":dst.coverageLevel,
+            "scope":dst.scope
             }
 
             for test_group in args.test_groups
@@ -1569,16 +1502,9 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.watcher_name._registered = False
-        args_schema.watcher_name._required = False
-        args_schema.watcher_rg._registered = False
-        args_schema.watcher_rg._required = False
         args_schema.address._required = False
         args_schema.address._registered = True
         args_schema.endpoint_name._registered = True
-
-        args_schema.filter_items._registered = True
-        args_schema.filter_type._registered = True
         args_schema.scope_exclude._registered = True
         args_schema.scope_include._registered = True
 
@@ -1620,42 +1546,11 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
 
     def pre_operations(self):
         pass
-        #args = self.ctx.args
-        # if has_value(args.dest_test_groups) or has_value(args.source_test_groups):
-        #     dest_test_groups, source_test_groups = args.dest_test_groups, args.source_test_groups
-        #     if dest_test_groups is None and source_test_groups is None:
-        #         raise ValidationError('usage error: endpoint has to be referenced from at least one existing '
-        #                               'test group via --dest-test-groups/--source-test-groups')
-        #get_network_watcher_from_location(self)
-
-        # args.scope_include = assign_aaz_list_arg(
-        #     args.scope_include,
-        #     args.address_include,
-        #     element_transformer=lambda _, tmp_ip: {"address": tmp_ip}
-        # )
-
-        # args.scope_exclude = assign_aaz_list_arg(
-        #     args.scope_exclude,
-        #     args.address_exclude,
-        #     element_transformer=lambda _, tmp_ip: {"address": tmp_ip}
-        # )
+       
 
     def pre_instance_create(self):
         pass
-        # args = self.ctx.args
-        # name = args.endpoint_name.to_serialized_data()
-        # instance = self.ctx.vars.instance
-        # src_test_groups = set()
-        # dst_test_groups = set()
-        # if has_value(args.source_test_groups):
-        #     src_test_groups = set(args.source_test_groups.to_serialized_data())
-        # if has_value(args.dest_test_groups):
-        #     dst_test_groups = set(args.dest_test_groups.to_serialized_data())
-        # for test_group in instance.properties.test_groups:
-        #     if test_group.name.to_serialized_data() in src_test_groups:
-        #         test_group.sources.append(name)
-        #     if test_group.name.to_serialized_data() in dst_test_groups:
-        #         test_group.destinations.append(name)
+        
 
 
 class WatcherConnectionMonitorEndpointShow(_WatcherConnectionMonitorEndpointShow):
@@ -1754,10 +1649,6 @@ class WatcherConnectionMonitorTestConfigurationAdd(_MonitorTestConfigurationAdd)
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.watcher_name._registered = False
-        args_schema.watcher_name._required = False
-        args_schema.watcher_rg._registered = False
-        args_schema.watcher_rg._required = False
         args_schema.http_request_headers._required = False
         args_schema.http_request_headers._registered = True
         
@@ -1893,15 +1784,8 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.watcher_name._registered = False
-        args_schema.watcher_name._required = False
-        args_schema.watcher_rg._registered = False
-        args_schema.watcher_rg._required = False
-        args_schema.watcher_rg._required = False
         args_schema.test_group_name._registered = True
         args_schema.test_group_name._required = True
-
-
         args_schema.destinations._registered = True
         args_schema.destinations._required = True
         args_schema.sources._registered = True

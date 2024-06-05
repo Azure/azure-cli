@@ -383,21 +383,28 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_endpoint1(self, resource_group, resource_group_location):
-        
-        self.kwargs.update({
-            'filter1': {'type':'AgentAddress','address':'npmuser'}
-        })
-        # self.cmd('network watcher connection-monitor endpoint add '
-        #         '--name CdmTest '
-        #         '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/srisa-rg/providers/Microsoft.Compute/virtualMachines/CdmTest '
-        #         '--type AzureVM '
-        #         '--scope-exclude "[{val1},{val2}]" ').get_output_in_json()
 
         self.cmd('network watcher connection-monitor endpoint add '
                 '--name CdmTest '
                 '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/srisa-rg/providers/Microsoft.Compute/virtualMachines/CdmTest '
+                '--type AzureVM ').get_output_in_json()
+        self.check('name','CdmTest')
+
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
+    @AllowLargeResponse()
+    def test_nw_connection_monitor_v2_endpoint2(self, resource_group, resource_group_location):
+        
+        #test endpoint add command with scope included in endpoint
+        self.kwargs.update({
+            'val1':{'address':'10.0.0.25'},
+            'val2':{'address':'10.0.0.30'}
+        })
+        self.cmd('network watcher connection-monitor endpoint add '
+                '--name CdmTest '
+                '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/srisa-rg/providers/Microsoft.Compute/virtualMachines/CdmTest '
                 '--type AzureVM '
-                '--filter-items "[{filter1}]" ').get_output_in_json()
+                '--scope-exclude "[{val1},{val2}]" ').get_output_in_json()
+
         self.check('name','CdmTest')
 
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
@@ -427,20 +434,11 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_test_group1(self, resource_group, resource_group_location):
-        
-        # self.kwargs.update({
-        #     'val1':{'address':'10.0.0.25'},
-        #     'val2':{'address':'10.0.0.30'}
-        # })
-        self.kwargs.update({
-            'filter1': {'type':'AgentAddress','address':'npmuser'}
-        })
 
         endpoint1=self.cmd('network watcher connection-monitor endpoint add '
                 '--name Bing '
                 '--address bing.com '
-                '--type ExternalAddress '
-                '--filter-items "[{filter1}]" ').get_output_in_json()
+                '--type ExternalAddress ').get_output_in_json()
         print("e1=",endpoint1)
         
         endpoint2=self.cmd('network watcher connection-monitor endpoint add '
@@ -496,6 +494,77 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
 
         # Restore sys.argv
         sys.argv = original_argv
+
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
+    @AllowLargeResponse()
+    def test_nw_connection_monitor_v2_test_group2(self, resource_group, resource_group_location):
+        #test test group add command with scope included in endpoint
+        self.kwargs.update({
+            'val1':{'address':'10.0.0.25'},
+            'val2':{'address':'10.0.0.30'}
+        })
+        
+
+        endpoint1=self.cmd('network watcher connection-monitor endpoint add '
+                '--name CdmTest '
+                '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/srisa-rg/providers/Microsoft.Compute/virtualMachines/CdmTest '
+                '--type AzureVM '
+                '--scope-exclude "[{val1},{val2}]" ').get_output_in_json()
+        
+        endpoint2=self.cmd('network watcher connection-monitor endpoint add '
+                '--name Github '
+                '--address github.com '
+                '--type ExternalAddress ').get_output_in_json()
+        
+        #creating a test configuration
+
+        self.kwargs.update({
+             'header1': {'name':'UserAgent','value':'Edge'},
+             'header2':{'name':'UserAgent','value':'Chrome'}
+        })
+
+        tc1 = self.cmd('network watcher connection-monitor test-configuration add '
+                 '--name testconfig1 '
+                 '--frequency 120 '
+                 '--protocol Http '
+                  '--http-method Get '
+                  '--http-valid-status-codes [200,201] '
+                  '--http-port 80 '
+                  '--http-request-headers "[{header1},{header2}]" ').get_output_in_json()
+        
+        tc2 = self.cmd('network watcher connection-monitor test-configuration add '
+                 '--name testconfig2 '
+                 '--frequency 120 '
+                 '--protocol Http '
+                  '--http-method Get '
+                  '--http-valid-status-codes [200,201] '
+                  '--http-port 84 ').get_output_in_json()
+        
+        self.kwargs.update({
+            'endpoint1': endpoint1,
+            'endpoint2': endpoint2,
+            'tc1': tc1,
+            'tc2':tc2,
+        })
+
+        # Backup sys.argv
+        original_argv = sys.argv
+
+        # Set sys.argv to your test case
+        sys.argv = ['network watcher connection-monitor test-group add', '--sources', [endpoint1,endpoint2], '--destinations', [endpoint2], '--test-configurations', [tc1,tc2]]
+
+        tg1=self.cmd("network watcher connection-monitor test-group add "
+         '--name tg1 '
+         "--sources [{endpoint1},{endpoint2}] "
+         "--destinations [{endpoint2}] "
+         "--test-configurations [{tc1},{tc2}] ")
+        
+        print("tg1=",tg1)
+        self.check('name','tg1')
+
+        # Restore sys.argv
+        sys.argv = original_argv
+
 
 
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')

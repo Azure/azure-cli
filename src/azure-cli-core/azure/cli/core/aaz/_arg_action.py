@@ -285,19 +285,6 @@ class AAZObjectArgAction(AAZCompoundTypeArgAction):
                 return data
             raise AAZInvalidValueError("field is not nullable")
         
-        if isinstance(data, list) and all(isinstance(d, dict) for d in data):
-        # Handle list of dictionaries
-            result = []
-            for item in data:
-                item_result = OrderedDict()
-                for key, value in item.items():
-                    action = cls._schema[key]._build_cmd_action()  # pylint: disable=unsubscriptable-object
-                    try:
-                        item_result[key] = action.format_data(value)
-                    except AAZInvalidValueError as ex:
-                        raise AAZInvalidValueError(f"Invalid '{key}' : {ex}") from ex
-                result.append(item_result)
-            return result
 
         if isinstance(data, dict):
             result = OrderedDict()

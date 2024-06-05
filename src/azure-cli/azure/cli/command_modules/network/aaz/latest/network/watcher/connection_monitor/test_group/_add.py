@@ -36,7 +36,7 @@ class Add(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        self.SubresourceSelector(ctx=self.ctx, name="subresource")
+        # self.SubresourceSelector(ctx=self.ctx, name="subresource")
         return self.InstanceCreateByJson(ctx=self.ctx)()
 
     _args_schema = None
@@ -50,21 +50,6 @@ class Add(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.connection_monitor = AAZStrArg(
-            options=["--connection-monitor"],
-            help="Connection monitor name.",
-            required=False,
-        )
-        _args_schema.watcher_name = AAZStrArg(
-            options=["--watcher-name"],
-            help="The name of the Network Watcher resource.",
-            required=False,
-        )
-        _args_schema.watcher_rg = AAZResourceGroupNameArg(
-            options=["-g", "--watcher-rg"],
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
-            required=False,
-        )
         _args_schema.disable = AAZBoolArg(
             options=["--disable"],
             help="Value indicating whether test group is disabled. false is  default.  Allowed values: false, true.",
@@ -92,6 +77,7 @@ class Add(AAZCommand):
             required=True,
         )
 
+
         destinations = cls._args_schema.destinations
         destinations.Element = AAZObjectArg()
         destinations.Element.name = AAZStrArg(
@@ -116,90 +102,28 @@ class Add(AAZCommand):
             help="Test coverage for the endpoint. Allowed values: AboveAverage, Average, BelowAverage, Default, Full, Low",
             enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage", "Default": "Default", "Full": "Full", "Low": "Low"},
         )
-        destinations.Element.filter_items = AAZListArg(
-            options=["--filter-items"],
-            help="List of property=value pairs to define filter items. Property currently include: type, address. Property value of type supports 'AgentAddress' only now.",
-        )
-        destinations.Element.filter_type = AAZStrArg(
-            options=["--filter-type"],
-            help="The behavior of the endpoint filter. Currently only 'Include' is supported.  Allowed values: Include.",
-            enum={"Include": "Include"},
-        )
-        destinations.Element.scope_exclude = AAZListArg(
+
+        destinations.Element.scope = AAZObjectArg()
+        destinations.Element.scope.exclude = AAZListArg(
             options=["--scope-exclude"],
             help="List of items which needs to be excluded from the endpoint scope.",
         )
-        destinations.Element.scope_include = AAZListArg(
+        destinations.Element.scope.exclude.Element = AAZObjectArg()
+        destinations.Element.scope.exclude.Element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
+        )
+        destinations.Element.scope.include = AAZListArg(
             options=["--scope-include"],
-            help="List of items which needs to be included to the endpoint scope.",
+            help="List of items which needs to be excluded from the endpoint scope.",
         )
-        destinations.Element.filter = AAZObjectArg()
-
-        # Define the 'type' and 'items' fields inside 'filter'
-        destinations.Element.filter.type = AAZStrArg(
-            options=["--filter-type"],
-            help="The behavior of the endpoint filter. Currently only 'Include' is supported.  Allowed values: Include.",
-            enum={"Include": "Include"},
-        )
-
-        destinations.Element.filter.items = AAZListArg(
-            options=["--filter-items"],
-            help="List of items which needs to be included in the filter.",
-        )
-
-        # Define the 'type' and 'address' fields inside 'items.Element'
-        destinations.Element.filter.items.Element = AAZObjectArg()
-        destinations.Element.filter.items.Element.type = AAZStrArg(
-            options=["type"],
-            help="The type of item included in the filter. Currently only 'AgentAddress' is supported.",
-            enum={"AgentAddress": "AgentAddress"},
-        )
-        destinations.Element.filter.items.Element.address = AAZStrArg(
-            options=["address"],
-            help="The address of the filter item.",
-        )
-
-
-
-
-
-
-
-
-
-
-        filter_items = cls._args_schema.destinations.Element.filter_items
-        filter_items.Element = AAZObjectArg()
-
-        _element = cls._args_schema.destinations.Element.filter_items.Element
-        _element.address = AAZStrArg(
-            options=["address"],
-            help="The address of the filter item.",
-        )
-        _element.type = AAZStrArg(
-            options=["type"],
-            help="The type of item included in the filter. Currently only 'AgentAddress' is supported.",
-            enum={"AgentAddress": "AgentAddress"},
-        )
-
-        scope_exclude = cls._args_schema.destinations.Element.scope_exclude
-        scope_exclude.Element = AAZObjectArg()
-
-        _element = cls._args_schema.destinations.Element.scope_exclude.Element
-        _element.address = AAZStrArg(
+        destinations.Element.scope.include.Element = AAZObjectArg()
+        destinations.Element.scope.include.Element.address = AAZStrArg(
             options=["address"],
             help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
         )
-
-        scope_include = cls._args_schema.destinations.Element.scope_include
-        scope_include.Element = AAZObjectArg()
-
-        _element = cls._args_schema.destinations.Element.scope_include.Element
-        _element.address = AAZStrArg(
-            options=["address"],
-            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
-        )
-
+        
+       
 
         sources = cls._args_schema.sources
         sources.Element = AAZObjectArg()
@@ -226,81 +150,26 @@ class Add(AAZCommand):
             help="Test coverage for the endpoint. Allowed values: AboveAverage, Average, BelowAverage, Default, Full, Low",
             enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage", "Default": "Default", "Full": "Full", "Low": "Low"},
         )
-        sources.Element.filter_items = AAZListArg(
-            options=["--filter-items"],
-            help="List of property=value pairs to define filter items. Property currently include: type, address. Property value of type supports 'AgentAddress' only now.",
-        )
-        sources.Element.filter_type = AAZStrArg(
-            options=["--filter-type"],
-            help="The behavior of the endpoint filter. Currently only 'Include' is supported.  Allowed values: Include.",
-            enum={"Include": "Include"},
-        )
-        sources.Element.scope_exclude = AAZListArg(
+        sources.Element.scope = AAZObjectArg()
+        sources.Element.scope.exclude = AAZListArg(
             options=["--scope-exclude"],
             help="List of items which needs to be excluded from the endpoint scope.",
         )
-        sources.Element.scope_include = AAZListArg(
+        sources.Element.scope.exclude.Element = AAZObjectArg()
+        sources.Element.scope.exclude.Element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
+        )
+        sources.Element.scope.include = AAZListArg(
             options=["--scope-include"],
-            help="List of items which needs to be included to the endpoint scope.",
+            help="List of items which needs to be excluded from the endpoint scope.",
         )
-        sources.Element.filter = AAZObjectArg()
-
-# Define the 'type' and 'items' fields inside 'filter'
-        sources.Element.filter.type = AAZStrArg(
-            options=["--filter-type"],
-            help="The behavior of the endpoint filter. Currently only 'Include' is supported.  Allowed values: Include.",
-            enum={"Include": "Include"},
-        )
-
-        sources.Element.filter.items = AAZListArg(
-            options=["--filter-items"],
-            help="List of items which needs to be included in the filter.",
-        )
-
-        # Define the 'type' and 'address' fields inside 'items.Element'
-        sources.Element.filter.items.Element = AAZObjectArg()
-        sources.Element.filter.items.Element.type = AAZStrArg(
-            options=["type"],
-            help="The type of item included in the filter. Currently only 'AgentAddress' is supported.",
-            enum={"AgentAddress": "AgentAddress"},
-        )
-        sources.Element.filter.items.Element.address = AAZStrArg(
-            options=["address"],
-            help="The address of the filter item.",
-        )
-
-        filter_items = cls._args_schema.sources.Element.filter_items
-        filter_items.Element = AAZObjectArg()
-
-        _element = cls._args_schema.sources.Element.filter_items.Element
-        _element.address = AAZStrArg(
-            options=["address"],
-            help="The address of the filter item.",
-        )
-        _element.type = AAZStrArg(
-            options=["type"],
-            help="The type of item included in the filter. Currently only 'AgentAddress' is supported.",
-            enum={"AgentAddress": "AgentAddress"},
-        )
-
-        scope_exclude = cls._args_schema.sources.Element.scope_exclude
-        scope_exclude.Element = AAZObjectArg()
-
-        _element = cls._args_schema.sources.Element.scope_exclude.Element
-        _element.address = AAZStrArg(
+        sources.Element.scope.include.Element = AAZObjectArg()
+        sources.Element.scope.include.Element.address = AAZStrArg(
             options=["address"],
             help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
         )
-
-        scope_include = cls._args_schema.sources.Element.scope_include
-        scope_include.Element = AAZObjectArg()
-
-        _element = cls._args_schema.sources.Element.scope_include.Element
-        _element.address = AAZStrArg(
-            options=["address"],
-            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
-        )
-
+        
         # define Arg Group "V2 Test Configuration"
 
         _args_schema = cls._args_schema
@@ -441,14 +310,6 @@ class Add(AAZCommand):
          
         return cls._args_schema
 
-
-    class SubresourceSelector(AAZJsonSelector):
-
-        def _get(self):
-            pass
-
-        def _set(self, value):
-            pass
 
     class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
 

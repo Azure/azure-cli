@@ -38,7 +38,6 @@ class Add(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         return self.InstanceCreateByJson(ctx=self.ctx)()
 
     _args_schema = None
@@ -52,21 +51,6 @@ class Add(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.connection_monitor = AAZStrArg(
-            options=["--connection-monitor"],
-            help="Connection monitor name.",
-            required=False,
-        )
-        _args_schema.watcher_name = AAZStrArg(
-            options=["--watcher-name"],
-            help="Name of the network watcher.",
-            required=False,
-        )
-        _args_schema.watcher_rg = AAZResourceGroupNameArg(
-            options=["-g", "--watcher-rg"],
-            help="Name of the resource group the watcher is in.",
-            required=False,
-        )
         _args_schema.address = AAZStrArg(
             options=["--address"],
             help="Address of the connection monitor endpoint (IP or domain name).",
@@ -75,15 +59,6 @@ class Add(AAZCommand):
             options=["--coverage-level"],
             help="Test coverage for the endpoint. Allowed values: AboveAverage, Average, BelowAverage, Default, Full, Low",
             enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage", "Default": "Default", "Full": "Full", "Low": "Low"},
-        )
-        _args_schema.filter_items = AAZListArg(
-            options=["--filter-items"],
-            help="List of property=value pairs to define filter items. Property currently include: type, address. Property value of type supports 'AgentAddress' only now.",
-        )
-        _args_schema.filter_type = AAZStrArg(
-            options=["--filter-type"],
-            help="The behavior of the endpoint filter. Currently only 'Include' is supported.  Allowed values: Include.",
-            enum={"Include": "Include"},
         )
         _args_schema.endpoint_name = AAZStrArg(
             options=["-n", "--name", "--endpoint-name"],
@@ -108,19 +83,6 @@ class Add(AAZCommand):
             enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM", "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress", "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
         )
 
-        filter_items = cls._args_schema.filter_items
-        filter_items.Element = AAZObjectArg()
-
-        _element = cls._args_schema.filter_items.Element
-        _element.address = AAZStrArg(
-            options=["address"],
-            help="The address of the filter item.",
-        )
-        _element.type = AAZStrArg(
-            options=["type"],
-            help="The type of item included in the filter. Currently only 'AgentAddress' is supported.",
-            enum={"AgentAddress": "AgentAddress"},
-        )
 
         scope_exclude = cls._args_schema.scope_exclude
         scope_exclude.Element = AAZObjectArg()
@@ -140,15 +102,6 @@ class Add(AAZCommand):
             help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
         )
         return cls._args_schema
-        
-
-    class SubresourceSelector(AAZJsonSelector):
-
-        def _get(self):
-          pass
-
-        def _set(self, value):
-          pass
 
 
     class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
@@ -178,7 +131,6 @@ class Add(AAZCommand):
                 "coverageLevel": str(self.ctx.args.coverage_level),
                 "resourceId": str(self.ctx.args.resource_id),
                 "type": str(self.ctx.args.type),
-                "filter": {},
                 "scope": {}
             }
 
@@ -203,14 +155,15 @@ class Add(AAZCommand):
                 data["scope"]["exclude"] = []
                 scope_exclude = getattr(self.ctx.args, "scope_exclude", [])
                 for exclude_item in scope_exclude:
-                        data["scope"]["exclude"].append(exclude_item['address'])
+                        data["scope"]["exclude"].append({
+                           "address": exclude_item['address']})
             
             if hasattr(self.ctx.args, "scope_include") and self.ctx.args.scope_include:
                 data["scope"]["include"] = []
                 scope_include = getattr(self.ctx.args, "scope_include", [])
                 for include_item in scope_include:
                         data["scope"]["include"].append({
-                            "address": include_item.get("address")
+                            "address": include_item['address']
                         })
 
             #It keeps a key-value pair if: The value v is not None.The value v is not the string 'Undefined'.The value v is not an empty dictionary.

@@ -51,21 +51,21 @@ class Add(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.connection_monitor = AAZStrArg(
-            options=["--connection-monitor"],
-            help="Connection monitor name.",
-            required=False,
-        )
-        _args_schema.watcher_name = AAZStrArg(
-            options=["--watcher-name"],
-            help="The name of the Network Watcher resource.",
-            required=False,
-        )
-        _args_schema.watcher_rg = AAZResourceGroupNameArg(
-            options=["-g", "--watcher-rg"],
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
-            required=False,
-        )
+        # _args_schema.connection_monitor = AAZStrArg(
+        #     options=["--connection-monitor"],
+        #     help="Connection monitor name.",
+        #     required=False,
+        # )
+        # _args_schema.watcher_name = AAZStrArg(
+        #     options=["--watcher-name"],
+        #     help="The name of the Network Watcher resource.",
+        #     required=False,
+        # )
+        # _args_schema.watcher_rg = AAZResourceGroupNameArg(
+        #     options=["-g", "--watcher-rg"],
+        #     help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
+        #     required=False,
+        # )
         _args_schema.test_configuration_name = AAZStrArg(
             options=["-n", "--name", "--test-configuration-name"],
             help="The name of the connection monitor test configuration.",
@@ -127,7 +127,6 @@ class Add(AAZCommand):
             options=["--http-request-headers"],
             arg_group="HTTP Protocol",
             help="The HTTP headers to transmit with the request.",
-            # required=False
         )
         _args_schema.http_valid_status_codes = AAZListArg(
             options=["--http-valid-status-codes"],
@@ -205,16 +204,7 @@ class Add(AAZCommand):
     def post_instance_create(self, instance):
         pass
 
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
 
-    class SubresourceSelector(AAZJsonSelector):
-
-        def _get(self):
-            pass
-
-        def _set(self, value):
-            pass
 
     class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
       
