@@ -728,6 +728,7 @@ def load_arguments(self, _):
         c.argument('instance_ids', nargs='+',
                    help='Space-separated list of VM instance ID. If missing, reimage all instances.',
                    options_list=['--instance-ids', c.deprecate(target='--instance-id', redirect='--instance-ids', hide=True)])
+        c.argument('force_update_os_disk_for_ephemeral', options_list=['--force-update-os-disk-for-ephemeral', '--update-os-disk'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='Force update ephemeral OS disk for a virtual machine scale set VM.')
 
     with self.argument_context('vmss create', operation_group='virtual_machine_scale_sets') as c:
         VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)

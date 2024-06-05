@@ -14,7 +14,8 @@ from ._transformers import (transform_containerapp_output,
                             transform_job_execution_show_output,
                             transform_revision_list_output,
                             transform_revision_output,
-                            transform_sensitive_values)
+                            transform_sensitive_values,
+                            transform_usages_output)
 
 
 def load_command_table(self, _):
@@ -30,6 +31,7 @@ def load_command_table(self, _):
         g.custom_command('up', 'containerapp_up', supports_no_wait=False, exception_handler=ex_handler_factory())
         g.custom_command('browse', 'open_containerapp_in_browser')
         g.custom_show_command('show-custom-domain-verification-id', 'show_custom_domain_verification_id')
+        g.custom_command('list-usages', 'list_usages', table_transformer=transform_usages_output)
 
     with self.command_group('containerapp replica') as g:
         g.custom_show_command('show', 'get_replica')  # TODO implement the table transformer
@@ -46,6 +48,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_managed_environment', supports_no_wait=True, exception_handler=ex_handler_factory())
         g.custom_command('delete', 'delete_managed_environment', supports_no_wait=True, confirmation=True, exception_handler=ex_handler_factory())
         g.custom_command('update', 'update_managed_environment', supports_no_wait=True, exception_handler=ex_handler_factory())
+        g.custom_command('list-usages', 'list_environment_usages', table_transformer=transform_usages_output)
 
     with self.command_group('containerapp job') as g:
         g.custom_show_command('show', 'show_containerappsjob')
@@ -72,6 +75,12 @@ def load_command_table(self, _):
         g.custom_command('assign', 'assign_managed_identity_job', supports_no_wait=True, exception_handler=ex_handler_factory())
         g.custom_command('remove', 'remove_managed_identity_job', confirmation=True, supports_no_wait=True, exception_handler=ex_handler_factory())
         g.custom_show_command('show', 'show_managed_identity_job')
+
+    with self.command_group('containerapp job registry', is_preview=True) as g:
+        g.custom_command('set', 'set_registry_job', exception_handler=ex_handler_factory())
+        g.custom_show_command('show', 'show_registry_job')
+        g.custom_command('list', 'list_registry_job')
+        g.custom_command('remove', 'remove_registry_job', exception_handler=ex_handler_factory())
 
     with self.command_group('containerapp env dapr-component') as g:
         g.custom_command('list', 'list_dapr_components')
