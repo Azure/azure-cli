@@ -42,7 +42,8 @@ from ._clients import (
     StorageClient,
     AuthClient,
     WorkloadProfileClient,
-    ContainerAppsJobClient
+    ContainerAppsJobClient,
+    SubscriptionClient
 )
 from ._github_oauth import get_github_access_token
 from ._models import (
@@ -51,7 +52,6 @@ from ._models import (
     RegistryCredentials as RegistryCredentialsModel,
     ContainerResources as ContainerResourcesModel,
     Scale as ScaleModel,
-    JobScale as JobScaleModel,
     Container as ContainerModel,
     GitHubActionConfiguration,
     RegistryInfo as RegistryInfoModel,
@@ -87,7 +87,11 @@ from ._ssh_utils import (SSH_DEFAULT_ENCODING, WebSocketConnection, read_ssh, ge
 from ._constants import (MAXIMUM_SECRET_LENGTH, MICROSOFT_SECRET_SETTING_NAME, FACEBOOK_SECRET_SETTING_NAME, GITHUB_SECRET_SETTING_NAME,
                          GOOGLE_SECRET_SETTING_NAME, TWITTER_SECRET_SETTING_NAME, APPLE_SECRET_SETTING_NAME, CONTAINER_APPS_RP,
                          NAME_INVALID, NAME_ALREADY_EXISTS, ACR_IMAGE_SUFFIX, HELLO_WORLD_IMAGE, LOG_TYPE_SYSTEM, LOG_TYPE_CONSOLE,
-                         MANAGED_CERTIFICATE_RT, PRIVATE_CERTIFICATE_RT, PENDING_STATUS, SUCCEEDED_STATUS, CONTAINER_APPS_SDK_MODELS)
+                         MANAGED_CERTIFICATE_RT, PRIVATE_CERTIFICATE_RT, PENDING_STATUS, SUCCEEDED_STATUS, CONTAINER_APPS_SDK_MODELS,
+                         BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME)
+
+from .containerapp_job_registry_decorator import ContainerAppJobRegistryDecorator, ContainerAppJobRegistrySetDecorator, \
+    ContainerAppJobRegistryRemoveDecorator
 
 logger = get_logger(__name__)
 
@@ -384,12 +388,11 @@ def update_containerapp_logic(cmd,
         new_containerapp["properties"]["template"] = r["properties"]["template"]
 
     # Doing this while API has bug. If env var is an empty string, API doesn't return "value" even though the "value" should be an empty string
-    if "properties" in containerapp_def and "template" in containerapp_def["properties"] and "containers" in containerapp_def["properties"]["template"]:
-        for container in containerapp_def["properties"]["template"]["containers"]:
-            if "env" in container:
-                for e in container["env"]:
-                    if "value" not in e:
-                        e["value"] = ""
+    for container in safe_get(containerapp_def, "properties", "template", "containers", default=[]):
+        if "env" in container:
+            for e in container["env"]:
+                if "value" not in e:
+                    e["value"] = ""
 
     update_map = {}
     update_map['scale'] = min_replicas is not None or max_replicas is not None or scale_rule_name
@@ -592,7 +595,7 @@ def update_containerapp_logic(cmd,
         scale_def["maxReplicas"] = max_replicas
     # so we don't overwrite rules
     if safe_get(new_containerapp, "properties", "template", "scale", "rules"):
-        new_containerapp["properties"]["template"]["scale"].pop(["rules"])
+        new_containerapp["properties"]["template"]["scale"].pop("rules")
     if scale_rule_name:
         if not scale_rule_type:
             scale_rule_type = "http"
@@ -600,19 +603,30 @@ def update_containerapp_logic(cmd,
         scale_rule_def = ScaleRuleModel
         curr_metadata = {}
         if scale_rule_http_concurrency:
-            if scale_rule_type in ('http', 'tcp'):
+            if scale_rule_type == 'http':
                 curr_metadata["concurrentRequests"] = str(scale_rule_http_concurrency)
+            elif scale_rule_type == 'tcp':
+                curr_metadata["concurrentConnections"] = str(scale_rule_http_concurrency)
         metadata_def = parse_metadata_flags(scale_rule_metadata, curr_metadata)
         auth_def = parse_auth_flags(scale_rule_auth)
         if scale_rule_type == "http":
             scale_rule_def["name"] = scale_rule_name
             scale_rule_def["custom"] = None
+            scale_rule_def["tcp"] = None
             scale_rule_def["http"] = {}
             scale_rule_def["http"]["metadata"] = metadata_def
             scale_rule_def["http"]["auth"] = auth_def
+        elif scale_rule_type == "tcp":
+            scale_rule_def["name"] = scale_rule_name
+            scale_rule_def["custom"] = None
+            scale_rule_def["http"] = None
+            scale_rule_def["tcp"] = {}
+            scale_rule_def["tcp"]["metadata"] = metadata_def
+            scale_rule_def["tcp"]["auth"] = auth_def
         else:
             scale_rule_def["name"] = scale_rule_name
             scale_rule_def["http"] = None
+            scale_rule_def["tcp"] = None
             scale_rule_def["custom"] = {}
             scale_rule_def["custom"]["type"] = scale_rule_type
             scale_rule_def["custom"]["metadata"] = metadata_def
@@ -786,6 +800,33 @@ def list_containerapp(cmd, resource_group_name=None, managed_env=None):
     return containerapp_list_decorator.list()
 
 
+def show_custom_domain_verification_id(cmd):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        r = SubscriptionClient.show_custom_domain_verification_id(cmd)
+        return r
+    except CLIError as e:
+        handle_raw_exception(e)
+
+
+def list_usages(cmd, location):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        r = SubscriptionClient.list_usages(cmd, location)
+        return r
+    except CLIError as e:
+        handle_raw_exception(e)
+
+
+def list_environment_usages(cmd, resource_group_name, name):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        r = ManagedEnvironmentClient.list_usages(cmd, resource_group_name, name)
+        return r
+    except CLIError as e:
+        handle_raw_exception(e)
+
+
 def delete_containerapp(cmd, name, resource_group_name, no_wait=False):
     raw_parameters = locals()
     containerapp_base_decorator = BaseContainerAppDecorator(
@@ -808,6 +849,7 @@ def create_managed_environment(cmd,
                                logs_key=None,
                                location=None,
                                instrumentation_key=None,
+                               dapr_connection_string=None,
                                infrastructure_subnet_resource_id=None,
                                docker_bridge_cidr=None,
                                platform_reserved_cidr=None,
@@ -821,6 +863,7 @@ def create_managed_environment(cmd,
                                certificate_password=None,
                                enable_workload_profiles=True,
                                mtls_enabled=None,
+                               p2p_encryption_enabled=None,
                                no_wait=False):
     raw_parameters = locals()
     containerapp_env_create_decorator = ContainerAppEnvCreateDecorator(
@@ -855,6 +898,7 @@ def update_managed_environment(cmd,
                                min_nodes=None,
                                max_nodes=None,
                                mtls_enabled=None,
+                               p2p_encryption_enabled=None,
                                no_wait=False):
     raw_parameters = locals()
     containerapp_env_update_decorator = ContainerAppEnvUpdateDecorator(
@@ -1201,16 +1245,7 @@ def update_containerappsjob_logic(cmd,
                     eventTriggerConfig_def["scale"]["maxExecutions"] = max_executions
                 if polling_interval is not None:
                     eventTriggerConfig_def["scale"]["pollingInterval"] = polling_interval
-
-                scale_def = None
-                if min_executions is not None or max_executions is not None or polling_interval is not None:
-                    scale_def = JobScaleModel
-                    scale_def["pollingInterval"] = polling_interval
-                    scale_def["minExecutions"] = min_executions
-                    scale_def["maxReplicas"] = max_executions
-                # so we don't overwrite rules
-                if safe_get(new_containerappsjob, "properties", "template", "scale", "rules"):
-                    new_containerappsjob["properties"]["template"]["scale"].pop(["rules"])
+                # ScaleRule
                 if scale_rule_name:
                     scale_rule_type = scale_rule_type.lower()
                     scale_rule_def = ScaleRuleModel
@@ -1221,10 +1256,17 @@ def update_containerappsjob_logic(cmd,
                     scale_rule_def["type"] = scale_rule_type
                     scale_rule_def["metadata"] = metadata_def
                     scale_rule_def["auth"] = auth_def
-                    if not scale_def:
-                        scale_def = JobScaleModel
-                    scale_def["rules"] = [scale_rule_def]
-                    eventTriggerConfig_def["scale"]["rules"] = scale_def["rules"]
+                    if safe_get(eventTriggerConfig_def, "scale", "rules") is None:
+                        eventTriggerConfig_def["scale"]["rules"] = []
+                    existing_rules = eventTriggerConfig_def["scale"]["rules"]
+                    updated_rule = False
+                    for rule in existing_rules:
+                        if rule["name"] == scale_rule_name:
+                            rule.update(scale_rule_def)
+                            updated_rule = True
+                            break
+                    if not updated_rule:
+                        existing_rules.append(scale_rule_def)
 
             new_containerappsjob["properties"]["configuration"]["eventTriggerConfig"] = eventTriggerConfig_def
 
@@ -1408,7 +1450,7 @@ def update_containerappjob_yaml(cmd, name, resource_group_name, file_name, from_
     yaml_containerappsjob = process_loaded_yaml(load_yaml_file(file_name))
     # check if the type is dict
     if not isinstance(yaml_containerappsjob, dict):
-        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid YAML spec.')
+        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-job-yaml for a valid YAML spec.')
 
     if not yaml_containerappsjob.get('name'):
         yaml_containerappsjob['name'] = name
@@ -1439,7 +1481,7 @@ def update_containerappjob_yaml(cmd, name, resource_group_name, file_name, from_
         deserializer = create_deserializer()
         containerappsjob_def = deserializer('ContainerAppsJob', yaml_containerappsjob)
     except DeserializationError as ex:
-        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid YAML spec.') from ex
+        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-job-yaml for a valid YAML spec.') from ex
 
     # Remove tags before converting from snake case to camel case, then re-add tags. We don't want to change the case of the tags. Need this since we're not using SDK
     tags = None
@@ -2479,6 +2521,8 @@ def update_ingress(cmd, name, resource_group_name, type=None, target_port=None, 
         ingress_def["allowInsecure"] = allow_insecure
 
     if "transport" in ingress_def and ingress_def["transport"] == "tcp":
+        # Client certificate mode can only be set for http transport.
+        ingress_def["clientCertificateMode"] = None
         if exposed_port is not None:
             ingress_def["exposedPort"] = exposed_port
     else:
@@ -3239,6 +3283,70 @@ def set_secrets_job(cmd, name, resource_group_name, secrets,
         handle_raw_exception(e)
 
 
+def show_registry_job(cmd, name, resource_group_name, server):
+    raw_parameters = locals()
+
+    containerapp_job_registry_decorator = ContainerAppJobRegistryDecorator(
+        cmd=cmd,
+        client=ContainerAppsJobClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_job_registry_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
+    containerapp_job_registry_decorator.validate_arguments()
+
+    r = containerapp_job_registry_decorator.show()
+    return r
+
+
+def list_registry_job(cmd, name, resource_group_name):
+    raw_parameters = locals()
+
+    containerapp_job_registry_decorator = ContainerAppJobRegistryDecorator(
+        cmd=cmd,
+        client=ContainerAppsJobClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_job_registry_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
+    containerapp_job_registry_decorator.validate_arguments()
+
+    r = containerapp_job_registry_decorator.list()
+    return r
+
+
+def set_registry_job(cmd, name, resource_group_name, server, username=None, password=None, disable_warnings=False, identity=None, no_wait=False):
+    raw_parameters = locals()
+
+    containerapp_job_registry_set_decorator = ContainerAppJobRegistrySetDecorator(
+        cmd=cmd,
+        client=ContainerAppsJobClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_job_registry_set_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
+    containerapp_job_registry_set_decorator.validate_arguments()
+    containerapp_job_registry_set_decorator.construct_payload()
+    r = containerapp_job_registry_set_decorator.set()
+    return r
+
+
+def remove_registry_job(cmd, name, resource_group_name, server, no_wait=False):
+    raw_parameters = locals()
+
+    containerapp_job_registry_remove_decorator = ContainerAppJobRegistryRemoveDecorator(
+        cmd=cmd,
+        client=ContainerAppsJobClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_job_registry_remove_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
+    containerapp_job_registry_remove_decorator.validate_arguments()
+    containerapp_job_registry_remove_decorator.construct_payload()
+    r = containerapp_job_registry_remove_decorator.remove()
+    return r
+
+
 def enable_dapr(cmd, name, resource_group_name,
                 dapr_app_id=None,
                 dapr_app_port=None,
@@ -3432,6 +3540,10 @@ def containerapp_ssh(cmd, resource_group_name, name, container=None, revision=No
 
     logger.warning("Use ctrl + D to exit.")
     while conn.is_connected:
+        if not reader.is_alive() or not writer.is_alive():
+            logger.warning("Reader or Writer for WebSocket is not alive. Closing the connection.")
+            conn.disconnect()
+
         try:
             time.sleep(0.1)
         except KeyboardInterrupt:
@@ -4128,7 +4240,7 @@ def update_aad_settings(cmd, resource_group_name, name,
         registration["clientSecretSettingName"] = client_secret_setting_name
     if client_secret is not None:
         registration["clientSecretSettingName"] = MICROSOFT_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{MICROSOFT_SECRET_SETTING_NAME}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{MICROSOFT_SECRET_SETTING_NAME}={client_secret}"], no_wait=False, disable_max_length=True)
     if client_secret_setting_name is not None or client_secret is not None:
         fields = ["clientSecretCertificateThumbprint", "clientSecretCertificateSubjectAlternativeName", "clientSecretCertificateIssuer"]
         for field in [f for f in fields if registration.get(f)]:
@@ -4239,7 +4351,7 @@ def update_facebook_settings(cmd, resource_group_name, name,
         registration["appSecretSettingName"] = app_secret_setting_name
     if app_secret is not None:
         registration["appSecretSettingName"] = FACEBOOK_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{FACEBOOK_SECRET_SETTING_NAME}={app_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{FACEBOOK_SECRET_SETTING_NAME}={app_secret}"], no_wait=False, disable_max_length=True)
     if graph_api_version is not None:
         existing_auth["identityProviders"]["facebook"]["graphApiVersion"] = graph_api_version
     if scopes is not None:
@@ -4314,7 +4426,7 @@ def update_github_settings(cmd, resource_group_name, name,
         registration["clientSecretSettingName"] = client_secret_setting_name
     if client_secret is not None:
         registration["clientSecretSettingName"] = GITHUB_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{GITHUB_SECRET_SETTING_NAME}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{GITHUB_SECRET_SETTING_NAME}={client_secret}"], no_wait=False, disable_max_length=True)
     if scopes is not None:
         existing_auth["identityProviders"]["gitHub"]["login"]["scopes"] = scopes.split(",")
     if client_id is not None or client_secret is not None or client_secret_setting_name is not None:
@@ -4391,7 +4503,7 @@ def update_google_settings(cmd, resource_group_name, name,
         registration["clientSecretSettingName"] = client_secret_setting_name
     if client_secret is not None:
         registration["clientSecretSettingName"] = GOOGLE_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{GOOGLE_SECRET_SETTING_NAME}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{GOOGLE_SECRET_SETTING_NAME}={client_secret}"], no_wait=False, disable_max_length=True)
     if scopes is not None:
         existing_auth["identityProviders"]["google"]["login"]["scopes"] = scopes.split(",")
     if allowed_token_audiences is not None:
@@ -4464,7 +4576,7 @@ def update_twitter_settings(cmd, resource_group_name, name,
         registration["consumerSecretSettingName"] = consumer_secret_setting_name
     if consumer_secret is not None:
         registration["consumerSecretSettingName"] = TWITTER_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{TWITTER_SECRET_SETTING_NAME}={consumer_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{TWITTER_SECRET_SETTING_NAME}={consumer_secret}"], no_wait=False, disable_max_length=True)
     if consumer_key is not None or consumer_secret is not None or consumer_secret_setting_name is not None:
         existing_auth["identityProviders"]["twitter"]["registration"] = registration
     try:
@@ -4534,7 +4646,7 @@ def update_apple_settings(cmd, resource_group_name, name,
         registration["clientSecretSettingName"] = client_secret_setting_name
     if client_secret is not None:
         registration["clientSecretSettingName"] = APPLE_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{APPLE_SECRET_SETTING_NAME}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{APPLE_SECRET_SETTING_NAME}={client_secret}"], no_wait=False, disable_max_length=True)
     if scopes is not None:
         existing_auth["identityProviders"]["apple"]["login"]["scopes"] = scopes.split(",")
     if client_id is not None or client_secret is not None or client_secret_setting_name is not None:
@@ -4693,7 +4805,7 @@ def update_openid_connect_provider_settings(cmd, resource_group_name, name, prov
     if client_secret is not None:
         final_client_secret_setting_name = get_oidc_client_setting_app_setting_name(provider_name)
         registration["clientSecretSettingName"] = final_client_secret_setting_name
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{final_client_secret_setting_name}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{final_client_secret_setting_name}={client_secret}"], no_wait=False, disable_max_length=True)
     if openid_configuration is not None:
         registration["openIdConnectConfiguration"]["wellKnownOpenIdConfiguration"] = openid_configuration
     if scopes is not None:
@@ -4736,7 +4848,9 @@ def update_auth_config(cmd, resource_group_name, name, set_string=None, enabled=
                        runtime_version=None, config_file_path=None, unauthenticated_client_action=None,
                        redirect_provider=None, require_https=None,
                        proxy_convention=None, proxy_custom_host_header=None,
-                       proxy_custom_proto_header=None, excluded_paths=None):
+                       proxy_custom_proto_header=None, excluded_paths=None,
+                       token_store=None, sas_url_secret=None, sas_url_secret_name=None,
+                       yes=False):
     raw_parameters = locals()
     containerapp_auth_decorator = ContainerAppAuthDecorator(
         cmd=cmd,
@@ -4746,6 +4860,14 @@ def update_auth_config(cmd, resource_group_name, name, set_string=None, enabled=
     )
 
     containerapp_auth_decorator.construct_payload()
+    # Set secretes will add a secret to the containerapp
+    if containerapp_auth_decorator.get_argument_token_store() and containerapp_auth_decorator.get_argument_sas_url_secret() is not None:
+        if not containerapp_auth_decorator.get_argument_yes():
+            msg = 'Configuring --sas-url-secret will add a secret to the containerapp. Are you sure you want to continue?'
+            if not prompt_y_n(msg, default="n"):
+                raise ArgumentUsageError(
+                    'Usage Error: --sas-url-secret cannot be used without agreeing to add secret to the containerapp.')
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME}={containerapp_auth_decorator.get_argument_sas_url_secret()}"], no_wait=False, disable_max_length=True)
     return containerapp_auth_decorator.create_or_update()
 
 
@@ -4805,7 +4927,8 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
         managed_environment = create_containerapps_compose_environment(cmd,
                                                                        managed_env_name,
                                                                        env_rg,
-                                                                       tags=tags)
+                                                                       tags=tags,
+                                                                       location=location)
 
     compose_yaml = load_yaml_file(compose_file_path)
     parsed_compose_file = ComposeFile(compose_yaml)

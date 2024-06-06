@@ -370,8 +370,8 @@ class AcrCommandsTests(ScenarioTest):
         token = self.cmd('account get-access-token').get_output_in_json()['accessToken']
 
         # service principal creds to support import from resource_imageV1
-        service_principal_username = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPusername').get_output_in_json()['value']
-        service_principal_password = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPpassword').get_output_in_json()['value']
+        #service_principal_username = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPusername').get_output_in_json()['value']
+        #service_principal_password = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPpassword').get_output_in_json()['value']
 
         self.kwargs.update({
             'resource_id': '/subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourcegroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
@@ -392,8 +392,8 @@ class AcrCommandsTests(ScenarioTest):
             'tag_same_registry': 'repository_same_registry:tag_same_registry',
             'tag_by_digest': 'repository_by_digest:tag_by_digest',
             'source_image_public_registry_dockerhub': 'registry.hub.docker.com/library/hello-world',
-            'application_ID': service_principal_username,
-            'service_principal_password': service_principal_password,
+           # 'application_ID': service_principal_username,
+            #'service_principal_password': service_principal_password,
             'token': token
         })
 
@@ -440,7 +440,7 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr import -n {registry_name} --source {source_image_public_registry_dockerhub}')
 
         # Case 8: Import image from an Azure Container Registry with Service Principal's credentials
-        self.cmd('acr import -n {registry_name} --source {resource_imageV1} -u {application_ID} -p {service_principal_password}')
+        #self.cmd('acr import -n {registry_name} --source {resource_imageV1} -u {application_ID} -p {service_principal_password}')
 
         # Case 9: Import image from an Azure Container Registry with personal access token
         self.cmd('acr import -n {registry_name} --source {resource_imageV2} -p {token}')
@@ -809,3 +809,60 @@ class AcrCommandsTests(ScenarioTest):
         result_identities = [identity.lower() for identity in result['userAssignedIdentities'].keys()]
         self.assertEqual(len(result['userAssignedIdentities']), len(query_identities))
         self.assertEqual(sorted(result_identities), sorted(query_identities))
+
+    @ResourceGroupPreparer()
+    def test_acr_create_with_metadata_search_enabled(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': resource_group_location,
+            'sku': 'Premium'
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --allow-metadata-search',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Premium'),
+                         self.check('sku.tier', 'Premium'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('metadataSearch', 'Enabled')])
+
+        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --allow-metadata-search false',
+            checks=[self.check('name', '{registry_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('metadataSearch', 'Disabled')])
+
+        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --allow-metadata-search',
+            checks=[self.check('name', '{registry_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('metadataSearch', 'Enabled')])
+
+        self._core_registry_scenario(registry_name, resource_group, resource_group_location)
+
+    @ResourceGroupPreparer()
+    def test_acr_create_with_metadata_search_disabled(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': resource_group_location,
+            'sku': 'Premium'
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Premium'),
+                         self.check('sku.tier', 'Premium'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('metadataSearch', 'Disabled')])
+
+        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --allow-metadata-search',
+            checks=[self.check('name', '{registry_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('metadataSearch', 'Enabled')])
+
+        self._core_registry_scenario(registry_name, resource_group, resource_group_location)

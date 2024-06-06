@@ -47,12 +47,12 @@ def table_transform_output_list_servers(result):
 
 def postgres_table_transform_output_list_skus(result):
     table_result = []
-    if len(result) > 1:
-        skus_tiers = result[0]["supportedFlexibleServerEditions"]
+    if len(result) > 0:
+        skus_tiers = result[0]["supportedServerEditions"]
         for skus in skus_tiers:
             tier_name = skus["name"]
             try:
-                keys = skus["supportedServerVersions"][0]["supportedVcores"]
+                keys = skus["supportedServerSkus"]
                 for key in keys:
                     new_entry = OrderedDict()
                     new_entry['SKU'] = key['name']

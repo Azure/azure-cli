@@ -24,12 +24,17 @@ class AddCustomizedKeys(argparse.Action):
             raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
 
 
+def is_k8s_source(command_name):
+    source_name = command_name.split(' ')[0]
+    return source_name.lower() == "aks"
+
+
 class AddSecretAuthInfo(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string)
+        action = self.get_action(values, option_string, namespace.command)
         namespace.secret_auth_info = action
 
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+    def get_action(self, values, option_string, command_name):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
@@ -49,11 +54,17 @@ class AddSecretAuthInfo(argparse.Action):
                     'value': v[0]
                 }
             elif kl == 'secret-uri':
+                if is_k8s_source(command_name):
+                    raise ValidationError('`secret-uri` not supported. ' +
+                                          'Service Connector does not support secrets from Key Vault for AKS.')
                 d['secret_info'] = {
                     'secret_type': 'keyVaultSecretUri',
                     'value': v[0]
                 }
             elif kl == 'secret-name':
+                if is_k8s_source(command_name):
+                    raise ValidationError('`secret-name` not supported. ' +
+                                          'Service Connector does not support secrets from Key Vault for AKS.')
                 d['secret_info'] = {
                     'secret_type': 'keyVaultSecretReference',
                     'name': v[0]
@@ -224,4 +235,38 @@ class AddServicePrincipalAuthInfo(argparse.Action):
                                       'object-id=XX secret=XX'.format(d['client_id']))
 
         d['auth_type'] = 'servicePrincipalSecret'
+        return d
+
+
+class AddWorkloadIdentityAuthInfo(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        # convert into user identity
+        namespace.user_identity_auth_info = action
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        try:
+            # --workload-identity <user-identity-resource-id>
+            properties = defaultdict(list)
+            if len(values) != 1:
+                raise ValidationError(
+                    'Invalid number of values for --workload-identity <USER-IDENTITY-RESOURCE-ID>')
+            properties['user-identity-resource-id'] = values[0]
+        except ValueError:
+            raise ValidationError('Usage error: {} [VALUE]'.format(option_string))
+
+        d = {}
+        if 'user-identity-resource-id' in properties:
+            from ._utils import run_cli_cmd
+            output = run_cli_cmd('az identity show --ids {}'.format(properties['user-identity-resource-id']))
+            if output:
+                d['client_id'] = output.get('clientId')
+                d['subscription_id'] = properties['user-identity-resource-id'].split('/')[2]
+            else:
+                raise ValidationError('Invalid user identity resource ID.')
+        else:
+            raise ValidationError('Required values missing for parameter --workload-identity: \
+                                  user-identity-resource-id')
+
+        d['auth_type'] = 'userAssignedIdentity'
         return d

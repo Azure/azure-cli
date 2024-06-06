@@ -14,7 +14,7 @@ from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list, resource_group_name_type, tags_type, file_type, get_three_state_flag,
     get_enum_type)
 from azure.cli.core.util import get_json_object
-from azure.cli.core.profiles import ResourceType, get_api_version
+from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.keyvault._completers import (
     get_keyvault_name_completion_list, get_keyvault_version_completion_list)
@@ -29,6 +29,7 @@ from azure.cli.command_modules.keyvault._validators import (
     validate_vault_name_and_hsm_name, set_vault_base_url, validate_keyvault_resource_id,
     process_hsm_name, KeyEncryptionDataType, process_key_release_policy, process_certificate_policy,
     process_certificate_import)
+from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_profile
 
 # CUSTOM CHOICE LISTS
 
@@ -682,10 +683,7 @@ def load_arguments(self, _):
                 type=get_json_object, validator=process_certificate_policy)
         c.extra('tags', tags_type)
 
-    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)). \
-        replace('.', '_').replace('-', '_')
-
-    if data_api_version != "2016_10_01":
+    if not is_azure_stack_profile(self):
         for cmd in ['list', 'list-deleted']:
             with self.argument_context('keyvault certificate {}'.format(cmd)) as c:
                 c.extra('include_pending', arg_type=get_three_state_flag(),

@@ -99,10 +99,11 @@ WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
     'powershell': 'FunctionApp/windows-powershell-functionapp-on-azure.yml',
 }
 
-DEFAULT_CENTAURI_IMAGE = 'mcr.microsoft.com/azure-functions/dotnet7-quickstart-demo:1.0'
+DEFAULT_CENTAURI_IMAGE = 'mcr.microsoft.com/azure-functions/dotnet8-quickstart-demo:1.0'
 ACR_IMAGE_SUFFIX = ".azurecr.io"
 
 RUNTIME_STATUS_TEXT_MAP = {
+    "BuildRequestReceived": "Received build request...",
     "BuildInProgress": "Building the app...",
     "BuildSuccessful": "Build successful.",
     "BuildFailed": "Build failed.",
@@ -136,3 +137,9 @@ LANGUAGE_EOL_DEPRECATION_NOTICES = {
                "14-lts-is-ending-on-30-april-2023/",
     "node|16": "https://azure.microsoft.com/en-us/updates/node16support/"
 }
+
+FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
+
+DEPLOYMENT_STORAGE_AUTH_TYPES = ['SystemAssignedIdentity', 'UserAssignedIdentity', 'StorageAccountConnectionString']
+
+STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'

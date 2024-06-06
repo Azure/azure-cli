@@ -1,4 +1,4 @@
-var storageAccountName = 'store${uniqueString(resourceGroup().id)}'
+var storageAccountName = 'clistore${uniqueString(resourceGroup().id)}'
 
 param location string
 

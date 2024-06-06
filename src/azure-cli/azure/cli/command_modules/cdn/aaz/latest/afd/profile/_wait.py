@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2024-02-01"],
         ]
     }
 
@@ -116,7 +116,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-02-01",
                     required=True,
                 ),
             }
@@ -215,6 +215,9 @@ class Wait(AAZWaitCommand):
                 serialized_name="frontDoorId",
                 flags={"read_only": True},
             )
+            properties.log_scrubbing = AAZObjectType(
+                serialized_name="logScrubbing",
+            )
             properties.origin_response_timeout_seconds = AAZIntType(
                 serialized_name="originResponseTimeoutSeconds",
             )
@@ -229,6 +232,27 @@ class Wait(AAZWaitCommand):
 
             extended_properties = cls._schema_on_200.properties.extended_properties
             extended_properties.Element = AAZStrType()
+
+            log_scrubbing = cls._schema_on_200.properties.log_scrubbing
+            log_scrubbing.scrubbing_rules = AAZListType(
+                serialized_name="scrubbingRules",
+            )
+            log_scrubbing.state = AAZStrType()
+
+            scrubbing_rules = cls._schema_on_200.properties.log_scrubbing.scrubbing_rules
+            scrubbing_rules.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.log_scrubbing.scrubbing_rules.Element
+            _element.match_variable = AAZStrType(
+                serialized_name="matchVariable",
+                flags={"required": True},
+            )
+            _element.selector = AAZStrType()
+            _element.selector_match_operator = AAZStrType(
+                serialized_name="selectorMatchOperator",
+                flags={"required": True},
+            )
+            _element.state = AAZStrType()
 
             sku = cls._schema_on_200.sku
             sku.name = AAZStrType()

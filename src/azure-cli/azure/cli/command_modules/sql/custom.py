@@ -647,6 +647,7 @@ class SqlServerMinimalTlsVersionType(Enum):
     tls_1_0 = "1.0"
     tls_1_1 = "1.1"
     tls_1_2 = "1.2"
+    tls_1_3 = "1.3"
 
 
 class ResourceIdType(Enum):
@@ -1733,7 +1734,7 @@ def db_list(
     return client.list_by_server(resource_group_name=resource_group_name, server_name=server_name)
 
 
-def db_update(  # pylint: disable=too-many-locals
+def db_update(  # pylint: disable=too-many-locals, too-many-branches
         cmd,
         instance,
         server_name,
@@ -1761,7 +1762,9 @@ def db_update(  # pylint: disable=too-many-locals
         keys_to_remove=None,
         encryption_protector_auto_rotation=None,
         use_free_limit=None,
-        free_limit_exhaustion_behavior=None):
+        free_limit_exhaustion_behavior=None,
+        manual_cutover=None,
+        perform_cutover=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1844,6 +1847,12 @@ def db_update(  # pylint: disable=too-many-locals
 
     if preferred_enclave_type is not None:
         instance.preferred_enclave_type = preferred_enclave_type
+
+    if manual_cutover is not None:
+        instance.manual_cutover = manual_cutover
+
+    if perform_cutover is not None:
+        instance.perform_cutover = perform_cutover
 
     # Set storage_account_type even if storage_acount_type is None
     # Otherwise, empty value defaults to current storage_account_type
@@ -4049,6 +4058,7 @@ def server_create(
         client,
         resource_group_name,
         server_name,
+        minimal_tls_version=None,
         assign_identity=False,
         no_wait=False,
         enable_public_network=None,
@@ -4081,6 +4091,11 @@ def server_create(
         kwargs['restrict_outbound_network_access'] = (
             ServerNetworkAccessFlag.ENABLED if restrict_outbound_network_access
             else ServerNetworkAccessFlag.DISABLED)
+
+    if minimal_tls_version is not None:
+        kwargs['minimal_tls_version'] = minimal_tls_version
+    else:
+        kwargs['minimal_tls_version'] = SqlServerMinimalTlsVersionType.tls_1_2
 
     kwargs['key_id'] = key_id
     kwargs['federated_client_id'] = federated_client_id
@@ -4175,6 +4190,7 @@ def server_update(
     # Apply params to instance
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
+
     instance.minimal_tls_version = (
         minimal_tls_version or instance.minimal_tls_version)
 

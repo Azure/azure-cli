@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from datetime import datetime, timedelta, timezone
 import azure.cli.command_modules.backup.custom_help as helper
+# pylint: disable=too-many-locals
 # pylint: disable=import-error
 # pylint: disable=unused-argument
 
@@ -173,7 +174,7 @@ def _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, 
 def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name, item, restore_mode,
                            resolve_conflict, restore_request_type, source_file_type=None, source_file_path=None,
                            target_storage_account_name=None, target_file_share_name=None, target_folder=None,
-                           target_resource_group_name=None):
+                           target_resource_group_name=None, tenant_id=None):
 
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)
@@ -218,6 +219,16 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
 
     trigger_restore_request = RestoreRequestResource(properties=afs_restore_request)
 
+    if helper.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore"):
+        # Cross Tenant scenario
+        if tenant_id is not None:
+            client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                             aux_tenants=[tenant_id]).restores
+        trigger_restore_request.properties.resource_guard_operation_requests = [
+            helper.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore")]
+
+    # Trigger restore
     result = client.begin_trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
                                   trigger_restore_request, cls=helper.get_pipeline_response, polling=False).result()
 
@@ -298,7 +309,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
 
 
 def disable_protection(cmd, client, resource_group_name, vault_name, item,
-                       retain_recovery_points_as_per_policy=False):
+                       retain_recovery_points_as_per_policy=False, tenant_id=None):
     # Get container and item URIs
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)
@@ -311,6 +322,19 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
         afs_item_properties.protection_state = ProtectionState.protection_stopped
     afs_item_properties.source_resource_id = item.properties.source_resource_id
     afs_item = ProtectedItemResource(properties=afs_item_properties)
+
+    # ResourceGuard scenario: if we are stopping backup and there is MUA setup for the scenario,
+    # we want to set the appropriate parameters.
+    if afs_item.properties.protection_state == ProtectionState.protection_stopped:
+        if helper.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
+                                             vault_name, "RecoveryServicesStopProtection"):
+            # Cross Tenant scenario
+            if tenant_id is not None:
+                client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                 aux_tenants=[tenant_id]).protected_item
+            afs_item.properties.resource_guard_operation_requests = [helper.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesStopProtection")]
+
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, afs_item, cls=helper.get_pipeline_response)
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)

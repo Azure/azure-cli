@@ -227,12 +227,12 @@ def validate_identity(namespace):
 
 def validate_secret_identifier(namespace):
     """ Validate the format of keyvault reference secret identifier """
-    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
+    from azure.keyvault.secrets._shared import parse_key_vault_id
 
     identifier = getattr(namespace, 'secret_identifier', None)
     try:
         # this throws an exception for invalid format of secret identifier
-        KeyVaultIdentifier(uri=identifier)
+        parse_key_vault_id(source_id=identifier)
     except Exception as e:
         raise CLIError("Received an exception while validating the format of secret identifier.\n{0}".format(str(e)))
 

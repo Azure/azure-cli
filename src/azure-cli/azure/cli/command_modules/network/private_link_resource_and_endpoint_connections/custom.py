@@ -20,7 +20,7 @@ def register_providers():
     _register_one_provider('Microsoft.Authorization/resourceManagementPrivateLinks', '2020-05-01', True)
     _register_one_provider('Microsoft.ApiManagement/service', '2021-08-01', True)
     _register_one_provider('Microsoft.AppConfiguration/configurationStores', '2020-06-01', True)
-    _register_one_provider("Microsoft.Batch/batchAccounts", "2022-10-01", True)
+    _register_one_provider("Microsoft.Batch/batchAccounts", "2023-11-01", True)
     _register_one_provider("Microsoft.BotService/botServices", "2021-03-01", True)
     _register_one_provider("Microsoft.Cache/Redis", "2021-06-01", True)
     # "Microsoft.Cache/redisEnterprise", "2021-03-01", True
@@ -82,6 +82,7 @@ def register_providers():
     _register_one_provider('Microsoft.DBforMySQL/flexibleServers', '2022-09-30-privatepreview', False)
     _register_one_provider("Microsoft.DocumentDB/mongoClusters", '2023-03-01-preview', True)
     _register_one_provider('Microsoft.DBforPostgreSQL/flexibleServers', '2023-06-01-preview', False)
+    _register_one_provider('Microsoft.App/managedEnvironments', '2024-02-02-preview', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long

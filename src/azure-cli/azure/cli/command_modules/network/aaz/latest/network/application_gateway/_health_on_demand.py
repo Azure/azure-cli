@@ -16,9 +16,9 @@ class HealthOnDemand(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-09-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}/getbackendhealthondemand", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}/getbackendhealthondemand", "2023-11-01"],
         ]
     }
 
@@ -215,7 +215,7 @@ class HealthOnDemand(AAZCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -709,6 +709,10 @@ class _HealthOnDemandHelper:
         properties.private_ip_address = AAZStrType(
             serialized_name="privateIPAddress",
         )
+        properties.private_ip_address_prefix_length = AAZIntType(
+            serialized_name="privateIPAddressPrefixLength",
+            nullable=True,
+        )
         properties.private_ip_address_version = AAZStrType(
             serialized_name="privateIPAddressVersion",
         )
@@ -717,6 +721,7 @@ class _HealthOnDemandHelper:
         )
         properties.private_link_connection_properties = AAZObjectType(
             serialized_name="privateLinkConnectionProperties",
+            flags={"read_only": True},
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
@@ -1085,6 +1090,7 @@ class _HealthOnDemandHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_link_service = AAZObjectType(
@@ -1273,6 +1279,7 @@ class _HealthOnDemandHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_endpoint_location = AAZStrType(
@@ -1496,7 +1503,9 @@ class _HealthOnDemandHelper:
             _schema.type = cls._schema_private_endpoint_read.type
             return
 
-        cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType()
+        cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
         private_endpoint_read = _schema_private_endpoint_read
         private_endpoint_read.etag = AAZStrType(
@@ -2111,6 +2120,9 @@ class _HealthOnDemandHelper:
         properties.service_endpoints = AAZListType(
             serialized_name="serviceEndpoints",
         )
+        properties.sharing_scope = AAZStrType(
+            serialized_name="sharingScope",
+        )
 
         address_prefixes = _schema_subnet_read.properties.address_prefixes
         address_prefixes.Element = AAZStrType()
@@ -2201,7 +2213,9 @@ class _HealthOnDemandHelper:
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
 
         private_endpoints = _schema_subnet_read.properties.private_endpoints
-        private_endpoints.Element = AAZObjectType()
+        private_endpoints.Element = AAZObjectType(
+            flags={"read_only": True},
+        )
         cls._build_schema_private_endpoint_read(private_endpoints.Element)
 
         resource_navigation_links = _schema_subnet_read.properties.resource_navigation_links

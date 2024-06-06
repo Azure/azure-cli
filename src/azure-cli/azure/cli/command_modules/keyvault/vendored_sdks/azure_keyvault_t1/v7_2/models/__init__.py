@@ -19,6 +19,7 @@ from .transfer_key_py3 import TransferKey
 from .certificate_set_py3 import CertificateSet
 from .error_py3 import Error
 from .key_vault_error_py3 import KeyVaultError, KeyVaultErrorException
+from .json_web_key_py3 import JsonWebKey
 
 
 from .key_vault_client_enums import (
@@ -35,5 +36,6 @@ __all__ = [
     'Error',
     'KeyVaultError',
     'KeyVaultErrorException',
-    'OperationStatus'
+    'OperationStatus',
+    'JsonWebKey',
 ]

@@ -564,7 +564,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                 value_obtained_from_snapshot = snapshot.os_sku
 
         # set default value
-        if value_obtained_from_agentpool is not None:
+        if self.decorator_mode == DecoratorMode.CREATE and value_obtained_from_agentpool is not None:
             os_sku = value_obtained_from_agentpool
         elif raw_value is not None:
             os_sku = raw_value
@@ -1345,6 +1345,34 @@ class AKSAgentPoolContext(BaseAKSContext):
                 ))
         return res
 
+    def _get_disable_windows_outbound_nat(self) -> bool:
+        """Internal function to obtain the value of disable_windows_outbound_nat.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        disable_windows_outbound_nat = self.raw_param.get("disable_windows_outbound_nat")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                hasattr(self.agentpool, "windows_profile") and
+                self.agentpool.windows_profile and
+                self.agentpool.windows_profile.disable_outbound_nat is not None
+            ):
+                disable_windows_outbound_nat = self.agentpool.windows_profile.disable_outbound_nat
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return disable_windows_outbound_nat
+
+    def get_disable_windows_outbound_nat(self) -> bool:
+        """Obtain the value of disable_windows_outbound_nat.
+
+        :return: bool
+        """
+        return self._get_disable_windows_outbound_nat()
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -1660,6 +1688,23 @@ class AKSAgentPoolAddDecorator:
 
         return agentpool
 
+    def set_up_agentpool_windows_profile(self, agentpool: AgentPool) -> AgentPool:
+        """Set up windows profile for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        disable_windows_outbound_nat = self.context.get_disable_windows_outbound_nat()
+
+        # Construct AgentPoolWindowsProfile if one of the fields has been set
+        if disable_windows_outbound_nat:
+            agentpool.windows_profile = self.models.AgentPoolWindowsProfile(  # pylint: disable=no-member
+                disable_outbound_nat=disable_windows_outbound_nat
+            )
+
+        return agentpool
+
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
@@ -1696,6 +1741,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_gpu_properties(agentpool)
         # set up agentpool network profile
         agentpool = self.set_up_agentpool_network_profile(agentpool)
+        # set up agentpool windows profile
+        agentpool = self.set_up_agentpool_windows_profile(agentpool)
         # set up crg id
         agentpool = self.set_up_crg_id(agentpool)
         # restore defaults
@@ -1919,6 +1966,14 @@ class AKSAgentPoolUpdateDecorator:
             agentpool.network_profile.allowed_host_ports = allowed_host_ports
         return agentpool
 
+    def update_os_sku(self, agentpool: AgentPool) -> AgentPool:
+        self._ensure_agentpool(agentpool)
+
+        os_sku = self.context.get_os_sku()
+        if os_sku:
+            agentpool.os_sku = os_sku
+        return agentpool
+
     def update_agentpool_profile_default(self, agentpools: List[AgentPool] = None) -> AgentPool:
         """The overall controller used to update AgentPool profile by default.
 
@@ -1939,6 +1994,8 @@ class AKSAgentPoolUpdateDecorator:
         agentpool = self.update_vm_properties(agentpool)
         # update network profile
         agentpool = self.update_network_profile(agentpool)
+        # update os sku
+        agentpool = self.update_os_sku(agentpool)
         return agentpool
 
     def update_agentpool(self, agentpool: AgentPool) -> AgentPool:

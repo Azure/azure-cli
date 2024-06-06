@@ -1172,6 +1172,52 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
         self.cmd('sql db op cancel -g {} -s {} -d {} -n {}'
                  .format(resource_group, server, database_name, ops[0]['name']))
 
+class SqlServerDbForwardMigrationScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='eastasia')
+    @SqlServerPreparer(location='eastasia')
+    def test_sql_db_forward_migration_manual_cutover(self, resource_group, resource_group_location, server):
+        database_name = "cliautomationdb01"
+        current_service_objective = 'GP_Gen5_2'
+        update_service_objective = 'HS_Gen5_2'
+
+        # Create db
+        self.cmd('sql db create -g {} -s {} -n {} --service-objective {} --yes'
+                 .format(resource_group, server, database_name, current_service_objective),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('status', 'Online')])
+
+        # Update DB with --manual-cutover --no-wait
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --manual-cutover --no-wait'
+                 .format(resource_group, server, database_name, update_service_objective))
+
+        operationPhaseDetailsObject = None
+        operationPhaseDetailsPhase = None
+
+        # Wait until UpdateSlo from GeneralPurpose to Hyperscale is in WaitingForCutover
+        # When run live, this may take like 10 minutes. Unforunately there's no way to speed this up
+        while operationPhaseDetailsObject is None or operationPhaseDetailsPhase != 'WaitingForCutover':
+            time.sleep(60)
+            # List operations
+            ops = list(
+                self.cmd('sql db op list -g {} -s {} -d {}'
+                        .format(resource_group, server, database_name),
+                        checks=[
+                            JMESPathCheck('length(@)', 1),
+                            JMESPathCheck('[0].resourceGroup', resource_group),
+                            JMESPathCheck('[0].databaseName', database_name)
+                        ])
+                        .get_output_in_json())
+
+            operationPhaseDetailsObject = ops[0]['operationPhaseDetails']
+
+            if operationPhaseDetailsObject is not None:
+                operationPhaseDetailsPhase = operationPhaseDetailsObject['phase']
+
+        # Perform cutover to complete UpdateSlo with --perform-cutover --no-wait
+        self.cmd('sql db update -g {} -s {} -n {} --perform-cutover --no-wait'
+                 .format(resource_group, server, database_name))
 
 class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_short_term_retention(self):
@@ -6831,11 +6877,13 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     def test_sql_server_minimal_tls_version(self, resource_group):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         resource_group_location = "eastus"
         tls1_2 = "1.2"
         tls1_1 = "1.1"
+        tls1_3 = "1.3"
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} '
@@ -6854,7 +6902,24 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('minimalTlsVersion', tls1_1)])
+                     
+        # test update sql server with tls version as 1.3
+        self.cmd('sql server update -g {} --name {} --minimal-tls-version {} -i'
+                 .format(resource_group, server_name_1, tls1_3),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('minimalTlsVersion', tls1_3)])
 
+        # test create sql server is created with default tls 1.2 when minimalTlsVersion is not passed explicitly
+        self.cmd('sql server create -g {} --name {} '
+                 '--admin-user {} --admin-password {}'
+                 .format(resource_group, server_name_2, admin_login, admin_passwords[0]),
+                 checks=[
+                     JMESPathCheck('name', server_name_2),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('minimalTlsVersion', tls1_2)]).get_output_in_json()
 
 class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
     @ManagedInstancePreparer()

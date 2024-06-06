@@ -74,7 +74,6 @@ IGNORE_PARAMETERS = [
     'job_manager_task.allow_low_priority_node',
     'job.job_manager_task.application_package_references',
     'virtual_machine_configuration.windows_configuration',
-    'virtual_machine_configuration.os_disk',
     'virtual_machine_configuration.container_configuration',
     'virtual_machine_configuration.license_type',
     'task_scheduling_policy',
@@ -95,7 +94,9 @@ IGNORE_PARAMETERS = [
     'job_schedule.job_specification.job_manager_task.environment_settings',
     'resource_file.storage_container_url',
     'resource_file.blob_prefix',
-    'resource_file.auto_storage_container_name'
+    'resource_file.auto_storage_container_name',
+    'virtual_machine_configuration.service_artifact_reference',
+
 ]
 
 # Options to be flattened into multiple arguments.

@@ -11,6 +11,7 @@ from msrestazure.tools import is_valid_resource_id
 
 def create_condition(match_variable,
                      operator, match_values=None, selector=None, negate_condition=None, transforms=None):
+    condition = None
     if match_variable == 'RemoteAddress':
         condition = {
             "remote_address": {
@@ -150,7 +151,8 @@ def create_condition(match_variable,
                     "type_name": "DeliveryRuleHttpVersionConditionParameters",
                     "match_values": match_values,
                     "negate_condition": negate_condition,
-                    "operator": operator
+                    "operator": operator,
+                    "transforms": transforms
                 }
             }
         }
@@ -246,9 +248,10 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                   header_name=None, header_value=None, query_string_behavior=None, query_parameters=None,
                   redirect_type=None, redirect_protocol=None, custom_hostname=None, custom_path=None,
                   custom_querystring=None, custom_fragment=None, source_pattern=None, destination=None,
-                  preserve_unmatched_path=None, sub_id=None, resource_group_name=None, profile_name=None,
+                  preserve_unmatched_path=None, sub_id=None, resource_group=None, profile_name=None,
                   endpoint_name=None, origin_group=None, query_string_caching_behavior=None,
                   enable_compression=None, enable_caching=None, forwarding_protocol=None):
+    action = None
     if action_name == "CacheExpiration":
         action = {
             "cache_expiration": {
@@ -336,7 +339,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
         if not is_valid_resource_id(formatetd_origin_group):
             # Ideally we should use resource_id but Auzre FrontDoor portal extension has some case-sensitive issues
             # that prevent it from displaying correctly in portal.
-            formatetd_origin_group = f'/subscriptions/{sub_id}/resourcegroups/{resource_group_name}' \
+            formatetd_origin_group = f'/subscriptions/{sub_id}/resourcegroups/{resource_group}' \
                 f'/providers/Microsoft.Cdn/profiles/{profile_name}/endpoints/{endpoint_name}' \
                 f'/origingroups/{formatetd_origin_group}'
         action = {
@@ -370,7 +373,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                 }
             else:
                 origin_group_refernce = f'/subscriptions/{sub_id}/resourcegroups/' \
-                    f'{resource_group_name}/providers/Microsoft.Cdn/profiles/{profile_name}/' \
+                    f'{resource_group}/providers/Microsoft.Cdn/profiles/{profile_name}/' \
                     f'origingroups/{formatetd_origin_group}'
                 origin_group_override = {
                     "origin_group": {
@@ -508,3 +511,22 @@ def create_conditions_from_existing(existing_conditions):
     if len(parsed_conditions) == 0:
         return []
     return parsed_conditions
+
+
+def create_delivery_policy_from_existing(existing_policy):
+    parsed_policy = {
+        'description': 'default_policy',
+        'rules': []
+    }
+
+    if 'rules' in existing_policy:
+        for rule in existing_policy['rules']:
+            parsed_rule = {
+                'name': rule['name'] if 'name' in rule else None,
+                'order': rule['order'],
+                'conditions': create_conditions_from_existing(rule['conditions']),
+                'actions': create_actions_from_existing(rule['actions'])
+            }
+            parsed_policy['rules'].append(parsed_rule)
+
+    return parsed_policy

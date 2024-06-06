@@ -16,8 +16,9 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
-from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
-                    get_resource_if_exists, is_functionapp, is_logicapp, is_webapp, is_centauri_functionapp)
+from .utils import (_normalize_sku, get_sku_tier, get_resource_name_and_group,
+                    get_resource_if_exists, is_functionapp, is_logicapp, is_webapp, is_centauri_functionapp,
+                    _normalize_location)
 
 from .aaz.latest.network import ListServiceTags
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
@@ -90,18 +91,19 @@ def validate_ase_create(cmd, namespace):
 
 
 def _validate_asp_sku(sku, app_service_environment, zone_redundant):
-    supported_skus = ['PREMIUMV2', 'PREMIUMV3', 'PREMIUMMV3', 'PREMIUM0V3', 'ISOLATEDV2']
+    supported_skus = ['PREMIUMV2', 'PREMIUMV3', 'PREMIUMMV3', 'PREMIUM0V3', 'ISOLATEDV2', 'ISOLATEDMV2']
     if zone_redundant and get_sku_tier(sku).upper() not in supported_skus:
         raise ValidationError("Zone redundancy cannot be enabled for sku {}".format(sku))
     # Isolated SKU is supported only for ASE
-    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2']:
+    if sku.upper() in ['I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2', 'I1MV2', 'I2MV2', 'I3MV2', 'I4MV2', 'I5MV2']:
         if not app_service_environment:
             raise ValidationError("The pricing tier 'Isolated' is not allowed for this app service plan. "
                                   "Use this link to learn more: "
                                   "https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
     else:
         if app_service_environment:
-            raise ValidationError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
+            raise ValidationError("Only pricing tier 'IsolatedV2' and 'IsolatedMV2' is allowed in this "
+                                  "app service plan. Use this link to "
                                   "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
 
 
@@ -139,6 +141,7 @@ def validate_functionapp_on_containerapp_container_settings_delete(cmd, namespac
         raise ValidationError(
             "Invalid command. This is currently not supported for Azure Functions on Azure Container app environments.",
             "Please use the following command instead: az functionapp config appsettings set")
+    validate_functionapp_on_flex_plan(cmd, namespace)
 
 
 def validate_functionapp_on_containerapp_update(cmd, namespace):
@@ -157,6 +160,37 @@ def validate_functionapp_on_containerapp_site_config_show(cmd, namespace):
         raise ValidationError(
             "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
             "Please use the following command instead: az functionapp config container show")
+
+
+def validate_functionapp_on_flex_plan(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = _get_app_name(namespace)
+    functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    if functionapp.server_farm_id is None:
+        return
+    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    client = web_client_factory(cmd.cli_ctx)
+    plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+    if plan_info is None:
+        raise ResourceNotFoundError('Could not determine the current plan of the functionapp')
+    if plan_info.sku.tier == 'FlexConsumption':
+        raise ValidationError('Invalid command. This is not currently supported for Azure Functions '
+                              'on the Flex Consumption plan.')
+
+
+def validate_is_flex_functionapp(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    if functionapp.server_farm_id is None:
+        raise ValidationError('This command is only valid for Azure Functions on the FlexConsumption plan.')
+    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    client = web_client_factory(cmd.cli_ctx)
+    plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+    if plan_info is None:
+        raise ResourceNotFoundError('Could not determine the current plan of the functionapp')
+    if plan_info.sku.tier.lower() != 'flexconsumption':
+        raise ValidationError('This command is only valid for Azure Functions on the FlexConsumption plan.')
 
 
 def validate_app_exists(cmd, namespace):
@@ -230,7 +264,8 @@ def validate_add_vnet(cmd, namespace):
 
     if vnet_loc != webapp_loc:
         raise ValidationError("The app and the vnet resources are in different locations. "
-                              "Cannot integrate a regional VNET to an app in a different region")
+                              "Cannot integrate a regional VNET to an app in a different region"
+                              "Web app location: {}. Vnet location: {}".format(webapp_loc, vnet_loc))
 
 
 def validate_front_end_scale_factor(namespace):
@@ -312,13 +347,13 @@ def _validate_service_tag_format(cmd, namespace):
         webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
         service_tag_full_list = ListServiceTags(cli_ctx=cmd.cli_ctx)(command_args={
             "location": webapp.location
-        })["values"]
+        })
         if service_tag_full_list is None:
             logger.warning('Not able to get full Service Tag list. Cannot validate Service Tag.')
             return
         for tag in input_tags:
             valid_tag = False
-            for tag_full_list in service_tag_full_list:
+            for tag_full_list in service_tag_full_list["values"]:
                 if tag.lower() == tag_full_list["name"].lower():
                     valid_tag = True
                     continue
@@ -403,6 +438,8 @@ def validate_vnet_integration(cmd, namespace):
         if is_valid_resource_id(namespace.plan):
             parse_result = parse_resource_id(namespace.plan)
             plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
+        elif _get_flexconsumption_location(namespace):
+            return
         elif _get_consumption_plan_location(namespace):
             raise ArgumentUsageError("Virtual network integration is not allowed for consumption plans.")
         else:
@@ -477,6 +514,12 @@ def _get_app_name(namespace):
 def _get_environment(namespace):
     if hasattr(namespace, "environment"):
         return namespace.environment
+    return None
+
+
+def _get_flexconsumption_location(namespace):
+    if hasattr(namespace, "flexconsumption_location"):
+        return namespace.flexconsumption_location
     return None
 
 

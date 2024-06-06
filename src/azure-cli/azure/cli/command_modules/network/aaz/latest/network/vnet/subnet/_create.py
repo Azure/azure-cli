@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-09-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2023-11-01"],
         ]
     }
 
@@ -114,6 +114,11 @@ class Create(AAZCommand):
         _args_schema.endpoints = AAZListArg(
             options=["--endpoints"],
             help="An array of service endpoints.",
+        )
+        _args_schema.sharing_scope = AAZStrArg(
+            options=["--sharing-scope"],
+            help="Set this property to Tenant to allow sharing subnet with other subscriptions in your AAD tenant. This property can only be set if defaultOutboundAccess is set to false, both properties can only be set if subnet is empty.",
+            enum={"DelegatedServices": "DelegatedServices", "Tenant": "Tenant"},
         )
 
         address_prefixes = cls._args_schema.address_prefixes
@@ -374,7 +379,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -415,6 +420,7 @@ class Create(AAZCommand):
                 properties.set_prop("routeTable", AAZObjectType)
                 properties.set_prop("serviceEndpointPolicies", AAZListType, ".policies")
                 properties.set_prop("serviceEndpoints", AAZListType, ".endpoints")
+                properties.set_prop("sharingScope", AAZStrType, ".sharing_scope")
 
             address_prefixes = _builder.get(".properties.addressPrefixes")
             if address_prefixes is not None:
@@ -814,6 +820,10 @@ class _CreateHelper:
         properties.primary = AAZBoolType()
         properties.private_ip_address = AAZStrType(
             serialized_name="privateIPAddress",
+        )
+        properties.private_ip_address_prefix_length = AAZIntType(
+            serialized_name="privateIPAddressPrefixLength",
+            nullable=True,
         )
         properties.private_ip_address_version = AAZStrType(
             serialized_name="privateIPAddressVersion",
@@ -1533,6 +1543,7 @@ class _CreateHelper:
             flags={"read_only": True},
         )
         _element.id = AAZStrType()
+        _element.identity = AAZObjectType()
         _element.location = AAZStrType()
         _element.name = AAZStrType(
             flags={"read_only": True},
@@ -1542,6 +1553,33 @@ class _CreateHelper:
         )
         _element.tags = AAZDictType()
         _element.type = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        identity = _schema_network_security_group_read.properties.flow_logs.Element.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType()
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_network_security_group_read.properties.flow_logs.Element.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
+
+        _element = _schema_network_security_group_read.properties.flow_logs.Element.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
             flags={"read_only": True},
         )
 
@@ -2254,6 +2292,9 @@ class _CreateHelper:
         )
         properties.service_endpoints = AAZListType(
             serialized_name="serviceEndpoints",
+        )
+        properties.sharing_scope = AAZStrType(
+            serialized_name="sharingScope",
         )
 
         address_prefixes = _schema_subnet_read.properties.address_prefixes

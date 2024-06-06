@@ -604,7 +604,10 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_capacity_reservation_group')
         g.custom_command('update', 'update_capacity_reservation_group')
         g.custom_show_command('show', 'show_capacity_reservation_group')
-        g.custom_command('list', 'list_capacity_reservation_group')
+
+    with self.command_group('capacity reservation group'):
+        from .custom import CapacityReservationGroupList
+        self.command_table['capacity reservation group list'] = CapacityReservationGroupList(loader=self)
 
     with self.command_group('capacity reservation', capacity_reservations_sdk, min_api='2021-04-01',
                             client_factory=cf_capacity_reservations, is_preview=True) as g:

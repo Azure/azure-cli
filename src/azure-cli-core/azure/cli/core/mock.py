@@ -10,6 +10,7 @@ class DummyCli(AzCli):
     """A dummy CLI instance can be used to facilitate automation"""
     def __init__(self, commands_loader_cls=None, random_config_dir=False, **kwargs):
         import os
+        from unittest.mock import patch
 
         from azure.cli.core import MainCommandsLoader
         from azure.cli.core.commands import AzCliCommandInvoker
@@ -26,24 +27,32 @@ class DummyCli(AzCli):
 
         if random_config_dir:
             config_dir = os.path.join(GLOBAL_CONFIG_DIR, 'dummy_cli_config_dir', random_string())
+            # Knack prioritizes the AZURE_CONFIG_DIR env over the config_dir param, and other functions may call
+            # get_config_dir directly. We need to set the env to make sure the config_dir is used.
+            self.env_patch = patch.dict(os.environ, {'AZURE_CONFIG_DIR': config_dir})
+            self.env_patch.start()
 
+            # Always copy command index to avoid initializing it again
+            files_to_copy = ['commandIndex.json']
             # In recording mode, copy login credentials from global config dir to the dummy config dir
             if os.getenv(ENV_VAR_TEST_LIVE, '').lower() == 'true':
-                if os.path.exists(GLOBAL_CONFIG_DIR):
-                    ensure_dir(config_dir)
-                    import shutil
-                    for file in ['azureProfile.json', 'msal_token_cache.bin', 'clouds.config', 'msal_token_cache.json',
-                                 'service_principal_entries.json']:
-                        try:
-                            shutil.copy(os.path.join(GLOBAL_CONFIG_DIR, file), config_dir)
-                        except FileNotFoundError:
-                            pass
-        else:
-            config_dir = GLOBAL_CONFIG_DIR
+                files_to_copy.extend([
+                    'azureProfile.json', 'clouds.config',
+                    'msal_token_cache.bin', 'msal_token_cache.json',
+                    'service_principal_entries.bin', 'service_principal_entries.json'
+                ])
+
+            ensure_dir(config_dir)
+            import shutil
+            for file in files_to_copy:
+                try:
+                    shutil.copy(os.path.join(GLOBAL_CONFIG_DIR, file), config_dir)
+                except FileNotFoundError:
+                    pass
 
         super(DummyCli, self).__init__(
             cli_name='az',
-            config_dir=config_dir,
+            config_dir=GLOBAL_CONFIG_DIR,
             config_env_var_prefix=ENV_VAR_PREFIX,
             commands_loader_cls=commands_loader_cls or MainCommandsLoader,
             parser_cls=AzCliCommandParser,

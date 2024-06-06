@@ -398,14 +398,14 @@ class CdnOriginScenarioTest(CdnScenarioMixin, ScenarioTest):
                              rule_name,
                              origin_group_2_id)
         add_rule_checks = [JMESPathCheck('name', endpoint_name),
-                         JMESPathCheck('length(deliveryPolicy.rules)', 1),
-                         JMESPathCheck('deliveryPolicy.rules[0].name', rule_name),
-                         JMESPathCheck('deliveryPolicy.rules[0].order', 1),
-                         JMESPathCheck('deliveryPolicy.rules[0].actions[0].name', "OriginGroupOverride"),
-                         JMESPathCheck('deliveryPolicy.rules[0].actions[0].parameters.originGroup.id', origin_group_2_id),
-                         JMESPathCheck('deliveryPolicy.rules[0].conditions[0].name', "UrlPath"),
-                         JMESPathCheck('deliveryPolicy.rules[0].conditions[0].parameters.matchValues[0]', "/test1"),
-                         JMESPathCheck('deliveryPolicy.rules[0].conditions[0].parameters.operator', "BeginsWith")]
+                           JMESPathCheck('length(deliveryPolicy.rules)', 1),
+                           JMESPathCheck('deliveryPolicy.rules[0].name', rule_name),
+                           JMESPathCheck('deliveryPolicy.rules[0].order', 1),
+                           JMESPathCheck('deliveryPolicy.rules[0].actions[0].name', "OriginGroupOverride"),
+                           JMESPathCheck('deliveryPolicy.rules[0].actions[0].parameters.originGroup.id', origin_group_2_id),
+                           JMESPathCheck('deliveryPolicy.rules[0].conditions[0].name', "UrlPath"),
+                           JMESPathCheck('deliveryPolicy.rules[0].conditions[0].parameters.matchValues[0]', "/test1"),
+                           JMESPathCheck('deliveryPolicy.rules[0].conditions[0].parameters.operator', "BeginsWith")]
         self.cmd(command, checks=add_rule_checks)
 
         # Specify origin group override by name
@@ -421,12 +421,12 @@ class CdnOriginScenarioTest(CdnScenarioMixin, ScenarioTest):
                              rule_name,
                              origin_group_3_name)
         add_rule_checks = [JMESPathCheck('name', endpoint_name),
-                         JMESPathCheck('length(deliveryPolicy.rules)', 2),
-                         JMESPathCheck('deliveryPolicy.rules[1].name', rule_name),
-                         JMESPathCheck('deliveryPolicy.rules[1].order', 2),
-                         JMESPathCheck('deliveryPolicy.rules[1].actions[0].name', "OriginGroupOverride"),
-                         JMESPathCheck('deliveryPolicy.rules[1].actions[0].parameters.originGroup.id', origin_group_3_id),
-                         JMESPathCheck('deliveryPolicy.rules[1].conditions[0].name', "UrlPath"),
-                         JMESPathCheck('deliveryPolicy.rules[1].conditions[0].parameters.matchValues[0]', "/test2"),
-                         JMESPathCheck('deliveryPolicy.rules[1].conditions[0].parameters.operator', "BeginsWith")]
+                           JMESPathCheck('length(deliveryPolicy.rules)', 2),
+                           JMESPathCheck('deliveryPolicy.rules[1].name', rule_name),
+                           JMESPathCheck('deliveryPolicy.rules[1].order', 2),
+                           JMESPathCheck('deliveryPolicy.rules[1].actions[0].name', "OriginGroupOverride"),
+                           JMESPathCheck('deliveryPolicy.rules[1].actions[0].parameters.originGroup.id', origin_group_3_id),
+                           JMESPathCheck('deliveryPolicy.rules[1].conditions[0].name', "UrlPath"),
+                           JMESPathCheck('deliveryPolicy.rules[1].conditions[0].parameters.matchValues[0]', "/test2"),
+                           JMESPathCheck('deliveryPolicy.rules[1].conditions[0].parameters.operator', "BeginsWith")]
         self.cmd(command, checks=add_rule_checks)

@@ -898,6 +898,9 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         agents.append(headers['User-Agent'])
     headers['User-Agent'] = ' '.join(agents)
 
+    from azure.cli.core.telemetry import set_user_agent
+    set_user_agent(headers['User-Agent'])
+
     if generated_client_request_id_name:
         headers[generated_client_request_id_name] = str(uuid.uuid4())
 

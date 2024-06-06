@@ -9,6 +9,8 @@ import os
 import time
 
 from OpenSSL import crypto
+from cryptography.hazmat.primitives.serialization import pkcs12
+from cryptography.hazmat.primitives import hashes
 
 try:
     from urllib.parse import urlparse
@@ -1105,10 +1107,10 @@ def _create_certificate(cmd,
             result = import_certificate(
                 cli_ctx, vault_uri, certificate_name, certificate_file, password=certificate_password)
             vault_id = vault.id
-            secret_url = result.sid
+            secret_url = result.secret_id
             import base64
             certificate_thumbprint = b64_to_hex(
-                base64.b64encode(result.x509_thumbprint))
+                base64.b64encode(result.properties.x509_thumbprint))
 
         else:
             if vault is None:
@@ -1119,18 +1121,20 @@ def _create_certificate(cmd,
             vault_uri = vault.properties.vault_uri
             certificate_name = _get_certificate_name(certificate_subject_name, resource_group_name)
 
-            policy = _get_default_policy(cli_ctx, certificate_subject_name)
+            from azure.cli.command_modules.keyvault._validators import build_certificate_policy
+            from knack.util import todict
+            policy = _get_default_policy(certificate_subject_name)
+            policyObj = build_certificate_policy(cli_ctx, todict(policy))
             logger.info("Creating self-signed certificate")
-            _create_self_signed_key_vault_certificate.__doc__ = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'key_vault_client#KeyVaultClient').__doc__
             result = _create_self_signed_key_vault_certificate(
-                cli_ctx, vault_uri, certificate_name, policy, certificate_output_folder=certificate_output_folder)
+                cli_ctx, vault_uri, certificate_name, policyObj, certificate_output_folder=certificate_output_folder)
             kv_result = result[0]
             output_file = result[1]
             vault_id = vault.id
-            secret_url = kv_result.sid
+            secret_url = kv_result.secret_id
             import base64
             certificate_thumbprint = b64_to_hex(
-                base64.b64encode(kv_result.x509_thumbprint))
+                base64.b64encode(kv_result.properties.x509_thumbprint))
 
     return vault_id, secret_url, certificate_thumbprint, output_file
 
@@ -1377,24 +1381,23 @@ def _get_thumbprint_from_secret_identifier(cli_ctx, vault, secret_identifier):
     secret_version = segment[3]
     vault_uri_group = _get_vault_uri_and_resource_group_name(cli_ctx, vault)
     vault_uri = vault_uri_group[0]
-    client_not_arm = _get_keyVault_not_arm_client(cli_ctx)
-    secret = client_not_arm.get_secret(vault_uri, secret_name, secret_version)
+    client_not_arm = _get_keyvault_secret_client(cli_ctx, vault_uri)
+    secret = client_not_arm.get_secret(secret_name, secret_version)
     cert_bytes = secret.value
     x509 = None
+    thumbprint = None
     import base64
     decoded = base64.b64decode(cert_bytes)
     try:
-        x509 = crypto.load_pkcs12(decoded).get_certificate()
+        p12 = pkcs12.load_pkcs12(decoded, None)
     except (ValueError, crypto.Error):
         pass
 
-    if not x509:
-        x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_bytes)
+    if p12.cert is None:
+        raise Exception("certificate is None")  # pylint: disable=broad-exception-raised
 
-    if not x509:
-        raise Exception('invalid certificate')  # pylint: disable=broad-exception-raised
-
-    thumbprint = x509.digest("sha1").decode("utf-8").replace(':', '')
+    x509 = p12.cert.certificate
+    thumbprint = x509.fingerprint(hashes.SHA1()).hex().upper()
     return thumbprint
 
 
@@ -1406,10 +1409,7 @@ def _get_certificate(client, vault_base_url, certificate_name):
 
 def import_certificate(cli_ctx, vault_base_url, certificate_name, certificate_data,
                        disabled=False, password=None, certificate_policy=None, tags=None):
-    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
-    CertificatePolicy = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_policy#CertificatePolicy')
-    SecretProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.secret_properties#SecretProperties')
-    import binascii
+    from azure.cli.command_modules.keyvault._validators import build_certificate_policy
     certificate_data = open(certificate_data, 'rb').read()
     x509 = None
     content_type = None
@@ -1417,63 +1417,28 @@ def import_certificate(cli_ctx, vault_base_url, certificate_name, certificate_da
         x509 = crypto.load_certificate(crypto.FILETYPE_PEM, certificate_data)
         # if we get here, we know it was a PEM file
         content_type = 'application/x-pem-file'
-        try:
-            # for PEM files (including automatic endline conversion for
-            # Windows)
-            certificate_data = certificate_data.decode(
-                'utf-8').replace('\r\n', '\n')
-        except UnicodeDecodeError:
-            certificate_data = binascii.b2a_base64(
-                certificate_data).decode('utf-8')
     except (ValueError, crypto.Error):
         pass
 
     if not x509:
-        try:
-            if password:
-                x509 = crypto.load_pkcs12(
-                    certificate_data, password).get_certificate()
-            else:
-                x509 = crypto.load_pkcs12(certificate_data).get_certificate()
-            content_type = 'application/x-pkcs12'
-            certificate_data = binascii.b2a_base64(
-                certificate_data).decode('utf-8')
-        except crypto.Error:
-            raise CLIError(
-                'We could not parse the provided certificate as .pem or .pfx. '
-                'Please verify the certificate with OpenSSL.')
-
-    not_before, not_after = None, None
-
-    if x509.get_notBefore():
-        not_before = _asn1_to_iso8601(x509.get_notBefore())
-
-    if x509.get_notAfter():
-        not_after = _asn1_to_iso8601(x509.get_notAfter())
-
-    cert_attrs = CertificateAttributes(enabled=not disabled,
-                                       not_before=not_before,
-                                       expires=not_after)
+        content_type = 'application/x-pkcs12'
 
     if certificate_policy:
         secret_props = certificate_policy.get('secret_properties')
         if secret_props:
             secret_props['content_type'] = content_type
         elif certificate_policy and not secret_props:
-            certificate_policy['secret_properties'] = SecretProperties(
-                content_type=content_type)
+            certificate_policy['secret_properties'] = {'content_type': content_type}
     else:
-        certificate_policy = CertificatePolicy(
-            secret_properties=SecretProperties(content_type=content_type))
+        certificate_policy = {'secret_properties': {'content_type': content_type}}
 
+    policyObj = build_certificate_policy(cli_ctx, certificate_policy)
     logger.info("Starting 'keyvault certificate import'")
-    client_not_arm = _get_keyVault_not_arm_client(cli_ctx)
-    result = client_not_arm.import_certificate(cli_ctx=cli_ctx,
-                                               vault_base_url=vault_base_url,
-                                               certificate_name=certificate_name,
-                                               base64_encoded_certificate=certificate_data,
-                                               certificate_attributes=cert_attrs,
-                                               certificate_policy=certificate_policy,
+    client_not_arm = _get_keyvault_cert_client(cli_ctx, vault_base_url)
+    result = client_not_arm.import_certificate(certificate_name=certificate_name,
+                                               certificate_bytes=certificate_data,
+                                               enabled=not disabled,
+                                               policy=policyObj,
                                                tags=tags,
                                                password=password)
 
@@ -1482,19 +1447,19 @@ def import_certificate(cli_ctx, vault_base_url, certificate_name, certificate_da
 
 
 def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, secret_version=''):
-    client = _get_keyVault_not_arm_client(cli_ctx)
-    secret = client.get_secret(vault_base_url, secret_name, secret_version)
+    client = _get_keyvault_secret_client(cli_ctx, vault_base_url)
+    secret = client.get_secret(secret_name, secret_version)
     secret_value = secret.value
     if pem_path:
         try:
             import base64
             decoded = base64.b64decode(secret_value)
-            p12 = crypto.load_pkcs12(decoded)
+            p12 = pkcs12.load_pkcs12(decoded, None)
             f_pem = open(pem_path, 'wb')
             f_pem.write(crypto.dump_privatekey(
-                crypto.FILETYPE_PEM, p12.get_privatekey()))
+                crypto.FILETYPE_PEM, p12.key))
             f_pem.write(crypto.dump_certificate(
-                crypto.FILETYPE_PEM, p12.get_certificate()))
+                crypto.FILETYPE_PEM, p12.cert))
             ca = p12.get_ca_certificates()
             if ca is not None:
                 for cert in ca:
@@ -1510,7 +1475,7 @@ def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, s
         try:
             import base64
             decoded = base64.b64decode(secret_value)
-            p12 = crypto.load_pkcs12(decoded)
+            p12 = pkcs12.load_pkcs12(decoded, None)
             with open(pfx_path, 'wb') as f:
                 f.write(decoded)
         except Exception as ex:  # pylint: disable=broad-except
@@ -1519,80 +1484,52 @@ def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, s
             raise ex
 
 
-def _get_default_policy(cli_ctx, subject):
+def _get_default_policy(subject):
     if subject.lower().startswith('cn') is not True:
         subject = "CN={0}".format(subject)
-    return _default_certificate_profile(cli_ctx, subject)
-
-
-def _default_certificate_profile(cli_ctx, subject):
-    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
-    CertificatePolicy = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_policy#CertificatePolicy')
-    ActionType = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#ActionType')
-    KeyUsageType = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#KeyUsageType')
-    IssuerParameters = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.issuer_parameters#IssuerParameters')
-    KeyProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_properties#KeyProperties')
-    LifetimeAction = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.lifetime_action#LifetimeAction')
-    SecretProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.secret_properties#SecretProperties')
-    X509CertificateProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.x509_certificate_properties#X509CertificateProperties')
-    Trigger = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.trigger#Trigger')
-    Action = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.action#Action')
-    template = CertificatePolicy(key_properties=KeyProperties(exportable=True,
-                                                              key_type=u'RSA',
-                                                              key_size=2048,
-                                                              reuse_key=True),
-                                 secret_properties=SecretProperties(
-                                     content_type=u'application/x-pkcs12'),
-                                 x509_certificate_properties=X509CertificateProperties(key_usage=[KeyUsageType.c_rl_sign,
-                                                                                                  KeyUsageType.data_encipherment,
-                                                                                                  KeyUsageType.digital_signature,
-                                                                                                  KeyUsageType.key_encipherment,
-                                                                                                  KeyUsageType.key_agreement,
-                                                                                                  KeyUsageType.key_cert_sign],
-                                                                                       subject=subject,
-                                                                                       validity_in_months=12),
-                                 lifetime_actions=[LifetimeAction(trigger=Trigger(days_before_expiry=90),
-                                                                  action=Action(action_type=ActionType.auto_renew))],
-                                 issuer_parameters=IssuerParameters(
-                                     name=u'Self',),
-                                 attributes=CertificateAttributes(enabled=True))
-
-    return template
+    cert_policy = {
+        'issuer_parameters': {
+            'name': 'Self'
+        },
+        'key_properties': {
+            'exportable': True,
+            'key_size': 2048,
+            'key_type': 'RSA',
+            'reuse_key': True
+        },
+        'lifetime_actions': [{
+            'action': {
+                'action_type': 'AutoRenew'
+            },
+            'trigger': {
+                'days_before_expiry': 90
+            }
+        }],
+        'secret_properties': {
+            'content_type': 'application/x-pkcs12'
+        },
+        'x509_certificate_properties': {
+            'key_usage': [
+                'cRLSign',
+                'dataEncipherment',
+                'digitalSignature',
+                'keyEncipherment',
+                'keyAgreement',
+                'keyCertSign'
+            ],
+            'subject': subject,
+            'validity_in_months': 12
+        }
+    }
+    return cert_policy
 
 
 def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certificate_name, certificate_policy, certificate_output_folder=None, disabled=False, tags=None, validity=None):
-    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
-    cert_attrs = CertificateAttributes(enabled=not disabled)
     logger.info("Starting long-running operation 'keyvault certificate create'")
-    if validity is not None:
-        certificate_policy['x509_certificate_properties']['validity_in_months'] = validity
-    client = _get_keyVault_not_arm_client(cli_ctx)
-    client.create_certificate(
-        vault_base_url, certificate_name, certificate_policy, cert_attrs, tags)
-
-    # otherwise loop until the certificate creation is complete
-    while True:
-        check = client.get_certificate_operation(
-            vault_base_url, certificate_name)
-        if check.status != 'inProgress':
-            logger.info("Long-running operation 'keyvault certificate create' finished with result %s.",
-                        check)
-            break
-        try:
-            time.sleep(10)
-        except KeyboardInterrupt:
-            logger.info("Long-running operation wait cancelled.")
-            raise
-        except Exception as client_exception:
-            message = getattr(client_exception, 'message', client_exception)
-            import json
-            try:
-                message = str(message) + ' ' + json.loads(
-                    client_exception.response.text)['error']['details'][0]['message']   # pylint: disable=no-member
-            except:  # pylint: disable=bare-except
-                pass
-
-            raise CLIError('{}'.format(message))
+    if validity:
+        certificate_policy._validity_in_months = validity  # pylint: disable=protected-access
+    client = _get_keyvault_cert_client(cli_ctx, vault_base_url)
+    client.begin_create_certificate(certificate_name, certificate_policy, enabled=not disabled, tags=tags).result()
 
     pem_output_folder = None
     if certificate_output_folder is not None:
@@ -1603,12 +1540,19 @@ def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certifica
             certificate_output_folder, certificate_name + '.pfx')
         _download_secret(cli_ctx, vault_base_url, certificate_name,
                          pem_output_folder, pfx_output_folder)
-    return client.get_certificate(vault_base_url, certificate_name, ''), pem_output_folder
+    return client.get_certificate(certificate_name), pem_output_folder
 
 
-def _get_keyVault_not_arm_client(cli_ctx):
-    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-    return keyvault_data_plane_factory(cli_ctx)
+def _get_keyvault_secret_client(cli_ctx, vault_base_url):
+    from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_secret_client
+    command_args = {'vault_base_url': vault_base_url}
+    return data_plane_azure_keyvault_secret_client(cli_ctx, command_args)
+
+
+def _get_keyvault_cert_client(cli_ctx, vault_base_url):
+    from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_certificate_client
+    command_args = {'vault_base_url': vault_base_url}
+    return data_plane_azure_keyvault_certificate_client(cli_ctx, command_args)
 
 
 def _create_keyvault(cmd,

@@ -25,7 +25,8 @@ from azure.cli.command_modules.keyvault._transformers import (
 from azure.cli.command_modules.keyvault._format import transform_secret_list_table
 
 from azure.cli.command_modules.keyvault._validators import (
-    process_secret_set_namespace, validate_private_endpoint_connection_id, validate_role_assignment_args)
+    process_secret_set_namespace, validate_key_create,
+    validate_private_endpoint_connection_id, validate_role_assignment_args)
 
 
 def transform_assignment_list(result):
@@ -149,7 +150,7 @@ def load_command_table(self, _):
             g.keyvault_custom('wait', '_wait_security_domain_operation')
 
     with self.command_group('keyvault key', data_key_entity.command_type) as g:
-        g.keyvault_custom('create', 'create_key', transform=transform_key_output)
+        g.keyvault_custom('create', 'create_key', transform=transform_key_output, validator=validate_key_create)
         g.keyvault_command('set-attributes', 'update_key_properties', transform=transform_key_output)
         g.keyvault_command('show', 'get_key', transform=transform_key_output)
         g.keyvault_custom('import', 'import_key', transform=transform_key_output)
@@ -249,7 +250,7 @@ def load_command_table(self, _):
         g.keyvault_custom('download', 'download_certificate')
         g.keyvault_custom('get-default-policy', 'get_default_policy')
 
-    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)). \
+    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES)). \
         replace('.', '_').replace('-', '_')
 
     if data_api_version != '2016_10_01':

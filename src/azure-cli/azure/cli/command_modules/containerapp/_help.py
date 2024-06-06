@@ -119,6 +119,24 @@ helps['containerapp list'] = """
           az containerapp list -g MyResourceGroup
 """
 
+helps['containerapp list-usages'] = """
+    type: command
+    short-summary: List usages of subscription level quotas in specific region.
+    examples:
+    - name: List usages of  quotas in specific region.
+      text: |
+          az containerapp list-usages -l eastus
+"""
+
+helps['containerapp env list-usages'] = """
+    type: command
+    short-summary: List usages of quotas for specific managed environment.
+    examples:
+    - name: List usages of quotas for specific managed environment.
+      text: |
+          az containerapp env list-usages -n MyEnv -g MyResourceGroup
+"""
+
 helps['containerapp exec'] = """
     type: command
     short-summary: Open an SSH-like interactive shell within a container app replica
@@ -199,6 +217,18 @@ helps['containerapp logs show'] = """
     - name: Fetch logs for a particular revision, replica, and container
       text: |
           az containerapp logs show -n my-containerapp -g MyResourceGroup --replica MyReplica --revision MyRevision --container MyContainer
+"""
+
+helps['containerapp show-custom-domain-verification-id'] = """
+    type: command
+    short-summary: Show the verification id for binding app or environment custom domains
+    examples:
+    - name: Get the verification id, which needs to be added as a TXT record for app custom domain to verify domain ownership
+      text: |
+          az containerapp show-custom-domain-verification-id
+    - name: Get the verification id, which needs to be added as a TXT record for custom environment DNS suffix to verify domain ownership
+      text: |
+          az containerapp show-custom-domain-verification-id
 """
 
 # Replica Commands
@@ -744,6 +774,49 @@ helps['containerapp job execution show'] = """
     examples:
     - name: Get execution of a Container App Job.
       text: az containerapp job execution show -n my-containerapp-job -g MyResourceGroup --job-execution-name MyContainerAppJob-66v9xh0
+"""
+
+# Container App Job Registry Commands
+helps['containerapp job registry'] = """
+    type: group
+    short-summary: Commands to manage container registry information of a Container App Job.
+"""
+
+helps['containerapp job registry show'] = """
+    type: command
+    short-summary: Show details of a container registry from a Container App Job.
+    examples:
+    - name: Show the details of a container registry.
+      text: |
+          az containerapp job registry show -n my-containerapp-job -g MyResourceGroup --server MyContainerappJobRegistry.azurecr.io
+"""
+
+helps['containerapp job registry list'] = """
+    type: command
+    short-summary: List container registries configured in a Container App Job.
+    examples:
+    - name: List container registries configured in a Container App Job.
+      text: |
+          az containerapp job registry list -n my-containerapp-job -g MyResourceGroup
+"""
+
+helps['containerapp job registry set'] = """
+    type: command
+    short-summary: Add or update a container registry's details in a Container App Job.
+    examples:
+    - name: Configure a Container App Job to use a registry.
+      text: |
+          az containerapp job registry set -n my-containerapp-job -g MyResourceGroup \\
+              --server MyContainerappJobRegistry.azurecr.io --username MyRegistryUsername --password MyRegistryPassword
+"""
+
+helps['containerapp job registry remove'] = """
+    type: command
+    short-summary: Remove a container registry's details in a Container App Job.
+    examples:
+    - name: Remove a registry from a Container App Job.
+      text: |
+          az containerapp job registry remove -n my-containerapp -g MyResourceGroup --server MyContainerappRegistry.azurecr.io
 """
 
 # Certificates Commands

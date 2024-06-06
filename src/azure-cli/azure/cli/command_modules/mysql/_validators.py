@@ -150,7 +150,7 @@ def _mysql_import_data_source_type_validator(data_source_type, data_source_backu
 
 
 def _mysql_import_mode_validator(mode):
-    allowed_values = ['offline']
+    allowed_values = ['offline', 'online']
     if mode is not None and mode.lower() not in allowed_values:
         raise InvalidArgumentValueError('Incorrect value for --mode. Allowed values : {}'.format(allowed_values))
 

@@ -165,7 +165,7 @@ examples:
 
 helps['sql db import'] = """
 type: command
-short-summary: Imports a bacpac into an existing database.
+short-summary: Imports a bacpac into a new database, or an existing empty database.
 examples:
   - name: Get an SAS key for use in import operation.
     text: |
@@ -539,6 +539,10 @@ examples:
     text: az sql db update -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
   - name: Update exhaustion behavior of free limit database to BillOverUsage
     text: az sql db update -g mygroup -s myserver -n mydb --free-limit-exhaustion-behavior BillOverUsage
+  - name: Update a database to Hyperscale edition, 2 vcores with Gen5 hardware, with manual cutover option
+    text: az sql db update -g mygroup -s myserver -n mydb --edition Hyperscale --service-objective HS_Gen5_2 --manual-cutover
+  - name: Trigger cutover with perform cutover option when update database to Hyperscale edition is in progress
+    text: az sql db update -g mygroup -s myserver -n mydb --perform-cutover
 
 """
 
@@ -899,7 +903,7 @@ examples:
   - name: Create managed instance with instance pool name
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --instance-pool-name myinstancepool
   - name: Create managed instance with database format and pricing model
-    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --database-format Regular --pricing-model AlwaysUpToDate
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --database-format AlwaysUpToDate --pricing-model Regular
 """
 
 helps['sql mi delete'] = """
@@ -1034,7 +1038,7 @@ examples:
   - name: Move managed instance out of instance pool
     text: az sql mi update -g mygroup -n myinstance --remove instancePoolId --capacity vcorecapacity
   - name: Update mi database format and pricing model
-    text: az sql mi update -g mygroup -n myinstance --database-format Regular --pricing-model AlwaysUpToDate
+    text: az sql mi update -g mygroup -n myinstance --database-format AlwaysUpToDate --pricing-model Regular
 """
 
 helps['sql midb'] = """

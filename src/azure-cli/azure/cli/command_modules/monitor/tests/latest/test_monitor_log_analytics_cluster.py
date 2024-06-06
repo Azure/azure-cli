@@ -3,11 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import unittest
 from azure.cli.testsdk import ScenarioTest, record_only, ResourceGroupPreparer
 
 
 class TestClusterScenarios(ScenarioTest):
 
+    # @unittest.skip('service not ready')
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_log_analytics_cluster_c', parameter_name='rg1', key='rg1', location='centralus')
     def test_monitor_log_analytics_cluster_default(self, rg1):
         new_cluster_name = self.create_random_name('clitest-cluster-', 20)
@@ -59,7 +61,7 @@ class TestClusterScenarios(ScenarioTest):
     @record_only()
     def test_monitor_log_analytics_cluster_update_key(self):
         new_key_name = 'log-analytics-cluster'
-        new_key_version = '903ca0dc34b44f0789e35488eaffc9f5'
+        new_key_version = '5f37dcb0f24642c3ab800ab845acde4f'
         self.kwargs.update({
             'rg': 'azure-cli-test-scus',
             'key_name': new_key_name,

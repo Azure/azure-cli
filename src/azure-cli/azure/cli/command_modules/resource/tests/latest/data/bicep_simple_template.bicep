@@ -2,7 +2,7 @@ param location string = 'centralus'
 
 @minLength(3)
 @maxLength(24)
-param storageAccountName string = 'uniquestorage001' // must be globally unique
+param storageAccountName string = 'uniquestorage002' // must be globally unique
 
 resource stg 'Providers.Test/statefulResources@2014-04-01' = {
     name: storageAccountName

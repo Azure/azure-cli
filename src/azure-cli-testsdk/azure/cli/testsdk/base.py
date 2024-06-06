@@ -142,6 +142,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         if self.random_config_dir:
             from azure.cli.core.util import rmtree_with_retry
             rmtree_with_retry(self.cli_ctx.config.config_dir)
+            self.cli_ctx.env_patch.stop()
         super(ScenarioTest, self).tearDown()
 
     def create_random_name(self, prefix, length):

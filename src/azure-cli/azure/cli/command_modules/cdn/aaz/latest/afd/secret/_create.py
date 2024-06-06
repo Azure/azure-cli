@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2024-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/secrets/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/secrets/{}", "2024-02-01"],
         ]
     }
 
@@ -69,8 +69,16 @@ class Create(AAZCommand):
         )
 
         parameters = cls._args_schema.parameters
+        parameters.azure_first_party_managed_certificate = AAZObjectArg(
+            options=["azure-first-party-managed-certificate"],
+            blank={},
+        )
         parameters.customer_certificate = AAZObjectArg(
             options=["customer-certificate"],
+        )
+        parameters.managed_certificate = AAZObjectArg(
+            options=["managed-certificate"],
+            blank={},
         )
         parameters.url_signing_key = AAZObjectArg(
             options=["url-signing-key"],
@@ -213,7 +221,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-02-01",
                     required=True,
                 ),
             }
@@ -246,9 +254,13 @@ class Create(AAZCommand):
 
             parameters = _builder.get(".properties.parameters")
             if parameters is not None:
+                parameters.set_const("type", "AzureFirstPartyManagedCertificate", AAZStrType, ".azure_first_party_managed_certificate", typ_kwargs={"flags": {"required": True}})
                 parameters.set_const("type", "CustomerCertificate", AAZStrType, ".customer_certificate", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("type", "ManagedCertificate", AAZStrType, ".managed_certificate", typ_kwargs={"flags": {"required": True}})
                 parameters.set_const("type", "UrlSigningKey", AAZStrType, ".url_signing_key", typ_kwargs={"flags": {"required": True}})
+                parameters.discriminate_by("type", "AzureFirstPartyManagedCertificate")
                 parameters.discriminate_by("type", "CustomerCertificate")
+                parameters.discriminate_by("type", "ManagedCertificate")
                 parameters.discriminate_by("type", "UrlSigningKey")
 
             disc_customer_certificate = _builder.get(".properties.parameters{type:CustomerCertificate}")

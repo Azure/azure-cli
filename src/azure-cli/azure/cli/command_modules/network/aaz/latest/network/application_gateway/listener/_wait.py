@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2023-06-01", "properties.listeners[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2023-11-01", "properties.listeners[]"],
         ]
     }
 
@@ -116,7 +116,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-06-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -243,6 +243,7 @@ class _WaitHelper:
         if cls._schema_application_gateway_header_configuration_read is not None:
             _schema.header_name = cls._schema_application_gateway_header_configuration_read.header_name
             _schema.header_value = cls._schema_application_gateway_header_configuration_read.header_value
+            _schema.header_value_matcher = cls._schema_application_gateway_header_configuration_read.header_value_matcher
             return
 
         cls._schema_application_gateway_header_configuration_read = _schema_application_gateway_header_configuration_read = AAZObjectType()
@@ -254,9 +255,20 @@ class _WaitHelper:
         application_gateway_header_configuration_read.header_value = AAZStrType(
             serialized_name="headerValue",
         )
+        application_gateway_header_configuration_read.header_value_matcher = AAZObjectType(
+            serialized_name="headerValueMatcher",
+        )
+
+        header_value_matcher = _schema_application_gateway_header_configuration_read.header_value_matcher
+        header_value_matcher.ignore_case = AAZBoolType(
+            serialized_name="ignoreCase",
+        )
+        header_value_matcher.negate = AAZBoolType()
+        header_value_matcher.pattern = AAZStrType()
 
         _schema.header_name = cls._schema_application_gateway_header_configuration_read.header_name
         _schema.header_value = cls._schema_application_gateway_header_configuration_read.header_value
+        _schema.header_value_matcher = cls._schema_application_gateway_header_configuration_read.header_value_matcher
 
     _schema_application_gateway_ip_configuration_read = None
 
@@ -427,6 +439,7 @@ class _WaitHelper:
         )
         properties.default_predefined_ssl_policy = AAZStrType(
             serialized_name="defaultPredefinedSslPolicy",
+            flags={"read_only": True},
         )
         properties.enable_fips = AAZBoolType(
             serialized_name="enableFips",
@@ -923,6 +936,7 @@ class _WaitHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_link_service_connection_state = AAZObjectType(
@@ -1263,6 +1277,7 @@ class _WaitHelper:
 
         sku = _schema_application_gateway_read.properties.sku
         sku.capacity = AAZIntType()
+        sku.family = AAZStrType()
         sku.name = AAZStrType()
         sku.tier = AAZStrType()
 
@@ -1835,6 +1850,10 @@ class _WaitHelper:
         properties.private_ip_address = AAZStrType(
             serialized_name="privateIPAddress",
         )
+        properties.private_ip_address_prefix_length = AAZIntType(
+            serialized_name="privateIPAddressPrefixLength",
+            nullable=True,
+        )
         properties.private_ip_address_version = AAZStrType(
             serialized_name="privateIPAddressVersion",
         )
@@ -1843,6 +1862,7 @@ class _WaitHelper:
         )
         properties.private_link_connection_properties = AAZObjectType(
             serialized_name="privateLinkConnectionProperties",
+            flags={"read_only": True},
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
@@ -2211,6 +2231,7 @@ class _WaitHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_link_service = AAZObjectType(
@@ -2399,6 +2420,7 @@ class _WaitHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_endpoint_location = AAZStrType(
@@ -2622,7 +2644,9 @@ class _WaitHelper:
             _schema.type = cls._schema_private_endpoint_read.type
             return
 
-        cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType()
+        cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
         private_endpoint_read = _schema_private_endpoint_read
         private_endpoint_read.etag = AAZStrType(
@@ -3237,6 +3261,9 @@ class _WaitHelper:
         properties.service_endpoints = AAZListType(
             serialized_name="serviceEndpoints",
         )
+        properties.sharing_scope = AAZStrType(
+            serialized_name="sharingScope",
+        )
 
         address_prefixes = _schema_subnet_read.properties.address_prefixes
         address_prefixes.Element = AAZStrType()
@@ -3307,7 +3334,9 @@ class _WaitHelper:
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
 
         private_endpoints = _schema_subnet_read.properties.private_endpoints
-        private_endpoints.Element = AAZObjectType()
+        private_endpoints.Element = AAZObjectType(
+            flags={"read_only": True},
+        )
         cls._build_schema_private_endpoint_read(private_endpoints.Element)
 
         resource_navigation_links = _schema_subnet_read.properties.resource_navigation_links

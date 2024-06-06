@@ -30,18 +30,29 @@ log_entry_type = {'warn': 'Warning', 'error': 'Error'}
 
 def can_do_action(perms, action):
     for perm in perms:
-        for not_action in perm.not_actions:
-            match = re.escape(not_action)
-            match = re.match("(?i)^" + match.replace(r"\*", ".*") + "$", action)
-            if match:
-                return f"{action} permission is disabled"
+        matched = False
+
         for perm_action in perm.actions:
             match = re.escape(perm_action)
             match = re.match("(?i)^" + match.replace(r"\*", ".*") + "$", action)
             if match:
-                return None
+                matched = True
+                break
 
-    return f"{action} permission is missing"
+        if not matched:
+            continue
+
+        for not_action in perm.not_actions:
+            match = re.escape(not_action)
+            match = re.match("(?i)^" + match.replace(r"\*", ".*") + "$", action)
+            if match:
+                matched = False
+                break
+
+        if matched:
+            return True
+
+    return False
 
 
 def validate_resource(client, key, resource, actions):
@@ -54,9 +65,8 @@ def validate_resource(client, key, resource, actions):
     for action in actions:
         perms, perms_copy = tee(perms)
         perms_list = list(perms_copy)
-        error = can_do_action(perms_list, action)
-        if error is not None:
-            row = [key, resource['name'], log_entry_type["error"], error]
+        if not can_do_action(perms_list, action):
+            row = [key, resource['name'], log_entry_type["error"], f"{action} permission is missing"]
             errors.append(row)
 
     return errors

@@ -3,7 +3,7 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 
 ## Why do we need migrate Track 1 SDK to Track 2 SDK in Azure CLI?
 - Track 1 SDK will be eventually deprecated sometime in the future. 
-- Some new features will only be in track2 SDK in the future.
+- Some new features will only be in Track 2 SDK in the future.
 
 ## Here are criteria to determine the priority of migration:
 - On-demand for Track 2 SDK from CLI customers (such as CAE support from LinkedIn) has higher priority.
@@ -11,9 +11,9 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 - The smaller the gap between Track 1 SDK version and Track 2 SDK version, the higher priority.
 - The more frequent release, the higher priority.
 - If Track 1 SDK is in preview (0.x.x or x.x.xrc), the lower priority.
-- Extenison has lower priority.
+- Extension has lower priority.
 
-## Here is the proposed roadmap for managment plane migration. (Total 60 CLI modules and 78 extensions)
+## Here is the proposed roadmap for management plane migration. (Total 60 CLI modules and 78 extensions)
 
 - To meet CAE requirements (`CAE support` column is `Yes` in the table below), 
   - 12 services need to be migrated by the end of 0/30/2021.

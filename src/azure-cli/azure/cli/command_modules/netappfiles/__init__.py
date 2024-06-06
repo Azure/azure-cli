@@ -5,7 +5,7 @@
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.profiles import ResourceType
-from azure.cli.command_modules.netappfiles._help import helps  # pylint: disable=unused-import
+# from azure.cli.command_modules.netappfiles._help import helps  # pylint: disable=unused-import
 
 
 class NetAppFilesCommandsLoader(AzCommandsLoader):
@@ -19,12 +19,23 @@ class NetAppFilesCommandsLoader(AzCommandsLoader):
 
     def load_command_table(self, args):
         from azure.cli.command_modules.netappfiles.commands import load_command_table
+        from azure.cli.core.aaz import load_aaz_command_table
+        try:
+            from . import aaz
+        except ImportError:
+            aaz = None
+        if aaz:
+            load_aaz_command_table(
+                loader=self,
+                aaz_pkg_name=aaz.__name__,
+                args=args
+            )
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
         from azure.cli.command_modules.netappfiles._params import load_arguments
-        load_arguments(self, command)
+        load_arguments(command)
 
 
 COMMAND_LOADER_CLS = NetAppFilesCommandsLoader

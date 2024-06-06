@@ -58,12 +58,6 @@ va_sql_vm_uuid_arg_type = CLIArgumentType(options_list=('--vm-uuid'), metavar='V
 # Auto Provisioning
 auto_provisioning_auto_provision_arg_type = CLIArgumentType(options_list=('--auto-provision'), metavar='AUTOPROVISION', help='Automatic provisioning toggle. possible values are "On" or "Off"')
 
-# Contacts
-contact_email_arg_type = CLIArgumentType(options_list=('--email'), metavar='EMAIL', help='E-mail of the security contact')
-contact_phone_arg_type = CLIArgumentType(options_list=('--phone'), metavar='PHONE', help='Phone of the security contact')
-contact_alert_notifications_arg_type = CLIArgumentType(options_list=('--alert-notifications'), metavar='ALERTNOTIFICATIONS', help='Whether to send mail notifications to the security contacts')
-contact_alerts_admins_arg_type = CLIArgumentType(options_list=('--alerts-admins'), metavar='ALERTADMINS', help='Whether to send mail notifications to the subscription administrators')
-
 # Pricing
 pricing_tier_arg_type = CLIArgumentType(options_list=('--tier'), metavar='TIER', help='pricing tier type')
 pricing_tier_subplan_arg_type = CLIArgumentType(options_list=('--subplan'), metavar='SUBPLAN', help='bundle suplan', required=False)
@@ -139,8 +133,6 @@ def load_arguments(self, _):
                   'atp',
                   'va sql',
                   'task',
-                  'setting',
-                  'contact',
                   'auto-provisioning-setting',
                   'discovered-security-solution',
                   'external-security-solution',
@@ -325,21 +317,6 @@ def load_arguments(self, _):
                   'va sql baseline set']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument('baseline_latest', options_list=('--latest'), metavar='BASELINE', help='Use this argument without parameters to set baseline upon latest scan results', arg_type=get_three_state_flag())
-
-    for scope in ['contact create']:
-        with self.argument_context('security {}'.format(scope)) as c:
-            c.argument(
-                'email',
-                arg_type=contact_email_arg_type)
-            c.argument(
-                'phone',
-                arg_type=contact_phone_arg_type)
-            c.argument(
-                'alert_notifications',
-                arg_type=contact_alert_notifications_arg_type)
-            c.argument(
-                'alerts_admins',
-                arg_type=contact_alerts_admins_arg_type)
 
     for scope in ['pricing create']:
         with self.argument_context('security {}'.format(scope)) as c:

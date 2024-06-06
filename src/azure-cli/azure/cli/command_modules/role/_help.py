@@ -9,23 +9,25 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['ad'] = """
 type: group
-short-summary: Manage Azure Active Directory Graph entities needed for Role Based Access Control
+short-summary: >-
+    Manage Microsoft Entra ID (formerly known as Azure Active Directory, Azure AD, AAD) entities needed for
+    Azure role-based access control (Azure RBAC) through Microsoft Graph API.
 """
 
 helps['ad app'] = """
 type: group
-short-summary: Manage applications with AAD Graph.
+short-summary: Manage Microsoft Entra applications.
 """
 
 helps['ad app create'] = """
 type: command
-short-summary: Create a web application, web API or native application
+short-summary: Create an application.
 long-summary: For more detailed documentation, see https://docs.microsoft.com/graph/api/resources/application
 examples:
   - name: Create an application.
     text: |
         az ad app create --display-name mytestapp
-  - name: Create an application that can fall back to public client with Microsoft Graph delegated permission Application.Read.All
+  - name: Create an application that can fall back to public client with Microsoft Graph delegated permission User.Read
     text: |
         az ad app create --display-name my-public --is-fallback-public-client --required-resource-accesses @manifest.json
         ("manifest.json" contains the following content)
@@ -33,7 +35,7 @@ examples:
             "resourceAppId": "00000003-0000-0000-c000-000000000000",
             "resourceAccess": [
                 {
-                    "id": "c79f8feb-a9db-4090-85f9-90d820caa0eb",
+                    "id": "e1fe6dd8-ba31-4d61-89e7-88639da4683d",
                     "type": "Scope"
                 }
            ]
@@ -192,10 +194,13 @@ long-summary: >-
     to get available permissions for Microsoft Graph API, run `az ad sp show --id 00000003-0000-0000-c000-000000000000`.
     Application permissions under the `appRoles` property correspond to `Role` in --api-permissions.
     Delegated permissions under the `oauth2Permissions` property correspond to `Scope` in --api-permissions.
+
+
+    For details on Microsoft Graph permissions, see https://learn.microsoft.com/graph/permissions-reference
 examples:
-  - name: Add Microsoft Graph delegated permission User.Read (Sign in and read user profile).
+  - name: Add Microsoft Graph delegated permission User.Read
     text: az ad app permission add --id {appId} --api 00000003-0000-0000-c000-000000000000 --api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope
-  - name: Add Microsoft Graph application permission Application.ReadWrite.All (Read and write all applications).
+  - name: Add Microsoft Graph application permission Application.ReadWrite.All
     text: az ad app permission add --id {appId} --api 00000003-0000-0000-c000-000000000000 --api-permissions 1bfefb4e-e0b5-418b-a88f-73c46d2cc8e9=Role
 """
 
@@ -213,10 +218,10 @@ helps['ad app permission delete'] = """
 type: command
 short-summary: Remove an API permission
 examples:
-  - name: Remove Azure Active Directory Graph permissions.
-    text: az ad app permission delete --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000
-  - name: Remove Azure Active Directory Graph delegated permission User.Read (Sign in and read user profile).
-    text: az ad app permission delete --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000 --api-permissions 311a71cc-e848-46a1-bdf8-97ff7156d8e6
+  - name: Remove Microsoft Graph permissions.
+    text: az ad app permission delete --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000003-0000-0000-c000-000000000000
+  - name: Remove Microsoft Graph delegated permission User.Read
+    text: az ad app permission delete --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000003-0000-0000-c000-000000000000 --api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d
 """
 
 helps['ad app permission grant'] = """
@@ -236,7 +241,7 @@ helps['ad app permission list'] = """
 type: command
 short-summary: List API permissions the application has requested
 examples:
-  - name: List the OAuth2 permissions for an existing AAD app
+  - name: List the OAuth2 permissions for an application.
     text: az ad app permission list --id e042ec79-34cd-498f-9d9f-1234234
 """
 
@@ -264,15 +269,15 @@ helps['ad app update'] = """
 type: command
 short-summary: Update an application.
 examples:
-  - name: update a native application with delegated permission of "access the AAD directory as the signed-in user"
+  - name: Update an application with Microsoft Graph delegated permission User.Read
     text: |
         az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --required-resource-accesses @manifest.json
         ("manifest.json" contains the following content)
         [{
-            "resourceAppId": "00000002-0000-0000-c000-000000000000",
+            "resourceAppId": "00000003-0000-0000-c000-000000000000",
             "resourceAccess": [
                 {
-                    "id": "a42657d6-7f20-40e3-b6f0-cee03008a62a",
+                    "id": "e1fe6dd8-ba31-4d61-89e7-88639da4683d",
                     "type": "Scope"
                 }
            ]
@@ -397,21 +402,51 @@ examples:
 
 helps['ad group'] = """
 type: group
-short-summary: Manage Azure Active Directory groups.
+short-summary: Manage Microsoft Entra groups.
 """
 
 helps['ad group create'] = """
 type: command
-short-summary: Create a group in the directory.
+short-summary: Create a group.
 examples:
   - name: Create a group in the directory. (autogenerated)
     text: az ad group create --display-name MyDisplay --mail-nickname MyDisplay
     crafted: true
 """
 
+helps['ad group show'] = """
+type: command
+short-summary: Get the details of a group.
+"""
+
+helps['ad group delete'] = """
+type: command
+short-summary: Delete a group.
+"""
+
+helps['ad group get-member-groups'] = """
+type: command
+short-summary: Get a collection of object IDs of groups of which the specified group is a member.
+"""
+
 helps['ad group member'] = """
 type: group
-short-summary: Manage Azure Active Directory group members.
+short-summary: Manage group members.
+"""
+
+helps['ad group member list'] = """
+type: command
+short-summary: Get the members of a group.
+"""
+
+helps['ad group member add'] = """
+type: command
+short-summary: Add a member to a group.
+"""
+
+helps['ad group member remove'] = """
+type: command
+short-summary: Remove a member from a group.
 """
 
 helps['ad group member check'] = """
@@ -425,7 +460,7 @@ examples:
 
 helps['ad group owner'] = """
 type: group
-short-summary: Manage Azure Active Directory group owners.
+short-summary: Manage group owners.
 """
 
 helps['ad group owner add'] = """
@@ -467,7 +502,7 @@ short-summary: Get the list of directory objects that are owned by the user
 
 helps['ad sp'] = """
 type: group
-short-summary: Manage Azure Active Directory service principals for automation authentication.
+short-summary: Manage Microsoft Entra service principals.
 """
 
 helps['ad sp create'] = """
@@ -609,12 +644,12 @@ examples:
 
 helps['ad user'] = """
 type: group
-short-summary: Manage Azure Active Directory users and user authentication.
+short-summary: Manage Microsoft Entra users.
 """
 
 helps['ad user create'] = """
 type: command
-short-summary: Create an Azure Active Directory user.
+short-summary: Create a user.
 parameters:
   - name: --force-change-password-next-sign-in
     short-summary: Marks this user as needing to update their password the next time they authenticate. If omitted, false will be used.
@@ -635,34 +670,34 @@ examples:
 
 helps['ad user list'] = """
 type: command
-short-summary: List Azure Active Directory users.
+short-summary: List users.
 examples:
-  - name: List all the Azure Active Directory users
+  - name: List all users.
     text: az ad user list
 """
 
 helps['ad user update'] = """
 type: command
-short-summary: Update Azure Active Directory users.
+short-summary: Update a user.
 examples:
-  - name: Update Azure Active Directory users.
+  - name: Update a user.
     text: az ad user update --id myuser@contoso.com --display-name username2
 """
 
 helps['ad user delete'] = """
 type: command
-short-summary: Delete Azure Active Directory user.
+short-summary: Delete a user.
 examples:
-  - name: Delete Azure Active Directory users.
+  - name: Delete a user.
     text: az ad user delete --id myuser@contoso.com
 """
 
 
 helps['ad user show'] = """
 type: command
-short-summary: Show details for a Azure Active Directory user.
+short-summary: Get the details of a user.
 examples:
-  - name: Show Azure Active Directory user.
+  - name: Show a user.
     text: az ad user show --id myuser@contoso.com
 """
 
@@ -673,7 +708,7 @@ short-summary: Get the details for the currently logged-in user.
 
 helps['role'] = """
 type: group
-short-summary: Manage user roles for access control with Azure Active Directory and service principals.
+short-summary: Manage Azure role-based access control (Azure RBAC).
 """
 
 helps['role assignment'] = """

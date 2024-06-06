@@ -197,10 +197,11 @@ def load_command_table(self, _):
             'aks_mesh_enable',
             supports_no_wait=True)
         g.custom_command(
-            'disable',
-            'aks_mesh_disable',
+            "disable",
+            "aks_mesh_disable",
             supports_no_wait=True,
-            confirmation=True)
+            confirmation="Existing Azure Service Mesh Profile values will be reset.\n" +
+            "Are you sure you want to perform this operation?")
         g.custom_command(
             'enable-ingress-gateway',
             'aks_mesh_enable_ingress_gateway',
@@ -233,3 +234,16 @@ def load_command_table(self, _):
             'rollback',
             'aks_mesh_upgrade_rollback',
             supports_no_wait=True)
+
+    # AKS approuting commands
+    with self.command_group('aks approuting', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command('enable', 'aks_approuting_enable')
+        g.custom_command('disable', 'aks_approuting_disable', confirmation=True)
+        g.custom_command('update', 'aks_approuting_update')
+
+    # AKS approuting dns-zone commands
+    with self.command_group('aks approuting zone', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command('add', 'aks_approuting_zone_add')
+        g.custom_command('delete', 'aks_approuting_zone_delete', confirmation=True)
+        g.custom_command('update', 'aks_approuting_zone_update')
+        g.custom_command('list', 'aks_approuting_zone_list')

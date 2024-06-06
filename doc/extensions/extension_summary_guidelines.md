@@ -6,7 +6,7 @@ on the documentation site:
 1. Summaries must contain complete sentences.
 2. Summaries must not be more than 3 sentences. Single sentences are preferred, 120-140 character max.
 3. Summaries must use correct spelling and English grammar, including definite and indefinite articles for nouns ('the', 'a', or 'an')
-4. Extension names are not proper nouns  (i.e. should be 'alias extension', not 'Alias Extension')
+4. Extension names are not proper nouns  (i.e., should be 'alias extension', not 'Alias Extension')
  
     BAD: Azure CLI Alias Extension  
     IMPROVED: The Azure CLI alias extension.

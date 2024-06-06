@@ -173,6 +173,10 @@ short-summary: Sets if SCM site is using the same restrictions as the main site.
 examples:
   - name: Enable SCM site to use same access restrictions as main site.
     text: az functionapp config access-restriction set -g ResourceGroup -n AppName --use-same-restrictions-for-scm-site true
+  - name: Set default action to Allow for main site.
+    text: az functionapp config access-restriction set -g ResourceGroup -n AppName --default-action Allow
+  - name: Set default action to Deny for scm site.
+    text: az functionapp config access-restriction set -g ResourceGroup -n AppName --scm-default-action Deny
 """
 
 helps['functionapp config access-restriction show'] = """
@@ -380,6 +384,106 @@ examples:
     text: az functionapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname cname.mycustomdomain.com
 """
 
+helps['functionapp deployment config'] = """
+type: group
+short-summary: Manage a function app's deployment configuration.
+"""
+
+helps['functionapp deployment config set'] = """
+type: command
+short-summary: Update an existing function app's deployment configuration.
+examples:
+  - name: Set the function app's deployment storage.
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-storage-name MyStorageAccount --deployment-storage-container-name MyStorageContainer
+  - name: Set the function app's deployment storage authentication method.
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-storage-auth-type userAssignedIdentity --deployment-storage-auth-value myAssignedId
+"""
+
+helps['functionapp deployment config show'] = """
+type: command
+short-summary: Get the details of a function app's deployment configuration.
+examples:
+  - name: Get the details of a function app's deployment configuration.
+    text: az functionapp deployment config show --name MyFunctionApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp runtime'] = """
+type: group
+short-summary: Manage a function app's runtime.
+"""
+
+helps['functionapp runtime config'] = """
+type: group
+short-summary: Manage a function app's runtime configuration.
+"""
+
+helps['functionapp runtime config set'] = """
+type: command
+short-summary: Update an existing function app's runtime configuration.
+examples:
+  - name: Set the function app's runtime version.
+    text: az functionapp runtime config set --name MyFunctionApp --resource-group MyResourceGroup --runtime-version 3.11
+"""
+
+helps['functionapp runtime config show'] = """
+type: command
+short-summary: Get the details of a function app's runtime configuration.
+examples:
+  - name: Get the details of a function app's runtime configuration.
+    text: az functionapp runtime config show --name MyFunctionApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp scale'] = """
+type: group
+short-summary: Manage a function app's scale.
+"""
+
+helps['functionapp scale config'] = """
+type: group
+short-summary: Manage a function app's scale configuration.
+"""
+
+helps['functionapp scale config set'] = """
+type: command
+short-summary: Update an existing function app's scale configuration.
+examples:
+  - name: Set the function app's instance memory configuration.
+    text: az functionapp scale config set --name MyFunctionApp --resource-group MyResourceGroup --instance-memory 2048
+  - name: Set the function app's maximum instance count configuration.
+    text: az functionapp scale config set --name MyFunctionApp --resource-group MyResourceGroup --maximum-instance-count 5
+  - name: Set the function app's trigger configuration.
+    text: az functionapp scale config set --name MyFunctionApp --resource-group MyResourceGroup --trigger-type http --trigger-settings perInstanceConcurrency=1
+"""
+
+helps['functionapp scale config show'] = """
+type: command
+short-summary: Get the details of a function app's scale configuration.
+examples:
+  - name: Get the details of a function app's scale configuration.
+    text: az functionapp scale config show --name MyFunctionApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp scale config always-ready'] = """
+type: group
+short-summary: Manage the always-ready settings in the scale configuration.
+"""
+
+helps['functionapp scale config always-ready delete'] = """
+type: command
+short-summary: Delete always-ready settings in the scale configuration.
+examples:
+  - name: Delete always-ready setings in the scale configuration.
+    text: az functionapp scale config always-ready delete --name MyFunctionApp --resource-group MyResourceGroup --setting-names key1 key2
+"""
+
+helps['functionapp scale config always-ready set'] = """
+type: command
+short-summary: Add or update existing always-ready settings in the scale configuration.
+examples:
+  - name: Add or update existing always-ready settings in the scale configuration.
+    text: az functionapp scale config always-ready set --name MyFunctionApp --resource-group MyResourceGroup --settings key1=value1 key2=value2
+"""
+
 helps['functionapp cors'] = """
 type: group
 short-summary: Manage Cross-Origin Resource Sharing (CORS)
@@ -441,6 +545,9 @@ examples:
   - name: Create a function app using a private ACR image.
     text: >
         az functionapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime node --storage-account MyStorageAccount --deployment-container-image-name myacr.azurecr.io/myimage:tag --docker-registry-server-password passw0rd --docker-registry-server-user MyUser
+  - name: Create a flex consumption function app. See https://aka.ms/flex-http-concurrency for more information on default http concurrency values.
+    text: >
+        az functionapp create -g MyResourceGroup --name MyUniqueAppName -s MyStorageAccount --flexconsumption-location northeurope --runtime java --instance-memory 2048
 """
 
 helps['functionapp delete'] = """
@@ -865,6 +972,16 @@ type: command
 short-summary: List available locations for running function apps.
 """
 
+helps['functionapp list-flexconsumption-locations'] = """
+type: command
+short-summary: List available locations for running function apps on the Flex Consumption plan.
+"""
+
+helps['functionapp list-flexconsumption-runtimes'] = """
+type: command
+short-summary: List available built-in stacks which can be used for function apps on the Flex Consumption plan.
+"""
+
 helps['functionapp plan'] = """
 type: group
 short-summary: Manage App Service Plans for an Azure Function
@@ -1102,10 +1219,14 @@ examples:
 
 helps['webapp config access-restriction set'] = """
 type: command
-short-summary: Sets if SCM site is using the same restrictions as the main site.
+short-summary: Sets if SCM site is using the same restrictions as the main site and default actions.
 examples:
   - name: Enable SCM site to use same access restrictions as main site.
     text: az webapp config access-restriction set -g ResourceGroup -n AppName --use-same-restrictions-for-scm-site true
+  - name: Set default action to Allow for main site.
+    text: az webapp config access-restriction set -g ResourceGroup -n AppName --default-action Allow
+  - name: Set default action to Deny for scm site.
+    text: az webapp config access-restriction set -g ResourceGroup -n AppName --scm-default-action Deny
 """
 
 helps['webapp config access-restriction show'] = """

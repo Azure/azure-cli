@@ -51,7 +51,7 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
         f.write(html)
 
     # Upload to storage account
-    cmd = 'az storage blob upload -f index.html -c {} -n index.html --account-name clitestresultstac --account-key {} --overwrite'.format(container, ACCOUNT_KEY)
+    cmd = 'az storage blob upload -f index.html -c {} -n index.html --account-name clitestresultstac --auth-mode login --overwrite'.format(container)
     logger.warning('Running: ' + cmd)
     os.system(cmd)
 
@@ -60,7 +60,7 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
             and USER_REPO == 'https://github.com/Azure/azure-cli.git' \
             and USER_REPO_EXT == 'https://github.com/Azure/azure-cli-extensions.git' \
             and USER_BRANCH == 'dev' and USER_BRANCH_EXT == 'main' and USER_LIVE == '--live':
-        cmd = 'az storage blob upload -f index.html -c latest -n index.html --account-name clitestresultstac --account-key {} --overwrite'.format(ACCOUNT_KEY)
+        cmd = 'az storage blob upload -f index.html -c latest -n index.html --account-name clitestresultstac --auth-mode login --overwrite'
         logger.warning('Running: ' + cmd)
         os.system(cmd)
 

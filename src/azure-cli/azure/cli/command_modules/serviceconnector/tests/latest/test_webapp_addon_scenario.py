@@ -11,7 +11,7 @@ from azure.cli.testsdk import (
     ScenarioTest, 
     live_only
 )
-from ._test_utils import CredentialReplacer
+from ._test_utils import CredentialReplacer, ConfigCredentialReplacer
 
 
 class WebAppAddonScenarioTest(ScenarioTest):
@@ -19,7 +19,7 @@ class WebAppAddonScenarioTest(ScenarioTest):
     def __init__(self, method_name):
         super(WebAppAddonScenarioTest, self).__init__(
             method_name,
-            recording_processors=[CredentialReplacer()]
+            recording_processors=[CredentialReplacer(), ConfigCredentialReplacer()]
         )
 
     @AllowLargeResponse()

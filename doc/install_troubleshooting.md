@@ -9,7 +9,7 @@ These are issues we have closed because we cannot address them within the CLI du
 lsb_release does not return the correct base distribution version
 -----------------------------------------------------------------
 
-Some Ubuntu- or Debian-derived distributions such as Linux Mint may not return the correct version name from `lsb_release`. This value is used in the install process to determine the package to install. If you know the code name of the Ubuntu or Debian version your distribution is derived from, you can set the `AZ_REPO` value manually when [adding the repository](https://docs.microsoft.com/cli/azure/install-azure-cli-apt#set-release). Otherwise, look up information for your distribution on how to determine the base distribution code name and set `AZ_REPO` to the correct value.
+Some Ubuntu- or Debian-derived distributions such as Linux Mint may not return the correct version name from `lsb_release`. This value is used in the install process to determine the package to install. If you know the code name of the Ubuntu or Debian version your distribution is derived from, you can set the `AZ_REPO` value manually when [adding the repository](https://learn.microsoft.com/cli/azure/install-azure-cli-linux?pivots=apt#lsb_release-doesnt-return-the-correct-base-distribution-version). Otherwise, look up information for your distribution on how to determine the base distribution code name and set `AZ_REPO` to the correct value.
 
 
 No package for your Debian-based distribution
@@ -17,14 +17,14 @@ No package for your Debian-based distribution
 
 Sometimes it may be a while after a distribution is released before there's an Azure CLI package available for it. The Azure CLI is designed to be resilient with regards to future versions of dependencies and rely on as few of them as possible. If there's no package available for your base distribution, try a package for an earlier distribution.
 
-To do this, set the value of `AZ_REPO` manually when [adding the repository](https://docs.microsoft.com/cli/azure/install-azure-cli-apt#set-release). For Ubuntu distributions use the `bionic` repository, and for Debian distributions
+To do this, set the value of `AZ_REPO` manually when [adding the repository](https://learn.microsoft.com/cli/azure/install-azure-cli-linux?pivots=apt#no-package-for-your-distribution). For Ubuntu distributions use the `bionic` repository, and for Debian distributions
 use `stretch`. Distributions released before Ubuntu Trusty and Debian Wheezy are not supported.
 
 
 Install on RHEL 7.6 or other YUM-managed systems without Python 3
 -----------------------------------------------------------------
 
-If you can, please upgrade your system to a version with official support for `python3` package. Otherwise, you need to first install a `python3` package, either [build from source](https://github.com/linux-on-ibm-z/docs/wiki/Building-Python-3.6.x) or install through some [additional repo](https://developers.redhat.com/blog/2018/08/13/install-python3-rhel/). Then you can download the package and install it without dependency.
+If you can, please upgrade your system to a version with official support for `python3` package. Otherwise, you need to first install a `python3` package, either [build from source](https://github.com/linux-on-ibm-z/docs/wiki/Building-Python-3.6.x) or install through some [additional repo](https://developers.redhat.com/blog/install-python3-rhel). Then you can download the package and install it without dependency.
 ```bash
 $ sudo yum install yum-utils
 $ sudo yumdownloader azure-cli

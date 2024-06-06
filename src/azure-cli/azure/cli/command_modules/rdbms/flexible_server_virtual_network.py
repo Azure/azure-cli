@@ -15,6 +15,7 @@ from azure.mgmt.privatedns.models import PrivateZone
 from azure.mgmt.privatedns.models import SubResource
 from azure.mgmt.privatedns.models import VirtualNetworkLink
 from ._client_factory import resource_client_factory, private_dns_client_factory, private_dns_link_client_factory
+from ._config_reader import get_cloud_cluster
 from ._flexible_server_util import get_id_components, check_existence, _is_resource_name, parse_public_access_input, get_user_confirmation, _check_resource_group_existence
 from .validators import validate_private_dns_zone, validate_vnet_location
 
@@ -338,14 +339,6 @@ def prepare_mysql_exist_private_dns_zone(cmd, resource_group, private_dns_zone, 
 
 def prepare_private_dns_zone(db_context, resource_group, server_name, private_dns_zone, subnet_id, location, yes):
     cmd = db_context.cmd
-    dns_suffix_client = db_context.cf_private_dns_zone_suffix(cmd.cli_ctx, '_')
-    private_dns_zone_suffix = dns_suffix_client.execute()
-    if db_context.command_group == 'mysql':
-        private_dns_zone_suffix = private_dns_zone_suffix.private_dns_zone_suffix
-
-    # suffix should start with .
-    if private_dns_zone_suffix[0] != '.':
-        private_dns_zone_suffix = '.' + private_dns_zone_suffix
 
     # Get Vnet Components
     vnet_subscription, vnet_rg, vnet_name, _ = get_id_components(subnet_id)
@@ -359,6 +352,20 @@ def prepare_private_dns_zone(db_context, resource_group, server_name, private_dn
         "subscription": vnet_subscription,
         "resource_group": vnet_rg
     })
+
+    cluster = get_cloud_cluster(cmd, location.replace('/ +/g', '').lower(), vnet_subscription)
+
+    if cluster is not None:
+        private_dns_zone_suffix = cluster["privateDnsZoneDomain"]
+    else:
+        dns_suffix_client = db_context.cf_private_dns_zone_suffix(cmd.cli_ctx, '_')
+        private_dns_zone_suffix = dns_suffix_client.execute()
+        if db_context.command_group == 'mysql':
+            private_dns_zone_suffix = private_dns_zone_suffix.private_dns_zone_suffix
+
+    # suffix should start with .
+    if private_dns_zone_suffix[0] != '.':
+        private_dns_zone_suffix = '.' + private_dns_zone_suffix
 
     # Process private dns zone (no input or Id input)
     dns_rg = None

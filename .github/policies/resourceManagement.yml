@@ -2798,6 +2798,14 @@ configuration:
             bodyContains:
               pattern: '\b(az network dns)\b'
               isRegex: True
+        - not:
+            titleContains:
+              pattern: '\b(az network bastion)\b'
+              isRegex: True
+        - not:
+            bodyContains:
+              pattern: '\b(az network bastion)\b'
+              isRegex: True
       then:
       - addLabel:
           label: Network
@@ -2995,6 +3003,8 @@ configuration:
       - assignTo:
           users:
           - archidda
+          - zhoxing-ms
+          - ReaNAiveD
       - addLabel:
           label: Auto-Assign
       description: '[logicapp] auto assign labels and users based on issue description.'
@@ -4341,6 +4351,9 @@ configuration:
           label: Service Attention
       - addLabel:
           label: Synapse
+      - assignTo:
+          users:
+          - evelyn-ys
       description: '[synapse] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -4385,7 +4398,7 @@ configuration:
           label: Portal
       - assignTo:
           users:
-          - jsntcy
+          - ReaNAiveD
       - addLabel:
           label: Auto-Assign
       - addLabel:
@@ -4415,7 +4428,7 @@ configuration:
           reviewer: wangzelin007
       - assignTo:
           users:
-          - jsntcy
+          - ReaNAiveD
       - addLabel:
           label: Portal
       description: '[portal] Auto assign labels and reviewers based on PR title/description.'
@@ -5274,7 +5287,7 @@ configuration:
           reviewer: jsntcy
       - assignTo:
           users:
-          - jsntcy
+          - evelyn-ys
       - addLabel:
           label: Synapse
       - requestReview:
@@ -5319,6 +5332,10 @@ configuration:
           label: Logic App
       - addLabel:
           label: Service Attention
+      - assignTo:
+          users:
+          - ReaNAiveD
+          - zhoxing-ms
       description: '[logic app] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5338,9 +5355,14 @@ configuration:
           label: Auto-Assign
       - requestReview:
           reviewer: jsntcy
+      - requestReview:
+          reviewer: ReaNAiveD
+      - requestReview:
+          reviewer: zhoxing-ms
       - assignTo:
           users:
-          - jsntcy
+          - ReaNAiveD
+          - zhoxing-ms
       - addLabel:
           label: Logic App
       - requestReview:
@@ -5889,5 +5911,56 @@ configuration:
           users:
           - kairu-ms
       description: '[ARO] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z [Ss]entinel'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z [Ss]entinel'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: SecurityInsights
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      - assignTo:
+          users:
+          - ReaNAiveD
+      description: '[SecurityInsights] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '[Aa]z [Ss]entinel'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z [Ss]entinel'
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: SecurityInsights
+      - requestReview:
+          reviewer: yonzhan
+      - requestReview:
+          reviewer: ReaNAiveD
+      - requestReview:
+          reviewer: necusjz
+      - assignTo:
+          users:
+          - ReaNAiveD
+      description: '[SecurityInsights] Auto assign labels and reviewers based on PR title/description.'
 onFailure: 
 onSuccess: 

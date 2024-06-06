@@ -34,6 +34,8 @@ logger = get_logger(__name__)
 
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 DEFAULT_DB_NAME = 'defaultdb'
+MYSQL_RETIRE_WARNING_MSG = 'Azure Database for MySQL - Single Server is scheduled for retirement (https://go.microsoft.com/fwlink/?linkid=2216041) by September 16, 2024. Migrate (https://go.microsoft.com/fwlink/?linkid=2202255) to Azure Database for MySQL- Flexible Server now.'
+MARIADB_RETIRE_WARNING_MSG = 'Azure Database for MariaDB is scheduled for retirement (https://go.microsoft.com/fwlink/?linkid=2248931) by September 19, 2025. Migrate (https://go.microsoft.com/fwlink/?linkid=2263092) to Azure Database for MySQL- Flexible Server now.'
 
 
 # pylint: disable=too-many-locals, too-many-statements, raise-missing-from
@@ -94,6 +96,7 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
             parameters.identity = postgresql.models.ResourceIdentity(
                 type=postgresql.models.IdentityType.system_assigned.value)
     elif provider == 'Microsoft.DBforMySQL':
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
         engine_name = 'mysql'
         pricing_link = 'https://aka.ms/mysql-pricing'
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
@@ -124,6 +127,7 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
         if assign_identity:
             parameters.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
     elif provider == 'Microsoft.DBforMariaDB':
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
         engine_name = 'mariadb'
         pricing_link = 'https://aka.ms/mariadb-pricing'
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
@@ -189,8 +193,10 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
 def _server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
         provider = 'Microsoft.DBforMySQL'
     elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
         provider = 'Microsoft.DBforMariaDB'
 
     parameters = None
@@ -246,8 +252,10 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
                        backup_retention=None, geo_redundant_backup=None, no_wait=False, **kwargs):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
         provider = 'Microsoft.DBforMySQL'
     elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
         provider = 'Microsoft.DBforMariaDB'
 
     parameters = None
@@ -307,8 +315,10 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
 def _replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, sku_name=None, **kwargs):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
         provider = 'Microsoft.DBforMySQL'
     elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
         provider = 'Microsoft.DBforMariaDB'
     # set source server id
     if not is_valid_resource_id(source_server):
@@ -354,6 +364,11 @@ def _replica_create(cmd, client, resource_group_name, server_name, source_server
 
 
 def _replica_stop(client, resource_group_name, server_name):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
+
     try:
         server_object = client.get(resource_group_name, server_name)
     except Exception as e:
@@ -371,7 +386,8 @@ def _replica_stop(client, resource_group_name, server_name):
     return client.begin_update(resource_group_name, server_name, params)
 
 
-def _server_update_custom_func(instance,
+def _server_update_custom_func(client,
+                               instance,
                                sku_name=None,
                                storage_mb=None,
                                backup_retention=None,
@@ -382,6 +398,12 @@ def _server_update_custom_func(instance,
                                assign_identity=False,
                                public_network_access=None,
                                minimal_tls_version=None):
+
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
+
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
     ServerUpdateParameters = getattr(module, 'ServerUpdateParameters')
@@ -426,6 +448,8 @@ def _server_update_custom_func(instance,
 
 
 def _server_mysql_upgrade(cmd, client, resource_group_name, server_name, target_server_version):
+    logger.warning(MYSQL_RETIRE_WARNING_MSG)
+
     parameters = mysql.models.ServerUpgradeParameters(
         target_server_version=target_server_version
     )
@@ -434,16 +458,23 @@ def _server_mysql_upgrade(cmd, client, resource_group_name, server_name, target_
 
 
 def _server_mariadb_get(cmd, resource_group_name, server_name):
+    logger.warning(MARIADB_RETIRE_WARNING_MSG)
     client = get_mariadb_management_client(cmd.cli_ctx)
     return client.servers.get(resource_group_name, server_name)
 
 
 def _server_mysql_get(cmd, resource_group_name, server_name):
+    logger.warning(MYSQL_RETIRE_WARNING_MSG)
     client = get_mysql_management_client(cmd.cli_ctx)
     return client.servers.get(resource_group_name, server_name)
 
 
 def _server_stop(cmd, client, resource_group_name, server_name):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
+
     logger.warning("Server will be automatically started after 7 days "
                    "if you do not perform a manual start operation")
     return client.begin_stop(resource_group_name, server_name)
@@ -455,10 +486,20 @@ def _server_postgresql_get(cmd, resource_group_name, server_name):
 
 
 def _server_update_get(client, resource_group_name, server_name):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
+
     return client.get(resource_group_name, server_name)
 
 
 def _server_update_set(client, resource_group_name, server_name, parameters):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
+
     return client.begin_update(resource_group_name, server_name, parameters)
 
 
@@ -466,6 +507,7 @@ def _server_delete(cmd, client, resource_group_name, server_name):
     database_engine = 'postgres'
     if isinstance(client, MySqlServersOperations):
         database_engine = 'mysql'
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
 
     result = client.begin_delete(resource_group_name, server_name)
 
@@ -481,6 +523,10 @@ def _get_sku_name(tier, family, capacity):
 
 
 def _firewall_rule_create(client, resource_group_name, server_name, firewall_rule_name, start_ip_address, end_ip_address):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
 
     parameters = {'name': firewall_rule_name, 'start_ip_address': start_ip_address, 'end_ip_address': end_ip_address}
 
@@ -488,10 +534,19 @@ def _firewall_rule_create(client, resource_group_name, server_name, firewall_rul
 
 
 def _firewall_rule_custom_getter(client, resource_group_name, server_name, firewall_rule_name):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
+
     return client.get(resource_group_name, server_name, firewall_rule_name)
 
 
 def _firewall_rule_custom_setter(client, resource_group_name, server_name, firewall_rule_name, parameters):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
     return client.begin_create_or_update(
         resource_group_name,
         server_name,
@@ -499,7 +554,11 @@ def _firewall_rule_custom_setter(client, resource_group_name, server_name, firew
         parameters)
 
 
-def _firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_address=None):
+def _firewall_rule_update_custom_func(client, instance, start_ip_address=None, end_ip_address=None):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
     if start_ip_address is not None:
         instance.start_ip_address = start_ip_address
     if end_ip_address is not None:
@@ -508,6 +567,10 @@ def _firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_ad
 
 
 def _vnet_rule_create(client, resource_group_name, server_name, virtual_network_rule_name, virtual_network_subnet_id, ignore_missing_vnet_service_endpoint=None):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
 
     parameters = {
         'name': virtual_network_rule_name,
@@ -519,10 +582,18 @@ def _vnet_rule_create(client, resource_group_name, server_name, virtual_network_
 
 
 def _custom_vnet_update_getter(client, resource_group_name, server_name, virtual_network_rule_name):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
     return client.get(resource_group_name, server_name, virtual_network_rule_name)
 
 
 def _custom_vnet_update_setter(client, resource_group_name, server_name, virtual_network_rule_name, parameters):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
     return client.begin_create_or_update(
         resource_group_name,
         server_name,
@@ -530,8 +601,11 @@ def _custom_vnet_update_setter(client, resource_group_name, server_name, virtual
         parameters)
 
 
-def _vnet_rule_update_custom_func(instance, virtual_network_subnet_id, ignore_missing_vnet_service_endpoint=None):
-
+def _vnet_rule_update_custom_func(client, instance, virtual_network_subnet_id, ignore_missing_vnet_service_endpoint=None):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
     instance.virtual_network_subnet_id = virtual_network_subnet_id
     if ignore_missing_vnet_service_endpoint is not None:
         instance.ignore_missing_vnet_service_endpoint = ignore_missing_vnet_service_endpoint
@@ -539,7 +613,10 @@ def _vnet_rule_update_custom_func(instance, virtual_network_subnet_id, ignore_mi
 
 
 def _configuration_update(client, resource_group_name, server_name, configuration_name, value=None, source=None):
-
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
     parameters = {
         'name': configuration_name,
         'value': value,
@@ -550,7 +627,10 @@ def _configuration_update(client, resource_group_name, server_name, configuratio
 
 
 def _db_create(client, resource_group_name, server_name, database_name, charset=None, collation=None):
-
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
     parameters = {
         'name': database_name,
         'charset': charset,
@@ -566,6 +646,10 @@ def _download_log_files(
         resource_group_name,
         server_name,
         file_name):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
 
     # list all files
     files = client.list_by_server(resource_group_name, server_name)
@@ -577,6 +661,10 @@ def _download_log_files(
 
 def _list_log_files_with_filter(client, resource_group_name, server_name, filename_contains=None,
                                 file_last_written=None, max_file_size=None):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
 
     # list all files
     all_files = client.list_by_server(resource_group_name, server_name)
@@ -602,6 +690,11 @@ def _list_log_files_with_filter(client, resource_group_name, server_name, filena
 
 # Custom functions for list servers
 def _server_list_custom_func(client, resource_group_name=None):
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
+
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
@@ -630,6 +723,10 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
 def approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
                                         description=None):
     """Approve a private endpoint connection request for a server."""
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
 
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=True,
@@ -639,6 +736,10 @@ def approve_private_endpoint_connection(cmd, client, resource_group_name, server
 def reject_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
                                        description=None):
     """Reject a private endpoint connection request for a server."""
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+    elif isinstance(client, MariaDBServersOperations):
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
 
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=False,
@@ -646,8 +747,9 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, server_
 
 
 def server_key_create(client, resource_group_name, server_name, kid):
-
     """Create Server Key."""
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
 
     key_name = _get_server_key_name_from_uri(kid)
 
@@ -662,6 +764,8 @@ def server_key_create(client, resource_group_name, server_name, kid):
 def server_key_get(client, resource_group_name, server_name, kid):
 
     """Get Server Key."""
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
 
     key_name = _get_server_key_name_from_uri(kid)
 
@@ -674,6 +778,9 @@ def server_key_get(client, resource_group_name, server_name, kid):
 def server_key_delete(cmd, client, resource_group_name, server_name, kid):
 
     """Drop Server Key."""
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
+
     key_name = _get_server_key_name_from_uri(kid)
 
     return client.begin_delete(
@@ -706,6 +813,9 @@ def server_ad_admin_set(client, resource_group_name, server_name, login=None, si
     '''
     Sets a server's AD admin.
     '''
+
+    if isinstance(client, MySqlServersOperations):
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
 
     parameters = {
         'administratorType': 'ActiveDirectory',
@@ -812,6 +922,7 @@ def get_connection_string(cmd, client, server_name='{server}', database_name='{d
         provider = 'MariaDB'
 
     if provider == 'MySQL':
+        logger.warning(MYSQL_RETIRE_WARNING_MSG)
         server_endpoint = cmd.cli_ctx.cloud.suffixes.mysql_server_endpoint
         host = '{}{}'.format(server_name, server_endpoint)
         result = {
@@ -866,6 +977,7 @@ def get_connection_string(cmd, client, server_name='{server}', database_name='{d
             result[k] = v.format(**connection_kwargs)
 
     if provider == 'MariaDB':
+        logger.warning(MARIADB_RETIRE_WARNING_MSG)
         server_endpoint = cmd.cli_ctx.cloud.suffixes.mariadb_server_endpoint
         host = '{}{}'.format(server_name, server_endpoint)
         result = {

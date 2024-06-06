@@ -518,7 +518,7 @@ def create_vault_or_hsm(cmd, client,
                         enabled_for_deployment=None,
                         enabled_for_disk_encryption=None,
                         enabled_for_template_deployment=None,
-                        enable_rbac_authorization=None,
+                        enable_rbac_authorization=True,
                         enable_purge_protection=None,
                         retention_days=None,
                         network_acls=None,
@@ -671,8 +671,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
         # if client.get raise exception, we can take it as no existing vault found
         # just continue the normal creation process
         pass
-    logger.warning('We will enable rbac authorization by default in the near future,'
-                   ' please manually specify --enable-rbac-authorization if you want to overwrite the default value.')
     from azure.cli.core._profile import Profile, _TENANT_ID
     from azure.cli.command_modules.role import graph_client_factory, GraphError
 

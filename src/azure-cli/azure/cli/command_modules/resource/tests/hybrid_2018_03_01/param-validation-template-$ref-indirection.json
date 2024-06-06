@@ -6,10 +6,10 @@
     "objectType": {
       "type": "object"
     },
-    "object!type~/with~weird name": {
+    "object&type~/with~weird name": {
       "$ref": "#/definitions/object",
       "properties": {
-        "fOo": {
+        "foo": {
           "type": "string"
         }
       }
@@ -17,7 +17,7 @@
   },
   "parameters": {
     "stringParam": {
-      "$ref": "#/dEfInItIoNs/ObJeCt%26tYpE~~1WiTh~0wEiRd%20NaMe/properties/foo"
+      "$ref": "#/definitions/object%26type~~1with~0weird%20name/properties/foo"
     },
     "intParam": {
       "$ref": "#/parameters/tupleParam/prefixItems/0"
@@ -37,7 +37,7 @@
   "outputs": {
     "anOutput": {
       "type": "object",
-      "additionalproperties": {
+      "additionalProperties": {
         "type": "bool"
       }
     }
