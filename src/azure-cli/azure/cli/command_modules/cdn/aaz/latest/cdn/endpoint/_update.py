@@ -145,7 +145,6 @@ class Update(AAZCommand):
             options=["--query-string-caching-behavior"],
             arg_group="Properties",
             help="Defines how CDN caches requests that include query strings. You can ignore any query strings when caching, bypass caching to prevent requests that contain query strings from being cached, or cache every request with a unique URL.",
-            default="NotSet",
             enum={"BypassCaching": "BypassCaching", "IgnoreQueryString": "IgnoreQueryString", "NotSet": "NotSet", "UseQueryString": "UseQueryString"},
         )
         _args_schema.url_signing_keys = AAZListArg(
