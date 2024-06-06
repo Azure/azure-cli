@@ -7607,6 +7607,39 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.scheduledEventsProfile.osImageNotificationProfile', None)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_scheduled_events_policy_', location='centraluseuap')
+    def test_vmss_scheduled_events_policy(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('vmss', 10),
+            'vmss2': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:UbuntuServer:18.04-LTS:latest --additional-events True --enable-reboot True --enable-redeploy True', checks=[
+            self.check('vmss.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('vmss.scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
+            self.check('vmss.scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss1} --additional-events False --enable-reboot False --enable-redeploy False', checks=[
+            self.check('scheduledEventsPolicy', None)
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss1} --additional-events true --enable-redeploy true --enable-reboot False ', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False)
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:18.04-LTS:latest', checks=[
+            self.check('vmss.scheduledEventsPolicy', None)
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss2} --additional-events True ', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True)
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss2} --enable-reboot True --enable-redeploy true', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+        ])
+
 
 class VMPriorityEvictionBillingTest(ScenarioTest):
 
