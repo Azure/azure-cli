@@ -438,7 +438,6 @@ class Create(AAZCommand):
         _element.testGroupName = AAZStrArg(
             options=["name"],
             help="The name of the connection monitor test group.",
-            # required=False,
         )
         _element.sources = AAZListArg(
             options=["sources"],

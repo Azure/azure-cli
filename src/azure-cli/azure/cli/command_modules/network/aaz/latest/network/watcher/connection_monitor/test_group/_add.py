@@ -316,7 +316,7 @@ class Add(AAZCommand):
         def __call__(self, *args, **kwargs):
             return self._create_instance()
 
-
+        #we are required to parse these explicitly as they are not being parsed by the aaz framework becuase eariler we did not pass objects inside a command as we are doing now
         def parse_arg(self, arg_index):
             if arg_index is not None:
                 # The next element in sys.argv is the value of the argument
@@ -336,7 +336,7 @@ class Add(AAZCommand):
                         except json.JSONDecodeError as e:
                             print(f"Failed to parse argument: {e}")
                 else:
-                    # If arg is not a list, just replace single quotes with double quotes and parse it
+                    # If arg is not a list, just replace single quotes with double quotes and parse it to convert it to a valid JSON string
                     arg = arg.replace("'", '"')
                     try:
                         arg_list = json.loads(arg)
@@ -366,6 +366,77 @@ class Add(AAZCommand):
                 "destinations" : destinations_list,
                 "testConfigurations" : test_configurations_list
             }
+            # data ={
+            #     "testGroupName" : str(self.ctx.args.test_group_name),
+            #     "sources" : [],
+            #     "destinations" : [],
+            #     "testConfigurations" : []
+            # }
+
+
+        #     dst_endpoints = [
+        #     {
+        #     "name": dst.name,
+        #     "resource_id": dst.resourceId,
+        #     "address": dst.address,
+        #     "type": dst.type,
+        #     "coverageLevel":dst.coverageLevel,
+        #     "scope":dst.scope
+        #     }
+
+        #     for test_group in args.test_groups
+        #     for dst in test_group["destinations"]
+        # ]
+
+    # Populate sources
+            # if hasattr(self.ctx.args,"sources") and self.ctx.args.sources:
+            #     for source_arg in self.ctx.args.sources:
+            #         source = {
+            #             "name": source_arg.name,
+            #             "resourceId": source_arg.resource_id,
+            #             "type": source_arg.type,
+            #             "address": source_arg.address,
+            #             "coverageLevel": source_arg.coverage_level,
+            #             # "scope": source.scope
+            #         }
+            #         if hasattr(source_arg, 'scope') and hasattr(source_arg.scope, '_data') and source_arg.scope._data:
+            #             source["scope"] = {
+            #                 "exclude": [{"address": address} for address in source_arg.scope.exclude.address]
+            #             }
+            #         data["sources"].append(source)
+            #         # if 'scope' in source and 'exclude' in source['scope']:
+                    #     source["scope"] = {
+                    #         "exclude": [{"address": address} for address in source['scope']['exclude']]
+                    #     }
+                    # if 'scope' in source and 'include' in source['scope']:
+                    #     source["scope"] = {
+                    #         "include": [{"address": address} for address in source['scope']['include']]
+                    #     }
+                    #data["sources"].append(source)
+
+            # Populate destinations
+            # if hasattr(self.ctx.args,"destinations") and self.ctx.args.destinations:
+            #     for destination in self.ctx.args.destinations:
+            #         destination = {
+            #             "name": destination['name'],
+            #             "resourceId": destination['resource_id'],
+            #             "type": destination['type'],
+            #             "address": destination['address'],
+            #             "coverageLevel": destination['coverage_level'],
+            #             "scope": destination['scope']
+            #         }
+            #         data["destinations"].append(destination)
+
+            # # Populate testConfigurations
+            # if hasattr(self.ctx.args,"test_configurations") and self.ctx.args.test_configurations:
+            #     for test_configuration in self.ctx.args.test_configurations:
+            #         test_configuration = {
+            #             "name": test_configuration['name'],
+            #             "protocol": test_configuration['protocol'],
+            #             "frequency": test_configuration['frequency']
+            #         }
+            #         data["testConfigurations"].append(test_configuration)
+
 
             data_str = str(data)
             data_str = data_str.replace(" ","")

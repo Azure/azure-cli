@@ -404,7 +404,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                 '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/srisa-rg/providers/Microsoft.Compute/virtualMachines/CdmTest '
                 '--type AzureVM '
                 '--scope-exclude "[{val1},{val2}]" '
-                '--coverage-level BelowAverage ').get_output_in_json()
+                '--coverage-level BelowAverage').get_output_in_json()
 
         self.check('name','CdmTest')
 
