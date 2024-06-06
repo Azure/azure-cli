@@ -564,7 +564,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                 value_obtained_from_snapshot = snapshot.os_sku
 
         # set default value
-        if value_obtained_from_agentpool is not None:
+        if self.decorator_mode == DecoratorMode.CREATE and value_obtained_from_agentpool is not None:
             os_sku = value_obtained_from_agentpool
         elif raw_value is not None:
             os_sku = raw_value
@@ -1966,6 +1966,14 @@ class AKSAgentPoolUpdateDecorator:
             agentpool.network_profile.allowed_host_ports = allowed_host_ports
         return agentpool
 
+    def update_os_sku(self, agentpool: AgentPool) -> AgentPool:
+        self._ensure_agentpool(agentpool)
+
+        os_sku = self.context.get_os_sku()
+        if os_sku:
+            agentpool.os_sku = os_sku
+        return agentpool
+
     def update_agentpool_profile_default(self, agentpools: List[AgentPool] = None) -> AgentPool:
         """The overall controller used to update AgentPool profile by default.
 
@@ -1986,6 +1994,8 @@ class AKSAgentPoolUpdateDecorator:
         agentpool = self.update_vm_properties(agentpool)
         # update network profile
         agentpool = self.update_network_profile(agentpool)
+        # update os sku
+        agentpool = self.update_os_sku(agentpool)
         return agentpool
 
     def update_agentpool(self, agentpool: AgentPool) -> AgentPool:

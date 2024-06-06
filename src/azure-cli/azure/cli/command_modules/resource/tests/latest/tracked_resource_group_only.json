@@ -11,13 +11,17 @@
   "parameters": {
     "rgname": {
       "type": "string"
+    },
+    "rgDeploymentName": {
+      "type": "string",
+      "defaultValue": "deploy-rg"
     }
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
-      "name": "deploy-rg",
+      "name": "[parameters('rgDeploymentName')]",
       "subscriptionId": "[subscription().subscriptionId]",
       "location": "[resourceGroup().location]",
       "properties": {

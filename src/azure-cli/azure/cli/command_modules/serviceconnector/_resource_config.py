@@ -861,7 +861,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.CosmosTable: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.CosmosSql: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
 
-        RESOURCE.StorageBlob: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.StorageBlob: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageQueue: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageFile: [AUTH_TYPE.SecretAuto],
         RESOURCE.StorageTable: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],

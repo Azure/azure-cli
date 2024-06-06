@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command_group(
     "netappfiles volume latest-backup-status current",
-    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
     """Get the latest backup status of the current volume

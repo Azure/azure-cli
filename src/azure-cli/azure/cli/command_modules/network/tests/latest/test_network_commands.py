@@ -1412,7 +1412,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {ag} --priority 1001 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
 
-        self.cmd('network public-ip create -g {rg} -n {ip1}')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Basic')
         self.cmd('network public-ip create -g {rg} -n {ip2}')
 
         self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --public-ip-address {ip1}')
@@ -2276,16 +2276,18 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  checks=[
                      self.check('length(@)', 0)
                  ])
-        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf} --type OWASP --version 3.2')
 
         # add two custom rules of this waf-policy
         self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
                  '--policy-name {waf} -n {custom-rule1} '
-                 '--priority 50 --action log --rule-type MatchRule',
+                 '--priority 50 --action log --rule-type MatchRule '
+                 '--match-conditions [{{"variables":[{{"variable_name":"RemoteAddr"}}],"operator":"IPMatch","values":["192.168.1.0/24","10.0.0.0/24"]}}]',
                  checks=self.check('priority', 50))
         self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
                  '--policy-name {waf} -n {custom-rule2} '
-                 '--priority 100 --action log --rule-type MatchRule')
+                 '--priority 100 --action log --rule-type MatchRule '
+                 '--match-conditions [{{"variables":[{{"variable_name":"RemoteAddr"}}],"operator":"IPMatch","values":["192.168.1.0/24","10.0.0.0/24"]}}]')
 
         # test custom-rule list
         self.cmd('network application-gateway waf-policy custom-rule list -g {rg} '
@@ -2393,12 +2395,13 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # create a custom rule
         self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
                  '--policy-name {waf} -n {rule} '
-                 '--priority 50 --action LOG --rule-type MatchRule',
+                 '--priority 50 --action LOG --rule-type MatchRule '
+                 '--match-conditions [{{"variables":[{{"variable_name":"RemoteAddr"}}],"operator":"IPMatch","values":["192.168.1.0/24","10.0.0.0/24"]}}]',
                  checks=[
                      self.check('priority', 50),
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
-                     self.check('matchConditions | length(@)', 0),
+                     self.check('matchConditions | length(@)', 1),
                      self.check("state", "Enabled")
                  ])
         self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
@@ -2410,11 +2413,10 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('priority', 50),
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
-                     self.check('matchConditions | length(@)', 0)
+                     self.check('matchConditions | length(@)', 1)
                  ])
         # validate match condition
-        from azure.cli.core.azclierror import ArgumentUsageError
-        with self.assertRaisesRegex(ArgumentUsageError, "Non-any operator requires --match-values."):
+        with self.assertRaisesRegex(SystemExit, '2'):
             self.cmd("network application-gateway waf-policy custom-rule match-condition add -g {rg} "
                      "--policy-name {waf} -n {rule} "
                      "--match-variables RequestHeaders.value --operator Contains --transform lowercase")
@@ -2429,7 +2431,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('priority', 50),
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
-                     self.check('matchConditions | length(@)', 1)
+                     self.check('matchConditions | length(@)', 2)
                  ])
 
         # update one of properties
@@ -2452,12 +2454,12 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('priority', 75),
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
-                     self.check('matchConditions | length(@)', 2)
+                     self.check('matchConditions | length(@)', 3)
                  ])
         self.cmd('network application-gateway waf-policy custom-rule match-condition list -n {rule} -g {rg} '
                  '--policy-name {waf}',
                  checks=[
-                     self.check('length(@)', 2)
+                     self.check('length(@)', 3)
                  ])
 
         # remove one of match condition of custom rule
@@ -2470,7 +2472,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('priority', 75),
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
-                     self.check('matchConditions | length(@)', 1)
+                     self.check('matchConditions | length(@)', 2)
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_custom_rule_v2_')
@@ -2501,12 +2503,14 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  '--policy-name {waf} -n {rule} '
                  '--priority 1 '
                  '--action Block '
-                 '--rule-type MatchRule')
+                 '--rule-type MatchRule '
+                 '--match-conditions [{{"variables":[{{"variable_name":"RemoteAddr"}}],"operator":"IPMatch","values":["192.168.2.0/24","10.0.2.0/24"]}}]')
         self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
                  '--policy-name {waf} -n {rule2} '
                  '--priority 2 '
                  '--action Block '
-                 '--rule-type MatchRule')
+                 '--rule-type MatchRule '
+                 '--match-conditions [{{"variables":[{{"variable_name":"RemoteAddr"}}],"operator":"IPMatch","values":["192.168.2.0/24","10.0.2.0/24"]}}]')
 
         self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
                  '--policy-name {waf} -n {rule} --match-variables RemoteAddr '
@@ -2525,7 +2529,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  '--rule-type RateLimitRule '
                  '--rate-limit-duration FiveMins '
                  '--rate-limit-threshold 15 '
-                 '--group-by-user-session [{{group-by-variables:[{{variable-name:"GeoLocation"}}]}}]',
+                 '--group-by-user-session [{{group-by-variables:[{{variable-name:"GeoLocation"}}]}}] '
+                 '--match-conditions [{{"variables":[{{"variable_name":"RemoteAddr"}}],"operator":"IPMatch","values":["192.168.2.0/24","10.0.2.0/24"]}}]',
                  checks=[self.check('name', '{rule3}'),
                          self.check('groupByUserSession[0].groupByVariables[0].variableName', 'GeoLocation'),
                          self.check('rateLimitDuration', 'FiveMins'),
@@ -2564,13 +2569,14 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
         # randomly update some properties
         self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
-                 '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention',
+                 '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention --js-cookie-exp-time 100',
                  checks=[
                      self.check('policySettings.fileUploadLimitInMb', 64),
                      self.check('policySettings.maxRequestBodySizeInKb', 128),
                      self.check('policySettings.mode', 'Prevention'),
                      self.check('policySettings.requestBodyCheck', False),
-                     self.check('policySettings.state', 'Enabled')
+                     self.check('policySettings.state', 'Enabled'),
+                     self.check('policySettings.jsChallengeCookieExpirationInMins', 100)
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_setting_v2_')
@@ -2851,7 +2857,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             "rule_group2": "REQUEST-920-PROTOCOL-ENFORCEMENT",
         })
         # create a waf-policy
-        self.cmd("network application-gateway waf-policy create -n {waf} -g {rg} --version 3.2")
+        self.cmd("network application-gateway waf-policy create -n {waf} -g {rg} --version 3.2 --type OWASP")
         # add one rule group to exclusion
         self.cmd(
             "network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} \
@@ -3052,7 +3058,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
 
         # test ddos protection status
         self.cmd('network application-gateway create -g {rg} -n testag --public-ip-address {ip1} --sku Standard_v2 --priority 1001')
-        self.cmd('network public-ip ddos-protection-statu show -g {rg} -n {ip1}', self.check('isWorkloadProtected', False))
+        self.cmd('network public-ip ddos-protection-statu show -g {rg} -n {ip1}', self.check('isWorkloadProtected', True))
 
         self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Disabled --ddos-protection-plan null',
                  checks=[
@@ -3067,6 +3073,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         self.cmd('network public-ip delete -g {rg} -n {ip1}')
         self.cmd('network public-ip list -g {rg}',
                  checks=self.check("length[?name == '{ip1}']", None))
+
 
 class NetworkZonedPublicIpScenarioTest(ScenarioTest):
 
@@ -3616,10 +3623,28 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         self.cmd('network cross-region-lb create -g {rg} -n {lb}')
 
         self.cmd('network cross-region-lb address-pool create -g {rg} --lb-name {lb} -n {address_pool} '
-                 '--backend-address name={backend_address1} frontend-ip-address={regional_lb_frontend_ip_address1} ',
-                 checks=self.check('name', self.kwargs['address_pool']))
+                 '--backend-address name={backend_address1} frontend-ip-address={regional_lb_frontend_ip_address1} '
+                 '--admin-state Up',
+                 checks=[self.check('name', self.kwargs['address_pool']),
+                         self.check('loadBalancerBackendAddresses[0].adminState', 'Up'),
+                         ])
 
-        self.cmd('network cross-region-lb address-pool address add -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2} --frontend-ip-address {regional_lb_frontend_ip_address2}', checks=self.check('name', self.kwargs['address_pool']))
+        self.cmd('network cross-region-lb address-pool update -g {rg} --lb-name {lb} -n {address_pool} '
+                 '--backend-address name={backend_address1} frontend-ip-address={regional_lb_frontend_ip_address1} admin-state=Down',
+                 checks=[self.check('name', self.kwargs['address_pool']),
+                         self.check('loadBalancerBackendAddresses[0].adminState', 'Down'),
+                         ])
+
+        self.cmd('network cross-region-lb address-pool address add -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2} --frontend-ip-address {regional_lb_frontend_ip_address2} --admin-state Down',
+                 checks=[self.check('name', self.kwargs['address_pool']),
+                         self.check('loadBalancerBackendAddresses[1].adminState', 'Down'),
+                         ])
+
+        self.cmd(
+            'network cross-region-lb address-pool address update -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2} --admin-state Up',
+            checks=[self.check('name', self.kwargs['address_pool']),
+                    self.check('loadBalancerBackendAddresses[1].adminState', 'Up'),
+                    ])
 
         self.cmd('network cross-region-lb address-pool address remove -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2}')
 
