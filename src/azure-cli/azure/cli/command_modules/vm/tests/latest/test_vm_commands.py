@@ -7631,6 +7631,39 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.scheduledEventsProfile.osImageNotificationProfile', None)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_scheduled_events_policy_', location='centraluseuap')
+    def test_vmss_scheduled_events_policy(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('vmss', 10),
+            'vmss2': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:UbuntuServer:18.04-LTS:latest --additional-events True --enable-reboot True --enable-redeploy True', checks=[
+            self.check('vmss.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('vmss.scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
+            self.check('vmss.scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss1} --additional-events False --enable-reboot False --enable-redeploy False', checks=[
+            self.check('scheduledEventsPolicy', None)
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss1} --additional-events true --enable-redeploy true --enable-reboot False ', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False)
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:18.04-LTS:latest', checks=[
+            self.check('vmss.scheduledEventsPolicy', None)
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss2} --additional-events True ', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True)
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss2} --enable-reboot True --enable-redeploy true', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+        ])
+
 
 class VMPriorityEvictionBillingTest(ScenarioTest):
 
@@ -9300,6 +9333,22 @@ class VMSSReimageScenarioTest(ScenarioTest):
         self.cmd('vmss reimage -g {rg} -n {vmss} --instance-ids {instance_id1}')
         self.cmd('vmss reimage -g {rg} -n {vmss} --instance-ids {instance_id1} {instance_id2}')
         self.cmd('vmss reimage -g {rg} -n {vmss}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_reimage_force_update_os_disk_for_ephemeral', location='eastus2euap')
+    def test_vmss_reimage_force_update_os_disk_for_ephemeral(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vmss create --resource-group {rg} --name {vmss} --image OpenLogic:CentOS:7.5:latest --ephemeral-os-disk --disable-overprovision --instance-count 1 --data-disk-sizes-gb 2 --storage-sku os=standard_lrs 0=premium_lrs --admin-username testuser1 --admin-password testPassword01! --orchestration-mode Uniform')
+        before_reimage_os_disk_name = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()[0]['storageProfile']['osDisk']['name']
+
+        self.cmd('vmss reimage -g {rg} -n {vmss}')
+        after_reimage_os_disk_name = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()[0]['storageProfile']['osDisk']['name']
+        assert before_reimage_os_disk_name == after_reimage_os_disk_name
+
+        self.cmd('vmss reimage -g {rg} -n {vmss} --update-os-disk')
+        after_reimage_force_update_os_disk_name = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()[0]['storageProfile']['osDisk']['name']
+        assert before_reimage_os_disk_name != after_reimage_force_update_os_disk_name
 
 
 class VMSSHKeyScenarioTest(ScenarioTest):

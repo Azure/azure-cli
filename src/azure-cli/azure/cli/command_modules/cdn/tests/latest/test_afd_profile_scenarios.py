@@ -8,7 +8,7 @@ from .afdx_scenario_mixin import CdnAfdScenarioMixin
 
 
 class CdnAfdProfileScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_profile_crud(self, resource_group):
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.afd_profile_list_cmd(resource_group, checks=list_checks)
@@ -85,7 +85,7 @@ class CdnAfdProfileScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.afd_profile_list_cmd(resource_group, checks=list_checks)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_profile_log_scrubbing(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=24)
 
