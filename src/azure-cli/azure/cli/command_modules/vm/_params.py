@@ -541,6 +541,7 @@ def load_arguments(self, _):
         c.argument('exclude_kbs_requiring_reboot', arg_type=get_three_state_flag(), help="Filter out KBs that don't have a reboot behavior of 'NeverReboots' when this is set. Applicable to Windows VM only")
         c.argument('package_name_masks_to_include', nargs='+', help='Space-separated list of packages to include in the patch operation. Format: packageName_packageVersion. Applicable to Linux VM only')
         c.argument('package_name_masks_to_exclude', nargs='+', help='Space-separated list of packages to exclude in the patch operation. Format: packageName_packageVersion. Applicable to Linux VM only')
+        c.argument('max_patch_publish_date', arg_type=get_datetime_type(help='ISO 8601 time value for install patch that were published on or before this given max published date.'))
 
     with self.argument_context('vm disk') as c:
         c.argument('vm_name', options_list=['--vm-name'], id_part=None, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
@@ -727,6 +728,7 @@ def load_arguments(self, _):
         c.argument('instance_ids', nargs='+',
                    help='Space-separated list of VM instance ID. If missing, reimage all instances.',
                    options_list=['--instance-ids', c.deprecate(target='--instance-id', redirect='--instance-ids', hide=True)])
+        c.argument('force_update_os_disk_for_ephemeral', options_list=['--force-update-os-disk-for-ephemeral', '--update-os-disk'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='Force update ephemeral OS disk for a virtual machine scale set VM.')
 
     with self.argument_context('vmss create', operation_group='virtual_machine_scale_sets') as c:
         VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
@@ -836,6 +838,7 @@ def load_arguments(self, _):
                         'Please refer to https://docs.microsoft.com/rest/api/compute/virtualmachinescalesets/get#virtualmachineextension for the data format.')
         c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2024-03-01', help='Allow you to specify the ephemeral disk settings for the operating system disk. Specify it to false to set ephemeral disk setting as empty and migrate it to non ephemeral')
         c.argument('ephemeral_os_disk_option', options_list=['--ephemeral-os-disk-option', '--ephemeral-option'], arg_type=get_enum_type(self.get_models('DiffDiskOptions')), min_api='2024-03-01', help='Specify the ephemeral disk settings for operating system disk.')
+        c.argument('zones', zones_type, min_api='2023-03-01')
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
 

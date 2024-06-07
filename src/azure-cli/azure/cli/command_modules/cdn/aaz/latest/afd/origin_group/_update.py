@@ -120,6 +120,25 @@ class Update(AAZCommand):
         )
 
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.session_affinity_state = AAZStrArg(
+            options=["--session-affinity-state"],
+            arg_group="Properties",
+            help="Whether to allow session affinity on this host. Valid options are 'Enabled' or 'Disabled'",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+        _args_schema.traffic_restoration_time_to_healed_or_new_endpoints_in_minutes = AAZIntArg(
+            options=["--traffic-restoration-time-to-healed-or-new-endpoints-in-minutes"],
+            arg_group="Properties",
+            help="Time in minutes to shift the traffic to the endpoint gradually when an unhealthy endpoint comes healthy or a new endpoint is added. Default is 10 mins. This property is currently not supported.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=50,
+                minimum=0,
+            ),
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -371,6 +390,8 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("healthProbeSettings", AAZObjectType)
                 properties.set_prop("loadBalancingSettings", AAZObjectType)
+                properties.set_prop("sessionAffinityState", AAZStrType, ".session_affinity_state")
+                properties.set_prop("trafficRestorationTimeToHealedOrNewEndpointsInMinutes", AAZIntType, ".traffic_restoration_time_to_healed_or_new_endpoints_in_minutes")
 
             health_probe_settings = _builder.get(".properties.healthProbeSettings")
             if health_probe_settings is not None:

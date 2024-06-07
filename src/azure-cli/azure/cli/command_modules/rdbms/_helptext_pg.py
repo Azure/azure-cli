@@ -590,10 +590,28 @@ examples:
         --migration-name testmigration --properties "migrationConfig.json"
   - name: >
       Start a private endpoint enabled migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file.
-      Use --migrationRuntimeResourceId to define the migration runtime server that is responsible for migrating data between source and target server.
+      Pass in MigrationRuntimeResourceId to define the migration runtime server that is responsible for migrating data between source and target server. Sample migrationConfig.json will look like this: \n
+      {
+        "properties": {
+          "SourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
+          "MigrationRuntimeResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testsourcemigration",
+          "SecretParameters": {
+            "AdminCredentials": {
+              "SourceServerPassword": "password",
+              "TargetServerPassword": "password"
+            },
+            "SourceServerUserName": "testuser@pg-single-1",
+            "TargetServerUserName": "fspguser"
+          },
+          "dBsToMigrate": [
+            "postgres"
+          ],
+          "OverwriteDbsInTarget": "true"
+        }
+      }
     text: >
       az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration
-      --properties "migrationConfig.json" --migrationRuntimeResourceId /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testsourcemigration
+      --properties "migrationConfig.json"
 """
 
 helps['postgres flexible-server migration list'] = """
