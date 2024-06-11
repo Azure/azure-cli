@@ -83,7 +83,6 @@ class Add(AAZCommand):
             enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM", "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress", "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
         )
 
-
         scope_exclude = cls._args_schema.scope_exclude
         scope_exclude.Element = AAZObjectArg()
 
@@ -103,12 +102,10 @@ class Add(AAZCommand):
         )
         return cls._args_schema
 
-
     class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
 
         def __call__(self, *args, **kwargs):
            return self._create_instance()
-        
 
         def clean_dict(self, d):
             clean = {}
@@ -124,7 +121,6 @@ class Add(AAZCommand):
             return clean
 
         def _create_instance(self):
-
             data = {
                 "name": str(self.ctx.args.endpoint_name),
                 "address": str(self.ctx.args.address),
@@ -134,22 +130,6 @@ class Add(AAZCommand):
                 "scope": {}
             }
 
-           # print(data)
-
-    # Populate filter
-            if hasattr(self.ctx.args, "filter_items") or hasattr(self.ctx.args, "filter_type"):
-                data["filter"]["items"] = []
-                data["filter"]["type"] = "Include"
-
-        # Populate filter items
-            if hasattr(self.ctx.args, "filter_items"):
-                filter_items = getattr(self.ctx.args, "filter_items", [])
-                for item in filter_items:
-                        data["filter"]["items"].append({
-                            "address": item['address'],
-                            "type": item['type']
-                        })
-
            # Populate scope
             if hasattr(self.ctx.args, "scope_exclude") and self.ctx.args.scope_exclude:
                 data["scope"]["exclude"] = []
@@ -157,24 +137,21 @@ class Add(AAZCommand):
                 for exclude_item in scope_exclude:
                         data["scope"]["exclude"].append({
                            "address": exclude_item['address']})
-            
+
             if hasattr(self.ctx.args, "scope_include") and self.ctx.args.scope_include:
                 data["scope"]["include"] = []
                 scope_include = getattr(self.ctx.args, "scope_include", [])
                 for include_item in scope_include:
                         data["scope"]["include"].append({
-                            "address": include_item['address']
-                        })
+                            "address": include_item['address']})
 
             #It keeps a key-value pair if: The value v is not None.The value v is not the string 'Undefined'.The value v is not an empty dictionary.
             #data = {k: v for k, v in data.items() if v is not None and v != 'Undefined' and (not isinstance(v, dict) or any(v.values()))}
             data = self.clean_dict(data)
             data_str = str(data)
             data_str = data_str.replace(" ", "")
-       
 
             return data_str
 
 
 __all__ = ["Add"]
-

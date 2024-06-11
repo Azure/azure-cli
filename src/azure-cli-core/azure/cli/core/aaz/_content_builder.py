@@ -96,7 +96,7 @@ class AAZContentBuilder:
             schema = value._schema
 
             if schema._element is None:
-                   schema.Element = typ(**typ_kwargs) if typ_kwargs else typ()
+                schema.Element = typ(**typ_kwargs) if typ_kwargs else typ()
             else:
                 assert isinstance(schema.Element, typ)
             if not isinstance(value, (AAZDict, AAZList)):

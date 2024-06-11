@@ -33,6 +33,8 @@ class Create(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
+        #The build_lro_poller method creates a poller object that polls the status of the LRO and calls self._output when the operation is complete. The _handler method returns this poller object.
+        #the _handler method in your class starts a long-running operation, creates a poller to monitor this operation, and returns this poller. The caller of _handler can use the returned poller to check the status of the operation and get the result when it's complete.
         return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
@@ -183,10 +185,6 @@ class Create(AAZCommand):
             help="Test coverage for the endpoint.",
             enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage", "Default": "Default", "Full": "Full", "Low": "Low"},
         )
-        _element.filter = AAZObjectArg(
-            options=["filter"],
-            help="Filter for sub-items within the endpoint.",
-        )
         _element.name = AAZStrArg(
             options=["name"],
             help="The name of the connection monitor endpoint.",
@@ -204,31 +202,6 @@ class Create(AAZCommand):
             options=["type"],
             help="The endpoint type.",
             enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM", "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress", "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
-        )
-
-        filter = cls._args_schema.endpoints.Element.filter
-        filter.items = AAZListArg(
-            options=["items"],
-            help="List of items in the filter.",
-        )
-        filter.type = AAZStrArg(
-            options=["type"],
-            help="The behavior of the endpoint filter. Currently only 'Include' is supported.",
-            enum={"Include": "Include"},
-        )
-
-        items = cls._args_schema.endpoints.Element.filter.items
-        items.Element = AAZObjectArg()
-
-        _element = cls._args_schema.endpoints.Element.filter.items.Element
-        _element.address = AAZStrArg(
-            options=["address"],
-            help="The address of the filter item.",
-        )
-        _element.type = AAZStrArg(
-            options=["type"],
-            help="The type of item included in the filter. Currently only 'AgentAddress' is supported.",
-            enum={"AgentAddress": "AgentAddress"},
         )
 
         scope = cls._args_schema.endpoints.Element.scope
@@ -267,7 +240,11 @@ class Create(AAZCommand):
             help="Connection monitor output destination type. Currently, only \"Workspace\" is supported.  Allowed values: Workspace.",
             enum={"Workspace": "Workspace"},
         )
-        _element.workspace_id = AAZStrArg(
+
+        _element.workspaceSettings = AAZObjectArg()
+
+        workspaceSettings = _element.workspaceSettings
+        workspaceSettings.workspaceResourceId = AAZStrArg(
             options=["workspace-id"],
             help="The id of log analytics workspace.",
         )
@@ -279,7 +256,7 @@ class Create(AAZCommand):
             options=["--test-configurations"],
             arg_group="V2 Test Configuration",
             help="List of connection monitor test configurations.",
-    
+
         )
 
         test_configurations = cls._args_schema.test_configurations
@@ -573,7 +550,7 @@ class Create(AAZCommand):
             options=["icmp-configuration"],
             help="The parameters used to perform test evaluation over ICMP.",
         )
-       
+
         _element.preferred_ip_version = AAZStrArg(
             options=["preferred-ip-version"],
             help="The preferred IP version to use in test evaluation. The connection monitor may choose to use a different version depending on other parameters.",
@@ -694,8 +671,15 @@ class Create(AAZCommand):
 
         _schema.address = cls._args_connection_monitor_endpoint_scope_item_create.address
 
+    #generator function which means that whenever this is executes it will return a generator object
+    #Long-running operations often involve multiple stages (e.g., validation, provisioning, completion), and it's common to track the progress of these stages asynchronously over time
     def _execute_operations(self):
         self.pre_operations()
+        #when you call build_lro_poller(self._execute_operations, self._output) in _command.py on L235, you're passing these two functions as arguments. Inside build_lro_poller, self._execute_operations is called
+        #and its returned generator is assigned to polling_generator. If lro_no_wait is False, an instance of AAZLROPoller is created with polling_generator and self._output as arguments.
+        #the important part here to note is the yeild statement which makes this function (execute_operations) a generator
+        #The generator returned by self.ConnectionMonitorsCreateOrUpdate(ctx=self.ctx)() is used in the context of a long-running operation (LRO). It's likely that each value it produces represents a different stage of the LRO, and the generator is used to poll the status of the operation over time.
+        # the yield statement in yield self.ConnectionMonitorsCreateOrUpdate(ctx=self.ctx)() is yielding an LRO polling object, not a generator
         yield self.ConnectionMonitorsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -719,11 +703,13 @@ class Create(AAZCommand):
             print("r=",request)
             session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [202]:
+                #This is a method call to build_lro_polling on self.client. It's used to build a long-running operation (LRO) polling object, which is used to poll the status of a long-running operation until it's complete. It uses the generator to poll the operation's status.
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
                     self.on_200_201,
                     self.on_error,
+                    # final result of the operation will be retrieved via an Azure async operation.
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
@@ -844,7 +830,7 @@ class Create(AAZCommand):
                 _elements.set_prop("resourceId", AAZStrType, ".resource_id")
                 _elements.set_prop("scope", AAZObjectType, ".scope")
                 _elements.set_prop("type", AAZStrType, ".type")
-                
+
 
             filter = _builder.get(".properties.endpoints[].filter")
             if filter is not None:
@@ -956,13 +942,13 @@ class Create(AAZCommand):
                 _elements.set_prop("name", AAZStrType, ".testGroupName", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("sources", AAZListType, ".sources", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("testConfigurations", AAZListType, ".testConfigurations", typ_kwargs={"flags": {"required": True}})
-            
+
 
             sources = _builder.get(".properties.testGroups[].sources")
             if sources is not None:
                 sources.set_elements(AAZStrType, ".name")
 
-               
+
 
             destinations = _builder.get(".properties.testGroups[].destinations")
             if destinations is not None:

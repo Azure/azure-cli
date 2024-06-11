@@ -321,7 +321,7 @@ class Add(AAZCommand):
             if arg_index is not None:
                 # The next element in sys.argv is the value of the argument
                 arg = sys.argv[arg_index + 1]
-                #print("arg=", arg)
+                print("arg=", arg)
 
                 # If arg is a list, convert each string in the list to a dictionary
                 if isinstance(arg, list):
@@ -336,6 +336,7 @@ class Add(AAZCommand):
                         except json.JSONDecodeError as e:
                             print(f"Failed to parse argument: {e}")
                 else:
+                    #converting it to a list because in create command we have test groups that contain list of sources, destinations and test configurations
                     # If arg is not a list, just replace single quotes with double quotes and parse it to convert it to a valid JSON string
                     arg = arg.replace("'", '"')
                     try:
@@ -366,76 +367,7 @@ class Add(AAZCommand):
                 "destinations" : destinations_list,
                 "testConfigurations" : test_configurations_list
             }
-            # data ={
-            #     "testGroupName" : str(self.ctx.args.test_group_name),
-            #     "sources" : [],
-            #     "destinations" : [],
-            #     "testConfigurations" : []
-            # }
-
-
-        #     dst_endpoints = [
-        #     {
-        #     "name": dst.name,
-        #     "resource_id": dst.resourceId,
-        #     "address": dst.address,
-        #     "type": dst.type,
-        #     "coverageLevel":dst.coverageLevel,
-        #     "scope":dst.scope
-        #     }
-
-        #     for test_group in args.test_groups
-        #     for dst in test_group["destinations"]
-        # ]
-
-    # Populate sources
-            # if hasattr(self.ctx.args,"sources") and self.ctx.args.sources:
-            #     for source_arg in self.ctx.args.sources:
-            #         source = {
-            #             "name": source_arg.name,
-            #             "resourceId": source_arg.resource_id,
-            #             "type": source_arg.type,
-            #             "address": source_arg.address,
-            #             "coverageLevel": source_arg.coverage_level,
-            #             # "scope": source.scope
-            #         }
-            #         if hasattr(source_arg, 'scope') and hasattr(source_arg.scope, '_data') and source_arg.scope._data:
-            #             source["scope"] = {
-            #                 "exclude": [{"address": address} for address in source_arg.scope.exclude.address]
-            #             }
-            #         data["sources"].append(source)
-            #         # if 'scope' in source and 'exclude' in source['scope']:
-                    #     source["scope"] = {
-                    #         "exclude": [{"address": address} for address in source['scope']['exclude']]
-                    #     }
-                    # if 'scope' in source and 'include' in source['scope']:
-                    #     source["scope"] = {
-                    #         "include": [{"address": address} for address in source['scope']['include']]
-                    #     }
-                    #data["sources"].append(source)
-
-            # Populate destinations
-            # if hasattr(self.ctx.args,"destinations") and self.ctx.args.destinations:
-            #     for destination in self.ctx.args.destinations:
-            #         destination = {
-            #             "name": destination['name'],
-            #             "resourceId": destination['resource_id'],
-            #             "type": destination['type'],
-            #             "address": destination['address'],
-            #             "coverageLevel": destination['coverage_level'],
-            #             "scope": destination['scope']
-            #         }
-            #         data["destinations"].append(destination)
-
-            # # Populate testConfigurations
-            # if hasattr(self.ctx.args,"test_configurations") and self.ctx.args.test_configurations:
-            #     for test_configuration in self.ctx.args.test_configurations:
-            #         test_configuration = {
-            #             "name": test_configuration['name'],
-            #             "protocol": test_configuration['protocol'],
-            #             "frequency": test_configuration['frequency']
-            #         }
-            #         data["testConfigurations"].append(test_configuration)
+           
 
 
             data_str = str(data)

@@ -6,8 +6,6 @@
 # pylint: disable=protected-access, too-few-public-methods
 
 import copy
-import json
-import re
 import os
 from argparse import Action
 from collections import OrderedDict
@@ -284,8 +282,6 @@ class AAZObjectArgAction(AAZCompoundTypeArgAction):
             if cls._schema._nullable:
                 return data
             raise AAZInvalidValueError("field is not nullable")
-        
-
         if isinstance(data, dict):
             result = OrderedDict()
             for key, value in data.items():
@@ -376,8 +372,6 @@ class AAZFreeFormDictArgAction(AAZSimpleTypeArgAction):
 class AAZListArgAction(AAZCompoundTypeArgAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
-        
-           
         if isinstance(values, list) and all(isinstance(d, dict) for d in values):
         # Handle list of dictionaries
             result = []
@@ -395,9 +389,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                 result.append(item_result)
                 setattr(namespace, self.dest, result)
             return
-
-        
-        elif not isinstance(getattr(namespace, self.dest), AAZArgActionOperations):
+        if not isinstance(getattr(namespace, self.dest), AAZArgActionOperations):
             # overwrite existing namespace value which is not an instance of AAZArgActionOperations.
             # especially the default value of argument.
             setattr(namespace, self.dest, AAZArgActionOperations())

@@ -30,7 +30,6 @@ class Add(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        #self.SubresourceSelector(ctx=self.ctx, name="subresource")
         return self.InstanceCreateByJson(ctx=self.ctx)()
 
     _args_schema = None
@@ -58,71 +57,22 @@ class Add(AAZCommand):
             required=True,
         )
         return cls._args_schema
-    
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
-        return result
-    
-    # class SubresourceSelector(AAZJsonSelector):
-
-    #     def _get(self):
-    #         result = self.ctx.vars.instance
-    #         result = result.properties.outputs
-    #         filters = enumerate(result)
-    #         filters = filter(
-    #             lambda e: e[0] == self.ctx.args.output_index,
-    #             filters
-    #         )
-    #         idx = next(filters)[0]
-    #         return result[idx]
-
-    #     def _set(self, value):
-    #         result = self.ctx.vars.instance
-    #         result = result.properties.outputs
-    #         filters = enumerate(result)
-    #         filters = filter(
-    #             lambda e: e[0] == self.ctx.args.output_index,
-    #             filters
-    #         )
-    #         idx = next(filters, [len(result)])[0]
-    #         self.ctx.args.output_index = idx
-    #         result[idx] = value
-    #         return
-        
-        
-        
 
     class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
-        
+
         def __call__(self, *args, **kwargs):
-            #self.ctx.selectors.subresource.set(self._create_instance())
             return self._create_instance()
 
         def _create_instance(self):
-
             data = {
                 "type": str(self.ctx.args.output_type),
+                "workspaceSettings": {
                 "workspaceResourceId": str(self.ctx.args.workspace_id)
+                }
             }
-
 
             ob = str(data)
             return ob
-            # _instance_value, _builder = self.new_content_builder(
-            #         self.ctx.args,
-            #         typ=AAZObjectType
-            # )
-            # _builder.set_prop("type", AAZStrType, ".output_type")
-            # _builder.set_prop("workspaceSettings", AAZObjectType)
 
-            # workspace_settings = _builder.get(".workspaceSettings")
-            # if workspace_settings is not None:
-            #     workspace_settings.set_prop("workspaceResourceId", AAZStrType, ".workspace_id")
-
-            # return _instance_value
-
-                      
 
 __all__ = ["Add"]
-
-

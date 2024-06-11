@@ -51,21 +51,6 @@ class Add(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        # _args_schema.connection_monitor = AAZStrArg(
-        #     options=["--connection-monitor"],
-        #     help="Connection monitor name.",
-        #     required=False,
-        # )
-        # _args_schema.watcher_name = AAZStrArg(
-        #     options=["--watcher-name"],
-        #     help="The name of the Network Watcher resource.",
-        #     required=False,
-        # )
-        # _args_schema.watcher_rg = AAZResourceGroupNameArg(
-        #     options=["-g", "--watcher-rg"],
-        #     help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
-        #     required=False,
-        # )
         _args_schema.test_configuration_name = AAZStrArg(
             options=["-n", "--name", "--test-configuration-name"],
             help="The name of the connection monitor test configuration.",
@@ -184,7 +169,7 @@ class Add(AAZCommand):
         )
         return cls._args_schema
 
-    def _execute_operations(self):  
+    def _execute_operations(self):
         result = self.InstanceCreateByJson(ctx=self.ctx)()
         return json.loads(result)
 
@@ -204,16 +189,12 @@ class Add(AAZCommand):
     def post_instance_create(self, instance):
         pass
 
-
-
     class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
-      
 
       def __call__(self, *args, **kwargs):
             return self._create_instance()
-       
+
       def clean_dict(self,d):
-            
             clean = {}
             for k, v in d.items():
                 if isinstance(v, dict):
@@ -224,10 +205,7 @@ class Add(AAZCommand):
                     clean[k] = v
             return clean
 
-
       def _create_instance(self):
-
-
         data = {
               "name":str(self.ctx.args.test_configuration_name),
               "protocol":str(self.ctx.args.protocol),
@@ -237,9 +215,8 @@ class Add(AAZCommand):
               "icmpConfiguration": {},
               "successThreshold": {},
               "tcpConfiguration": {}
-
           }
-         
+
         if hasattr(self.ctx.args, "http_method") or hasattr(self.ctx.args, "http_path") or hasattr(self.ctx.args, "http_port") or hasattr(self.ctx.args, "http_prefer_https") or hasattr(self.ctx.args, "http_request_headers") or hasattr(self.ctx.args, "http_valid_status_codes"):
             data["httpConfiguration"]["method"] = getattr(self.ctx.args, "http_method", None)
             data["httpConfiguration"]["path"] = getattr(self.ctx.args, "http_path", None)
@@ -252,7 +229,7 @@ class Add(AAZCommand):
                 valid_status_codes = getattr(self.ctx.args, "http_valid_status_codes",[])
                 for code in valid_status_codes:
                    data["httpConfiguration"]["valid_status_code_ranges"].append(code)
-            
+
 
             # Populate request headers
             if hasattr(self.ctx.args, "http_request_headers"):
@@ -278,10 +255,6 @@ class Add(AAZCommand):
             data["tcpConfiguration"]["disable_trace_route"] = getattr(self.ctx.args, "tcp_disable_trace_route", None)
             data["tcpConfiguration"]["port"] = getattr(self.ctx.args, "tcp_port", None)
 
-    
-        
-        #print(data)
-
         #removing null and undefined fields from data
         data = {k: v for k, v in data.items() if v is not None and v != 'Undefined' and (not isinstance(v, dict) or any(v.values()))}
         data = self.clean_dict(data)
@@ -289,13 +262,8 @@ class Add(AAZCommand):
 
         #removing spaces
         data_str = data_str.replace(" ", "")
-        
+
         return data_str
 
 
 __all__ = ["Add"]
-
-
-
-
-
