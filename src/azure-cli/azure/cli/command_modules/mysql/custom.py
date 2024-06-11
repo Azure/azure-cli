@@ -287,13 +287,11 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
 def flexible_server_version_upgrade(cmd, client, resource_group_name, server_name, version, yes=None):
     if not yes:
         user_confirmation(
-            "Updating major version in server {} is irreversible. The action you're about to take can't be undone. "
+            "Upgrading major version in server {} is irreversible. The action you're about to take can't be undone. "
             "Going further will initiate major version upgrade to the selected version on this server."
             .format(server_name), yes=yes)
 
     instance = client.get(resource_group_name, server_name)
-    if instance.sku.tier == 'Burstable':
-        raise CLIError("Major version update is not supported for the Burstable pricing tier.")
 
     current_version = int(instance.version.split('.')[0])
     if current_version >= int(version):
@@ -322,7 +320,7 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
             resource_group_name=resource_group_name,
             server_name=server_name,
             parameters=parameters),
-        cmd.cli_ctx, 'Updating server {} to major version {}'.format(server_name, version)
+        cmd.cli_ctx, 'Upgrading server {} to major version {}'.format(server_name, version)
     )
 
 
