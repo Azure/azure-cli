@@ -1,0 +1,38 @@
+resources:
+- repo: self
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - '*'
+
+pr:
+  branches:
+    include:
+    - '*'
+
+variables:
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+
+parameters:
+- name: architectures
+  type: object
+  default:
+  - name: AMD64
+    value: amd64
+    pool: pool-ubuntu-2004
+  - name: ARM64
+    value: arm64
+    pool: ubuntu-arm64-2004-pool
+
+jobs:
+- job: CheckPullRequest
+  displayName: "Check the Format of Pull Request Title and Content"
+  condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release', 'main'))
+
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - bash: |
+      echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
