@@ -16,80 +16,80 @@ helps['appconfig create'] = """
 type: command
 short-summary: Create an App Configuration.
 examples:
-  - name: Create an App Configuration with name, location, sku, tags and resource group.
+  - name: Create an App Configuration store with name, location, sku, tags and resource group.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --tags key1=value1 key2=value2
-  - name: Create an App Configuration with name, location, sku and resource group with system assigned identity.
+  - name: Create an App Configuration store with name, location, sku and resource group with system assigned identity.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity
-  - name: Create an App Configuration with name, location, sku and resource group with user assigned identity.
+  - name: Create an App Configuration store with name, location, sku and resource group with user assigned identity.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity /subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity
-  - name: Create an App Configuration with name, location and resource group with public network access enabled and local auth disabled.
+  - name: Create an App Configuration store with name, location and resource group with public network access enabled and local auth disabled.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --enable-public-network --disable-local-auth
 """
 
 helps['appconfig list-deleted'] = """
 type: command
-short-summary: List all deleted, but not yet purged App Configurations.
+short-summary: List all deleted, but not yet purged App Configuration stores.
 examples:
-  - name: List all deleted, but not yet purged App Configurations.
+  - name: List all deleted, but not yet purged App Configuration stores.
     text: az appconfig list-deleted
 """
 
 helps['appconfig show-deleted'] = """
 type: command
-short-summary: Show properties of a deleted, but not yet purged App Configuration.
+short-summary: Show properties of a deleted, but not yet purged App Configuration store.
 examples:
-  - name: Show properties of a deleted App Configuration named 'sample-app-configuration'.
+  - name: Show properties of a deleted App Configuration store named 'sample-app-configuration'.
     text: az appconfig show-deleted --name sample-app-configuration
 """
 
 helps['appconfig purge'] = """
 type: command
-short-summary: Permanently delete an App Configuration. Aka 'purge' the deleted App Configuration.
+short-summary: Permanently delete an App Configuration store. Aka 'purge' the deleted App Configuration store.
 examples:
-  - name: Purge a deleted App Configuration named 'sample-app-configuration'.
+  - name: Purge a deleted App Configuration store named 'sample-app-configuration'.
     text: az appconfig purge --name sample-app-configuration
 """
 
 helps['appconfig recover'] = """
 type: command
-short-summary: Recover a previously deleted, but not yet purged App Configuration.
+short-summary: Recover a previously deleted, but not yet purged App Configuration store.
 examples:
-  - name: Recover a deleted App Configuration named 'sample-app-configuration'.
+  - name: Recover a deleted App Configuration store named 'sample-app-configuration'.
     text: az appconfig recover --name sample-app-configuration
 """
 
 helps['appconfig identity'] = """
 type: group
-short-summary: Managed identities for App Configurations.
+short-summary: Managed identities for App Configuration stores.
 """
 
 helps['appconfig identity assign'] = """
 type: command
-short-summary: Update managed identities for an App Configuration.
+short-summary: Update managed identities for an App Configuration store.
 examples:
-  - name: Enable the system-assigned identity for an existing App Configuration
+  - name: Enable the system-assigned identity for an existing App Configuration store
     text: az appconfig identity assign -g MyResourceGroup -n MyAppConfiguration
-  - name: Assign a user-assigned managed identity for an existing App Configuration
+  - name: Assign a user-assigned managed identity for an existing App Configuration store
     text: az appconfig identity assign -g MyResourceGroup -n MyAppConfiguration --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
-  - name: Assign both system-assigned and user assigned identities for an existing App Configuration
+  - name: Assign both system-assigned and user assigned identities for an existing App Configuration store
     text: az appconfig identity assign -g MyResourceGroup -n MyAppConfiguration --identities [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
 """
 
 helps['appconfig identity remove'] = """
 type: command
-short-summary: Remove managed identities for an App Configuration.
+short-summary: Remove managed identities for an App Configuration store.
 examples:
-  - name: Remove the system-assigned identity from a App Configuration.
+  - name: Remove the system-assigned identity from a App Configuration store.
     text: az appconfig identity remove -g MyResourceGroup -n MyAppConfiguration
-  - name: Remove a user assigned identity from a App Configuration.
+  - name: Remove a user assigned identity from a App Configuration store.
     text: az appconfig identity remove -g MyResourceGroup -n MyAppConfiguration --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
-  - name: Remove all identities from an App Configuration.
+  - name: Remove all identities from an App Configuration store.
     text: az appconfig identity remove -g MyResourceGroup -n MyAppConfiguration --identities [all]
 """
 
 helps['appconfig identity show'] = """
 type: command
-short-summary: Display managed identities for an App Configuration.
+short-summary: Display managed identities for an App Configuration store.
 examples:
   - name: Display managed identities for a task.
     text: az appconfig identity show -g MyResourceGroup -n MyAppConfiguration
@@ -97,53 +97,53 @@ examples:
 
 helps['appconfig credential'] = """
 type: group
-short-summary: Manage credentials for App Configurations.
+short-summary: Manage credentials for App Configuration store.
 """
 
 helps['appconfig credential list'] = """
 type: command
-short-summary: List access keys of an App Configuration.
+short-summary: List access keys of an App Configuration store.
 examples:
-  - name: List access keys of an App Configuration
+  - name: List access keys of an App Configuration store
     text: az appconfig credential list -g MyResourceGroup -n MyAppConfiguration
 """
 
 helps['appconfig credential regenerate'] = """
 type: command
-short-summary: Regenerate an access key for an App Configuration.
+short-summary: Regenerate an access key for an App Configuration store.
 examples:
-  - name: Regenerate a read only access key for an App Configuration
+  - name: Regenerate a read only access key for an App Configuration store
     text: az appconfig credential regenerate -g MyResourceGroup -n MyAppConfiguration --id 0-l0-s0:8ldbreMVH+d7EjaSUg3H
 """
 
 helps['appconfig delete'] = """
 type: command
-short-summary: Delete an App Configuration.
+short-summary: Delete an App Configuration store.
 examples:
-  - name: Delete an App Configuration under resource group
+  - name: Delete an App Configuration store under resource group
     text: az appconfig delete -g MyResourceGroup -n MyAppConfiguration
 """
 
 helps['appconfig kv'] = """
 type: group
-short-summary: Manage key-values stored in an App Configuration.
+short-summary: Manage key-values stored in an App Configuration store.
 """
 
 helps['appconfig kv delete'] = """
 type: command
 short-summary: Delete key-values.
 examples:
-  - name: Delete a key using App Configuration name without confirmation.
+  - name: Delete a key using App Configuration store name without confirmation.
     text: az appconfig kv delete -n MyAppConfiguration --key color --label MyLabel --yes
   - name: Delete a key using connection string.
     text: az appconfig kv delete --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --label MyLabel
-  - name: Delete a key using your 'az login' credentials and App Configuration endpoint.
+  - name: Delete a key using your 'az login' credentials and App Configuration store endpoint.
     text: az appconfig kv delete --endpoint https://myappconfiguration.azconfig.io --key color --auth-mode login --yes
 """
 
 helps['appconfig kv export'] = """
 type: command
-short-summary: Export configurations to another place from your App Configuration.
+short-summary: Export configurations to another place from your App Configuration store.
 examples:
   - name: Export all keys and feature flags with label test to a json file.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json
@@ -151,37 +151,37 @@ examples:
     text: az appconfig kv export -n MyAppConfiguration -d appservice --appservice-account MyAppService
   - name: Export all keys with label test excluding feature flags to a json file.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json --skip-features
-  - name: Export all keys and feature flags with all labels to another App Configuration.
+  - name: Export all keys and feature flags with all labels to another App Configuration store.
     text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --key * --label * --preserve-labels
-  - name: Export all keys and feature flags with all labels to another App Configuration and overwrite destination labels.
+  - name: Export all keys and feature flags with all labels to another App Configuration store and overwrite destination labels.
     text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --key * --label * --dest-label ExportedKeys
-  - name: Export all keys to another App Configuration using your 'az login' credentials.
+  - name: Export all keys to another App Configuration store using your 'az login' credentials.
     text: az appconfig kv export -d appconfig --endpoint https://myappconfiguration.azconfig.io --auth-mode login --dest-endpoint https://anotherappconfiguration.azconfig.io --dest-auth-mode login --key * --label * --preserve-labels
   - name: Export all keys and feature flags with label test using appconfig/kvset profile.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json --profile appconfig/kvset
-  - name: Export all keys to another App Configuration from a snapshot of the source configuration
+  - name: Export all keys to another App Configuration store from a snapshot of the source configuration
     text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --snapshot MySnapshot
 """
 
 helps['appconfig kv import'] = """
 type: command
-short-summary: Import configurations into your App Configuration from another place.
+short-summary: Import configurations into your App Configuration store from another place.
 examples:
   - name: Import all keys and feature flags from a file and apply test label.
     text: az appconfig kv import -n MyAppConfiguration --label test -s file --path D:/abc.json --format json
-  - name: Import all keys and feature flags with null label and apply new label from an App Configuration.
+  - name: Import all keys and feature flags with null label and apply new label from an App Configuration store.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --label ImportedKeys
-  - name: Import all keys from a snapshot of an App Configuration.
+  - name: Import all keys from a snapshot of an App Configuration store.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --src-snapshot MySnapshot
   - name: Import all keys and apply null label from an App Service application.
     text: az appconfig kv import -n MyAppConfiguration -s appservice --appservice-account MyAppService
-  - name: Import all keys with label test and apply test2 label excluding feature flags from an App Configuration.
+  - name: Import all keys with label test and apply test2 label excluding feature flags from an App Configuration store.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-label test --label test2 --src-name AnotherAppConfiguration --skip-features
-  - name: Import all keys and feature flags with all labels to another App Configuration.
+  - name: Import all keys and feature flags with all labels to another App Configuration store.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --src-key * --src-label * --preserve-labels
   - name: Import all keys and feature flags from a JSON file and apply JSON content type.
     text: az appconfig kv import -n MyAppConfiguration -s file --path D:/abc.json --format json --separator . --content-type application/json
-  - name: Import all keys to another App Configuration using your 'az login' credentials.
+  - name: Import all keys to another App Configuration store using your 'az login' credentials.
     text: az appconfig kv import -s appconfig --endpoint https://myappconfiguration.azconfig.io --auth-mode login --src-endpoint https://anotherappconfiguration.azconfig.io --src-auth-mode login --src-key * --src-label * --preserve-labels
   - name: Import all keys and feature flags from a file using the appconfig/kvset format.
     text: az appconfig kv import -n MyAppConfiguration -s file --path D:/abc.json --format json --profile appconfig/kvset
@@ -211,7 +211,7 @@ helps['appconfig kv lock'] = """
 type: command
 short-summary: Lock a key-value to prohibit write operations.
 examples:
-  - name: Lock a key-value using App Configuration name.
+  - name: Lock a key-value using App Configuration store name.
     text: az appconfig kv lock -n MyAppConfiguration --key color --label test
   - name: Force locking a key-value using connection string.
     text: az appconfig kv lock --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --label test --yes
@@ -259,7 +259,7 @@ helps['appconfig kv show'] = """
 type: command
 short-summary: Show all attributes of a key-value.
 examples:
-  - name: Show a key-value using App Configuration name with a specific label and datetime
+  - name: Show a key-value using App Configuration store name with a specific label and datetime
     text: az appconfig kv show -n MyAppConfiguration --key color --label MyLabel --datetime "2019-05-01T11:24:12Z"
   - name: Show a key-value using connection string with label
     text: az appconfig kv show --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --label MyLabel
@@ -271,7 +271,7 @@ helps['appconfig kv unlock'] = """
 type: command
 short-summary: Unlock a key-value to gain write operations.
 examples:
-  - name: Unlock a key-value using App Configuration name.
+  - name: Unlock a key-value using App Configuration store name.
     text: az appconfig kv unlock -n MyAppConfiguration --key color --label test
   - name: Force unlocking a key-value using connection string.
     text: az appconfig kv unlock --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --label test --yes
@@ -279,22 +279,22 @@ examples:
 
 helps['appconfig list'] = """
 type: command
-short-summary: Lists all App Configurations under the current subscription.
+short-summary: Lists all App Configuration stores under the current subscription.
 examples:
-  - name: List all App Configurations under a resource group
+  - name: List all App Configuration stores under a resource group
     text: az appconfig list -g MyResourceGroup
 """
 
 helps['appconfig revision'] = """
 type: group
-short-summary: Manage revisions for key-values stored in an App Configuration.
+short-summary: Manage revisions for key-values stored in an App Configuration store.
 """
 
 helps['appconfig revision list'] = """
 type: command
 short-summary: Lists revision history of key-values.
 examples:
-  - name: List revision history of a key-value using App Configuration name.
+  - name: List revision history of a key-value using App Configuration store name.
     text: az appconfig revision list -n MyAppConfiguration --key color --label test
   - name: List revision history of a key-value with multiple labels.
     text: az appconfig revision list -n MyAppConfiguration --key color --label test,prod,\\0
@@ -306,68 +306,68 @@ examples:
 
 helps['appconfig replica'] = """
 type: group
-short-summary: Manage replicas of an App Configuration.
+short-summary: Manage replicas of an App Configuration store.
 """
 
 helps['appconfig replica list'] = """
 type: command
-short-summary: List replicas of an App Configuration.
+short-summary: List replicas of an App Configuration store.
 examples:
-  - name: List replicas of an App Configuration.
+  - name: List replicas of an App Configuration store.
     text: az appconfig replica list --store-name MyAppConfiguration
 """
 
 helps['appconfig replica show'] = """
 type: command
-short-summary: Show details of a replica of an App Configuration.
+short-summary: Show details of a replica of an App Configuration store.
 examples:
-  - name: Show details of a replica of an App Configuration.
+  - name: Show details of a replica of an App Configuration store.
     text: az appconfig replica show --store-name MyAppConfiguration --name MyReplicaName
 """
 
 helps['appconfig replica create'] = """
 type: command
-short-summary: Create a new replica of an App Configuration.
+short-summary: Create a new replica of an App Configuration store.
 examples:
-  - name: Create a new replica of an App Configuration at a location.
+  - name: Create a new replica of an App Configuration store at a location.
     text: az appconfig replica create --store-name MyAppConfiguration --name MyReplicaName --location westus
 """
 
 helps['appconfig replica delete'] = """
 type: command
-short-summary: Delete a replica of an App Configuration.
+short-summary: Delete a replica of an App Configuration store.
 examples:
-  - name: Delete a replica of an App Configuration.
+  - name: Delete a replica of an App Configuration store.
     text: az appconfig replica delete --store-name MyAppConfiguration --name MyReplicaName
 """
 
 helps['appconfig show'] = """
 type: command
-short-summary: Show properties of an App Configuration.
+short-summary: Show properties of an App Configuration store.
 examples:
-  - name: Show properties of an App Configuration
+  - name: Show properties of an App Configuration store
     text: az appconfig show -g MyResourceGroup -n MyAppConfiguration
 """
 
 helps['appconfig update'] = """
 type: command
-short-summary: Update an App Configuration.
+short-summary: Update an App Configuration store.
 examples:
-  - name: Update tags of an App Configuration
+  - name: Update tags of an App Configuration store
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --tags key1=value1 key2=value2
-  - name: Upgrade sku of an App Configuration to standard
+  - name: Upgrade sku of an App Configuration store to standard
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --sku Standard
   - name: Enable customer encryption key with system assigned identity
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name myKey --encryption-key-version keyVersion --encryption-key-vault https://keyVaultName.vault.azure.net
   - name: Remove customer encryption key
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name ""
-  - name: Update an App Configuration to enable public network access and disable local auth.
+  - name: Update an App Configuration store to enable public network access and disable local auth.
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --enable-public-network true --disable-local-auth true
 """
 
 helps['appconfig feature'] = """
     type: group
-    short-summary: Manage feature flags stored in an App Configuration.
+    short-summary: Manage feature flags stored in an App Configuration store.
     """
 
 helps['appconfig feature set'] = """
@@ -392,13 +392,13 @@ helps['appconfig feature delete'] = """
     type: command
     short-summary: Delete feature flag.
     examples:
-        - name: Delete a feature using App Configuration name without confirmation.
+        - name: Delete a feature using App Configuration store name without confirmation.
           text:
             az appconfig feature delete -n MyAppConfiguration --feature color --label MyLabel --yes
         - name: Delete a feature using connection string.
           text:
             az appconfig feature delete --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label MyLabel
-        - name: Delete a feature using App Configuration endpoint and your 'az login' credentials.
+        - name: Delete a feature using App Configuration store endpoint and your 'az login' credentials.
           text:
             az appconfig feature delete --endpoint https://myappconfiguration.azconfig.io --feature color --auth-mode login
         - name: Delete a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
@@ -410,13 +410,13 @@ helps['appconfig feature show'] = """
     type: command
     short-summary: Show all attributes of a feature flag.
     examples:
-        - name: Show a feature flag using App Configuration name with a specific label
+        - name: Show a feature flag using App Configuration store name with a specific label
           text:
             az appconfig feature show -n MyAppConfiguration --feature color --label MyLabel
         - name: Show a feature flag using connection string and field filters
           text:
             az appconfig feature show --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --fields key locked conditions state
-        - name: Show a feature flag using App Configuration endpoint and your 'az login' credentials.
+        - name: Show a feature flag using App Configuration store endpoint and your 'az login' credentials.
           text:
             az appconfig feature show --endpoint https://myappconfiguration.azconfig.io --feature color --auth-mode login
         - name: Show a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
@@ -455,7 +455,7 @@ helps['appconfig feature lock'] = """
     type: command
     short-summary: Lock a feature flag to prohibit write operations.
     examples:
-        - name: Lock a feature using App Configuration name.
+        - name: Lock a feature using App Configuration store name.
           text:
             az appconfig feature lock -n MyAppConfiguration --feature color --label test
         - name: Force locking a feature using connection string.
@@ -470,7 +470,7 @@ helps['appconfig feature unlock'] = """
     type: command
     short-summary: Unlock a feature to gain write operations.
     examples:
-        - name: Unlock a feature using App Configuration name.
+        - name: Unlock a feature using App Configuration store name.
           text:
             az appconfig feature unlock -n MyAppConfiguration --feature color --label test
         - name: Force unlocking a feature using connection string.
@@ -485,7 +485,7 @@ helps['appconfig feature enable'] = """
     type: command
     short-summary: Enable a feature flag to turn it ON for use.
     examples:
-        - name: enable a feature using App Configuration name.
+        - name: enable a feature using App Configuration store name.
           text:
             az appconfig feature enable -n MyAppConfiguration --feature color --label test
         - name: Force enabling a feature using connection string.
@@ -500,7 +500,7 @@ helps['appconfig feature disable'] = """
     type: command
     short-summary: Disable a feature flag to turn it OFF for use.
     examples:
-        - name: disable a feature using App Configuration name.
+        - name: disable a feature using App Configuration store name.
           text:
             az appconfig feature disable -n MyAppConfiguration --feature color --label test
         - name: Force disabling a feature using connection string.
@@ -513,7 +513,7 @@ helps['appconfig feature disable'] = """
 
 helps['appconfig feature filter'] = """
     type: group
-    short-summary: Manage filters associated with feature flags stored in an App Configuration.
+    short-summary: Manage filters associated with feature flags stored in an App Configuration store.
     """
 
 helps['appconfig feature filter add'] = """
@@ -529,7 +529,7 @@ helps['appconfig feature filter add'] = """
         - name: Add a filter with name 'MyFilter' using connection string.
           text:
             az appconfig feature filter add --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --filter-name MyFilter
-        - name: Add a filter with name 'MyFilter' using App Configuration endpoint and your 'az login' credentials.
+        - name: Add a filter with name 'MyFilter' using App Configuration store endpoint and your 'az login' credentials.
           text:
             az appconfig feature filter add --endpoint=https://contoso.azconfig.io --feature color --filter-name MyFilter --auth-mode login
         - name: Add a filter for feature 'color' with label MyLabel with name 'MyFilter' and array parameters.
@@ -559,13 +559,13 @@ helps['appconfig feature filter delete'] = """
     type: command
     short-summary: Delete a filter from a feature flag.
     examples:
-        - name: Delete a filter from a feature using App Configuration name without confirmation.
+        - name: Delete a filter from a feature using App Configuration store name without confirmation.
           text:
             az appconfig feature filter delete -n MyAppConfiguration --feature color --filter-name MyFilter --yes
         - name: Delete a filter from a feature when you have multiple filters with that same name.
           text:
             az appconfig feature filter delete --feature color --filter-name MyFilter --index 2 --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx
-        - name: Delete all filters of a feature using App Configuration name without confirmation.
+        - name: Delete all filters of a feature using App Configuration store name without confirmation.
           text:
             az appconfig feature filter delete -n MyAppConfiguration --feature color --label MyLabel --all --yes
     """
