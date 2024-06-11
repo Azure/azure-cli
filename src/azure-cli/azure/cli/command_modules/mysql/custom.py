@@ -292,6 +292,8 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
             .format(server_name), yes=yes)
 
     instance = client.get(resource_group_name, server_name)
+    if instance.sku.tier == 'Burstable':
+        raise CLIError("Major version update is not supported for the Burstable pricing tier.")
 
     current_version = int(instance.version.split('.')[0])
     if current_version >= int(version):
