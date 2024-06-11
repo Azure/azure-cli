@@ -1346,8 +1346,6 @@ class AGRewriteRuleCreate(_AGRewriteRuleCreate):
                  "Values from: `az network application-gateway rewrite-rule list-response-headers`.",
         )
         args_schema.response_headers.Element = AAZStrArg()
-        args_schema.request_header_configurations._registered = False
-        args_schema.response_header_configurations._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -1387,8 +1385,6 @@ class AGRewriteRuleUpdate(_AGRewriteRuleUpdate):
         args_schema.response_headers.Element = AAZStrArg(
             nullable=True,
         )
-        args_schema.request_header_configurations._registered = False
-        args_schema.response_header_configurations._registered = False
         return args_schema
 
     def pre_operations(self):
