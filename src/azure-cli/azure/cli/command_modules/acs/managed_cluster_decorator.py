@@ -4369,14 +4369,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         disable_ingress_gateway = self.raw_param.get("disable_ingress_gateway", False)
         ingress_gateway_type = self.raw_param.get("ingress_gateway_type", None)
 
-        # disallow disable ingress gateway on a cluser with no asm enabled
-        if disable_ingress_gateway:
-            if new_profile is None or new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_DISABLED:
-                raise ArgumentUsageError(
-                    "Istio has not been enabled for this cluster, please refer to https://aka.ms/asm-aks-addon-docs "
-                    "for more details on enabling Azure Service Mesh."
-                )
-
         if enable_ingress_gateway and disable_ingress_gateway:
             raise MutuallyExclusiveArgumentError(
                 "Cannot both enable and disable azure service mesh ingress gateway at the same time.",

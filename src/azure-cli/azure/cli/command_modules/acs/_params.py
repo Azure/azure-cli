@@ -349,7 +349,8 @@ def load_arguments(self, _):
         c.argument('enable_vpa', action='store_true', help='enable vertical pod autoscaler for cluster')
         c.argument('enable_azure_service_mesh',
                    options_list=["--enable-azure-service-mesh", "--enable-asm"],
-                   action='store_true')
+                   action='store_true',
+                   is_preview=True)
         c.argument("revision", validator=validate_azure_service_mesh_revision)
         # addons
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
