@@ -1359,9 +1359,6 @@ helps['containerapp hostname bind'] = """
     - name: Add or update hostname and binding with a provided certificate.
       text: |
           az containerapp hostname bind -n my-containerapp -g MyResourceGroup --hostname MyHostname --certificate MyCertificateId
-    - name: Look for or create a managed certificate and bind with the hostname if no certificate or thumbprint is provided.
-      text: |
-          az containerapp hostname bind -n my-containerapp -g MyResourceGroup --hostname MyHostname
 """
 
 helps['containerapp hostname delete'] = """
