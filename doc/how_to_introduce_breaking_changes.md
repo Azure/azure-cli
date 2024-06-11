@@ -21,7 +21,7 @@ The breaking change window is a designated sprint that **permits** the merging o
 
 The timing of the breaking change window in Azure CLI aligns with [Microsoft Build](https://build.microsoft.com/) and [Microsoft Ignite](https://ignite.microsoft.com/). You could find the next Breaking Change Release plan in our [milestones](https://github.com/Azure/azure-cli/milestones).
 
-> It's highlighted that  the introduction of breaking changes is typically prohibited within non-breaking-change window, based on what we stated above for consistency and stable tooling experience.
+> It's highlighted that the introduction of breaking changes is typically prohibited within non-breaking-change window, based on what we stated above for consistency and stable tooling experience.
 > 
 > Exceptions to this policy may be considered under extraordinary circumstances. We understand and would like to help out. There would be high-graded justifications required to provide the info Azure CLI can access.
 > 
