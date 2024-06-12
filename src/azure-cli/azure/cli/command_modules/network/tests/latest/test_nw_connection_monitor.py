@@ -375,7 +375,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         # Restore sys.argv
         sys.argv = original_argv
 
-    @unittest.skip('PathNotSupportedInBothHTTPConfigurationAndAddress')
+    #@unittest.skip('PathNotSupportedInBothHTTPConfigurationAndAddress')
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_test_group2(self, resource_group, resource_group_location):
@@ -859,6 +859,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--protocol Icmp ').get_output_in_json()
 
         print("tc34=",tc34)
+        print("tc24=",tc24)
 
         self.kwargs.update({
             'endpoint14': endpoint14,
