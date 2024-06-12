@@ -348,6 +348,7 @@ class Add(AAZCommand):
 
         def _create_instance(self):
             #comment to debug
+            import sys
             destinations_index = sys.argv.index('--destinations') if '--destinations' in sys.argv else None
             sources_index = sys.argv.index('--sources') if '--sources' in sys.argv else None
             test_configurations_index = sys.argv.index('--test-configurations') if '--test-configurations' in sys.argv else None
