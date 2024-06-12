@@ -212,7 +212,6 @@ class ContainerappEnvScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location="northeurope")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_env_certificate_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
-        resource_group = "client.env_rg_francecentral"
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-e2e-env', length=24)
@@ -310,7 +309,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
 
         self.cmd('containerapp hostname bind -g {} -n {} --hostname {} --environment {} --thumbprint {}'.format(resource_group, ca_name, hostname_1, env_name, cert_thumbprint), expect_failure=False)
         # CertificateInUse
-        self.cmd('containerapp env certificate delete -n {} -g {} --certificate {} --yes'.format(env_name, resource_group, certs[0]["id"]), expect_failure=True)
+        self.cmd('containerapp env certificate delete -n {} -g {} --certificate {} --yes'.format(env_name, resource_group, certs[0]["name"]), expect_failure=True)
 
         self.cmd('containerapp hostname delete -g {} -n {} --hostname {} --yes'.format(resource_group, ca_name, hostname_1), expect_failure=False)
 

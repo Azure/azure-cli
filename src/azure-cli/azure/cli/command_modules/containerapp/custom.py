@@ -3918,11 +3918,19 @@ def delete_certificate_logic(cmd, resource_group_name, name, cert_name, location
             raise ResourceNotFoundError(f"The certificate '{cert_name}' does not exist in Container app environment '{name}'.")
         if len(managed_certs) > 0 and len(private_certs) > 0:
             raise RequiredArgumentMissingError(f"Found more than one certificates with name '{cert_name}':\n'{managed_certs[0]['id']}',\n'{private_certs[0]['id']}'.\nPlease specify the certificate id using --certificate.")
-        try:
-            ManagedEnvironmentClient.delete_managed_certificate(cmd, resource_group_name, name, cert_name)
-            logger.warning('Successfully deleted certificate: %s', cert_name)
-        except Exception as e:
-            handle_raw_exception(e)
+        if private_certs:
+            try:
+                ManagedEnvironmentClient.delete_certificate(cmd, resource_group_name, name, cert_name)
+                logger.warning('Successfully deleted certificate: %s', cert_name)
+            except Exception as e:
+                handle_raw_exception(e)
+
+        if managed_certs:
+            try:
+                ManagedEnvironmentClient.delete_managed_certificate(cmd, resource_group_name, name, cert_name)
+                logger.warning('Successfully deleted certificate: %s', cert_name)
+            except Exception as e:
+                handle_raw_exception(e)
 
 
 def upload_ssl(cmd, resource_group_name, name, environment, certificate_file, hostname, certificate_password=None, certificate_name=None, location=None):
