@@ -172,26 +172,6 @@ class Add(AAZCommand):
         )
         return cls._args_schema
 
-    def _execute_operations(self):
-        result = self.InstanceCreateByJson(ctx=self.ctx)()
-        return json.loads(result)
-
-    @register_callback
-    def pre_operations(self):
-        pass
-
-    @register_callback
-    def post_operations(self):
-        pass
-
-    @register_callback
-    def pre_instance_create(self):
-        pass
-
-    @register_callback
-    def post_instance_create(self, instance):
-        pass
-
     class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
 
       def __call__(self, *args, **kwargs):
@@ -213,7 +193,7 @@ class Add(AAZCommand):
               "name":str(self.ctx.args.test_configuration_name),
               "protocol":str(self.ctx.args.protocol),
               "frequency":str(self.ctx.args.frequency),
-              "preferredIPVersion": self.ctx.args.preferred_ip_version,
+              "preferredIPVersion": str(self.ctx.args.preferred_ip_version),
               "httpConfiguration": {},
               "icmpConfiguration": {},
               "successThreshold": {},
@@ -221,10 +201,10 @@ class Add(AAZCommand):
           }
 
         if hasattr(self.ctx.args, "http_method") or hasattr(self.ctx.args, "http_path") or hasattr(self.ctx.args, "http_port") or hasattr(self.ctx.args, "http_prefer_https") or hasattr(self.ctx.args, "http_request_headers") or hasattr(self.ctx.args, "http_valid_status_codes"):
-            data["httpConfiguration"]["method"] = getattr(self.ctx.args, "http_method", None)
-            data["httpConfiguration"]["path"] = getattr(self.ctx.args, "http_path", None)
-            data["httpConfiguration"]["port"] = getattr(self.ctx.args, "http_port", None)
-            data["httpConfiguration"]["prefer_https"] = getattr(self.ctx.args, "http_prefer_https", None)
+            data["httpConfiguration"]["method"] = getattr(self.ctx.args, "http_method")
+            data["httpConfiguration"]["path"] = getattr(self.ctx.args, "http_path")
+            data["httpConfiguration"]["port"] = getattr(self.ctx.args, "http_port")
+            data["httpConfiguration"]["prefer_https"] = getattr(self.ctx.args, "http_prefer_https")
             data["httpConfiguration"]["request_headers"] = []
             data["httpConfiguration"]["valid_status_code_ranges"] = []
 
@@ -245,14 +225,14 @@ class Add(AAZCommand):
 
         # Populate successThreshold
         if hasattr(self.ctx.args, "threshold_failed_percent") and self.ctx.args.threshold_failed_percent is not None or hasattr(self.ctx.args, "threshold_round_trip_time") and self.ctx.args.threshold_round_trip_time is not None:
-            data["successThreshold"]["checks_failed_percent"] = getattr(self.ctx.args, "threshold_failed_percent", None)
-            data["successThreshold"]["round_trip_time_ms"] = getattr(self.ctx.args, "threshold_round_trip_time", None)
+            data["successThreshold"]["checks_failed_percent"] = getattr(self.ctx.args, "threshold_failed_percent")
+            data["successThreshold"]["round_trip_time_ms"] = getattr(self.ctx.args, "threshold_round_trip_time")
 
         # Populate tcpConfiguration
         if hasattr(self.ctx.args, "tcp_port_behavior") and self.ctx.args.tcp_port_behavior is not None or hasattr(self.ctx.args, "tcp_disable_trace_route") and self.ctx.args.tcp_disable_trace_route is not None or hasattr(self.ctx.args, "tcp_port") and self.ctx.args.tcp_port is not None:
-            data["tcpConfiguration"]["destination_port_behavior"] = getattr(self.ctx.args, "tcp_port_behavior", None)
-            data["tcpConfiguration"]["disable_trace_route"] = getattr(self.ctx.args, "tcp_disable_trace_route", None)
-            data["tcpConfiguration"]["port"] = getattr(self.ctx.args, "tcp_port", None)
+            data["tcpConfiguration"]["destination_port_behavior"] = getattr(self.ctx.args, "tcp_port_behavior")
+            data["tcpConfiguration"]["disable_trace_route"] = getattr(self.ctx.args, "tcp_disable_trace_route")
+            data["tcpConfiguration"]["port"] = getattr(self.ctx.args, "tcp_port")
 
         #removing null and undefined fields from data
         data = {k: v for k, v in data.items() if v is not None and v != 'Undefined' and (not isinstance(v, dict) or any(v.values()))}

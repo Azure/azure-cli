@@ -310,7 +310,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
 
         self.check('name', 'testconfig')
 
-    @unittest.skip('PathNotSupportedInBothHTTPConfigurationAndAddress')
+    #@unittest.skip('PathNotSupportedInBothHTTPConfigurationAndAddress')
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_test_group1(self, resource_group, resource_group_location):
@@ -343,12 +343,11 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                   '--http-request-headers "[{header1},{header2}]" ').get_output_in_json()
 
         tc2 = self.cmd('network watcher connection-monitor test-configuration add '
-                 '--name testconfig2 '
+                 '--name icmptestconfig '
                  '--frequency 120 '
-                 '--protocol Http '
-                  '--http-method Get '
-                  '--http-valid-status-codes [200,201] '
-                  '--http-port 84 ').get_output_in_json()
+                 '--protocol Icmp ').get_output_in_json()
+
+        print("tc2=",tc2)
 
         self.kwargs.update({
             'endpoint1': endpoint1,
@@ -365,9 +364,9 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
 
         tg1=self.cmd("network watcher connection-monitor test-group add "
          '--name tg1 '
-         "--sources [{endpoint1},{endpoint2}] "
-         "--destinations [{endpoint2}] "
-         "--test-configurations [{tc1},{tc2}] ")
+         '--sources "[{endpoint1},{endpoint2}]" '
+         '--destinations "[{endpoint2}]" '
+         '--test-configurations "[{tc1},{tc2}]" ').get_output_in_json()
 
         print("tg1=",tg1)
         self.check('name','tg1')
@@ -436,9 +435,9 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
 
         tg1=self.cmd("network watcher connection-monitor test-group add "
          '--name tg1 '
-         "--sources [{endpoint1},{endpoint2}] "
-         "--destinations [{endpoint2}] "
-         "--test-configurations [{tc1},{tc2}] ")
+         '--sources "[{endpoint1},{endpoint2}]" '
+         '--destinations "[{endpoint2}]" '
+         '--test-configurations "[{tc1},{tc2}]" ').get_output_in_json()
 
         print("tg1=",tg1)
         self.check('name','tg1')
@@ -864,7 +863,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.kwargs.update({
             'endpoint14': endpoint14,
             'endpoint24': endpoint24,
-            'endpoint34': endpoint34,
+            'endpoint34': endpoint32,
             'tc14': tc14,
             'tc24': tc24,
             'tc34': tc34
