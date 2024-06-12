@@ -234,7 +234,7 @@ class Add(AAZCommand):
                     data["httpConfiguration"]["valid_status_code_ranges"].append(code)
 
             # Populate request headers
-            if hasattr(self.ctx.args, "http_request_headers"):
+            if hasattr(self.ctx.args, "http_request_headers") and self.ctx.args.http_request_headers is not None:
                 request_headers = getattr(self.ctx.args, "http_request_headers", [])
                 for header in request_headers:
                     data["httpConfiguration"]["request_headers"].append({"name": header['name'],"value": header['value']})
@@ -249,7 +249,7 @@ class Add(AAZCommand):
             data["successThreshold"]["round_trip_time_ms"] = getattr(self.ctx.args, "threshold_round_trip_time", None)
 
         # Populate tcpConfiguration
-        if hasattr(self.ctx.args, "tcp_port_behavior") or hasattr(self.ctx.args, "tcp_disable_trace_route") or hasattr(self.ctx.args, "tcp_port"):
+        if hasattr(self.ctx.args, "tcp_port_behavior") and self.ctx.args.tcp_port_behaviour is not None or hasattr(self.ctx.args, "tcp_disable_trace_route") and self.ctx.args.tcp_disable_trace_route is not None or hasattr(self.ctx.args, "tcp_port") and self.ctx.args.tcp_port is not None:
             data["tcpConfiguration"]["destination_port_behavior"] = getattr(self.ctx.args, "tcp_port_behavior", None)
             data["tcpConfiguration"]["disable_trace_route"] = getattr(self.ctx.args, "tcp_disable_trace_route", None)
             data["tcpConfiguration"]["port"] = getattr(self.ctx.args, "tcp_port", None)

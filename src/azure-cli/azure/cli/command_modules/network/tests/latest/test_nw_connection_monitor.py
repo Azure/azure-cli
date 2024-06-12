@@ -733,7 +733,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
 
         tc33 = self.cmd('network watcher connection-monitor test-configuration add '
                 '--name icmptestconfig '
-                '--preferred-ip-version IPv4'
+                '--preferred-ip-version IPv4 '
                 '--frequency 60 '
                  '--protocol Icmp ').get_output_in_json()
 
@@ -847,7 +847,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
 
         tc24 = self.cmd('network watcher connection-monitor test-configuration add '
                 '--name tcptestconfig '
-                '--preferred-ip-version IPv4'
+                '--preferred-ip-version IPv4 '
                 '--frequency 60 '
                  '--protocol Tcp '
                   '--tcp-port 80 ').get_output_in_json()
