@@ -574,24 +574,24 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
     def process_endpoints(self, args):
         src_endpoints = [
             {
-            "name": src.name,
-            "resource_id": src.resourceId,
-            "address": src.address,
-            "type": src.type,
-            "coverageLevel": src.coverageLevel,
-            "scope": src.scope
+                "name": src.name,
+                "resource_id": src.resourceId,
+                "address": src.address,
+                "type": src.type,
+                "coverageLevel": src.coverageLevel,
+                "scope": src.scope
             }
             for test_group in args.test_groups
             for src in test_group["sources"]
         ]
         dst_endpoints = [
             {
-            "name": dst.name,
-            "resource_id": dst.resourceId,
-            "address": dst.address,
-            "type": dst.type,
-            "coverageLevel": dst.coverageLevel,
-            "scope": dst.scope
+                "name": dst.name,
+                "resource_id": dst.resourceId,
+                "address": dst.address,
+                "type": dst.type,
+                "coverageLevel": dst.coverageLevel,
+                "scope": dst.scope
             }
             for test_group in args.test_groups
             for dst in test_group["destinations"]
@@ -610,13 +610,13 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
 
     def process_test_config(self, test_config):
         config = {
-                    "name": test_config["name"] if test_config["name"] is not None else None,
-                    "test_frequency_sec": int(str(test_config["frequency"] if test_config["frequency"] is not None else None)),
-                    "protocol": test_config["protocol"] if test_config["protocol"] is not None else None,
-                    "location": test_config["location"] if test_config["location"] is not None else None,
-                    "preferred_ip_version": test_config["preferred_ip_version"] if test_config["preferred_ip_version"] is not None else None,
-                    "success_threshold": test_config["success_threshold"] if test_config["success_threshold"] is not None else None,
-                }
+            "name": test_config["name"] if test_config["name"] is not None else None,
+            "test_frequency_sec": int(str(test_config["frequency"] if test_config["frequency"] is not None else None)),
+            "protocol": test_config["protocol"] if test_config["protocol"] is not None else None,
+            "location": test_config["location"] if test_config["location"] is not None else None,
+            "preferred_ip_version": test_config["preferred_ip_version"] if test_config["preferred_ip_version"] is not None else None,
+            "success_threshold": test_config["success_threshold"] if test_config["success_threshold"] is not None else None,
+        }
 
         if test_config["protocol"] == "Http" and test_config["httpConfiguration"] is not None:
 
@@ -801,7 +801,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             options=["--tcp-port-behavior"],
             help='Destination port behavior.',
             arg_group="V2 Test Configuration",
-            enum={"ListenIfAvailable": "ListenIfAvailable",  "None": "None"},
+            enum={"ListenIfAvailable": "ListenIfAvailable", "None": "None"},
         )
         args_schema.test_config_threshold_failed_percent = AAZIntArg(
             options=["--threshold-failed-percent"],
@@ -837,7 +837,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         args = self.process_test_configs(args)
         args = self.remove_duplicates(args)
 
-        test_groups=[]
+        test_groups = []
 
         for test_group in args.test_groups:
             test_group_name = test_group['testGroupName']
@@ -897,7 +897,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         else:
             args.outputs = []
 
-        #removing duplicate endpoints
+        # removing duplicate endpoints
         seen = set()
         unique_endpoints = []
         for endpoint in args.endpoints:
@@ -908,7 +908,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
                 seen.add(endpoint_name)
         args.endpoints = unique_endpoints
 
-        #removing duplicate test-configurations
+        # removing duplicate test-configurations
         seen = set()
         unique_testconfigs = []
         for test_config in args.test_configurations:
@@ -1098,7 +1098,7 @@ class NwFlowLogCreate(_NwFlowLogCreate):
             help="Number of days to retain logs.",
         )
         args_schema.traffic_analytics_enabled = AAZBoolArg(
-            options=['--traffic-analytics'],  arg_group="Traffic Analytics",
+            options=['--traffic-analytics'], arg_group="Traffic Analytics",
             help="Enable traffic analytics. Defaults to true if `--workspace` is provided."
         )
         args_schema.traffic_analytics_workspace = AAZResourceIdArg(
@@ -1202,7 +1202,7 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
             nullable=True,
         )
         args_schema.traffic_analytics_interval = AAZIntArg(
-            options=['--interval'],  arg_group="Traffic Analytics",
+            options=['--interval'], arg_group="Traffic Analytics",
             help="Interval in minutes at which to conduct flow analytics. Temporarily allowed values are 10 and 60.",
             nullable=True,
             fmt=AAZIntArgFormat(
@@ -1211,11 +1211,11 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
             )
         )
         args_schema.traffic_analytics_enabled = AAZBoolArg(
-            options=['--traffic-analytics'],  arg_group="Traffic Analytics",  nullable=True,
+            options=['--traffic-analytics'], arg_group="Traffic Analytics", nullable=True,
             help="Enable traffic analytics. Defaults to true if `--workspace` is provided."
         )
         args_schema.traffic_analytics_workspace = AAZResourceIdArg(
-            options=['--workspace'],  arg_group="Traffic Analytics",  nullable=True,
+            options=['--workspace'], arg_group="Traffic Analytics", nullable=True,
             help="Name or ID of a Log Analytics workspace. Must be in the same region of flow log",
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.OperationalInsights/workspaces/{}"
@@ -1306,7 +1306,7 @@ class NwFlowLogList(_NwFlowLogList):
         args_schema.resource_group._registered = False
         args_schema.resource_group._required = False
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location to identify the exclusive Network Watcher under a region. "
                  "Only one Network Watcher can be existed per subscription and region.",
             required=True,
@@ -1359,13 +1359,13 @@ class NwTroubleshootingStart(_NwTroubleshootingStart):
         args_schema.target_resource_id._registered = False
         args_schema.target_resource_id._required = False
         args_schema.resource_group_name = AAZStrArg(
-            options=["-g",  "--resource-group"],
+            options=["-g", "--resource-group"],
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
         )
         args_schema.resource_type = AAZStrArg(
-            options=["-t",  "--resource-type"],
+            options=["-t", "--resource-type"],
             help="The type of target resource to troubleshoot,  if resource ID is not specified.",
-            enum={"vnetGateway": "virtualNetworkGateways",  "vpnConnection": "connections"},
+            enum={"vnetGateway": "virtualNetworkGateways", "vpnConnection": "connections"},
         )
         args_schema.resource = AAZResourceIdArg(
             options=["--resource"],
@@ -1410,7 +1410,7 @@ class NwTroubleshootingShow(_NwTroubleshootingShow):
         args_schema.resource_type = AAZStrArg(
             options=["-t", "--resource-type"],
             help="The resource type.",
-            enum={"vnetGateway": "virtualNetworkGateways",  "vpnConnection": "connections"},
+            enum={"vnetGateway": "virtualNetworkGateways", "vpnConnection": "connections"},
         )
         args_schema.resource = AAZResourceIdArg(
             options=["--resource"],
@@ -1528,7 +1528,7 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
             options=["--dest-test-groups"],
             help="Space-separated list of names for test group to reference as destination.",
             arg_group="V2 Test Group",
-            required = False
+            required=False
         )
         args_schema.dest_test_groups.Element = AAZStrArg()
 
@@ -1536,7 +1536,7 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
             options=["--source-test-groups"],
             help="Space-separated list of names for test group to reference as source.",
             arg_group="V2 Test Group",
-            required = False
+            required=False
         )
         args_schema.source_test_groups.Element = AAZStrArg()
         return args_schema
@@ -1811,7 +1811,7 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
             options=["--http-method"],
             help="The HTTP method to use.",
             arg_group="V2 Test Configuration",
-            enum={"Get": "Get",  "Post": "Post"},
+            enum={"Get": "Get", "Post": "Post"},
         )
         args_schema.test_config_http_path = AAZStrArg(
             options=["--http-path"],
@@ -1848,7 +1848,7 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
             help='The preferred IP version to use in test evaluation. '
                  'The connection monitor may choose to use a different version depending on other parameters.',
             arg_group="V2 Test Configuration",
-            enum={"IPv4": "IPv4",  "IPv6": "IPv6"},
+            enum={"IPv4": "IPv4", "IPv6": "IPv6"},
         )
         args_schema.test_config_protocol = AAZStrArg(
             options=["--protocol"],
@@ -2017,13 +2017,13 @@ class WatcherConnectionMonitorTestGroupRemove(_WatcherConnectionMonitorUpdate):
     def pre_operations(self):
         get_network_watcher_from_location(self)
 
-    def pre_instance_update(self,  instance):
+    def pre_instance_update(self, instance):
         args = self.ctx.args
         name = args.test_group_name.to_serialized_data()
 
         instance = self.ctx.vars.instance
 
-        new_test_groups,  removed_test_group = [],  None
+        new_test_groups, removed_test_group = [], None
         for t in instance.properties.test_groups:
             if t.name.to_serialized_data() == name:
                 removed_test_group = t

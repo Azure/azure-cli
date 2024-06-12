@@ -373,7 +373,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
         if isinstance(values, list) and all(isinstance(d, dict) for d in values):
-        # Handle list of dictionaries
+            # Handle list of dictionaries
             result = []
             for item in values:
                 item_result = OrderedDict()
@@ -382,8 +382,6 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                     try:
                         if isinstance(value, str):
                             item_result[key] = value
-                        # else:
-                        #    item_result[key] = action.format_data(value)
                     except AAZInvalidValueError as ex:
                         raise AAZInvalidValueError(f"Invalid '{key}' : {ex}") from ex
                 result.append(item_result)
