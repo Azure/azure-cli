@@ -858,6 +858,8 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                 '--frequency 60 '
                  '--protocol Icmp ').get_output_in_json()
 
+        print("tc34=",tc34)
+
         self.kwargs.update({
             'endpoint14': endpoint14,
             'endpoint24': endpoint24,

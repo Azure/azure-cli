@@ -237,7 +237,7 @@ class Add(AAZCommand):
             if hasattr(self.ctx.args, "http_request_headers") and self.ctx.args.http_request_headers is not None:
                 request_headers = getattr(self.ctx.args, "http_request_headers", [])
                 for header in request_headers:
-                    data["httpConfiguration"]["request_headers"].append({"name": header['name'],"value": header['value']})
+                    data["httpConfiguration"]["request_headers"].append({"name": header['name'], "value": header['value']})
 
     # Populate icmpConfiguration
         if hasattr(self.ctx.args, "icmp_disable_trace_route") and self.ctx.args.icmp_disable_trace_route is not None:
