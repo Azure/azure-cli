@@ -8,10 +8,10 @@
 # pylint: skip-file
 # flake8: noqa
 
-
-from azure.cli.core.aaz import *
 import json
 import sys
+
+from azure.cli.core.aaz import *
 
 @register_command(
     "network watcher connection-monitor test-group add",
