@@ -477,19 +477,16 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                 '--name testconfig2 '
                 '--preferred-ip-version IPv4 '
                 '--frequency 120 '
-                 '--protocol Http '
-                  '--http-method Get '
-                  '--http-valid-status-codes [200,201] '
-                  '--http-port 80 ').get_output_in_json()
+                '--protocol Icmp '
+                '--icmp-disable-trace-route true ').get_output_in_json()
 
         tc2 = self.cmd('network watcher connection-monitor test-configuration add '
                 '--name testconfig1 '
                 '--preferred-ip-version IPv4 '
-                '--frequency 120 '
-                 '--protocol Http '
-                  '--http-method Get '
-                  '--http-valid-status-codes [200,201] '
-                  '--http-port 80 ').get_output_in_json()
+                '--frequency 60 '
+                '--protocol Icmp '
+                '--http-method Get '
+                '--icmp-disable-trace-route false ').get_output_in_json()
 
         self.kwargs.update({
             'endpoint1': endpoint1,

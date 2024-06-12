@@ -175,7 +175,7 @@ class Add(AAZCommand):
     class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
 
       def __call__(self, *args, **kwargs):
-            return self._create_instance()
+        return self._create_instance()
 
       def clean_dict(self,d):
             clean = {}
@@ -200,7 +200,8 @@ class Add(AAZCommand):
               "tcpConfiguration": {}
           }
 
-        if hasattr(self.ctx.args, "http_method") or hasattr(self.ctx.args, "http_path") or hasattr(self.ctx.args, "http_port") or hasattr(self.ctx.args, "http_prefer_https") or hasattr(self.ctx.args, "http_request_headers") or hasattr(self.ctx.args, "http_valid_status_codes"):
+        #if hasattr(self.ctx.args, "http_method") or hasattr(self.ctx.args, "http_path") or hasattr(self.ctx.args, "http_port") or hasattr(self.ctx.args, "http_prefer_https") or hasattr(self.ctx.args, "http_request_headers") or hasattr(self.ctx.args, "http_valid_status_codes"):
+        if self.ctx.args.protocol == "Http":
             data["httpConfiguration"]["method"] = getattr(self.ctx.args, "http_method")
             data["httpConfiguration"]["path"] = getattr(self.ctx.args, "http_path")
             data["httpConfiguration"]["port"] = getattr(self.ctx.args, "http_port")
@@ -220,16 +221,19 @@ class Add(AAZCommand):
                     data["httpConfiguration"]["request_headers"].append({"name": header['name'], "value": header['value']})
 
     # Populate icmpConfiguration
-        if hasattr(self.ctx.args, "icmp_disable_trace_route") and self.ctx.args.icmp_disable_trace_route is not None:
+        #if hasattr(self.ctx.args, "icmp_disable_trace_route") and self.ctx.args.icmp_disable_trace_route is not None:
+        if self.ctx.args.protocol == "Icmp":
             data["icmpConfiguration"]["disable_trace_route"] = self.ctx.args.icmp_disable_trace_route
 
         # Populate successThreshold
-        if hasattr(self.ctx.args, "threshold_failed_percent") and self.ctx.args.threshold_failed_percent is not None or hasattr(self.ctx.args, "threshold_round_trip_time") and self.ctx.args.threshold_round_trip_time is not None:
+        if hasattr(self.ctx.args, "threshold_failed_percent") and self.ctx.args.threshold_failed_percent is not None:
             data["successThreshold"]["checks_failed_percent"] = getattr(self.ctx.args, "threshold_failed_percent")
+        if hasattr(self.ctx.args, "threshold_round_trip_time") and self.ctx.args.threshold_round_trip_time is not None:
             data["successThreshold"]["round_trip_time_ms"] = getattr(self.ctx.args, "threshold_round_trip_time")
 
         # Populate tcpConfiguration
-        if hasattr(self.ctx.args, "tcp_port_behavior") and self.ctx.args.tcp_port_behavior is not None or hasattr(self.ctx.args, "tcp_disable_trace_route") and self.ctx.args.tcp_disable_trace_route is not None or hasattr(self.ctx.args, "tcp_port") and self.ctx.args.tcp_port is not None:
+        #if hasattr(self.ctx.args, "tcp_port_behavior") and self.ctx.args.tcp_port_behavior is not None or hasattr(self.ctx.args, "tcp_disable_trace_route") and self.ctx.args.tcp_disable_trace_route is not None or hasattr(self.ctx.args, "tcp_port") and self.ctx.args.tcp_port is not None:
+        if self.ctx.args.protocol == "Tcp":
             data["tcpConfiguration"]["destination_port_behavior"] = getattr(self.ctx.args, "tcp_port_behavior")
             data["tcpConfiguration"]["disable_trace_route"] = getattr(self.ctx.args, "tcp_disable_trace_route")
             data["tcpConfiguration"]["port"] = getattr(self.ctx.args, "tcp_port")
