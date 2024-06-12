@@ -60,6 +60,7 @@ class Add(AAZCommand):
             options=["--preferred-ip-version"],
             help="The preferred IP version to use in test evaluation. The connection monitor may choose to use a different version depending on other parameters.  Allowed values: IPv4, IPv6.",
             enum={"IPv4": "IPv4", "IPv6": "IPv6"},
+            required=False
         )
         _args_schema.protocol = AAZStrArg(
             options=["--protocol"],
@@ -142,6 +143,7 @@ class Add(AAZCommand):
             options=["--icmp-disable-trace-route"],
             arg_group="ICMP Protocol",
             help="Value indicating whether path evaluation with trace route should be disabled. false is default.  Allowed values: false, true.",
+            required=False
         )
 
         # define Arg Group "TCP Protocol"
@@ -157,6 +159,7 @@ class Add(AAZCommand):
             options=["--tcp-disable-trace-route"],
             arg_group="TCP Protocol",
             help="Value indicating whether path evaluation with trace route should be disabled. false is default.  Allowed values: false, true.",
+            required=False
         )
         _args_schema.tcp_port = AAZIntArg(
             options=["--tcp-port"],

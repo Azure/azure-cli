@@ -213,7 +213,11 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     def test_nw_connection_monitor_output(self, resource_group, resource_group_location):
 
         self.kwargs.update({
-            'workspace_name': self.create_random_name('clitest', 20)
+            'workspace_name': self.create_random_name('clitest', 20),
+            'location': 'eastus',
+            'rg': resource_group,
+            'location': resource_group_location,
+            'cmv2': 'CMv2-01',
         })
 
         workspace = self.cmd('monitor log-analytics workspace create '
@@ -611,7 +615,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
 
         tc22 = self.cmd('network watcher connection-monitor test-configuration add '
                 '--name httptestconfig2 '
-                '--preferred-ip-version IPv6'
+                '--preferred-ip-version IPv6 '
                 '--frequency 60 '
                  '--protocol Http '
                   '--http-method Get '
@@ -722,7 +726,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
 
         tc23 = self.cmd('network watcher connection-monitor test-configuration add '
                 '--name tcptestconfig '
-                '--preferred-ip-version IPv4'
+                '--preferred-ip-version IPv4 '
                 '--frequency 60 '
                  '--protocol Tcp '
                   '--tcp-port 80 ').get_output_in_json()
@@ -850,7 +854,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
 
         tc34 = self.cmd('network watcher connection-monitor test-configuration add '
                 '--name icmptestconfig '
-                '--preferred-ip-version IPv4'
+                '--preferred-ip-version IPv4 '
                 '--frequency 60 '
                  '--protocol Icmp ').get_output_in_json()
 
