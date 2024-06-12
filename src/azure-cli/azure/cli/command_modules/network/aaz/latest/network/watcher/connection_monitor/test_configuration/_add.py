@@ -249,7 +249,7 @@ class Add(AAZCommand):
             data["successThreshold"]["round_trip_time_ms"] = getattr(self.ctx.args, "threshold_round_trip_time", None)
 
         # Populate tcpConfiguration
-        if hasattr(self.ctx.args, "tcp_port_behavior") and self.ctx.args.tcp_port_behaviour is not None or hasattr(self.ctx.args, "tcp_disable_trace_route") and self.ctx.args.tcp_disable_trace_route is not None or hasattr(self.ctx.args, "tcp_port") and self.ctx.args.tcp_port is not None:
+        if hasattr(self.ctx.args, "tcp_port_behavior") and self.ctx.args.tcp_port_behavior is not None or hasattr(self.ctx.args, "tcp_disable_trace_route") and self.ctx.args.tcp_disable_trace_route is not None or hasattr(self.ctx.args, "tcp_port") and self.ctx.args.tcp_port is not None:
             data["tcpConfiguration"]["destination_port_behavior"] = getattr(self.ctx.args, "tcp_port_behavior", None)
             data["tcpConfiguration"]["disable_trace_route"] = getattr(self.ctx.args, "tcp_disable_trace_route", None)
             data["tcpConfiguration"]["port"] = getattr(self.ctx.args, "tcp_port", None)
