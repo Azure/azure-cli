@@ -66,6 +66,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                worker_count='3',
                apiserver_visibility='Public',
                ingress_visibility='Public',
+               load_balancer_managed_outbound_ip_count=None,
                tags=None,
                version=None,
                no_wait=False):
@@ -122,6 +123,12 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
     if ingress_visibility is not None:
         ingress_visibility = ingress_visibility.capitalize()
 
+    load_balancer_profile = None
+    if load_balancer_managed_outbound_ip_count is not None:
+        load_balancer_profile = openshiftcluster.LoadBalancerProfile()
+        load_balancer_profile.managed_outbound_ips = openshiftcluster.ManagedOutboundIPs()
+        load_balancer_profile.managed_outbound_ips.count = load_balancer_managed_outbound_ip_count  # pylint: disable=line-too-long
+
     oc = openshiftcluster.OpenShiftCluster(
         location=location,
         tags=tags,
@@ -141,6 +148,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
             pod_cidr=pod_cidr or '10.128.0.0/14',
             service_cidr=service_cidr or '172.30.0.0/16',
             outbound_type=outbound_type or '',
+            load_balancer_profile=load_balancer_profile,
             preconfigured_nsg='Enabled' if enable_preconfigured_nsg else 'Disabled',
         ),
         master_profile=openshiftcluster.MasterProfile(
@@ -403,6 +411,7 @@ def aro_update(cmd,
                refresh_cluster_credentials=False,
                client_id=None,
                client_secret=None,
+               load_balancer_managed_outbound_ip_count=None,
                no_wait=False):
     # if we can't read cluster spec, we will not be able to do much. Fail.
     oc = client.open_shift_clusters.get(resource_group_name, resource_name)
@@ -420,6 +429,12 @@ def aro_update(cmd,
 
         if client_id is not None:
             ocUpdate.service_principal_profile.client_id = client_id
+
+    if load_balancer_managed_outbound_ip_count is not None:
+        ocUpdate.network_profile = openshiftcluster.NetworkProfile()
+        ocUpdate.network_profile.load_balancer_profile = openshiftcluster.LoadBalancerProfile()
+        ocUpdate.network_profile.load_balancer_profile.managed_outbound_ips = openshiftcluster.ManagedOutboundIPs()
+        ocUpdate.network_profile.load_balancer_profile.managed_outbound_ips.count = load_balancer_managed_outbound_ip_count  # pylint: disable=line-too-long
 
     return sdk_no_wait(no_wait, client.open_shift_clusters.begin_update,
                        resource_group_name=resource_group_name,
