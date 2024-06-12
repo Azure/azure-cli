@@ -8,8 +8,9 @@
 # pylint: skip-file
 # flake8: noqa
 
-import json
 import sys
+import json
+
 
 from azure.cli.core.aaz import *
 
