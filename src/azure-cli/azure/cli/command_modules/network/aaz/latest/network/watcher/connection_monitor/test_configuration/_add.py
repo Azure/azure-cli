@@ -228,17 +228,13 @@ class Add(AAZCommand):
             if hasattr(self.ctx.args, "http_valid_status_codes"):
                 valid_status_codes = getattr(self.ctx.args, "http_valid_status_codes",[])
                 for code in valid_status_codes:
-                   data["httpConfiguration"]["valid_status_code_ranges"].append(code)
-
+                    data["httpConfiguration"]["valid_status_code_ranges"].append(code)
 
             # Populate request headers
             if hasattr(self.ctx.args, "http_request_headers"):
                 request_headers = getattr(self.ctx.args, "http_request_headers", [])
                 for header in request_headers:
-                    data["httpConfiguration"]["request_headers"].append({
-                        "name": header['name'],
-                        "value": header['value']
-                    })
+                    data["httpConfiguration"]["request_headers"].append({"name": header['name'],"value": header['value']})
 
     # Populate icmpConfiguration
         if hasattr(self.ctx.args, "icmp_disable_trace_route") and self.ctx.args.icmp_disable_trace_route is not None:

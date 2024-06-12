@@ -541,7 +541,6 @@ class Create(AAZCommand):
             options=["--location"],
             help="Location to create a test configuration"
         )
-
         _element.http_configuration = AAZObjectArg(
             options=["http-configuration"],
             help="The parameters used to perform test evaluation over HTTP.",
@@ -550,7 +549,6 @@ class Create(AAZCommand):
             options=["icmp-configuration"],
             help="The parameters used to perform test evaluation over ICMP.",
         )
-
         _element.preferred_ip_version = AAZStrArg(
             options=["preferred-ip-version"],
             help="The preferred IP version to use in test evaluation. The connection monitor may choose to use a different version depending on other parameters.",

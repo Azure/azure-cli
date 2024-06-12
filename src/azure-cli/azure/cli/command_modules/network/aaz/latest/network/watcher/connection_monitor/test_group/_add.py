@@ -36,7 +36,6 @@ class Add(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        # self.SubresourceSelector(ctx=self.ctx, name="subresource")
         return self.InstanceCreateByJson(ctx=self.ctx)()
 
     _args_schema = None
@@ -59,7 +58,7 @@ class Add(AAZCommand):
             help="The name of the connection monitor test group.",
             required=True,
         )
-        
+
         # used to group together command line arguments
         # define Arg Group "V2 Endpoint"
 
@@ -76,7 +75,6 @@ class Add(AAZCommand):
             help="List of source endpoint names.",
             required=True,
         )
-
 
         destinations = cls._args_schema.destinations
         destinations.Element = AAZObjectArg()
@@ -122,8 +120,6 @@ class Add(AAZCommand):
             options=["address"],
             help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
         )
-        
-       
 
         sources = cls._args_schema.sources
         sources.Element = AAZObjectArg()
@@ -169,7 +165,7 @@ class Add(AAZCommand):
             options=["address"],
             help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
         )
-        
+
         # define Arg Group "V2 Test Configuration"
 
         _args_schema = cls._args_schema
@@ -211,7 +207,7 @@ class Add(AAZCommand):
             options=["icmp-configuration"],
             help="The parameters used to perform test evaluation over ICMP.",
         )
-       
+
         _element.preferred_ip_version = AAZStrArg(
             options=["preferred-ip-version"],
             help="The preferred IP version to use in test evaluation. The connection monitor may choose to use a different version depending on other parameters.",
@@ -307,9 +303,8 @@ class Add(AAZCommand):
                 minimum=0,
             ),
         )
-         
-        return cls._args_schema
 
+        return cls._args_schema
 
     class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
 
@@ -359,7 +354,7 @@ class Add(AAZCommand):
             destinations_list = self.parse_arg(destinations_index)
             sources_list = self.parse_arg(sources_index)
             test_configurations_list = self.parse_arg(test_configurations_index)
-            
+
 
             data ={
                 "testGroupName" : str(self.ctx.args.test_group_name),
@@ -367,8 +362,6 @@ class Add(AAZCommand):
                 "destinations" : destinations_list,
                 "testConfigurations" : test_configurations_list
             }
-           
-
 
             data_str = str(data)
             data_str = data_str.replace(" ","")

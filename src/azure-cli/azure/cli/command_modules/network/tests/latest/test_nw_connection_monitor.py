@@ -267,7 +267,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
     @AllowLargeResponse()
-    def test_nw_connection_monitor_v2_endpoint1(self, resource_group, resource_group_location):
+    def test_nw_connection_monitor_v2_endpoint_with_scope_and_coverage(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'val1':{'address':'10.0.0.25'},
@@ -709,10 +709,6 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                 '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/MC_aks-managed-natgw-rg_aks-managed-natgw_eastus2/providers/Microsoft.Network/virtualNetworks/aks-vnet-29306067 '
                 '--type AzureVNet ').get_output_in_json()
 
-        # print("e1=",endpoint12)
-        # print("e2=",endpoint22)
-
-
         #creating a test configuration
 
         tc13 = self.cmd('network watcher connection-monitor test-configuration add '
@@ -828,10 +824,6 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                 '--name aks-vnet-29306067 '
                 '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/MC_aks-managed-natgw-rg_aks-managed-natgw_eastus2/providers/Microsoft.Network/virtualNetworks/aks-vnet-29306067 '
                 '--type AzureVNet ').get_output_in_json()
-
-        # print("e1=",endpoint12)
-        # print("e2=",endpoint22)
-
 
         #creating a test configuration
         self.kwargs.update({
