@@ -380,7 +380,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                 for key, value in item.items():
                     action = self._schema[key]._build_cmd_action()  # pylint: disable=unsubscriptable-object
                     try:
-                        if isinstance(value,str):
+                        if isinstance(value, str):
                             item_result[key] = value
                         # else:
                         #    item_result[key] = action.format_data(value)

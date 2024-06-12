@@ -5,29 +5,29 @@
 # pylint: disable=line-too-long,  protected-access,  too-few-public-methods
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.tools import is_valid_resource_id,  parse_resource_id,  resource_id
+from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
 
-from azure.cli.core.azclierror import ValidationError,  RequiredArgumentMissingError,  MutuallyExclusiveArgumentError
+from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 from azure.cli.core.commands.arm import get_arm_resource_by_id
 
-from azure.cli.core.aaz import has_value,  AAZResourceLocationArg,  AAZResourceLocationArgFormat,  AAZListArg,  AAZStrArg,  \
-    AAZBoolArg,  AAZFloatArg,  AAZIntArg,  AAZIntArgFormat,  AAZDictArg,  AAZResourceIdArg,  AAZResourceIdArgFormat
+from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat, AAZListArg, AAZStrArg,  \
+    AAZBoolArg, AAZFloatArg, AAZIntArg, AAZIntArgFormat, AAZDictArg, AAZResourceIdArg, AAZResourceIdArgFormat
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
 
 from ..aaz.latest.network.watcher import RunConfigurationDiagnostic as _RunConfigurationDiagnostic
-from ..aaz.latest.network.watcher import ShowNextHop as _ShowNextHop,  ShowSecurityGroupView as _ShowSecurityGroupView,  \
+from ..aaz.latest.network.watcher import ShowNextHop as _ShowNextHop, ShowSecurityGroupView as _ShowSecurityGroupView,  \
     ShowTopology as _ShowTopology
-from ..aaz.latest.network.watcher import TestConnectivity as _TestConnectivity,  TestIpFlow as _TestIPFlow
+from ..aaz.latest.network.watcher import TestConnectivity as _TestConnectivity, TestIpFlow as _TestIPFlow
 
-from ..aaz.latest.network.watcher.flow_log import Create as _NwFlowLogCreate,  Update as _NwFlowLogUpdate,  \
-    List as _NwFlowLogList,  Delete as _NwFlowLogDelete
+from ..aaz.latest.network.watcher.flow_log import Create as _NwFlowLogCreate, Update as _NwFlowLogUpdate,  \
+    List as _NwFlowLogList, Delete as _NwFlowLogDelete
 from ..aaz.latest.network.watcher.troubleshooting import Start as _NwTroubleshootingStart,  \
     Show as _NwTroubleshootingShow
 from ..aaz.latest.network.watcher.packet_capture import Create as _PacketCaptureCreate
-from ..aaz.latest.network.watcher.packet_capture import Delete as _PacketCaptureDelete,  List as _PacketCaptureList,  \
-    Show as _PacketCaptureShow,  ShowStatus as _PacketCaptureShowStatus,  Stop as _PacketCaptureStop
+from ..aaz.latest.network.watcher.packet_capture import Delete as _PacketCaptureDelete, List as _PacketCaptureList,  \
+    Show as _PacketCaptureShow, ShowStatus as _PacketCaptureShowStatus, Stop as _PacketCaptureStop
 
 from ..aaz.latest.network.watcher.connection_monitor import Create as _WatcherConnectionMonitorCreate
 from ..aaz.latest.network.watcher.connection_monitor import Start as _WatcherConnectionMonitorStart
@@ -40,63 +40,63 @@ from ..aaz.latest.network.watcher.connection_monitor import Update as _WatcherCo
 from ..aaz.latest.network.watcher.connection_monitor.output import Add as _WatcherConnectionMonitorOutputAdd,  \
     List as _WatcherConnectionMonitorOutputList
 from ..aaz.latest.network.watcher.connection_monitor.endpoint import Show as _WatcherConnectionMonitorEndpointShow,  \
-    Remove as _WatcherConnectionMonitorEndpointRemove,  List as _WatcherConnectionMonitorEndpointList,  \
+    Remove as _WatcherConnectionMonitorEndpointRemove, List as _WatcherConnectionMonitorEndpointList,  \
     Add as _WatcherConnectionMonitorEndpointAdd
 
 from ..aaz.latest.network.watcher.connection_monitor.test_configuration import Add as _MonitorTestConfigurationAdd,  \
-    Show as _MonitorTestConfigurationShow,  List as _MonitorTestConfigurationList,  \
+    Show as _MonitorTestConfigurationShow, List as _MonitorTestConfigurationList,  \
     Remove as _MonitorTestConfigurationRemove
 
 from ..aaz.latest.network.watcher.connection_monitor.test_group import Add as _WatcherConnectionMonitorTestGroupAdd,  \
-    Show as _WatcherConnectionMonitorTestGroupShow,  List as _WatcherConnectionMonitorTestGroupList
+    Show as _WatcherConnectionMonitorTestGroupShow, List as _WatcherConnectionMonitorTestGroupList
 
 logger = get_logger(__name__)
 
 
-def get_network_watcher_from_location(cmd,  watcher_name="watcher_name",  rg_name="watcher_rg"):
+def get_network_watcher_from_location(cmd, watcher_name="watcher_name", rg_name="watcher_rg"):
     from ..aaz.latest.network.watcher import List
 
     args = cmd.ctx.args
     location = args.location.to_serialized_data()
     watcher_list = List(cli_ctx=cmd.cli_ctx)(command_args={})
-    watcher = next((w for w in watcher_list if w["location"].lower() == location.lower()),  None)
+    watcher = next((w for w in watcher_list if w["location"].lower() == location.lower()), None)
     if not watcher:
         raise ValidationError(f"network watcher is not enabled for region {location}.")
 
     id_parts = parse_resource_id(watcher["id"])
-    setattr(args,  rg_name,  id_parts["resource_group"])
-    setattr(args,  watcher_name,  id_parts["name"])
+    setattr(args, rg_name, id_parts["resource_group"])
+    setattr(args, watcher_name, id_parts["name"])
 
 
 def get_network_watcher_from_vm(cmd):
     args = cmd.ctx.args
-    compute_client = get_mgmt_service_client(cmd.cli_ctx,  ResourceType.MGMT_COMPUTE).virtual_machines
+    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machines
     vm_name = parse_resource_id(args.vm.to_serialized_data())["name"]
-    vm = compute_client.get(args.resource_group_name,  vm_name)
+    vm = compute_client.get(args.resource_group_name, vm_name)
     args.location = vm.location
     get_network_watcher_from_location(cmd)
 
 
 def get_network_watcher_from_resource(cmd):
     args = cmd.ctx.args
-    resource = get_arm_resource_by_id(cmd.cli_ctx,  args.resource.to_serialized_data())
+    resource = get_arm_resource_by_id(cmd.cli_ctx, args.resource.to_serialized_data())
     args.location = resource.location
     get_network_watcher_from_location(cmd)
 
 
 def get_network_watcher_from_vmss(cmd):
     args = cmd.ctx.args
-    compute_client = get_mgmt_service_client(cmd.cli_ctx,  ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets
+    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets
     vmss_name = parse_resource_id(args.target.to_serialized_data())["name"]
-    vmss = compute_client.get(args.resource_group_name,  vmss_name)
+    vmss = compute_client.get(args.resource_group_name, vmss_name)
     args.location = vmss.location
     get_network_watcher_from_location(cmd)
 
 
 class TestIPFlow(_TestIPFlow):
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             registered=False,
         )
@@ -113,7 +113,7 @@ class TestIPFlow(_TestIPFlow):
             required=True,
         )
         args_schema.resource_group_name = AAZStrArg(
-            options=["-g",  "--resource-group"],
+            options=["-g", "--resource-group"],
             help="Name of the resource group the target VM is in.",
         )
         args_schema.vm._fmt = AAZResourceIdArgFormat(
@@ -141,8 +141,8 @@ class TestIPFlow(_TestIPFlow):
     def pre_operations(self):
         args = self.ctx.args
         try:
-            args.local_ip_address,  args.local_port = args.local.to_serialized_data().split(":")
-            args.remote_ip_address,  args.remote_port = args.remote.to_serialized_data().split(":")
+            args.local_ip_address, args.local_port = args.local.to_serialized_data().split(":")
+            args.remote_ip_address, args.remote_port = args.remote.to_serialized_data().split(":")
         except:
             raise ValidationError("usage error: the format of the '--local' and '--remote' should be like x.x.x.x:port")
 
@@ -151,13 +151,13 @@ class TestIPFlow(_TestIPFlow):
 
 class ShowNextHop(_ShowNextHop):
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             registered=False,
         )
         args_schema.resource_group_name = AAZStrArg(
-            options=["-g",  "--resource-group"],
+            options=["-g", "--resource-group"],
             help="Name of the resource group the target VM is in.",
         )
         args_schema.vm._fmt = AAZResourceIdArgFormat(
@@ -180,13 +180,13 @@ class ShowNextHop(_ShowNextHop):
 
 class ShowSecurityGroupView(_ShowSecurityGroupView):
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             registered=False,
         )
         args_schema.resource_group_name = AAZStrArg(
-            options=["-g",  "--resource-group"],
+            options=["-g", "--resource-group"],
             help="Name of the resource group the target VM is in.",
         )
         args_schema.vm._fmt = AAZResourceIdArgFormat(
@@ -205,8 +205,8 @@ class ShowSecurityGroupView(_ShowSecurityGroupView):
 
 class RunConfigurationDiagnostic(_RunConfigurationDiagnostic):
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             registered=False,
         )
@@ -219,7 +219,7 @@ class RunConfigurationDiagnostic(_RunConfigurationDiagnostic):
             options=["--direction"],
             arg_group="Query",
             help="Direction of the traffic.",
-            enum={"Inbound": "Inbound",  "Outbound": "Outbound"},
+            enum={"Inbound": "Inbound", "Outbound": "Outbound"},
         )
         args_schema.port = AAZStrArg(
             options=["--port"],
@@ -230,7 +230,7 @@ class RunConfigurationDiagnostic(_RunConfigurationDiagnostic):
             options=["--protocol"],
             arg_group="Query",
             help="Protocol to be verified on.",
-            enum={"TCP": "TCP",  "UDP": "UDP"},
+            enum={"TCP": "TCP", "UDP": "UDP"},
         )
         args_schema.source = AAZStrArg(
             options=["--source"],
@@ -243,12 +243,12 @@ class RunConfigurationDiagnostic(_RunConfigurationDiagnostic):
             help="Parent path,  e.g.,  virtualMachineScaleSets/vmss1.",
         )
         args_schema.resource_group_name = AAZStrArg(
-            options=["-g",  "--resource-group"],
+            options=["-g", "--resource-group"],
             arg_group="Target",
             help="Name of the resource group the target resource is in.",
         )
         args_schema.resource_type = AAZStrArg(
-            options=["-t",  "--resource-type"],
+            options=["-t", "--resource-type"],
             arg_group="Target",
             help="Resource type.",
             enum={
@@ -269,7 +269,7 @@ class RunConfigurationDiagnostic(_RunConfigurationDiagnostic):
         # validate target resource
         resource_usage = ValidationError("usage error: --resource ID | --resource NAME --resource-type TYPE --resource-group NAME [--parent PATH]")
         # omit --parent since it is optional
-        id_params = [has_value(args.resource_group_name),  has_value(args.resource_type)]
+        id_params = [has_value(args.resource_group_name), has_value(args.resource_type)]
         if not is_valid_resource_id(args.resource.to_serialized_data()):
             if not all(id_params):
                 raise resource_usage
@@ -296,7 +296,7 @@ class RunConfigurationDiagnostic(_RunConfigurationDiagnostic):
             raise resource_usage
         # validate query
         query_usage = ValidationError("usage error: --queries JSON | --destination DEST --source SRC --direction DIR --port PORT --protocol PROTOCOL")
-        query_params = [has_value(args.destination),  has_value(args.port),  has_value(args.direction),  has_value(args.protocol),  has_value(args.source)]
+        query_params = [has_value(args.destination), has_value(args.port), has_value(args.direction), has_value(args.protocol), has_value(args.source)]
         if has_value(args.queries):
             if any(query_params):
                 raise query_usage
@@ -316,14 +316,14 @@ class RunConfigurationDiagnostic(_RunConfigurationDiagnostic):
 
 class ShowTopology(_ShowTopology):
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             help="Location. Defaults to the location of the target resource group. "
                  "Topology information is only shown for resources within the target resource group "
                  "that are within the specified region.",
         )
-        args_schema.resource_group_name._options = ["-g",  "--resource-group"]
+        args_schema.resource_group_name._options = ["-g", "--resource-group"]
         args_schema.vnet._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Network"
                      "/virtualNetworks/{}",
@@ -352,7 +352,7 @@ class ShowTopology(_ShowTopology):
         # retrieve location from resource group
         if not has_value(args.location):
             resource_client = \
-                get_mgmt_service_client(self.cli_ctx,  ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups
+                get_mgmt_service_client(self.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups
             resource_group = resource_client.get(rg)
             args.location = resource_group.location
 
@@ -361,13 +361,13 @@ class ShowTopology(_ShowTopology):
 
 class TestConnectivity(_TestConnectivity):
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             registered=False,
         )
         args_schema.resource_group_name = AAZStrArg(
-            options=["-g",  "--resource-group"],
+            options=["-g", "--resource-group"],
             help="Name of the resource group the target resource is in.",
         )
         args_schema.headers = AAZDictArg(
@@ -385,14 +385,14 @@ class TestConnectivity(_TestConnectivity):
 
     def pre_operations(self):
         args = self.ctx.args
-        compute_client = get_mgmt_service_client(self.cli_ctx,  ResourceType.MGMT_COMPUTE).virtual_machines
+        compute_client = get_mgmt_service_client(self.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machines
         id_parts = parse_resource_id(args.source_resource.to_serialized_data())
         vm_name = id_parts["name"]
-        rg = args.resource_group_name or id_parts.get("resource_group",  None)
+        rg = args.resource_group_name or id_parts.get("resource_group", None)
         if not rg:
             raise ValidationError("usage error: --source-resource ID | --source-resource NAME --resource-group NAME")
 
-        vm = compute_client.get(rg,  vm_name)
+        vm = compute_client.get(rg, vm_name)
         args.location = vm.location
         get_network_watcher_from_location(self)
 
@@ -415,18 +415,18 @@ class TestConnectivity(_TestConnectivity):
             )
 
         if has_value(args.headers):
-            args.headers_obj = [{"name": k,  "value": v} for k,  v in args.headers.items()]
+            args.headers_obj = [{"name": k, "value": v} for k, v in args.headers.items()]
 
 
 class PacketCaptureCreate(_PacketCaptureCreate):
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             registered=False,
         )
         args_schema.resource_group_name = AAZStrArg(
-            options=["-g",  "--resource-group"],
+            options=["-g", "--resource-group"],
             help="Name of the resource group the target resource is in.",
             required=True,
         )
@@ -461,7 +461,7 @@ class PacketCaptureCreate(_PacketCaptureCreate):
             # set the appropriate fields if target is vm
             get_network_watcher_from_vm(self)
             args.target = args.vm
-            args.include,  args.exclude = None,  None
+            args.include, args.exclude = None, None
 
         storage_usage = ValidationError("usage error: --storage-account NAME_OR_ID [--storage-path PATH] [--file-path PATH] | --file-path PATH")
         if not has_value(args.storage_account) and (has_value(args.storage_path) or not has_value(args.file_path)):
@@ -473,14 +473,14 @@ class PacketCaptureCreate(_PacketCaptureCreate):
                 raise ValidationError("usage error: --file-path PATH must end with the '*.cap' extension")
 
             if not path.startswith("/"):
-                path = path.replace("/",  "\\")
+                path = path.replace("/", "\\")
             args.file_path = path
 
 
 class PacketCaptureDelete(_PacketCaptureDelete):
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             required=True,
         )
@@ -496,8 +496,8 @@ class PacketCaptureDelete(_PacketCaptureDelete):
 
 class PacketCaptureList(_PacketCaptureList):
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             required=True,
         )
@@ -513,8 +513,8 @@ class PacketCaptureList(_PacketCaptureList):
 
 class PacketCaptureShow(_PacketCaptureShow):
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             required=True,
         )
@@ -530,8 +530,8 @@ class PacketCaptureShow(_PacketCaptureShow):
 
 class PacketCaptureShowStatus(_PacketCaptureShowStatus):
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             required=True,
         )
@@ -547,8 +547,8 @@ class PacketCaptureShowStatus(_PacketCaptureShowStatus):
 
 class PacketCaptureStop(_PacketCaptureStop):
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             required=True,
         )
@@ -571,7 +571,6 @@ def process_nw_cm_v2_create_namespace(cmd):
 
 class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
 
-
     def process_endpoints(self, args):
         src_endpoints = [
             {
@@ -579,8 +578,8 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             "resource_id": src.resourceId,
             "address": src.address,
             "type": src.type,
-            "coverageLevel":src.coverageLevel,
-            "scope":src.scope
+            "coverageLevel": src.coverageLevel,
+            "scope": src.scope
             }
             for test_group in args.test_groups
             for src in test_group["sources"]
@@ -591,8 +590,8 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             "resource_id": dst.resourceId,
             "address": dst.address,
             "type": dst.type,
-            "coverageLevel":dst.coverageLevel,
-            "scope":dst.scope
+            "coverageLevel": dst.coverageLevel,
+            "scope": dst.scope
             }
             for test_group in args.test_groups
             for dst in test_group["destinations"]
@@ -630,16 +629,14 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
                 "port": test_config["http_configuration"]["port"] if test_config["http_configuration"]["port"] is not None else None,
                 "prefer_https": test_config["http_configuration"]["prefer_https"] if test_config["http_configuration"]["prefer_https"] is not None else None,
                 "request_headers": [],
-                "valid_status_code_ranges":[]
+                "valid_status_code_ranges": []
             }
 
             for code in valid_status_code_ranges:
                 http_config["valid_status_code_ranges"].append(code)
 
             for header in request_headers:
-                http_config["request_headers"].append({"name": header["name"],"value": header["value"]})
-
-
+                http_config["request_headers"].append({"name": header["name"], "value": header["value"]})
             config['http_configuration'] = http_config
         elif test_config["protocol"] == "Icmp" and test_config["icmp_configuration"] is not None:
             icmp_config = {
@@ -683,8 +680,8 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         return unique_testconfigs
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = True
         args_schema.network_watcher_name._required = True
         args_schema.resource_group._required = True
@@ -712,15 +709,15 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         args_schema.endpoint_source_type = AAZStrArg(
             options=["--endpoint-source-type"],
             help="The endpoint type.",
-            enum={"AzureArcVM": "AzureArcVM",  "AzureSubnet": "AzureSubnet",  "AzureVM": "AzureVM",
-                  "AzureVMSS": "AzureVMSS",  "AzureVNet": "AzureVNet",  "ExternalAddress": "ExternalAddress",
-                  "MMAWorkspaceMachine": "MMAWorkspaceMachine",  "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
+            enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM",
+                  "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress",
+                  "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
             arg_group="V2 Endpoint"
         )
 
         # V2 Output
         args_schema.output_type = AAZStrArg(
-            options=["--type",  "--output-type"],
+            options=["--type", "--output-type"],
             help="Connection monitor output destination type. Currently,  only \"Workspace\" is supported.",
             enum={"Workspace": "Workspace"},
             arg_group="V2 Output"
@@ -735,7 +732,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         # V2 Test Configuration
         args_schema.test_config_frequency = AAZIntArg(
             options=["--frequency"],
-            help="The frequency of test evaluation,  in seconds.",
+            help="The frequency of test evaluation, in seconds.",
             arg_group="V2 Test Configuration",
             default=60,
         )
@@ -743,11 +740,11 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             options=["--http-method"],
             help="The HTTP method to use.",
             arg_group="V2 Test Configuration",
-            enum={"Get": "Get",  "Post": "Post"},
+            enum={"Get": "Get", "Post": "Post"},
         )
         args_schema.test_config_http_path = AAZStrArg(
             options=["--http-path"],
-            help='The path component of the URI. For instance,  "/dir1/dir2".',
+            help='The path component of the URI. For instance, "/dir1/dir2".',
             arg_group="V2 Test Configuration",
         )
         args_schema.test_config_http_port = AAZIntArg(
@@ -780,19 +777,19 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             help='The preferred IP version to use in test evaluation. '
                  'The connection monitor may choose to use a different version depending on other parameters.',
             arg_group="V2 Test Configuration",
-            enum={"IPv4": "IPv4",  "IPv6": "IPv6"},
+            enum={"IPv4": "IPv4", "IPv6": "IPv6"},
         )
         args_schema.test_config_protocol = AAZStrArg(
             options=["--protocol"],
             help='The protocol to use in test evaluation.',
             arg_group="V2 Test Configuration",
-            enum={"Http": "Http",  "Icmp": "Icmp",  "Tcp": "Tcp"},
+            enum={"Http": "Http", "Icmp": "Icmp", "Tcp": "Tcp"},
         )
 
         args_schema.test_config_tcp_disable_trace_route = AAZBoolArg(
             options=["--tcp-disable-trace-route"],
             help='Value indicating whether path evaluation with trace route should be disabled. false is default. '
-                 'Allowed values: false,  true.',
+                 'Allowed values: false, true.',
             arg_group="V2 Test Configuration",
         )
         args_schema.test_config_tcp_port = AAZIntArg(
@@ -833,7 +830,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
 
     def pre_operations(self):
         process_nw_cm_v2_create_namespace(self)
-        get_network_watcher_from_location(self,  watcher_name='network_watcher_name',  rg_name='resource_group')
+        get_network_watcher_from_location(self, watcher_name='network_watcher_name', rg_name='resource_group')
         args = self.ctx.args
 
         args = self.process_endpoints(args)
@@ -925,18 +922,17 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         args.test_groups = test_groups
 
 
-
 class WatcherConnectionMonitorStart(_WatcherConnectionMonitorStart):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
         args_schema.resource_group_name._registered = False
         args_schema.resource_group_name._required = False
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -954,14 +950,14 @@ class WatcherConnectionMonitorStart(_WatcherConnectionMonitorStart):
 class WatcherConnectionMonitorStop(_WatcherConnectionMonitorStop):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
         args_schema.resource_group_name._registered = False
         args_schema.resource_group_name._required = False
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -979,14 +975,14 @@ class WatcherConnectionMonitorStop(_WatcherConnectionMonitorStop):
 class WatcherConnectionMonitorList(_WatcherConnectionMonitorList):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
         args_schema.resource_group_name._registered = False
         args_schema.resource_group_name._required = False
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1004,14 +1000,14 @@ class WatcherConnectionMonitorList(_WatcherConnectionMonitorList):
 class WatcherConnectionMonitorShow(_WatcherConnectionMonitorShow):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
         args_schema.resource_group_name._registered = False
         args_schema.resource_group_name._required = False
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1029,14 +1025,14 @@ class WatcherConnectionMonitorShow(_WatcherConnectionMonitorShow):
 class WatcherConnectionMonitorQuery(_WatcherConnectionMonitorQuery):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
         args_schema.resource_group_name._registered = False
         args_schema.resource_group_name._required = False
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1054,14 +1050,14 @@ class WatcherConnectionMonitorQuery(_WatcherConnectionMonitorQuery):
 class WatcherConnectionMonitorDelete(_WatcherConnectionMonitorDelete):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
         args_schema.resource_group_name._registered = False
         args_schema.resource_group_name._required = False
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1079,8 +1075,8 @@ class WatcherConnectionMonitorDelete(_WatcherConnectionMonitorDelete):
 class NwFlowLogCreate(_NwFlowLogCreate):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
         args_schema.resource_group._required = False
@@ -1089,7 +1085,7 @@ class NwFlowLogCreate(_NwFlowLogCreate):
         args_schema.retention_policy._registered = False
         args_schema.target_resource_id._registered = False
         args_schema.traffic_analytics_interval = AAZIntArg(
-            options=['--interval'],  arg_group="Traffic Analytics",
+            options=['--interval'], arg_group="Traffic Analytics",
             help="Interval in minutes at which to conduct flow analytics. Temporarily allowed values are 10 and 60.",
             default=60,
             fmt=AAZIntArgFormat(
@@ -1106,7 +1102,7 @@ class NwFlowLogCreate(_NwFlowLogCreate):
             help="Enable traffic analytics. Defaults to true if `--workspace` is provided."
         )
         args_schema.traffic_analytics_workspace = AAZResourceIdArg(
-            options=['--workspace'],  arg_group="Traffic Analytics",
+            options=['--workspace'], arg_group="Traffic Analytics",
             help="Name or ID of a Log Analytics workspace. Must be in the same region of flow log",
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.OperationalInsights/workspaces/{}"
@@ -1155,9 +1151,9 @@ class NwFlowLogCreate(_NwFlowLogCreate):
 
         if not has_value(args.enabled):
             args.enabled = True
-        if sum(map(bool,  [args.vnet,  args.subnet,  args.nic,  args.nsg])) == 0:
+        if sum(map(bool, [args.vnet, args.subnet, args.nic, args.nsg])) == 0:
             raise RequiredArgumentMissingError("Please enter atleast one target resource ID.")
-        if sum(map(bool,  [args.vnet,  args.nic,  args.nsg])) > 1:
+        if sum(map(bool, [args.vnet, args.nic, args.nsg])) > 1:
             raise MutuallyExclusiveArgumentError("Please enter only one target resource ID.")
 
         if has_value(args.subnet):
@@ -1171,11 +1167,11 @@ class NwFlowLogCreate(_NwFlowLogCreate):
 
         if has_value(args.retention):
             if args.retention > 0:
-                args.retention_policy = {"days": args.retention,  "enabled": True}
+                args.retention_policy = {"days": args.retention, "enabled": True}
 
         if has_value(args.traffic_analytics_workspace):
 
-            workspace = get_arm_resource_by_id(self.cli_ctx,  args.traffic_analytics_workspace.to_serialized_data())
+            workspace = get_arm_resource_by_id(self.cli_ctx, args.traffic_analytics_workspace.to_serialized_data())
             if not workspace:
                 raise CLIError('Name or ID of workspace is invalid')
 
@@ -1191,8 +1187,8 @@ class NwFlowLogCreate(_NwFlowLogCreate):
 class NwFlowLogUpdate(_NwFlowLogUpdate):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
         args_schema.resource_group._required = False
@@ -1270,7 +1266,7 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
             if not is_valid_resource_id(subnet) and has_value(args.vnet):
                 args.subnet = args.vnet.to_serialized_data() + "/subnets/" + subnet
 
-        if sum(map(bool,  [args.vnet,  args.nic,  args.nsg])) > 1:
+        if sum(map(bool, [args.vnet, args.nic, args.nsg])) > 1:
             raise MutuallyExclusiveArgumentError("Please enter only one target resource ID.")
         if has_value(args.subnet):
             args.target_resource_id = args.subnet
@@ -1282,10 +1278,10 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
             args.target_resource_id = args.nsg
 
         if has_value(args.retention) and args.retention > 0:
-            args.retention_policy = {"days": args.retention,  "enabled": True}
+            args.retention_policy = {"days": args.retention, "enabled": True}
 
         if has_value(args.traffic_analytics_workspace):
-            workspace = get_arm_resource_by_id(self.cli_ctx,  args.traffic_analytics_workspace.to_serialized_data())
+            workspace = get_arm_resource_by_id(self.cli_ctx, args.traffic_analytics_workspace.to_serialized_data())
             if not workspace:
                 raise CLIError('Name or ID of workspace is invalid')
 
@@ -1303,8 +1299,8 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
 class NwFlowLogList(_NwFlowLogList):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
         args_schema.resource_group._registered = False
@@ -1329,14 +1325,14 @@ class NwFlowLogList(_NwFlowLogList):
 class NwFlowLogDelete(_NwFlowLogDelete):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
         args_schema.resource_group._registered = False
         args_schema.resource_group._required = False
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location to identify the exclusive Network Watcher under a region. "
                  "Only one Network Watcher can be existed per subscription and region.",
             required=True,
@@ -1355,8 +1351,8 @@ class NwFlowLogDelete(_NwFlowLogDelete):
 class NwTroubleshootingStart(_NwTroubleshootingStart):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._required = False
@@ -1400,19 +1396,19 @@ class NwTroubleshootingStart(_NwTroubleshootingStart):
 
 class NwTroubleshootingShow(_NwTroubleshootingShow):
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._required = False
         args_schema.target_resource_id._registered = False
         args_schema.target_resource_id._required = False
         args_schema.resource_group_name = AAZStrArg(
-            options=["-g",  "--resource-group"],
+            options=["-g", "--resource-group"],
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
         )
         args_schema.resource_type = AAZStrArg(
-            options=["-t",  "--resource-type"],
+            options=["-t", "--resource-type"],
             help="The resource type.",
             enum={"vnetGateway": "virtualNetworkGateways",  "vpnConnection": "connections"},
         )
@@ -1439,13 +1435,13 @@ class NwTroubleshootingShow(_NwTroubleshootingShow):
 class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.workspace_id.registered = True
 
         args_schema.output_type._required = False
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1463,15 +1459,15 @@ class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
 class WatcherConnectionMonitorOutputList(_WatcherConnectionMonitorOutputList):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
 
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1486,8 +1482,8 @@ class WatcherConnectionMonitorOutputList(_WatcherConnectionMonitorOutputList):
 class WatcherConnectionMonitorOutputRemove(_WatcherConnectionMonitorUpdate):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._required = False
         return args_schema
@@ -1501,8 +1497,8 @@ class WatcherConnectionMonitorOutputRemove(_WatcherConnectionMonitorUpdate):
 class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.address._required = False
         args_schema.address._registered = True
         args_schema.endpoint_name._registered = True
@@ -1510,7 +1506,7 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
         args_schema.scope_include._registered = True
 
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1548,24 +1544,22 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
     def pre_operations(self):
         pass
 
-
     def pre_instance_create(self):
         pass
-
 
 
 class WatcherConnectionMonitorEndpointShow(_WatcherConnectionMonitorEndpointShow):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
 
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1580,15 +1574,15 @@ class WatcherConnectionMonitorEndpointShow(_WatcherConnectionMonitorEndpointShow
 class WatcherConnectionMonitorEndpointList(_WatcherConnectionMonitorEndpointList):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
 
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1603,15 +1597,15 @@ class WatcherConnectionMonitorEndpointList(_WatcherConnectionMonitorEndpointList
 class WatcherConnectionMonitorEndpointRemove(_WatcherConnectionMonitorEndpointRemove):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
 
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1648,14 +1642,13 @@ class WatcherConnectionMonitorEndpointRemove(_WatcherConnectionMonitorEndpointRe
 class WatcherConnectionMonitorTestConfigurationAdd(_MonitorTestConfigurationAdd):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.http_request_headers._required = False
         args_schema.http_request_headers._registered = True
 
-
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1682,8 +1675,6 @@ class WatcherConnectionMonitorTestConfigurationAdd(_MonitorTestConfigurationAdd)
     def pre_instance_create(self):
         args = self.ctx.args
         name = args.test_configuration_name.to_serialized_data()
-
-
         instance = self.ctx.vars.instance
         if has_value(args.test_groups):
             for test_group in instance.properties.test_groups:
@@ -1694,15 +1685,15 @@ class WatcherConnectionMonitorTestConfigurationAdd(_MonitorTestConfigurationAdd)
 class WatcherConnectionMonitorTestConfigurationShow(_MonitorTestConfigurationShow):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
 
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1717,15 +1708,15 @@ class WatcherConnectionMonitorTestConfigurationShow(_MonitorTestConfigurationSho
 class WatcherConnectionMonitorTestConfigurationList(_MonitorTestConfigurationList):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
 
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1740,15 +1731,15 @@ class WatcherConnectionMonitorTestConfigurationList(_MonitorTestConfigurationLis
 class WatcherConnectionMonitorTestConfigurationRemove(_MonitorTestConfigurationRemove):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
 
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1783,8 +1774,8 @@ class WatcherConnectionMonitorTestConfigurationRemove(_MonitorTestConfigurationR
 class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.test_group_name._registered = True
         args_schema.test_group_name._required = True
         args_schema.destinations._registered = True
@@ -1796,7 +1787,7 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
         args_schema.sources.Element.address._registered = True
 
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1842,13 +1833,13 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
         args_schema.test_config_http_prefer_https = AAZBoolArg(
             options=["--https-prefer"],
             help='Value indicating whether HTTPS is preferred over HTTP in cases where the choice is not explicit. '
-                 ' Allowed values: false,  true.',
+                 ' Allowed values: false, true.',
             arg_group="V2 Test Configuration",
         )
         args_schema.test_config_icmp_disable_trace_route = AAZBoolArg(
             options=["--icmp-disable-trace-route"],
             help='Value indicating whether path evaluation with trace route should be disabled. false is default. '
-                 ' Allowed values: false,  true.',
+                 ' Allowed values: false, true.',
             arg_group="V2 Test Configuration",
         )
 
@@ -1863,13 +1854,13 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
             options=["--protocol"],
             help='The protocol to use in test evaluation.',
             arg_group="V2 Test Configuration",
-            enum={"Http": "Http",  "Icmp": "Icmp",  "Tcp": "Tcp"},
+            enum={"Http": "Http", "Icmp": "Icmp", "Tcp": "Tcp"},
         )
 
         args_schema.test_config_tcp_disable_trace_route = AAZBoolArg(
             options=["--tcp-disable-trace-route"],
             help='Value indicating whether path evaluation with trace route should be disabled. false is default. '
-                 'Allowed values: false,  true.',
+                 'Allowed values: false, true.',
             arg_group="V2 Test Configuration",
         )
         args_schema.test_config_tcp_port = AAZIntArg(
@@ -1965,15 +1956,15 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
 class WatcherConnectionMonitorTestGroupShow(_WatcherConnectionMonitorTestGroupShow):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
 
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -1988,15 +1979,15 @@ class WatcherConnectionMonitorTestGroupShow(_WatcherConnectionMonitorTestGroupSh
 class WatcherConnectionMonitorTestGroupList(_WatcherConnectionMonitorTestGroupList):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
 
         args_schema.location = AAZResourceLocationArg(
-            options=["-l",  "--location"],
+            options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
@@ -2011,8 +2002,8 @@ class WatcherConnectionMonitorTestGroupList(_WatcherConnectionMonitorTestGroupLi
 class WatcherConnectionMonitorTestGroupRemove(_WatcherConnectionMonitorUpdate):
 
     @classmethod
-    def _build_arguments_schema(cls,  *args,  **kwargs):
-        args_schema = super()._build_arguments_schema(*args,  **kwargs)
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._required = False
         args_schema.test_group_name = AAZStrArg(
