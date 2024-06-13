@@ -64,7 +64,7 @@ class BreakingChange(abc.ABC):
         pass
 
 
-class Remove(BreakingChange):
+class AzCLIRemove(BreakingChange):
     """
     Remove the command groups, commands or arguments in a future release.
 
@@ -92,7 +92,7 @@ class Remove(BreakingChange):
         return self._target_version
 
 
-class Rename(BreakingChange):
+class AzCLIRename(BreakingChange):
     """
     Rename the command groups, commands or arguments to a new name in a future release.
 
@@ -120,7 +120,7 @@ class Rename(BreakingChange):
         return self._target_version
 
 
-class OutputChange(BreakingChange):
+class AzCLIOutputChange(BreakingChange):
     """
     The output of the command will be changed in a future release.
     :param description: describe the changes in output
@@ -154,7 +154,7 @@ class OutputChange(BreakingChange):
         return self._target_version
 
 
-class LogicChange(BreakingChange):
+class AzCLILogicChange(BreakingChange):
     """
     There would be a breaking change in the logic of the command in future release.
     :param summary: a short summary about the breaking change
@@ -180,7 +180,7 @@ class LogicChange(BreakingChange):
         return self._target_version
 
 
-class DefaultChange(BreakingChange):
+class AzCLIDefaultChange(BreakingChange):
     """
     The default value of an argument would be changed in a future release.
     :param target: name of the related argument
@@ -208,7 +208,7 @@ class DefaultChange(BreakingChange):
         return self._target_version
 
 
-class BeRequired(BreakingChange):
+class AzCLIBeRequired(BreakingChange):
     """
     The argument would become required in a future release.
     :param target: name of the related argument
@@ -231,7 +231,7 @@ class BeRequired(BreakingChange):
         return self._target_version
 
 
-class OtherChange(BreakingChange):
+class AzCLIOtherChange(BreakingChange):
     """
     Other custom breaking changes.
     :param message: A description of the breaking change, including the version number where it is expected to occur.

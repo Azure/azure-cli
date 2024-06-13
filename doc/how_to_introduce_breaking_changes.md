@@ -85,10 +85,12 @@ from azure.cli.core.breaking_change import upcoming_breaking_changes
 Then you could pre-announce breaking changes for different command groups or command, both list and `BreakingChange` object are accepted.
 
 ```python
-from azure.cli.core.breaking_change import upcoming_breaking_changes, BeRequired, DefaultChange, OtherChange
+from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIBeRequired, AzCLIDefaultChange,
+  AzCLIOtherChange
 
-upcoming_breaking_changes['bar foo'] = BeRequired('--name')
-upcoming_breaking_changes['bar foo baz'] = [DefaultChange('--foobar', 'A', 'B'), OtherChange('During May 2024, another Breaking Change would happen in Build Event.')]
+upcoming_breaking_changes['bar foo'] = AzCLIBeRequired('--name')
+upcoming_breaking_changes['bar foo baz'] = [AzCLIDefaultChange('--foobar', 'A', 'B'), AzCLIOtherChange(
+  'During May 2024, another Breaking Change would happen in Build Event.')]
 ```
 
 All related breaking changes would be displayed while executing the command. For example, in the above 
@@ -106,67 +108,82 @@ az bar foo baz
 There are several types of breaking changes defined in `breaking_change`. You should use any of them to declare breaking changes in `_breaking_change.py`.
 
 **Remove**
+
 ```python
-from azure.cli.core.breaking_change import upcoming_breaking_changes, Remove, NextBreakingChangeWindow
+from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIRemove, NextBreakingChangeWindow
 
 # Remove the command groups, commands or arguments in a future release.
 # **It is recommended to utilize `deprecate_info` instead of this class to pre-announce Breaking Change of Removal.**
-upcoming_breaking_changes['bar foo'] = Remove('az bar foo', target_version=NextBreakingChangeWindow(), redirect='`az barfoo`')
+upcoming_breaking_changes['bar foo'] = AzCLIRemove('az bar foo', target_version=NextBreakingChangeWindow(),
+                                                   redirect='`az barfoo`')
 # `az bar foo` will be removed in next breaking change release(2.61.0). Please use `az barfoo` instead.
 ```
 
 **Rename**
+
 ```python
-from azure.cli.core.breaking_change import upcoming_breaking_changes, Rename, NextBreakingChangeWindow
+from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIRename, NextBreakingChangeWindow
 
 # Rename the command groups, commands or arguments to a new name in a future release.
 # **It is recommended to utilize `deprecate_info` instead of this class to pre-announce Breaking Change of Renaming.**
 # It is recommended that the old name and the new name should be reserved in few releases.
-upcoming_breaking_changes['bar foo'] = Rename('az bar foo', 'az bar baz', target_version=NextBreakingChangeWindow())
+upcoming_breaking_changes['bar foo'] = AzCLIRename('az bar foo', 'az bar baz',
+                                                   target_version=NextBreakingChangeWindow())
 # `az bar foo` will be renamed to `az bar baz` in next breaking change release(2.61.0).
 ```
 
 **OutputChange**
+
 ```python
-from azure.cli.core.breaking_change import upcoming_breaking_changes, OutputChange, NextBreakingChangeWindow
+from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIOutputChange, NextBreakingChangeWindow
 
 # The output of the command will be changed in a future release.
-upcoming_breaking_changes['bar foo'] = OutputChange('Reduce the output field `baz`', target_version=NextBreakingChangeWindow())
+upcoming_breaking_changes['bar foo'] = AzCLIOutputChange('Reduce the output field `baz`',
+                                                         target_version=NextBreakingChangeWindow())
 # The output will be changed in next breaking change release(2.61.0). Reduce the output field `baz`. 
 ```
 
 **LogicChange**
+
 ```python
-from azure.cli.core.breaking_change import upcoming_breaking_changes, LogicChange, NextBreakingChangeWindow
+from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLILogicChange, NextBreakingChangeWindow
 
 # There would be a breaking change in the logic of the command in future release.
-upcoming_breaking_changes['bar foo'] = LogicChange('Update the validator', target_version=NextBreakingChangeWindow(), detail='The xxx will not be accepted.')
+upcoming_breaking_changes['bar foo'] = AzCLILogicChange('Update the validator',
+                                                        target_version=NextBreakingChangeWindow(),
+                                                        detail='The xxx will not be accepted.')
 # Update the validator in next breaking change release(2.61.0). The xxx will not be accepted.
 ```
 
 **DefaultChange**
+
 ```python
-from azure.cli.core.breaking_change import upcoming_breaking_changes, DefaultChange, NextBreakingChangeWindow
+from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIDefaultChange, NextBreakingChangeWindow
 
 # The default value of an argument would be changed in a future release.
-upcoming_breaking_changes['bar foo'] = DefaultChange('--type', 'TypeA', 'TypeB', target_version=NextBreakingChangeWindow())
+upcoming_breaking_changes['bar foo'] = AzCLIDefaultChange('--type', 'TypeA', 'TypeB',
+                                                          target_version=NextBreakingChangeWindow())
 # The default value of `--type` will be changed to `TypeB` from `TypeA` in next breaking change release(2.61.0).
 ```
 
 **BeRequired**
+
 ```python
-from azure.cli.core.breaking_change import upcoming_breaking_changes, BeRequired, NextBreakingChangeWindow
+from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIBeRequired, NextBreakingChangeWindow
 
 # The argument would become required in a future release.
-upcoming_breaking_changes['bar foo'] = BeRequired('--type', target_version=NextBreakingChangeWindow())
+upcoming_breaking_changes['bar foo'] = AzCLIBeRequired('--type', target_version=NextBreakingChangeWindow())
 # The argument `--type` will become required in next breaking change release(2.61.0).
 ```
 
 **OtherChange**
+
 ```python
-from azure.cli.core.breaking_change import upcoming_breaking_changes, OtherChange, NextBreakingChangeWindow
+from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIOtherChange, NextBreakingChangeWindow
+
 # Other custom breaking changes.
-upcoming_breaking_changes['bar foo'] = OtherChange('During May 2024, another Breaking Change would happen in Build Event.', target_version=NextBreakingChangeWindow())
+upcoming_breaking_changes['bar foo'] = AzCLIOtherChange(
+  'During May 2024, another Breaking Change would happen in Build Event.', target_version=NextBreakingChangeWindow())
 # During May 2024, another Breaking Change would happen in Build Event.
 ```
 
@@ -174,8 +191,9 @@ To enhance flexibility in using the Breaking Change Pre-announcement, instead of
 
 ```python
 # src/azure-cli/azure/cli/command_modules/vm/_breaking_change.py
-from azure.cli.core.breaking_change import upcoming_breaking_changes, BeRequired
-upcoming_breaking_changes['bar foo.TYPE_REQUIRED'] = BeRequired('--type')
+from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIBeRequired
+
+upcoming_breaking_changes['bar foo.TYPE_REQUIRED'] = AzCLIBeRequired('--type')
 
 # src/azure-cli/azure/cli/command_modules/vm/custom.py
 # Use the pre-announcement. Replace `vm` with your module
