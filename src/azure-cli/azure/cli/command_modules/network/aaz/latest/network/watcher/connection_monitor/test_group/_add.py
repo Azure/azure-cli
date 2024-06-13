@@ -314,6 +314,7 @@ class Add(AAZCommand):
 
         #we are required to parse these explicitly as they are not being parsed by the aaz framework becuase eariler we did not pass objects inside a command as we are doing now
         def parse_arg(self, arg_index):
+            import sys
             if arg_index is not None:
                 # The next element in sys.argv is the value of the argument
                 arg = sys.argv[arg_index + 1]
