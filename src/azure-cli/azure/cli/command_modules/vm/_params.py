@@ -63,7 +63,7 @@ def load_arguments(self, _):
     extension_instance_name_type = CLIArgumentType(help="Name of extension instance, which can be customized. Default: name of the extension.")
     image_template_name_type = CLIArgumentType(overrides=name_arg_type, id_part='name')
     disk_encryption_set_name = CLIArgumentType(overrides=name_arg_type, help='Name of disk encryption set.', id_part='name')
-    ephemeral_placement_type = CLIArgumentType(options_list=['--ephemeral-os-disk-placement', '--ephemeral-placement'], arg_type=get_enum_type(['ResourceDisk', 'CacheDisk']), min_api='2019-12-01')
+    ephemeral_placement_type = CLIArgumentType(options_list=['--ephemeral-os-disk-placement', '--ephemeral-placement'], arg_type=get_enum_type(self.get_models('DiffDiskPlacement')), min_api='2019-12-01')
 
     license_type = CLIArgumentType(
         help="Specifies that the Windows image or disk was licensed on-premises. To enable Azure Hybrid Benefit for "
@@ -490,6 +490,10 @@ def load_arguments(self, _):
         c.argument('attach_data_disks', nargs='+', help='Attach existing data disks to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
         c.argument('os_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2021-03-01', help='Specify the behavior of the managed disk when the VM gets deleted i.e whether the managed disk is deleted or detached.')
         c.argument('data_disk_delete_option', options_list=['--data-disk-delete-option', self.deprecate(target='--data-delete-option', redirect='--data-disk-delete-option', hide=True)], nargs='+', min_api='2021-03-01', help='Specify whether data disk should be deleted or detached upon VM deletion. If a single data disk is attached, the allowed values are Delete and Detach. For multiple data disks are attached, please use "<data_disk>=Delete <data_disk2>=Detach" to configure each disk')
+        c.argument('source_snapshots_or_disks', options_list=['--source-snapshots-or-disks', '--source-resource'], nargs='+', min_api='2024-03-01', help='Create a data disk from a snapshot or another disk. Can use the ID of a disk or snapshot.')
+        c.argument('source_snapshots_or_disks_size_gb', options_list=['--source-snapshots-or-disks-size-gb', '--source-resource-size'], nargs='+', type=int, min_api='2024-03-01', help='The size of the source disk in GB')
+        c.argument('source_disk_restore_point', options_list=['--source-disk-restore-point', '--source-disk-rp'], nargs='+', min_api='2024-03-01', help='create a data disk from a disk restore point. Can use the ID of a disk restore point.')
+        c.argument('source_disk_restore_point_size_gb', options_list=['--source-disk-restore-point-size-gb', '--source-rp-size'], nargs='+', type=int, min_api='2024-03-01', help='The size of the source disk restore point in GB')
 
     with self.argument_context('vm create', arg_group='Dedicated Host', min_api='2019-03-01') as c:
         c.argument('dedicated_host_group', options_list=['--host-group'], is_preview=True, help="Name or resource ID of the dedicated host group that the VM will reside in. --host and --host-group can't be used together.")
@@ -537,6 +541,7 @@ def load_arguments(self, _):
         c.argument('exclude_kbs_requiring_reboot', arg_type=get_three_state_flag(), help="Filter out KBs that don't have a reboot behavior of 'NeverReboots' when this is set. Applicable to Windows VM only")
         c.argument('package_name_masks_to_include', nargs='+', help='Space-separated list of packages to include in the patch operation. Format: packageName_packageVersion. Applicable to Linux VM only')
         c.argument('package_name_masks_to_exclude', nargs='+', help='Space-separated list of packages to exclude in the patch operation. Format: packageName_packageVersion. Applicable to Linux VM only')
+        c.argument('max_patch_publish_date', arg_type=get_datetime_type(help='ISO 8601 time value for install patch that were published on or before this given max published date.'))
 
     with self.argument_context('vm disk') as c:
         c.argument('vm_name', options_list=['--vm-name'], id_part=None, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
@@ -723,6 +728,7 @@ def load_arguments(self, _):
         c.argument('instance_ids', nargs='+',
                    help='Space-separated list of VM instance ID. If missing, reimage all instances.',
                    options_list=['--instance-ids', c.deprecate(target='--instance-id', redirect='--instance-ids', hide=True)])
+        c.argument('force_update_os_disk_for_ephemeral', options_list=['--force-update-os-disk-for-ephemeral', '--update-os-disk'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='Force update ephemeral OS disk for a virtual machine scale set VM.')
 
     with self.argument_context('vmss create', operation_group='virtual_machine_scale_sets') as c:
         VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
@@ -822,7 +828,7 @@ def load_arguments(self, _):
         c.argument('enable_secure_boot', enable_secure_boot_type)
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
-        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch"]), min_api='2020-06-01', help='Specify the security type of the virtual machine scale set.')
+        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch", "Standard"]), min_api='2020-06-01', help='Specify the security type of the virtual machine scale set.')
         c.argument('security_posture_reference_id', min_api='2023-03-01',
                    options_list=['--security-posture-reference-id', '--security-posture-id'],
                    help='The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest')
@@ -830,6 +836,9 @@ def load_arguments(self, _):
                    options_list=['--security-posture-reference-exclude-extensions', '--exclude-extensions'],
                    help='List of virtual machine extensions to exclude when applying the Security Posture. Either a Json string or a file path is acceptable. '
                         'Please refer to https://docs.microsoft.com/rest/api/compute/virtualmachinescalesets/get#virtualmachineextension for the data format.')
+        c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2024-03-01', help='Allow you to specify the ephemeral disk settings for the operating system disk. Specify it to false to set ephemeral disk setting as empty and migrate it to non ephemeral')
+        c.argument('ephemeral_os_disk_option', options_list=['--ephemeral-os-disk-option', '--ephemeral-option'], arg_type=get_enum_type(self.get_models('DiffDiskOptions')), min_api='2024-03-01', help='Specify the ephemeral disk settings for operating system disk.')
+        c.argument('zones', zones_type, min_api='2023-03-01')
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
 
@@ -861,6 +870,11 @@ def load_arguments(self, _):
             c.argument('regular_priority_count', type=int, min_api='2022-08-01', is_preview=True, help='The base number of regular priority VMs that will be created in this scale set as it scales out. Must be greater than 0.')
             c.argument('regular_priority_percentage', type=int, min_api='2022-08-01', is_preview=True, help='The percentage of VM instances, after the base regular priority count has been reached, that are expected to use regular priority. Must be between 0 and 100.')
             c.argument('enable_osimage_notification', arg_type=get_three_state_flag(), min_api='2022-11-01', help='Specify whether the OS Image Scheduled event is enabled or disabled.')
+            c.argument('enable_resilient_creation', arg_type=get_three_state_flag(), min_api='2023-09-01', help='Automatically recover customers from OS Provisioning Timeout and VM Start Timeout errors experienced during a VM Create operation by deleting and recreating the affected VM.')
+            c.argument('enable_resilient_deletion', arg_type=get_three_state_flag(), min_api='2023-09-01', help='Retry VM Delete requests asynchronously in the event of a failed delete operation.')
+            c.argument('additional_scheduled_events', options_list=['--additional-scheduled-events', '--scheduled-event-additional-publishing-target-event-grid-and-resource-graph', '--additional-events'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='The configuration parameter used while creating event grid and resource graph scheduled event setting.')
+            c.argument('enable_user_reboot_scheduled_events', options_list=['--enable-user-reboot-scheduled-events', '--enable-reboot'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='The configuration parameter used while publishing scheduled events additional publishing targets.')
+            c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
 
     for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
         with self.argument_context(scope) as c:

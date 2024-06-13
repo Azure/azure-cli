@@ -25,12 +25,14 @@ logger = get_logger(__name__)
 def create_containerapps_compose_environment(cmd,
                                              name,
                                              resource_group_name,
-                                             tags=None):
+                                             tags=None,
+                                             location=None):
 
     return create_managed_environment(cmd,
                                       name,
                                       resource_group_name,
-                                      tags=tags)
+                                      tags=tags,
+                                      location=location)
 
 
 def build_containerapp_from_compose_service(cmd,

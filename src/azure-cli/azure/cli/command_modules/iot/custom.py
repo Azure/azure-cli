@@ -198,8 +198,12 @@ def iot_dps_policy_update(
         if policy.key_name == access_policy_name:
             if primary_key is not None:
                 policy.primary_key = primary_key
+                if policy.primary_key == '':
+                    policy.primary_key = None
             if secondary_key is not None:
                 policy.secondary_key = secondary_key
+                if policy.secondary_key == '':
+                    policy.secondary_key = None
             if rights is not None:
                 policy.rights = _convert_rights_to_access_rights(rights)
 

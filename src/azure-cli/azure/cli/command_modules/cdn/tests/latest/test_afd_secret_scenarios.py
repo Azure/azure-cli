@@ -11,7 +11,7 @@ from azure.core.exceptions import (HttpResponseError)
 
 # This tests relies on a specific subscription with existing resources
 class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_secret_specific_version_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=24)
         self.afd_secret_list_cmd(resource_group, profile_name, expect_failure=True)
@@ -61,7 +61,7 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.afd_secret_list_cmd(resource_group, profile_name, checks=list_checks)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_secret_latest_version_crud(self, resource_group):
         # Create a standard Azure frontdoor profile
         profile_name = self.create_random_name(prefix='profile', length=24)
@@ -72,7 +72,7 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         # Create a secret
         secret_name = self.create_random_name(prefix='secret', length=24)
         secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc-int/secrets/localdev-multi"
-        latest_version = "e8900af0ca17408a9b2937f548026890"
+        latest_version = "6244bbfa61c241d78403a6e394cc2d30"
         checks = [JMESPathCheck('provisioningState', 'Succeeded')]
         self.afd_secret_create_cmd(resource_group,
                                    profile_name,

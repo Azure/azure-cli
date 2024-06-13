@@ -12,7 +12,8 @@ import socket
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
-from azure.cli.core.aaz import has_value
+from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client
+from azure.cli.core.aaz._client import AAZMgmtClient
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
@@ -148,6 +149,24 @@ subnet_disable_ple_msg = ("`--disable-private-endpoint-network-policies` will be
 subnet_disable_pls_msg = ("`--disable-private-link-service-network-policies` will be deprecated in the future, if you "
                           "wanna disable network policy for private link service, please use "
                           "`--private-link-service-network-policies Disabled` instead.")
+
+
+@register_client("NonRetryableClient")
+class AAZNonRetryableClient(AAZMgmtClient):
+    @classmethod
+    def _build_configuration(cls, ctx, credential, **kwargs):
+        from azure.cli.core.auth.util import resource_to_scopes
+        from azure.core.pipeline.policies import RetryPolicy
+
+        retry_policy = RetryPolicy(**kwargs)
+        retry_policy._retry_on_status_codes.discard(429)
+        kwargs["retry_policy"] = retry_policy
+
+        return AAZClientConfiguration(
+            credential=credential,
+            credential_scopes=resource_to_scopes(ctx.cli_ctx.cloud.endpoints.active_directory_resource_id),
+            **kwargs
+        )
 
 
 # region Utility methods
@@ -436,6 +455,19 @@ class AddressPoolUpdate(_AddressPoolUpdate):
         )
         args_schema.backend_addresses._registered = False
         return args_schema
+
+    class NonRetryableCreateOrUpdate(_AddressPoolUpdate.ApplicationGatewaysCreateOrUpdate):
+        CLIENT_TYPE = "NonRetryableClient"
+
+    def _execute_operations(self):
+        self.pre_operations()
+        self.ApplicationGatewaysGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.selectors.subresource.required())
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.selectors.subresource.required())
+        yield self.NonRetryableCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
 
     def pre_operations(self):
         args = self.ctx.args
@@ -1314,8 +1346,6 @@ class AGRewriteRuleCreate(_AGRewriteRuleCreate):
                  "Values from: `az network application-gateway rewrite-rule list-response-headers`.",
         )
         args_schema.response_headers.Element = AAZStrArg()
-        args_schema.request_header_configurations._registered = False
-        args_schema.response_header_configurations._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -1355,8 +1385,6 @@ class AGRewriteRuleUpdate(_AGRewriteRuleUpdate):
         args_schema.response_headers.Element = AAZStrArg(
             nullable=True,
         )
-        args_schema.request_header_configurations._registered = False
-        args_schema.response_header_configurations._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -2459,54 +2487,19 @@ def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
             print('Could not add delegation in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
 
 
-def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, tags=None,
-                    if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
-
-    resolution_vnets_dict = []
-    if resolution_vnets:
-        for resolution_vnet in resolution_vnets:
-            resolution_vnets_dict.append({"id": resolution_vnet.id})
-
-    registration_vnets_dict = []
-    if registration_vnets:
-        for registration_vnet in registration_vnets:
-            registration_vnets_dict.append({"id": registration_vnet.id})
-
+def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, tags=None, if_none_match=False):
     created_zone = _DNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "zone_name": zone_name,
         "if_none_match": '*' if if_none_match else None,
         "location": 'global',
-        "tags": tags,
-        "zone_type": zone_type,
-        "resolution_virtual_networks": resolution_vnets_dict if resolution_vnets else None,
-        "registration_virtual_networks": registration_vnets_dict if registration_vnets else None
+        "tags": tags
     })
 
-    if cmd.supported_api_version(min_api='2016-04-01', resource_type=ResourceType.MGMT_NETWORK_DNS) and parent_zone_name is not None:
+    if parent_zone_name is not None:
         logger.info('Attempting to add delegation in the parent zone')
         add_dns_delegation(cmd, created_zone, parent_zone_name, resource_group_name, zone_name)
     return created_zone
-
-
-def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, registration_vnets=None):
-
-    if tags is not None:
-        instance.tags = tags
-
-    if zone_type:
-        instance.zone_type = zone_type
-
-    if resolution_vnets == ['']:
-        instance.resolution_virtual_networks = None
-    elif resolution_vnets:
-        instance.resolution_virtual_networks = resolution_vnets
-
-    if registration_vnets == ['']:
-        instance.registration_virtual_networks = None
-    elif registration_vnets:
-        instance.registration_virtual_networks = registration_vnets
-    return instance
 
 
 def show_dns_soa_record_set(cmd, resource_group_name, zone_name, record_type):

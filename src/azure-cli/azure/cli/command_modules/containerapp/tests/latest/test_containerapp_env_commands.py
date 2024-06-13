@@ -77,6 +77,16 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             JMESPathCheck('properties.appLogsConfiguration.destination', "log-analytics"),
             JMESPathCheck('properties.appLogsConfiguration.logAnalyticsConfiguration.customerId', laworkspace_customer_id),
         ])
+        # update env log destination to none
+        self.cmd('containerapp env update -g {} -n {} --logs-destination none'.format(resource_group, env_name), checks=[
+            JMESPathCheck('properties.appLogsConfiguration.destination', None),
+        ])
+        # update env log destination from log-analytics to none
+        self.cmd('containerapp env update -g {} -n {} --logs-workspace-id {} --logs-workspace-key {} --logs-destination log-analytics'.format(
+            resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key), checks=[
+            JMESPathCheck('properties.appLogsConfiguration.destination', "log-analytics"),
+            JMESPathCheck('properties.appLogsConfiguration.logAnalyticsConfiguration.customerId', laworkspace_customer_id),
+        ])
 
         storage_account_name = self.create_random_name(prefix='cappstorage', length=24)
         storage_account = self.cmd('storage account create -g {} -n {}  --https-only'.format(resource_group, storage_account_name)).get_output_in_json()["id"]
@@ -468,6 +478,43 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         ])
         self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name), expect_failure=False)
 
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="northeurope")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
+    def test_containerapp_env_p2p_traffic_encryption(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        env_name = self.create_random_name(prefix='containerapp-e2e-env', length=24)
+
+        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {} --enable-peer-to-peer-encryption false --enable-mtls'
+                    .format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key), expect_failure=True)
+
+        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {} --enable-peer-to-peer-encryption'
+                    .format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key))
+        
+        containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() == "waiting":
+            time.sleep(5)
+            containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        self.cmd('containerapp env show -n {} -g {}'.format(env_name, resource_group), checks=[
+            JMESPathCheck('name', env_name),
+            JMESPathCheck('properties.peerTrafficConfiguration.encryption.enabled', True),
+        ])
+
+        self.cmd('containerapp env update -g {} -n {} --enable-peer-to-peer-encryption false'.format(resource_group, env_name))
+
+        while containerapp_env["properties"]["provisioningState"].lower() == "waiting":
+            time.sleep(5)
+            containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        self.cmd('containerapp env show -n {} -g {}'.format(env_name, resource_group), checks=[
+            JMESPathCheck('name', env_name),
+            JMESPathCheck('properties.peerTrafficConfiguration.encryption.enabled', False),
+        ])
+        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name), expect_failure=False)
+
     @ResourceGroupPreparer(location="northeurope")
     def test_containerapp_env_dapr_connection_string(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
@@ -477,3 +524,37 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         self.cmd('containerapp env create -g {} -n {} --logs-destination none -d "Endpoint=https://foo.azconfig.io;Id=osOX-l9-s0:sig;InstrumentationKey=00000000000000000000000000000000000000000000"'.format(resource_group, env_name), expect_failure=False)
 
         self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env_name), expect_failure=False)
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="northeurope")
+    def test_containerapp_env_usages(self, resource_group):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        result = self.cmd('containerapp list-usages').get_output_in_json()
+        usages = result["value"]
+        self.assertEqual(len(usages), 1)
+        self.assertEqual(usages[0]["name"]["value"], "ManagedEnvironmentCount")
+        self.assertGreater(usages[0]["limit"], 0)
+        self.assertGreaterEqual(usages[0]["usage"], 0)
+
+        env_name = self.create_random_name(prefix='containerapp-e2e-env', length=24)
+
+        self.cmd('containerapp env create -g {} -n {} --logs-destination none'.format(resource_group, env_name))
+
+        containerapp_env = self.cmd(
+            'containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() == "waiting":
+            time.sleep(5)
+            containerapp_env = self.cmd(
+                'containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        self.cmd('containerapp env show -n {} -g {}'.format(env_name, resource_group), checks=[
+            JMESPathCheck('name', env_name)
+        ])
+
+        result = self.cmd('containerapp env list-usages --id {}'.format(containerapp_env["id"])).get_output_in_json()
+        usages = result["value"]
+        self.assertEqual(len(usages), 3)
+        self.assertGreater(usages[0]["limit"], 0)
+        self.assertGreaterEqual(usages[0]["usage"], 0)

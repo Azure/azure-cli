@@ -135,7 +135,7 @@ Considering version increment rules above, version transition table can be summa
 - &#10006; means no
 - \- means skip check
 - The major version number of preview can increase by at most one compared to the last stable version. For example, the last stable version is 2.0.0, if there are breaking changes for next preview release, the version will be 3.0.0b1. Then another breaking changes for the next preview release, the version will be 3.0.0b2
-- If last version is less than 1.0.0, then, the next preview version should be 1.0.0b1 and the next stable one should be 1.0.0
+- Minimum preview version is 1.0.0b1 and minimum stable version is 1.0.0
 
 ## Backward Compatibility of Extension Version Tags
 
@@ -146,4 +146,4 @@ Current extension module has a combination of semantic scheme and extra metadata
 
 ## Extension Installation Upgrade
 
-To distinguish `stable-only` extension installation with `preview-included` extension installation, `--allow-preview` is added into `az extension add/update` and `az upgrade` and the `stable/preview` justification is made based on this extension versioning specification from CLI version `2.56.0`. Default value for `--allow-preview` is `True` for user compatibility and will be reset to `False` in next breaking change window (by May 2024).
+To distinguish `stable-only` extension installation with `preview-included` extension installation, `--allow-preview` is added into `az extension add/update` and `az upgrade` and the `stable/preview` justification is made based on this extension versioning specification from CLI version `2.56.0`. Default value for `--allow-preview` is `True` for user compatibility and will be reset to `False` in future breaking change window.
