@@ -9,7 +9,6 @@
 # flake8: noqa
 
 from azure.cli.core.aaz import *
-import sys
 
 
 @register_command_group(

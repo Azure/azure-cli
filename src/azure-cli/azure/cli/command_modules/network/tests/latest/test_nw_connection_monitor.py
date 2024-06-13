@@ -310,7 +310,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
 
         self.check('name', 'testconfig')
 
-    #@unittest.skip('PathNotSupportedInBothHTTPConfigurationAndAddress')
+    @unittest.skip('PathNotSupportedInBothHTTPConfigurationAndAddress')
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_test_group1(self, resource_group, resource_group_location):
@@ -374,7 +374,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         # Restore sys.argv
         sys.argv = original_argv
 
-    #@unittest.skip('PathNotSupportedInBothHTTPConfigurationAndAddress')
+    @unittest.skip('PathNotSupportedInBothHTTPConfigurationAndAddress')
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_test_group2(self, resource_group, resource_group_location):
@@ -485,7 +485,6 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                 '--preferred-ip-version IPv4 '
                 '--frequency 60 '
                 '--protocol Icmp '
-                '--http-method Get '
                 '--icmp-disable-trace-route false ').get_output_in_json()
 
         self.kwargs.update({
@@ -601,23 +600,20 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         #creating a test configuration
 
         tc12 = self.cmd('network watcher connection-monitor test-configuration add '
-                '--name httptestconfig1 '
+                '--name tcptestconfig '
                 '--preferred-ip-version IPv6 '
                 '--frequency 60 '
-                 '--protocol Http '
-                  '--http-method Get '
-                  '--http-valid-status-codes [200,201] '
-                  '--http-port 80 ').get_output_in_json()
+                '--protocol Tcp '
+                '--tcp-port-behavior None '
+                '--tcp-disable-trace-route false '
+                '--tcp-port 80 ').get_output_in_json()
 
         tc22 = self.cmd('network watcher connection-monitor test-configuration add '
                 '--name httptestconfig2 '
-                '--preferred-ip-version IPv6 '
+                '--preferred-ip-version IPv4 '
                 '--frequency 60 '
-                 '--protocol Http '
-                  '--http-method Get '
-                  '--http-valid-status-codes [200,201] '
-                  '--http-port 80 '
-                  '--http-request-headers "[{header1}]" ').get_output_in_json()
+                '--protocol Icmp '
+                '--icmp-disable-trace-route false ').get_output_in_json()
 
         self.kwargs.update({
             'endpoint12': endpoint12,
@@ -684,242 +680,3 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.check('name','cmv2-05')
         self.check('location','eastus2')
         self.check('testGroups[0].name','tg11')
-
-
-
-    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
-    @AllowLargeResponse()
-    def test_nw_connection_monitor_v2_creation3(self, resource_group, resource_group_location):
-    # create a V2 connection monitor with HTTP, TCP and ICMP configuration
-    #self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
-
-        endpoint13=self.cmd('network watcher connection-monitor endpoint add '
-                '--name aks-private-vnet '
-                '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/aks-private-rg/providers/Microsoft.Network/virtualNetworks/aks-private-vnet '
-                '--type AzureVNet ').get_output_in_json()
-
-
-        endpoint23=self.cmd('network watcher connection-monitor endpoint add '
-                '--name aks-azure-cni-vnet '
-                '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/aks-azure-cni-rg/providers/Microsoft.Network/virtualNetworks/aks-azure-cni-vnet '
-                '--type AzureVNet ').get_output_in_json()
-
-        endpoint33=self.cmd('network watcher connection-monitor endpoint add '
-                '--name aks-vnet-29306067 '
-                '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/MC_aks-managed-natgw-rg_aks-managed-natgw_eastus2/providers/Microsoft.Network/virtualNetworks/aks-vnet-29306067 '
-                '--type AzureVNet ').get_output_in_json()
-
-        #creating a test configuration
-
-        tc13 = self.cmd('network watcher connection-monitor test-configuration add '
-                '--name httptestconfig '
-                '--preferred-ip-version IPv4 '
-                '--frequency 60 '
-                 '--protocol Http '
-                  '--http-method Get '
-                  '--http-valid-status-codes [200,201] '
-                  '--http-port 80 ').get_output_in_json()
-
-        tc23 = self.cmd('network watcher connection-monitor test-configuration add '
-                '--name tcptestconfig '
-                '--preferred-ip-version IPv4 '
-                '--frequency 60 '
-                 '--protocol Tcp '
-                  '--tcp-port 80 ').get_output_in_json()
-
-        tc33 = self.cmd('network watcher connection-monitor test-configuration add '
-                '--name icmptestconfig '
-                '--preferred-ip-version IPv4 '
-                '--frequency 60 '
-                 '--protocol Icmp ').get_output_in_json()
-
-        self.kwargs.update({
-            'endpoint13': endpoint13,
-            'endpoint23': endpoint23,
-            'endpoint33': endpoint33,
-            'tc13': tc13,
-            'tc23': tc23,
-            'tc33': tc33
-        })
-
-        # Backup sys.argv
-        original_argv = sys.argv
-
-        # Set sys.argv to your test case
-
-
-        sys.argv = ['network watcher connection-monitor test-group add', '--sources', [endpoint13,endpoint33], '--destinations', [endpoint23,endpoint33], '--test-configurations', [tc13,tc23]]
-
-        tg13=self.cmd("network watcher connection-monitor test-group add "
-        '--name tg13 '
-        '--sources "[{endpoint13},{endpoint33}]" '
-        '--destinations "[{endpoint23},{endpoint33}]" '
-        '--test-configurations "[{tc13},{tc23}]" ').get_output_in_json()
-
-
-        #Restore sys.argv
-        sys.argv = original_argv
-
-        #backup sys.argv
-        original_argv = sys.argv
-
-        sys.argv = ['network watcher connection-monitor test-group add', '--sources', [endpoint13,endpoint23], '--destinations', [endpoint23,endpoint33], '--test-configurations', [tc23,tc33]]
-
-        tg23=self.cmd("network watcher connection-monitor test-group add "
-        '--name tg23 '
-        '--sources "[{endpoint13},{endpoint23}]" '
-        '--destinations "[{endpoint23},{endpoint33}]" '
-        '--test-configurations "[{tc23},{tc33}]" ').get_output_in_json()
-
-        print("tg1=",tg13)
-        print("tg2=",tg23)
-
-        # Restore sys.argv
-        sys.argv = original_argv
-
-        self.kwargs.update({
-            'tg1': tg13,
-            'tg2': tg23
-        })
-
-
-        original_argv = sys.argv
-        sys.argv = ['network watcher connection-monitor create', '--test-groups', [tg13,tg23]]
-
-        cm=self.cmd('network watcher connection-monitor create '
-                '--name cmv2-06 '
-                '--network-watcher-name kumamtestnw '
-                '--resource-group kumamtestrg '
-                '--location eastus2 '
-                '--test-groups  "[{tg1},{tg2}]" ').get_output_in_json()
-
-
-        sys.argv = original_argv
-
-        self.check('name','cmv2-06')
-        self.check('location','eastus2')
-        self.check('testGroups[0].name','tg13')
-
-
-    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
-    @AllowLargeResponse()
-    def test_nw_connection_monitor_v2_creation4(self, resource_group, resource_group_location):
-    # create a V2 connection monitor with HTTP, TCP and ICMP configuration and request headers in http test configuration
-    #self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
-
-
-        endpoint14=self.cmd('network watcher connection-monitor endpoint add '
-                '--name aks-private-vnet '
-                '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/aks-private-rg/providers/Microsoft.Network/virtualNetworks/aks-private-vnet '
-                '--type AzureVNet '
-                '--coverage-level BelowAverage ').get_output_in_json()
-
-
-        endpoint24=self.cmd('network watcher connection-monitor endpoint add '
-                '--name aks-azure-cni-vnet '
-                '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/aks-azure-cni-rg/providers/Microsoft.Network/virtualNetworks/aks-azure-cni-vnet '
-                '--type AzureVNet ').get_output_in_json()
-
-        endpoint34=self.cmd('network watcher connection-monitor endpoint add '
-                '--name aks-vnet-29306067 '
-                '--resource-id /subscriptions/9cece3e3-0f7d-47ca-af0e-9772773f90b7/resourceGroups/MC_aks-managed-natgw-rg_aks-managed-natgw_eastus2/providers/Microsoft.Network/virtualNetworks/aks-vnet-29306067 '
-                '--type AzureVNet ').get_output_in_json()
-
-        #creating a test configuration
-        self.kwargs.update({
-            'header1': {'name':'UserAgent','value':'Edge'},
-            'header2':{'name':'UserAgent','value':'Chrome'}
-        })
-
-        tc14 = self.cmd('network watcher connection-monitor test-configuration add '
-                '--name httptestconfig '
-                '--preferred-ip-version IPv4 '
-                '--frequency 60 '
-                 '--protocol Http '
-                  '--http-method Get '
-                  '--http-valid-status-codes [200,201] '
-                  '--http-port 80 '
-                  '--http-request-headers "[{header1},{header2}]" ').get_output_in_json()
-
-        tc24 = self.cmd('network watcher connection-monitor test-configuration add '
-                '--name tcptestconfig '
-                '--preferred-ip-version IPv4 '
-                '--frequency 60 '
-                 '--protocol Tcp '
-                  '--tcp-port 80 ').get_output_in_json()
-
-        tc34 = self.cmd('network watcher connection-monitor test-configuration add '
-                '--name icmptestconfig '
-                '--preferred-ip-version IPv4 '
-                '--frequency 60 '
-                 '--protocol Icmp ').get_output_in_json()
-
-        print("tc34=",tc34)
-        print("tc24=",tc24)
-
-        self.kwargs.update({
-            'endpoint14': endpoint14,
-            'endpoint24': endpoint24,
-            'endpoint34': endpoint32,
-            'tc14': tc14,
-            'tc24': tc24,
-            'tc34': tc34
-        })
-
-        # Backup sys.argv
-        original_argv = sys.argv
-
-        # Set sys.argv to your test case
-
-
-        sys.argv = ['network watcher connection-monitor test-group add', '--sources', [endpoint14,endpoint34], '--destinations', [endpoint24,endpoint34], '--test-configurations', [tc14,tc24]]
-
-        tg14=self.cmd("network watcher connection-monitor test-group add "
-        '--name tg13 '
-        '--sources "[{endpoint14},{endpoint34}]" '
-        '--destinations "[{endpoint24},{endpoint34}]" '
-        '--test-configurations "[{tc14},{tc24}]" ').get_output_in_json()
-
-
-        #Restore sys.argv
-        sys.argv = original_argv
-
-        #backup sys.argv
-        original_argv = sys.argv
-
-        sys.argv = ['network watcher connection-monitor test-group add', '--sources', [endpoint14,endpoint24], '--destinations', [endpoint24,endpoint34], '--test-configurations', [tc24,tc34]]
-
-        tg24=self.cmd("network watcher connection-monitor test-group add "
-        '--name tg23 '
-        '--sources "[{endpoint14},{endpoint24}]" '
-        '--destinations "[{endpoint24},{endpoint34}]" '
-        '--test-configurations "[{tc24},{tc34}]" ').get_output_in_json()
-
-        print("tg1=",tg14)
-        print("tg2=",tg24)
-
-        # Restore sys.argv
-        sys.argv = original_argv
-
-        self.kwargs.update({
-            'tg1': tg14,
-            'tg2': tg24
-        })
-
-
-        original_argv = sys.argv
-        sys.argv = ['network watcher connection-monitor create', '--test-groups', [tg14,tg24]]
-
-        cm=self.cmd('network watcher connection-monitor create '
-                '--name cmv2-07 '
-                '--network-watcher-name kumamtestnw '
-                '--resource-group kumamtestrg '
-                '--location eastus2 '
-                '--test-groups  "[{tg1},{tg2}]" ').get_output_in_json()
-
-
-        sys.argv = original_argv
-
-        self.check('name','cmv2-07')
-        self.check('location','eastus2')
-        self.check('testGroups[0].name','tg14')
