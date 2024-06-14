@@ -203,7 +203,7 @@ def load_arguments(self, _):
         c.argument('prompt', options_list=['--show-prompt'], action='store_true', help='Show prompt to upload an existing certificate.')
 
     with self.argument_context('containerapp env certificate create') as c:
-        c.argument('hostname', options_list=['--hostname'], help='The custom domain name.')
+        c.argument('hostname', help='The custom domain name.')
         c.argument('certificate_name', options_list=['--certificate-name', '-c'], help='Name of the managed certificate which should be unique within the Container Apps environment.')
         c.argument('validation_method', options_list=['--validation-method', '-v'], help='Validation method of custom domain ownership. Supported methods are HTTP, CNAME and TXT.')
 
