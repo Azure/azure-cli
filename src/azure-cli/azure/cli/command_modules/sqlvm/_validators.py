@@ -219,8 +219,7 @@ def validate_azure_ad_authentication(cmd, namespace):
         raise InvalidArgumentValueError("Azure AD authentication is not supported in {}".format(cmd.ctx_cli.cloud.name))
 
     # validate the SQL VM supports Azure AD authentication, i.e. it is on Windows platform and is SQL 2022 or later
-    _validate_azure_ad_authentication_supported_on_sqlvm(cmd.cli_ctx, namespace)
-    logger.debug("Validate Azure AD authentication: the SQL VM itself is suitable for Azure AD authentication.")
+    # this validation will take place in RP call
 
     # validate the MSI is valid on the Azure virtual machine
     principal_id = _validate_msi_valid_on_vm(cmd.cli_ctx, namespace)
@@ -229,55 +228,6 @@ def validate_azure_ad_authentication(cmd, namespace):
     # validate the MSI has appropriate permission to query Microsoft Graph API
     _validate_msi_with_enough_permission(cmd.cli_ctx, principal_id)
     logger.debug("Validate Azure AD authentication: the managed identity has required Graph API permission.")
-
-
-def _validate_azure_ad_authentication_supported_on_sqlvm(cli_ctx, namespace):
-    """ Validate this SQL VM instance supports Azure AD authentication, i.e. it is on Windows platform and is SQL 2022 or later
-
-        :param cli_ctx: The CLI context.
-        :type cli_ctx: AzCli.
-        :param namespace: The argparse namespace represents the arguments.
-        :type namespace: argpase.Namespace.
-    """
-    logger.debug("Validate Azure AD authentication against SQL VM instance.")
-
-    # retrieve SQL VM client
-    from ._util import get_sqlvirtualmachine_management_client
-    sqlvm_ops = get_sqlvirtualmachine_management_client(cli_ctx).sql_virtual_machines
-
-    # Retrieve the sqlvm instance, This is a rest call to the server and deserialization afterwards
-    # therefore there is a greater chance to encouter an exception. Instead of poping the exception
-    # to the caller directly, we will throw our own InvalidArgumentValueError with more context
-    # information.
-    try:
-        sqlvm = sqlvm_ops.get(namespace.resource_group_name, namespace.sql_virtual_machine_name)
-    except Exception as ex:
-        raise InvalidArgumentValueError("Unable to validate Azure AD authentication due to retrieving SQL VM instance encountering an error: {}.".format(ex)) from ex
-
-    # Construct error message for unsupported SQL server version or OS platform.
-    unsupported_error = "Azure AD authentication requires SQL Server 2022 on Windows platform, but the SQL Image Offer of this SQL VM is {}".format(sqlvm.sql_image_offer)
-
-    logger.debug("The SQL VM sql_image_offer is %s.", sqlvm.sql_image_offer)
-    if sqlvm.sql_image_offer is None:
-        raise InvalidArgumentValueError(unsupported_error)
-
-    # An example sqlImageOffer is SQL2022-WS2022.
-    version_platform = sqlvm.sql_image_offer.split('-')
-    if len(version_platform) < 2:
-        raise InvalidArgumentValueError(unsupported_error)
-
-    version = version_platform[0]
-    platform = version_platform[1]
-
-    try:
-        int_version = int(version[3:])
-    except ValueError:
-        raise InvalidArgumentValueError(unsupported_error)
-
-    if int_version < 2022 or not platform.startswith("WS"):
-        az_error = InvalidArgumentValueError(unsupported_error)
-        az_error.set_recommendation("Upgrade SQL server to SQL server 2022 or later.")
-        raise az_error
 
 
 def _validate_msi_valid_on_vm(cli_ctx, namespace):
