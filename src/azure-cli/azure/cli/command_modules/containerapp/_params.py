@@ -205,7 +205,7 @@ def load_arguments(self, _):
     with self.argument_context('containerapp env certificate create') as c:
         c.argument('hostname', help='The custom domain name.')
         c.argument('certificate_name', options_list=['--certificate-name', '-c'], help='Name of the managed certificate which should be unique within the Container Apps environment.')
-        c.argument('validation_method', options_list=['--validation-method', '-v'], help='Validation method of custom domain ownership. Supported methods are HTTP, CNAME and TXT.')
+        c.argument('validation_method', arg_type=get_enum_type(['HTTP', 'CNAME', 'TXT']), options_list=['--validation-method', '-v'], help='Validation method of custom domain ownership.')
 
     with self.argument_context('containerapp env certificate list') as c:
         c.argument('name', id_part=None)
