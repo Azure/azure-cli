@@ -439,6 +439,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     with self.argument_context('mysql flexible-server list-skus') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
 
+    with self.argument_context('mysql flexible-server detach-vnet') as c:
+        c.argument('public_network_access', options_list=['--public-network-access'], arg_type=get_enum_type(['Enabled', 'Disabled']), help='Determines the public access after vnet detach. ')
+        c.argument('yes', arg_type=yes_arg_type)
+
     # flexible-server parameter
     for scope in ['list', 'set', 'show', 'set-batch']:
         argument_context_string = 'mysql flexible-server parameter {}'.format(scope)

@@ -1623,6 +1623,15 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
                          self.get_subscription_id(), resource_group, vnet_name_2, 'Subnet' + servers[1]))
 
+        # Case 3 : Detach server vnet
+        self.cmd('{} flexible-server detach-vnet -g {} -n {} --public-network-access Disabled --yes'
+                 .format(database_engine, resource_group, servers[0], vnet_name, location, subnet_name, private_dns_zone_1))
+        
+        show_result_3 = self.cmd('{} flexible-server show -g {} -n {}'
+                            .format(database_engine, resource_group, servers[1])).get_output_in_json()
+        self.assertEqual(show_result_3['network']['delegatedSubnetResourceId'], None)
+
+
         # delete all servers
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[0]),
                  checks=NoneCheck())

@@ -436,6 +436,15 @@ examples:
     text: az mysql flexible-server restart --resource-group testGroup --name testserver --failover Forced
 """
 
+helps['mysql flexible-server detach-vnet'] = """
+type: command
+short-summary: Detach vnet for a flexible server.
+examples:
+  - name: RDetach vnet for a flexible server with public access disabled.
+    text: az mysql flexible-server detach-vnet --resource-group testGroup --name testserver --public-network-access Disabled
+    crafted: true
+"""
+
 helps['mysql flexible-server wait'] = """
 type: command
 short-summary: Wait for the flexible server to satisfy certain conditions.
