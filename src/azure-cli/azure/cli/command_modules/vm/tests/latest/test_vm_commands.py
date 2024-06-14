@@ -89,7 +89,7 @@ class VmReimageTest(ScenarioTest):
         })
 
         self.cmd('vm reimage --name {vm} --resource-group {rg} --temp-disk false '
-                 '--admin-password password --custom-data "dGVzdA==" --exact-version 0.1')
+                 '--admin-password password --custom-data "dGVzdA=="')
         vm_json_after_reimage = self.cmd('vm show -n {vm} -g {rg}').get_output_in_json()
         self.kwargs.update({
             'os_disk_after_reimage': vm_json_after_reimage['storageProfile']['osDisk']['name']
@@ -174,12 +174,19 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
             'loc': 'centralus',
             'vm': 'vm-with-public-ip',
             'allocation': 'static',
-            'zone': 2
+            'zone': 2,
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
         # Expecting no results at the beginning
         self.cmd('vm list-ip-addresses --resource-group {rg}', checks=self.is_empty())
         self.cmd('vm create --resource-group {rg} --location {loc} -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest'
-                 ' --admin-password testPassword0 --public-ip-address-allocation {allocation} --authentication-type password --zone {zone} --nsg-rule NONE')
+                 ' --admin-password testPassword0 --public-ip-address-allocation {allocation} --authentication-type password --zone {zone} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd(
+            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         result = self.cmd('vm show --resource-group {rg} --name {vm} -d', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{vm}'),
