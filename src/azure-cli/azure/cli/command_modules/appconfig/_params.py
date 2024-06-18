@@ -67,7 +67,7 @@ def load_arguments(self, _):
     retention_days_arg_type = CLIArgumentType(
         options_list=['--retention-days'],
         type=int,
-        help='Number of days to retain the soft delete enabled App Configuration after deleting. Must be a positive integer between 0 and 7.'
+        help='Number of days to retain the soft delete enabled App Configuration store after deleting. Must be a positive integer between 0 and 7.'
     )
     identities_arg_type = CLIArgumentType(
         nargs='*',
@@ -76,13 +76,13 @@ def load_arguments(self, _):
     store_name_arg_type = CLIArgumentType(
         options_list=['--store-name', '-s'],
         type=str,
-        help='Name of the App Configuration. You can configure the default name using `az configure --defaults app_configuration_store=<name>`.',
+        help='Name of the App Configuration store. You can configure the default name using `az configure --defaults app_configuration_store=<name>`.',
         configured_default='app_configuration_store'
     )
     replica_name_arg_type = CLIArgumentType(
         options_list=['--name', '-n'],
         type=str,
-        help='Name of the replica of the App Configuration.',
+        help='Name of the replica of the App Configuration store.',
         configured_default=None
     )
 
@@ -111,26 +111,26 @@ def load_arguments(self, _):
     data_plane_name_arg_type = CLIArgumentType(
         options_list=['--name', '-n'],
         type=str,
-        help='Name of the App Configuration. You can configure the default name using `az configure --defaults app_configuration_store=<name>`.',
+        help='Name of the App Configuration store. You can configure the default name using `az configure --defaults app_configuration_store=<name>`.',
         configured_default=None
     )
 
     with self.argument_context('appconfig') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('name', options_list=['--name', '-n'], id_part='None', help='Name of the App Configuration. You can configure the default name using `az configure --defaults app_configuration_store=<name>`', configured_default='app_configuration_store')
+        c.argument('name', options_list=['--name', '-n'], id_part='None', help='Name of the App Configuration store. You can configure the default name using `az configure --defaults app_configuration_store=<name>`', configured_default='app_configuration_store')
         c.argument('connection_string', validator=validate_connection_string,
-                   help="Combination of access key and endpoint of App Configuration. Can be found using 'az appconfig credential list'. Users can preset it using `az configure --defaults appconfig_connection_string=<connection_string>` or environment variable with the name AZURE_APPCONFIG_CONNECTION_STRING.")
+                   help="Combination of access key and endpoint of the App Configuration store. Can be found using 'az appconfig credential list'. Users can preset it using `az configure --defaults appconfig_connection_string=<connection_string>` or environment variable with the name AZURE_APPCONFIG_CONNECTION_STRING.")
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.')
         c.argument('datetime', arg_type=datatime_filter_arg_type)
         c.argument('top', arg_type=top_arg_type)
         c.argument('all_', options_list=['--all'], action='store_true', help="List all items.")
         c.argument('fields', arg_type=fields_arg_type)
-        c.argument('sku', help='The sku of App Configuration', arg_type=get_enum_type(['Free', 'Standard']))
-        c.argument('endpoint', help='If auth mode is "login", provide endpoint URL of the App Configuration. The endpoint can be retrieved using "az appconfig show" command. You can configure the default endpoint using `az configure --defaults appconfig_endpoint=<endpoint>`', configured_default='appconfig_endpoint')
+        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Standard']))
+        c.argument('endpoint', help='If auth mode is "login", provide endpoint URL of the App Configuration store. The endpoint can be retrieved using "az appconfig show" command. You can configure the default endpoint using `az configure --defaults appconfig_endpoint=<endpoint>`', configured_default='appconfig_endpoint')
         c.argument('auth_mode', arg_type=get_enum_type(['login', 'key']), configured_default='appconfig_auth_mode', validator=validate_auth_mode,
                    help='This parameter can be used for indicating how a data operation is to be authorized. ' +
                    'If the auth mode is "key", provide connection string or store name and your account access keys will be retrieved for authorization. ' +
-                   'If the auth mode is "login", provide the store endpoint or store name and your "az login" credentials will be used for authorization. ' +
+                   'If the auth mode is "login", provide the `--endpoint` or `--name` and your "az login" credentials will be used for authorization. ' +
                    'You can configure the default auth mode using `az configure --defaults appconfig_auth_mode=<auth_mode>`. ' +
                    'For more information, see https://docs.microsoft.com/azure/azure-app-configuration/concept-enable-rbac')
 
@@ -143,24 +143,24 @@ def load_arguments(self, _):
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
         c.argument('retention_days', arg_type=retention_days_arg_type)
-        c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration. Setting this property to true activates protection against purge for this App Configuration and its contents. Enabling this functionality is irreversible.')
+        c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(),
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
-        c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration. Setting this property to true activates protection against purge for this App Configuration and its contents. Enabling this functionality is irreversible.')
+        c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
 
     with self.argument_context('appconfig recover') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration. Can be viewed using command `az appconfig show-deleted`.')
-        c.argument('resource_group_name', arg_type=resource_group_name_type, help='Resource group of the deleted App Configuration.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration store. Can be viewed using command `az appconfig show-deleted`.')
+        c.argument('resource_group_name', arg_type=resource_group_name_type, help='Resource group of the deleted App Configuration store.')
 
     with self.argument_context('appconfig show-deleted') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration store.')
 
     with self.argument_context('appconfig purge') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration. Can be viewed using command `az appconfig show-deleted`.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration store. Can be viewed using command `az appconfig show-deleted`.')
 
     with self.argument_context('appconfig update', arg_group='Customer Managed Key') as c:
         c.argument('encryption_key_name', help='The name of the KeyVault key.')
@@ -199,19 +199,19 @@ def load_arguments(self, _):
         c.argument('strict', validator=validate_strict_import, arg_type=get_three_state_flag(), help="Delete all other key-values in the store with specified prefix and label")
 
     with self.argument_context('appconfig kv import', arg_group='AppConfig') as c:
-        c.argument('src_name', help='The name of the source App Configuration.')
+        c.argument('src_name', help='The name of the source App Configuration store.')
         c.argument('src_connection_string', validator=validate_connection_string, help="Combination of access key and endpoint of the source store.")
         c.argument('src_key', help='If no key specified, import all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Key filtering not applicable for feature flags. By default, all feature flags with specified label will be imported.')
         c.argument('src_label', help="Only keys with this label in source AppConfig will be imported. If no value specified, import keys with null label by default. Support star sign as filters, for instance * means all labels, abc* means labels with abc as prefix.")
         c.argument('preserve_labels', arg_type=get_three_state_flag(), help="Flag to preserve labels from source AppConfig. This argument should NOT be specified along with --label.")
-        c.argument('src_endpoint', help='If --src-auth-mode is "login", provide endpoint URL of the source App Configuration.')
+        c.argument('src_endpoint', help='If --src-auth-mode is "login", provide endpoint URL of the source App Configuration store.')
         c.argument('src_auth_mode', arg_type=get_enum_type(['login', 'key']),
-                   help='Auth mode for connecting to source App Configuration. For details, refer to "--auth-mode" argument.')
+                   help='Auth mode for connecting to source App Configuration store. For details, refer to "--auth-mode" argument.')
         c.argument('src_snapshot', validator=validate_snapshot_import,
                    help='Import all keys in a given snapshot of the source App Configuration store. If no snapshot is specified, the keys currently in the store are imported based on the specified key and label filters.')
 
     with self.argument_context('appconfig kv import', arg_group='AppService') as c:
-        c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
+        c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration store. Required for AppService arguments')
 
     with self.argument_context('appconfig kv export') as c:
         c.argument('label', help="Only keys and feature flags with this label will be exported. If no label specified, export keys and feature flags with null label by default. When export destination is appconfig, or when export destination is file with `appconfig/kvset` profile, this argument supports asterisk and comma signs for label filtering, for instance, * means all labels, abc* means labels with abc as prefix, and abc,xyz means labels with abc or xyz.")
@@ -235,16 +235,16 @@ def load_arguments(self, _):
         c.argument('profile', validator=validate_export_profile, arg_type=get_enum_type([ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET]), help="Export profile to be used for exporting the key-values. Options 'depth', 'separator', 'naming-convention', 'prefix', 'dest-label' and, 'resolve-keyvault' are not supported when using '{}' profile".format(ImportExportProfiles.KVSET))
 
     with self.argument_context('appconfig kv export', arg_group='AppConfig') as c:
-        c.argument('dest_name', help='The name of the destination App Configuration.')
+        c.argument('dest_name', help='The name of the destination App Configuration store.')
         c.argument('dest_connection_string', validator=validate_connection_string, help="Combination of access key and endpoint of the destination store.")
         c.argument('dest_label', help="Exported KVs will be labeled with this destination label. If neither --dest-label nor --preserve-labels is specified, will assign null label.")
         c.argument('preserve_labels', arg_type=get_three_state_flag(), help="Flag to preserve labels from source AppConfig. This argument should NOT be specified along with --dest-label.")
-        c.argument('dest_endpoint', help='If --dest-auth-mode is "login", provide endpoint URL of the destination App Configuration.')
+        c.argument('dest_endpoint', help='If --dest-auth-mode is "login", provide endpoint URL of the destination App Configuration store.')
         c.argument('dest_auth_mode', arg_type=get_enum_type(['login', 'key']),
-                   help='Auth mode for connecting to destination App Configuration. For details, refer to "--auth-mode" argument.')
+                   help='Auth mode for connecting to the destination App Configuration store. For details, refer to "--auth-mode" argument.')
 
     with self.argument_context('appconfig kv export', arg_group='AppService') as c:
-        c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
+        c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration store. Required for AppService arguments')
         c.argument('export_as_reference', options_list=['--export-as-reference', '-r'], arg_type=get_three_state_flag(), validator=validate_export_as_reference,
                    help="Export key-values as App Configuration references. For more information, see https://docs.microsoft.com/en-us/azure/app-service/app-service-configuration-references")
 
@@ -252,8 +252,8 @@ def load_arguments(self, _):
         c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
         c.argument('label', help="If no label specified, set the key with null label by default")
         c.argument('tags', arg_type=tags_type)
-        c.argument('content_type', help='Content type of the keyvalue to be set.')
-        c.argument('value', help='Value of the keyvalue to be set.')
+        c.argument('content_type', help='Content type of the key-value to be set.')
+        c.argument('value', help='Value of the key-value to be set.')
 
     with self.argument_context('appconfig kv set-keyvault') as c:
         c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
