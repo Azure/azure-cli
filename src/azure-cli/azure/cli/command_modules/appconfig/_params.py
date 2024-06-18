@@ -130,7 +130,7 @@ def load_arguments(self, _):
         c.argument('auth_mode', arg_type=get_enum_type(['login', 'key']), configured_default='appconfig_auth_mode', validator=validate_auth_mode,
                    help='This parameter can be used for indicating how a data operation is to be authorized. ' +
                    'If the auth mode is "key", provide connection string or store name and your account access keys will be retrieved for authorization. ' +
-                   'If the auth mode is "login", provide the store endpoint (--endpoint) or store name (--name) and your "az login" credentials will be used for authorization. ' +
+                   'If the auth mode is "login", provide the `--endpoint` or `--name` and your "az login" credentials will be used for authorization. ' +
                    'You can configure the default auth mode using `az configure --defaults appconfig_auth_mode=<auth_mode>`. ' +
                    'For more information, see https://docs.microsoft.com/azure/azure-app-configuration/concept-enable-rbac')
 

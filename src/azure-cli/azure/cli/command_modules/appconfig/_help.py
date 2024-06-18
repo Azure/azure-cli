@@ -97,7 +97,7 @@ examples:
 
 helps['appconfig credential'] = """
 type: group
-short-summary: Manage credentials for App Configuration store.
+short-summary: Manage credentials for App Configuration stores.
 """
 
 helps['appconfig credential list'] = """
