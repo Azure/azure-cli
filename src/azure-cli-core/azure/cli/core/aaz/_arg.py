@@ -505,7 +505,8 @@ class AAZResourceGroupNameArg(AAZStrArg):
         from azure.cli.core.commands.parameters import get_resource_group_completion_list
         from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
         arg = super().to_cmd_arg(name, **kwargs)
-        arg.completer = get_resource_group_completion_list
+        if not arg.completer:
+            arg.completer = get_resource_group_completion_list
         arg.local_context_attribute = LocalContextAttribute(
             name='resource_group_name',
             actions=[LocalContextAction.SET, LocalContextAction.GET],
@@ -546,7 +547,8 @@ class AAZResourceLocationArg(AAZStrArg):
             short_summary += "When not specified, the location of the resource group will be used."
             arg.help = short_summary
 
-        arg.completer = get_location_completion_list
+        if not arg.completer:
+            arg.completer = get_location_completion_list
         arg.local_context_attribute = LocalContextAttribute(
             name='location',
             actions=[LocalContextAction.SET, LocalContextAction.GET],
@@ -580,7 +582,8 @@ class AAZSubscriptionIdArg(AAZStrArg):
     def to_cmd_arg(self, name, **kwargs):
         from azure.cli.core._completers import get_subscription_id_list
         arg = super().to_cmd_arg(name, **kwargs)
-        arg.completer = get_subscription_id_list
+        if not arg.completer:
+            arg.completer = get_subscription_id_list
         return arg
 
 
