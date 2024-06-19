@@ -6557,6 +6557,7 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance')
     @AllowLargeResponse()
     def test_network_virtual_appliance(self, resource_group):
+        subscriptionId = self.get_subscription_id()
         self.kwargs.update({
             'vwan': 'clitestvwan',
             'vhub': 'clitestvhub',
@@ -6603,6 +6604,9 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         self.cmd('network virtual-appliance sku show --name "barracudasdwanrelease"', checks=[
             self.check('name', 'barracudasdwanrelease')
         ])
+
+        self.cmd('az network virtual-appliance restart --resource-group {rg} --network-virtual-appliance-name {name} --subscription {subscriptionId}')
+        self.cmd('az network virtual-appliance restart --resource-group {rg} --network-virtual-appliance-name {name} --subscription {subscriptionId} --instance-ids 0')
 
         self.cmd('network virtual-appliance site create -n {site} -g {rg} --appliance-name {name} --address-prefix 10.0.0.0/24 --allow --default --optimize', checks=[
             self.check('name', '{site}'),
