@@ -94,7 +94,6 @@ class AAZContentBuilder:
         sub_args = []
         for value, arg in zip(self._values, self._args):
             schema = value._schema
-
             if schema._element is None:
                 schema.Element = typ(**typ_kwargs) if typ_kwargs else typ()
             else:
