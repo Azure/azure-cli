@@ -714,6 +714,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 result = list(result)
 
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
+            
             event_data = {'result': result}
             cmd_copy.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
             return event_data['result']
