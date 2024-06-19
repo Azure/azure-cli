@@ -12,12 +12,12 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "network application-gateway",
+    "network network-watcher connection-monitor",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage application-level routing and load balancing services.
+    """Manage connection monitor
 
-    To learn more about Application Gateway, visit https://learn.microsoft.com/en-us/azure/application-gateway/quick-create-cli.
+    Connection monitor provides unified, end-to-end connection monitoring in Network Watcher. The Connection monitor feature supports hybrid and Azure cloud deployments.
     """
     pass
 
