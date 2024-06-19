@@ -282,7 +282,7 @@ class AAZObjectArgAction(AAZCompoundTypeArgAction):
             if cls._schema._nullable:
                 return data
             raise AAZInvalidValueError("field is not nullable")
-            
+
         if isinstance(data, dict):
             result = OrderedDict()
             for key, value in data.items():
