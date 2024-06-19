@@ -110,25 +110,25 @@ There are several types of breaking changes defined in `breaking_change`. You sh
 **Remove**
 
 ```python
-from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIRemove, NextBreakingChangeWindow
+from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIRemoveChange, NextBreakingChangeWindow
 
 # Remove the command groups, commands or arguments in a future release.
 # **It is recommended to utilize `deprecate_info` instead of this class to pre-announce Breaking Change of Removal.**
-upcoming_breaking_changes['bar foo'] = AzCLIRemove('az bar foo', target_version=NextBreakingChangeWindow(),
-                                                   redirect='`az barfoo`')
+upcoming_breaking_changes['bar foo'] = AzCLIRemoveChange('az bar foo', target_version=NextBreakingChangeWindow(),
+                                                         redirect='`az barfoo`')
 # `az bar foo` will be removed in next breaking change release(2.61.0). Please use `az barfoo` instead.
 ```
 
 **Rename**
 
 ```python
-from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIRename, NextBreakingChangeWindow
+from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIRenameChange, NextBreakingChangeWindow
 
 # Rename the command groups, commands or arguments to a new name in a future release.
 # **It is recommended to utilize `deprecate_info` instead of this class to pre-announce Breaking Change of Renaming.**
 # It is recommended that the old name and the new name should be reserved in few releases.
-upcoming_breaking_changes['bar foo'] = AzCLIRename('az bar foo', 'az bar baz',
-                                                   target_version=NextBreakingChangeWindow())
+upcoming_breaking_changes['bar foo'] = AzCLIRenameChange('az bar foo', 'az bar baz',
+                                                         target_version=NextBreakingChangeWindow())
 # `az bar foo` will be renamed to `az bar baz` in next breaking change release(2.61.0).
 ```
 

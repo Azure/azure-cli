@@ -64,7 +64,7 @@ class BreakingChange(abc.ABC):
         pass
 
 
-class AzCLIRemove(BreakingChange):
+class AzCLIRemoveChange(BreakingChange):
     """
     Remove the command groups, commands or arguments in a future release.
 
@@ -92,7 +92,7 @@ class AzCLIRemove(BreakingChange):
         return self._target_version
 
 
-class AzCLIRename(BreakingChange):
+class AzCLIRenameChange(BreakingChange):
     """
     Rename the command groups, commands or arguments to a new name in a future release.
 
