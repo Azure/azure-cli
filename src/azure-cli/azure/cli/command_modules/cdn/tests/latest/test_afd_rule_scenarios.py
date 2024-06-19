@@ -14,7 +14,7 @@ from collections import namedtuple
 from azure.core.exceptions import HttpResponseError
 
 class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_rule_set_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
         self.afd_rule_set_list_cmd(resource_group, profile_name, expect_failure=True)
@@ -40,7 +40,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.afd_rule_set_list_cmd(resource_group, profile_name, checks=list_checks)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_rule_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
         self.afd_profile_create_cmd(resource_group, profile_name)
@@ -300,7 +300,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         self.afd_rule_set_delete_cmd(resource_group, rule_set_name, profile_name)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_rule_complex_condition_creation(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
         self.afd_profile_create_cmd(resource_group, profile_name)
@@ -381,7 +381,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         self.afd_rule_set_delete_cmd(resource_group, rule_set_name, profile_name)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_rule_creation_invalid_operator(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
         self.afd_profile_create_cmd(resource_group, profile_name)
@@ -437,7 +437,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         self.afd_rule_set_delete_cmd(resource_group, rule_set_name, profile_name)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_rule_creation_invalid_match_values(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
         self.afd_profile_create_cmd(resource_group, profile_name)
@@ -479,7 +479,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         self.afd_rule_set_delete_cmd(resource_group, rule_set_name, profile_name)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_rule_actions(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
         self.afd_profile_create_cmd(resource_group, profile_name)
