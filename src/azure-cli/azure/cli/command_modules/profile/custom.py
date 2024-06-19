@@ -41,6 +41,11 @@ LOGIN_OUTPUT_WARNING = (
     "[Warning] The login output has been updated. Please be aware that it no longer displays the full list of "
     "available subscriptions by default.\n")
 
+USERNAME_PASSWORD_DEPRECATION_WARNING = (
+    "Authentication with username and password in the command line is strongly discouraged. "
+    "Use one of the recommended authentication methods based on your requirements. "
+    "For more details, see https://go.microsoft.com/fwlink/?linkid=2276314")
+
 
 def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
@@ -123,6 +128,8 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
         raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
+    if username and not service_principal and not identity:
+        logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING)
 
     interactive = False
 

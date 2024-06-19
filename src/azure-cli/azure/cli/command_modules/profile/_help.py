@@ -14,11 +14,17 @@ long-summary: >-
     By default, this command logs in with a user account. CLI will try to launch a web browser to log in interactively.
     If a web browser is not available, CLI will fall back to device code login.
 
+
+    [WARNING] Authentication with username and password in the command line is strongly discouraged.
+    Use one of the recommended authentication methods based on your requirements.
+    For more details, see https://go.microsoft.com/fwlink/?linkid=2276314
+
+
     To login with a service principal, specify --service-principal.
 examples:
     - name: Log in interactively.
       text: az login
-    - name: Log in with user name and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled. Use -p=secret if the first character of the password is '-'.
+    - name: Log in with username and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled. Use -p=secret if the first character of the password is '-'.
       text: az login -u johndoe@contoso.com -p VerySecret
     - name: Log in with a service principal using client secret. Use -p=secret if the first character of the password is '-'.
       text: az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
