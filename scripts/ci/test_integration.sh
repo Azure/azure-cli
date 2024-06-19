@@ -11,6 +11,7 @@ ALL_MODULES=`find $share_folder/build/ -name "*.whl"`
 pip install -e ./tools
 [ -d privates ] && pip install -qqq privates/*.whl
 pip install $ALL_MODULES
+which az
 
 echo '=== List installed packages'
 pip freeze

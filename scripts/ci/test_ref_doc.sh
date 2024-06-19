@@ -16,6 +16,7 @@ pip install $ALL_MODULES
 
 pip install sphinx==1.6.7 Jinja2==3.0.3
 echo "Installed."
+which az
 
 cd doc/sphinx; python ./__main__.py
 

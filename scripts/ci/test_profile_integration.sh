@@ -13,6 +13,8 @@ pip install $ALL_MODULES
 set -ev
 
 output=$(az cloud list-profiles -otsv)
+which az
+which azdev
 
 azdev verify package $share_folder/build/
 
