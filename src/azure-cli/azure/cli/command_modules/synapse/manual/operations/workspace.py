@@ -7,7 +7,7 @@ from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.mgmt.synapse.models import Workspace, WorkspacePatchInfo, ManagedIdentity, \
     DataLakeStorageAccountDetails, WorkspaceKeyDetails, CustomerManagedKeyDetails, EncryptionDetails, ManagedVirtualNetworkSettings, \
     ManagedIdentitySqlControlSettingsModelPropertiesGrantSqlControlToManagedIdentity, IpFirewallRuleInfo, Key, ManagedIdentitySqlControlSettingsModel, WorkspaceRepositoryConfiguration, \
-    KekIdentityProperties, UserAssignedManagedIdentity
+    KekIdentityProperties, UserAssignedManagedIdentity, WorkspacePublicNetworkAccess
 from azure.mgmt.cdn.models import CheckNameAvailabilityInput
 
 
@@ -102,7 +102,7 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
                      allowed_aad_tenant_ids=None, tags=None, key_name=None, repository_type=None, host_name=None, account_name=None,
                      collaboration_branch=None, repository_name=None, root_folder=None, project_name=None, last_commit_id=None, tenant_id=None,
                      user_assigned_identity_id=None, user_assigned_identity_action=None, user_assigned_identity_in_encryption=None,
-                     use_system_assigned_identity_in_encryption=None, no_wait=False):
+                     use_system_assigned_identity_in_encryption=None, public_network_access=None, no_wait=False):
     encryption = None
     identity = None
     tenant_ids_list = None
@@ -192,8 +192,14 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
                                                                               last_commit_id=last_commit_id,
                                                                               tenant_id=tenant_id)
 
+    if public_network_access is not None:
+        if public_network_access:
+            public_network_access = WorkspacePublicNetworkAccess.ENABLED
+        else:
+            public_network_access = WorkspacePublicNetworkAccess.DISABLED
+
     updated_vnet_settings = ManagedVirtualNetworkSettings(allowed_aad_tenant_ids_for_linking=tenant_ids_list) if allowed_aad_tenant_ids is not None else None
-    workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_administrator_login_password=sql_admin_login_password, encryption=encryption, managed_virtual_network_settings=updated_vnet_settings, workspace_repository_configuration=workspace_repository_configuration, identity=identity)
+    workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_administrator_login_password=sql_admin_login_password, encryption=encryption, managed_virtual_network_settings=updated_vnet_settings, workspace_repository_configuration=workspace_repository_configuration, identity=identity, public_network_access=public_network_access)
     return sdk_no_wait(no_wait, client.begin_update, resource_group_name, workspace_name, workspace_patch_info)
 
 
