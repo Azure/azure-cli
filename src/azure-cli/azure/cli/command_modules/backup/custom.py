@@ -628,15 +628,15 @@ def update_encryption(cmd, client, resource_group_name, vault_name, encryption_k
     vault_properties = VaultProperties(encryption=encryption_data)
     vault = PatchVault(properties=vault_properties)
 
-    # if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name,
-    #                                         "RecoveryServicesModifyEncryptionSettings"):
-    #     # Cross tenant scenario
-    #     if tenant_id is not None:
-    #         client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesClient,
-    #                                          aux_tenants=[tenant_id]).vaults
+    if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name,
+                                            "RecoveryServicesModifyEncryptionSettings"):
+        # Cross tenant scenario
+        if tenant_id is not None:
+            client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesClient,
+                                             aux_tenants=[tenant_id]).vaults
 
-    #     vault.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
-    #         cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesModifyEncryptionSettings")]
+        vault.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
+            cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesModifyEncryptionSettings")]
 
     client.begin_update(resource_group_name, vault_name, vault).result()
 
