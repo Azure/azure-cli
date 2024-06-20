@@ -1658,6 +1658,8 @@ class TestAazArgCompleter(unittest.TestCase):
         schema.bar = AAZResourceLocationArg(
             options=['bar']
         )
+        self.assertEqual(schema.foo._completer, self.custom_completer)
+        self.assertEqual(schema.bar._completer, get_location_completion_list)
 
         args = {}
         for name, field in schema._fields.items():

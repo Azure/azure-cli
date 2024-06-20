@@ -492,21 +492,22 @@ class AAZResourceGroupNameArg(AAZStrArg):
             help="Name of resource group. "
                  "You can configure the default group using `az configure --defaults group=<name>`",
             configured_default='group',
+            completer=None,
             **kwargs):
+        from azure.cli.core.commands.parameters import get_resource_group_completion_list
+        completer = completer or get_resource_group_completion_list
         super().__init__(
             options=options,
             id_part=id_part,
             help=help,
             configured_default=configured_default,
+            completer=completer
             **kwargs
         )
 
     def to_cmd_arg(self, name, **kwargs):
-        from azure.cli.core.commands.parameters import get_resource_group_completion_list
         from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
         arg = super().to_cmd_arg(name, **kwargs)
-        if not arg.completer:
-            arg.completer = get_resource_group_completion_list
         arg.local_context_attribute = LocalContextAttribute(
             name='resource_group_name',
             actions=[LocalContextAction.SET, LocalContextAction.GET],
@@ -523,18 +524,22 @@ class AAZResourceLocationArg(AAZStrArg):
                  "You can configure the default location using `az configure --defaults location=<location>`.",
             fmt=None,
             configured_default='location',
+            completer=None,
             **kwargs):
+        from azure.cli.core.commands.parameters import get_location_completion_list
+
         fmt = fmt or AAZResourceLocationArgFormat()
+        completer = completer or get_location_completion_list
         super().__init__(
             options=options,
             help=help,
             fmt=fmt,
             configured_default=configured_default,
+            completer=completer,
             **kwargs
         )
 
     def to_cmd_arg(self, name, **kwargs):
-        from azure.cli.core.commands.parameters import get_location_completion_list
         from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
         arg = super().to_cmd_arg(name, **kwargs)
         if self._required and \
@@ -547,8 +552,6 @@ class AAZResourceLocationArg(AAZStrArg):
             short_summary += "When not specified, the location of the resource group will be used."
             arg.help = short_summary
 
-        if not arg.completer:
-            arg.completer = get_location_completion_list
         arg.local_context_attribute = LocalContextAttribute(
             name='location',
             actions=[LocalContextAction.SET, LocalContextAction.GET],
@@ -571,19 +574,20 @@ class AAZSubscriptionIdArg(AAZStrArg):
             self, help="Name or ID of subscription. You can configure the default subscription "
                        "using `az account set -s NAME_OR_ID`",
             fmt=None,
+            completer=None,
             **kwargs):
+        from azure.cli.core._completers import get_subscription_id_list
         fmt = fmt or AAZSubscriptionIdArgFormat()
+        completer = completer or get_subscription_id_list
         super().__init__(
             help=help,
             fmt=fmt,
+            completer=completer,
             **kwargs
         )
 
     def to_cmd_arg(self, name, **kwargs):
-        from azure.cli.core._completers import get_subscription_id_list
         arg = super().to_cmd_arg(name, **kwargs)
-        if not arg.completer:
-            arg.completer = get_subscription_id_list
         return arg
 
 
