@@ -967,6 +967,37 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_3.get_enable_managed_identity()
 
+        # custom value
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_managed_identity": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_4.get_enable_managed_identity(), True)
+
+        # custom value
+        ctx_5 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_managed_identity": False,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_5.get_enable_managed_identity(), False)
+        mc_5 = self.models.ManagedCluster(location="test_location", identity=self.models.ManagedClusterIdentity(
+            type="SystemAssigned"
+        ))
+        ctx_5.attach_mc(mc_5)
+        self.assertEqual(ctx_5.get_enable_managed_identity(), False)
+
     def test_get_skip_subnet_role_assignment(self):
         # default
         ctx_1 = AKSManagedClusterContext(

@@ -11,6 +11,7 @@ from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
@@ -23,12 +24,11 @@ TEST_PWSH_SCRIPT_INLINE = [
     '"echo Azure-Image-Builder-Was-Here  > c:\\buildActions\\buildActionsOutput.txt"'
 ]
 
-LINUX_IMAGE_SOURCE = "Canonical:UbuntuServer:18.04-LTS:18.04.201808140"
-WIN_IMAGE_SOURCE = "MicrosoftWindowsServer:WindowsServer:2019-Datacenter:2019.0.20190214"
+LINUX_IMAGE_SOURCE = "Canonical:UbuntuServer:18_04-LTS-GEN2:latest"
+WIN_IMAGE_SOURCE = "MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest"
 INDEX_FILE = "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/exampleArtifacts/buildArtifacts/index.html"
 
 
-@unittest.skip("https://github.com/Azure/azure-cli/issues/28909")
 class ImageTemplateTest(ScenarioTest):
     def _assign_ib_permissions(self, rg):   # need to manually give IB service permission to add image to grou
         subscription_id = self.get_subscription_id()
@@ -146,7 +146,7 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} {script} --image-source {img_src} --identity {ide} --vnet {vnet} --subnet {subnet} --vm-size Standard_D1_v2 --os-disk-size 20 --defer',
                  checks=[
                      self.check('properties.source.offer', 'UbuntuServer'), self.check('properties.source.publisher', 'Canonical'),
-                     self.check('properties.source.sku', '18.04-LTS'), self.check('properties.source.version', '18.04.201808140'),
+                     self.check('properties.source.sku', '18_04-LTS-GEN2'), self.check('properties.source.version', 'latest'),
                      self.check('properties.source.type', 'PlatformImage'),
                      self.check('length(properties.customize)', 2),
 
@@ -187,7 +187,7 @@ class ImageTemplateTest(ScenarioTest):
                  checks=[
                      self.check('name', '{tmpl_01}'), self.check('provisioningState', 'Succeeded'),
                      self.check('source.offer', 'UbuntuServer'), self.check('source.publisher', 'Canonical'),
-                     self.check('source.sku', '18.04-LTS'), self.check('source.version', '18.04.201808140'),
+                     self.check('source.sku', '18_04-LTS-GEN2'), self.check('source.version', 'latest'),
                      self.check('source.type', 'PlatformImage'),
                      self.check('length(customize)', 2),
                      self.check('length(distribute)', 2),
@@ -469,7 +469,6 @@ class ImageTemplateTest(ScenarioTest):
         self.assertTrue(parsed['name'], self.kwargs['gallery'])
         self.assertTrue(parsed['child_name_1'], self.kwargs['sig1'])
 
-    # @record_only()
     @ResourceGroupPreparer(name_prefix='img_tmpl_managed')
     def test_image_build_managed_image(self, resource_group, resource_group_location):
         self._identity_role(resource_group)
@@ -508,8 +507,7 @@ class ImageTemplateTest(ScenarioTest):
         self.assertEqual(img_tmpl['source']['imageId'].lower(), self.kwargs['image_id'].lower())
         self.assertEqual(img_tmpl['source']['type'].lower(), 'managedimage')
 
-    # @record_only()
-    @ResourceGroupPreparer(name_prefix='img_tmpl_sig')
+    @ResourceGroupPreparer(name_prefix='img_tmpl_sig', location='eastus')
     def test_image_build_shared_image(self, resource_group, resource_group_location):
         self._identity_role(resource_group)
 
@@ -530,15 +528,15 @@ class ImageTemplateTest(ScenarioTest):
 
         self.cmd('image builder create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --identity {ide} --defer')
         self.cmd('image builder output add -n {tmpl} -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1}'
-                 ' --gallery-replication-regions westus --defer',
+                 ' --gallery-replication-regions eastus --defer',
                  checks=[
-                     self.check('properties.distribute[0].replicationRegions[0]', 'westus'),
+                     self.check('properties.distribute[0].replicationRegions[0]', 'eastus'),
                      self.check('properties.distribute[0].runOutputName', '{sig1}')
                  ])
 
         # send put request using cached template object
         self.cmd('image builder update -n {tmpl} -g {rg}', checks=[
-            self.check('distribute[0].replicationRegions[0]', 'westus'),
+            self.check('distribute[0].replicationRegions[0]', 'eastus'),
             self.check('distribute[0].runOutputName', '{sig1}')
         ])
 
@@ -562,6 +560,7 @@ class ImageTemplateTest(ScenarioTest):
         self.assertEqual(img_tmpl['source']['imageVersionId'].lower(), self.kwargs['image_id'].lower())
         self.assertEqual(img_tmpl['source']['type'].lower(), 'sharedimageversion')
 
+    @AllowLargeResponse(99999)
     @ResourceGroupPreparer(name_prefix='img_tmpl_versioning_')
     def test_image_build_output_versioning(self, resource_group):
         self._identity_role(resource_group)
@@ -627,7 +626,7 @@ class ImageTemplateTest(ScenarioTest):
         self._identity_role(resource_group)
 
         self.kwargs.update({
-            'img_src': 'Canonical:UbuntuServer:18.04-LTS:latest',
+            'img_src': LINUX_IMAGE_SOURCE,
             'tmpl': 'template01',
             'script': TEST_SHELL_SCRIPT_URL,
             'img': 'new_img',

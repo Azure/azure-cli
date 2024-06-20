@@ -9,7 +9,7 @@ from azure.mgmt.cdn.models import (AfdCertificateType, AfdMinimumTlsVersion)
 
 
 class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_custom_domain_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
         self.afd_custom_domain_list_cmd(resource_group, profile_name, expect_failure=True)

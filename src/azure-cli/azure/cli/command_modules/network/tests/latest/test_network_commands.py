@@ -2140,6 +2140,7 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
             'rule': 'rule1',
             'rule2': 'rule2',
             'rule3': 'rule3',
+            'rule4': 'rule4',
             'var': 'http_req_Authorization'
         })
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
@@ -2181,6 +2182,30 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
 
         # ISSUE#17373 create rewrite rule without
         self.cmd('network application-gateway rewrite-rule create -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule3} --sequence 123 --modified-path "/" --no-wait')
+
+        # manage rewrite rules with response-header-configurations
+        self.cmd('network application-gateway rewrite-rule create -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule4} '
+                 '--sequence 123 --response-header-configurations [{{"header-name":Set-Cookie,"header-value":hat1,"header-value-matcher":{{"ignore-case":true,"negate":true,"pattern":"(https?)\/\/.*azurewebsites\.net(.*)$"}}}}] --request-headers foo=bar '
+                 '--modified-path "/def" --modified-query-string "a=b&c=d%20f"',
+                 checks=[
+                     self.check('actionSet.responseHeaderConfigurations[0].headerName', 'Set-Cookie'),
+                     self.check('actionSet.responseHeaderConfigurations[0].headerValue', 'hat1'),
+                     self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.ignoreCase', True),
+                     self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.negate', True),
+                     self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.pattern', "(https?)\/\/.*azurewebsites\.net(.*)$"),
+                 ])
+        self.cmd(
+            'network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule4} '
+            '--sequence 123 --response-header-configurations [{{"header-name":Set-Cookie,"header-value":hat2,"header-value-matcher":{{"ignore-case":true,"negate":false,"pattern":"(https?)\/\/.*azurewebsites\.net(.*)$"}}}}] --request-headers foo=bar '
+            '--modified-path "/def" --modified-query-string "a=b&c=d%20f"',
+            checks=[
+                self.check('actionSet.responseHeaderConfigurations[0].headerName', 'Set-Cookie'),
+                self.check('actionSet.responseHeaderConfigurations[0].headerValue', 'hat2'),
+                self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.ignoreCase', True),
+                self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.negate', False),
+                self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.pattern',
+                           "(https?)\/\/.*azurewebsites\.net(.*)$"),
+            ])
 
         # manage rewrite rule conditions
         self.cmd('network application-gateway rewrite-rule condition create -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var} --pattern "^Bearer" --ignore-case false --negate --no-wait')
@@ -2569,13 +2594,14 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
         # randomly update some properties
         self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
-                 '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention',
+                 '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention --js-cookie-exp-time 100',
                  checks=[
                      self.check('policySettings.fileUploadLimitInMb', 64),
                      self.check('policySettings.maxRequestBodySizeInKb', 128),
                      self.check('policySettings.mode', 'Prevention'),
                      self.check('policySettings.requestBodyCheck', False),
-                     self.check('policySettings.state', 'Enabled')
+                     self.check('policySettings.state', 'Enabled'),
+                     self.check('policySettings.jsChallengeCookieExpirationInMins', 100)
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_setting_v2_')
@@ -3622,10 +3648,28 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         self.cmd('network cross-region-lb create -g {rg} -n {lb}')
 
         self.cmd('network cross-region-lb address-pool create -g {rg} --lb-name {lb} -n {address_pool} '
-                 '--backend-address name={backend_address1} frontend-ip-address={regional_lb_frontend_ip_address1} ',
-                 checks=self.check('name', self.kwargs['address_pool']))
+                 '--backend-address name={backend_address1} frontend-ip-address={regional_lb_frontend_ip_address1} '
+                 '--admin-state Up',
+                 checks=[self.check('name', self.kwargs['address_pool']),
+                         self.check('loadBalancerBackendAddresses[0].adminState', 'Up'),
+                         ])
 
-        self.cmd('network cross-region-lb address-pool address add -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2} --frontend-ip-address {regional_lb_frontend_ip_address2}', checks=self.check('name', self.kwargs['address_pool']))
+        self.cmd('network cross-region-lb address-pool update -g {rg} --lb-name {lb} -n {address_pool} '
+                 '--backend-address name={backend_address1} frontend-ip-address={regional_lb_frontend_ip_address1} admin-state=Down',
+                 checks=[self.check('name', self.kwargs['address_pool']),
+                         self.check('loadBalancerBackendAddresses[0].adminState', 'Down'),
+                         ])
+
+        self.cmd('network cross-region-lb address-pool address add -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2} --frontend-ip-address {regional_lb_frontend_ip_address2} --admin-state Down',
+                 checks=[self.check('name', self.kwargs['address_pool']),
+                         self.check('loadBalancerBackendAddresses[1].adminState', 'Down'),
+                         ])
+
+        self.cmd(
+            'network cross-region-lb address-pool address update -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2} --admin-state Up',
+            checks=[self.check('name', self.kwargs['address_pool']),
+                    self.check('loadBalancerBackendAddresses[1].adminState', 'Up'),
+                    ])
 
         self.cmd('network cross-region-lb address-pool address remove -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2}')
 

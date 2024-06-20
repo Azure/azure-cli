@@ -3179,7 +3179,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_osimage_notification=None, max_surge=None, disable_integrity_monitoring_autoupgrade=False,
                 enable_hibernation=None, enable_proxy_agent=None, proxy_agent_mode=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
-                enable_resilient_creation=None, enable_resilient_deletion=None):
+                enable_resilient_creation=None, enable_resilient_deletion=None,
+                additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
+                enable_user_redeploy_scheduled_events=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3489,7 +3491,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             security_posture_reference_id=security_posture_reference_id,
             security_posture_reference_exclude_extensions=security_posture_reference_exclude_extensions,
             enable_resilient_vm_creation=enable_resilient_creation,
-            enable_resilient_vm_deletion=enable_resilient_deletion)
+            enable_resilient_vm_deletion=enable_resilient_deletion,
+            additional_scheduled_events=additional_scheduled_events,
+            enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
+            enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3705,7 +3710,7 @@ def get_vmss_modified(cmd, resource_group_name, name, instance_id=None, security
         return vms
 
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, name)
-    if security_type is not None:
+    if security_type == 'TrustedLaunch':
         _check_vmss_hyper_v_generation(cmd.cli_ctx, vmss)
     # To avoid unnecessary permission check of image
     if hasattr(vmss, "virtual_machine_profile") and vmss.virtual_machine_profile \
@@ -3836,15 +3841,22 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
     return [r for r in result if 'ipAddress' in r and r['ipAddress']]
 
 
-def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
+def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None,
+                 force_update_os_disk_for_ephemeral=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids:
         VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
         instance_ids = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
         return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage_all, resource_group_name,
                            vm_scale_set_name, instance_ids)
-
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage, resource_group_name, vm_scale_set_name)
+    if force_update_os_disk_for_ephemeral is not None:
+        VirtualMachineScaleSetReimageParameters = cmd.get_models('VirtualMachineScaleSetReimageParameters')
+        vm_scale_set_reimage_input = VirtualMachineScaleSetReimageParameters(
+            force_update_os_disk_for_ephemeral=force_update_os_disk_for_ephemeral)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage,
+                           resource_group_name, vm_scale_set_name, vm_scale_set_reimage_input)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage,
+                       resource_group_name, vm_scale_set_name)
 
 
 def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
@@ -3919,7 +3931,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 security_type=None, enable_proxy_agent=None, proxy_agent_mode=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                 max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None,
-                ephemeral_os_disk=None, ephemeral_os_disk_option=None, **kwargs):
+                ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
+                enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3986,6 +3999,27 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
                                          enable=enable_terminate_notification)
 
+    if additional_scheduled_events is not None or \
+            enable_user_reboot_scheduled_events is not None or enable_user_redeploy_scheduled_events is not None:
+        if vmss.scheduled_events_policy is None:
+            ScheduledEventsPolicy = cmd.get_models('ScheduledEventsPolicy')
+            UserInitiatedRedeploy = cmd.get_models('UserInitiatedRedeploy')
+            UserInitiatedReboot = cmd.get_models('UserInitiatedReboot')
+            EventGridAndResourceGraph = cmd.get_models('EventGridAndResourceGraph')
+            ScheduledEventsAdditionalPublishingTargets = cmd.get_models('ScheduledEventsAdditionalPublishingTargets')
+            vmss.scheduled_events_policy = ScheduledEventsPolicy()
+            vmss.scheduled_events_policy.scheduled_events_additional_publishing_targets = \
+                ScheduledEventsAdditionalPublishingTargets()
+            vmss.scheduled_events_policy.scheduled_events_additional_publishing_targets.\
+                event_grid_and_resource_graph = EventGridAndResourceGraph()
+            vmss.scheduled_events_policy.user_initiated_reboot = UserInitiatedReboot()
+            vmss.scheduled_events_policy.user_initiated_redeploy = UserInitiatedRedeploy()
+        vmss.scheduled_events_policy.scheduled_events_additional_publishing_targets.\
+            event_grid_and_resource_graph.enable = additional_scheduled_events
+        vmss.scheduled_events_policy.user_initiated_redeploy.automatically_approve = \
+            enable_user_redeploy_scheduled_events
+        vmss.scheduled_events_policy.user_initiated_reboot.automatically_approve = enable_user_reboot_scheduled_events
+
     if enable_osimage_notification is not None:
         if vmss.virtual_machine_profile.scheduled_events_profile is None:
             vmss.virtual_machine_profile.scheduled_events_profile = cmd.get_models('ScheduledEventsProfile')()
@@ -4038,14 +4072,22 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if security_type is not None or enable_secure_boot is not None or enable_vtpm is not None:
         security_profile = vmss.virtual_machine_profile.security_profile
         prev_security_type = security_profile.security_type if security_profile else None
-        # At present, `SecurityType` only has option `TrustedLaunch`
-        if security_type is not None and prev_security_type != security_type:
+        # At present, `SecurityType` has options `TrustedLaunch` and `Standard`
+        if security_type == 'TrustedLaunch' and prev_security_type != security_type:
             vmss.virtual_machine_profile.security_profile = {
                 'securityType': security_type,
                 'uefiSettings': {
                     'secureBootEnabled': enable_secure_boot if enable_secure_boot is not None else False,
                     'vTpmEnabled': enable_vtpm if enable_vtpm is not None else True
                 }
+            }
+        elif security_type == 'Standard':
+            if prev_security_type == 'TrustedLaunch':
+                logger.warning('Turning off Trusted launch disables foundational security for your VMs. '
+                               'For more information, visit https://aka.ms/TrustedLaunch')
+            vmss.virtual_machine_profile.security_profile = {
+                'securityType': security_type,
+                'uefiSettings': None
             }
         else:
             vmss.virtual_machine_profile.security_profile = {'uefiSettings': {
@@ -4164,6 +4206,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             resiliency_policy.resilient_vm_creation_policy = {'enabled': enable_resilient_creation}
         if enable_resilient_deletion is not None:
             resiliency_policy.resilient_vm_deletion_policy = {'enabled': enable_resilient_deletion}
+
+    if zones is not None:
+        vmss.zones = zones
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
@@ -5324,9 +5369,9 @@ def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_na
 
 # region install patches
 def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_duration, reboot_setting, classifications_to_include_win=None, classifications_to_include_linux=None, kb_numbers_to_include=None, kb_numbers_to_exclude=None,
-                       exclude_kbs_requiring_reboot=None, package_name_masks_to_include=None, package_name_masks_to_exclude=None, no_wait=False):
+                       exclude_kbs_requiring_reboot=None, package_name_masks_to_include=None, package_name_masks_to_exclude=None, max_patch_publish_date=None, no_wait=False):
     VMInstallPatchesParameters, WindowsParameters, LinuxParameters = cmd.get_models('VirtualMachineInstallPatchesParameters', 'WindowsParameters', 'LinuxParameters')
-    windows_parameters = WindowsParameters(classifications_to_include=classifications_to_include_win, kb_numbers_to_inclunde=kb_numbers_to_include, kb_numbers_to_exclude=kb_numbers_to_exclude, exclude_kbs_requirig_reboot=exclude_kbs_requiring_reboot)
+    windows_parameters = WindowsParameters(classifications_to_include=classifications_to_include_win, kb_numbers_to_inclunde=kb_numbers_to_include, kb_numbers_to_exclude=kb_numbers_to_exclude, exclude_kbs_requirig_reboot=exclude_kbs_requiring_reboot, max_patch_publish_date=max_patch_publish_date)
     linux_parameters = LinuxParameters(classifications_to_include=classifications_to_include_linux, package_name_masks_to_include=package_name_masks_to_include, package_name_masks_to_exclude=package_name_masks_to_exclude)
     install_patches_input = VMInstallPatchesParameters(maximum_duration=maximum_duration, reboot_setting=reboot_setting, linux_parameters=linux_parameters, windows_parameters=windows_parameters)
 

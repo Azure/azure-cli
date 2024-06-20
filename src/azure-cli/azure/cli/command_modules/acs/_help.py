@@ -351,7 +351,7 @@ parameters:
     short-summary: Comma-separated list of authorized apiserver IP ranges. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
   - name: --enable-managed-identity
     type: bool
-    short-summary: Using a system assigned managed identity to manage cluster resource group.
+    short-summary: Using a system assigned managed identity to manage cluster resource group. You can explicitly specify "--service-principal" and "--client-secret" to disable managed identity, otherwise it will be enabled.
   - name: --assign-identity
     type: string
     short-summary: Specify an existing user assigned identity for control plane's usage in order to manage cluster resource group.
