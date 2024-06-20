@@ -171,11 +171,21 @@ class AzCli(CLI):
     def _configure_style(self):
         from azure.cli.core.util import in_cloud_console
         from azure.cli.core.style import format_styled_text, get_theme_dict, Style
+        import platform
 
-        # Configure Style
+        # Most terminals, like those on Windows, Ubuntu use dark background
+        default_theme = 'dark'
+
+        if in_cloud_console():
+            # Cloud Shell has its own RGB-defined theme
+            default_theme = 'cloud-shell'
+        elif platform.system() == 'Darwin':
+            # MacOS's terminal by default has white background
+            # https://github.com/Azure/azure-cli/issues/18298#issuecomment-1263529261
+            default_theme = 'light'
+
         if self.enable_color:
-            theme = self.config.get('core', 'theme',
-                                    fallback="cloud-shell" if in_cloud_console() else "dark")
+            theme = self.config.get('core', 'theme', fallback=default_theme)
 
             theme_dict = get_theme_dict(theme)
 
