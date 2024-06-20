@@ -5688,7 +5688,8 @@ def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     app_is_linux_webapp = is_linux_webapp(app)
-    if not app_is_linux_webapp:
+    # TODO: enable tracking for slot deployments again once site warmup is fixed for slots
+    if not app_is_linux_webapp or slot is not None:
         response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                                      slot, timeout)
     else:
