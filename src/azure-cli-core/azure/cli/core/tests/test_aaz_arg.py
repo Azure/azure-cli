@@ -1645,8 +1645,10 @@ class TestAazArgCompleter(unittest.TestCase):
         self.assertEqual(args['foo'].completer, self.custom_completer)
 
     def test_completer_override(self):
-        from azure.cli.core.aaz._arg import AAZResourceLocationArg, AAZArgumentsSchema, AAZUnregisteredArg
+        from azure.cli.core.aaz._arg import (AAZResourceLocationArg, AAZArgumentsSchema, AAZUnregisteredArg,
+                                             AAZSubscriptionIdArg)
         from azure.cli.core.commands.parameters import get_location_completion_list
+        from azure.cli.core._completers import get_subscription_id_list
 
         schema = AAZArgumentsSchema()
         v = schema()
@@ -1658,8 +1660,14 @@ class TestAazArgCompleter(unittest.TestCase):
         schema.bar = AAZResourceLocationArg(
             options=['bar']
         )
+        schema.sub = AAZSubscriptionIdArg(
+            options=["--subscription-id"],
+            help="subscription id",
+            required=True,
+            id_part="subscription")
         self.assertEqual(schema.foo._completer, self.custom_completer)
         self.assertEqual(schema.bar._completer, get_location_completion_list)
+        self.assertEqual(schema.sub._completer, get_subscription_id_list)
 
         args = {}
         for name, field in schema._fields.items():
@@ -1670,6 +1678,7 @@ class TestAazArgCompleter(unittest.TestCase):
                 continue
         self.assertEqual(args['foo'].completer, self.custom_completer)
         self.assertEqual(args['bar'].completer, get_location_completion_list)
+        self.assertEqual(args['sub'].completer, get_subscription_id_list)
         schema.bar._completer = self.custom_completer
         new_arg = schema.bar.to_cmd_arg('bar')
         self.assertEqual(new_arg.completer, self.custom_completer)

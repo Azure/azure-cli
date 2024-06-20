@@ -501,7 +501,7 @@ class AAZResourceGroupNameArg(AAZStrArg):
             id_part=id_part,
             help=help,
             configured_default=configured_default,
-            completer=completer
+            completer=completer,
             **kwargs
         )
 
@@ -585,10 +585,6 @@ class AAZSubscriptionIdArg(AAZStrArg):
             completer=completer,
             **kwargs
         )
-
-    def to_cmd_arg(self, name, **kwargs):
-        arg = super().to_cmd_arg(name, **kwargs)
-        return arg
 
 
 class AAZFileArg(AAZStrArg):
