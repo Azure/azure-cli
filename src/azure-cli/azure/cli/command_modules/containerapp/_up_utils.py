@@ -56,8 +56,7 @@ from ._utils import (
 
 )
 
-from ._constants import (MAXIMUM_SECRET_LENGTH,
-                         LOG_ANALYTICS_RP,
+from ._constants import (LOG_ANALYTICS_RP,
                          CONTAINER_APPS_RP,
                          ACR_IMAGE_SUFFIX,
                          ACR_TASK_TEMPLATE,
@@ -767,12 +766,6 @@ def _validate_up_args(cmd, source, image, repo, registry_server):
             "Cannot use --source and --repo togther. "
             "Can either deploy from a local directory or a Github repo"
         )
-    if repo and registry_server and "azurecr.io" in registry_server:
-        parsed = urlparse(registry_server)
-        registry_name = (parsed.netloc if parsed.scheme else parsed.path).split(".")[0]
-        if registry_name and len(registry_name) > MAXIMUM_SECRET_LENGTH:
-            raise ValidationError(f"--registry-server ACR name must be less than {MAXIMUM_SECRET_LENGTH} "
-                                  "characters when using --repo")
 
 
 def _reformat_image(source, repo, image):
