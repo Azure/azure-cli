@@ -6605,9 +6605,6 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
             self.check('name', 'barracudasdwanrelease')
         ])
 
-        self.cmd('az network virtual-appliance restart --resource-group {rg} --network-virtual-appliance-name {name} --subscription {subscriptionId}')
-        self.cmd('az network virtual-appliance restart --resource-group {rg} --network-virtual-appliance-name {name} --subscription {subscriptionId} --instance-ids 0')
-
         self.cmd('network virtual-appliance site create -n {site} -g {rg} --appliance-name {name} --address-prefix 10.0.0.0/24 --allow --default --optimize', checks=[
             self.check('name', '{site}'),
             self.check('o365Policy.breakOutCategories.allow', True),
@@ -6762,6 +6759,58 @@ class NetworkVirtualApplianceIdentityScenarioTest(ScenarioTest):
                      self.check('identity.type', 'UserAssigned')
                  ])
         self.cmd('network virtual-appliance delete -n {nva_name4} -g {rg} -y')
+
+class NetworkVirtualApplianceRestartScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance_restart')
+    @AllowLargeResponse(size_kb=9999)
+    def test_network_virtual_appliance_restart(self, resource_group):
+        subscriptionId = self.get_subscription_id()
+        self.kwargs.update({
+            'vwan': 'clitestvwan',
+            'vhub': 'clitestvhub',
+            'name': 'cli-virtual-appliance',
+            'site': 'cli-site',
+            'blob': 'https://azurecliprod.blob.core.windows.net/cli-extensions/account-0.1.0-py2.py3-none-any.whl',
+            'rg': resource_group
+        })
+
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard')
+
+        routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+        retry_count = 0
+        while routing_state != 'Provisioned':
+            if retry_count == 20:
+                break
+            retry_count += 1
+            sleep(360)
+            routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+
+        self.cmd('network virtual-appliance create -n {name} -g {rg} --vhub {vhub} --vendor "barracudasdwanrelease" '
+                 '--scale-unit 2 -v latest --asn 10000 --init-config "echo $abc" '
+                 '--boot-blobs {blob} {blob} --cloud-blobs {blob} {blob}',
+                 checks=[
+                     self.check('name', '{name}'),
+                     self.check('length(bootStrapConfigurationBlobs)', 2),
+                     self.check('length(cloudInitConfigurationBlobs)', 2),
+                     self.check('virtualApplianceAsn', 10000),
+                     self.check('cloudInitConfiguration', "echo $abc")
+                 ])
+        self.cmd('network virtual-appliance update -n {name} -g {rg} --asn 20000 --init-config "echo $abcd"', checks=[
+            self.check('virtualApplianceAsn', 20000),
+            self.check('cloudInitConfiguration', "echo $abcd")
+        ])
+        self.cmd('network virtual-appliance show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('length(bootStrapConfigurationBlobs)', 2),
+            self.check('length(cloudInitConfigurationBlobs)', 2),
+            self.check('virtualApplianceAsn', 20000),
+            self.check('cloudInitConfiguration', "echo $abcd")
+        ])
+        instance_ids = "0"
+        self.cmd('az network virtual-appliance restart --resource-group {rg} --network-virtual-appliance-name {name} --subscription {subscriptionId}')
+        self.cmd('az network virtual-appliance restart --resource-group {rg} --network-virtual-appliance-name {name} --subscription {subscriptionId} --instance-ids {instance_ids}')
 
 class NetworkVirtualApplianceConnectionScenarioTest(ScenarioTest):
     @live_only()
