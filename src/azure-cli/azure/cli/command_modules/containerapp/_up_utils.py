@@ -750,7 +750,7 @@ def _get_ingress_and_target_port(ingress, target_port, dockerfile_content: "list
     return ingress, target_port
 
 
-def _validate_up_args(cmd, source, image, repo, registry_server):
+def _validate_up_args(cmd, source, image, repo):
     disallowed_params = ["--only-show-errors", "--output", "-o"]
     command_args = cmd.cli_ctx.data.get("safe_params", [])
     for a in disallowed_params:
