@@ -7,6 +7,7 @@ CONNECTED_ENVIRONMENT_TYPE = "connected"
 MANAGED_ENVIRONMENT_RESOURCE_TYPE = "managedEnvironments"
 CONNECTED_ENVIRONMENT_RESOURCE_TYPE = "connectedEnvironments"
 
+MAXIMUM_ACR_LENGTH = 121
 MAXIMUM_CONTAINER_APP_NAME_LENGTH = 32
 
 SHORT_POLLING_INTERVAL_SECS = 3
@@ -47,7 +48,6 @@ UPDATING_STATUS = "Updating"
 
 BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME = "blob-storage-token-store-sasurl-secret"
 
-MAXIMUM_ACR_LENGTH = 121
 MICROSOFT_SECRET_SETTING_NAME = "microsoft-provider-authentication-secret"
 FACEBOOK_SECRET_SETTING_NAME = "facebook-provider-authentication-secret"
 GITHUB_SECRET_SETTING_NAME = "github-provider-authentication-secret"
