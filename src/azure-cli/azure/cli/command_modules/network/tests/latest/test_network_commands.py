@@ -6557,7 +6557,6 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance')
     @AllowLargeResponse()
     def test_network_virtual_appliance(self, resource_group):
-        subscriptionId = self.get_subscription_id()
         self.kwargs.update({
             'vwan': 'clitestvwan',
             'vhub': 'clitestvhub',
