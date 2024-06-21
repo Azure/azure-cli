@@ -576,14 +576,14 @@ def _validate_ip(ips):
 
 def _validate_ranges_in_ip(ip):
     parsed_ip = ip.split('.')
-    if len(parsed_ip) == 4 and _valid_range(int(parsed_ip[0])) and _valid_range(int(parsed_ip[1])) \
-       and _valid_range(int(parsed_ip[2])) and _valid_range(int(parsed_ip[3])):
+    if len(parsed_ip) == 4 and _valid_range(parsed_ip[0]) and _valid_range(parsed_ip[1]) \
+       and _valid_range(parsed_ip[2]) and _valid_range(parsed_ip[3]):
         return True
     return False
 
 
 def _valid_range(addr_range):
-    if 0 <= addr_range <= 255:
+    if addr_range.isdigit() and 0 <= int(addr_range) <= 255:
         return True
     return False
 
