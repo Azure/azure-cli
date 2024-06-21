@@ -22,7 +22,7 @@ class Restart(AAZCommand):
     :example: Restart one network virtual appliance VM
         az network virtual-appliance restart --resource-group rg1 --network-virtual-appliance-name nvaName --subscription subscriptionId --instance-ids 0
 
-    :example: Restart multiple network virtual appliance VMs
+    :example: Restart multiple network virtual appliance VMs in parallel
         az network virtual-appliance restart --resource-group rg1 --network-virtual-appliance-name nva --subscription subscriptionId --instance-ids 0 2
     """
 
