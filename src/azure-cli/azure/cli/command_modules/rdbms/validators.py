@@ -597,6 +597,8 @@ def virtual_endpoint_name_validator(ns):
 
 
 def firewall_rule_name_validator(ns):
+    if not ns.firewall_rule_name:
+        return
     if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,126}[_a-zA-Z0-9]$', ns.firewall_rule_name):
         raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
                               "Additionally, the name of the firewall rule must be at least 3 characters "
