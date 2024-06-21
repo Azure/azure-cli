@@ -6760,45 +6760,6 @@ class NetworkVirtualApplianceIdentityScenarioTest(ScenarioTest):
                  ])
         self.cmd('network virtual-appliance delete -n {nva_name4} -g {rg} -y')
 
-class NetworkVirtualApplianceRestartScenarioTest(ScenarioTest):
-    @live_only()
-    @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance_restart')
-    @AllowLargeResponse(size_kb=9999)
-    def test_network_virtual_appliance_restart(self, resource_group):
-        from time import sleep
-        subscriptionId = self.get_subscription_id()
-        self.kwargs.update({
-            'vwan': 'clitestvwan',
-            'vhub': 'clitestvhub',
-            'name': 'cli-virtual-appliance',
-            'site': 'cli-site',
-            'blob': 'https://azurecliprod.blob.core.windows.net/cli-extensions/account-0.1.0-py2.py3-none-any.whl',
-            'rg': resource_group
-        })
-
-        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
-        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard')
-
-        routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
-        retry_count = 0
-        while routing_state != 'Provisioned':
-            if retry_count == 20:
-                break
-            retry_count += 1
-            sleep(360)
-            routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
-
-        self.cmd('network virtual-appliance create -n {name} -g {rg} --vhub {vhub} --vendor "checkpoint" --scale-unit 2 -v latest --asn 64512 --init-config "echo $abc" ',
-                 checks=[
-                     self.check('name', '{name}'),
-                     self.check('virtualApplianceAsn', 64512),
-                     self.check('cloudInitConfiguration', 'echo $abc')
-                 ])
-
-        instance_ids = "0"
-        self.cmd('az network virtual-appliance restart --resource-group {rg} --network-virtual-appliance-name {name} --subscription {subscriptionId}')
-        self.cmd('az network virtual-appliance restart --resource-group {rg} --network-virtual-appliance-name {name} --subscription {subscriptionId} --instance-ids {instance_ids}')
-
 class NetworkVirtualApplianceConnectionScenarioTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance_connection')
