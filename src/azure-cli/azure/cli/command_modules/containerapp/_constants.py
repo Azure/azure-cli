@@ -47,7 +47,7 @@ UPDATING_STATUS = "Updating"
 
 BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME = "blob-storage-token-store-sasurl-secret"
 
-MAXIMUM_ACR_LENGTH = 126
+MAXIMUM_ACR_LENGTH = 121
 MICROSOFT_SECRET_SETTING_NAME = "microsoft-provider-authentication-secret"
 FACEBOOK_SECRET_SETTING_NAME = "facebook-provider-authentication-secret"
 GITHUB_SECRET_SETTING_NAME = "github-provider-authentication-secret"
