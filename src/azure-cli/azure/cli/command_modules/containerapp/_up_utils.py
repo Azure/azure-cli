@@ -750,7 +750,7 @@ def _get_ingress_and_target_port(ingress, target_port, dockerfile_content: "list
     return ingress, target_port
 
 
-def _validate_up_args(cmd, source, image, repo):
+def _validate_up_args(cmd, source, image, repo, registry_server):
     disallowed_params = ["--only-show-errors", "--output", "-o"]
     command_args = cmd.cli_ctx.data.get("safe_params", [])
     for a in disallowed_params:
@@ -767,6 +767,12 @@ def _validate_up_args(cmd, source, image, repo):
             "Can either deploy from a local directory or a Github repo"
         )
 
+    if repo and registry_server and "azurecr.io" in registry_server:
+        parsed = urlparse(registry_server)
+        registry_name = (parsed.netloc if parsed.scheme else parsed.path).split(".")[0]
+        if registry_name and len(registry_name) > MAXIMUM_SECRET_LENGTH:
+            raise ValidationError(f"--registry-server ACR name must be less than 50 "
+                                  "characters when using --repo")
 
 def _reformat_image(source, repo, image):
     if source and (image or repo):
