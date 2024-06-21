@@ -777,6 +777,7 @@ def _validate_up_args(cmd, source, image, repo, registry_server):
             raise ValidationError(f"--registry-server ACR name must be less than {MAXIMUM_ACR_LENGTH} "
                                   "characters when using --repo")
 
+
 def _reformat_image(source, repo, image):
     if source and (image or repo):
         image = image.split("/")[-1]  # if link is given
