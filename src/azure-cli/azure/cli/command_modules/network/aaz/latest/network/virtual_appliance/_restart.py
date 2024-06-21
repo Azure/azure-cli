@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class Restart(AAZCommand):
     """Restarts one or more VMs belonging to the specified Network Virtual Appliance.
 
-    The restart network virtual appliance (NVA) command restarts the virtual machine instances associated with an NVA. Restarting all or multiple VM instances will restart the VMs in parallel.
+    Restarting all or multiple VM instances will restart the VMs in parallel.
 
     :example: Restart one network virtual appliance VM
         az network virtual-appliance restart --resource-group rg1 --network-virtual-appliance-name nvaName --subscription subscriptionId --instance-ids 0
@@ -67,7 +67,7 @@ class Restart(AAZCommand):
         _args_schema.instance_ids = AAZListArg(
             options=["--instance-ids"],
             arg_group="NetworkVirtualApplianceInstanceIds",
-            help="The network virtual appliance (NVA) instance ids. Specifying more than one NVA instance id will result in the operation being performed on the corresponding virtual machines parallelly.",
+            help="Space-separated list of IDs (ex: 1 2 3 ...). Specifying more than one NVA instance id will result in the operation being performed on the corresponding virtual machines parallelly.",
         )
 
         instance_ids = cls._args_schema.instance_ids

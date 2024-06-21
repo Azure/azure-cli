@@ -6788,9 +6788,9 @@ class NetworkVirtualApplianceRestartScenarioTest(ScenarioTest):
             sleep(360)
             routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
 
-        self.cmd('network virtual-appliance create -n {nva_name4} -g {rg} --vhub {vhub} --vendor "checkpoint" --scale-unit 2 -v latest --asn 64512 --init-config "echo $abc" ',
+        self.cmd('network virtual-appliance create -n {name} -g {rg} --vhub {vhub} --vendor "checkpoint" --scale-unit 2 -v latest --asn 64512 --init-config "echo $abc" ',
                  checks=[
-                     self.check('name', '{nva_name4}'),
+                     self.check('name', '{name}'),
                      self.check('virtualApplianceAsn', 64512),
                      self.check('cloudInitConfiguration', 'echo $abc')
                  ])
