@@ -771,6 +771,8 @@ def _validate_up_args(cmd, source, image, repo, registry_server):
     if repo and registry_server and "azurecr.io" in registry_server:
         parsed = urlparse(registry_server)
         registry_name = (parsed.netloc if parsed.scheme else parsed.path).split(".")[0]
+        # The length limit of secret name is 253, we use {registry_name}azurecrio-{acr-username} as the registry's secret name.
+        # The value of {acr-username} is registry_name. So the length of registry_name need to <= 121
         if registry_name and len(registry_name) > MAXIMUM_ACR_LENGTH:
             raise ValidationError(f"--registry-server ACR name must be less than {MAXIMUM_ACR_LENGTH} "
                                   "characters when using --repo")
