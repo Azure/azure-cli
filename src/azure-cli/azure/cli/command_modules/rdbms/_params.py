@@ -687,6 +687,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
             c.argument('backup_byok_key', arg_type=backup_key_arg_type)
+            c.argument('public_access', arg_type=public_access_update_arg_type)
             if command_group == 'mysql':
                 c.argument('auto_grow', arg_type=auto_grow_arg_type)
                 c.argument('auto_scale_iops', arg_type=auto_scale_iops_arg_type)
@@ -696,7 +697,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
                 c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
                 c.argument('disable_data_encryption', arg_type=disable_data_encryption_arg_type)
-                c.argument('public_access', arg_type=public_access_update_arg_type)
             elif command_group == 'postgres':
                 c.argument('auto_grow', arg_type=auto_grow_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
