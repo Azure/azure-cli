@@ -329,7 +329,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         create_default_db_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--create-default-database'],
-            help='Enable or disable the creation of default database flexibleserverdb.. Default value is Enabled.'
+            help='Enable or disable the creation of default database flexibleserverdb. Default value is Enabled.'
         )
 
         auto_grow_arg_type = CLIArgumentType(
