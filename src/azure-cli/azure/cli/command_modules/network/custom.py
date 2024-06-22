@@ -1346,8 +1346,6 @@ class AGRewriteRuleCreate(_AGRewriteRuleCreate):
                  "Values from: `az network application-gateway rewrite-rule list-response-headers`.",
         )
         args_schema.response_headers.Element = AAZStrArg()
-        args_schema.request_header_configurations._registered = False
-        args_schema.response_header_configurations._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -1387,8 +1385,6 @@ class AGRewriteRuleUpdate(_AGRewriteRuleUpdate):
         args_schema.response_headers.Element = AAZStrArg(
             nullable=True,
         )
-        args_schema.request_header_configurations._registered = False
-        args_schema.response_header_configurations._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -2635,7 +2631,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
             if record_type not in zone_obj[record_set_name]:
                 zone_obj[record_set_name][record_type] = []
             # Checking for alias record
-            if (record_type == 'a' or record_type == 'aaaa' or record_type == 'cname') and record_set["target_resource"]["id"]:
+            if (record_type == 'a' or record_type == 'aaaa' or record_type == 'cname') and record_set["target_resource"].get("id", ""):
                 target_resource_id = record_set["target_resource"]["id"]
                 record_obj.update({'target-resource-id': record_type.upper() + " " + target_resource_id})
                 record_type = 'alias'

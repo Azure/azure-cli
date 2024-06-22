@@ -968,7 +968,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_osimage_notification=None, max_surge=None, enable_hibernation=None,
                         enable_auto_os_upgrade=None, enable_proxy_agent=None, proxy_agent_mode=None,
                         security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
-                        enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None):
+                        enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
+                        additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
+                        enable_user_redeploy_scheduled_events=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1420,6 +1422,30 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
             }
         })
         virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
+
+    scheduled_events_policy = {}
+    if additional_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "scheduledEventsAdditionalPublishingTargets": {
+                "eventGridAndResourceGraph": {
+                    "enable": additional_scheduled_events
+                }
+            }
+        })
+    if enable_user_redeploy_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedRedeploy": {
+                "automaticallyApprove": enable_user_redeploy_scheduled_events
+            }
+        })
+    if enable_user_reboot_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedReboot": {
+                "automaticallyApprove": enable_user_reboot_scheduled_events
+            }
+        })
+    if scheduled_events_policy:
+        vmss_properties['scheduledEventsPolicy'] = scheduled_events_policy
 
     if automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
         automatic_repairs_policy = {

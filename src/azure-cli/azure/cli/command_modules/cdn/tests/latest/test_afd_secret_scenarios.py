@@ -11,7 +11,7 @@ from azure.core.exceptions import (HttpResponseError)
 
 # This tests relies on a specific subscription with existing resources
 class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_secret_specific_version_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=24)
         self.afd_secret_list_cmd(resource_group, profile_name, expect_failure=True)
@@ -61,7 +61,7 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.afd_secret_list_cmd(resource_group, profile_name, checks=list_checks)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_secret_latest_version_crud(self, resource_group):
         # Create a standard Azure frontdoor profile
         profile_name = self.create_random_name(prefix='profile', length=24)
