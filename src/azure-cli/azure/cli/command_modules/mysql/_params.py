@@ -428,6 +428,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('backup_byok_key', arg_type=backup_key_arg_type)
         c.argument('disable_data_encryption', arg_type=disable_data_encryption_arg_type)
         c.argument('public_access', arg_type=public_access_update_arg_type)
+        c.argument('yes', arg_type=yes_arg_type)
 
     with self.argument_context('mysql flexible-server upgrade') as c:
         c.argument('version', arg_type=mysql_version_upgrade_arg_type)
