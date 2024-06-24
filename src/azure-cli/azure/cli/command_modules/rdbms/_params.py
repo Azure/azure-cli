@@ -326,6 +326,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                  'This value can only be updated if flexible server is using Premium SSD v2 Disks.'
         )
 
+        create_default_db_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            options_list=['--create-default-database', '-c'],
+            help='Enable or disable the creation of default database flexibleserverdb. Default value is Enabled.'
+        )
+
         auto_grow_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--storage-auto-grow'],
@@ -569,6 +575,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('iops', default=None, arg_type=iops_v2_arg_type)
                 c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
+                c.argument('create_default_db', default='Enabled', arg_type=create_default_db_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
