@@ -26,6 +26,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NODE_OS_CHANNEL_NODE_IMAGE,
     CONST_NODE_OS_CHANNEL_NONE,
     CONST_NODE_OS_CHANNEL_UNMANAGED,
+    CONST_NODE_OS_CHANNEL_SECURITY_PATCH,
     CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER,
     CONST_OS_DISK_TYPE_EPHEMERAL, CONST_OS_DISK_TYPE_MANAGED,
     CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER, CONST_OS_SKU_UBUNTU,
@@ -65,6 +66,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
     validate_azure_keyvault_kms_key_vault_resource_id,
     validate_azuremonitorworkspaceresourceid, validate_create_parameters,
+    validate_azuremonitor_privatelinkscope_resourceid,
     validate_credential_format, validate_defender_config_parameter,
     validate_defender_disable_and_enable_parameters, validate_eviction_policy,
     validate_grafanaresourceid, validate_host_group_id,
@@ -88,6 +90,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_force_upgrade_disable_and_enable_parameters,
     validate_allowed_host_ports, validate_application_security_groups,
     validate_node_public_ip_tags,
+    validate_disable_windows_outbound_nat,
     validate_crg_id,
     validate_azure_service_mesh_revision)
 from azure.cli.core.commands.parameters import (
@@ -140,6 +143,7 @@ node_os_disk_types = [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]
 node_mode_types = [CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER]
 node_os_skus_create = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER]
 node_os_skus = node_os_skus_create + [CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022]
+node_os_skus_update = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER]
 scale_down_modes = [CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]
 
 # consts for ManagedCluster
@@ -162,6 +166,7 @@ node_os_upgrade_channels = [
     CONST_NODE_OS_CHANNEL_NODE_IMAGE,
     CONST_NODE_OS_CHANNEL_NONE,
     CONST_NODE_OS_CHANNEL_UNMANAGED,
+    CONST_NODE_OS_CHANNEL_SECURITY_PATCH,
 ]
 
 dev_space_endpoint_types = ['Public', 'Private', 'None']
@@ -350,9 +355,11 @@ def load_arguments(self, _):
         # addons
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('workspace_resource_id')
-        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('enable_syslog', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('data_collection_settings', is_preview=True)
+        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag())
+        c.argument('enable_syslog', arg_type=get_three_state_flag())
+        c.argument('data_collection_settings')
+        c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
+        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag(), is_preview=True)
         c.argument('aci_subnet_name')
         c.argument('appgw_name', arg_group='Application Gateway')
         c.argument('appgw_subnet_cidr', arg_group='Application Gateway')
@@ -433,6 +440,7 @@ def load_arguments(self, _):
         )
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('enable_cost_analysis', action='store_true')
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -569,6 +577,8 @@ def load_arguments(self, _):
         )
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('enable_cost_analysis', action='store_true')
+        c.argument('disable_cost_analysis', action='store_true')
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -586,9 +596,11 @@ def load_arguments(self, _):
         c.argument('enable_sgxquotehelper', action='store_true')
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('rotation_poll_interval')
-        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('enable_syslog', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('data_collection_settings', is_preview=True)
+        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag())
+        c.argument('enable_syslog', arg_type=get_three_state_flag())
+        c.argument('data_collection_settings')
+        c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
+        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag(), is_preview=True)
 
     with self.argument_context('aks get-credentials', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
@@ -706,6 +718,7 @@ def load_arguments(self, _):
         c.argument('enable_encryption_at_host', action='store_true')
         c.argument('enable_ultra_ssd', action='store_true')
         c.argument('enable_fips_image', action='store_true')
+        c.argument("disable_windows_outbound_nat", action="store_true", validator=validate_disable_windows_outbound_nat)
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
@@ -735,6 +748,7 @@ def load_arguments(self, _):
         c.argument('scale_down_mode', arg_type=get_enum_type(scale_down_modes))
         c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
+        c.argument('os_sku', arg_type=get_enum_type(node_os_skus_update), validator=validate_os_sku)
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)
@@ -824,6 +838,22 @@ def load_arguments(self, _):
 
     with self.argument_context('aks mesh upgrade start') as c:
         c.argument('revision', validator=validate_azure_service_mesh_revision, required=True)
+
+    with self.argument_context("aks mesh upgrade rollback") as c:
+        c.argument(
+            "yes",
+            options_list=["--yes", "-y"],
+            help="Do not prompt for confirmation.",
+            action="store_true"
+        )
+
+    with self.argument_context("aks mesh upgrade complete") as c:
+        c.argument(
+            "yes",
+            options_list=["--yes", "-y"],
+            help="Do not prompt for confirmation.",
+            action="store_true"
+        )
 
     with self.argument_context('aks approuting enable') as c:
         c.argument('enable_kv', action='store_true')

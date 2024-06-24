@@ -56,10 +56,13 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'tags': "key1=value1 key2=value2",
             'name': self.create_random_name('NSR-', 10),
             'access': 'allow',
+            'inv_access': 'deny',
             'description': self.create_random_name('NSR-description', 30),
             'direction': 'inbound',
+            'inv_direction': 'outbound',
             'protocol': 'any',
             'priority': 1200,
+            'update_priority': 1100,
             'source_port_ranges': '1-1000 1122-65535',
             'dest_port_ranges': '1-1900 2200-65535',
             'source_addr_prefixes': '167.220.242.0/27 167.220.0.0/23 131.107.132.16/28 167.220.81.128/26',
@@ -85,6 +88,31 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
                         self.check('networkSecurityRules[0].priority', 1200),
                         self.check('networkSecurityRules[0].sourcePortRanges[0]', '1-1000'),
                         self.check('networkSecurityRules[0].destinationPortRanges[1]', '2200-65535')])
+        
+        self.cmd('az sf managed-cluster network-security-rule update -g {rg} -c {cluster_name} '
+                '--name {name} --access {inv_access} --direction {inv_direction} --priority {update_priority}',
+                checks=[self.check('provisioningState', 'Succeeded'),])
+        
+        self.cmd('az sf managed-cluster network-security-rule get -g {rg} -c {cluster_name} --name {name}',
+                 checks=[self.check('access', 'deny'),
+                         self.check('direction', 'outbound'),
+                         self.check('priority', 1100)])
+
+        self.cmd('az sf managed-cluster network-security-rule list -g {rg} -c {cluster_name}',
+                checks=[self.check('length(@)', 1)])
+        
+        self.cmd('az sf managed-cluster network-security-rule delete -g {rg} -c {cluster_name} --name {name}',
+                checks=[self.check('provisioningState', 'Succeeded')])
+        
+        self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}',
+                checks=[self.check('clusterState', 'Ready'),
+                        self.check('length(networkSecurityRules)', 0)])
+
+        self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
+
+        # SystemExit 3 'not found'
+        with self.assertRaisesRegex(SystemExit, '3'):
+            self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
     @ResourceGroupPreparer()
     def test_node_type_operation(self):

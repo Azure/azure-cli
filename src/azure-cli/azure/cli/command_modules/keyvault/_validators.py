@@ -18,7 +18,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
-from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, AzureInternalError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
@@ -26,64 +26,6 @@ logger = get_logger(__name__)
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
 secret_binary_encoding_values = ['base64', 'hex']
-default_cvm_policy_url = "https://raw.githubusercontent.com/Azure/confidential-computing-cvm/main/cvm_deployment/key/skr-policy.json"  # pylint: disable=line-too-long
-fallback_cvm_policy = {
-    'version': '1.0.0',
-    'anyOf': [
-        {
-            'authority': 'https://sharedeus.eus.attest.azure.net/',
-            'allOf': [
-                {
-                    'claim': 'x-ms-attestation-type',
-                    'equals': 'sevsnpvm'
-                },
-                {
-                    'claim': 'x-ms-compliance-status',
-                    'equals': 'azure-compliant-cvm'
-                }
-            ]
-        },
-        {
-            'authority': 'https://sharedwus.wus.attest.azure.net/',
-            'allOf': [
-                {
-                    'claim': 'x-ms-attestation-type',
-                    'equals': 'sevsnpvm'
-                },
-                {
-                    'claim': 'x-ms-compliance-status',
-                    'equals': 'azure-compliant-cvm'
-                }
-            ]
-        },
-        {
-            'authority': 'https://sharedneu.neu.attest.azure.net/',
-            'allOf': [
-                {
-                    'claim': 'x-ms-attestation-type',
-                    'equals': 'sevsnpvm'
-                },
-                {
-                    'claim': 'x-ms-compliance-status',
-                    'equals': 'azure-compliant-cvm'
-                }
-            ]
-        },
-        {
-            'authority': 'https://sharedweu.weu.attest.azure.net/',
-            'allOf': [
-                {
-                    'claim': 'x-ms-attestation-type',
-                    'equals': 'sevsnpvm'
-                },
-                {
-                    'claim': 'x-ms-compliance-status',
-                    'equals': 'azure-compliant-cvm'
-                }
-            ]
-        }
-    ]
-}
 
 
 class KeyEncryptionDataType(str, Enum):
@@ -266,16 +208,63 @@ def validate_key_type(ns):
     setattr(ns, 'kty', kty)
 
 
-def _fetch_default_cvm_policy():
+def _fetch_default_cvm_policy(cli_ctx, vault_url):
     try:
-        import requests
+        # get vault/hsm location
+        mgmt_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT)
+        location = None
+        parsed_vault_url = vault_url.removeprefix('https://').split('.')
+        if parsed_vault_url[1] == 'vault':
+            vault_name_filter = f"resourceType eq 'Microsoft.KeyVault/vaults' and name eq '{parsed_vault_url[0]}'"
+            for vault in mgmt_client.vaults.list(filter=vault_name_filter):
+                location = vault.location
+                break
+        elif parsed_vault_url[1] == 'managedhsm':
+            for hsm in mgmt_client.managed_hsms.list_by_subscription():
+                if hsm.name == parsed_vault_url[0]:
+                    location = hsm.location
+                    break
+        if not location:
+            raise InvalidArgumentValueError(f"Fail to fetch default cvm policy due to invalid {vault_url}")
+
+        # call MAA to get default cvm policy
+        from azure.cli.core.util import send_raw_request
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        _endpoint = cli_ctx.cloud.endpoints.resource_manager
+        if _endpoint.endswith('/'):
+            _endpoint = _endpoint[:-1]
+        default_cvm_policy_url = f"{_endpoint}/subscriptions/{get_subscription_id(cli_ctx)}" \
+                                 f"/providers/Microsoft.Attestation/Locations/{location}" \
+                                 f"/defaultProvider?api-version=2020-10-01"
+        response = send_raw_request(cli_ctx, 'get', default_cvm_policy_url)
+        if response.status_code != 200:
+            raise AzureInternalError(f"Fail to fetch default cvm policy from {default_cvm_policy_url}")
+
+        # extract attest uri from response as authority in cvm policy
         import json
-        policy = requests.get(default_cvm_policy_url)
-        return json.loads(policy.content)
-    except Exception:  # pylint: disable=broad-except
-        logger.debug("Fail to fetch default cvm policy from %s,use local cvm policy as fallback",
-                     default_cvm_policy_url)
-    return fallback_cvm_policy
+        res_json = json.loads(response.text)
+        attest_uri = res_json['properties']['attestUri']
+        default_cvm_policy = {
+            'version': '1.0.0',
+            'anyOf': [
+                {
+                    'authority': attest_uri,
+                    'allOf': [
+                        {
+                            'claim': 'x-ms-attestation-type',
+                            'equals': 'sevsnpvm'
+                        },
+                        {
+                            'claim': 'x-ms-compliance-status',
+                            'equals': 'azure-compliant-cvm'
+                        }
+                    ]
+                }
+            ]
+        }
+        return default_cvm_policy
+    except Exception as ex:  # pylint: disable=broad-except
+        raise AzureInternalError(f"Fail to fetch default cvm policy: {ex}")
 
 
 def process_key_release_policy(cmd, ns):
@@ -301,7 +290,10 @@ def process_key_release_policy(cmd, ns):
     KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     if default_cvm_policy:
-        policy = _fetch_default_cvm_policy()
+        vault_url = getattr(ns, 'hsm_name', None) or getattr(ns, 'vault_base_url', None)
+        if not vault_url:
+            vault_url = getattr(ns, 'identifier', None)
+        policy = _fetch_default_cvm_policy(cmd.cli_ctx, vault_url)
         ns.release_policy = KeyReleasePolicy(encoded_policy=json.dumps(policy).encode('utf-8'),
                                              immutable=immutable)
         return
@@ -701,6 +693,14 @@ def validate_encryption(ns):
 
 def validate_decryption(ns):
     ns.value = base64.b64decode(ns.value)
+
+
+def validate_key_create(cmd, ns):
+    validate_tags(ns)
+    set_vault_base_url(ns)
+    validate_keyvault_resource_id('key')(ns)
+    validate_key_type(ns)
+    process_key_release_policy(cmd, ns)
 
 
 # pylint: disable=line-too-long, too-many-locals

@@ -381,7 +381,22 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
                 """
         write_test_file(containerappjob_file_name, containerappjob_yaml_text)
 
-        self.cmd(f'containerapp job update -n {job} -g {resource_group} --yaml {containerappjob_file_name}')
+        self.cmd(f'containerapp job update -n {job} -g {resource_group} --yaml {containerappjob_file_name}', checks=[
+            JMESPathCheck('properties.provisioningState', "Succeeded"),
+            JMESPathCheck("properties.configuration.triggerType", "Manual", case_sensitive=False),
+            JMESPathCheck('properties.configuration.replicaTimeout', 200),
+            JMESPathCheck('properties.configuration.replicaRetryLimit', 1),
+            JMESPathCheck('properties.template.containers[0].image', "mcr.microsoft.com/k8se/quickstart-jobs:latest"),
+            JMESPathCheck('properties.template.containers[0].resources.cpu', "0.75"),
+            JMESPathCheck('properties.template.containers[0].resources.memory', "1.5Gi"),
+            JMESPathCheck('properties.template.volumes[0].storageType', 'AzureFile'),
+            JMESPathCheck('properties.template.volumes[0].storageName', share),
+            JMESPathCheck('properties.template.volumes[0].name', 'azure-files-volume'),
+            JMESPathCheck('properties.template.volumes[0].mountOptions', 'uid=1000,gid=1000'),
+            JMESPathCheck('properties.template.containers[0].volumeMounts[0].subPath', 'sub2'),
+            JMESPathCheck('properties.template.containers[0].volumeMounts[0].mountPath', '/mnt/data'),
+            JMESPathCheck('properties.template.containers[0].volumeMounts[0].volumeName', 'azure-files-volume'),
+        ])
 
         self.cmd(f'containerapp job show -g {resource_group} -n {job}', checks=[
             JMESPathCheck("properties.configuration.triggerType", "Manual", case_sensitive=False),
@@ -417,7 +432,7 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
                                 """
         write_test_file(containerappjob_file_name, containerappjob_yaml_text)
 
-        self.cmd(f'containerapp job update -n {job} -g {resource_group} --yaml {containerappjob_file_name}')
+        self.cmd(f'containerapp job update -n {job} -g {resource_group} --yaml {containerappjob_file_name} --no-wait')
 
         self.cmd(f'containerapp job show -g {resource_group} -n {job}', checks=[
             JMESPathCheck("properties.environmentId", containerapp_env["id"]),
@@ -579,7 +594,7 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
                 """
         write_test_file(containerappjob_file_name, containerappjob_yaml_text)
 
-        self.cmd(f'containerapp job update -n {job} -g {resource_group} --yaml {containerappjob_file_name}')
+        self.cmd(f'containerapp job update -n {job} -g {resource_group} --yaml {containerappjob_file_name} --no-wait')
 
         self.cmd(f'containerapp job show -g {resource_group} -n {job}', checks=[
             JMESPathCheck("properties.configuration.triggerType", "Event", case_sensitive=False),

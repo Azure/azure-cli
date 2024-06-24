@@ -22,9 +22,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01-preview",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes", "2023-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes", "2023-11-01"],
         ]
     }
 
@@ -138,7 +138,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01-preview",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -278,11 +278,6 @@ class List(AAZCommand):
                 serialized_name="fileSystemId",
                 flags={"read_only": True},
             )
-            properties.inherited_size_in_bytes = AAZIntType(
-                serialized_name="inheritedSizeInBytes",
-                nullable=True,
-                flags={"read_only": True},
-            )
             properties.is_default_quota_enabled = AAZBoolType(
                 serialized_name="isDefaultQuotaEnabled",
             )
@@ -409,9 +404,6 @@ class List(AAZCommand):
             )
 
             backup = cls._schema_on_200.value.Element.properties.data_protection.backup
-            backup.backup_enabled = AAZBoolType(
-                serialized_name="backupEnabled",
-            )
             backup.backup_policy_id = AAZStrType(
                 serialized_name="backupPolicyId",
             )
@@ -426,9 +418,6 @@ class List(AAZCommand):
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
             )
-            replication.remote_path = AAZObjectType(
-                serialized_name="remotePath",
-            )
             replication.remote_volume_region = AAZStrType(
                 serialized_name="remoteVolumeRegion",
             )
@@ -442,20 +431,6 @@ class List(AAZCommand):
             )
             replication.replication_schedule = AAZStrType(
                 serialized_name="replicationSchedule",
-            )
-
-            remote_path = cls._schema_on_200.value.Element.properties.data_protection.replication.remote_path
-            remote_path.external_host_name = AAZStrType(
-                serialized_name="externalHostName",
-                flags={"required": True},
-            )
-            remote_path.server_name = AAZStrType(
-                serialized_name="serverName",
-                flags={"required": True},
-            )
-            remote_path.volume_name = AAZStrType(
-                serialized_name="volumeName",
-                flags={"required": True},
             )
 
             snapshot = cls._schema_on_200.value.Element.properties.data_protection.snapshot

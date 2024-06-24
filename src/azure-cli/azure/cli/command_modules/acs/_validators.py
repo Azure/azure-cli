@@ -672,6 +672,16 @@ def sanitize_resource_id(resource_id):
 
 
 # pylint:disable=line-too-long
+def validate_azuremonitor_privatelinkscope_resourceid(namespace):
+    resource_id = namespace.ampls_resource_id
+    if resource_id is None:
+        return
+    resource_id = sanitize_resource_id(resource_id)
+    if (bool(re.match(r'/subscriptions/.*/resourcegroups/.*/providers/microsoft.insights/privatelinkscopes/.*', resource_id))) is False:
+        raise InvalidArgumentValueError("--ampls-resource-id  not in the correct format. It should match `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/microsoft.insights/privatelinkscopes/<resourceName>`")
+
+
+# pylint:disable=line-too-long
 def validate_azuremonitorworkspaceresourceid(namespace):
     resource_id = namespace.azure_monitor_workspace_resource_id
     if resource_id is None:
@@ -797,3 +807,11 @@ def validate_azure_service_mesh_revision(namespace):
     found = asm_revision_regex.findall(revision)
     if not found:
         raise InvalidArgumentValueError(f"Revision {revision} is not supported by the service mesh add-on.")
+
+
+def validate_disable_windows_outbound_nat(namespace):
+    """Validates disable_windows_outbound_nat can only be used on Windows."""
+    if namespace.disable_windows_outbound_nat:
+        if hasattr(namespace, 'os_type') and str(namespace.os_type).lower() != "windows":
+            raise ArgumentUsageError(
+                '--disable-windows-outbound-nat can only be set for Windows nodepools')

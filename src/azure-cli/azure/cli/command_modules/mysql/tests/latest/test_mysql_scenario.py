@@ -5,6 +5,7 @@
 import os
 import time
 import uuid
+import unittest
 
 from datetime import datetime, timedelta
 from time import sleep
@@ -94,6 +95,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @unittest.skip("Currently blocked due to creation of 'Azure Database for MySQL - Single Server' no longer supported on March 19 2024.")
     def test_mysql_flexible_server_import_create(self, resource_group):
         self._test_mysql_flexible_server_import_create_mgmt('mysql', resource_group)
 
@@ -1263,10 +1265,10 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         replica_role = 'Replica'
         private_dns_param = 'privateDnsZoneResourceId'
 
-        master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
+        master_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
         self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --tier GeneralPurpose --sku-name {} --public-access none'
-                 .format(database_engine, resource_group, master_server, master_location, 32, DEFAULT_GENERAL_PURPOSE_SKU))
+                 .format(database_engine, resource_group, master_server, master_location, 256, DEFAULT_GENERAL_PURPOSE_SKU))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
                           checks=[JMESPathCheck('replicationRole', primary_role)]).get_output_in_json()
@@ -1794,15 +1796,19 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
         vnet_group_subnet_name = 'vnetgrouptestsubnet'
         vnet_prefix = '172.1.0.0/16'
         subnet_prefix = '172.1.0.0/24'
+
+        # vnet in server rg
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
                  server_resource_group, location, server_group_vnet_name, vnet_prefix, server_group_subnet_name, subnet_prefix))
-
         server_group_subnet = self.cmd('network vnet subnet show -g {} -n {} --vnet-name {}'.format(
                                        server_resource_group, server_group_subnet_name, server_group_vnet_name)).get_output_in_json()
+
+        # vnet in vnet rg
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
                  vnet_resource_group, location, vnet_group_vnet_name, vnet_prefix, vnet_group_subnet_name, subnet_prefix))
         vnet_group_subnet = self.cmd('network vnet subnet show -g {} -n {} --vnet-name {}'.format(
                                        vnet_resource_group, vnet_group_subnet_name, vnet_group_vnet_name)).get_output_in_json()
+
         # no input, vnet in server rg
         dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[0], None, server_group_subnet["id"], location, True)
         self.assertEqual(dns_zone,
@@ -1810,12 +1816,12 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
                          self.get_subscription_id(), server_resource_group, server_names[0] + ".private." + database_engine + ".database.azure.com"))
 
         # no input, vnet in vnet rg
-        dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[1], None, vnet_group_subnet["id"], location, True)
+        dns_zone = prepare_private_dns_zone(db_context, database_engine, vnet_resource_group, server_names[1], None, vnet_group_subnet["id"], location, True)
         self.assertEqual(dns_zone,
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
                          self.get_subscription_id(), vnet_resource_group, server_names[1] + ".private." + database_engine + ".database.azure.com"))
 
-        # new private dns zone, zone name (vnet in smae rg)
+        # new private dns zone, zone name (vnet in same rg)
         dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[2], private_dns_zone_names[0],
                                             server_group_subnet["id"], location, True)
         self.assertEqual(dns_zone,
@@ -1925,6 +1931,7 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @live_only()
     def test_mysql_flexible_server_upgrade_mgmt(self, resource_group):
         self._test_flexible_server_upgrade_mgmt('mysql', resource_group, False)
         self._test_flexible_server_upgrade_mgmt('mysql', resource_group, True)

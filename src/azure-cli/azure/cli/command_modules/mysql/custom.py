@@ -1829,9 +1829,6 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
             logger.warning("Changing administrator login name and password is currently not supported for single to flex migrations. "
                            "Please use source single server administrator login name and password to connect after migration.")
 
-        if not administrator_login:
-            administrator_login = source_single_server.administrator_login
-
         if not location:
             location = ''.join(source_single_server.location.lower().split())
 

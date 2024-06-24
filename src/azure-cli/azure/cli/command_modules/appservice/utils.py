@@ -8,17 +8,19 @@ import os
 import urllib
 import urllib3
 import certifi
+from datetime import datetime
 
 from knack.log import get_logger
 
-from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError, ResourceNotFoundError)
+from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError, ResourceNotFoundError,
+                                       CLIInternalError)
 from azure.cli.core.commands.parameters import get_subscription_locations
 from azure.cli.core.util import should_disable_connection_verify, send_raw_request
 from azure.cli.core.commands.client_factory import get_subscription_id
 
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
-from ._client_factory import web_client_factory
+from ._client_factory import web_client_factory, providers_client_factory
 from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND, LINUXAPP_KIND
 
 logger = get_logger(__name__)
@@ -92,6 +94,8 @@ def get_sku_tier(name):  # pylint: disable=too-many-return-statements
         return 'Isolated'
     if name in ['I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2']:
         return 'IsolatedV2'
+    if name in ['I1MV2', 'I2MV2', 'I3MV2', 'I4MV2', 'I5MV2']:
+        return 'IsolatedMV2'
     if name in ['WS1', 'WS2', 'WS3']:
         return 'WorkflowStandard'
     raise ValidationError("Invalid sku(pricing tier), please refer to command help for valid values")
@@ -137,6 +141,37 @@ def retryable_method(retries=3, interval_sec=5, excpt_type=Exception):
     return decorate
 
 
+def register_app_provider(cmd):
+    from azure.mgmt.resource.resources.models import ProviderRegistrationRequest, ProviderConsentDefinition
+
+    namespace = "Microsoft.App"
+    providers_client = providers_client_factory(cmd.cli_ctx)
+    is_registered = False
+    try:
+        registration_state = providers_client.get(namespace).registration_state
+        is_registered = registration_state and registration_state.lower() == 'registered'
+    except Exception:  # pylint: disable=broad-except
+        logger.warning("An error occurred while trying to get the registration state of the '%s' provider.", namespace)
+
+    if not is_registered:
+        try:
+            logger.warning("Registering the '%s' provider.", namespace)
+            properties = ProviderRegistrationRequest(
+                third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=True))
+            providers_client.register(namespace, properties=properties)
+            timeout_secs = 120
+            start_time = datetime.now()
+            while not is_registered:
+                time.sleep(5)
+                registration_state = providers_client.get(namespace).registration_state
+                is_registered = registration_state and registration_state.lower() == 'registered'
+                if not is_registered and (datetime.now() - start_time).seconds >= timeout_secs:
+                    raise CLIInternalError("Timed out waiting for the '%s' provider to register." % namespace)
+            logger.warning("Successfully registered the '%s' provider.", namespace)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning("An error occurred while trying to register the '%s' provider: %s", namespace, str(ex))
+
+
 def raise_missing_token_suggestion():
     pat_documentation = "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line"
     raise RequiredArgumentMissingError("GitHub access token is required to authenticate to your repositories. "
@@ -168,13 +203,11 @@ def is_centauri_functionapp(cmd, resource_group, name):
 
 
 def is_flex_functionapp(cli_ctx, resource_group, name):
-    client = web_client_factory(cli_ctx)
-    app = client.web_apps.get(resource_group, name)
-    if app.server_farm_id is None:
+    app = get_raw_functionapp(cli_ctx, resource_group, name)
+    if app["properties"]["serverFarmId"] is None:
         return False
-    parse_plan_id = parse_resource_id(app.server_farm_id)
-    plan_info = client.app_service_plans.get(parse_plan_id['resource_group'], parse_plan_id['name'])
-    return plan_info.sku.tier.lower() == 'flexconsumption'
+    sku = app["properties"]["sku"]
+    return sku and sku.lower() == 'flexconsumption'
 
 
 def _list_app(cli_ctx, resource_group_name=None):
@@ -195,12 +228,12 @@ def _rename_server_farm_props(webapp):
     return webapp
 
 
-def get_raw_functionapp(cmd, resource_group_name, name):
+def get_raw_functionapp(cli_ctx, resource_group_name, name):
     site_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
-    subscription_id = get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cli_ctx)
     site_url = site_url_base.format(subscription_id, resource_group_name, name, '2023-12-01')
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
-    response = send_raw_request(cmd.cli_ctx, "GET", request_url)
+    request_url = cli_ctx.cloud.endpoints.resource_manager + site_url
+    response = send_raw_request(cli_ctx, "GET", request_url)
     return response.json()
 
 

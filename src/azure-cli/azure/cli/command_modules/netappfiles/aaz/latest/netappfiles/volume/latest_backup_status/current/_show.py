@@ -13,16 +13,15 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles volume latest-backup-status current show",
-    is_preview=True,
 )
 class Show(AAZCommand):
     """Get the latest status of the backup for a volume
     """
 
     _aaz_info = {
-        "version": "2022-11-01-preview",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/latestbackupstatus/current", "2022-11-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/latestbackupstatus/current", "2023-11-01"],
         ]
     }
 
@@ -66,7 +65,7 @@ class Show(AAZCommand):
             required=True,
         )
         _args_schema.volume_name = AAZStrArg(
-            options=["--volume-name"],
+            options=["-v", "--volume-name"],
             help="The name of the volume",
             required=True,
             id_part="child_name_2",
@@ -151,7 +150,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01-preview",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
