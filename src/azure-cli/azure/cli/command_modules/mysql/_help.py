@@ -440,7 +440,7 @@ helps['mysql flexible-server detach-vnet'] = """
 type: command
 short-summary: Detach vnet for a flexible server.
 examples:
-  - name: RDetach vnet for a flexible server with public access disabled.
+  - name: Detach vnet for a flexible server with public access disabled.
     text: az mysql flexible-server detach-vnet --resource-group testGroup --name testserver --public-network-access Disabled
     crafted: true
 """
