@@ -1728,7 +1728,6 @@ def process_vmss_create_namespace(cmd, namespace):
         namespace.load_balancer_sku = 'Standard'  # lb sku MUST be standard
         # namespace.public_ip_per_vm = True  # default to true for VMSS Flex
 
-        namespace.upgrade_policy_mode = None
         namespace.use_unmanaged_disk = None
 
         banned_params = {
