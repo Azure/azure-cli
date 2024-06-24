@@ -10,6 +10,11 @@ from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_ACSTOR_IO_ENGINE_LABEL_KEY,
     CONST_ACSTOR_K8S_EXTENSION_NAME,
+    CONST_EPHEMERAL_NVME_PERF_TIER_BASIC,
+    CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM,
+    CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
+    CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
+    CONST_DISK_TYPE_PV_WITH_ANNOTATION,
     CONST_EXT_INSTALLATION_NAME,
     CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME,
     CONST_K8S_EXTENSION_CUSTOM_MOD_NAME,
@@ -144,7 +149,7 @@ def get_extension_installed_and_cluster_configs(
     resource_group,
     cluster_name,
     agentpool_profiles
-) -> Tuple[bool, bool, bool, bool, float]:
+) -> Tuple[bool, bool, bool, bool, float, str, str]:
     client_factory = get_k8s_extension_module(CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME)
     client = client_factory.cf_k8s_extension_operation(cmd.cli_ctx)
     k8s_extension_custom_mod = get_k8s_extension_module(CONST_K8S_EXTENSION_CUSTOM_MOD_NAME)
@@ -153,6 +158,8 @@ def get_extension_installed_and_cluster_configs(
     is_azureDisk_enabled = False
     is_ephemeralDisk_nvme_enabled = False
     is_ephemeralDisk_localssd_enabled = False
+    ephemeral_disk_volume_type = CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY
+    perf_tier = CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
     resource_cpu_value = -1
 
     try:
@@ -163,11 +170,9 @@ def get_extension_installed_and_cluster_configs(
             CONST_EXT_INSTALLATION_NAME,
             "managedClusters",
         )
-
         extension_type = extension.extension_type.lower()
         is_extension_installed = extension_type == CONST_ACSTOR_K8S_EXTENSION_NAME
         config_settings = extension.configuration_settings
-
         if is_extension_installed and config_settings is not None:
             is_cli_operation_active = config_settings.get("global.cli.activeControl", "False") == "True"
             if is_cli_operation_active:
@@ -184,6 +189,25 @@ def get_extension_installed_and_cluster_configs(
                     config_settings.get("global.cli.storagePool.ephemeralDisk.temp.enabled", "False") == "True"
                 )
                 cpu_value = config_settings.get("global.cli.resources.ioEngine.cpu", "1")
+                enable_ephemeral_bypass_annotation = (
+                    config_settings.get(
+                        "global.cli.storagePool.ephemeralDisk.enableEphemeralBypassAnnotation", "False"
+                    ) == "True"
+                )
+                perf_tier = config_settings.get(
+                    "global.cli.storagePool.ephemeralDisk.nvme.perfTier",
+                    CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                )
+
+                if perf_tier.lower() == CONST_EPHEMERAL_NVME_PERF_TIER_BASIC.lower():
+                    perf_tier = CONST_EPHEMERAL_NVME_PERF_TIER_BASIC
+                elif perf_tier.lower() == CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM.lower():
+                    perf_tier = CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM
+                else:
+                    perf_tier = CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+
+                if enable_ephemeral_bypass_annotation:
+                    ephemeral_disk_volume_type = CONST_DISK_TYPE_PV_WITH_ANNOTATION
                 resource_cpu_value = float(cpu_value)
             else:
                 # For versions where "global.cli.activeControl" were not set it signifies
@@ -192,7 +216,7 @@ def get_extension_installed_and_cluster_configs(
                 is_azureDisk_enabled = is_elasticSan_enabled = is_ephemeralDisk_localssd_enabled = True
                 resource_cpu_value = 1
 
-                # Determine if epehemeral NVMe was active based on the labelled nodepools present in cluster.
+                # Determine if ephemeral NVMe was active based on the labelled nodepools present in cluster.
                 for agentpool in agentpool_profiles:
                     vm_size = agentpool.vm_size
                     node_labels = agentpool.node_labels
@@ -201,17 +225,17 @@ def get_extension_installed_and_cluster_configs(
                             vm_size.lower().startswith('standard_l')):
                         is_ephemeralDisk_nvme_enabled = True
                         break
-
     except:  # pylint: disable=bare-except
         is_extension_installed = False
-
     return (
         is_extension_installed,
         is_azureDisk_enabled,
         is_elasticSan_enabled,
         is_ephemeralDisk_localssd_enabled,
         is_ephemeralDisk_nvme_enabled,
-        resource_cpu_value
+        resource_cpu_value,
+        ephemeral_disk_volume_type,
+        perf_tier
     )
 
 
@@ -219,6 +243,7 @@ def get_initial_resource_value_args(
     storage_pool_type,
     storage_pool_option,
     nodepool_skus,
+    ephemeral_nvme_perf_tier,
 ):
     core_value = memory_value = hugepages_value = hugepages_number = 0
     if (storage_pool_type == CONST_STORAGE_POOL_TYPE_AZURE_DISK or
@@ -230,7 +255,7 @@ def get_initial_resource_value_args(
         hugepages_number = 512
     elif (storage_pool_type == CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK and
           storage_pool_option == CONST_STORAGE_POOL_OPTION_NVME):
-        core_value = _get_cpu_value_based_on_vm_size(nodepool_skus)
+        core_value = _get_ephemeral_nvme_cpu_value_based_on_vm_size_perf_tier(nodepool_skus, ephemeral_nvme_perf_tier)
         memory_value = 2
         hugepages_value = 2
         hugepages_number = 1024
@@ -248,6 +273,7 @@ def get_current_resource_value_args(
     is_elasticSan_enabled,
     is_ephemeralDisk_localssd_enabled,
     is_ephemeralDisk_nvme_enabled,
+    ephemeral_nvme_perf_tier,
     current_core_value=None,
     nodepool_skus=None,
 ):
@@ -261,6 +287,7 @@ def get_current_resource_value_args(
         is_elasticSan_enabled,
         is_ephemeralDisk_localssd_enabled,
         is_ephemeralDisk_nvme_enabled,
+        ephemeral_nvme_perf_tier,
         current_core_value,
         nodepool_skus,
     )
@@ -276,6 +303,7 @@ def get_current_resource_value_args(
 def get_desired_resource_value_args(
     storage_pool_type,
     storage_pool_option,
+    ephemeral_nvme_perf_tier,
     current_core_value,
     is_azureDisk_enabled,
     is_elasticSan_enabled,
@@ -294,6 +322,7 @@ def get_desired_resource_value_args(
         is_elasticSan_enabled,
         is_ephemeralDisk_localssd_enabled,
         is_ephemeralDisk_nvme_enabled,
+        ephemeral_nvme_perf_tier,
         current_core_value,
         nodepool_skus,
     )
@@ -311,7 +340,10 @@ def get_desired_resource_value_args(
             updated_hugepages_number = 512
         elif (storage_pool_type == CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK and
               storage_pool_option == CONST_STORAGE_POOL_OPTION_NVME):
-            updated_core_value = _get_cpu_value_based_on_vm_size(nodepool_skus)
+            updated_core_value = _get_ephemeral_nvme_cpu_value_based_on_vm_size_perf_tier(
+                nodepool_skus,
+                ephemeral_nvme_perf_tier,
+            )
             updated_memory_value = 2
             updated_hugepages_value = 2
             updated_hugepages_number = 1024
@@ -344,9 +376,8 @@ def get_desired_resource_value_args(
                 (is_azureDisk_enabled or is_ephemeralDisk_nvme_enabled))
         )
         is_ephemeral_nvme_disabled_azureDisk_active = (
-            storage_pool_type == CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK and
-            (storage_pool_option == CONST_STORAGE_POOL_OPTION_NVME and
-                (is_ephemeralDisk_localssd_enabled or is_azureDisk_enabled) or
+            ((storage_pool_option == CONST_STORAGE_POOL_OPTION_NVME and
+                (is_ephemeralDisk_localssd_enabled or is_azureDisk_enabled)) or
                 (storage_pool_option == CONST_ACSTOR_ALL and is_azureDisk_enabled))
         )
         if is_disabled_type_smaller_than_active_types:
@@ -399,24 +430,52 @@ def get_cores_from_sku(vm_size):
     return cpu_value
 
 
-def _get_cpu_value_based_on_vm_size(nodepool_skus):
+def check_if_new_storagepool_creation_required(
+    storage_pool_type,
+    storage_pool_option,
+    ephemeral_disk_volume_type,
+    ephemeral_disk_nvme_perf_tier,
+    is_extension_installed,
+    is_ephemeralDisk_nvme_enabled,
+    is_ephemeralDisk_localssd_enabled,
+) -> bool:
+    if not is_extension_installed or \
+       not (is_ephemeralDisk_localssd_enabled or is_ephemeralDisk_nvme_enabled) or \
+       storage_pool_type != CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK or \
+       (ephemeral_disk_nvme_perf_tier is None and ephemeral_disk_volume_type is None):
+        return True
+
+    if (storage_pool_option == CONST_STORAGE_POOL_OPTION_SSD and is_ephemeralDisk_localssd_enabled) or \
+       (storage_pool_option == CONST_STORAGE_POOL_OPTION_NVME and is_ephemeralDisk_nvme_enabled):
+        return False
+
+    return True
+
+
+def _get_ephemeral_nvme_cpu_value_based_on_vm_size_perf_tier(nodepool_skus, perf_tier):
     cpu_value = -1
+    multiplication_factor = 0.25
+    if perf_tier.lower() == CONST_EPHEMERAL_NVME_PERF_TIER_BASIC.lower():
+        multiplication_factor = 0.15
+    elif perf_tier.lower() == CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM.lower():
+        multiplication_factor = 0.5
     for vm_size in nodepool_skus:
         number_of_cores = get_cores_from_sku(vm_size)
         if number_of_cores != -1:
             if cpu_value == -1:
-                cpu_value = number_of_cores * 0.25
+                cpu_value = number_of_cores * multiplication_factor
             else:
-                cpu_value = (number_of_cores * 0.25) if \
-                    (cpu_value > number_of_cores * 0.25) else \
+                cpu_value = (number_of_cores * multiplication_factor) if \
+                    (cpu_value > number_of_cores * multiplication_factor) else \
                     cpu_value
         else:
             raise UnknownError(
                 f"Unable to determine the number of cores in nodepool of node size: {vm_size}"
             )
 
-    if cpu_value == -1:
-        cpu_value = 1
+    # In any case when cpu_value = -1 or is lesser than 1,
+    # set the value to 1.
+    cpu_value = max(cpu_value, 1)
     return cpu_value
 
 
@@ -425,6 +484,7 @@ def _get_current_resource_values(
     is_elasticSan_enabled,
     is_ephemeralDisk_localssd_enabled,
     is_ephemeralDisk_nvme_enabled,
+    ephemeral_nvme_perf_tier,
     current_core_value=None,
     nodepool_skus=None,
 ):
@@ -444,7 +504,10 @@ def _get_current_resource_values(
         current_hugepages_number = 512
     if is_ephemeralDisk_nvme_enabled:
         if current_core_value is None and nodepool_skus is not None:
-            core_value = _get_cpu_value_based_on_vm_size(nodepool_skus)
+            core_value = _get_ephemeral_nvme_cpu_value_based_on_vm_size_perf_tier(
+                nodepool_skus,
+                ephemeral_nvme_perf_tier,
+            )
         current_memory_value = 2
         current_hugepages_value = 2
         current_hugepages_number = 1024
