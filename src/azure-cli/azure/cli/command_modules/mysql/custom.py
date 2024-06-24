@@ -958,7 +958,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        replication_role=None,
                                        byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
                                        disable_data_encryption=False,
-                                       public_access=None, yes=None):
+                                       public_access=None):
     # validator
     location = ''.join(instance.location.lower().split())
     db_context = DbContext(
@@ -1032,7 +1032,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if high_availability:
         if high_availability.lower() != "disabled":
-            user_confirmation("Enabling High-availability may result in a short downtime for the server based on your server configuration. Do you want to continue and enable High availability?", yes=yes)
+            logger.warning("Enabling High-availability may result in a short downtime for the server based on your server configuration.")
             instance.high_availability.mode = high_availability
             if standby_availability_zone:
                 instance.high_availability.standby_availability_zone = standby_availability_zone
