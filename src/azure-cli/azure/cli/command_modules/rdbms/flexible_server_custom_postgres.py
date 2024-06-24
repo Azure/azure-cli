@@ -57,7 +57,7 @@ def flexible_server_create(cmd, client,
                            high_availability=None, zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, yes=False):
+                           storage_type=None, iops=None, throughput=None, create_default_db='Enabled', yes=False):
 
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
@@ -152,9 +152,9 @@ def flexible_server_create(cmd, client,
         firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
     # Create mysql database if it does not exist
-    if database_name is None:
-        database_name = DEFAULT_DB_NAME
-    _create_database(db_context, cmd, resource_group_name, server_name, database_name)
+    if database_name is not None or (create_default_db and create_default_db.lower() == 'enabled'):
+        db_name = database_name if database_name else DEFAULT_DB_NAME
+        _create_database(db_context, cmd, resource_group_name, server_name, db_name)
 
     user = server_result.administrator_login
     server_id = server_result.id
@@ -275,6 +275,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        backup_byok_identity=None, backup_byok_key=None,
                                        active_directory_auth=None, password_auth=None,
                                        private_dns_zone_arguments=None,
+                                       public_access=None,
                                        tags=None,
                                        auto_grow=None,
                                        performance_tier=None,
@@ -315,6 +316,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
     server_id_parts = parse_resource_id(instance.id)
     resource_group_name = server_id_parts['resource_group']
     server_name = server_id_parts['name']
+
+    if public_access:
+        instance.network.public_network_access = public_access
 
     if private_dns_zone_arguments:
         private_dns_zone_id = prepare_private_dns_zone(db_context,
