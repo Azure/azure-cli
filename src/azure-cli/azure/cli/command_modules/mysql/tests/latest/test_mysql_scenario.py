@@ -1628,7 +1628,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, servers[0], vnet_name, location, subnet_name, private_dns_zone_1))
         
         show_result_3 = self.cmd('{} flexible-server show -g {} -n {}'
-                            .format(database_engine, resource_group, servers[1])).get_output_in_json()
+                            .format(database_engine, resource_group, servers[0])).get_output_in_json()
         self.assertEqual(show_result_3['network']['delegatedSubnetResourceId'], None)
 
 
