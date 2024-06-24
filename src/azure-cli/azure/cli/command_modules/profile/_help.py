@@ -20,7 +20,13 @@ long-summary: >-
     For more details, see https://go.microsoft.com/fwlink/?linkid=2276314
 
 
-    To login with a service principal, specify --service-principal.
+    To log in with a service principal, specify --service-principal.
+
+
+    To log in with a managed identity, specify --identity.
+
+
+    For more details, see https://learn.microsoft.com/cli/azure/authenticate-azure-cli
 examples:
     - name: Log in interactively.
       text: az login
@@ -30,10 +36,10 @@ examples:
       text: az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
     - name: Log in with a service principal using client certificate.
       text: az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
-    - name: Log in using a VM's system-assigned managed identity.
+    - name: Log in with a system-assigned managed identity.
       text: az login --identity
-    - name: Log in using a VM's user-assigned managed identity. Client or object ids of the service identity also work.
-      text: az login --identity -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+    - name: Log in with a user-assigned managed identity. You must specify the client ID, object ID or resource ID of the user-assigned managed identity with --username.
+      text: az login --identity --username 00000000-0000-0000-0000-000000000000
 """
 
 helps['account'] = """
