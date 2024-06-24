@@ -275,6 +275,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        backup_byok_identity=None, backup_byok_key=None,
                                        active_directory_auth=None, password_auth=None,
                                        private_dns_zone_arguments=None,
+                                       public_access=None,
                                        tags=None,
                                        auto_grow=None,
                                        performance_tier=None,
@@ -315,6 +316,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
     server_id_parts = parse_resource_id(instance.id)
     resource_group_name = server_id_parts['resource_group']
     server_name = server_id_parts['name']
+
+    if public_access:
+        instance.network.public_network_access = public_access
 
     if private_dns_zone_arguments:
         private_dns_zone_id = prepare_private_dns_zone(db_context,
