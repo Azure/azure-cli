@@ -547,6 +547,11 @@ def public_access_validator(ns):
             _validate_start_and_end_ip_address_order(vals[0], vals[1])
 
 
+def default_version_validator(ns):
+    if ns.version == '13':
+        logger.warning('In the next release, the default value for the PostgreSQL server major version will be updated to 16')
+
+
 def _validate_start_and_end_ip_address_order(start_ip, end_ip):
     start_ip_elements = [int(octet) for octet in start_ip.split('.')]
     end_ip_elements = [int(octet) for octet in end_ip.split('.')]
