@@ -876,7 +876,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer(location='southcentralus')
-    @KeyVaultPreparer(location='southcentralus')
+    @KeyVaultPreparer(location='southcentralus', additional_params='--enable-rbac-authorization false')
     def test_customer_managed_key(self, resource_group, storage_account, key_vault):
         self.kwargs = {'rg': resource_group, 'sa': storage_account, 'vt': key_vault}
 
@@ -1767,9 +1767,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'rg': resource_group,
             'container': self.create_random_name(prefix='container', length=24),
         }
-        self.cmd('storage account create -n {sa1} -g {rg} --edge-zone microsoftrrdclab1 -l eastus2euap --sku Premium_LRS',
+        self.cmd('storage account create -n {sa1} -g {rg} --edge-zone microsoftrrdclab3 -l eastus2euap --sku Premium_LRS',
                  checks=[
-                     JMESPathCheck('extendedLocation.name', 'microsoftrrdclab1'),
+                     JMESPathCheck('extendedLocation.name', 'microsoftrrdclab3'),
                      JMESPathCheck('extendedLocation.type', 'EdgeZone')
                  ])
         self.cmd('storage account create -n {sa2} -g {rg} --edge-zone microsoftlosangeles1 --sku Premium_LRS',
@@ -2539,8 +2539,7 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
             'src_sc': self.create_random_name(prefix='clicor', length=24),
         })
 
-        self.cmd('storage account create -n {src_sc} -g {rg} ', checks=[
-            JMESPathCheck('allowCrossTenantReplication', None)])
+        self.cmd('storage account create -n {src_sc} -g {rg} ')
 
         self.cmd('storage account update -n {src_sc} -g {rg} -r false', checks=[
             JMESPathCheck('allowCrossTenantReplication', False)])

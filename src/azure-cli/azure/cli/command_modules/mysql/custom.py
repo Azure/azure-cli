@@ -287,7 +287,7 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
 def flexible_server_version_upgrade(cmd, client, resource_group_name, server_name, version, yes=None):
     if not yes:
         user_confirmation(
-            "Updating major version in server {} is irreversible. The action you're about to take can't be undone. "
+            "Upgrading major version in server {} is irreversible. The action you're about to take can't be undone. "
             "Going further will initiate major version upgrade to the selected version on this server."
             .format(server_name), yes=yes)
 
@@ -322,7 +322,7 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
             resource_group_name=resource_group_name,
             server_name=server_name,
             parameters=parameters),
-        cmd.cli_ctx, 'Updating server {} to major version {}'.format(server_name, version)
+        cmd.cli_ctx, 'Upgrading server {} to major version {}'.format(server_name, version)
     )
 
 
@@ -1055,9 +1055,10 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
         replicas = replica_operations_client.list_by_server(resource_group_name, instance.name)
         for replica in replicas:
+            replica_resource_group = re.search("(?<=/resourceGroups/).*?(?=/)", replica.id).group()
             resolve_poller(
                 server_operations_client.begin_update(
-                    resource_group_name=resource_group_name,
+                    resource_group_name=replica_resource_group,
                     server_name=replica.name,
                     parameters=ServerForUpdate(identity=identity, data_encryption=data_encryption)),
                 cmd.cli_ctx, 'Updating data encryption to replica {}'.format(replica.name)
@@ -1597,9 +1598,10 @@ def flexible_server_identity_assign(cmd, client, resource_group_name, server_nam
 
     replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
     for replica in replicas:
+        replica_resource_group = re.search("(?<=/resourceGroups/).*?(?=/)", replica.id).group()
         resolve_poller(
             client.begin_update(
-                resource_group_name=resource_group_name,
+                resource_group_name=replica_resource_group,
                 server_name=replica.name,
                 parameters=parameters),
             cmd.cli_ctx, 'Adding identities to replica {}'.format(replica.name)
@@ -1658,9 +1660,10 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
 
     replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
     for replica in replicas:
+        replica_resource_group = re.search("(?<=/resourceGroups/).*?(?=/)", replica.id).group()
         resolve_poller(
             client.begin_update(
-                resource_group_name=resource_group_name,
+                resource_group_name=replica_resource_group,
                 server_name=replica.name,
                 parameters=parameters),
             cmd.cli_ctx, 'Removing identities from replica {}'.format(replica.name)
@@ -1711,9 +1714,10 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
     for replica in replicas:
         if not (replica.identity and replica.identity.user_assigned_identities and
            identity.lower() in [key.lower() for key in replica.identity.user_assigned_identities.keys()]):
+            replica_resource_group = re.search("(?<=/resourceGroups/).*?(?=/)", replica.id).group()
             resolve_poller(
                 server_operations_client.begin_update(
-                    resource_group_name=resource_group_name,
+                    resource_group_name=replica_resource_group,
                     server_name=replica.name,
                     parameters=parameters),
                 cmd.cli_ctx, 'Adding identity {} to replica {}'.format(identity, replica.name)
@@ -1778,8 +1782,9 @@ def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_nam
     replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
     for replica in replicas:
         if config_operations_client.get(resource_group_name, replica.name, configuration_name).value == "ON":
+            replica_resource_group = re.search("(?<=/resourceGroups/).*?(?=/)", replica.id).group()
             resolve_poller(
-                config_operations_client.begin_update(resource_group_name, replica.name, configuration_name, parameters),
+                config_operations_client.begin_update(replica_resource_group, replica.name, configuration_name, parameters),
                 cmd.cli_ctx, 'Disabling aad_auth_only in replica {}'.format(replica.name))
 
     if config_operations_client.get(resource_group_name, server_name, configuration_name).value == "ON":
