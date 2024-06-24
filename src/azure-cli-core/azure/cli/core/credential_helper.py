@@ -59,8 +59,9 @@ class CredentialType(Enum):
 def get_secret_masker():
     # global secret_masker_instance
     from microsoft_security_utilities_secret_masker import SecretMasker, load_regex_patterns_from_json_file
-    regex_patterns = load_regex_patterns_from_json_file('HighConfidenceMicrosoftSecurityModels.json')
-    return SecretMasker(regex_patterns)
+    precisely_classified_regex_patterns = load_regex_patterns_from_json_file('PreciselyClassifiedSecurityKeys.json')
+    unclassified_regex_patterns = load_regex_patterns_from_json_file('UnclassifiedPotentialSecurityKeys.json')
+    return SecretMasker(precisely_classified_regex_patterns.union(unclassified_regex_patterns))
 
 
 def is_containing_credential(content, is_file=False, max_level=9):
