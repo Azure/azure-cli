@@ -6,6 +6,7 @@
 from azure.cli.core.azclierror import UnknownError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
+    CONST_ACSTOR_ALL,
     CONST_ACSTOR_K8S_EXTENSION_NAME,
     CONST_DISK_TYPE_PV_WITH_ANNOTATION,
     CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
@@ -17,7 +18,6 @@ from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_STORAGE_POOL_OPTION_NVME,
     CONST_STORAGE_POOL_OPTION_SSD,
     CONST_STORAGE_POOL_SKU_PREMIUM_LRS,
-    CONST_ACSTOR_ALL,
     CONST_STORAGE_POOL_TYPE_AZURE_DISK,
     CONST_STORAGE_POOL_TYPE_ELASTIC_SAN,
     CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
@@ -78,9 +78,10 @@ def perform_enable_azure_container_storage(  # pylint: disable=too-many-statemen
 
     is_storagepool_create_op_required = check_if_new_storagepool_creation_required(
         storage_pool_type,
-        storage_pool_option,
         ephemeral_disk_volume_type,
         ephemeral_disk_nvme_perf_tier,
+        existing_ephemeral_disk_volume_type,
+        existing_ephemeral_nvme_perf_tier,
         is_extension_installed,
         is_ephemeralDisk_nvme_enabled,
         is_ephemeralDisk_localssd_enabled,
@@ -140,6 +141,10 @@ def perform_enable_azure_container_storage(  # pylint: disable=too-many-statemen
     if ephemeral_disk_nvme_perf_tier is None:
         ephemeral_disk_nvme_perf_tier = existing_ephemeral_nvme_perf_tier
 
+    perf_tier_updated = False
+    if existing_ephemeral_nvme_perf_tier.lower() != ephemeral_disk_nvme_perf_tier.lower():
+        perf_tier_updated = True
+
     config_settings.extend(
         [
             {"global.cli.activeControl": True},
@@ -176,6 +181,7 @@ def perform_enable_azure_container_storage(  # pylint: disable=too-many-statemen
             is_elasticSan_enabled,
             is_ephemeralDisk_localssd_enabled,
             is_ephemeralDisk_nvme_enabled,
+            perf_tier_updated,
             acstor_nodepool_skus,
             True,
         )
@@ -545,6 +551,7 @@ def perform_disable_azure_container_storage(  # pylint: disable=too-many-stateme
             is_elasticSan_enabled,
             is_ephemeralDisk_localssd_enabled,
             is_ephemeralDisk_nvme_enabled,
+            False,
             None,
             False,
         )
