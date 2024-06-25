@@ -1498,7 +1498,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('maxShares', 1)
         ])
 
-    @AllowLargeResponse(size_kb=99999)
+    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_create_disk_from_diff_gallery_image_version_', location='westus')
     def test_create_disk_from_diff_gallery_image_version(self):
         self.kwargs.update({
@@ -1513,19 +1513,12 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk2': 'disk2',
             'disk3': 'disk3',
             'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',
-            'tenantId': '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a',
-            'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'tenantId': '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'
         })
 
         self.kwargs['vm_id'] = \
             self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --data-disk-sizes-gb 10 --admin-username clitest1 '
-                     '--generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()['id']
-
-        # Disable default outbound access
-        self.cmd(
-            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
-
+                     '--generate-ssh-key --nsg-rule NONE').get_output_in_json()['id']
         time.sleep(70)
 
         self.cmd('sig create -g {rg} --gallery-name {gallery1} --permissions community --publisher-uri publisher1 '
@@ -1533,7 +1526,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('sig share enable-community -g {rg} -r {gallery1}')
 
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery1} --gallery-image-definition {image1} '
-                 '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
+                 '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1')
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery1} --gallery-image-definition {image1} '
                  '--gallery-image-version {version} --virtual-machine {vm_id}')
 
@@ -1774,7 +1767,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} -n {vm} --image OpenLogic:CentOS:7.5:latest --size Standard_D2s_v3 --v-cpus-available 1 --v-cpus-per-core 1 --admin-username vmtest '
-                 '--admin-username vmtest--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--admin-username vmtest --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
