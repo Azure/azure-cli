@@ -464,7 +464,7 @@ def _validate_nodepools(  # pylint: disable=too-many-branches
                 f'\nNode pools available in the cluster are: {agentpool_names_str}.'
                 '\nAborting Azure Container Storage operation.'
             )
-        _validate_nodepool_names(nodepool_list, agentpool_details)
+        _validate_nodepool_names(nodepool_list, agentpool_names)
         nodepool_arr = nodepool_list.split(',')
 
     nvme_nodepool_found = False

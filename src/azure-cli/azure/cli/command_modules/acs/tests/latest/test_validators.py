@@ -12,6 +12,7 @@ from azure.cli.core.azclierror import (
     InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
     RequiredArgumentMissingError,
+    UnknownError,
 )
 import azure.cli.command_modules.acs.azurecontainerstorage._consts as acstor_consts
 import azure.cli.command_modules.acs.azurecontainerstorage._validators as acstor_validator
