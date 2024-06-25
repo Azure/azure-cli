@@ -1179,7 +1179,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer()
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
-    @unittest.skip('RBAC-related issue, TODO fix by June 29 2024')
+    # @unittest.skip('RBAC-related issue, TODO fix by June 29 2024')
     @KeyVaultPreparer()
     def test_backup_encryption(self, resource_group, resource_group_location, vault1, vault2, key_vault):
         self.kwargs.update({
@@ -1198,33 +1198,34 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         })
 
         subscription = self.cmd('account show --query "id"').get_output_in_json()
-        self.kwargs["user_principal_id"] = self.cmd('account show --query "user.name"').get_output_in_json()
+        user_principal_id = self.cmd('account show --query "user.name"').get_output_in_json()
+        self.kwargs["user_principal_id"] = user_principal_id
         self.kwargs['key_vault_id'] = "subscriptions/{}/resourceGroups/{}/providers/Microsoft.KeyVault/vaults/{}".format(
             subscription, resource_group, key_vault)
         self.cmd('role assignment create --role "{user_rbac_permissions}" --scope "{key_vault_id}" --assignee "{user_principal_id}"')
 
-        self.kwargs['identity1_id'] = self.cmd('identity create -n {identity1} -g {rg} --query id').get_output_in_json()
-        self.kwargs['identity1_principalid'] = self.cmd('identity show -n {identity1} -g {rg} --query principalId').get_output_in_json()
+        self.kwargs['identity1_id'] = self.cmd('identity create -n "{identity1}" -g "{rg}" --query id').get_output_in_json()
+        self.kwargs['identity1_principalid'] = self.cmd('identity show -n "{identity1}" -g "{rg}" --query principalId').get_output_in_json()
 
-        self.kwargs['identity2_id'] = self.cmd('identity create -n {identity2} -g {rg} --query id').get_output_in_json()
-        self.kwargs['identity2_principalid'] = self.cmd('identity show -n {identity2} -g {rg} --query principalId').get_output_in_json()
+        self.kwargs['identity2_id'] = self.cmd('identity create -n "{identity2}" -g "{rg}" --query id').get_output_in_json()
+        self.kwargs['identity2_principalid'] = self.cmd('identity show -n "{identity2}" -g "{rg}" --query principalId').get_output_in_json()
 
 
-        userMSI_v1_json = self.cmd('backup vault identity assign --user-assigned {identity1_id} {identity2_id} -g {rg} -n {vault1}').get_output_in_json()
+        userMSI_v1_json = self.cmd('backup vault identity assign --user-assigned "{identity1_id}" "{identity2_id}" -g "{rg}" -n "{vault1}"').get_output_in_json()
 
-        system_v1_json = self.cmd('backup vault identity assign --system-assigned -g {rg} -n {vault1}').get_output_in_json()
+        system_v1_json = self.cmd('backup vault identity assign --system-assigned -g "{rg}" -n "{vault1}"').get_output_in_json()
 
         self.kwargs['system1_principalid'] = system_v1_json['identity']['principalId']
 
-        userMSI1_v2_json = self.cmd('backup vault identity assign --user-assigned {identity1_id} -g {rg} -n {vault2}').get_output_in_json()
+        userMSI1_v2_json = self.cmd('backup vault identity assign --user-assigned "{identity1_id}" -g "{rg}" -n "{vault2}"').get_output_in_json()
 
-        system_v2_json = self.cmd('backup vault identity assign --system-assigned -g {rg} -n {vault2}').get_output_in_json()
+        system_v2_json = self.cmd('backup vault identity assign --system-assigned -g "{rg}" -n "{vault2}"').get_output_in_json()
 
         self.kwargs['system2_principalid'] = system_v2_json['identity']['principalId']
 
-        self.cmd('keyvault update --name {key_vault} --enable-purge-protection')
+        self.cmd('keyvault update --name "{key_vault}" --enable-purge-protection')
 
-        key1_json = self.cmd('keyvault key create --vault-name {key_vault} -n {key1} --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
+        key1_json = self.cmd('keyvault key create --vault-name "{key_vault}" -n "{key1}" --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
             self.check("attributes.enabled", True),
             self.check('key.kty', "RSA"),
         ]).get_output_in_json()
@@ -1237,7 +1238,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn("verify", keyOps1)
         self.assertIn("wrapKey", keyOps1)
 
-        key2_json = self.cmd('keyvault key create --vault-name {key_vault} -n {key2} --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
+        key2_json = self.cmd('keyvault key create --vault-name "{key_vault}" -n "{key2}" --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
             self.check("attributes.enabled", True),
             self.check('key.kty', "RSA"),
         ]).get_output_in_json()
@@ -1254,21 +1255,23 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['key1_id'] = key1_json['key']['kid']
         self.kwargs['key2_id'] = key2_json['key']['kid']
 
-        rbac1_json = self.cmd('role assignment create --scope {key_vault_id} --assignee {identity1_principalid} --role {identity_rbac_permissions}').get_output_in_json()
-        self.assertEqual(rbac1_json['roleDefinitionName'], 'Key Vault Crypto Service Encryption User')
+        role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/e147488a-f6f5-4113-8e2d-b22465e65bf6'.format(subscription)
+        rbac1_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{identity1_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
+        print(rbac1_json)
+        self.assertEqual(rbac1_json['roleDefinitionId'], role_id)
 
-        rbac2_json = self.cmd('role assignment create --scope {key_vault_id} --assignee {identity2_principalid} --role {identity_rbac_permissions}').get_output_in_json()
-        self.assertEqual(rbac1_json['roleDefinitionName'], 'Key Vault Crypto Service Encryption User')
+        rbac2_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{identity2_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
+        self.assertEqual(rbac2_json['roleDefinitionId'], role_id)
 
-        rbac3_json = self.cmd('role assignment create --scope {key_vault_id} --assignee {system1_principalid} --role {identity_rbac_permissions}').get_output_in_json()
-        self.assertEqual(rbac1_json['roleDefinitionName'], 'Key Vault Crypto Service Encryption User')
+        rbac3_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{system1_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
+        self.assertEqual(rbac3_json['roleDefinitionId'], role_id)
 
-        rbac4_json = self.cmd('role assignment create --scope {key_vault_id} --assignee {system2_principalid} --role {identity_rbac_permissions}').get_output_in_json()
-        self.assertEqual(rbac1_json['roleDefinitionName'], 'Key Vault Crypto Service Encryption User')
+        rbac4_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{system2_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
+        self.assertEqual(rbac4_json['roleDefinitionId'], role_id)
 
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity1_id} -g {rg} -n {vault1}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key1_id}" --mi-user-assigned "{identity1_id}" -g "{rg}" -n "{vault1}"')
 
-        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault1}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key1_id}'),
@@ -1277,9 +1280,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity2_id} -g {rg} -n {vault1}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key1_id}" --mi-user-assigned "{identity2_id}" -g "{rg}" -n "{vault1}"')
 
-        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault1}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key1_id}'),
@@ -1288,9 +1291,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key2_id} --mi-system-assigned -g {rg} -n {vault1}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key2_id}" --mi-system-assigned -g "{rg}" -n "{vault1}"')
 
-        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault1}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key2_id}'),
@@ -1299,9 +1302,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} -g {rg} -n {vault1}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key1_id}" -g "{rg}" -n "{vault1}"')
 
-        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault1}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key1_id}'),
@@ -1311,9 +1314,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
 
-        self.cmd('backup vault encryption update --encryption-key-id {key2_id} --mi-system-assigned --infrastructure-encryption Enabled -g {rg} -n {vault2}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key2_id}" --mi-system-assigned --infrastructure-encryption Enabled -g "{rg}" -n "{vault2}"')
 
-        self.cmd('backup vault encryption show -n {vault2} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault2}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Enabled"),
             self.check('properties.keyUri', '{key2_id}'),
@@ -1322,9 +1325,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity1_id} -g {rg} -n {vault2}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key1_id}" --mi-user-assigned "{identity1_id}" -g "{rg}" -n "{vault2}"')
 
-        self.cmd('backup vault encryption show -n {vault2} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault2}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Enabled"),
             self.check('properties.keyUri', '{key1_id}'),
