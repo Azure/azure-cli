@@ -359,6 +359,7 @@ def validate_enable_azure_container_storage_params(  # pylint: disable=too-many-
                 f'{storage_pool_type} in the cluster.'
             )
 
+        # pylint: disable=too-many-boolean-expressions
         if storage_pool_type == CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK and \
            ((is_ephemeralDisk_nvme_enabled and
             storage_pool_option == CONST_STORAGE_POOL_OPTION_NVME and
