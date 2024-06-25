@@ -315,6 +315,8 @@ examples:
 helps['mysql flexible-server update'] = """
 type: command
 short-summary: Update a flexible server.
+long-summary: >
+  [!WARNING] Enabling High-availability may result in a short downtime for the server based on your server configuration.
 examples:
   - name: Update a flexible server's sku, using local context for server and resource group.
     text: az mysql flexible-server update --sku-name Standard_D4ds_v4 --tier GeneralPurpose
