@@ -11133,7 +11133,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
                      '--enable-azure-container-storage ephemeralDisk --storage-pool-option NVMe ' \
                      '--ephemeral-disk-volume-type PersistentVolumeWithAnnotation ' \
-                     '--ephemeral-disk-nvme-per-tier Standard'
+                     '--ephemeral-disk-nvme-perf-tier Standard'
 
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
