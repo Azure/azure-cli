@@ -364,8 +364,10 @@ def perform_disable_azure_container_storage(  # pylint: disable=too-many-stateme
         else:
             if is_ephemeralDisk_nvme_enabled:
                 pool_option = CONST_STORAGE_POOL_OPTION_NVME.lower()
+                storage_pool_option = CONST_STORAGE_POOL_OPTION_NVME
             elif is_ephemeralDisk_localssd_enabled:
                 pool_option = CONST_STORAGE_POOL_OPTION_SSD.lower()
+                storage_pool_option = CONST_STORAGE_POOL_OPTION_SSD
 
     # Step 1: Perform validation if accepted by user
     if perform_validation:
