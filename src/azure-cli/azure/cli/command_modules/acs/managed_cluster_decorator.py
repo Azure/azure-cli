@@ -6918,9 +6918,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 agent_pool_vm_sizes,
                 ephemeral_disk_volume_type,
                 ephemeral_disk_nvme_perf_tier,
+                True,
                 existing_ephemeral_disk_volume_type,
                 existing_ephemeral_nvme_perf_tier,
-                True,
             )
 
     def put_mc(self, mc: ManagedCluster) -> ManagedCluster:
@@ -8661,9 +8661,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 acstor_nodepool_skus,
                 ephemeral_disk_volume_type,
                 ephemeral_disk_nvme_perf_tier,
+                False,
                 existing_ephemeral_disk_volume_type,
                 existing_ephemeral_nvme_perf_tier,
-                False,
                 is_extension_installed,
                 is_azureDisk_enabled,
                 is_elasticSan_enabled,

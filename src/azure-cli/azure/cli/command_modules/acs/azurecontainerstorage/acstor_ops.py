@@ -8,6 +8,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_ACSTOR_K8S_EXTENSION_NAME,
+    CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
     CONST_DISK_TYPE_PV_WITH_ANNOTATION,
     CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
     CONST_EXT_INSTALLATION_NAME,
@@ -51,9 +52,9 @@ def perform_enable_azure_container_storage(  # pylint: disable=too-many-statemen
     acstor_nodepool_skus,
     ephemeral_disk_volume_type,
     ephemeral_disk_nvme_perf_tier,
-    existing_ephemeral_disk_volume_type,
-    existing_ephemeral_nvme_perf_tier,
     is_cluster_create,
+    existing_ephemeral_disk_volume_type=CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
+    existing_ephemeral_nvme_perf_tier=CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
     is_extension_installed=False,
     is_azureDisk_enabled=False,
     is_elasticSan_enabled=False,
@@ -333,8 +334,8 @@ def perform_disable_azure_container_storage(  # pylint: disable=too-many-stateme
     is_ephemeralDisk_localssd_enabled,
     is_ephemeralDisk_nvme_enabled,
     current_core_value,
-    existing_ephemeral_disk_volume_type,
-    existing_ephemeral_nvme_perf_tier,
+    existing_ephemeral_disk_volume_type=CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
+    existing_ephemeral_nvme_perf_tier=CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
 ):
     client_factory = get_k8s_extension_module(CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME)
     client = client_factory.cf_k8s_extension_operation(cmd.cli_ctx)
