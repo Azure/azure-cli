@@ -449,18 +449,19 @@ def check_if_new_storagepool_creation_required(
     is_ephemeralDisk_nvme_enabled,
     is_ephemeralDisk_localssd_enabled,
 ) -> bool:
-    if (
-        not is_extension_installed or \
-        not (is_ephemeralDisk_localssd_enabled or is_ephemeralDisk_nvme_enabled) or \
-        storage_pool_type != CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK or \
-        ((ephemeral_disk_volume_type is None or
-            (existing_ephemeral_nvme_perf_tier.lower() == ephemeral_disk_volume_type.lower())) and
-        (ephemeral_disk_nvme_perf_tier is None or
-            (existing_ephemeral_nvme_perf_tier.lower() == ephemeral_disk_nvme_perf_tier.lower())))
-        ):
-        return True
+    should_create_storagepool = (
+        not is_extension_installed or
+        not (is_ephemeralDisk_localssd_enabled or is_ephemeralDisk_nvme_enabled) or
+        storage_pool_type != CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK or
+        (
+            (ephemeral_disk_volume_type is None or
+                (existing_ephemeral_disk_volume_type.lower() == ephemeral_disk_volume_type.lower())) and
+            (ephemeral_disk_nvme_perf_tier is None or
+                (existing_ephemeral_nvme_perf_tier.lower() == ephemeral_disk_nvme_perf_tier.lower()))
+        )
+    )
 
-    return False
+    return should_create_storagepool
 
 
 def _get_ephemeral_nvme_cpu_value_based_on_vm_size_perf_tier(nodepool_skus, perf_tier):
