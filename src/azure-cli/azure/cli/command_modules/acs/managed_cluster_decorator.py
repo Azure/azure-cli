@@ -6470,6 +6470,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 False,
                 False,
                 False,
+                ephemeral_disk_volume_type,
+                ephemeral_disk_nvme_perf_tier,
+                default_ephemeral_disk_volume_type,
+                default_ephemeral_disk_nvme_perf_tier,
             )
 
             # Setup Azure Container Storage labels on the nodepool
