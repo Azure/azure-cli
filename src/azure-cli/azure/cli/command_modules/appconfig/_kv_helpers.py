@@ -270,7 +270,8 @@ def __read_kv_from_config_store(azconfig_client,
                                 all_=True,
                                 cli_ctx=None,
                                 prefix_to_remove="",
-                                prefix_to_add=""):
+                                prefix_to_add="",
+                                correlationRequestId=None):
     # pylint: disable=too-many-branches too-many-statements
 
     # list_configuration_settings returns kv with null label when:
@@ -289,10 +290,16 @@ def __read_kv_from_config_store(azconfig_client,
                 break
             query_fields.append(field.name.lower())
 
+    custom_headers = {
+        "headers": {
+            "x-ms-correlation-request-id": correlationRequestId
+        }
+    }
     if snapshot:
         try:
             configsetting_iterable = AppConfigSnapshotClient(azconfig_client).list_snapshot_kv(name=snapshot,
-                                                                                               fields=query_fields)
+                                                                                               fields=query_fields.
+                                                                                               custom_headers)
 
         except HttpResponseError as exception:
             raise AzureResponseError('Failed to read key-values(s) from snapshot {}. '.format(snapshot) + str(exception))
@@ -302,7 +309,8 @@ def __read_kv_from_config_store(azconfig_client,
             configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
                                                                                  label_filter=label,
                                                                                  accept_datetime=datetime,
-                                                                                 fields=query_fields)
+                                                                                 fields=query_fields,
+                                                                                 headers=custom_headers)
         except HttpResponseError as exception:
             raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
 
@@ -346,7 +354,7 @@ def __read_kv_from_config_store(azconfig_client,
     # We first check if the snapshot exists before returning an empty result.
     if snapshot and len(retrieved_kvs) == 0:
         try:
-            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot)
+            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot, headers=custom_headers)
 
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.NOT_FOUND:
@@ -360,7 +368,8 @@ def __write_kv_and_features_to_config_store(azconfig_client,
                                             features=None,
                                             label=None,
                                             preserve_labels=False,
-                                            content_type=None):
+                                            content_type=None,
+                                            correlationRequestId=None):
     if not key_values and not features:
         logger.warning('\nSource configuration is empty. No changes will be made.')
         return
@@ -378,7 +387,7 @@ def __write_kv_and_features_to_config_store(azconfig_client,
         if content_type and not is_feature_flag(set_kv) and not __is_key_vault_ref(set_kv):
             set_kv.content_type = content_type
 
-        __write_configuration_setting_to_config_store(azconfig_client, set_kv)
+        __write_configuration_setting_to_config_store(azconfig_client, set_kv, correlationRequestId)
 
 
 def __is_key_vault_ref(kv):
@@ -394,7 +403,7 @@ def __discard_features_from_retrieved_kv(src_kvs):
 
 # App Service <-> List of KeyValue object
 
-def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", content_type=None):
+def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", content_type=None, correlationRequestId=None):
     try:
         key_values = []
         from azure.cli.command_modules.appservice.custom import get_app_settings
@@ -828,7 +837,7 @@ def __resolve_secret(cli_ctx, keyvault_reference):
         raise CLIError(str(exception))
 
 
-def __import_kvset_from_file(client, path, strict, yes, import_mode=ImportMode.IGNORE_MATCH):
+def __import_kvset_from_file(client, path, strict, yes, import_mode=ImportMode.IGNORE_MATCH, correlationRequestId=None):
     new_kvset = __read_with_appropriate_encoding(file_path=path, format_='json')
     if KVSetConstants.KVSETRootElementName not in new_kvset:
         raise FileOperationError("file '{0}' is not in a valid '{1}' format.".format(path, ImportExportProfiles.KVSET))
@@ -869,7 +878,7 @@ def __import_kvset_from_file(client, path, strict, yes, import_mode=ImportMode.I
         kvset_to_import_iter = kvset_from_file
 
     for config_setting in kvset_to_import_iter:
-        __write_configuration_setting_to_config_store(client, config_setting)
+        __write_configuration_setting_to_config_store(client, config_setting, correlationRequestId)
 
 
 def __validate_import_keyvault_ref(kv):
@@ -943,9 +952,14 @@ def __validate_import_tags(kv):
     return True
 
 
-def __write_configuration_setting_to_config_store(azconfig_client, configuration_setting):
+def __write_configuration_setting_to_config_store(azconfig_client, configuration_setting, correlationRequestId = None):
     try:
-        azconfig_client.set_configuration_setting(configuration_setting)
+        correlationHeader = {
+            "headers": {
+                "x-ms-correlation-request-id": correlationRequestId
+            }
+        }
+        azconfig_client.set_configuration_setting(configuration_setting, correlationHeader)
     except ResourceReadOnlyError:
         logger.warning(
             "Failed to set read only key-value with key '%s' and label '%s'. Unlock the key-value before updating it.",

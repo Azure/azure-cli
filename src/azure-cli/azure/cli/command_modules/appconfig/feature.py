@@ -285,7 +285,8 @@ def list_feature(cmd,
                  top=None,
                  all_=False,
                  auth_mode="key",
-                 endpoint=None):
+                 endpoint=None,
+                 correlationRequestId=None):
     if key and feature:
         logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 
@@ -300,7 +301,8 @@ def list_feature(cmd,
     try:
         retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
                                                    key_filter=key_filter,
-                                                   label=label if label else SearchFilterOptions.ANY_LABEL)
+                                                   label=label if label else SearchFilterOptions.ANY_LABEL,
+                                                   correlationRequestId=correlationRequestId)
         retrieved_featureflags = []
 
         invalid_ffs = 0
@@ -1127,7 +1129,8 @@ def __update_existing_key_value(azconfig_client,
 
 def __list_all_keyvalues(azconfig_client,
                          key_filter,
-                         label=None):
+                         label=None,
+                         correlationRequestId=None):
     '''
         To get all keys by name or pattern
 
@@ -1151,7 +1154,12 @@ def __list_all_keyvalues(azconfig_client,
     label = prep_label_filter_for_url_encoding(label)
 
     try:
-        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label)
+        correlationHeader = {
+            "headers": {
+                "x-ms-correlation-request-id": correlationRequestId
+            }
+        }
+        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label, headers=correlationHeader)
     except HttpResponseError as exception:
         raise CLIErrors.AzureResponseError('Failed to read feature flag(s) that match the specified feature and label. ' + str(exception))
 
