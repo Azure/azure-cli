@@ -13,6 +13,7 @@ import uuid
 from itertools import chain
 from knack.log import get_logger
 from knack.util import CLIError
+from ._constants import HttpHeaders
 
 from azure.appconfiguration import (ConfigurationSetting,
                                     ResourceReadOnlyError)
@@ -154,7 +155,7 @@ def import_config(cmd,
 
     elif source == 'appservice':
         src_kvs = __read_kv_from_app_service(
-            cmd, appservice_account=appservice_account, prefix_to_add=prefix, content_type=content_type, correlationRequestId=correlationRequestId)
+            cmd, appservice_account=appservice_account, prefix_to_add=prefix, content_type=content_type)
 
     if strict or not yes or import_mode == ImportMode.IGNORE_MATCH:
         # fetch key values from user's configstore
@@ -812,7 +813,7 @@ def restore_key(cmd,
         #set unique correlationRequestId for all operations undertaken during restore
         correlationHeader = {
             "headers": {
-                "x-ms-correlation-request-id": correlationRequestId
+                [HttpHeaders.CORRELATIONREQUESTID]: correlationRequestId
             }
         }
 

@@ -11,6 +11,7 @@ from itertools import chain
 from json import JSONDecodeError
 from urllib.parse import urlparse
 from ._snapshot_custom_client import AppConfigSnapshotClient
+from ._constants import HttpHeaders
 
 import chardet
 import javaproperties
@@ -290,16 +291,16 @@ def __read_kv_from_config_store(azconfig_client,
                 break
             query_fields.append(field.name.lower())
 
-    custom_headers = {
+    correlationHeader = {
         "headers": {
-            "x-ms-correlation-request-id": correlationRequestId
+            [HttpHeaders.CORRELATIONREQUESTID]: correlationRequestId
         }
     }
     if snapshot:
         try:
             configsetting_iterable = AppConfigSnapshotClient(azconfig_client).list_snapshot_kv(name=snapshot,
                                                                                                fields=query_fields.
-                                                                                               custom_headers)
+                                                                                               correlationHeader)
 
         except HttpResponseError as exception:
             raise AzureResponseError('Failed to read key-values(s) from snapshot {}. '.format(snapshot) + str(exception))
@@ -310,7 +311,7 @@ def __read_kv_from_config_store(azconfig_client,
                                                                                  label_filter=label,
                                                                                  accept_datetime=datetime,
                                                                                  fields=query_fields,
-                                                                                 headers=custom_headers)
+                                                                                 headers=correlationHeader)
         except HttpResponseError as exception:
             raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
 
@@ -403,7 +404,7 @@ def __discard_features_from_retrieved_kv(src_kvs):
 
 # App Service <-> List of KeyValue object
 
-def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", content_type=None, correlationRequestId=None):
+def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", content_type=None):
     try:
         key_values = []
         from azure.cli.command_modules.appservice.custom import get_app_settings
@@ -956,7 +957,7 @@ def __write_configuration_setting_to_config_store(azconfig_client, configuration
     try:
         correlationHeader = {
             "headers": {
-                "x-ms-correlation-request-id": correlationRequestId
+                [HttpHeaders.CORRELATIONREQUESTID]: correlationRequestId
             }
         }
         azconfig_client.set_configuration_setting(configuration_setting, correlationHeader)

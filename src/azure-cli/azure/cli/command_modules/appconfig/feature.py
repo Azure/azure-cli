@@ -12,6 +12,7 @@ import copy
 
 from knack.log import get_logger
 from knack.util import CLIError
+from ._constants import HttpHeaders
 import azure.cli.core.azclierror as CLIErrors
 
 from azure.appconfiguration import (ConfigurationSetting,
@@ -1156,7 +1157,7 @@ def __list_all_keyvalues(azconfig_client,
     try:
         correlationHeader = {
             "headers": {
-                "x-ms-correlation-request-id": correlationRequestId
+                [HttpHeaders.CORRELATIONREQUESTID]: correlationRequestId
             }
         }
         configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label, headers=correlationHeader)
