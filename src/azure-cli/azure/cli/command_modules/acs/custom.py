@@ -627,6 +627,8 @@ def aks_create(
     storage_pool_size=None,
     storage_pool_sku=None,
     storage_pool_option=None,
+    ephemeral_disk_volume_type=None,
+    ephemeral_disk_nvme_perf_tier=None,
     # misc
     yes=False,
     no_wait=False,
@@ -779,6 +781,8 @@ def aks_update(
     storage_pool_sku=None,
     storage_pool_option=None,
     azure_container_storage_nodepools=None,
+    ephemeral_disk_volume_type=None,
+    ephemeral_disk_nvme_perf_tier=None,
     # misc
     yes=False,
     no_wait=False,
