@@ -79,6 +79,7 @@ class CosmosDBTests(ScenarioTest):
         ]).get_output_in_json()
         assert account['tags']['testKey'] == "testValue"
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_update_database_account(self, resource_group):
         from azure.mgmt.cosmosdb.models import BackupStorageRedundancy
@@ -164,6 +165,7 @@ class CosmosDBTests(ScenarioTest):
         result = self.cmd('az cosmosdb check-name-exists -n {acc}').get_output_in_json()
         assert result
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_keys_database_account(self, resource_group):
 
@@ -280,6 +282,7 @@ class CosmosDBTests(ScenarioTest):
             self.check('consistencyPolicy.defaultConsistencyLevel', 'ConsistentPrefix'),
         ]).get_output_in_json()
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_list_databases(self, resource_group):
 
@@ -447,6 +450,7 @@ class CosmosDBTests(ScenarioTest):
         # Test delete
         self.cmd('cosmosdb private-endpoint-connection delete --id {pec_id}')
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_database')
     def test_cosmosdb_database(self, resource_group):
 
@@ -474,6 +478,7 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb database delete -g {rg} -n {acc} -d {db_name} --yes')
         assert not self.cmd('az cosmosdb database exists -g {rg} -n {acc} -d {db_name}').get_output_in_json()
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_collection')
     def test_cosmosdb_collection(self, resource_group):
 
@@ -1829,6 +1834,11 @@ class CosmosDBTests(ScenarioTest):
             'az cosmosdb mongodb role definition list -g {rg} -a {acc}').get_output_in_json()
         assert len(role_definition_list) == 0
 
+    '''
+    This test will be rewritten to generalize principals for any subscription.
+    Disabling the test for now.
+    '''
+    @unittest.skip('Needs to be rewritten to generalize principal across subscriptions')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_role')
     def test_cosmosdb_sql_role(self, resource_group):
         acc_name = self.create_random_name(prefix='cli', length=15)

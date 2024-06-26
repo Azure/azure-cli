@@ -3436,8 +3436,8 @@ def cli_cosmosdb_service_create(client,
                                 dedicated_gateway_type=DedicatedGatewayType.INTEGRATED_CACHE.value):
 
     properties = SqlDedicatedGatewayServiceResourceCreateUpdateProperties(instance_count=instance_count,
-                                                                        instance_size=instance_size,
-                                                                        dedicated_gateway_type=dedicated_gateway_type)
+                                                                          instance_size=instance_size,
+                                                                          dedicated_gateway_type=dedicated_gateway_type)
 
     properties.service_type = ServiceType.SQL_DEDICATED_GATEWAY.value
     params = ServiceResourceCreateUpdateParameters(
@@ -3455,7 +3455,7 @@ def cli_cosmosdb_service_update(client,
                                 instance_size=None):
 
     properties = SqlDedicatedGatewayServiceResourceCreateUpdateProperties(instance_count=instance_count,
-                                                                        instance_size=instance_size)
+                                                                          instance_size=instance_size)
 
     properties.service_type = ServiceType.SQL_DEDICATED_GATEWAY.value
     params = ServiceResourceCreateUpdateParameters(
