@@ -634,6 +634,9 @@ def aks_create(
     node_public_ip_tags=None,
     # metrics profile
     enable_cost_analysis=False,
+    # trusted launch
+    enable_vtpm=False,
+    enable_secure_boot=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2329,6 +2332,9 @@ def aks_agentpool_add(
     asg_ids=None,
     node_public_ip_tags=None,
     disable_windows_outbound_nat=False,
+    # trusted launch
+    enable_vtpm=False,
+    enable_secure_boot=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2377,6 +2383,11 @@ def aks_agentpool_update(
     allowed_host_ports=None,
     asg_ids=None,
     os_sku=None,
+    # trusted launch
+    enable_vtpm=False,
+    disable_vtpm=False,
+    enable_secure_boot=False,
+    disable_secure_boot=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
