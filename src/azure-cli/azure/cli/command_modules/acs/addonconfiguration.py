@@ -651,14 +651,14 @@ def ensure_container_insights_for_monitoring(
 
 def create_or_delete_dce_association(cmd, cluster_region, remove_monitoring, cluster_resource_id, config_dce_resource_id):
     association_body = json.dumps(
-                    {
-                        "location": cluster_region,
-                        "properties": {
-                            "dataCollectionEndpointId": config_dce_resource_id,
-                            "description": "routes monitoring data to a Log Analytics workspace",
-                        },
-                    }
-                )
+        {
+            "location": cluster_region,
+            "properties": {
+                "dataCollectionEndpointId": config_dce_resource_id,
+                "description": "routes monitoring data to a Log Analytics workspace",
+            },
+        }
+    )
     association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
                     f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint?api-version=2022-06-01"
     for _ in range(3):
@@ -679,14 +679,14 @@ def create_or_delete_dce_association(cmd, cluster_region, remove_monitoring, clu
 
 def create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, cluster_resource_id, dcr_resource_id):
     association_body = json.dumps(
-                {
-                    "location": cluster_region,
-                    "properties": {
-                        "dataCollectionRuleId": dcr_resource_id,
-                        "description": "routes monitoring data to a Log Analytics workspace",
-                    },
-                }
-            )
+        {
+            "location": cluster_region,
+            "properties": {
+                "dataCollectionRuleId": dcr_resource_id,
+                "description": "routes monitoring data to a Log Analytics workspace",
+            },
+        }
+    )
     association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
                 f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2022-06-01"
     for _ in range(3):
@@ -707,12 +707,12 @@ def create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, clu
 
 def create_ampls_scope(cmd, ampls_resource_id, dce_endpoint_name, dce_resource_id):
     link_dce_ampls_body = json.dumps(
-                        {
-                            "properties": {
-                                "linkedResourceId": dce_resource_id,
-                            },
-                        }
-                    )
+        {
+            "properties": {
+               "linkedResourceId": dce_resource_id,
+            },
+       }
+    )
     link_dce_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
                         f"{ampls_resource_id}/scopedresources/{dce_endpoint_name}-connection?api-version=2021-07-01-preview"
 
@@ -734,29 +734,27 @@ def create_ampls_scope(cmd, ampls_resource_id, dce_endpoint_name, dce_resource_i
 
 def create_data_collection_endpoint(cmd, subscription, resource_group, region, endpoint_name, is_ampls):
     dce_resource_id = (
-                    f"/subscriptions/{subscription}/resourceGroups/{resource_group}/"
-                    f"providers/Microsoft.Insights/dataCollectionEndpoints/{endpoint_name}"
-                )
+        f"/subscriptions/{subscription}/resourceGroups/{resource_group}/"
+        f"providers/Microsoft.Insights/dataCollectionEndpoints/{endpoint_name}"
+    )
     dce_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
                     f"{dce_resource_id}?api-version=2022-06-01"
-                # create the DCE
+    # create the DCE
     dce_creation_body_common = {
-                    "location": region,
-                    "kind": "Linux",
-                    "properties": {
-                        "networkAcls": {
-                            "publicNetworkAccess": "Enabled"
-                        }
-                    }
-                }
+        "location": region,
+            "kind": "Linux",
+            "properties": {
+                "networkAcls": {
+                "publicNetworkAccess": "Enabled"
+            }
+        }
+    }
     if is_ampls:
         dce_creation_body_common["properties"]["networkAcls"]["publicNetworkAccess"] = "Disabled"
     dce_creation_body_ = json.dumps(dce_creation_body_common)
     for _ in range(3):
         try:
-            send_raw_request(
-                            cmd.cli_ctx, "PUT", dce_url, body=dce_creation_body_
-                        )
+            send_raw_request(cmd.cli_ctx, "PUT", dce_url, body=dce_creation_body_)
             error = None
             break
         except AzCLIError as e:
