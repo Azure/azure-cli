@@ -660,15 +660,15 @@ def create_or_delete_dce_association(cmd, cluster_region, remove_monitoring, clu
         }
     )
     association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                    f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint?api-version=2022-06-01"
+        f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint?api-version=2022-06-01"
     for _ in range(3):
         try:
             send_raw_request(
-                            cmd.cli_ctx,
-                            "PUT" if not remove_monitoring else "DELETE",
-                            association_url,
-                            body=association_body,
-                        )
+                cmd.cli_ctx,
+                "PUT" if not remove_monitoring else "DELETE",
+                association_url,
+                body=association_body,
+            )
             error = None
             break
         except AzCLIError as e:
@@ -688,15 +688,15 @@ def create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, clu
         }
     )
     association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2022-06-01"
+        f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2022-06-01"
     for _ in range(3):
         try:
             send_raw_request(
-                        cmd.cli_ctx,
-                        "PUT" if not remove_monitoring else "DELETE",
-                        association_url,
-                        body=association_body,
-                    )
+                cmd.cli_ctx,
+                "PUT" if not remove_monitoring else "DELETE",
+                association_url,
+                body=association_body,
+            )
             error = None
             break
         except AzCLIError as e:
@@ -711,7 +711,7 @@ def create_ampls_scope(cmd, ampls_resource_id, dce_endpoint_name, dce_resource_i
             "properties": {
                "linkedResourceId": dce_resource_id,
             },
-       }
+        }
     )
     link_dce_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
                         f"{ampls_resource_id}/scopedresources/{dce_endpoint_name}-connection?api-version=2021-07-01-preview"
@@ -719,11 +719,11 @@ def create_ampls_scope(cmd, ampls_resource_id, dce_endpoint_name, dce_resource_i
     for _ in range(3):
         try:
             send_raw_request(
-                                cmd.cli_ctx,
-                                "PUT",
-                                link_dce_ampls_url,
-                                body=link_dce_ampls_body,
-                            )
+                cmd.cli_ctx,
+                "PUT",
+                link_dce_ampls_url,
+                body=link_dce_ampls_body,
+            )
             error = None
             break
         except AzCLIError as e:
@@ -742,9 +742,9 @@ def create_data_collection_endpoint(cmd, subscription, resource_group, region, e
     # create the DCE
     dce_creation_body_common = {
         "location": region,
-            "kind": "Linux",
-            "properties": {
-                "networkAcls": {
+        "kind": "Linux",
+        "properties": {
+            "networkAcls": {
                 "publicNetworkAccess": "Enabled"
             }
         }
