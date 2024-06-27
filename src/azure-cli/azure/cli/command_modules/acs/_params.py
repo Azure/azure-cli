@@ -49,6 +49,11 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL)
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
+    CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
+    CONST_DISK_TYPE_PV_WITH_ANNOTATION,
+    CONST_EPHEMERAL_NVME_PERF_TIER_BASIC,
+    CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM,
+    CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
     CONST_STORAGE_POOL_TYPE_AZURE_DISK,
     CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
     CONST_STORAGE_POOL_TYPE_ELASTIC_SAN,
@@ -241,6 +246,17 @@ disable_storage_pool_options = [
     CONST_STORAGE_POOL_OPTION_NVME,
     CONST_STORAGE_POOL_OPTION_SSD,
     CONST_ACSTOR_ALL,
+]
+
+ephemeral_disk_volume_types = [
+    CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
+    CONST_DISK_TYPE_PV_WITH_ANNOTATION,
+]
+
+ephemeral_disk_nvme_perf_tiers = [
+    CONST_EPHEMERAL_NVME_PERF_TIER_BASIC,
+    CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM,
+    CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
 ]
 
 
@@ -438,6 +454,16 @@ def load_arguments(self, _):
             arg_type=get_enum_type(storage_pool_options),
             help="set ephemeral disk storage pool option for azure container storage",
         )
+        c.argument(
+            "ephemeral_disk_volume_type",
+            arg_type=get_enum_type(ephemeral_disk_volume_types),
+            help="set ephemeral disk volume type for azure container storage",
+        )
+        c.argument(
+            "ephemeral_disk_nvme_perf_tier",
+            arg_type=get_enum_type(ephemeral_disk_nvme_perf_tiers),
+            help="set ephemeral disk volume type for azure container storage",
+        )
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_cost_analysis', action='store_true')
@@ -574,6 +600,16 @@ def load_arguments(self, _):
         c.argument(
             "azure_container_storage_nodepools",
             help="define the comma separated nodepool list to install azure container storage",
+        )
+        c.argument(
+            "ephemeral_disk_volume_type",
+            arg_type=get_enum_type(ephemeral_disk_volume_types),
+            help="set ephemeral disk volume type for azure container storage",
+        )
+        c.argument(
+            "ephemeral_disk_nvme_perf_tier",
+            arg_type=get_enum_type(ephemeral_disk_nvme_perf_tiers),
+            help="set ephemeral disk volume type for azure container storage",
         )
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')

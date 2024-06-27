@@ -29,6 +29,9 @@ AZURE_TENANT_ID = "AZURE_TENANT_ID"
 AZURE_CLIENT_ID = "AZURE_CLIENT_ID"
 AZURE_CLIENT_SECRET = "AZURE_CLIENT_SECRET"
 
+WAM_PROMPT = (
+    "Select the account you want to log in with. "
+    "For more information on login with Azure CLI, see https://go.microsoft.com/fwlink/?linkid=2271136")
 
 logger = get_logger(__name__)
 
@@ -150,7 +153,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                                "flow with `az login --use-device-code`.",
                                self._msal_app.authority.authorization_endpoint)
             elif ui == 'broker':
-                logger.warning("Please select the account you want to log in with.")
+                logger.warning(WAM_PROMPT)
 
         from .util import read_response_templates
         success_template, error_template = read_response_templates()

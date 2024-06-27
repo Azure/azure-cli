@@ -4446,6 +4446,16 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('vmss.virtualMachineProfile.extensionProfile.extensions[0].name', 'ApplicationHealthWindows')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_flexible_vmss_set_automatic_upgrade_policy_during_creation', location='eastus')
+    def test_flexible_vmss_set_automatic_upgrade_policy_during_creation(self):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntu2204 --orchestration-mode Flexible --upgrade-policy-mode Automatic --admin-username azureuser --generate-ssh-keys', checks=[
+            self.check('vmss.upgradePolicy.mode', 'Automatic'),
+            self.check('vmss.orchestrationMode', 'Flexible')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_', location='westus')
     def test_vmss_update_image(self):
         self.kwargs.update({
