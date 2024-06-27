@@ -429,7 +429,7 @@ def ensure_container_insights_for_monitoring(
 
         # ingestion DCE MUST be in workspace region
         ingestionDataCollectionEndpointName = f"MSCI-ingest-{location}-{cluster_name}"
-         # Max length of the DCE name is 44 chars
+        # Max length of the DCE name is 44 chars
         ingestionDataCollectionEndpointName = _trim_suffix_if_needed(ingestionDataCollectionEndpointName[0:43])
         ingestion_dce_resource_id = None
 
@@ -439,14 +439,13 @@ def ensure_container_insights_for_monitoring(
         configDataCollectionEndpointName = _trim_suffix_if_needed(configDataCollectionEndpointName[0:43])
         config_dce_resource_id = None
 
-
         if enable_high_log_scale_mode or (ampls_resource_id is not None):
             # create config DCE if AMPLS resource specified
             if ampls_resource_id is not None:
                 config_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, cluster_region, configDataCollectionEndpointName, True)
             # create ingestion DCE if high log scale mode enabled
             if enable_high_log_scale_mode:
-                ingestion_dce_resource_id =  create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, location, ingestionDataCollectionEndpointName, False)
+                ingestion_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, location, ingestionDataCollectionEndpointName, False)
 
         if create_dcr:
             # first get the association between region display names and region IDs (because for some reason
@@ -649,6 +648,7 @@ def ensure_container_insights_for_monitoring(
                     if enable_high_log_scale_mode:
                         create_ampls_scope(cmd, ampls_resource_id, ingestionDataCollectionEndpointName, ingestion_dce_resource_id)
 
+
 def create_or_delete_dce_association(cmd, cluster_region, remove_monitoring, cluster_resource_id, config_dce_resource_id):
     association_body = json.dumps(
                     {
@@ -675,6 +675,7 @@ def create_or_delete_dce_association(cmd, cluster_region, remove_monitoring, clu
             error = e
     else:
         raise error
+
 
 def create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, cluster_resource_id, dcr_resource_id):
     association_body = json.dumps(
@@ -703,6 +704,7 @@ def create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, clu
     else:
         raise error
 
+
 def create_ampls_scope(cmd, ampls_resource_id, dce_endpoint_name, dce_resource_id):
     link_dce_ampls_body = json.dumps(
                         {
@@ -729,6 +731,7 @@ def create_ampls_scope(cmd, ampls_resource_id, dce_endpoint_name, dce_resource_i
     else:
         raise error
 
+
 def create_data_collection_endpoint(cmd, subscription, resource_group, region, endpoint_name, is_ampls):
     dce_resource_id = (
                     f"/subscriptions/{subscription}/resourceGroups/{resource_group}/"
@@ -747,7 +750,7 @@ def create_data_collection_endpoint(cmd, subscription, resource_group, region, e
                     }
                 }
     if is_ampls:
-       dce_creation_body_common["properties"]["networkAcls"]["publicNetworkAccess"] = "Disabled"
+        dce_creation_body_common["properties"]["networkAcls"]["publicNetworkAccess"] = "Disabled"
     dce_creation_body_ = json.dumps(dce_creation_body_common)
     for _ in range(3):
         try:
@@ -1011,6 +1014,7 @@ def _get_data_collection_settings(file_path):
         msg = "Error reading data_collection_settings."
         raise InvalidArgumentValueError(msg.format(file_path))
     return data_collection_settings
+
 
 def _trim_suffix_if_needed(s, suffix="-"):
     if s.endswith(suffix):
