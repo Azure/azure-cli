@@ -728,12 +728,6 @@ class LBProbeCreate(_LBProbeCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.probe_threshold):
-            logger.warning(
-                "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
-                "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
-                "by not specifying the value of the property."
-            )
         if has_value(args.request_path) and args.request_path == "":
             args.request_path = None
 
@@ -750,12 +744,6 @@ class LBProbeUpdate(_LBProbeUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.probe_threshold):
-            logger.warning(
-                "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
-                "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
-                "by not specifying the value of the property."
-            )
         if has_value(args.request_path) and args.request_path == "":
             args.request_path = None
 
