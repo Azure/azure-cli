@@ -1179,7 +1179,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer()
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
-    # @unittest.skip('RBAC-related issue, TODO fix by June 29 2024')
     @KeyVaultPreparer()
     def test_backup_encryption(self, resource_group, resource_group_location, vault1, vault2, key_vault):
         self.kwargs.update({
