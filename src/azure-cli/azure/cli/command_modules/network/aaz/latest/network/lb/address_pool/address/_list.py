@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network lb address-pool address list",
-    is_preview=True,
 )
 class List(AAZCommand):
     """List all backend addresses of the load balance backend address pool.
