@@ -59,6 +59,9 @@ def flexible_server_create(cmd, client,
                            active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, create_default_db='Enabled', yes=False):
 
+    # Warning for upcoming breaking change to default value of pg version
+    logger.warning('In the next release, the default value for the PostgreSQL server major version will be updated to 16')
+
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'postgres')
@@ -360,13 +363,14 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if backup_retention:
         instance.backup.backup_retention_days = backup_retention
 
-    if maintenance_window and maintenance_window.lower() == "disabled":
-        # if disabled is pass in reset to default values
-        day_of_week = start_hour = start_minute = 0
-        custom_window = "Disabled"
-    elif maintenance_window:
-        day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
-        custom_window = "Enabled"
+    if maintenance_window:
+        if maintenance_window.lower() == "disabled":
+            # if disabled is pass in reset to default values
+            day_of_week = start_hour = start_minute = 0
+            custom_window = "Disabled"
+        else:
+            day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
+            custom_window = "Enabled"
 
         # set values - if maintenance_window when is None when created then create a new object
         instance.maintenance_window.day_of_week = day_of_week
