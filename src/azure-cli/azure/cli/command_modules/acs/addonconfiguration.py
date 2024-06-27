@@ -709,12 +709,12 @@ def create_ampls_scope(cmd, ampls_resource_id, dce_endpoint_name, dce_resource_i
     link_dce_ampls_body = json.dumps(
         {
             "properties": {
-               "linkedResourceId": dce_resource_id,
+                "linkedResourceId": dce_resource_id,
             },
         }
     )
     link_dce_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                        f"{ampls_resource_id}/scopedresources/{dce_endpoint_name}-connection?api-version=2021-07-01-preview"
+        f"{ampls_resource_id}/scopedresources/{dce_endpoint_name}-connection?api-version=2021-07-01-preview"
 
     for _ in range(3):
         try:
@@ -738,7 +738,7 @@ def create_data_collection_endpoint(cmd, subscription, resource_group, region, e
         f"providers/Microsoft.Insights/dataCollectionEndpoints/{endpoint_name}"
     )
     dce_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                    f"{dce_resource_id}?api-version=2022-06-01"
+        f"{dce_resource_id}?api-version=2022-06-01"
     # create the DCE
     dce_creation_body_common = {
         "location": region,
