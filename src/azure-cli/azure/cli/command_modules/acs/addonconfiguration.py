@@ -368,6 +368,10 @@ def ensure_container_insights_for_monitoring(
     if (not is_private_cluster or not aad_route) and ampls_resource_id is not None:
         raise ArgumentUsageError("--ampls-resource-id can only be used with private cluster in MSI mode.")
 
+    is_use_ampls = False
+    if ampls_resource_id is not None:
+        is_use_ampls = True
+
     # workaround for this addon key which has been seen lowercased in the wild
     for key in list(addon.config):
         if (
@@ -439,13 +443,14 @@ def ensure_container_insights_for_monitoring(
         configDataCollectionEndpointName = _trim_suffix_if_needed(configDataCollectionEndpointName[0:43])
         config_dce_resource_id = None
 
-        if enable_high_log_scale_mode or (ampls_resource_id is not None):
-            # create config DCE if AMPLS resource specified
-            if ampls_resource_id is not None:
-                config_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, cluster_region, configDataCollectionEndpointName, True)
-            # create ingestion DCE if high log scale mode enabled
-            if enable_high_log_scale_mode:
-                ingestion_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, location, ingestionDataCollectionEndpointName, False)
+        # create ingestion DCE if high log scale mode enabled
+        if enable_high_log_scale_mode:
+           ingestion_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, location, ingestionDataCollectionEndpointName, is_use_ampls)
+
+        # create config DCE if AMPLS resource specified
+        if is_use_ampls:
+           config_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, cluster_region, configDataCollectionEndpointName, is_use_ampls)
+
 
         if create_dcr:
             # first get the association between region display names and region IDs (because for some reason
@@ -636,7 +641,7 @@ def ensure_container_insights_for_monitoring(
         if create_dcra:
             # only create or delete the association between the DCR and cluster
             create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, cluster_resource_id, dcr_resource_id)
-            if ampls_resource_id is not None:
+            if is_use_ampls:
                 # associate config DCE to the cluster
                 create_dce_association(cmd, cluster_region, cluster_resource_id, config_dce_resource_id)
                 # link config DCE to AMPLS
