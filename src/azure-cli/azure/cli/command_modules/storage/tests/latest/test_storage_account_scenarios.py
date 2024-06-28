@@ -411,6 +411,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_2'.format(name4, resource_group),
                  checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
+        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_3'.format(name4, resource_group),
+                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     @StorageAccountPreparer(name_prefix='tls')
@@ -423,6 +426,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_2'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
+
+        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_3'.format(
+            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_0'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
@@ -1802,7 +1808,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'sastoragewithtier': self.create_random_name('sa', 24),
             'sablobstorage': self.create_random_name('sa', 24),
             'sablobstoragewithtier': self.create_random_name('sa', 24),
-            'sastoragev2': self.create_random_name('sa', 24)
+            'sastoragev2': self.create_random_name('sa', 24),
+            'sastoragecold': self.create_random_name('sa', 24)
         })
         # Storagev1
         self.cmd('az storage account create --kind Storage -n {sastorage} -g {rg}',
@@ -1838,6 +1845,13 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account update --access-tier Cool -n {sastoragev2} -g {rg} -y',
                  checks=[JMESPathCheck('accessTier', 'Cool')])
 
+        # test Cold
+        self.cmd('az storage account create -n {sastoragecold} -g {rg} --access-tier Cold',
+                 checks=[JMESPathCheck('accessTier', 'Cold')])
+        self.cmd('az storage account update --access-tier Cool -n {sastoragecold} -g {rg} -y',
+                 checks=[JMESPathCheck('accessTier', 'Cool')])
+        self.cmd('az storage account update --access-tier Cold -n {sastoragecold} -g {rg} -y',
+                 checks=[JMESPathCheck('accessTier', 'Cold')])
 
 
 
