@@ -355,7 +355,7 @@ def __read_kv_from_config_store(azconfig_client,
     # We first check if the snapshot exists before returning an empty result.
     if snapshot and len(retrieved_kvs) == 0:
         try:
-            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot, headers=custom_headers)
+            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
 
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.NOT_FOUND:
