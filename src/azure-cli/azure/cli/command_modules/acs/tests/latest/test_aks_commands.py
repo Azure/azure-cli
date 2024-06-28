@@ -8047,6 +8047,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         expected_log_stream = 'Microsoft-ContainerLogV2'
         if highlogscale_mode_enabled:
             expected_log_stream = 'Microsoft-ContainerLogV2-HighScale'
+            # check ingestion DCE linked to the DCR
+            self.cmd(get_cmd, checks=[
+                 self.check('properties.dataCollectionEndpointId', f'{ingestion_dce_resource_id}')
+            ])
         if syslog_enabled:
             self.cmd(get_cmd, checks=[
                 self.check('properties.dataSources.syslog[0].streams[0]', f'Microsoft-Syslog')
@@ -8064,6 +8068,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             ])
 
         if use_ampls:
+            # check association created for config DataCollectionEndpoint
+            dcea_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint"
+            get_cmd = f'rest --method get --url https://management.azure.com{dcea_resource_id}?api-version=2022-06-01'
+            self.cmd(get_cmd, checks=[
+                self.check('properties.dataCollectionEndpointId', f'{config_dce_resource_id}')
+            ])
             # check the config DCE was created with the right settings
             dce_cmd = f'rest --method get --url https://management.azure.com{config_dce_resource_id}?api-version=2022-06-01'
             self.cmd(dce_cmd, checks=[
@@ -8091,13 +8101,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
         ])
 
-        # check the ingestion DCE linked to DCR when high log scale mode enabled
         if highlogscale_mode_enabled:
-            dcea_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint"
-            get_cmd = f'rest --method get --url https://management.azure.com{dcea_resource_id}?api-version=2022-06-01'
-            self.cmd(get_cmd, checks=[
-                self.check('properties.dataCollectionEndpointId', f'{ingestion_dce_resource_id}')
-            ])
             # check the ingest DCE was created with the right settings
             dce_cmd = f'rest --method get --url https://management.azure.com{ingestion_dce_resource_id}?api-version=2022-06-01'
             if use_ampls:
