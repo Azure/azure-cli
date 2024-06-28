@@ -1155,12 +1155,7 @@ def __list_all_keyvalues(azconfig_client,
     label = prep_label_filter_for_url_encoding(label)
 
     try:
-        correlationHeader = {
-            "headers": {
-                [HttpHeaders.CORRELATIONREQUESTID]: correlationRequestId
-            }
-        }
-        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label, headers=correlationHeader)
+        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
     except HttpResponseError as exception:
         raise CLIErrors.AzureResponseError('Failed to read feature flag(s) that match the specified feature and label. ' + str(exception))
 

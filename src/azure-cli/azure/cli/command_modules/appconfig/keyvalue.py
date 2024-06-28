@@ -810,17 +810,11 @@ def restore_key(cmd,
         keys_to_restore = len(kvs_to_restore) + len(kvs_to_modify) + len(kvs_to_delete)
         restored_so_far = 0
 
-        #set unique correlationRequestId for all operations undertaken during restore
-        correlationHeader = {
-            "headers": {
-                [HttpHeaders.CORRELATIONREQUESTID]: correlationRequestId
-            }
-        }
 
         for kv in chain(kvs_to_restore, kvs_to_modify):
             set_kv = convert_keyvalue_to_configurationsetting(kv)
             try:
-                azconfig_client.set_configuration_setting(set_kv, correlationHeader)
+                azconfig_client.set_configuration_setting(set_kv, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
                 restored_so_far += 1
             except ResourceReadOnlyError:
                 exception = "Failed to update read-only key-value with key '{}' and label '{}'. Unlock the key-value before updating it.".format(set_kv.key, set_kv.label)
@@ -835,7 +829,7 @@ def restore_key(cmd,
                                                              label=kv.label,
                                                              etag=kv.etag,
                                                              match_condition=MatchConditions.IfNotModified,
-                                                             headers=correlationHeader)
+                                                             headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
                 restored_so_far += 1
             except ResourceReadOnlyError:
                 exception = "Failed to delete read-only key-value with key '{}' and label '{}'. Unlock the key-value before deleting it.".format(kv.key, kv.label)
