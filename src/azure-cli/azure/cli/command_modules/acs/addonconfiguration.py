@@ -445,12 +445,11 @@ def ensure_container_insights_for_monitoring(
 
         # create ingestion DCE if high log scale mode enabled
         if enable_high_log_scale_mode:
-           ingestion_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, location, ingestionDataCollectionEndpointName, is_use_ampls)
+            ingestion_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, location, ingestionDataCollectionEndpointName, is_use_ampls)
 
         # create config DCE if AMPLS resource specified
         if is_use_ampls:
-           config_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, cluster_region, configDataCollectionEndpointName, is_use_ampls)
-
+            config_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, cluster_region, configDataCollectionEndpointName, is_use_ampls)
 
         if create_dcr:
             # first get the association between region display names and region IDs (because for some reason
