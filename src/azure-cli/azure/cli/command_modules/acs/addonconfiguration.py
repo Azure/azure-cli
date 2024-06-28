@@ -636,26 +636,25 @@ def ensure_container_insights_for_monitoring(
         if create_dcra:
             # only create or delete the association between the DCR and cluster
             create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, cluster_resource_id, dcr_resource_id)
-            # create dce association
-            if enable_high_log_scale_mode or (ampls_resource_id is not None) or remove_monitoring:
-                create_or_delete_dce_association(cmd, cluster_region, remove_monitoring, cluster_resource_id, config_dce_resource_id)
-                if ampls_resource_id is not None:
-                    # link config DCE to AMPLS
-                    create_ampls_scope(cmd, ampls_resource_id, configDataCollectionEndpointName, config_dce_resource_id)
-                    # link workspace to AMPLS
-                    create_ampls_scope(cmd, ampls_resource_id, workspace_name, workspace_resource_id)
-                    # link ingest DCE to AMPLS
-                    if enable_high_log_scale_mode:
-                        create_ampls_scope(cmd, ampls_resource_id, ingestionDataCollectionEndpointName, ingestion_dce_resource_id)
+            if ampls_resource_id is not None:
+                # associate config DCE to the cluster
+                create_dce_association(cmd, cluster_region, cluster_resource_id, config_dce_resource_id)
+                # link config DCE to AMPLS
+                create_ampls_scope(cmd, ampls_resource_id, configDataCollectionEndpointName, config_dce_resource_id)
+                # link workspace to AMPLS
+                create_ampls_scope(cmd, ampls_resource_id, workspace_name, workspace_resource_id)
+                # link ingest DCE to AMPLS
+                if enable_high_log_scale_mode:
+                    create_ampls_scope(cmd, ampls_resource_id, ingestionDataCollectionEndpointName, ingestion_dce_resource_id)
 
 
-def create_or_delete_dce_association(cmd, cluster_region, remove_monitoring, cluster_resource_id, config_dce_resource_id):
+def create_dce_association(cmd, cluster_region, cluster_resource_id, config_dce_resource_id):
     association_body = json.dumps(
         {
             "location": cluster_region,
             "properties": {
                 "dataCollectionEndpointId": config_dce_resource_id,
-                "description": "routes monitoring data to a Log Analytics workspace",
+                "description": "associates config dataCollectionEndpoint to AKS cluster resource",
             },
         }
     )
@@ -665,7 +664,7 @@ def create_or_delete_dce_association(cmd, cluster_region, remove_monitoring, clu
         try:
             send_raw_request(
                 cmd.cli_ctx,
-                "PUT" if not remove_monitoring else "DELETE",
+                "PUT",
                 association_url,
                 body=association_body,
             )
@@ -683,7 +682,7 @@ def create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, clu
             "location": cluster_region,
             "properties": {
                 "dataCollectionRuleId": dcr_resource_id,
-                "description": "routes monitoring data to a Log Analytics workspace",
+                "description": "associates dataCollectionRule to the AKS",
             },
         }
     )
