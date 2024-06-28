@@ -410,7 +410,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             ):
                 enable_vtpm = self.agentpool.enable_vtpm
 
-         # This parameter does not need dynamic completion.
+        # This parameter does not need dynamic completion.
         if enable_validation:
             if enable_vtpm and self._get_disable_vtpm(enable_validation=False):
                 raise MutuallyExclusiveArgumentError(
@@ -421,7 +421,8 @@ class AKSAgentPoolContext(BaseAKSContext):
 
     def _get_disable_vtpm(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of disable_vtpm.
-        This function supports the option of enable_vtpm. When enabled, if both enable_vtpm and disable_vtpm are specified,
+        This function supports the option of enable_vtpm. 
+        When enabled, if both enable_vtpm and disable_vtpm are specified,
         raise a MutuallyExclusiveArgumentError.
         :return: bool
         """
@@ -440,7 +441,8 @@ class AKSAgentPoolContext(BaseAKSContext):
 
     def get_disable_vtpm(self) -> bool:
         """Obtain the value of disable_vtpm.
-        This function will verify the parameter by default. If both enable_vtpm and disable_vtpm are specified, raise a MutuallyExclusiveArgumentError.
+        This function will verify the parameter by default. 
+        If both enable_vtpm and disable_vtpm are specified, raise a MutuallyExclusiveArgumentError.
         :return: bool
         """
         return self._get_disable_vtpm(enable_validation=True)
@@ -466,7 +468,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             ):
                 enable_secure_boot = self.agentpool.enable_secure_boot
 
-         # This parameter does not need dynamic completion.
+        # This parameter does not need dynamic completion.
         if enable_validation:
             if enable_secure_boot and self._get_disable_secure_boot(enable_validation=False):
                 raise MutuallyExclusiveArgumentError(
@@ -477,7 +479,8 @@ class AKSAgentPoolContext(BaseAKSContext):
 
     def _get_disable_secure_boot(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of disable_secure_boot.
-        This function supports the option of enable_secure_boot. When enabled, if both enable_secure_boot and disable_secure_boot are specified,
+        This function supports the option of enable_secure_boot. 
+        When enabled, if both enable_secure_boot and disable_secure_boot are specified,
         raise a MutuallyExclusiveArgumentError.
         :return: bool
         """
@@ -496,7 +499,8 @@ class AKSAgentPoolContext(BaseAKSContext):
 
     def get_disable_secure_boot(self) -> bool:
         """Obtain the value of disable_secure_boot.
-        This function will verify the parameter by default. If both enable_secure_boot and disable_secure_boot are specified, raise a MutuallyExclusiveArgumentError.
+        This function will verify the parameter by default. 
+        If both enable_secure_boot and disable_secure_boot are specified, raise a MutuallyExclusiveArgumentError.
         :return: bool
         """
         return self._get_disable_secure_boot(enable_validation=True)
@@ -2118,7 +2122,7 @@ class AKSAgentPoolUpdateDecorator:
         if os_sku:
             agentpool.os_sku = os_sku
         return agentpool
-    
+
     def update_secure_boot(self, agentpool: AgentPool) -> AgentPool:
         """Update secure boot property for the AgentPool object.
         :return: the AgentPool object
