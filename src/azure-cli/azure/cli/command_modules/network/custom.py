@@ -5594,7 +5594,6 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         )
         # filter arguments
         args_schema.policies._registered = False
-        args_schema.endpoints._registered = False
         args_schema.delegated_services._registered = False
         args_schema.address_prefix._registered = False
         return args_schema
@@ -5614,16 +5613,19 @@ class VNetSubnetCreate(_VNetSubnetCreate):
                 "service_name": service_name,
             }
 
+        if has_value(args.endpoints) and has_value(args.service_endpoints):
+            raise ArgumentUsageError("usage error: --endpoints and --service-endpoints cannot be used together")
         args.delegated_services = assign_aaz_list_arg(
             args.delegated_services,
             args.delegations,
             element_transformer=delegation_trans
         )
-        args.endpoints = assign_aaz_list_arg(
-            args.endpoints,
-            args.service_endpoints,
-            element_transformer=lambda _, service_name: {"service": service_name}
-        )
+        if has_value(args.service_endpoints):
+            args.endpoints = assign_aaz_list_arg(
+                args.endpoints,
+                args.service_endpoints,
+                element_transformer=lambda _, service_name: {"service": service_name}
+            )
         args.policies = assign_aaz_list_arg(
             args.policies,
             args.service_endpoint_policy,
@@ -5697,7 +5699,6 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         # filter arguments
         args_schema.address_prefix._registered = False
         args_schema.delegated_services._registered = False
-        args_schema.endpoints._registered = False
         args_schema.policies._registered = False
         # handle detach logic
         args_schema.nat_gateway._fmt = AAZResourceIdArgFormat(
@@ -5729,16 +5730,19 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
                 "service_name": service_name,
             }
 
+        if has_value(args.endpoints) and has_value(args.service_endpoints):
+            raise ArgumentUsageError("usage error: --endpoints and --service-endpoints cannot be used together")
         args.delegated_services = assign_aaz_list_arg(
             args.delegated_services,
             args.delegations,
             element_transformer=delegation_trans
         )
-        args.endpoints = assign_aaz_list_arg(
-            args.endpoints,
-            args.service_endpoints,
-            element_transformer=lambda _, service_name: {"service": service_name}
-        )
+        if has_value(args.service_endpoints):
+            args.endpoints = assign_aaz_list_arg(
+                args.endpoints,
+                args.service_endpoints,
+                element_transformer=lambda _, service_name: {"service": service_name}
+            )
         args.policies = assign_aaz_list_arg(
             args.policies,
             args.service_endpoint_policy,
