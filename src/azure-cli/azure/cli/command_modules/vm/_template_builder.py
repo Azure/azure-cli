@@ -1285,9 +1285,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         }
     if upgrade_policy_mode and cmd.supported_api_version(min_api='2020-12-01',
                                                          operation_group='virtual_machine_scale_sets'):
-        vmss_properties['upgradePolicy']['rollingUpgradePolicy'] = {}
-        rolling_upgrade_policy = vmss_properties['upgradePolicy']['rollingUpgradePolicy']
-
+        rolling_upgrade_policy = {}
         if max_batch_instance_percent is not None:
             rolling_upgrade_policy['maxBatchInstancePercent'] = max_batch_instance_percent
 
@@ -1309,18 +1307,17 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         if max_surge is not None:
             rolling_upgrade_policy['maxSurge'] = max_surge
 
-        if not rolling_upgrade_policy:
-            del rolling_upgrade_policy
+        if rolling_upgrade_policy:
+            vmss_properties['upgradePolicy']['rollingUpgradePolicy'] = rolling_upgrade_policy
+
     if upgrade_policy_mode and cmd.supported_api_version(min_api='2018-10-01',
                                                          operation_group='virtual_machine_scale_sets'):
-        vmss_properties['upgradePolicy']['automaticOSUpgradePolicy'] = {}
-        automatic_os_upgrade_policy = vmss_properties['upgradePolicy']['automaticOSUpgradePolicy']
-
+        automatic_os_upgrade_policy = {}
         if enable_auto_os_upgrade is not None:
             automatic_os_upgrade_policy['enableAutomaticOSUpgrade'] = enable_auto_os_upgrade
 
-        if not automatic_os_upgrade_policy:
-            del automatic_os_upgrade_policy
+        if automatic_os_upgrade_policy:
+            vmss_properties['upgradePolicy']['automaticOSUpgradePolicy'] = automatic_os_upgrade_policy
 
     if upgrade_policy_mode and upgrade_policy_mode.lower() == 'rolling' and orchestration_mode.lower() == 'uniform' and\
             cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
