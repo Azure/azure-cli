@@ -2099,7 +2099,8 @@ class VMExtensionScenarioTest(ScenarioTest):
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext2}')
 
         self.cmd(
-            'vm create -g {rg} -n {vm2} --image Win2022Datacenter --admin-username AzureUser --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+            'vm create -n {vm2} -g {rg} --image Win2022Datacenter --authentication-type password --admin-username user12 '
+            '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         self.cmd('vm extension set -n {ext3} --publisher {pub3} --vm-name {vm2} --resource-group {rg} --force-update')
         self.cmd('vm extension show --resource-group {rg} --vm-name {vm2} --name {ext3}', checks=[
@@ -2174,7 +2175,8 @@ class VMExtensionScenarioTest(ScenarioTest):
             'vnet': 'vnet1'
         })
 
-        vm = self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+        vm = self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password '
+                      '--admin-username user11 --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
 
         # Disable default outbound access
         self.cmd(
