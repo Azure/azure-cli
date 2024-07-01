@@ -303,17 +303,34 @@ def validate_enable_azure_container_storage_params(  # pylint: disable=too-many-
                         f'already enabled for storage pool option {enabled_options}.'
                     )
             else:
-                if ephemeral_disk_volume_type is not None and ephemeral_disk_nvme_perf_tier is None and \
+                if required_type_installed_for_disk_vol_type and \
+                   ephemeral_disk_volume_type is not None and \
+                   ephemeral_disk_nvme_perf_tier is None and \
                    existing_ephemeral_disk_volume_type.lower() == ephemeral_disk_volume_type.lower():
                     raise InvalidArgumentValueError(
                         'Azure Container Storage is already configured with --ephemeral-disk-volume-type '
                         f'value set to {existing_ephemeral_disk_volume_type}.'
                     )
 
-                if ephemeral_disk_nvme_perf_tier is not None and ephemeral_disk_volume_type is None and \
+                if required_type_installed_for_nvme_perf_tier and \
+                   ephemeral_disk_nvme_perf_tier is not None and \
+                   ephemeral_disk_volume_type is None and \
                    existing_ephemeral_disk_nvme_perf_tier.lower() == ephemeral_disk_nvme_perf_tier.lower():
                     raise InvalidArgumentValueError(
                         'Azure Container Storage is already configured with --ephemeral-disk-nvme-perf-tier '
+                        f'value set to {existing_ephemeral_disk_nvme_perf_tier}.'
+                    )
+
+                # pylint: disable=too-many-boolean-expressions
+                if required_type_installed_for_disk_vol_type and \
+                   ephemeral_disk_volume_type is not None and \
+                   existing_ephemeral_disk_volume_type.lower() == ephemeral_disk_volume_type.lower() and \
+                   required_type_installed_for_nvme_perf_tier and \
+                   ephemeral_disk_nvme_perf_tier is not None and \
+                   existing_ephemeral_disk_nvme_perf_tier.lower() == ephemeral_disk_nvme_perf_tier.lower():
+                    raise InvalidArgumentValueError(
+                        'Azure Container Storage is already configured with --ephemeral-disk-volume-type '
+                        f'value set to {existing_ephemeral_disk_volume_type} and --ephemeral-disk-nvme-perf-tier '
                         f'value set to {existing_ephemeral_disk_nvme_perf_tier}.'
                     )
 

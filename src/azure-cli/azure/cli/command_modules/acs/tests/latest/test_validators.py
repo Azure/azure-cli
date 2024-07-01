@@ -1017,6 +1017,47 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
             )
         self.assertEqual(str(cm.exception), err)
 
+    def test_enable_with_same_ephemeral_disk_nvme_perf_tier_already_set(self):
+        perf_tier = acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM
+        storage_pool_type = acstor_consts.CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK
+        err = (
+                "Azure Container Storage is already configured with --ephemeral-disk-nvme-perf-tier "
+                f"value set to {perf_tier}."
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_params(
+                storage_pool_type, None, None, None, None, None, None, True, False, False, False, True, None, perf_tier, acstor_consts.CONST_DISK_TYPE_PV_WITH_ANNOTATION, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM
+            )
+        self.assertEqual(str(cm.exception), err)
+
+    def test_enable_with_same_ephemeral_disk_volume_type_already_set(self):
+        disk_vol_type = acstor_consts.CONST_DISK_TYPE_PV_WITH_ANNOTATION
+        storage_pool_type = acstor_consts.CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK
+        err = (
+                "Azure Container Storage is already configured with --ephemeral-disk-volume-type "
+                f"value set to {disk_vol_type}."
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_params(
+                storage_pool_type, None, None, None, None, None, None, True, False, False, False, True, disk_vol_type, None, acstor_consts.CONST_DISK_TYPE_PV_WITH_ANNOTATION, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM
+            )
+        self.assertEqual(str(cm.exception), err)
+
+    def test_enable_with_same_ephemeral_disk_nvme_perf_tier_and_ephemeral_temp_disk_pool_already_set(self):
+        perf_tier = acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+        disk_vol_type = acstor_consts.CONST_DISK_TYPE_PV_WITH_ANNOTATION
+        storage_pool_type = acstor_consts.CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK
+        err = (
+                "Azure Container Storage is already configured with --ephemeral-disk-volume-type "
+                f"value set to {disk_vol_type} and --ephemeral-disk-nvme-perf-tier "
+                f"value set to {perf_tier}."
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_params(
+                storage_pool_type, None, None, None, None, None, None, True, False, False, False, True, disk_vol_type, perf_tier, acstor_consts.CONST_DISK_TYPE_PV_WITH_ANNOTATION, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            )
+        self.assertEqual(str(cm.exception), err)
+
     def test_enable_with_option_all_and_ephemeral_disk_pool(self):
         storage_pool_name = "valid-name"
         storage_pool_option = acstor_consts.CONST_ACSTOR_ALL
