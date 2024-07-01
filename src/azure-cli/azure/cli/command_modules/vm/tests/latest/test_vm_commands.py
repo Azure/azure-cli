@@ -1498,7 +1498,6 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('maxShares', 1)
         ])
 
-    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_create_disk_from_diff_gallery_image_version_', location='westus')
     def test_create_disk_from_diff_gallery_image_version(self):
         self.kwargs.update({
@@ -2053,17 +2052,10 @@ class VMExtensionScenarioTest(ScenarioTest):
             'pub3': 'Microsoft.Azure.Security.WindowsCodeIntegrity',
             'ext3': 'CodeIntegrityAgent',
             'config': config_file,
-            'user': user_name,
-            'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'user': user_name
         })
 
-        self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password '
-                 '--admin-username user11 --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
-
-        # Disable default outbound access
-        self.cmd(
-            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+        self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username user11 --admin-password testPassword0 --nsg-rule NONE')
 
         self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
                  checks=self.check('length([])', 0))
@@ -2099,8 +2091,7 @@ class VMExtensionScenarioTest(ScenarioTest):
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext2}')
 
         self.cmd(
-            'vm create -n {vm2} -g {rg} --image Win2022Datacenter --authentication-type password --admin-username user12 '
-            '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+            'vm create -g {rg} -n {vm2} --image Win2022Datacenter --admin-username AzureUser --admin-password testPassword0 --nsg-rule NONE')
 
         self.cmd('vm extension set -n {ext3} --publisher {pub3} --vm-name {vm2} --resource-group {rg} --force-update')
         self.cmd('vm extension show --resource-group {rg} --vm-name {vm2} --name {ext3}', checks=[
