@@ -5614,18 +5614,17 @@ class VNetSubnetCreate(_VNetSubnetCreate):
             }
 
         if has_value(args.endpoints) and has_value(args.service_endpoints):
-            raise ArgumentUsageError("usage error: --endpoints and --service-endpoints cannot be used together")
+            raise ArgumentUsageError("usage error: `--endpoints` and `--service-endpoints` cannot be used together, we prefer to use `endpoints` instead")
         args.delegated_services = assign_aaz_list_arg(
             args.delegated_services,
             args.delegations,
             element_transformer=delegation_trans
         )
-        if has_value(args.service_endpoints):
-            args.endpoints = assign_aaz_list_arg(
-                args.endpoints,
-                args.service_endpoints,
-                element_transformer=lambda _, service_name: {"service": service_name}
-            )
+        args.endpoints = assign_aaz_list_arg(
+            args.endpoints,
+            args.service_endpoints,
+            element_transformer=lambda _, service_name: {"service": service_name}
+        )
         args.policies = assign_aaz_list_arg(
             args.policies,
             args.service_endpoint_policy,
@@ -5731,18 +5730,17 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             }
 
         if has_value(args.endpoints) and has_value(args.service_endpoints):
-            raise ArgumentUsageError("usage error: --endpoints and --service-endpoints cannot be used together")
+            raise ArgumentUsageError("usage error: `--endpoints` and `--service-endpoints` cannot be used together, we prefer to use `endpoints` instead")
         args.delegated_services = assign_aaz_list_arg(
             args.delegated_services,
             args.delegations,
             element_transformer=delegation_trans
         )
-        if has_value(args.service_endpoints):
-            args.endpoints = assign_aaz_list_arg(
-                args.endpoints,
-                args.service_endpoints,
-                element_transformer=lambda _, service_name: {"service": service_name}
-            )
+        args.endpoints = assign_aaz_list_arg(
+            args.endpoints,
+            args.service_endpoints,
+            element_transformer=lambda _, service_name: {"service": service_name}
+        )
         args.policies = assign_aaz_list_arg(
             args.policies,
             args.service_endpoint_policy,
