@@ -79,6 +79,7 @@ class CosmosDBTests(ScenarioTest):
         ]).get_output_in_json()
         assert account['tags']['testKey'] == "testValue"
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_update_database_account(self, resource_group):
         from azure.mgmt.cosmosdb.models import BackupStorageRedundancy
@@ -164,6 +165,7 @@ class CosmosDBTests(ScenarioTest):
         result = self.cmd('az cosmosdb check-name-exists -n {acc}').get_output_in_json()
         assert result
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_keys_database_account(self, resource_group):
 
@@ -280,6 +282,7 @@ class CosmosDBTests(ScenarioTest):
             self.check('consistencyPolicy.defaultConsistencyLevel', 'ConsistentPrefix'),
         ]).get_output_in_json()
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_list_databases(self, resource_group):
 
@@ -447,6 +450,7 @@ class CosmosDBTests(ScenarioTest):
         # Test delete
         self.cmd('cosmosdb private-endpoint-connection delete --id {pec_id}')
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_database')
     def test_cosmosdb_database(self, resource_group):
 
@@ -474,6 +478,7 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb database delete -g {rg} -n {acc} -d {db_name} --yes')
         assert not self.cmd('az cosmosdb database exists -g {rg} -n {acc} -d {db_name}').get_output_in_json()
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_collection')
     def test_cosmosdb_collection(self, resource_group):
 
@@ -656,7 +661,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
     
-    @record_only() # Requests to disable analytics temporarily blocked in production. Will reenable test once disable analytics capability is restored.
+    @unittest.skip('Requests to disable analytics temporarily blocked in production. Will reenable test once disable analytics capability is restored.')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_disable_analytics')
     def test_cosmosdb_sql_container_update_disable_analytics(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)
@@ -1829,6 +1834,11 @@ class CosmosDBTests(ScenarioTest):
             'az cosmosdb mongodb role definition list -g {rg} -a {acc}').get_output_in_json()
         assert len(role_definition_list) == 0
 
+    '''
+    This test will be rewritten to generalize principals for any subscription.
+    Disabling the test for now.
+    '''
+    @unittest.skip('Needs to be rewritten to generalize principal across subscriptions')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_role')
     def test_cosmosdb_sql_role(self, resource_group):
         acc_name = self.create_random_name(prefix='cli', length=15)
@@ -2809,7 +2819,7 @@ class CosmosDBTests(ScenarioTest):
 
         acc_create = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName=eastus2 failoverPriority=0 isZoneRedundant=False')
 
-        service_create = self.cmd('az cosmosdb service create -a {acc} -g {rg} --name "sqlDedicatedGateway" --count 1 --size "Cosmos.D4s" ').get_output_in_json()
+        service_create = self.cmd('az cosmosdb service create -a {acc} -g {rg} --name "sqlDedicatedGateway" --count 1 --size "Cosmos.D4s" --gateway-type IntegratedCache').get_output_in_json()
         assert service_create["name"] == "sqlDedicatedGateway"
 
         service_update = self.cmd('az cosmosdb service update -a {acc} -g {rg} --name "sqlDedicatedGateway" --count 2 --size "Cosmos.D4s" ').get_output_in_json()

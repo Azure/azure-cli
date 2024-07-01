@@ -567,7 +567,7 @@ def show_identity(client, resource_group_name, vault_name):
 
 
 def update_encryption(cmd, client, resource_group_name, vault_name, encryption_key_id, infrastructure_encryption=None,
-                      mi_user_assigned=None, mi_system_assigned=None):
+                      mi_user_assigned=None, mi_system_assigned=None, tenant_id=None):
     keyVaultproperties = CmkKeyVaultProperties(key_uri=encryption_key_id)
 
     vault_details = client.get(resource_group_name, vault_name)
@@ -627,6 +627,17 @@ def update_encryption(cmd, client, resource_group_name, vault_name, encryption_k
                                                 infrastructure_encryption=infrastructure_encryption)
     vault_properties = VaultProperties(encryption=encryption_data)
     vault = PatchVault(properties=vault_properties)
+
+    if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name,
+                                            "RecoveryServicesModifyEncryptionSettings"):
+        # Cross tenant scenario
+        if tenant_id is not None:
+            client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesClient,
+                                             aux_tenants=[tenant_id]).vaults
+
+        vault.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
+            cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesModifyEncryptionSettings")]
+
     client.begin_update(resource_group_name, vault_name, vault).result()
 
 
