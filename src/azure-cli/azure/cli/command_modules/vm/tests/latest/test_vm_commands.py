@@ -11121,6 +11121,8 @@ class ArchitectureScenarioTest(ScenarioTest):
             'sig1': 'image1',
             'gallery1': self.create_random_name('sig1', 10),
             'gallery2': self.create_random_name("sig2", 10),
+            'gallery3': self.create_random_name("sig3", 10),
+            'gallery4': self.create_random_name("sig4", 10),
         })
         self.cmd('sig create -g {rg} --gallery-name {gallery1}')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery1} --gallery-image-definition {sig1} '
@@ -11138,6 +11140,12 @@ class ArchitectureScenarioTest(ScenarioTest):
             self.check('features[1].name', 'SecurityType'),
             self.check('features[1].value', 'TrustedLaunchSupported'),
             self.check('hyperVGeneration', 'V2'),
+        ])
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery3}')
+        self.cmd('sig image-definition create --resource-group {rg} --gallery-name {gallery3} --gallery-image-definition suse_liberty_linux_8_byos_gen1 --offer suse_liberty_linux_8_byos --os-type Linux --publisher suse --sku gen1 --architecture x64 --os-state Generalized --hyper-v-generation V1', checks=[
+            self.check('features', None),
+            self.check('hyperVGeneration', 'V1'),
         ])
 
 
