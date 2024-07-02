@@ -18,7 +18,8 @@ azure.cli.core.auth.util.AccessToken to build the return value. See below creden
 
 from knack.log import get_logger
 from knack.util import CLIError
-from msal import PublicClientApplication, ConfidentialClientApplication
+from msal import (PublicClientApplication, ConfidentialClientApplication,
+                  ManagedIdentityClient, SystemAssignedManagedIdentity)
 
 from .util import check_result, build_sdk_access_token
 
@@ -136,5 +137,26 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
 
         scopes = list(scopes)
         result = self.acquire_token_for_client(scopes, **kwargs)
+        check_result(result)
+        return build_sdk_access_token(result)
+
+
+class ManagedIdentityCredential:  # pylint: disable=too-few-public-methods
+    """Managed identity credential implementing get_token interface.
+
+    It uses MSAL internally.
+
+    Currently, only Azure Arc's system-assigned managed identity is supported.
+    """
+
+    def __init__(self):
+        import requests
+        self._msal_client = ManagedIdentityClient(SystemAssignedManagedIdentity(), http_client=requests.Session())
+
+    def get_token(self, *scopes, **kwargs):
+        logger.debug("ManagedIdentityCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
+
+        from .util import scopes_to_resource
+        result = self._msal_client.acquire_token_for_client(resource=scopes_to_resource(scopes))
         check_result(result)
         return build_sdk_access_token(result)
