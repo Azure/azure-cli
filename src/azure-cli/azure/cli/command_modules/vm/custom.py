@@ -3710,7 +3710,7 @@ def get_vmss_modified(cmd, resource_group_name, name, instance_id=None, security
         return vms
 
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, name)
-    if security_type is not None:
+    if security_type == 'TrustedLaunch':
         _check_vmss_hyper_v_generation(cmd.cli_ctx, vmss)
     # To avoid unnecessary permission check of image
     if hasattr(vmss, "virtual_machine_profile") and vmss.virtual_machine_profile \
@@ -4072,14 +4072,22 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if security_type is not None or enable_secure_boot is not None or enable_vtpm is not None:
         security_profile = vmss.virtual_machine_profile.security_profile
         prev_security_type = security_profile.security_type if security_profile else None
-        # At present, `SecurityType` only has option `TrustedLaunch`
-        if security_type is not None and prev_security_type != security_type:
+        # At present, `SecurityType` has options `TrustedLaunch` and `Standard`
+        if security_type == 'TrustedLaunch' and prev_security_type != security_type:
             vmss.virtual_machine_profile.security_profile = {
                 'securityType': security_type,
                 'uefiSettings': {
                     'secureBootEnabled': enable_secure_boot if enable_secure_boot is not None else False,
                     'vTpmEnabled': enable_vtpm if enable_vtpm is not None else True
                 }
+            }
+        elif security_type == 'Standard':
+            if prev_security_type == 'TrustedLaunch':
+                logger.warning('Turning off Trusted launch disables foundational security for your VMs. '
+                               'For more information, visit https://aka.ms/TrustedLaunch')
+            vmss.virtual_machine_profile.security_profile = {
+                'securityType': security_type,
+                'uefiSettings': None
             }
         else:
             vmss.virtual_machine_profile.security_profile = {'uefiSettings': {
@@ -4779,9 +4787,9 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                 feature_list.append(GalleryImageFeature(name=key, value=value))
             except ValueError:
                 raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
-        if security_type is None:
+        if security_type is None and hyper_v_generation == 'V2':
             feature_list.append(GalleryImageFeature(name='SecurityType', value='TrustedLaunchSupported'))
-    if features is None and cmd.cli_ctx.cloud.profile == 'latest':
+    if features is None and cmd.cli_ctx.cloud.profile == 'latest' and hyper_v_generation == 'V2':
         feature_list = []
         feature_list.append(GalleryImageFeature(name='SecurityType', value='TrustedLaunchSupported'))
 
