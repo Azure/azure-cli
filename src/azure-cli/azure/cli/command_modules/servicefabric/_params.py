@@ -27,7 +27,8 @@ from azure.mgmt.servicefabricmanagedclusters.models import (FailureAction,
                                                             ServiceKind,
                                                             DiskType,
                                                             ClusterUpgradeMode,
-                                                            ClusterUpgradeCadence)
+                                                            ClusterUpgradeCadence,
+                                                            VmssExtensionSetupOrder)
 from knack.arguments import CLIArgumentType
 
 
@@ -344,7 +345,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('auto_upgrade_minor_version', options_list=['--auto-upgrade-minor-version', '--auto-upgrade'], arg_type=get_three_state_flag(), help='Indicates whether the extension should use a newer minor version if one is available at deployment time. Once deployed, however, the extension will not upgrade minor versions unless redeployed, even with this property set to true.')
         c.argument('setting', help='Json formatted public settings for the extension.')
         c.argument('protected_setting', help='The extension can contain either protectedSettings or protectedSettingsFromKeyVault or no protected settings at all.')
-        c.argument('provision_after_extension', options_list=['--provision-after-extension', '--provision-after'], help='Collection of extension names after which this extension needs to be provisioned.')
+        c.argument('provision_after_extension', nargs='+', options_list=['--provision-after-extension', '--provision-after'], help='Collection of extension names after which this extension needs to be provisioned.')
+        c.argument('setup_order', arg_type=get_enum_type(VmssExtensionSetupOrder), nargs='+', help='Indicates the setup order for the extension.')
 
     with self.argument_context('sf managed-node-type vm-secret') as c:
         c.argument('source_vault_id', help='Key Vault resource id containing the certificates.')
