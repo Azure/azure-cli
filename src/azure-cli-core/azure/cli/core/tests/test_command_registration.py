@@ -93,8 +93,8 @@ class TestCommandRegistration(unittest.TestCase):
         }
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
-                                          command_metadata.arguments[existing].options)
+            self.assertLessEqual(some_expected_arguments[existing].settings.items(),
+                                 command_metadata.arguments[existing].options.items())
         self.assertEqual(command_metadata.arguments['vm_name'].options_list, ('--wonky-name', '-n'))
 
     def test_register_command(self):
@@ -137,8 +137,8 @@ class TestCommandRegistration(unittest.TestCase):
 
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
-                                          command_metadata.arguments[existing].options)
+            self.assertLessEqual(some_expected_arguments[existing].settings.items(),
+                                 command_metadata.arguments[existing].options.items())
         self.assertEqual(command_metadata.arguments['resource_group_name'].options_list,
                          ['--resource-group-name'])
 
@@ -518,8 +518,8 @@ class TestCommandRegistration(unittest.TestCase):
 
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
-                                          command_metadata.arguments[existing].options)
+            self.assertLessEqual(some_expected_arguments[existing].settings.items(),
+                                 command_metadata.arguments[existing].options.items())
 
     def test_command_build_argument_help_text(self):
 
@@ -562,8 +562,8 @@ class TestCommandRegistration(unittest.TestCase):
 
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
-                                          command_metadata.arguments[existing].options)
+            self.assertLessEqual(some_expected_arguments[existing].settings.items(),
+                                 command_metadata.arguments[existing].options.items())
 
     def test_override_existing_option_string(self):
         arg = CLIArgumentType(options_list=('--funky', '-f'))
