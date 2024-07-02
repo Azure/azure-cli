@@ -41,7 +41,7 @@ from ._kv_helpers import (__read_kv_from_file, __read_features_from_file,
                           __convert_featureflag_list_to_keyvalue_list, __export_kvset_to_file,
                           __import_kvset_from_file, __delete_configuration_setting_from_config_store, __map_to_appservice_config_reference)
 from ._diff_utils import print_preview, KVComparer
-from .feature import list_feature
+from .feature import __list_features
 
 logger = get_logger(__name__)
 
@@ -86,7 +86,7 @@ def import_config(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
-    #generate correlationRequestId for bulk operation
+    # generate correlationRequestId for bulk operation
     correlationRequestId = str(uuid.uuid4())
 
     # fetch key values from source
@@ -281,7 +281,7 @@ def export_config(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
-    #generate correlationRequestId for bulk operation
+    # generate correlationRequestId for bulk operation
     correlationRequestId = str(uuid.uuid4())
 
     dest_azconfig_client = None
@@ -319,15 +319,17 @@ def export_config(cmd,
 
             # src_features is a list of FeatureFlag objects
             else:
-                src_features = list_feature(cmd,
-                                            feature='*',
-                                            label=label if label else SearchFilterOptions.EMPTY_LABEL,
-                                            name=name,
-                                            connection_string=connection_string,
-                                            all_=True,
-                                            auth_mode=auth_mode,
-                                            endpoint=endpoint,
-                                            correlationRequestId=correlationRequestId)
+                src_features = __list_features(
+                    cmd,
+                    feature="*",
+                    label=label if label else SearchFilterOptions.EMPTY_LABEL,
+                    name=name,
+                    connection_string=connection_string,
+                    all_=True,
+                    auth_mode=auth_mode,
+                    endpoint=endpoint,
+                    correlationRequestId=correlationRequestId,
+                )
 
     # We need to separate KV from feature flags for the default export profile and only need to discard
     # if skip_features is true for the appconfig/kvset export profile.
@@ -355,15 +357,17 @@ def export_config(cmd,
 
         if not skip_features:
             # Append all features to dest_features list
-            dest_features = list_feature(cmd,
-                                         feature='*',
-                                         label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL,
-                                         name=dest_name,
-                                         connection_string=dest_connection_string,
-                                         all_=True,
-                                         auth_mode=dest_auth_mode,
-                                         endpoint=dest_endpoint,
-                                         correlationRequestId=correlationRequestId)
+            dest_features = __list_features(
+                cmd,
+                feature="*",
+                label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL,
+                name=dest_name,
+                connection_string=dest_connection_string,
+                all_=True,
+                auth_mode=dest_auth_mode,
+                endpoint=dest_endpoint,
+                correlationRequestId=correlationRequestId,
+            )
 
     elif destination == 'appservice':
         dest_kvs = __read_kv_from_app_service(cmd, appservice_account=appservice_account)
@@ -776,7 +780,7 @@ def restore_key(cmd,
                 endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
-    #generate correlationRequestId for bulk operation
+    # generate correlationRequestId for bulk operation
     correlationRequestId = str(uuid.uuid4())
 
     exception_messages = []
@@ -809,7 +813,6 @@ def restore_key(cmd,
 
         keys_to_restore = len(kvs_to_restore) + len(kvs_to_modify) + len(kvs_to_delete)
         restored_so_far = 0
-
 
         for kv in chain(kvs_to_restore, kvs_to_modify):
             set_kv = convert_keyvalue_to_configurationsetting(kv)

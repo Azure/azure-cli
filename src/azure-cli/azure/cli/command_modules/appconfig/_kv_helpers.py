@@ -293,11 +293,13 @@ def __read_kv_from_config_store(azconfig_client,
 
     if snapshot:
         try:
-            configsetting_iterable = AppConfigSnapshotClient(azconfig_client).list_snapshot_kv(name=snapshot,
-                                                                                               fields=query_fields,
-                                                                                               headers={
-                                                                                                    HttpHeaders.CORRELATIONREQUESTID: correlationRequestId
-                                                                                                })
+            configsetting_iterable = AppConfigSnapshotClient(
+                azconfig_client
+            ).list_snapshot_kv(
+                name=snapshot,
+                fields=query_fields,
+                headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId}
+            )
 
         except HttpResponseError as exception:
             raise AzureResponseError('Failed to read key-values(s) from snapshot {}. '.format(snapshot) + str(exception))
@@ -308,9 +310,8 @@ def __read_kv_from_config_store(azconfig_client,
                                                                                  label_filter=label,
                                                                                  accept_datetime=datetime,
                                                                                  fields=query_fields,
-                                                                                 headers={
-                                                                                    HttpHeaders.CORRELATIONREQUESTID: correlationRequestId
-                                                                                })
+                                                                                 headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId}
+                                                                                 )
 
         except HttpResponseError as exception:
             raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
@@ -953,7 +954,7 @@ def __validate_import_tags(kv):
     return True
 
 
-def __write_configuration_setting_to_config_store(azconfig_client, configuration_setting, correlationRequestId = None):
+def __write_configuration_setting_to_config_store(azconfig_client, configuration_setting, correlationRequestId=None):
     try:
         azconfig_client.set_configuration_setting(configuration_setting, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
     except ResourceReadOnlyError:
