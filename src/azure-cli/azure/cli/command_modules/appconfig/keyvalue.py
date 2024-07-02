@@ -8,10 +8,12 @@
 import json
 import time
 import sys
+import uuid
 
 from itertools import chain
 from knack.log import get_logger
 from knack.util import CLIError
+from ._constants import HttpHeaders
 
 from azure.appconfiguration import (ConfigurationSetting,
                                     ResourceReadOnlyError)
@@ -39,7 +41,7 @@ from ._kv_helpers import (__read_kv_from_file, __read_features_from_file,
                           __convert_featureflag_list_to_keyvalue_list, __export_kvset_to_file,
                           __import_kvset_from_file, __delete_configuration_setting_from_config_store, __map_to_appservice_config_reference)
 from ._diff_utils import print_preview, KVComparer
-from .feature import list_feature
+from .feature import __list_features
 
 logger = get_logger(__name__)
 
@@ -84,10 +86,13 @@ def import_config(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # generate correlationRequestId for bulk operation
+    correlationRequestId = str(uuid.uuid4())
+
     # fetch key values from source
     if source == 'file':
         if profile == ImportExportProfiles.KVSET:
-            __import_kvset_from_file(client=azconfig_client, path=path, strict=strict, yes=yes, import_mode=import_mode)
+            __import_kvset_from_file(client=azconfig_client, path=path, strict=strict, yes=yes, import_mode=import_mode, correlationRequestId=correlationRequestId)
             return
         if format_ and content_type:
             # JSON content type is only supported with JSON format.
@@ -128,7 +133,8 @@ def import_config(cmd,
                                               key=src_key,
                                               snapshot=src_snapshot,
                                               label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL,
-                                              prefix_to_add=prefix)
+                                              prefix_to_add=prefix,
+                                              correlationRequestId=correlationRequestId)
 
         if not skip_features:
             if src_snapshot:
@@ -137,7 +143,8 @@ def import_config(cmd,
                 # Get all Feature flags with matching label
                 all_features = __read_kv_from_config_store(src_azconfig_client,
                                                            key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
-                                                           label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL)
+                                                           label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL,
+                                                           correlationRequestId=correlationRequestId)
 
             for feature in all_features:
                 if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
@@ -154,7 +161,8 @@ def import_config(cmd,
         # fetch key values from user's configstore
         dest_kvs = __read_kv_from_config_store(azconfig_client,
                                                key=prefix + SearchFilterOptions.ANY_KEY if prefix else SearchFilterOptions.ANY_KEY,
-                                               label=label if label else SearchFilterOptions.EMPTY_LABEL)
+                                               label=label if label else SearchFilterOptions.EMPTY_LABEL,
+                                               correlationRequestId=correlationRequestId)
         __discard_features_from_retrieved_kv(dest_kvs)
 
     # if customer needs preview & confirmation
@@ -177,7 +185,8 @@ def import_config(cmd,
     if strict or (src_features and not skip_features):
         all_features = __read_kv_from_config_store(azconfig_client,
                                                    key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + SearchFilterOptions.ANY_KEY,
-                                                   label=label if label else SearchFilterOptions.EMPTY_LABEL)
+                                                   label=label if label else SearchFilterOptions.EMPTY_LABEL,
+                                                   correlationRequestId=correlationRequestId)
 
         # Append all features to dest_features list
         for feature in all_features:
@@ -227,7 +236,8 @@ def import_config(cmd,
                                             key_values=kvs_to_write,
                                             label=label,
                                             preserve_labels=preserve_labels,
-                                            content_type=content_type)
+                                            content_type=content_type,
+                                            correlationRequestId=correlationRequestId)
 
 
 def export_config(cmd,
@@ -270,6 +280,10 @@ def export_config(cmd,
     naming_convention = naming_convention.lower()
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
+
+    # generate correlationRequestId for bulk operation
+    correlationRequestId = str(uuid.uuid4())
+
     dest_azconfig_client = None
     if destination == 'appconfig':
         if dest_label is not None and preserve_labels:
@@ -287,7 +301,8 @@ def export_config(cmd,
                                           label=label if label else SearchFilterOptions.EMPTY_LABEL,
                                           prefix_to_remove=prefix if not export_as_reference else "",
                                           snapshot=snapshot,
-                                          cli_ctx=cmd.cli_ctx if resolve_keyvault else None)
+                                          cli_ctx=cmd.cli_ctx if resolve_keyvault else None,
+                                          correlationRequestId=correlationRequestId)
 
     if skip_keyvault:
         src_kvs = [keyvalue for keyvalue in src_kvs if keyvalue.content_type != KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
@@ -304,14 +319,17 @@ def export_config(cmd,
 
             # src_features is a list of FeatureFlag objects
             else:
-                src_features = list_feature(cmd,
-                                            feature='*',
-                                            label=label if label else SearchFilterOptions.EMPTY_LABEL,
-                                            name=name,
-                                            connection_string=connection_string,
-                                            all_=True,
-                                            auth_mode=auth_mode,
-                                            endpoint=endpoint)
+                src_features = __list_features(
+                    cmd,
+                    feature="*",
+                    label=label if label else SearchFilterOptions.EMPTY_LABEL,
+                    name=name,
+                    connection_string=connection_string,
+                    all_=True,
+                    auth_mode=auth_mode,
+                    endpoint=endpoint,
+                    correlationRequestId=correlationRequestId,
+                )
 
     # We need to separate KV from feature flags for the default export profile and only need to discard
     # if skip_features is true for the appconfig/kvset export profile.
@@ -333,19 +351,23 @@ def export_config(cmd,
         # dest_kvs contains features and KV that match the label
         dest_kvs = __read_kv_from_config_store(dest_azconfig_client,
                                                key=SearchFilterOptions.ANY_KEY,
-                                               label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL)
+                                               label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL,
+                                               correlationRequestId=correlationRequestId)
         __discard_features_from_retrieved_kv(dest_kvs)
 
         if not skip_features:
             # Append all features to dest_features list
-            dest_features = list_feature(cmd,
-                                         feature='*',
-                                         label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL,
-                                         name=dest_name,
-                                         connection_string=dest_connection_string,
-                                         all_=True,
-                                         auth_mode=dest_auth_mode,
-                                         endpoint=dest_endpoint)
+            dest_features = __list_features(
+                cmd,
+                feature="*",
+                label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL,
+                name=dest_name,
+                connection_string=dest_connection_string,
+                all_=True,
+                auth_mode=dest_auth_mode,
+                endpoint=dest_endpoint,
+                correlationRequestId=correlationRequestId,
+            )
 
     elif destination == 'appservice':
         dest_kvs = __read_kv_from_app_service(cmd, appservice_account=appservice_account)
@@ -387,7 +409,8 @@ def export_config(cmd,
                                         naming_convention=naming_convention)
     elif destination == 'appconfig':
         __write_kv_and_features_to_config_store(dest_azconfig_client, key_values=src_kvs, features=src_features,
-                                                label=dest_label, preserve_labels=preserve_labels)
+                                                label=dest_label, preserve_labels=preserve_labels,
+                                                correlationRequestId=correlationRequestId)
     elif destination == 'appservice':
         __write_kv_to_app_service(cmd, key_values=src_kvs, appservice_account=appservice_account)
 
@@ -757,14 +780,19 @@ def restore_key(cmd,
                 endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # generate correlationRequestId for bulk operation
+    correlationRequestId = str(uuid.uuid4())
+
     exception_messages = []
     restore_keyvalues = __read_kv_from_config_store(azconfig_client,
                                                     key=key if key else SearchFilterOptions.ANY_KEY,
                                                     label=label if label else SearchFilterOptions.ANY_LABEL,
-                                                    datetime=datetime)
+                                                    datetime=datetime,
+                                                    correlationRequestId=correlationRequestId)
     current_keyvalues = __read_kv_from_config_store(azconfig_client,
                                                     key=key if key else SearchFilterOptions.ANY_KEY,
-                                                    label=label if label else SearchFilterOptions.ANY_LABEL)
+                                                    label=label if label else SearchFilterOptions.ANY_LABEL,
+                                                    correlationRequestId=correlationRequestId)
 
     try:
         comparer = KVComparer(restore_keyvalues, CompareFieldsMap["restore"])
@@ -789,7 +817,7 @@ def restore_key(cmd,
         for kv in chain(kvs_to_restore, kvs_to_modify):
             set_kv = convert_keyvalue_to_configurationsetting(kv)
             try:
-                azconfig_client.set_configuration_setting(set_kv)
+                azconfig_client.set_configuration_setting(set_kv, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
                 restored_so_far += 1
             except ResourceReadOnlyError:
                 exception = "Failed to update read-only key-value with key '{}' and label '{}'. Unlock the key-value before updating it.".format(set_kv.key, set_kv.label)
@@ -803,7 +831,8 @@ def restore_key(cmd,
                 azconfig_client.delete_configuration_setting(key=kv.key,
                                                              label=kv.label,
                                                              etag=kv.etag,
-                                                             match_condition=MatchConditions.IfNotModified)
+                                                             match_condition=MatchConditions.IfNotModified,
+                                                             headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
                 restored_so_far += 1
             except ResourceReadOnlyError:
                 exception = "Failed to delete read-only key-value with key '{}' and label '{}'. Unlock the key-value before deleting it.".format(kv.key, kv.label)
