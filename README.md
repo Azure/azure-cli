@@ -96,7 +96,7 @@ Please check [Tips for using Azure CLI effectively](https://docs.microsoft.com/e
 - [Generic resource commands - `az resource`](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#generic-resource-commands---az-resource)
 - [REST API command - `az rest`](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#rest-api-command---az-rest)
 - [Quoting issues](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#quoting-issues)
-- [Work behind a proxy](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy)
+- [Proxy blocks connection](https://learn.microsoft.com/en-us/cli/azure/use-azure-cli-successfully-troubleshooting#error-sslerror-bad-handshakecertificate-verify-failed-proxy-blocks-connection)
 - [Concurrent builds](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#concurrent-builds)
 
 ### More samples and snippets
