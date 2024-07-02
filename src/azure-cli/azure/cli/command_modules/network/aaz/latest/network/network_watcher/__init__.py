@@ -8,18 +8,4 @@
 # pylint: skip-file
 # flake8: noqa
 
-from azure.cli.core.aaz import *
-
-
-@register_command_group(
-    "network application-gateway",
-)
-class __CMDGroup(AAZCommandGroup):
-    """Manage application-level routing and load balancing services.
-
-    To learn more about Application Gateway, visit https://learn.microsoft.com/en-us/azure/application-gateway/quick-create-cli.
-    """
-    pass
-
-
-__all__ = ["__CMDGroup"]
+from .__cmd_group import *

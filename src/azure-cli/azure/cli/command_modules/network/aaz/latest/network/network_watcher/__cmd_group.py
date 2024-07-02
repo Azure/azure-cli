@@ -12,12 +12,12 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "network application-gateway",
+    "network network-watcher",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage application-level routing and load balancing services.
+    """Manage network watcher and its sub-resources.
 
-    To learn more about Application Gateway, visit https://learn.microsoft.com/en-us/azure/application-gateway/quick-create-cli.
+    Network Watcher provides tools to monitor, diagnose, and view connectivity-related metrics for your Azure deployments.
     """
     pass
 
