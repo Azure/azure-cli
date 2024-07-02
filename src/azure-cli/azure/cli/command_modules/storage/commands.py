@@ -338,7 +338,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
         from ._transformers import (transform_blob_list_output, transform_blob_json_output,
                                     transform_blob_upload_output, transform_url_without_encode,
-                                    create_boolean_result_output_transformer)
+                                    create_boolean_result_output_transformer, transform_blobs_batch_output)
         from ._format import transform_blob_output, transform_boolean_for_table
         from ._exception_handler import file_related_exception_handler
         from ._validators import (process_blob_upload_batch_parameters, process_blob_download_batch_parameters,
@@ -349,6 +349,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        table_transformer=transform_blob_output,
                                        exception_handler=show_exception_handler)
         g.storage_custom_command_oauth('set-tier', 'set_blob_tier_v2')
+        g.storage_custom_command_oauth('set-tier-batch', 'set_blob_tier_batch', client_factory=cf_container_client,
+                                       transform=transform_blobs_batch_output)
         g.storage_custom_command_oauth('list', 'list_blobs', client_factory=cf_container_client,
                                        transform=transform_blob_list_output,
                                        table_transformer=transform_blob_output)
