@@ -80,7 +80,6 @@ DEPENDENCIES = [
     'azure-mgmt-containerservice~=30.0.0',
     'azure-mgmt-cosmosdb==9.5.1',
     'azure-mgmt-databoxedge~=1.0.0',
-    'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=10.0.0',
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=8.0.0',
