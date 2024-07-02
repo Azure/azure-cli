@@ -1320,6 +1320,6 @@ class AFDSecurityPolicyUpdate(_AFDSecurityPolicyUpdate):
 
         args.web_application_firewall = {
             'waf_policy': args.waf_policy if has_value(args.waf_policy)
-            else existing_security_policy['parameters']['wafPolicy'],
+            else existing_security_policy['parameters']['wafPolicy']['id'],
             'associations': associations
         }
