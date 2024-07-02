@@ -749,6 +749,7 @@ class AzCliCommandInvoker(CommandInvoker):
     def resolve_warnings(self, cmd, parsed_args):
         self._resolve_preview_and_deprecation_warnings(cmd, parsed_args)
         self._resolve_extension_override_warning(cmd)
+        self._resolve_upcoming_breaking_change_warning(cmd)
 
     def _resolve_preview_and_deprecation_warnings(self, cmd, parsed_args):
         deprecations = [] + getattr(parsed_args, '_argument_deprecations', [])
@@ -816,6 +817,31 @@ class AzCliCommandInvoker(CommandInvoker):
     def _resolve_extension_override_warning(self, cmd):  # pylint: disable=no-self-use
         if isinstance(cmd.command_source, ExtensionCommandSource) and cmd.command_source.overrides_command:
             logger.warning(cmd.command_source.get_command_warn_msg())
+
+    def _resolve_upcoming_breaking_change_warning(self, cmd):
+        breaking_changes = []
+        try:
+            import_module(cmd.loader.__class__.__module__ + '._breaking_change')
+        except ImportError:
+            pass
+
+        from ..breaking_change import upcoming_breaking_changes, BreakingChange
+        cmd_parts = cmd.name.split()
+        if cmd_parts and cmd_parts[0] == 'az':
+            cmd_parts = cmd_parts[1:]
+        for parts_end in range(0, len(cmd_parts) + 1):
+            bc = upcoming_breaking_changes.get(' '.join(cmd_parts[:parts_end]))
+            if isinstance(bc, list):
+                breaking_changes.extend(bc)
+            elif bc:
+                breaking_changes.append(bc)
+
+        if not self.cli_ctx.only_show_errors:
+            for bc in breaking_changes:
+                if isinstance(bc, str):
+                    print(bc, file=sys.stderr)
+                elif isinstance(bc, BreakingChange):
+                    print(bc.message, file=sys.stderr)
 
     def _resolve_output_sensitive_data_warning(self, cmd, result):
         if not cmd.cli_ctx.config.getboolean('clients', 'show_secrets_warning', False):
