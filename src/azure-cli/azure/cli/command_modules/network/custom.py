@@ -5594,7 +5594,6 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         )
         # filter arguments
         args_schema.policies._registered = False
-        args_schema.endpoints._registered = False
         args_schema.delegated_services._registered = False
         args_schema.address_prefix._registered = False
         return args_schema
@@ -5614,6 +5613,8 @@ class VNetSubnetCreate(_VNetSubnetCreate):
                 "service_name": service_name,
             }
 
+        if has_value(args.endpoints) and has_value(args.service_endpoints):
+            raise ArgumentUsageError("usage error: `--endpoints` and `--service-endpoints` cannot be used together, we prefer to use `endpoints` instead")
         args.delegated_services = assign_aaz_list_arg(
             args.delegated_services,
             args.delegations,
@@ -5697,7 +5698,6 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         # filter arguments
         args_schema.address_prefix._registered = False
         args_schema.delegated_services._registered = False
-        args_schema.endpoints._registered = False
         args_schema.policies._registered = False
         # handle detach logic
         args_schema.nat_gateway._fmt = AAZResourceIdArgFormat(
@@ -5729,6 +5729,8 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
                 "service_name": service_name,
             }
 
+        if has_value(args.endpoints) and has_value(args.service_endpoints):
+            raise ArgumentUsageError("usage error: `--endpoints` and `--service-endpoints` cannot be used together, we prefer to use `endpoints` instead")
         args.delegated_services = assign_aaz_list_arg(
             args.delegated_services,
             args.delegations,
