@@ -127,7 +127,7 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
         # client_assertion
         client_assertion = getattr(service_principal_auth, _CLIENT_ASSERTION, None)
         if client_assertion:
-            client_credential = {'client_assertion': client_assertion}
+            client_credential = {'client_assertion': get_id_token_on_github}
 
         super().__init__(service_principal_auth.client_id, client_credential=client_credential, **kwargs)
 
@@ -138,3 +138,22 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
         result = self.acquire_token_for_client(scopes, **kwargs)
         check_result(result)
         return build_sdk_access_token(result)
+
+
+def get_id_token_on_github():
+    import os
+    from urllib.parse import quote
+    import requests
+    token = os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']
+    url = os.environ['ACTIONS_ID_TOKEN_REQUEST_URL']
+    encodedAudience = quote('api://AzureADTokenExchange')
+    url = f'{url}&audience={encodedAudience}'
+    headers = {
+        'Authorization': f'bearer {token}',
+        'Accept': 'application/json; api-version=2.0',
+        'Content-Type': 'application/json'
+    }
+    result = requests.get(url, headers=headers)
+    id_token = result.json()['value']
+    logger.warning('Got ID token: %s', id_token)
+    return id_token
