@@ -25,7 +25,7 @@ import time
 import uuid
 import webbrowser
 import zipfile
-from distutils.version import StrictVersion  # pylint: disable=deprecated-module
+from packaging.version import Version
 from urllib.error import URLError
 from urllib.request import urlopen
 from azure.cli.command_modules.acs.maintenanceconfiguration import aks_maintenanceconfiguration_update_internal
@@ -159,7 +159,7 @@ def _aks_browse(
 
     return_msg = None
     # open portal view if addon is not enabled or k8s version >= 1.19.0
-    if StrictVersion(instance.kubernetes_version) >= StrictVersion('1.19.0') or (not addon_profile.enabled):
+    if Version(instance.kubernetes_version) >= Version('1.19.0') or (not addon_profile.enabled):
         subscription_id = get_subscription_id(cmd.cli_ctx)
         dashboardURL = (
             # Azure Portal URL (https://portal.azure.com for public cloud)
