@@ -4787,9 +4787,9 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                 feature_list.append(GalleryImageFeature(name=key, value=value))
             except ValueError:
                 raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
-        if security_type is None:
+        if security_type is None and hyper_v_generation == 'V2':
             feature_list.append(GalleryImageFeature(name='SecurityType', value='TrustedLaunchSupported'))
-    if features is None and cmd.cli_ctx.cloud.profile == 'latest':
+    if features is None and cmd.cli_ctx.cloud.profile == 'latest' and hyper_v_generation == 'V2':
         feature_list = []
         feature_list.append(GalleryImageFeature(name='SecurityType', value='TrustedLaunchSupported'))
 
