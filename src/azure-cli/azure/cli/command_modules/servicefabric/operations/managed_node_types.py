@@ -16,6 +16,10 @@ from azure.mgmt.servicefabricmanagedclusters.models import (
     SubResource,
     NodeTypeActionParameters
 )
+from azure.cli.command_modules.servicefabric._sf_utils import (
+    update_in_collection,
+    find_in_collection
+)
 
 from knack.log import get_logger
 
@@ -44,7 +48,9 @@ def create_node_type(cmd,
                      capacity=None,
                      placement_property=None,
                      is_stateless=False,
-                     multiple_placement_groups=False):
+                     multiple_placement_groups=False,
+                     security_type=None,
+                     secure_boot_enabled=False):
 
     #  set defult parameters
     if disk_size is None:
@@ -60,7 +66,7 @@ def create_node_type(cmd,
         vm_image_offer = "WindowsServer"
 
     if vm_image_sku is None:
-        vm_image_sku = "2019-Datacenter"
+        vm_image_sku = "2022-Datacenter"
 
     if vm_image_version is None:
         vm_image_version = "latest"
@@ -78,7 +84,9 @@ def create_node_type(cmd,
                                  capacities=capacity,
                                  placement_properties=placement_property,
                                  is_stateless=is_stateless,
-                                 multiple_placement_groups=multiple_placement_groups)
+                                 multiple_placement_groups=multiple_placement_groups,
+                                 security_type=security_type,
+                                 secure_boot_enabled=secure_boot_enabled)
 
         if application_start_port and application_end_port:
             new_node_type.application_ports = EndpointRangeDescription(start_port=application_start_port,
@@ -108,7 +116,11 @@ def update_node_type(cmd,
                      ephemeral_start_port=None,
                      ephemeral_end_port=None,
                      capacity=None,
-                     placement_property=None):
+                     placement_property=None,
+                     security_type=None,
+                     secure_boot_enabled=None,
+                     vm_image_sku=None,
+                     vm_size=None):
     try:
         node_type = client.node_types.get(resource_group_name, cluster_name, node_type_name)
 
@@ -128,6 +140,21 @@ def update_node_type(cmd,
 
         if placement_property is not None:
             node_type.placement_properties = placement_property
+
+        if security_type is not None:
+            node_type.security_type = security_type
+
+        if secure_boot_enabled is not None:
+            node_type.secure_boot_enabled = secure_boot_enabled
+
+        if vm_image_sku is not None:
+            node_type.vm_image_sku = vm_image_sku
+
+        if vm_size is not None:
+            node_type.vm_size = vm_size
+
+        if secure_boot_enabled is not None:
+            node_type.secure_boot_enabled = secure_boot_enabled
 
         poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)
@@ -200,7 +227,8 @@ def add_vm_extension(cmd,
                      auto_upgrade_minor_version=True,
                      setting=None,
                      protected_setting=None,
-                     provision_after_extension=None):
+                     provision_after_extension=None,
+                     setup_order=None):
     try:
         node_type: NodeType = client.node_types.get(resource_group_name, cluster_name, node_type_name)
 
@@ -215,9 +243,51 @@ def add_vm_extension(cmd,
                                      auto_upgrade_minor_version=auto_upgrade_minor_version,
                                      settings=setting,
                                      protected_settings=protected_setting,
-                                     provision_after_extensions=provision_after_extension)
+                                     provision_after_extensions=provision_after_extension,
+                                     setup_order=setup_order)
 
         node_type.vm_extensions.append(newExtension)
+
+        poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
+        return LongRunningOperation(cmd.cli_ctx)(poller)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
+        raise
+
+
+def update_vm_extension(cmd,
+                        client,
+                        resource_group_name,
+                        cluster_name,
+                        node_type_name,
+                        extension_name,
+                        type_handler_version=None,
+                        force_update_tag=None,
+                        auto_upgrade_minor_version=None,
+                        setting=None,
+                        protected_setting=None,
+                        provision_after_extension=None,
+                        setup_order=None):
+    try:
+        node_type: NodeType = client.node_types.get(resource_group_name, cluster_name, node_type_name)
+        updated_extension = find_in_collection(node_type, 'vm_extensions', 'name', extension_name)
+
+        if updated_extension is None:
+            logger.error('Extension %s does not exist.', extension_name)
+            return None
+
+        newExtension = VMSSExtension(name=extension_name,
+                                     publisher=updated_extension.publisher,
+                                     type=updated_extension.type,
+                                     type_handler_version=type_handler_version if type_handler_version is not None else updated_extension.type_handler_version,
+                                     force_update_tag=force_update_tag if force_update_tag is not None else updated_extension.force_update_tag,
+                                     auto_upgrade_minor_version=auto_upgrade_minor_version if auto_upgrade_minor_version is not None else updated_extension.auto_upgrade_minor_version,
+                                     settings=setting if setting is not None else updated_extension.settings,
+                                     protected_settings=protected_setting,
+                                     provision_after_extensions=provision_after_extension if provision_after_extension is not None else updated_extension.provision_after_extensions,
+                                     setup_order=setup_order if setup_order is not None else updated_extension.setup_order)
+
+        update_in_collection(node_type, "vm_extensions", newExtension, 'name')
 
         poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)

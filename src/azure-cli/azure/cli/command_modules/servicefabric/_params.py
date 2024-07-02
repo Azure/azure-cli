@@ -27,7 +27,8 @@ from azure.mgmt.servicefabricmanagedclusters.models import (FailureAction,
                                                             ServiceKind,
                                                             DiskType,
                                                             ClusterUpgradeMode,
-                                                            ClusterUpgradeCadence)
+                                                            ClusterUpgradeCadence,
+                                                            SecurityType)
 from knack.arguments import CLIArgumentType
 
 
@@ -320,16 +321,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('application_end_port', options_list=['--application-end-port', '--app-end-port'], help='Application End port of a range of ports.')
         c.argument('ephemeral_start_port', help='Ephemeral start port of a range of ports.')
         c.argument('ephemeral_end_port', help='Ephemeral end port of a range of ports.')
-        c.argument('vm_size', help='The size of virtual machines in the pool. All virtual machines in a pool are the same size.', default='Standard_D2')
+        c.argument('vm_size', help='The size of virtual machines in the pool. All virtual machines in a pool are the same size.')
         c.argument('vm_image_publisher', help='The publisher of the Azure Virtual Machines Marketplace image.', default='MicrosoftWindowsServer')
         c.argument('vm_image_offer', help='The offer type of the Azure Virtual Machines Marketplace image.', default='WindowsServer')
-        c.argument('vm_image_sku', help='The SKU of the Azure Virtual Machines Marketplace image.', default='2019-Datacenter')
+        c.argument('vm_image_sku', help='The SKU of the Azure Virtual Machines Marketplace image.')
         c.argument('vm_image_version', help='The version of the Azure Virtual Machines Marketplace image. ', default='latest')
         c.argument('capacity', arg_type=capacity)
         c.argument('placement_property', arg_type=placement_property)
         c.argument('is_stateless', arg_type=get_three_state_flag(), help='Indicates if the node type can only host Stateless workloads.', default=False)
         c.argument('multiple_placement_groups', options_list=['--multiple-placement-groups', '--multi-place-groups'], arg_type=get_three_state_flag(),
                    help='Indicates if scale set associated with the node type can be composed of multiple placement groups.', default=False)
+        c.argument('security_type', arg_type=get_enum_type(SecurityType), help='Specifies the security type of the nodeType. Only TrustedLaunch is currently supported.')
+        c.argument('secure_boot_enabled', arg_type=get_three_state_flag(), help='Specifies whether secure boot should be enabled on the nodeType. Can only be used with TrustedLaunch SecurityType.')
 
     with self.argument_context('sf managed-node-type node') as c:
         c.argument('node_name', nargs='+', help='list of target nodes to perform the operation.')
@@ -345,6 +348,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('setting', help='Json formatted public settings for the extension.')
         c.argument('protected_setting', help='The extension can contain either protectedSettings or protectedSettingsFromKeyVault or no protected settings at all.')
         c.argument('provision_after_extension', options_list=['--provision-after-extension', '--provision-after'], help='Collection of extension names after which this extension needs to be provisioned.')
+        c.argument('setup_order', arg_type=get_enum_type(VmssExtensionSetupOrder), nargs='+', help='Indicates the setup order for the extension.')
 
     with self.argument_context('sf managed-node-type vm-secret') as c:
         c.argument('source_vault_id', help='Key Vault resource id containing the certificates.')
