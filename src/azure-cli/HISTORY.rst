@@ -8,7 +8,7 @@ Release History
 
 **ACR**
 
-* `az acr build` and `az acr task`: Highlight the difference between arguments in the description (#28941)
+* `az acr build/task`: Highlight the difference between arguments in the description (#28941)
 
 **AKS**
 
