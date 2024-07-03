@@ -2996,7 +2996,7 @@ def _aks_mesh_update(
         mc = aks_update_decorator.fetch_mc()
         mc = aks_update_decorator.update_azure_service_mesh_profile(mc)
 
-         # check for unsupported asm revision once the smp in mc object has been updated
+        # check for unsupported asm revision once the smp in mc object has been updated
         # skip the warning incase upgrade is in progress
         service_mesh_profile = mc.service_mesh_profile
         if (
