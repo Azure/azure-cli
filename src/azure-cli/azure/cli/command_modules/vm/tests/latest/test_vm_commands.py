@@ -2261,6 +2261,7 @@ class VMExtensionImageSearchScenarioTest(LiveScenarioTest):
 
 class VMCreateUbuntuScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_ubuntu')
     def test_vm_create_ubuntu(self, resource_group, resource_group_location):
 
@@ -2271,10 +2272,16 @@ class VMCreateUbuntuScenarioTest(ScenarioTest):
             'image': 'Canonical:UbuntuServer:18.04-LTS:latest',
             'auth': 'ssh',
             'ssh_key': TEST_SSH_KEY_PUB,
-            'loc': resource_group_location
+            'loc': resource_group_location,
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
         self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --computer-name {comp_name} '
-                 ' --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly --nsg-rule NONE')
+                 ' --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly '
+                 '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -2290,11 +2297,12 @@ class VMCreateUbuntuScenarioTest(ScenarioTest):
 
         # test for idempotency--no need to reverify, just ensure the command doesn't fail
         self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --computer-name {comp_name} '
-                 ' --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly --nsg-rule NONE')
+                 ' --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
 
 class VMCreateEphemeralOsDisk(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_ephemeral_os_disk')
     def test_vm_create_ephemeral_os_disk(self, resource_group, resource_group_location):
 
@@ -2304,11 +2312,17 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
             'image': 'Canonical:UbuntuServer:18.04-LTS:latest',
             'ssh_key': TEST_SSH_KEY_PUB,
             'loc': resource_group_location,
-            'user': 'user_1'
+            'user': 'user_1',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
         # check that we can create a vm with local / ephemeral os disk.
-        self.cmd('vm create --resource-group {rg} --name {vm} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk --admin-username {user} --nsg-rule NONE')
+        self.cmd('vm create --resource-group {rg} --name {vm} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} '
+                 '--ephemeral-os-disk --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -2317,7 +2331,8 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
         ])
 
         # explicitly specify os-disk-caching
-        self.cmd('vm create --resource-group {rg} --name {vm_2} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk --os-disk-caching ReadOnly --admin-username {user} --nsg-rule NONE')
+        self.cmd('vm create --resource-group {rg} --name {vm_2} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} '
+                 '--ephemeral-os-disk --os-disk-caching ReadOnly --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm_2}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('storageProfile.osDisk.caching', 'ReadOnly'),
@@ -2338,10 +2353,17 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
             'user': 'user_1',
             'placement1': 'ResourceDisk',
             'placement2': 'CacheDisk',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
         # check base
-        self.cmd('vm create -n {base} -g {rg} --image {image} --size Standard_DS4_v2 --location {loc} --ephemeral-os-disk --ephemeral-os-disk-placement {placement1} --admin-username {user}')
+        self.cmd('vm create -n {base} -g {rg} --image {image} --size Standard_DS4_v2 --location {loc} --ssh-key-value \'{ssh_key}\' '
+                 '--ephemeral-os-disk --ephemeral-os-disk-placement {placement1} --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.cmd('vm show -g {rg} -n {base}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('storageProfile.osDisk.caching', 'ReadOnly'),
@@ -2351,7 +2373,8 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
 
         # check that we can create a vm with ResourceDisk.
         self.cmd(
-            'vm create --resource-group {rg} --name {vm} --image {image} --size Standard_DS4_v2 --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk --ephemeral-os-disk-placement {placement1} --admin-username {user} --nsg-rule NONE')
+            'vm create --resource-group {rg} --name {vm} --image {image} --size Standard_DS4_v2 --ssh-key-value \'{ssh_key}\' --location {loc} '
+            '--ephemeral-os-disk --ephemeral-os-disk-placement {placement1} --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -2362,7 +2385,8 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
 
         # check that we can create a vm with CacheDisk.
         self.cmd(
-            'vm create --resource-group {rg} --name {vm_2} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk --ephemeral-os-disk-placement {placement2} --os-disk-caching ReadOnly --admin-username {user} --nsg-rule NONE')
+            'vm create --resource-group {rg} --name {vm_2} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk '
+            '--ephemeral-os-disk-placement {placement2} --os-disk-caching ReadOnly --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm_2}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('storageProfile.osDisk.caching', 'ReadOnly'),
@@ -2375,7 +2399,7 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
 class VMUpdateTests(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_update_size_', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_update_size_')
     def test_vm_update_size(self, resource_group, resource_group_location):
         self.kwargs.update({
             'base': 'cli-test-vm-local-base',
@@ -2383,10 +2407,18 @@ class VMUpdateTests(ScenarioTest):
             'image': 'Canonical:UbuntuServer:18.04-LTS:latest',
             'loc': resource_group_location,
             'size': 'Standard_DS5_v2',
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
         # check base
-        self.cmd('vm create -n {base} -g {rg} --image {image} --size Standard_DS4_v2 --location {loc} --admin-username vmtest')
+        self.cmd('vm create -n {base} -g {rg} --image {image} --size Standard_DS4_v2 --location {loc} --ephemeral-os-disk '
+                 '--admin-username vmtest --ssh-key-value \'{ssh_key}\' --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.cmd('vm show -g {rg} -n {base}', checks=[
             self.check('provisioningState', 'Succeeded'),
         ])
@@ -2408,7 +2440,8 @@ class VMUpdateTests(ScenarioTest):
         ])
 
         # check create with default size
-        self.cmd('vm create -n {base2} -g {rg} --image {image}  --location {loc} --admin-username vmtest')
+        self.cmd('vm create -n {base2} -g {rg} --image {image}  --location {loc} --admin-username vmtest '
+                 '--ssh-key-value \'{ssh_key}\' --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {base2}', checks=[
             self.check('provisioningState', 'Succeeded'),
         ])
@@ -2421,7 +2454,7 @@ class VMUpdateTests(ScenarioTest):
         ])
 
     @AllowLargeResponse(99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_update_ephemeral_os_disk_placement_', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_update_ephemeral_os_disk_placement_')
     def test_vm_update_ephemeral_os_disk_placement(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm1': 'cli-test-vm-local-vm1',
@@ -2434,10 +2467,17 @@ class VMUpdateTests(ScenarioTest):
             'placement2': 'CacheDisk',
             'size1': 'Standard_DS5_v2',
             'size2': 'Standard_DS4_v2',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
         # check create base1
-        self.cmd('vm create -n {vm1} -g {rg} --image {image} --size Standard_DS4_v2 --location {loc} --ephemeral-os-disk --admin-username vmtest')
+        self.cmd('vm create -n {vm1} -g {rg} --image {image} --size Standard_DS4_v2 --location {loc} --ephemeral-os-disk '
+                 '--admin-username vmtest --ssh-key-value \'{ssh_key}\' --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk'),
@@ -2463,6 +2503,7 @@ class VMUpdateTests(ScenarioTest):
 
 class VMMultiNicScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_multi_nic_vm')
     def test_vm_create_multi_nics(self, resource_group):
 
@@ -2474,6 +2515,10 @@ class VMMultiNicScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         for i in range(1, 5):  # create four NICs
             self.kwargs['nic'] = 'nic{}'.format(i)
             self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet}')
@@ -2531,6 +2576,7 @@ class VMMultiNicScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance
 
 class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_none_options', location='westus')
     def test_vm_create_none_options(self, resource_group):
 
@@ -2538,10 +2584,16 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
             'vm': 'nooptvm',
             'loc': 'eastus',  # create in different location from RG
             'quotes': '""' if platform.system() == 'Windows' else "''",
-            'ssh_key': TEST_SSH_KEY_PUB
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
-        self.cmd('vm create -n {vm} -g {rg} --computer-name {quotes} --image Debian:debian-10:10:latest --availability-set {quotes} --nsg {quotes} --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --location {loc} --admin-username user11')
+        self.cmd('vm create -n {vm} -g {rg} --computer-name {quotes} --image Debian:debian-10:10:latest --availability-set {quotes} '
+                 '--nsg {quotes} --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --location {loc} --admin-username user11 --subnet {subnet} --vnet-name {vnet}')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm show -n {vm} -g {rg}', checks=[
             self.check('availabilitySet', None),
@@ -2571,11 +2623,18 @@ class VMMonitorTestDefault(ScenarioTest):
             'vm': 'monitorvm',
             'workspace': self.create_random_name('cliworkspace', 20),
             'rg': resource_group,
-            'nsg': self.create_random_name('clinsg', 20)
+            'nsg': self.create_random_name('clinsg', 20),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
         self.cmd('network nsg create -g {rg} -n {nsg}')
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=self.create_guid):
-            self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --workspace {workspace} --nsg {nsg} --admin-username azureuser --admin-password testPassword0 --authentication-type password')
+            self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --workspace {workspace} '
+                     '--nsg {nsg} --admin-username azureuser --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet}')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.cmd('vm monitor log show -n {vm} -g {rg} -q "Perf | limit 10"')
 
     @AllowLargeResponse()
@@ -2585,10 +2644,17 @@ class VMMonitorTestDefault(ScenarioTest):
         self.kwargs.update({
             'vm': 'monitorvm',
             'rg': resource_group,
-            'nsg': self.create_random_name('clinsg', 20)
+            'nsg': self.create_random_name('clinsg', 20),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
         self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --nsg {nsg} --admin-username azureuser --admin-password testPassword0 --authentication-type password')
+        self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --nsg {nsg} --admin-username azureuser '
+                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet}')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.cmd('vm start -n {vm} -g {rg}')
 
         time.sleep(60)
@@ -2612,11 +2678,17 @@ class VMMonitorTestCreateLinux(ScenarioTest):
             'vm': 'monitorvm',
             'workspace': self.create_random_name('cliworkspace', 20),
             'rg': resource_group,
-            'nsg': self.create_random_name('clinsg', 20)
+            'nsg': self.create_random_name('clinsg', 20),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
         self.cmd('network nsg create -g {rg} -n {nsg}')
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=self.create_guid):
-            self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --workspace {workspace} --nsg {nsg} --generate-ssh-keys --admin-username azureuser')
+            self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --workspace {workspace} --nsg {nsg} '
+                     '--generate-ssh-keys --admin-username azureuser --subnet {subnet} --vnet-name {vnet}')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace} -g {rg}').get_output_in_json()['id']
         uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2020-03-01-preview"
