@@ -43,7 +43,7 @@ Release History
 
 * Fix #28721: `az afd origin-group create`: Add parameter to support session affinity state (#28995)
 * Fix #28824: `az cdn profile`: Add default location (#28996)
-* Fix 28733: `az cdn endpoint update`: Cannot update an existing endpoint (#29110)
+* Fix #28733: `az cdn endpoint update`: Cannot update an existing endpoint (#29110)
 
 **Compute**
 
