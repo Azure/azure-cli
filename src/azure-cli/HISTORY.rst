@@ -100,7 +100,7 @@ Release History
 
 **SignalR**
 
-* Remove the empty location string when updating resource (#29242)
+* `az signalr upstream update`: Remove the empty location string when updating resource (#29242)
 
 **SQL**
 
