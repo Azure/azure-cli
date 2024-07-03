@@ -19,7 +19,7 @@ Release History
 
 **App Config**
 
-* Update appconfig help messages (#29151)
+* `az appconfig`: Update help message for App Configuration store (#29151)
 * `appconfig kv import`: Update the help message for ignore-match (#29200)
 
 **App Service**
