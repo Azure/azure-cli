@@ -547,12 +547,12 @@ jobs:
       
       echo "== Testing pip install on Python 3.9 =="
       docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
+        --rm -v $PYPI_FILES:/mnt/pypi mcr.microsoft.com/mirror/docker/library/python:3.9-slim \
         /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
       
       echo "== Testing pip install on Python 3.11 =="
       docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi python:3.11 \
+        --rm -v $PYPI_FILES:/mnt/pypi mcr.microsoft.com/mirror/docker/library/python:3.11-slim \
         /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
@@ -999,7 +999,7 @@ jobs:
       targetType: 'filePath'
       filePath: scripts/release/debian/pipeline.sh
     env:
-      DISTRO_BASE_IMAGE: $(deb_system):$(distro)
+      DISTRO_BASE_IMAGE: mcr.microsoft.com/mirror/docker/library/$(deb_system):$(distro)
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
@@ -1071,7 +1071,7 @@ jobs:
   - task: Bash@3
     displayName: 'Test $(deb_system) $(distro) $(arch) Package'
     env:
-      DISTRO_BASE_IMAGE: $(deb_system):$(distro)
+      DISTRO_BASE_IMAGE: mcr.microsoft.com/mirror/docker/library/$(deb_system):$(distro)
     inputs:
       targetType: 'inline'
       script: |
