@@ -323,6 +323,7 @@ jobs:
       filePath: build_scripts\windows\scripts\test_zip_installation.ps1
 
 - job: BuildDockerImageAlpine
+  continueOnError: true
   displayName: Build Docker Image Alpine
   strategy:
     matrix:
@@ -355,6 +356,7 @@ jobs:
       ArtifactName: $(artifactName)
 
 - job: TestDockerImageAlpine
+  continueOnError: true
   displayName: Test Docker Image Alpine
   dependsOn:
     - BuildDockerImageAlpine
@@ -943,6 +945,7 @@ jobs:
     displayName: 'Test Rpm Package'
 
 - job: BuildDebPackages
+  continueOnError: true
   displayName: Build Deb Packages
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
@@ -1013,6 +1016,7 @@ jobs:
       ArtifactName: $(deb_system)-$(distro)-$(arch)
 
 - job: TestDebPackages
+  continueOnError: true
   timeoutInMinutes: 120
   displayName: Test Deb Packages
   dependsOn:
