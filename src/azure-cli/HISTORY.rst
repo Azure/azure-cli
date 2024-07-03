@@ -27,7 +27,7 @@ Release History
 * `az webapp deploy`: Disable deploymentstatus API for deployments to app slots (#29209)
 * `az webapp deployment source config-zip`: Disable deploymentstatus API for deployments to app slots (#29209)
 * Fix #29041: `az webapp config access-restriction add`: Fix edge case validating service tags (#29048)
-* `az functionapp create`: Do not throw exception if endOfLifeDate not passed from stacks API (#28974)
+* `az functionapp create`: Avoid throwing exception when endOfLifeDate not passed from stacks API (#28974)
 
 **ARM**
 
