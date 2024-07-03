@@ -945,7 +945,6 @@ jobs:
     displayName: 'Test Rpm Package'
 
 - job: BuildDebPackages
-  continueOnError: true
   displayName: Build Deb Packages
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
@@ -1016,7 +1015,6 @@ jobs:
       ArtifactName: $(deb_system)-$(distro)-$(arch)
 
 - job: TestDebPackages
-  continueOnError: true
   timeoutInMinutes: 120
   displayName: Test Deb Packages
   dependsOn:
