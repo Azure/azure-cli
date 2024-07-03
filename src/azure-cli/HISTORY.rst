@@ -3,6 +3,118 @@
 Release History
 ===============
 
+2.62.0
+++++++
+
+**ACR**
+
+* `az acr build` and `az acr task`: Highlight the difference between arguments in the description (#28941)
+
+**AKS**
+
+* `az aks create/update`: Update AMW resource.location to only accept alphanumeric characters (#29025)
+* `az aks create/update`: Add Azure Managed Grafana support for managed prometheus addon in usnat (#29098)
+* `az aks create/update`: Ephemeral disk additional support for Azure Container Storage (#29230)
+* `az aks create/update`: Add and fix existing validations for ephemeral disk support for Azure Container Storage (#29274)
+
+**App Config**
+
+* Update appconfig help messages (#29151)
+* `appconfig kv import`: Update the help message for ignore-match (#29200)
+
+**App Service**
+
+* `az webapp deploy`: Disable deploymentstatus API for deployments to app slots (#29209)
+* `az webapp deployment source config-zip`: Disable deploymentstatus API for deployments to app slots (#29209)
+* Fix #29041: `az webapp config access-restriction add`: Fix edge case validating service tags (#29048)
+* `az functionapp create`: Do not throw exception if endOfLifeDate not passed from stacks API (#28974)
+
+**ARM**
+
+* `az stack mg create`: MG stacks are now automatically validated before creation (#29092)
+* `az bicep restore`: Fix typos in help messages (#29046)
+
+**Backup**
+
+* `az backup restore restore-disks/restore-azurewl/restore-azurefiles/restore-azurefileshare`: Add `--tenant-id` for cross-tenant MUA protection, otherwise allows restore when protected by a resource guard (#28950)
+* `az backup vault encryption update`: Add support for MUA for CMK operations (#29213)
+
+**CDN**
+
+* Fix #28721: `az afd origin-group create`: Add parameter to support session affinity state (#28995)
+* Fix #28824: `az cdn profile`: Add default location (#28996)
+* Fix 28733: `az cdn endpoint update`: Cannot update an existing endpoint (#29110)
+
+**Compute**
+
+* `az vmss update`: Add new parameter `--zones` to support setting vmss zonal expansion (#29035)
+* `az vm install-patches`: Add new parameter `--max-patch-publish-date` to support setting max patch publish date (#29045)
+* `az vmss reimage`: Add new parameter `--force-update-os-disk-for-ephemeral` to support updating the base OS disk (#29085)
+* `az vmss create/update`: Add new parameter `--scheduled-event-additional-publishing-target-event-grid-and-resource-graph` to support setting scheduled event policy (#29122)
+* `az vmss create/update`: Add new parameter `--enable-user-reboot-scheduled-events` to support setting scheduled event policy (#29122)
+* `az vmss create/update`: Add new parameter `--enable-user-redeploy-scheduled-events` to support setting scheduled event policy (#29122)
+* `az vmss update`: Add an option `Standard` to `--security-type` parameter (#29066)
+* `az vmss create`: Support set upgrade policy mode to automatic during flexible VMSS creation (#29234)
+* `az sig image-definition create`: Fix default value of security type (#29246)
+
+**Container app**
+
+* `az containerapp env create/update`: Support peer-to-peer traffic encryption with `--enable-peer-to-peer-encryption` (#28790)
+* `az containerapp job update`: Fix poll logic and `--no-wait` (#29017)
+* `az containerapp show-custom-domain-verification-id`: Show verification id used for binding custom domain (#29037)
+* `az containerapp env update`: Fix logs configuration about removing destination with `--logs-destination none` (#29056)
+* `az containerapp list-usages`: Support list-usages in subscription (#29058)
+* Fix #28983: `az containerapp job registry`: Support commands for modifying the job's registries (#29023)
+* `az containerapp auth`: Support Token Store with `--token-store`, `--sas-url-secret`, `--sas-url-secret-name`, `--yes` (#29068)
+* Fix #29128: `az containerapp env certificate`: Support managed certificate (#29156)
+* Fix #29172: `az containerapp secret set`: Remove the limit of length for secret name (#29214)
+
+**Cosmos DB**
+
+* `az service create`: Add `--gateway-type` to support multiple dedicated gateway types (#29053)
+
+**MySQL**
+
+* `az mysql flexible-server update`: Support replica resource group different with primary server (#29160)
+* `az mysql flexible-server detach-vnet`: New command to support converting a vnet azure mysql server to a non-vnet server (#29231)
+* `az mysql flexible-server deploy/update`: Add warning message for HA enabled and input validator (#29229)
+
+**NetAppFiles**
+
+* Coolnessperiod minimum fix (#29050)
+
+**Network**
+
+* `az network application-gateway waf-policy custom-rule update`: Add parameter `--js-cookie-exp-time` (#28999)
+* `az network cross-region-lb address-pool`: Add parameter `-- admin-state` (#29049)
+* `az network application-gateway rewrite-rule`: Add `--request-header-configurations` and `--response-header-configurations` (#29126)
+* `az network virtual-appliance restart`: Allow restart of virtual machines associated with a network virtual appliance (#29220)
+* `az network virtual-appliance inbound-security-rule`: Support of GET operation for NVA Inbound Security Rule (#29223)
+* `az network vnet subnet`: Add parameter `--endpoints` (#29285)
+
+**RDBMS**
+
+* `az postgres flexible-server restore`: Add capability to restore to new server using Premium SSD v2 Disks by setting Storage Type to "PremiumV2_LRS" (#28975)
+* `az postgres flexible-server migration create`: Fix bugs while passing in MigrationRuntimeResourceId to Migration Parameters, now need to be provided within properties json file (#29106)
+* `az postgres flexible-server firewall-rule create`: Correct firewall rule name and ip range validators (#29224)
+* `az postgres flexible-server update`: Add argument to enable or disable public-access (#29228)
+* `az postgres flexible-server create`: Add argument `--create-default-database` to support disabling default database creation (#29227)
+* `az postgres flexible-server upgrade`: Unblock MVU for Burstable from CLI (#29145)
+* `az postgres flexible-server update`: Correct setting `--maintenance-window` to be disabled (#29249)
+
+**SignalR**
+
+* Remove the empty location string when updating resource (#29242)
+
+**SQL**
+
+* `az sql db update`: Add `--manual-cutover` and `--perform-cutover` arguments (#28938)
+
+**Storage**
+
+* `az storage container policy`: Fix cases where permission and expiry are both null (#29165)
+* `az storage account create/update`: Support TLS 1.3, update recommended `--min-tls-version` to be 1.2 (#29286)
+
 2.61.0
 ++++++
 

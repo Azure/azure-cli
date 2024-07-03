@@ -3,6 +3,12 @@
 Release History
 ===============
 
+2.62.0
+++++++
+* Resolve CVE-2024-37891 (#29194)
+* Resolve CVE-2024-35195 (#29186)
+* `aaz`: Add argument completer support (#29204)
+
 2.61.0
 ++++++
 * Resolve CVE-2024-34064 (#28895)
