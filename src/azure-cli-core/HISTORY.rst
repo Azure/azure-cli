@@ -5,6 +5,7 @@ Release History
 
 2.62.0
 ++++++
+Fix #28997: Fix error "User cancelled the Accounts Control Operation" when logging in with WAM as Administrator (#29088)
 * Resolve CVE-2024-37891 (#29194)
 * Resolve CVE-2024-35195 (#29186)
 * `aaz`: Add argument completer support (#29204)
