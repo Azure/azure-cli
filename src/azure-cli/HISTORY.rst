@@ -79,10 +79,6 @@ Release History
 * `az mysql flexible-server detach-vnet`: New command to support converting a vnet azure mysql server to a non-vnet server (#29231)
 * `az mysql flexible-server deploy/update`: Add warning message for HA enabled and input validator (#29229)
 
-**NetAppFiles**
-
-* Coolnessperiod minimum fix (#29050)
-
 **Network**
 
 * `az network application-gateway waf-policy custom-rule update`: Add parameter `--js-cookie-exp-time` (#28999)
