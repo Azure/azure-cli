@@ -31,7 +31,7 @@ Release History
 
 **ARM**
 
-* `az stack mg create`: MG stacks are now automatically validated before creation (#29092)
+* `az stack mg create`: Validate MG stacks automatically before creation (#29092)
 * `az bicep restore`: Fix typos in help messages (#29046)
 
 **Backup**
