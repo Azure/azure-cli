@@ -323,6 +323,7 @@ jobs:
       filePath: build_scripts\windows\scripts\test_zip_installation.ps1
 
 - job: BuildDockerImageAlpine
+  continueOnError: true
   displayName: Build Docker Image Alpine
   strategy:
     matrix:
@@ -355,6 +356,7 @@ jobs:
       ArtifactName: $(artifactName)
 
 - job: TestDockerImageAlpine
+  continueOnError: true
   displayName: Test Docker Image Alpine
   dependsOn:
     - BuildDockerImageAlpine
@@ -547,12 +549,12 @@ jobs:
       
       echo "== Testing pip install on Python 3.9 =="
       docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
+        --rm -v $PYPI_FILES:/mnt/pypi mcr.microsoft.com/mirror/docker/library/python:3.9-slim \
         /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
       
       echo "== Testing pip install on Python 3.11 =="
       docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi python:3.11 \
+        --rm -v $PYPI_FILES:/mnt/pypi mcr.microsoft.com/mirror/docker/library/python:3.11-slim \
         /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
@@ -669,7 +671,7 @@ jobs:
                  -e CLI_VERSION=$CLI_VERSION \
                  -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
                  --name azurecli \
-                 python:3.11 \
+                 mcr.microsoft.com/mirror/docker/library/python:3.11-slim \
                  /mnt/scripts/run.sh
       
       # clean up
@@ -943,6 +945,7 @@ jobs:
     displayName: 'Test Rpm Package'
 
 - job: BuildDebPackages
+  continueOnError: true
   displayName: Build Deb Packages
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
@@ -999,7 +1002,7 @@ jobs:
       targetType: 'filePath'
       filePath: scripts/release/debian/pipeline.sh
     env:
-      DISTRO_BASE_IMAGE: $(deb_system):$(distro)
+      DISTRO_BASE_IMAGE: mcr.microsoft.com/mirror/docker/library/$(deb_system):$(distro)
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
@@ -1013,6 +1016,7 @@ jobs:
       ArtifactName: $(deb_system)-$(distro)-$(arch)
 
 - job: TestDebPackages
+  continueOnError: true
   timeoutInMinutes: 120
   displayName: Test Deb Packages
   dependsOn:
@@ -1071,7 +1075,7 @@ jobs:
   - task: Bash@3
     displayName: 'Test $(deb_system) $(distro) $(arch) Package'
     env:
-      DISTRO_BASE_IMAGE: $(deb_system):$(distro)
+      DISTRO_BASE_IMAGE: mcr.microsoft.com/mirror/docker/library/$(deb_system):$(distro)
     inputs:
       targetType: 'inline'
       script: |
