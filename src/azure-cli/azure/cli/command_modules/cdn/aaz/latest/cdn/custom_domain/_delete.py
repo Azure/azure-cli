@@ -32,7 +32,7 @@ class Delete(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, None)
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -80,6 +80,10 @@ class Delete(AAZCommand):
     @register_callback
     def post_operations(self):
         pass
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
     class CustomDomainsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"

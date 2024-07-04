@@ -19,7 +19,7 @@ from azure.cli.command_modules.cdn.aaz.latest.cdn.origin_group import Create as 
     Update as _CDNOriginGroupUpdate, Show as _CDNOriginGroupShow
 from azure.cli.command_modules.cdn.aaz.latest.cdn.endpoint import Create as _CDNEndpointCreate, \
     Update as _CDNEndpointUpdate, Show as _CDNEndpointShow
-from azure.cli.command_modules.cdn.aaz.latest.cdn.profile import CdnMigrateToAfd as _MigrateToAfd
+from azure.cli.command_modules.cdn.aaz.latest.cdn.profile_migration import Migrate as _Migrate
 from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDProfileShow, \
     Update as _AFDProfileUpdate
 from azure.cli.command_modules.cdn.aaz.latest.cdn._name_exists import NameExists
@@ -1111,7 +1111,7 @@ class CDNEndpointRuleConditionRemove(_CDNEndpointUpdate):
         args.delivery_policy = delivery_policy
 
 
-class CdnMigrateToAfd(_MigrateToAfd):
+class CdnMigrateToAfd(_Migrate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)

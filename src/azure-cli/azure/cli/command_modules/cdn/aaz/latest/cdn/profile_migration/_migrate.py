@@ -12,16 +12,17 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "cdn profile cdn-migration-commit",
+    "cdn profile-migration migrate",
+    is_preview=True,
 )
-class CdnMigrationCommit(AAZCommand):
-    """Commit the migrated Azure Frontdoor(Standard/Premium) profile.
+class Migrate(AAZCommand):
+    """Checks if CDN profile can be migrated to Azure Frontdoor(Standard/Premium) profile.
     """
 
     _aaz_info = {
         "version": "2024-05-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/migrationcommit", "2024-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/cdncanmigratetoafd", "2024-05-01-preview"],
         ]
     }
 
@@ -29,7 +30,7 @@ class CdnMigrationCommit(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, None)
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -44,9 +45,14 @@ class CdnMigrationCommit(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.profile_name = AAZStrArg(
             options=["--profile-name"],
-            help="Name of the CDN profile which is unique within the resource group.",
+            help="Name of the Azure Front Door Standard or Azure Front Door Premium which is unique within the resource group.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9]+(-*[a-zA-Z0-9])*$",
+                max_length=260,
+                min_length=1,
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -55,7 +61,7 @@ class CdnMigrationCommit(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.ProfilesMigrationCommit(ctx=self.ctx)()
+        yield self.CdnProfilesCdnCanMigrateToAfd(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -66,7 +72,11 @@ class CdnMigrationCommit(AAZCommand):
     def post_operations(self):
         pass
 
-    class ProfilesMigrationCommit(AAZHttpOperation):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+    class CdnProfilesCdnCanMigrateToAfd(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -78,7 +88,7 @@ class CdnMigrationCommit(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -87,7 +97,7 @@ class CdnMigrationCommit(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -96,7 +106,7 @@ class CdnMigrationCommit(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/migrationCommit",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/cdnCanMigrateToAfd",
                 **self.url_parameters
             )
 
@@ -136,12 +146,79 @@ class CdnMigrationCommit(AAZCommand):
             }
             return parameters
 
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
         def on_200(self, session):
-            pass
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _schema_on_200.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.properties
+            properties.can_migrate = AAZBoolType(
+                serialized_name="canMigrate",
+                flags={"read_only": True},
+            )
+            properties.default_sku = AAZStrType(
+                serialized_name="defaultSku",
+                flags={"read_only": True},
+            )
+            properties.errors = AAZListType()
+
+            errors = cls._schema_on_200.properties.errors
+            errors.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.errors.Element
+            _element.code = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.error_message = AAZStrType(
+                serialized_name="errorMessage",
+                flags={"read_only": True},
+            )
+            _element.next_steps = AAZStrType(
+                serialized_name="nextSteps",
+                flags={"read_only": True},
+            )
+            _element.resource_name = AAZStrType(
+                serialized_name="resourceName",
+                flags={"read_only": True},
+            )
+
+            return cls._schema_on_200
 
 
-class _CdnMigrationCommitHelper:
-    """Helper class for CdnMigrationCommit"""
+class _MigrateHelper:
+    """Helper class for Migrate"""
 
 
-__all__ = ["CdnMigrationCommit"]
+__all__ = ["Migrate"]

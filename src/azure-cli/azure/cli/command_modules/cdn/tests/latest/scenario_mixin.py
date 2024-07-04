@@ -412,24 +412,24 @@ class CdnScenarioMixin:
         return f'/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Cdn'
 
     def cdn_can_migrate_to_afd(self, resource_group, profile_name, checks=None):
-        command = 'cdn profile cdn-can-migrate-to-afd -g {} --profile-name {}'.format(resource_group,
-                                                                                      profile_name)
+        command = 'cdn profile-migration check-compatiability -g {} --profile-name {}'.format(resource_group,
+                                                                                              profile_name)
         return self.cmd(command, checks)
 
     def cdn_migrate_to_afd(self, resource_group, profile_name, sku, migration_endpoint_mappings=None, checks=None):
-        command = 'cdn profile cdn-migrate-to-afd -g {} --profile-name {} --sku {} --identity-type SystemAssigned'.format(resource_group,
-                                                                                                                          profile_name, sku)
+        command = 'cdn profile-migration migrate -g {} --profile-name {} --sku {} --identity-type SystemAssigned'.format(resource_group,
+                                                                                                                         profile_name, sku)
         if migration_endpoint_mappings is not None:
             command += ' --migration-endpoint-mappings {}'.format(migration_endpoint_mappings)
 
         return self.cmd(command, checks)
 
     def cdn_migration_abort(self, resource_group, profile_name, checks=None):
-        command = 'cdn profile cdn-migration-abort -g {} --profile-name {}'.format(resource_group,
-                                                                                   profile_name)
+        command = 'cdn profile-migration abort -g {} --profile-name {}'.format(resource_group,
+                                                                               profile_name)
         return self.cmd(command, checks)
 
     def cdn_migration_commit(self, resource_group, profile_name, checks=None):
-        command = 'cdn profile cdn-migration-commit -g {} --profile-name {}'.format(resource_group,
-                                                                                    profile_name)
+        command = 'cdn profile-migration commit -g {} --profile-name {}'.format(resource_group,
+                                                                                profile_name)
         return self.cmd(command, checks)

@@ -9,7 +9,7 @@
 # flake8: noqa
 
 from .__cmd_group import *
-from ._cdn_can_migrate_to_afd import *
-from ._cdn_migrate_to_afd import *
-from ._cdn_migration_abort import *
-from ._cdn_migration_commit import *
+from ._abort import *
+from ._check_compatiability import *
+from ._commit import *
+from ._migrate import *
