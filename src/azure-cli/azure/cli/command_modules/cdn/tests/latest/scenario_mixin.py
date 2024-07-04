@@ -412,8 +412,8 @@ class CdnScenarioMixin:
         return f'/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Cdn'
 
     def cdn_can_migrate_to_afd(self, resource_group, profile_name, checks=None):
-        command = 'cdn profile-migration check-compatiability -g {} --profile-name {}'.format(resource_group,
-                                                                                              profile_name)
+        command = 'cdn profile-migration check-compatibility -g {} --profile-name {}'.format(resource_group,
+                                                                                             profile_name)
         return self.cmd(command, checks)
 
     def cdn_migrate_to_afd(self, resource_group, profile_name, sku, migration_endpoint_mappings=None, checks=None):

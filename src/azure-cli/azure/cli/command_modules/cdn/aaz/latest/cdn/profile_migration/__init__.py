@@ -10,6 +10,6 @@
 
 from .__cmd_group import *
 from ._abort import *
-from ._check_compatiability import *
+from ._check_compatibility import *
 from ._commit import *
 from ._migrate import *

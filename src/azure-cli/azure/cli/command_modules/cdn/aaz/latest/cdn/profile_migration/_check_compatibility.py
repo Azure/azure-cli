@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "cdn profile-migration check-compatiability",
+    "cdn profile-migration check-compatibility",
     is_preview=True,
 )
-class CheckCompatiability(AAZCommand):
+class CheckCompatibility(AAZCommand):
     """Migrate the CDN profile to Azure Frontdoor(Standard/Premium) profile. This step prepares the profile for migration and will be followed by Commit to finalize the migration.
     """
 
@@ -254,8 +254,8 @@ class CheckCompatiability(AAZCommand):
             return cls._schema_on_200
 
 
-class _CheckCompatiabilityHelper:
-    """Helper class for CheckCompatiability"""
+class _CheckCompatibilityHelper:
+    """Helper class for CheckCompatibility"""
 
 
-__all__ = ["CheckCompatiability"]
+__all__ = ["CheckCompatibility"]
