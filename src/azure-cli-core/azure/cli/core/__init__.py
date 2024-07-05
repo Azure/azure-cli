@@ -218,6 +218,7 @@ class MainCommandsLoader(CLICommandsLoader):
             _load_module_command_loader, _load_extension_command_loader, BLOCKED_MODS, ExtensionCommandSource)
         from azure.cli.core.extension import (
             get_extensions, get_extension_path, get_extension_modname)
+        from azure.cli.core.breaking_change import (import_module_breaking_changes, import_extension_breaking_changes)
 
         def _update_command_table_from_modules(args, command_modules=None):
             """Loads command tables from modules and merge into the main command table.
@@ -254,6 +255,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 try:
                     start_time = timeit.default_timer()
                     module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
+                    import_module_breaking_changes(mod)
                     for cmd in module_command_table.values():
                         cmd.command_source = mod
                     self.command_table.update(module_command_table)
@@ -349,6 +351,7 @@ class MainCommandsLoader(CLICommandsLoader):
                         start_time = timeit.default_timer()
                         extension_command_table, extension_group_table = \
                             _load_extension_command_loader(self, args, ext_mod)
+                        import_extension_breaking_changes(ext_mod)
 
                         for cmd_name, cmd in extension_command_table.items():
                             cmd.command_source = ExtensionCommandSource(

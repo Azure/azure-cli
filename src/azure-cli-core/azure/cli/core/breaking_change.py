@@ -252,3 +252,31 @@ class AzCLIOtherChange(BreakingChange):
 
 
 upcoming_breaking_changes = {}
+
+
+def import_module_breaking_changes(mod):
+    try:
+        from importlib import import_module
+        import_module('azure.cli.command_modules.' + mod + '._breaking_change')
+    except ImportError:
+        pass
+
+
+def import_extension_breaking_changes(ext_mod):
+    try:
+        from importlib import import_module
+        import_module(ext_mod + '._breaking_change')
+    except ImportError:
+        pass
+
+
+def iter_command_breaking_changes(cmd):
+    cmd_parts = cmd.split()
+    if cmd_parts and cmd_parts[0] == 'az':
+        cmd_parts = cmd_parts[1:]
+    for parts_end in range(0, len(cmd_parts) + 1):
+        bc = upcoming_breaking_changes.get(' '.join(cmd_parts[:parts_end]))
+        if isinstance(bc, list):
+            yield from bc
+        elif bc:
+            yield bc

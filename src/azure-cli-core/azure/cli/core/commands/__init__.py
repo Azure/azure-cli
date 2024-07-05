@@ -819,25 +819,10 @@ class AzCliCommandInvoker(CommandInvoker):
             logger.warning(cmd.command_source.get_command_warn_msg())
 
     def _resolve_upcoming_breaking_change_warning(self, cmd):
-        breaking_changes = []
-        try:
-            import_module(cmd.loader.__class__.__module__ + '._breaking_change')
-        except ImportError:
-            pass
-
-        from ..breaking_change import upcoming_breaking_changes, BreakingChange
-        cmd_parts = cmd.name.split()
-        if cmd_parts and cmd_parts[0] == 'az':
-            cmd_parts = cmd_parts[1:]
-        for parts_end in range(0, len(cmd_parts) + 1):
-            bc = upcoming_breaking_changes.get(' '.join(cmd_parts[:parts_end]))
-            if isinstance(bc, list):
-                breaking_changes.extend(bc)
-            elif bc:
-                breaking_changes.append(bc)
-
         if not self.cli_ctx.only_show_errors:
-            for bc in breaking_changes:
+            from ..breaking_change import iter_command_breaking_changes, BreakingChange
+
+            for bc in iter_command_breaking_changes(cmd.name):
                 if isinstance(bc, str):
                     print(bc, file=sys.stderr)
                 elif isinstance(bc, BreakingChange):

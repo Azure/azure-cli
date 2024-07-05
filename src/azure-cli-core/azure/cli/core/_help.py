@@ -61,6 +61,7 @@ class CLIPrintMixin(CLIHelp):
 
     def _print_detailed_help(self, cli_name, help_file):
         CLIPrintMixin._print_extensions_msg(help_file)
+        CLIPrintMixin._print_break_change_msg(help_file)
         super(CLIPrintMixin, self)._print_detailed_help(cli_name, help_file)
         self._print_az_find_message(help_file.command)
 
@@ -126,6 +127,16 @@ class CLIPrintMixin(CLIHelp):
             #     logger.warning(help_file.command_source.get_experimental_warn_msg())
             # elif help_file.command_source.preview:
             #     logger.warning(help_file.command_source.get_preview_warn_msg())
+
+    @staticmethod
+    def _print_break_change_msg(help_file):
+        from azure.cli.core.breaking_change import iter_command_breaking_changes, BreakingChange
+
+        for bc in iter_command_breaking_changes(help_file.command):
+            if isinstance(bc, str):
+                logger.warning(bc)
+            elif isinstance(bc, BreakingChange):
+                logger.warning(bc.message)
 
 
 class AzCliHelp(CLIPrintMixin, CLIHelp):
