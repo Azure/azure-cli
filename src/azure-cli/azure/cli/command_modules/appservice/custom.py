@@ -4197,7 +4197,7 @@ class _FlexFunctionAppStackRuntimeHelper:
                             'isDefault': runtime_settings.get('isDefault', False),
                             'sku': sku,
                             'applicationInsights': runtime_settings['appInsightsSettings']['isSupported'],
-                            'endOfLifeDate': runtime_settings['endOfLifeDate'],
+                            'endOfLifeDate': runtime_settings.get('endOfLifeDate'),
                             'github_actions_properties': self.GithubActionsProperties(**github_actions_properties)
                         }
 
@@ -5489,7 +5489,9 @@ def _get_or_create_user_assigned_identity(cmd, resource_group_name, functionapp_
     msi_client = get_mgmt_service_client(cmd.cli_ctx, ManagedServiceIdentityClient)
     if user_assigned_identity:
         if is_valid_resource_id(user_assigned_identity):
-            user_assigned_identity = parse_resource_id(user_assigned_identity)['name']
+            parse_result = parse_resource_id(user_assigned_identity)
+            user_assigned_identity = parse_result['name']
+            resource_group_name = parse_result['resource_group']
         identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
                                                            resource_name=user_assigned_identity)
     else:
@@ -5724,7 +5726,8 @@ def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     app_is_linux_webapp = is_linux_webapp(app)
-    if not app_is_linux_webapp:
+    # TODO: enable tracking for slot deployments again once site warmup is fixed for slots
+    if not app_is_linux_webapp or slot is not None:
         response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                                      slot, timeout)
     else:

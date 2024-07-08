@@ -54,6 +54,21 @@ class StorageSASScenario(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage container policy list -c {} ', account_info, container) \
             .assert_with_checks(NoneCheck())
 
+        # test container policy with empty permissions/expiry
+        self.storage_cmd('storage container policy create -c {} -n {}', account_info, container, policy)
+        self.storage_cmd('storage container policy show -c {} -n {} ', account_info, container, policy)
+        self.storage_cmd('storage container policy list -c {}', account_info, container)\
+            .assert_with_checks(JMESPathCheck(policy, None))
+        self.storage_cmd('storage container policy delete -c {} -n {}', account_info, container, policy)
+        self.storage_cmd('storage container policy list -c {}', account_info, container) \
+            .assert_with_checks(NoneCheck())
+        self.storage_cmd('storage container policy create -c {} -n {}', account_info, container, policy)
+        self.storage_cmd('storage container policy update -c {} -n {} --permissions rwdxl', account_info, container,
+                         policy)
+        self.storage_cmd('storage container policy show -c {} -n {} ', account_info, container, policy).\
+            assert_with_checks(JMESPathCheck('permission', 'rwdxl'))
+
+
 class StorageSASLiveScenario(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

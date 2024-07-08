@@ -17,7 +17,7 @@ def load_command_table(self, _):
     from ._validators import (
         validate_subnet
     )
-    adls_format_path = 'azure.mgmt.datalake.store.operations.{}#{}.{{}}'
+    adls_format_path = 'azure.cli.command_modules.dls.vendored_sdks.azure_mgmt_datalake_store.operations.{}#{}.{{}}'
 
     dls_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.dls.custom#{}')
 
