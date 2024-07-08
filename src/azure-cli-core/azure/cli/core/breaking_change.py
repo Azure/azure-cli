@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import abc
 
-NEXT_BREAKING_CHANGE_RELEASE = '2.61.0'
+NEXT_BREAKING_CHANGE_RELEASE = '2.67.0'
 
 
 def _next_breaking_change_version():
