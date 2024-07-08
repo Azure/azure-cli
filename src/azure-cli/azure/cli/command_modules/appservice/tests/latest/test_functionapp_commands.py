@@ -904,6 +904,23 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(deployment_config['storage']['authentication']['userAssignedIdentityResourceId'] == identity['id'])
         self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] is None)
 
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP, parameter_name="functionapp_rg")
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP, parameter_name="identity_rg")
+    @StorageAccountPreparer(resource_group_parameter_name="functionapp_rg")
+    def test_functionapp_flex_deployment_config_by_user_identity_id(self, functionapp_rg, identity_rg, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+        identity_name = self.create_random_name('id1', 8)
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime java --deployment-storage-auth-type storageAccountConnectionString'
+                 .format(functionapp_rg, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+        identity = self.cmd('identity create -g {} -n {}'.format(identity_rg, identity_name)).get_output_in_json()
+        deployment_config = self.cmd('functionapp deployment config set -g {} -n {} --deployment-storage-auth-type userAssignedIdentity --deployment-storage-auth-value {}'
+                                     .format(functionapp_rg, functionapp_name, identity['id'])).get_output_in_json()
+        self.assertTrue(deployment_config['storage']['authentication']['type'] == 'UserAssignedIdentity')
+        self.assertTrue(deployment_config['storage']['authentication']['userAssignedIdentityResourceId'] == identity['id'])
+        self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] is None)
+
+
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_flex_vnet_integration(self, resource_group, storage_account):

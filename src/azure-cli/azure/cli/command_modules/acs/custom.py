@@ -627,6 +627,8 @@ def aks_create(
     storage_pool_size=None,
     storage_pool_sku=None,
     storage_pool_option=None,
+    ephemeral_disk_volume_type=None,
+    ephemeral_disk_nvme_perf_tier=None,
     # misc
     yes=False,
     no_wait=False,
@@ -779,6 +781,8 @@ def aks_update(
     storage_pool_sku=None,
     storage_pool_option=None,
     azure_container_storage_nodepools=None,
+    ephemeral_disk_volume_type=None,
+    ephemeral_disk_nvme_perf_tier=None,
     # misc
     yes=False,
     no_wait=False,
@@ -1128,11 +1132,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               enable_sgxquotehelper=enable_sgxquotehelper,
                               enable_secret_rotation=enable_secret_rotation,
                               rotation_poll_interval=rotation_poll_interval,
-                              no_wait=no_wait,
-                              enable_syslog=enable_syslog,
-                              data_collection_settings=data_collection_settings,
-                              ampls_resource_id=ampls_resource_id,
-                              enable_high_log_scale_mode=enable_high_log_scale_mode)
+                              no_wait=no_wait,)
 
     enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
         and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
@@ -1219,11 +1219,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    enable_secret_rotation=False,
                    disable_secret_rotation=False,
                    rotation_poll_interval=None,
-                   no_wait=False,
-                   enable_syslog=False,
-                   data_collection_settings=None,
-                   ampls_resource_id=None,
-                   enable_high_log_scale_mode=False):
+                   no_wait=False,):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
                                                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                 operation_group='managed_clusters')

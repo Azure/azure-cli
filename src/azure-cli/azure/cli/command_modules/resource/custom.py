@@ -2950,20 +2950,19 @@ def create_deployment_stack_at_management_group(
         cmd, rcf, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
     # run validate
-    # TODO: renable once ARM bug with POST requests on MG location mapped resources is fixed. A race condition on the backend will cause the create after validate to fail.
-    # from azure.core.exceptions import HttpResponseError
-    # try:
-    #     validation_poller = rcf.deployment_stacks.begin_validate_stack_at_management_group(
-    #         management_group_id, name, deployment_stack_model)
-    # except HttpResponseError as err:
-    #     err_message = _build_http_response_error_message(err)
-    #     raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
-    #
-    # validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
-    #
-    # if validation_result and validation_result.error:
-    #     err_message = _build_preflight_error_message(validation_result.error)
-    #     raise_subdivision_deployment_error(err_message)
+    from azure.core.exceptions import HttpResponseError
+    try:
+        validation_poller = rcf.deployment_stacks.begin_validate_stack_at_management_group(
+            management_group_id, name, deployment_stack_model)
+    except HttpResponseError as err:
+        err_message = _build_http_response_error_message(err)
+        raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+
+    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+    if validation_result and validation_result.error:
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise_subdivision_deployment_error(err_message)
 
     # run create
     return sdk_no_wait(no_wait, rcf.deployment_stacks.begin_create_or_update_at_management_group, management_group_id, name, deployment_stack_model)

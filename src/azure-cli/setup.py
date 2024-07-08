@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.61.0"
+VERSION = "2.62.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -78,9 +78,8 @@ DEPENDENCIES = [
     'azure-mgmt-containerinstance==10.1.0',
     'azure-mgmt-containerregistry==10.3.0',
     'azure-mgmt-containerservice~=30.0.0',
-    'azure-mgmt-cosmosdb==9.4.0',
+    'azure-mgmt-cosmosdb==9.5.1',
     'azure-mgmt-databoxedge~=1.0.0',
-    'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=10.0.0',
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=8.0.0',
@@ -120,7 +119,7 @@ DEPENDENCIES = [
     'azure-mgmt-signalr==2.0.0b1',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
     'azure-mgmt-sql==4.0.0b17',
-    'azure-mgmt-storage==21.1.0',
+    'azure-mgmt-storage==21.2.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==7.2.0',
@@ -128,7 +127,7 @@ DEPENDENCIES = [
     'azure-multiapi-storage~=1.2.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
-    'azure-synapse-artifacts~=0.18.0',
+    'azure-synapse-artifacts~=0.19.0',
     'azure-synapse-managedprivateendpoints~=0.4.0',
     'azure-synapse-spark~=0.2.0',
     'chardet~=5.2.0',
