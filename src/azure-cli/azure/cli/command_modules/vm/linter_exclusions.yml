@@ -35,6 +35,9 @@ vmss create:
         disable_integrity_monitoring:
             rule_exclusions:
             - option_length_too_long
+        enable_integrity_monitoring:
+            rule_exclusions:
+            - option_length_too_long
         os_disk_security_encryption_type:
             rule_exclusions:
                 - option_length_too_long
@@ -48,6 +51,15 @@ vmss create:
             rule_exclusions:
                 - option_length_too_long
         enable_osimage_notification:
+            rule_exclusions:
+                - option_length_too_long
+        disable_integrity_monitoring_autoupgrade:
+            rule_exclusions:
+                - option_length_too_long
+        enable_resilient_creation:
+            rule_exclusions:
+                - option_length_too_long
+        enable_resilient_deletion:
             rule_exclusions:
                 - option_length_too_long
 vmss update:
@@ -76,6 +88,12 @@ vmss update:
         enable_osimage_notification:
             rule_exclusions:
                 - option_length_too_long
+        enable_resilient_creation:
+            rule_exclusions:
+                - option_length_too_long
+        enable_resilient_deletion:
+            rule_exclusions:
+                - option_length_too_long
 vmss encryption enable:
     parameters:
         key_encryption_algorithm:
@@ -94,10 +112,16 @@ vm create:
         disable_integrity_monitoring:
             rule_exclusions:
                 - option_length_too_long
+        enable_integrity_monitoring:
+            rule_exclusions:
+                - option_length_too_long
         os_disk_security_encryption_type:
             rule_exclusions:
                 - option_length_too_long
         os_disk_secure_vm_disk_encryption_set:
+            rule_exclusions:
+                - option_length_too_long
+        disable_integrity_monitoring_autoupgrade:
             rule_exclusions:
                 - option_length_too_long
 vm unmanaged-disk attach:
@@ -156,6 +180,33 @@ sig image-version create:
 sig image-version update:
     parameters:
         allow_replicated_location_deletion:
+            rule_exclusions:
+            - option_length_too_long
+sig image-version undelete:
+    parameters:
+        allow_replicated_location_deletion:
+            rule_exclusions:
+            - option_length_too_long
+restore-point create:
+    parameters:
+        data_disk_restore_point_encryption_set:
+            rule_exclusions:
+                - option_length_too_long
+        data_disk_restore_point_encryption_type:
+            rule_exclusions:
+                - option_length_too_long
+        os_restore_point_encryption_set:
+            rule_exclusions:
+                - option_length_too_long
+        os_restore_point_encryption_type:
+            rule_exclusions:
+                - option_length_too_long
+        source_data_disk_resource:
+            rule_exclusions:
+                - option_length_too_long
+disk create:
+    parameters:
+        optimized_for_frequent_attach:
             rule_exclusions:
             - option_length_too_long
 ...

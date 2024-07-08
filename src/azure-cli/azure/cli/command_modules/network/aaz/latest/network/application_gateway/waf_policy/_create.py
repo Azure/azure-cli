@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2022-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2023-11-01"],
         ]
     }
 
@@ -98,7 +98,11 @@ class Create(AAZCommand):
             options=["action"],
             help="Action to take.",
             required=True,
-            enum={"Allow": "Allow", "Block": "Block", "Log": "Log"},
+            enum={"Allow": "Allow", "Block": "Block", "JSChallenge": "JSChallenge", "Log": "Log"},
+        )
+        _element.group_by_user_session = AAZListArg(
+            options=["group-by-user-session"],
+            help="List of user session identifier group by clauses.",
         )
         _element.match_conditions = AAZListArg(
             options=["match-conditions"],
@@ -117,11 +121,46 @@ class Create(AAZCommand):
             help="Rule priority. Lower values are evaluated prior to higher values.",
             required=True,
         )
+        _element.rate_limit_duration = AAZStrArg(
+            options=["rate-limit-duration"],
+            help="Duration over which Rate Limit policy will be applied. Applies only when ruleType is RateLimitRule.",
+            enum={"FiveMins": "FiveMins", "OneMin": "OneMin"},
+        )
+        _element.rate_limit_threshold = AAZIntArg(
+            options=["rate-limit-threshold"],
+            help="Rate Limit threshold to apply in case ruleType is RateLimitRule. Must be greater than or equal to 1",
+        )
         _element.rule_type = AAZStrArg(
             options=["rule-type"],
             help="Type of rule.",
             required=True,
-            enum={"Invalid": "Invalid", "MatchRule": "MatchRule"},
+            enum={"Invalid": "Invalid", "MatchRule": "MatchRule", "RateLimitRule": "RateLimitRule"},
+        )
+        _element.state = AAZStrArg(
+            options=["state"],
+            help="Describes if the custom rule is in enabled or disabled state. Defaults to Enabled if not specified.",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+
+        group_by_user_session = cls._args_schema.custom_rules.Element.group_by_user_session
+        group_by_user_session.Element = AAZObjectArg()
+
+        _element = cls._args_schema.custom_rules.Element.group_by_user_session.Element
+        _element.group_by_variables = AAZListArg(
+            options=["group-by-variables"],
+            help="List of group by clause variables.",
+            required=True,
+        )
+
+        group_by_variables = cls._args_schema.custom_rules.Element.group_by_user_session.Element.group_by_variables
+        group_by_variables.Element = AAZObjectArg()
+
+        _element = cls._args_schema.custom_rules.Element.group_by_user_session.Element.group_by_variables.Element
+        _element.variable_name = AAZStrArg(
+            options=["variable-name"],
+            help="User Session clause variable.",
+            required=True,
+            enum={"ClientAddr": "ClientAddr", "GeoLocation": "GeoLocation", "None": "None"},
         )
 
         match_conditions = cls._args_schema.custom_rules.Element.match_conditions
@@ -131,6 +170,7 @@ class Create(AAZCommand):
         _element.values = AAZListArg(
             options=["values"],
             help="Space-separated list of values to match.",
+            required=True,
         )
         _element.variables = AAZListArg(
             options=["variables"],
@@ -295,7 +335,7 @@ class Create(AAZCommand):
         _element.action = AAZStrArg(
             options=["action"],
             help="Describes the override action to be applied when rule matches.",
-            enum={"Allow": "Allow", "AnomalyScoring": "AnomalyScoring", "Block": "Block", "Log": "Log"},
+            enum={"Allow": "Allow", "AnomalyScoring": "AnomalyScoring", "Block": "Block", "JSChallenge": "JSChallenge", "Log": "Log"},
         )
         _element.rule_id = AAZStrArg(
             options=["rule-id"],
@@ -309,12 +349,31 @@ class Create(AAZCommand):
         )
 
         policy_settings = cls._args_schema.policy_settings
+        policy_settings.custom_body = AAZStrArg(
+            options=["custom-body"],
+            help="If the action type is block, customer can override the response body. The body must be specified in base64 encoding.",
+            fmt=AAZStrArgFormat(
+                pattern="^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$",
+                max_length=32768,
+            ),
+        )
+        policy_settings.custom_status_code = AAZIntArg(
+            options=["custom-status-code"],
+            help="If the action type is block, customer can override the response status code.",
+            fmt=AAZIntArgFormat(
+                minimum=0,
+            ),
+        )
         policy_settings.file_upload_limit_in_mb = AAZIntArg(
             options=["file-upload-limit-in-mb"],
             help="Maximum file upload size in Mb for WAF.",
             fmt=AAZIntArgFormat(
                 minimum=0,
             ),
+        )
+        policy_settings.log_scrubbing = AAZObjectArg(
+            options=["log-scrubbing"],
+            help="To scrub sensitive log fields",
         )
         policy_settings.max_request_body_size_in_kb = AAZIntArg(
             options=["max-request-body-size-in-kb"],
@@ -325,7 +384,7 @@ class Create(AAZCommand):
         )
         policy_settings.mode = AAZStrArg(
             options=["mode"],
-            help="The mode of the policy.",
+            help="If it is in detection mode or prevention mode at policy level.",
             enum={"Detection": "Detection", "Prevention": "Prevention"},
         )
         policy_settings.request_body_check = AAZBoolArg(
@@ -334,7 +393,44 @@ class Create(AAZCommand):
         )
         policy_settings.state = AAZStrArg(
             options=["state"],
-            help="The state of the policy.",
+            help="If the policy is in enabled state or disabled state.",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+
+        log_scrubbing = cls._args_schema.policy_settings.log_scrubbing
+        log_scrubbing.scrubbing_rules = AAZListArg(
+            options=["scrubbing-rules"],
+            help="The rules that are applied to the logs for scrubbing.",
+        )
+        log_scrubbing.state = AAZStrArg(
+            options=["state"],
+            help="State of the log scrubbing config. Default value is Enabled.",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+
+        scrubbing_rules = cls._args_schema.policy_settings.log_scrubbing.scrubbing_rules
+        scrubbing_rules.Element = AAZObjectArg()
+
+        _element = cls._args_schema.policy_settings.log_scrubbing.scrubbing_rules.Element
+        _element.match_variable = AAZStrArg(
+            options=["match-variable"],
+            help="The variable to be scrubbed from the logs.",
+            required=True,
+            enum={"RequestArgNames": "RequestArgNames", "RequestCookieNames": "RequestCookieNames", "RequestHeaderNames": "RequestHeaderNames", "RequestIPAddress": "RequestIPAddress", "RequestJSONArgNames": "RequestJSONArgNames", "RequestPostArgNames": "RequestPostArgNames"},
+        )
+        _element.selector = AAZStrArg(
+            options=["selector"],
+            help="When matchVariable is a collection, operator used to specify which elements in the collection this rule applies to.",
+        )
+        _element.selector_match_operator = AAZStrArg(
+            options=["selector-match-operator"],
+            help="When matchVariable is a collection, operate on the selector to specify which elements in the collection this rule applies to.",
+            required=True,
+            enum={"Equals": "Equals", "EqualsAny": "EqualsAny"},
+        )
+        _element.state = AAZStrArg(
+            options=["state"],
+            help="Defines the state of log scrubbing rule. Default value is Enabled.",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         return cls._args_schema
@@ -404,7 +500,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -446,10 +542,30 @@ class Create(AAZCommand):
             _elements = _builder.get(".properties.customRules[]")
             if _elements is not None:
                 _elements.set_prop("action", AAZStrType, ".action", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("groupByUserSession", AAZListType, ".group_by_user_session")
                 _elements.set_prop("matchConditions", AAZListType, ".match_conditions", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("name", AAZStrType, ".name")
                 _elements.set_prop("priority", AAZIntType, ".priority", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("rateLimitDuration", AAZStrType, ".rate_limit_duration")
+                _elements.set_prop("rateLimitThreshold", AAZIntType, ".rate_limit_threshold")
                 _elements.set_prop("ruleType", AAZStrType, ".rule_type", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("state", AAZStrType, ".state")
+
+            group_by_user_session = _builder.get(".properties.customRules[].groupByUserSession")
+            if group_by_user_session is not None:
+                group_by_user_session.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.customRules[].groupByUserSession[]")
+            if _elements is not None:
+                _elements.set_prop("groupByVariables", AAZListType, ".group_by_variables", typ_kwargs={"flags": {"required": True}})
+
+            group_by_variables = _builder.get(".properties.customRules[].groupByUserSession[].groupByVariables")
+            if group_by_variables is not None:
+                group_by_variables.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.customRules[].groupByUserSession[].groupByVariables[]")
+            if _elements is not None:
+                _elements.set_prop("variableName", AAZStrType, ".variable_name", typ_kwargs={"flags": {"required": True}})
 
             match_conditions = _builder.get(".properties.customRules[].matchConditions")
             if match_conditions is not None:
@@ -457,7 +573,7 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.customRules[].matchConditions[]")
             if _elements is not None:
-                _elements.set_prop("matchValues", AAZListType, ".values")
+                _elements.set_prop("matchValues", AAZListType, ".values", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("matchVariables", AAZListType, ".variables", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("negationConditon", AAZBoolType, ".negate")
                 _elements.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
@@ -554,11 +670,30 @@ class Create(AAZCommand):
 
             policy_settings = _builder.get(".properties.policySettings")
             if policy_settings is not None:
+                policy_settings.set_prop("customBlockResponseBody", AAZStrType, ".custom_body")
+                policy_settings.set_prop("customBlockResponseStatusCode", AAZIntType, ".custom_status_code")
                 policy_settings.set_prop("fileUploadLimitInMb", AAZIntType, ".file_upload_limit_in_mb")
+                policy_settings.set_prop("logScrubbing", AAZObjectType, ".log_scrubbing")
                 policy_settings.set_prop("maxRequestBodySizeInKb", AAZIntType, ".max_request_body_size_in_kb")
                 policy_settings.set_prop("mode", AAZStrType, ".mode")
                 policy_settings.set_prop("requestBodyCheck", AAZBoolType, ".request_body_check")
                 policy_settings.set_prop("state", AAZStrType, ".state")
+
+            log_scrubbing = _builder.get(".properties.policySettings.logScrubbing")
+            if log_scrubbing is not None:
+                log_scrubbing.set_prop("scrubbingRules", AAZListType, ".scrubbing_rules")
+                log_scrubbing.set_prop("state", AAZStrType, ".state")
+
+            scrubbing_rules = _builder.get(".properties.policySettings.logScrubbing.scrubbingRules")
+            if scrubbing_rules is not None:
+                scrubbing_rules.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.policySettings.logScrubbing.scrubbingRules[]")
+            if _elements is not None:
+                _elements.set_prop("matchVariable", AAZStrType, ".match_variable", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("selector", AAZStrType, ".selector")
+                _elements.set_prop("selectorMatchOperator", AAZStrType, ".selector_match_operator", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("state", AAZStrType, ".state")
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -699,6 +834,10 @@ class Create(AAZCommand):
             )
             properties.custom_error_configurations = AAZListType(
                 serialized_name="customErrorConfigurations",
+            )
+            properties.default_predefined_ssl_policy = AAZStrType(
+                serialized_name="defaultPredefinedSslPolicy",
+                flags={"read_only": True},
             )
             properties.enable_fips = AAZBoolType(
                 serialized_name="enableFips",
@@ -1099,6 +1238,9 @@ class Create(AAZCommand):
                 serialized_name="frontendPort",
             )
             _CreateHelper._build_schema_sub_resource_read(properties.frontend_port)
+            properties.host_names = AAZListType(
+                serialized_name="hostNames",
+            )
             properties.protocol = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -1112,6 +1254,9 @@ class Create(AAZCommand):
                 serialized_name="sslProfile",
             )
             _CreateHelper._build_schema_sub_resource_read(properties.ssl_profile)
+
+            host_names = cls._schema_on_200_201.properties.application_gateways.Element.properties.listeners.Element.properties.host_names
+            host_names.Element = AAZStrType()
 
             load_distribution_policies = cls._schema_on_200_201.properties.application_gateways.Element.properties.load_distribution_policies
             load_distribution_policies.Element = AAZObjectType()
@@ -1189,6 +1334,7 @@ class Create(AAZCommand):
             )
             properties.private_endpoint = AAZObjectType(
                 serialized_name="privateEndpoint",
+                flags={"read_only": True},
             )
             _CreateHelper._build_schema_private_endpoint_read(properties.private_endpoint)
             properties.private_link_service_connection_state = AAZObjectType(
@@ -1529,6 +1675,7 @@ class Create(AAZCommand):
 
             sku = cls._schema_on_200_201.properties.application_gateways.Element.properties.sku
             sku.capacity = AAZIntType()
+            sku.family = AAZStrType()
             sku.name = AAZStrType()
             sku.tier = AAZStrType()
 
@@ -1837,6 +1984,9 @@ class Create(AAZCommand):
             _element.etag = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.group_by_user_session = AAZListType(
+                serialized_name="groupByUserSession",
+            )
             _element.match_conditions = AAZListType(
                 serialized_name="matchConditions",
                 flags={"required": True},
@@ -1845,8 +1995,33 @@ class Create(AAZCommand):
             _element.priority = AAZIntType(
                 flags={"required": True},
             )
+            _element.rate_limit_duration = AAZStrType(
+                serialized_name="rateLimitDuration",
+            )
+            _element.rate_limit_threshold = AAZIntType(
+                serialized_name="rateLimitThreshold",
+            )
             _element.rule_type = AAZStrType(
                 serialized_name="ruleType",
+                flags={"required": True},
+            )
+            _element.state = AAZStrType()
+
+            group_by_user_session = cls._schema_on_200_201.properties.custom_rules.Element.group_by_user_session
+            group_by_user_session.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.custom_rules.Element.group_by_user_session.Element
+            _element.group_by_variables = AAZListType(
+                serialized_name="groupByVariables",
+                flags={"required": True},
+            )
+
+            group_by_variables = cls._schema_on_200_201.properties.custom_rules.Element.group_by_user_session.Element.group_by_variables
+            group_by_variables.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.custom_rules.Element.group_by_user_session.Element.group_by_variables.Element
+            _element.variable_name = AAZStrType(
+                serialized_name="variableName",
                 flags={"required": True},
             )
 
@@ -1856,6 +2031,7 @@ class Create(AAZCommand):
             _element = cls._schema_on_200_201.properties.custom_rules.Element.match_conditions.Element
             _element.match_values = AAZListType(
                 serialized_name="matchValues",
+                flags={"required": True},
             )
             _element.match_variables = AAZListType(
                 serialized_name="matchVariables",
@@ -1992,8 +2168,23 @@ class Create(AAZCommand):
             _CreateHelper._build_schema_sub_resource_read(path_based_rules.Element)
 
             policy_settings = cls._schema_on_200_201.properties.policy_settings
+            policy_settings.custom_block_response_body = AAZStrType(
+                serialized_name="customBlockResponseBody",
+            )
+            policy_settings.custom_block_response_status_code = AAZIntType(
+                serialized_name="customBlockResponseStatusCode",
+            )
+            policy_settings.file_upload_enforcement = AAZBoolType(
+                serialized_name="fileUploadEnforcement",
+            )
             policy_settings.file_upload_limit_in_mb = AAZIntType(
                 serialized_name="fileUploadLimitInMb",
+            )
+            policy_settings.js_challenge_cookie_expiration_in_mins = AAZIntType(
+                serialized_name="jsChallengeCookieExpirationInMins",
+            )
+            policy_settings.log_scrubbing = AAZObjectType(
+                serialized_name="logScrubbing",
             )
             policy_settings.max_request_body_size_in_kb = AAZIntType(
                 serialized_name="maxRequestBodySizeInKb",
@@ -2002,7 +2193,34 @@ class Create(AAZCommand):
             policy_settings.request_body_check = AAZBoolType(
                 serialized_name="requestBodyCheck",
             )
+            policy_settings.request_body_enforcement = AAZBoolType(
+                serialized_name="requestBodyEnforcement",
+            )
+            policy_settings.request_body_inspect_limit_in_kb = AAZIntType(
+                serialized_name="requestBodyInspectLimitInKB",
+            )
             policy_settings.state = AAZStrType()
+
+            log_scrubbing = cls._schema_on_200_201.properties.policy_settings.log_scrubbing
+            log_scrubbing.scrubbing_rules = AAZListType(
+                serialized_name="scrubbingRules",
+            )
+            log_scrubbing.state = AAZStrType()
+
+            scrubbing_rules = cls._schema_on_200_201.properties.policy_settings.log_scrubbing.scrubbing_rules
+            scrubbing_rules.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.policy_settings.log_scrubbing.scrubbing_rules.Element
+            _element.match_variable = AAZStrType(
+                serialized_name="matchVariable",
+                flags={"required": True},
+            )
+            _element.selector = AAZStrType()
+            _element.selector_match_operator = AAZStrType(
+                serialized_name="selectorMatchOperator",
+                flags={"required": True},
+            )
+            _element.state = AAZStrType()
 
             tags = cls._schema_on_200_201.tags
             tags.Element = AAZStrType()
@@ -2101,6 +2319,7 @@ class _CreateHelper:
         if cls._schema_application_gateway_header_configuration_read is not None:
             _schema.header_name = cls._schema_application_gateway_header_configuration_read.header_name
             _schema.header_value = cls._schema_application_gateway_header_configuration_read.header_value
+            _schema.header_value_matcher = cls._schema_application_gateway_header_configuration_read.header_value_matcher
             return
 
         cls._schema_application_gateway_header_configuration_read = _schema_application_gateway_header_configuration_read = AAZObjectType()
@@ -2112,9 +2331,20 @@ class _CreateHelper:
         application_gateway_header_configuration_read.header_value = AAZStrType(
             serialized_name="headerValue",
         )
+        application_gateway_header_configuration_read.header_value_matcher = AAZObjectType(
+            serialized_name="headerValueMatcher",
+        )
+
+        header_value_matcher = _schema_application_gateway_header_configuration_read.header_value_matcher
+        header_value_matcher.ignore_case = AAZBoolType(
+            serialized_name="ignoreCase",
+        )
+        header_value_matcher.negate = AAZBoolType()
+        header_value_matcher.pattern = AAZStrType()
 
         _schema.header_name = cls._schema_application_gateway_header_configuration_read.header_name
         _schema.header_value = cls._schema_application_gateway_header_configuration_read.header_value
+        _schema.header_value_matcher = cls._schema_application_gateway_header_configuration_read.header_value_matcher
 
     _schema_application_gateway_ip_configuration_read = None
 
@@ -2464,6 +2694,10 @@ class _CreateHelper:
         properties.private_ip_address = AAZStrType(
             serialized_name="privateIPAddress",
         )
+        properties.private_ip_address_prefix_length = AAZIntType(
+            serialized_name="privateIPAddressPrefixLength",
+            nullable=True,
+        )
         properties.private_ip_address_version = AAZStrType(
             serialized_name="privateIPAddressVersion",
         )
@@ -2472,6 +2706,7 @@ class _CreateHelper:
         )
         properties.private_link_connection_properties = AAZObjectType(
             serialized_name="privateLinkConnectionProperties",
+            flags={"read_only": True},
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
@@ -2543,9 +2778,16 @@ class _CreateHelper:
             serialized_name="provisioningState",
             flags={"read_only": True},
         )
+        properties.sync_mode = AAZStrType(
+            serialized_name="syncMode",
+        )
         properties.tunnel_interfaces = AAZListType(
             serialized_name="tunnelInterfaces",
         )
+        properties.virtual_network = AAZObjectType(
+            serialized_name="virtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.virtual_network)
 
         backend_ip_configurations = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.backend_ip_configurations
         backend_ip_configurations.Element = AAZObjectType()
@@ -2788,6 +3030,9 @@ class _CreateHelper:
         properties.auxiliary_mode = AAZStrType(
             serialized_name="auxiliaryMode",
         )
+        properties.auxiliary_sku = AAZStrType(
+            serialized_name="auxiliarySku",
+        )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
         )
@@ -2830,6 +3075,7 @@ class _CreateHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_link_service = AAZObjectType(
@@ -3018,8 +3264,13 @@ class _CreateHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
+        properties.private_endpoint_location = AAZStrType(
+            serialized_name="privateEndpointLocation",
+            flags={"read_only": True},
+        )
         properties.private_link_service_connection_state = AAZObjectType(
             serialized_name="privateLinkServiceConnectionState",
         )
@@ -3237,7 +3488,9 @@ class _CreateHelper:
             _schema.type = cls._schema_private_endpoint_read.type
             return
 
-        cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType()
+        cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
         private_endpoint_read = _schema_private_endpoint_read
         private_endpoint_read.etag = AAZStrType(
@@ -3545,6 +3798,9 @@ class _CreateHelper:
         dns_settings.domain_name_label = AAZStrType(
             serialized_name="domainNameLabel",
         )
+        dns_settings.domain_name_label_scope = AAZStrType(
+            serialized_name="domainNameLabelScope",
+        )
         dns_settings.fqdn = AAZStrType()
         dns_settings.reverse_fqdn = AAZStrType(
             serialized_name="reverseFqdn",
@@ -3690,7 +3946,9 @@ class _CreateHelper:
         properties.direction = AAZStrType(
             flags={"required": True},
         )
-        properties.priority = AAZIntType()
+        properties.priority = AAZIntType(
+            flags={"required": True},
+        )
         properties.protocol = AAZStrType(
             flags={"required": True},
         )
@@ -3788,7 +4046,10 @@ class _CreateHelper:
             serialized_name="addressPrefixes",
         )
         properties.application_gateway_ip_configurations = AAZListType(
-            serialized_name="applicationGatewayIpConfigurations",
+            serialized_name="applicationGatewayIPConfigurations",
+        )
+        properties.default_outbound_access = AAZBoolType(
+            serialized_name="defaultOutboundAccess",
         )
         properties.delegations = AAZListType()
         properties.ip_allocations = AAZListType(
@@ -3843,6 +4104,9 @@ class _CreateHelper:
         )
         properties.service_endpoints = AAZListType(
             serialized_name="serviceEndpoints",
+        )
+        properties.sharing_scope = AAZStrType(
+            serialized_name="sharingScope",
         )
 
         address_prefixes = _schema_subnet_read.properties.address_prefixes
@@ -3914,7 +4178,9 @@ class _CreateHelper:
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
 
         private_endpoints = _schema_subnet_read.properties.private_endpoints
-        private_endpoints.Element = AAZObjectType()
+        private_endpoints.Element = AAZObjectType(
+            flags={"read_only": True},
+        )
         cls._build_schema_private_endpoint_read(private_endpoints.Element)
 
         resource_navigation_links = _schema_subnet_read.properties.resource_navigation_links

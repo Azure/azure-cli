@@ -173,7 +173,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
     def setup_operations(cls, dest_ops, values, prefix_keys=None):
         if prefix_keys is None:
             prefix_keys = []
-        if values is None:
+        if values is None or values == []:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument cannot be blank")
             assert not isinstance(cls._schema._blank, AAZPromptInput), "Prompt input is not supported in " \
@@ -402,7 +402,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
     def setup_operations(cls, dest_ops, values, prefix_keys=None):
         if prefix_keys is None:
             prefix_keys = []
-        if values is None:
+        if values is None or values == []:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument cannot be blank")
             assert not isinstance(cls._schema._blank, AAZPromptInput), "Prompt input is not supported in List args."

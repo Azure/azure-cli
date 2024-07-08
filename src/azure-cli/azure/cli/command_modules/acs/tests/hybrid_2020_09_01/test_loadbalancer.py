@@ -68,6 +68,7 @@ class TestLoadBalancer(unittest.TestCase):
             outbound_ip_prefixes,
             outbound_ports,
             idle_timeout,
+            None,
             profile,
             lb_models,
         )

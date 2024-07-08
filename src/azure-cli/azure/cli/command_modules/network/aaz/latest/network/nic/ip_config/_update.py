@@ -1010,13 +1010,11 @@ class Update(AAZCommand):
             _schema.idle_timeout_in_minutes = cls._args_public_ip_address_update.idle_timeout_in_minutes
             _schema.ip_address = cls._args_public_ip_address_update.ip_address
             _schema.ip_tags = cls._args_public_ip_address_update.ip_tags
-            _schema.linked_public_ip_address = cls._args_public_ip_address_update.linked_public_ip_address
             _schema.location = cls._args_public_ip_address_update.location
             _schema.nat_gateway = cls._args_public_ip_address_update.nat_gateway
             _schema.public_ip_address_version = cls._args_public_ip_address_update.public_ip_address_version
             _schema.public_ip_allocation_method = cls._args_public_ip_address_update.public_ip_allocation_method
             _schema.public_ip_prefix = cls._args_public_ip_address_update.public_ip_prefix
-            _schema.service_public_ip_address = cls._args_public_ip_address_update.service_public_ip_address
             _schema.sku = cls._args_public_ip_address_update.sku
             _schema.tags = cls._args_public_ip_address_update.tags
             _schema.zones = cls._args_public_ip_address_update.zones
@@ -1080,12 +1078,6 @@ class Update(AAZCommand):
             help="The list of tags associated with the public IP address.",
             nullable=True,
         )
-        public_ip_address_update.linked_public_ip_address = AAZObjectArg(
-            options=["linked-public-ip-address"],
-            help="The linked public IP address of the public IP address resource.",
-            nullable=True,
-        )
-        cls._build_args_public_ip_address_update(public_ip_address_update.linked_public_ip_address)
         public_ip_address_update.nat_gateway = AAZObjectArg(
             options=["nat-gateway"],
             help="The NatGateway for the Public IP address.",
@@ -1109,12 +1101,6 @@ class Update(AAZCommand):
             nullable=True,
         )
         cls._build_args_sub_resource_update(public_ip_address_update.public_ip_prefix)
-        public_ip_address_update.service_public_ip_address = AAZObjectArg(
-            options=["service-public-ip-address"],
-            help="The service public IP address of the public IP address resource.",
-            nullable=True,
-        )
-        cls._build_args_public_ip_address_update(public_ip_address_update.service_public_ip_address)
         public_ip_address_update.sku = AAZObjectArg(
             options=["sku"],
             help="The public IP address SKU.",
@@ -1294,13 +1280,11 @@ class Update(AAZCommand):
         _schema.idle_timeout_in_minutes = cls._args_public_ip_address_update.idle_timeout_in_minutes
         _schema.ip_address = cls._args_public_ip_address_update.ip_address
         _schema.ip_tags = cls._args_public_ip_address_update.ip_tags
-        _schema.linked_public_ip_address = cls._args_public_ip_address_update.linked_public_ip_address
         _schema.location = cls._args_public_ip_address_update.location
         _schema.nat_gateway = cls._args_public_ip_address_update.nat_gateway
         _schema.public_ip_address_version = cls._args_public_ip_address_update.public_ip_address_version
         _schema.public_ip_allocation_method = cls._args_public_ip_address_update.public_ip_allocation_method
         _schema.public_ip_prefix = cls._args_public_ip_address_update.public_ip_prefix
-        _schema.service_public_ip_address = cls._args_public_ip_address_update.service_public_ip_address
         _schema.sku = cls._args_public_ip_address_update.sku
         _schema.tags = cls._args_public_ip_address_update.tags
         _schema.zones = cls._args_public_ip_address_update.zones
@@ -2340,12 +2324,10 @@ class _UpdateHelper:
             properties.set_prop("idleTimeoutInMinutes", AAZIntType, ".idle_timeout_in_minutes")
             properties.set_prop("ipAddress", AAZStrType, ".ip_address")
             properties.set_prop("ipTags", AAZListType, ".ip_tags")
-            cls._build_schema_public_ip_address_update(properties.set_prop("linkedPublicIPAddress", AAZObjectType, ".linked_public_ip_address"))
             properties.set_prop("natGateway", AAZObjectType, ".nat_gateway")
             properties.set_prop("publicIPAddressVersion", AAZStrType, ".public_ip_address_version")
             properties.set_prop("publicIPAllocationMethod", AAZStrType, ".public_ip_allocation_method")
             cls._build_schema_sub_resource_update(properties.set_prop("publicIPPrefix", AAZObjectType, ".public_ip_prefix"))
-            cls._build_schema_public_ip_address_update(properties.set_prop("servicePublicIPAddress", AAZObjectType, ".service_public_ip_address"))
 
         ddos_settings = _builder.get(".properties.ddosSettings")
         if ddos_settings is not None:

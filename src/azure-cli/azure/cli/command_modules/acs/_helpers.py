@@ -98,6 +98,28 @@ def check_is_private_cluster(mc: ManagedCluster) -> bool:
     return False
 
 
+def check_is_apiserver_vnet_integration_cluster(mc: ManagedCluster) -> bool:
+    """Check `mc` object to determine whether apiserver vnet integration is enabled.
+
+    Note: enableVnetIntegration is still in preview api so we use additional_properties here
+
+    :return: bool
+    """
+    if mc and mc.api_server_access_profile:
+        additional_properties = mc.api_server_access_profile.additional_properties
+        if 'enableVnetIntegration' in additional_properties:
+            return additional_properties['enableVnetIntegration']
+        return False
+    return False
+
+
+def check_is_private_link_cluster(mc: ManagedCluster) -> bool:
+    """Check `mc` object to determine whether private link cluster is enabled.
+    :return: bool
+    """
+    return check_is_private_cluster(mc) and not check_is_apiserver_vnet_integration_cluster(mc)
+
+
 def check_is_managed_aad_cluster(mc: ManagedCluster) -> bool:
     """Check `mc` object to determine whether managed aad is enabled.
 

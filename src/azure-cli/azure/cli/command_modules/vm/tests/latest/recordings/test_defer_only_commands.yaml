@@ -13,21 +13,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_defer_only_commands000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_defer_only_commands000001","name":"img_defer_only_commands000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2023-03-15T04:56:45Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_defer_only_commands000001","name":"img_defer_only_commands000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","test":"test_defer_only_commands","date":"2023-10-13T06:09:36Z","module":"vm"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '380'
+      - '385'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Mar 2023 04:56:47 GMT
+      - Fri, 13 Oct 2023 06:09:39 GMT
       expires:
       - '-1'
       pragma:
@@ -59,12 +59,12 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_defer_only_commands000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1?api-version=2023-01-31
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_defer_only_commands000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1","name":"ide1","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus2","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"077c17bf-a982-4b99-9c28-c5ed079fe04d","clientId":"ba2d795a-8c06-46d5-84ee-9da4ad1a6891"}}'
+      string: '{"location":"westus2","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_defer_only_commands000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1","name":"ide1","type":"Microsoft.ManagedIdentity/userAssignedIdentities","properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"d2d7eb11-7e3a-4f9d-aa7f-f982d7f591b0","clientId":"7035981d-1493-4e85-b58c-38c5a886774e"}}'
     headers:
       cache-control:
       - no-cache
@@ -73,7 +73,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Mar 2023 04:56:53 GMT
+      - Fri, 13 Oct 2023 06:09:44 GMT
       expires:
       - '-1'
       location:
@@ -85,7 +85,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -103,13 +103,13 @@ interactions:
       ParameterSetName:
       - --assignee --role --scope
       User-Agent:
-      - python/3.10.9 (Windows-10-10.0.22621-SP0) AZURECLI/2.46.0
+      - python/3.10.9 (Windows-10-10.0.22621-SP0) AZURECLI/2.53.0
     method: GET
-    uri: https://graph.microsoft.com/v1.0/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27ba2d795a-8c06-46d5-84ee-9da4ad1a6891%27%29
+    uri: https://graph.microsoft.com/v1.0/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%277035981d-1493-4e85-b58c-38c5a886774e%27%29
   response:
     body:
-      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#servicePrincipals","value":[{"id":"077c17bf-a982-4b99-9c28-c5ed079fe04d","deletedDateTime":null,"accountEnabled":true,"alternativeNames":["isExplicit=True","/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_defer_only_commands000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1"],"appDisplayName":null,"appDescription":null,"appId":"ba2d795a-8c06-46d5-84ee-9da4ad1a6891","applicationTemplateId":null,"appOwnerOrganizationId":null,"appRoleAssignmentRequired":false,"createdDateTime":"2023-03-15T04:56:52Z","description":null,"disabledByMicrosoftStatus":null,"displayName":"ide1","homepage":null,"loginUrl":null,"logoutUrl":null,"notes":null,"notificationEmailAddresses":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyThumbprint":null,"replyUrls":[],"servicePrincipalNames":["ba2d795a-8c06-46d5-84ee-9da4ad1a6891","https://identity.azure.net/v7PqnlxPAXEiL/Czsl8MuFk7f/LVXoTuAYqPyajyxEU="],"servicePrincipalType":"ManagedIdentity","signInAudience":null,"tags":[],"tokenEncryptionKeyId":null,"info":null,"samlSingleSignOnSettings":null,"addIns":[],"appRoles":[],"keyCredentials":[{"customKeyIdentifier":"FCEE41CB5B78E738190DDD16F63592B7718BB4B8","displayName":"CN=ba2d795a-8c06-46d5-84ee-9da4ad1a6891,
-        DC=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","endDateTime":"2023-06-13T04:51:00Z","key":null,"keyId":"9c6ac01b-995a-4801-ad7a-a9580dc56463","startDateTime":"2023-03-15T04:51:00Z","type":"AsymmetricX509Cert","usage":"Verify"}],"oauth2PermissionScopes":[],"passwordCredentials":[],"resourceSpecificApplicationPermissions":[],"verifiedPublisher":{"displayName":null,"verifiedPublisherId":null,"addedDateTime":null}}]}'
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#servicePrincipals","value":[{"id":"d2d7eb11-7e3a-4f9d-aa7f-f982d7f591b0","deletedDateTime":null,"accountEnabled":true,"alternativeNames":["isExplicit=True","/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_defer_only_commands000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1"],"appDisplayName":null,"appDescription":null,"appId":"7035981d-1493-4e85-b58c-38c5a886774e","applicationTemplateId":null,"appOwnerOrganizationId":null,"appRoleAssignmentRequired":false,"createdDateTime":"2023-10-13T06:09:44Z","description":null,"disabledByMicrosoftStatus":null,"displayName":"ide1","homepage":null,"loginUrl":null,"logoutUrl":null,"notes":null,"notificationEmailAddresses":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyThumbprint":null,"replyUrls":[],"servicePrincipalNames":["7035981d-1493-4e85-b58c-38c5a886774e","https://identity.azure.net/gd4ymJJObD9fydmkpW7fyRdbR8NmlZzgu9w05fAJKyo="],"servicePrincipalType":"ManagedIdentity","signInAudience":null,"tags":[],"tokenEncryptionKeyId":null,"info":null,"samlSingleSignOnSettings":null,"addIns":[],"appRoles":[],"keyCredentials":[{"customKeyIdentifier":"A5AF9DB05033E091631BA19D90B367F024012782","displayName":"CN=7035981d-1493-4e85-b58c-38c5a886774e,
+        DC=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","endDateTime":"2024-01-11T06:04:00Z","key":null,"keyId":"e480dadb-8b3b-4b12-9648-7f8fd9ceec86","startDateTime":"2023-10-13T06:04:00Z","type":"AsymmetricX509Cert","usage":"Verify"}],"oauth2PermissionScopes":[],"passwordCredentials":[],"resourceSpecificApplicationPermissions":[],"verifiedPublisher":{"displayName":null,"verifiedPublisherId":null,"addedDateTime":null}}]}'
     headers:
       cache-control:
       - no-cache
@@ -118,11 +118,11 @@ interactions:
       content-type:
       - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
       date:
-      - Wed, 15 Mar 2023 04:57:40 GMT
+      - Fri, 13 Oct 2023 06:10:32 GMT
       odata-version:
       - '4.0'
       request-id:
-      - 79854e38-32eb-43e6-8ca7-4386bde19149
+      - 8f494e7e-4fa8-42ab-a641-3d674aa3c95e
       strict-transport-security:
       - max-age=31536000
       transfer-encoding:
@@ -130,7 +130,7 @@ interactions:
       vary:
       - Accept-Encoding
       x-ms-ags-diagnostic:
-      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF0000D4CE"}}'
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00001A45"}}'
       x-ms-resource-unit:
       - '1'
     status:
@@ -150,24 +150,24 @@ interactions:
       ParameterSetName:
       - --assignee --role --scope
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-authorization/3.0.0 Python/3.10.9
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-authorization/4.0.0 Python/3.10.9
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_defer_only_commands000001/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_defer_only_commands000001/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2022-05-01-preview
   response:
     body:
       string: '{"value":[{"properties":{"roleName":"Contributor","type":"BuiltInRole","description":"Grants
         full access to manage all resources, but does not allow you to assign roles
-        in Azure RBAC, manage assignments in Azure Blueprints, or share image galleries.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write","Microsoft.Authorization/elevateAccess/Action","Microsoft.Blueprint/blueprintAssignments/write","Microsoft.Blueprint/blueprintAssignments/delete","Microsoft.Compute/galleries/share/action"],"dataActions":[],"notDataActions":[]}],"createdOn":"2015-02-02T21:55:09.8806423Z","updatedOn":"2021-11-11T20:13:28.6061853Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}]}'
+        in Azure RBAC, manage assignments in Azure Blueprints, or share image galleries.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write","Microsoft.Authorization/elevateAccess/Action","Microsoft.Blueprint/blueprintAssignments/write","Microsoft.Blueprint/blueprintAssignments/delete","Microsoft.Compute/galleries/share/action","Microsoft.Purview/consents/write","Microsoft.Purview/consents/delete"],"dataActions":[],"notDataActions":[]}],"createdOn":"2015-02-02T21:55:09.8806423Z","updatedOn":"2023-07-07T20:27:50.9966612Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '984'
+      - '1055'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Mar 2023 04:57:40 GMT
+      - Fri, 13 Oct 2023 06:10:33 GMT
       expires:
       - '-1'
       pragma:
@@ -187,7 +187,7 @@ interactions:
       message: OK
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
-      "principalId": "077c17bf-a982-4b99-9c28-c5ed079fe04d", "principalType": "ServicePrincipal"}}'
+      "principalId": "d2d7eb11-7e3a-4f9d-aa7f-f982d7f591b0", "principalType": "ServicePrincipal"}}'
     headers:
       Accept:
       - application/json
@@ -206,13 +206,13 @@ interactions:
       ParameterSetName:
       - --assignee --role --scope
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-authorization/3.0.0 Python/3.10.9
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-authorization/4.0.0 Python/3.10.9
         (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_defer_only_commands000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001?api-version=2022-04-01
   response:
     body:
-      string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"077c17bf-a982-4b99-9c28-c5ed079fe04d","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_defer_only_commands000001","condition":null,"conditionVersion":null,"createdOn":"2023-03-15T04:57:41.4861739Z","updatedOn":"2023-03-15T04:57:42.1431777Z","createdBy":null,"updatedBy":"d44a2991-98c6-47c3-b59b-2b30d72cfcc2","delegatedManagedIdentityResourceId":null,"description":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_defer_only_commands000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001","type":"Microsoft.Authorization/roleAssignments","name":"88888888-0000-0000-0000-000000000001"}'
+      string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"d2d7eb11-7e3a-4f9d-aa7f-f982d7f591b0","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_defer_only_commands000001","condition":null,"conditionVersion":null,"createdOn":"2023-10-13T06:10:33.7998386Z","updatedOn":"2023-10-13T06:10:35.6240938Z","createdBy":null,"updatedBy":"d44a2991-98c6-47c3-b59b-2b30d72cfcc2","delegatedManagedIdentityResourceId":null,"description":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_defer_only_commands000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001","type":"Microsoft.Authorization/roleAssignments","name":"88888888-0000-0000-0000-000000000001"}'
     headers:
       cache-control:
       - no-cache
@@ -221,7 +221,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Mar 2023 04:57:45 GMT
+      - Fri, 13 Oct 2023 06:10:38 GMT
       expires:
       - '-1'
       pragma:
@@ -231,7 +231,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -249,21 +249,21 @@ interactions:
       ParameterSetName:
       - -n -g --scripts --image-source --identity --defer
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_defer_only_commands000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_defer_only_commands000001","name":"img_defer_only_commands000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2023-03-15T04:56:45Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_defer_only_commands000001","name":"img_defer_only_commands000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","test":"test_defer_only_commands","date":"2023-10-13T06:09:36Z","module":"vm"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '380'
+      - '385'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Mar 2023 04:57:45 GMT
+      - Fri, 13 Oct 2023 06:10:39 GMT
       expires:
       - '-1'
       pragma:
@@ -291,7 +291,7 @@ interactions:
       ParameterSetName:
       - -n -g --scripts --image-source --identity --defer
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2019-11-01
   response:
@@ -373,7 +373,7 @@ interactions:
         ,\"name\":\"southafricanorth\",\"displayName\":\"South Africa North\",\"regionalDisplayName\"\
         :\"(Africa) South Africa North\",\"metadata\":{\"regionType\":\"Physical\"\
         ,\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Africa\",\"longitude\"\
-        :\"28.218370\",\"latitude\":\"-25.731340\",\"physicalLocation\":\"Johannesburg\"\
+        :\"28.21837\",\"latitude\":\"-25.73134\",\"physicalLocation\":\"Johannesburg\"\
         ,\"pairedRegion\":[{\"name\":\"southafricawest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricawest\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralindia\"\
         ,\"name\":\"centralindia\",\"displayName\":\"Central India\",\"regionalDisplayName\"\
@@ -397,8 +397,8 @@ interactions:
         ,\"name\":\"koreacentral\",\"displayName\":\"Korea Central\",\"regionalDisplayName\"\
         :\"(Asia Pacific) Korea Central\",\"metadata\":{\"regionType\":\"Physical\"\
         ,\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia Pacific\",\"\
-        longitude\":\"126.9780\",\"latitude\":\"37.5665\",\"physicalLocation\":\"\
-        Seoul\",\"pairedRegion\":[{\"name\":\"koreasouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/koreasouth\"\
+        longitude\":\"126.978\",\"latitude\":\"37.5665\",\"physicalLocation\":\"Seoul\"\
+        ,\"pairedRegion\":[{\"name\":\"koreasouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/koreasouth\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadacentral\"\
         ,\"name\":\"canadacentral\",\"displayName\":\"Canada Central\",\"regionalDisplayName\"\
         :\"(Canada) Canada Central\",\"metadata\":{\"regionType\":\"Physical\",\"\
@@ -409,7 +409,7 @@ interactions:
         ,\"name\":\"francecentral\",\"displayName\":\"France Central\",\"regionalDisplayName\"\
         :\"(Europe) France Central\",\"metadata\":{\"regionType\":\"Physical\",\"\
         regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\"\
-        :\"2.3730\",\"latitude\":\"46.3772\",\"physicalLocation\":\"Paris\",\"pairedRegion\"\
+        :\"2.373\",\"latitude\":\"46.3772\",\"physicalLocation\":\"Paris\",\"pairedRegion\"\
         :[{\"name\":\"francesouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanywestcentral\"\
         ,\"name\":\"germanywestcentral\",\"displayName\":\"Germany West Central\"\
@@ -417,13 +417,23 @@ interactions:
         regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\"\
         :\"Europe\",\"longitude\":\"8.682127\",\"latitude\":\"50.110924\",\"physicalLocation\"\
         :\"Frankfurt\",\"pairedRegion\":[{\"name\":\"germanynorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/italynorth\"\
+        ,\"name\":\"italynorth\",\"displayName\":\"Italy North\",\"regionalDisplayName\"\
+        :\"(Europe) Italy North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
+        :\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"9.18109\",\"\
+        latitude\":\"45.46888\",\"physicalLocation\":\"Milan\",\"pairedRegion\":[]}},{\"\
+        id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"\
         ,\"name\":\"norwayeast\",\"displayName\":\"Norway East\",\"regionalDisplayName\"\
         :\"(Europe) Norway East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
         :\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"10.752245\"\
         ,\"latitude\":\"59.913868\",\"physicalLocation\":\"Norway\",\"pairedRegion\"\
         :[{\"name\":\"norwaywest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/polandcentral\"\
+        ,\"name\":\"polandcentral\",\"displayName\":\"Poland Central\",\"regionalDisplayName\"\
+        :\"(Europe) Poland Central\",\"metadata\":{\"regionType\":\"Physical\",\"\
+        regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\"\
+        :\"21.01666\",\"latitude\":\"52.23334\",\"physicalLocation\":\"Warsaw\",\"\
+        pairedRegion\":[]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\"\
         ,\"name\":\"switzerlandnorth\",\"displayName\":\"Switzerland North\",\"regionalDisplayName\"\
         :\"(Europe) Switzerland North\",\"metadata\":{\"regionType\":\"Physical\"\
         ,\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\"\
@@ -441,12 +451,18 @@ interactions:
         ,\"regionCategory\":\"Recommended\",\"geographyGroup\":\"South America\",\"\
         longitude\":\"-46.633\",\"latitude\":\"-23.55\",\"physicalLocation\":\"Sao\
         \ Paulo State\",\"pairedRegion\":[{\"name\":\"southcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"\
-        ,\"name\":\"eastus2euap\",\"displayName\":\"East US 2 EUAP\",\"regionalDisplayName\"\
-        :\"(US) East US 2 EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\"\
-        :\"36.6681\",\"pairedRegion\":[{\"name\":\"centraluseuap\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/qatarcentral\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\"\
+        ,\"name\":\"centraluseuap\",\"displayName\":\"Central US EUAP\",\"regionalDisplayName\"\
+        :\"(US) Central US EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
+        :\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-93.6208\",\"latitude\"\
+        :\"41.5908\",\"physicalLocation\":\"\",\"pairedRegion\":[{\"name\":\"eastus2euap\"\
+        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/israelcentral\"\
+        ,\"name\":\"israelcentral\",\"displayName\":\"Israel Central\",\"regionalDisplayName\"\
+        :\"(Middle East) Israel Central\",\"metadata\":{\"regionType\":\"Physical\"\
+        ,\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Middle East\",\"\
+        longitude\":\"33.4506633\",\"latitude\":\"31.2655698\",\"physicalLocation\"\
+        :\"Israel\",\"pairedRegion\":[]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/qatarcentral\"\
         ,\"name\":\"qatarcentral\",\"displayName\":\"Qatar Central\",\"regionalDisplayName\"\
         :\"(Middle East) Qatar Central\",\"metadata\":{\"regionType\":\"Physical\"\
         ,\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Middle East\",\"\
@@ -542,18 +558,18 @@ interactions:
         ,\"name\":\"southeastasiastage\",\"displayName\":\"Southeast Asia (Stage)\"\
         ,\"regionalDisplayName\":\"(Asia Pacific) Southeast Asia (Stage)\",\"metadata\"\
         :{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\"\
-        :\"Asia Pacific\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstg\"\
+        :\"Asia Pacific\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilus\"\
+        ,\"name\":\"brazilus\",\"displayName\":\"Brazil US\",\"regionalDisplayName\"\
+        :\"(South America) Brazil US\",\"metadata\":{\"regionType\":\"Physical\",\"\
+        regionCategory\":\"Other\",\"geographyGroup\":\"South America\",\"longitude\"\
+        :\"0\",\"latitude\":\"0\",\"physicalLocation\":\"\",\"pairedRegion\":[{\"\
+        name\":\"brazilsoutheast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsoutheast\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstg\"\
         ,\"name\":\"eastusstg\",\"displayName\":\"East US STG\",\"regionalDisplayName\"\
         :\"(US) East US STG\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
         :\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-79.8164\",\"latitude\"\
         :\"37.3719\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\"\
         :\"southcentralusstg\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralusstg\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralusstg\"\
-        ,\"name\":\"southcentralusstg\",\"displayName\":\"South Central US STG\",\"\
-        regionalDisplayName\":\"(US) South Central US STG\",\"metadata\":{\"regionType\"\
-        :\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\"\
-        :\"-98.5\",\"latitude\":\"29.4167\",\"physicalLocation\":\"Texas\",\"pairedRegion\"\
-        :[{\"name\":\"eastusstg\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstg\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northcentralus\"\
         ,\"name\":\"northcentralus\",\"displayName\":\"North Central US\",\"regionalDisplayName\"\
         :\"(US) North Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
@@ -572,22 +588,23 @@ interactions:
         ,\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia Pacific\",\"longitude\"\
         :\"70.05773\",\"latitude\":\"22.470701\",\"physicalLocation\":\"Jamnagar\"\
         ,\"pairedRegion\":[{\"name\":\"jioindiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiacentral\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/taiwannorth\"\
-        ,\"name\":\"taiwannorth\",\"displayName\":\"Taiwan North\",\"regionalDisplayName\"\
-        :\"(Asia Pacific) Taiwan North\",\"metadata\":{\"regionType\":\"Physical\"\
-        ,\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia Pacific\",\"longitude\"\
-        :\"121.3662962\",\"latitude\":\"25.0174719\",\"physicalLocation\":\"Taiwan\
-        \ North\",\"pairedRegion\":[{\"name\":\"taiwannw\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/taiwannw\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\"\
-        ,\"name\":\"centraluseuap\",\"displayName\":\"Central US EUAP\",\"regionalDisplayName\"\
-        :\"(US) Central US EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-93.6208\",\"latitude\"\
-        :\"41.5908\",\"pairedRegion\":[{\"name\":\"eastus2euap\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"\
+        ,\"name\":\"eastus2euap\",\"displayName\":\"East US 2 EUAP\",\"regionalDisplayName\"\
+        :\"(US) East US 2 EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
+        :\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\"\
+        :\"36.6681\",\"physicalLocation\":\"\",\"pairedRegion\":[{\"name\":\"centraluseuap\"\
+        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralusstg\"\
+        ,\"name\":\"southcentralusstg\",\"displayName\":\"South Central US STG\",\"\
+        regionalDisplayName\":\"(US) South Central US STG\",\"metadata\":{\"regionType\"\
+        :\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\"\
+        :\"-98.5\",\"latitude\":\"29.4167\",\"physicalLocation\":\"Texas\",\"pairedRegion\"\
+        :[{\"name\":\"eastusstg\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstg\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westcentralus\"\
         ,\"name\":\"westcentralus\",\"displayName\":\"West Central US\",\"regionalDisplayName\"\
         :\"(US) West Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
         :\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-110.234\",\"latitude\"\
-        :\"40.890\",\"physicalLocation\":\"Wyoming\",\"pairedRegion\":[{\"name\":\"\
+        :\"40.89\",\"physicalLocation\":\"Wyoming\",\"pairedRegion\":[{\"name\":\"\
         westus2\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricawest\"\
         ,\"name\":\"southafricawest\",\"displayName\":\"South Africa West\",\"regionalDisplayName\"\
@@ -600,14 +617,14 @@ interactions:
         :\"(Asia Pacific) Australia Central\",\"metadata\":{\"regionType\":\"Physical\"\
         ,\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia Pacific\",\"longitude\"\
         :\"149.1244\",\"latitude\":\"-35.3075\",\"physicalLocation\":\"Canberra\"\
-        ,\"pairedRegion\":[{\"name\":\"australiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral\"\
+        ,\"pairedRegion\":[{\"name\":\"australiacentral2\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2\"\
         ,\"name\":\"australiacentral2\",\"displayName\":\"Australia Central 2\",\"\
         regionalDisplayName\":\"(Asia Pacific) Australia Central 2\",\"metadata\"\
         :{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\"\
         :\"Asia Pacific\",\"longitude\":\"149.1244\",\"latitude\":\"-35.3075\",\"\
-        physicalLocation\":\"Canberra\",\"pairedRegion\":[{\"name\":\"australiacentral2\"\
-        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2\"\
+        physicalLocation\":\"Canberra\",\"pairedRegion\":[{\"name\":\"australiacentral\"\
+        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiasoutheast\"\
         ,\"name\":\"australiasoutheast\",\"displayName\":\"Australia Southeast\",\"\
         regionalDisplayName\":\"(Asia Pacific) Australia Southeast\",\"metadata\"\
@@ -639,12 +656,6 @@ interactions:
         ,\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia Pacific\",\"longitude\"\
         :\"80.1636\",\"latitude\":\"12.9822\",\"physicalLocation\":\"Chennai\",\"\
         pairedRegion\":[{\"name\":\"centralindia\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralindia\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/taiwannorthwest\"\
-        ,\"name\":\"taiwannorthwest\",\"displayName\":\"Taiwan Northwest\",\"regionalDisplayName\"\
-        :\"(Asia Pacific) Taiwan Northwest\",\"metadata\":{\"regionType\":\"Physical\"\
-        ,\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia Pacific\",\"longitude\"\
-        :\"120.921008\",\"latitude\":\"24.7848456\",\"physicalLocation\":\"Taiwan\
-        \ Northwest\",\"pairedRegion\":[{\"name\":\"taiwann\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/taiwann\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westindia\"\
         ,\"name\":\"westindia\",\"displayName\":\"West India\",\"regionalDisplayName\"\
         :\"(Asia Pacific) West India\",\"metadata\":{\"regionType\":\"Physical\",\"\
@@ -675,12 +686,6 @@ interactions:
         :\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"5.733107\",\"latitude\"\
         :\"58.969975\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\"\
         :\"norwayeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedensouth\"\
-        ,\"name\":\"swedensouth\",\"displayName\":\"Sweden South\",\"regionalDisplayName\"\
-        :\"(Europe) Sweden South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"13.0007\",\"latitude\"\
-        :\"55.6059\",\"physicalLocation\":\"Malmo\",\"pairedRegion\":[{\"name\":\"\
-        swedencentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedencentral\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\"\
         ,\"name\":\"switzerlandwest\",\"displayName\":\"Switzerland West\",\"regionalDisplayName\"\
         :\"(Europe) Switzerland West\",\"metadata\":{\"regionType\":\"Physical\",\"\
@@ -705,27 +710,16 @@ interactions:
         ,\"regionCategory\":\"Other\",\"geographyGroup\":\"South America\",\"longitude\"\
         :\"-43.2075\",\"latitude\":\"-22.90278\",\"physicalLocation\":\"Rio\",\"pairedRegion\"\
         :[{\"name\":\"brazilsouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/polandcentral\"\
-        ,\"name\":\"polandcentral\",\"displayName\":\"Poland Central\",\"regionalDisplayName\"\
-        :\"(Europe) Poland Central\",\"metadata\":{\"regionType\":\"Physical\",\"\
-        regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"\
-        21.01666\",\"latitude\":\"52.23334\",\"physicalLocation\":\"Warsaw\",\"pairedRegion\"\
-        :[]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/israelcentral\"\
-        ,\"name\":\"israelcentral\",\"displayName\":\"Israel Central\",\"regionalDisplayName\"\
-        :\"(Middle East) Israel Central\",\"metadata\":{\"regionType\":\"Physical\"\
-        ,\"regionCategory\":\"Other\",\"geographyGroup\":\"Middle East\",\"longitude\"\
-        :\"33.4506633\",\"latitude\":\"31.2655698\",\"physicalLocation\":\"Israel\"\
-        ,\"pairedRegion\":[{\"name\":\"swedencentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedencentral\"\
         }]}}]}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '32589'
+      - '31907'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Mar 2023 04:57:47 GMT
+      - Fri, 13 Oct 2023 06:10:41 GMT
       expires:
       - '-1'
       pragma:
@@ -753,7 +747,7 @@ interactions:
       ParameterSetName:
       - -n -g --is-vhd --output-name
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2019-11-01
   response:
@@ -835,7 +829,7 @@ interactions:
         ,\"name\":\"southafricanorth\",\"displayName\":\"South Africa North\",\"regionalDisplayName\"\
         :\"(Africa) South Africa North\",\"metadata\":{\"regionType\":\"Physical\"\
         ,\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Africa\",\"longitude\"\
-        :\"28.218370\",\"latitude\":\"-25.731340\",\"physicalLocation\":\"Johannesburg\"\
+        :\"28.21837\",\"latitude\":\"-25.73134\",\"physicalLocation\":\"Johannesburg\"\
         ,\"pairedRegion\":[{\"name\":\"southafricawest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricawest\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralindia\"\
         ,\"name\":\"centralindia\",\"displayName\":\"Central India\",\"regionalDisplayName\"\
@@ -859,8 +853,8 @@ interactions:
         ,\"name\":\"koreacentral\",\"displayName\":\"Korea Central\",\"regionalDisplayName\"\
         :\"(Asia Pacific) Korea Central\",\"metadata\":{\"regionType\":\"Physical\"\
         ,\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia Pacific\",\"\
-        longitude\":\"126.9780\",\"latitude\":\"37.5665\",\"physicalLocation\":\"\
-        Seoul\",\"pairedRegion\":[{\"name\":\"koreasouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/koreasouth\"\
+        longitude\":\"126.978\",\"latitude\":\"37.5665\",\"physicalLocation\":\"Seoul\"\
+        ,\"pairedRegion\":[{\"name\":\"koreasouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/koreasouth\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadacentral\"\
         ,\"name\":\"canadacentral\",\"displayName\":\"Canada Central\",\"regionalDisplayName\"\
         :\"(Canada) Canada Central\",\"metadata\":{\"regionType\":\"Physical\",\"\
@@ -871,7 +865,7 @@ interactions:
         ,\"name\":\"francecentral\",\"displayName\":\"France Central\",\"regionalDisplayName\"\
         :\"(Europe) France Central\",\"metadata\":{\"regionType\":\"Physical\",\"\
         regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\"\
-        :\"2.3730\",\"latitude\":\"46.3772\",\"physicalLocation\":\"Paris\",\"pairedRegion\"\
+        :\"2.373\",\"latitude\":\"46.3772\",\"physicalLocation\":\"Paris\",\"pairedRegion\"\
         :[{\"name\":\"francesouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanywestcentral\"\
         ,\"name\":\"germanywestcentral\",\"displayName\":\"Germany West Central\"\
@@ -879,13 +873,23 @@ interactions:
         regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\"\
         :\"Europe\",\"longitude\":\"8.682127\",\"latitude\":\"50.110924\",\"physicalLocation\"\
         :\"Frankfurt\",\"pairedRegion\":[{\"name\":\"germanynorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/italynorth\"\
+        ,\"name\":\"italynorth\",\"displayName\":\"Italy North\",\"regionalDisplayName\"\
+        :\"(Europe) Italy North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
+        :\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"9.18109\",\"\
+        latitude\":\"45.46888\",\"physicalLocation\":\"Milan\",\"pairedRegion\":[]}},{\"\
+        id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"\
         ,\"name\":\"norwayeast\",\"displayName\":\"Norway East\",\"regionalDisplayName\"\
         :\"(Europe) Norway East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
         :\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"10.752245\"\
         ,\"latitude\":\"59.913868\",\"physicalLocation\":\"Norway\",\"pairedRegion\"\
         :[{\"name\":\"norwaywest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/polandcentral\"\
+        ,\"name\":\"polandcentral\",\"displayName\":\"Poland Central\",\"regionalDisplayName\"\
+        :\"(Europe) Poland Central\",\"metadata\":{\"regionType\":\"Physical\",\"\
+        regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\"\
+        :\"21.01666\",\"latitude\":\"52.23334\",\"physicalLocation\":\"Warsaw\",\"\
+        pairedRegion\":[]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\"\
         ,\"name\":\"switzerlandnorth\",\"displayName\":\"Switzerland North\",\"regionalDisplayName\"\
         :\"(Europe) Switzerland North\",\"metadata\":{\"regionType\":\"Physical\"\
         ,\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\"\
@@ -903,12 +907,18 @@ interactions:
         ,\"regionCategory\":\"Recommended\",\"geographyGroup\":\"South America\",\"\
         longitude\":\"-46.633\",\"latitude\":\"-23.55\",\"physicalLocation\":\"Sao\
         \ Paulo State\",\"pairedRegion\":[{\"name\":\"southcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"\
-        ,\"name\":\"eastus2euap\",\"displayName\":\"East US 2 EUAP\",\"regionalDisplayName\"\
-        :\"(US) East US 2 EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\"\
-        :\"36.6681\",\"pairedRegion\":[{\"name\":\"centraluseuap\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/qatarcentral\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\"\
+        ,\"name\":\"centraluseuap\",\"displayName\":\"Central US EUAP\",\"regionalDisplayName\"\
+        :\"(US) Central US EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
+        :\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-93.6208\",\"latitude\"\
+        :\"41.5908\",\"physicalLocation\":\"\",\"pairedRegion\":[{\"name\":\"eastus2euap\"\
+        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/israelcentral\"\
+        ,\"name\":\"israelcentral\",\"displayName\":\"Israel Central\",\"regionalDisplayName\"\
+        :\"(Middle East) Israel Central\",\"metadata\":{\"regionType\":\"Physical\"\
+        ,\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Middle East\",\"\
+        longitude\":\"33.4506633\",\"latitude\":\"31.2655698\",\"physicalLocation\"\
+        :\"Israel\",\"pairedRegion\":[]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/qatarcentral\"\
         ,\"name\":\"qatarcentral\",\"displayName\":\"Qatar Central\",\"regionalDisplayName\"\
         :\"(Middle East) Qatar Central\",\"metadata\":{\"regionType\":\"Physical\"\
         ,\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Middle East\",\"\
@@ -1004,18 +1014,18 @@ interactions:
         ,\"name\":\"southeastasiastage\",\"displayName\":\"Southeast Asia (Stage)\"\
         ,\"regionalDisplayName\":\"(Asia Pacific) Southeast Asia (Stage)\",\"metadata\"\
         :{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\"\
-        :\"Asia Pacific\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstg\"\
+        :\"Asia Pacific\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilus\"\
+        ,\"name\":\"brazilus\",\"displayName\":\"Brazil US\",\"regionalDisplayName\"\
+        :\"(South America) Brazil US\",\"metadata\":{\"regionType\":\"Physical\",\"\
+        regionCategory\":\"Other\",\"geographyGroup\":\"South America\",\"longitude\"\
+        :\"0\",\"latitude\":\"0\",\"physicalLocation\":\"\",\"pairedRegion\":[{\"\
+        name\":\"brazilsoutheast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsoutheast\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstg\"\
         ,\"name\":\"eastusstg\",\"displayName\":\"East US STG\",\"regionalDisplayName\"\
         :\"(US) East US STG\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
         :\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-79.8164\",\"latitude\"\
         :\"37.3719\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\"\
         :\"southcentralusstg\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralusstg\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralusstg\"\
-        ,\"name\":\"southcentralusstg\",\"displayName\":\"South Central US STG\",\"\
-        regionalDisplayName\":\"(US) South Central US STG\",\"metadata\":{\"regionType\"\
-        :\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\"\
-        :\"-98.5\",\"latitude\":\"29.4167\",\"physicalLocation\":\"Texas\",\"pairedRegion\"\
-        :[{\"name\":\"eastusstg\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstg\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northcentralus\"\
         ,\"name\":\"northcentralus\",\"displayName\":\"North Central US\",\"regionalDisplayName\"\
         :\"(US) North Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
@@ -1034,22 +1044,23 @@ interactions:
         ,\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia Pacific\",\"longitude\"\
         :\"70.05773\",\"latitude\":\"22.470701\",\"physicalLocation\":\"Jamnagar\"\
         ,\"pairedRegion\":[{\"name\":\"jioindiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiacentral\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/taiwannorth\"\
-        ,\"name\":\"taiwannorth\",\"displayName\":\"Taiwan North\",\"regionalDisplayName\"\
-        :\"(Asia Pacific) Taiwan North\",\"metadata\":{\"regionType\":\"Physical\"\
-        ,\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia Pacific\",\"longitude\"\
-        :\"121.3662962\",\"latitude\":\"25.0174719\",\"physicalLocation\":\"Taiwan\
-        \ North\",\"pairedRegion\":[{\"name\":\"taiwannw\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/taiwannw\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\"\
-        ,\"name\":\"centraluseuap\",\"displayName\":\"Central US EUAP\",\"regionalDisplayName\"\
-        :\"(US) Central US EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-93.6208\",\"latitude\"\
-        :\"41.5908\",\"pairedRegion\":[{\"name\":\"eastus2euap\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"\
+        ,\"name\":\"eastus2euap\",\"displayName\":\"East US 2 EUAP\",\"regionalDisplayName\"\
+        :\"(US) East US 2 EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
+        :\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\"\
+        :\"36.6681\",\"physicalLocation\":\"\",\"pairedRegion\":[{\"name\":\"centraluseuap\"\
+        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralusstg\"\
+        ,\"name\":\"southcentralusstg\",\"displayName\":\"South Central US STG\",\"\
+        regionalDisplayName\":\"(US) South Central US STG\",\"metadata\":{\"regionType\"\
+        :\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\"\
+        :\"-98.5\",\"latitude\":\"29.4167\",\"physicalLocation\":\"Texas\",\"pairedRegion\"\
+        :[{\"name\":\"eastusstg\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstg\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westcentralus\"\
         ,\"name\":\"westcentralus\",\"displayName\":\"West Central US\",\"regionalDisplayName\"\
         :\"(US) West Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
         :\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-110.234\",\"latitude\"\
-        :\"40.890\",\"physicalLocation\":\"Wyoming\",\"pairedRegion\":[{\"name\":\"\
+        :\"40.89\",\"physicalLocation\":\"Wyoming\",\"pairedRegion\":[{\"name\":\"\
         westus2\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricawest\"\
         ,\"name\":\"southafricawest\",\"displayName\":\"South Africa West\",\"regionalDisplayName\"\
@@ -1062,14 +1073,14 @@ interactions:
         :\"(Asia Pacific) Australia Central\",\"metadata\":{\"regionType\":\"Physical\"\
         ,\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia Pacific\",\"longitude\"\
         :\"149.1244\",\"latitude\":\"-35.3075\",\"physicalLocation\":\"Canberra\"\
-        ,\"pairedRegion\":[{\"name\":\"australiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral\"\
+        ,\"pairedRegion\":[{\"name\":\"australiacentral2\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2\"\
         ,\"name\":\"australiacentral2\",\"displayName\":\"Australia Central 2\",\"\
         regionalDisplayName\":\"(Asia Pacific) Australia Central 2\",\"metadata\"\
         :{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\"\
         :\"Asia Pacific\",\"longitude\":\"149.1244\",\"latitude\":\"-35.3075\",\"\
-        physicalLocation\":\"Canberra\",\"pairedRegion\":[{\"name\":\"australiacentral2\"\
-        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2\"\
+        physicalLocation\":\"Canberra\",\"pairedRegion\":[{\"name\":\"australiacentral\"\
+        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiasoutheast\"\
         ,\"name\":\"australiasoutheast\",\"displayName\":\"Australia Southeast\",\"\
         regionalDisplayName\":\"(Asia Pacific) Australia Southeast\",\"metadata\"\
@@ -1101,12 +1112,6 @@ interactions:
         ,\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia Pacific\",\"longitude\"\
         :\"80.1636\",\"latitude\":\"12.9822\",\"physicalLocation\":\"Chennai\",\"\
         pairedRegion\":[{\"name\":\"centralindia\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralindia\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/taiwannorthwest\"\
-        ,\"name\":\"taiwannorthwest\",\"displayName\":\"Taiwan Northwest\",\"regionalDisplayName\"\
-        :\"(Asia Pacific) Taiwan Northwest\",\"metadata\":{\"regionType\":\"Physical\"\
-        ,\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia Pacific\",\"longitude\"\
-        :\"120.921008\",\"latitude\":\"24.7848456\",\"physicalLocation\":\"Taiwan\
-        \ Northwest\",\"pairedRegion\":[{\"name\":\"taiwann\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/taiwann\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westindia\"\
         ,\"name\":\"westindia\",\"displayName\":\"West India\",\"regionalDisplayName\"\
         :\"(Asia Pacific) West India\",\"metadata\":{\"regionType\":\"Physical\",\"\
@@ -1137,12 +1142,6 @@ interactions:
         :\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"5.733107\",\"latitude\"\
         :\"58.969975\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\"\
         :\"norwayeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedensouth\"\
-        ,\"name\":\"swedensouth\",\"displayName\":\"Sweden South\",\"regionalDisplayName\"\
-        :\"(Europe) Sweden South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"13.0007\",\"latitude\"\
-        :\"55.6059\",\"physicalLocation\":\"Malmo\",\"pairedRegion\":[{\"name\":\"\
-        swedencentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedencentral\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\"\
         ,\"name\":\"switzerlandwest\",\"displayName\":\"Switzerland West\",\"regionalDisplayName\"\
         :\"(Europe) Switzerland West\",\"metadata\":{\"regionType\":\"Physical\",\"\
@@ -1167,27 +1166,16 @@ interactions:
         ,\"regionCategory\":\"Other\",\"geographyGroup\":\"South America\",\"longitude\"\
         :\"-43.2075\",\"latitude\":\"-22.90278\",\"physicalLocation\":\"Rio\",\"pairedRegion\"\
         :[{\"name\":\"brazilsouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/polandcentral\"\
-        ,\"name\":\"polandcentral\",\"displayName\":\"Poland Central\",\"regionalDisplayName\"\
-        :\"(Europe) Poland Central\",\"metadata\":{\"regionType\":\"Physical\",\"\
-        regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"\
-        21.01666\",\"latitude\":\"52.23334\",\"physicalLocation\":\"Warsaw\",\"pairedRegion\"\
-        :[]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/israelcentral\"\
-        ,\"name\":\"israelcentral\",\"displayName\":\"Israel Central\",\"regionalDisplayName\"\
-        :\"(Middle East) Israel Central\",\"metadata\":{\"regionType\":\"Physical\"\
-        ,\"regionCategory\":\"Other\",\"geographyGroup\":\"Middle East\",\"longitude\"\
-        :\"33.4506633\",\"latitude\":\"31.2655698\",\"physicalLocation\":\"Israel\"\
-        ,\"pairedRegion\":[{\"name\":\"swedencentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedencentral\"\
         }]}}]}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '32589'
+      - '31907'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Mar 2023 04:57:50 GMT
+      - Fri, 13 Oct 2023 06:10:44 GMT
       expires:
       - '-1'
       pragma:
@@ -1215,21 +1203,21 @@ interactions:
       ParameterSetName:
       - -n -g --is-vhd --output-name
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_defer_only_commands000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_defer_only_commands000001","name":"img_defer_only_commands000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2023-03-15T04:56:45Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_defer_only_commands000001","name":"img_defer_only_commands000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","test":"test_defer_only_commands","date":"2023-10-13T06:09:36Z","module":"vm"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '380'
+      - '385'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Mar 2023 04:57:50 GMT
+      - Fri, 13 Oct 2023 06:10:44 GMT
       expires:
       - '-1'
       pragma:

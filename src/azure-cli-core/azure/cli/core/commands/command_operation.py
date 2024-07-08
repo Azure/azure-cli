@@ -166,7 +166,7 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
         from knack.util import CLIError
         from azure.cli.core.commands import cached_get, cached_put, _is_poller
         from azure.cli.core.util import find_child_item, augment_no_wait_handler_args
-        from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage,\
+        from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage, \
             add_properties, remove_properties, set_properties
 
         self.cmd = command_args.get('cmd')

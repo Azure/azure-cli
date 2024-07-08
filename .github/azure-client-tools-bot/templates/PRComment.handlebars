@@ -1,16 +1,22 @@
 {{#each this}}
 <details>
-<summary>{{renderStatus Status}}{{Module}}</summary>
+<summary>{{renderStatus Status}}{{TestName}}</summary>
 
 {{#each Items}}
 ><details>
-> <summary>{{renderStatus Status}}{{Profile}}</summary>
+> <summary>{{renderStatus Status}}{{Module}}</summary>
 >
 {{#each Items}}
 >><details>
->> <summary>{{renderStatus Status}}{{PythonVersion}}</summary>
+>> <summary>{{renderStatus Status}}{{Profile}}</summary>
 >>
-{{renderContent Content 2}}
+{{#each Items}}
+>>><details>
+>>> <summary>{{renderStatus Status}}{{PythonVersion}}</summary>
+>>>
+{{renderContent Content 3}}
+>>></details>
+{{/each}}
 >></details>
 {{/each}}
 ></details>

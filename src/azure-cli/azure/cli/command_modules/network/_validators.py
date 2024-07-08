@@ -48,7 +48,7 @@ def get_vnet_validator(dest):
     from msrestazure.tools import is_valid_resource_id, resource_id
 
     def _validate_vnet_name_or_id(cmd, namespace):
-        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
+        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
         subscription_id = get_subscription_id(cmd.cli_ctx)
 
         resource_group = namespace.resource_group_name
@@ -220,7 +220,7 @@ def validate_ssl_cert(namespace):
 
 def validate_dns_record_type(namespace):
     tokens = namespace.command.split(' ')
-    types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
+    types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'soa', 'srv', 'tlsa', 'txt']
     for token in tokens:
         if token in types:
             if hasattr(namespace, 'record_type'):
@@ -477,15 +477,6 @@ def get_servers_validator(camel_case=False):
         namespace.servers = servers if servers else None
 
     return validate_servers
-
-
-def validate_subresource_list(cmd, namespace):
-    if namespace.target_resources:
-        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
-        subresources = []
-        for item in namespace.target_resources:
-            subresources.append(SubResource(id=item))
-        namespace.target_resources = subresources
 
 
 def validate_private_dns_zone(cmd, namespace):
@@ -876,7 +867,7 @@ def process_private_link_resource_id_argument(cmd, namespace):
 
     from msrestazure.tools import is_valid_resource_id, parse_resource_id
     if not is_valid_resource_id(namespace.id):
-        raise CLIError("Resource ID is not invalid. Please check it.")
+        raise CLIError("Resource ID is invalid. Please check it.")
     split_resource_id = parse_resource_id(namespace.id)
     cmd.cli_ctx.data['subscription_id'] = split_resource_id['subscription']
     namespace.resource_group_name = split_resource_id['resource_group']

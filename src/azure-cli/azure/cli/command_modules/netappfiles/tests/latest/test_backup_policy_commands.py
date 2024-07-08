@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import unittest
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 LOCATION = "westus2"
 VNET_LOCATION = "westus2"
@@ -43,8 +44,6 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
                             (account_name, pool_name, volume_name, LOCATION, vnet_name, subnet_name, volume_name,
                              backup_id)).get_output_in_json()
 
-    def get_vaults(self, account_name):
-        return self.cmd("az netappfiles vault list -g {rg} -a %s" % account_name).get_output_in_json()
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_backup_policies(self):
@@ -80,7 +79,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert len(backup_policy_list) == 1
 
         # delete backup policy
-        self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s" %
+        self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s --yes" %
                  (account_name, backup_policy_name))
 
         # create backup policy using short parameter names and validate result
@@ -97,7 +96,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert backup_policy['tags']['Tag2'] == 'Value2'
 
         # delete backup policy
-        self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s" %
+        self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s --yes" %
                  (account_name, backup_policy_name))
 
         # validate backup policy doesn't exist
@@ -126,7 +125,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
 
         # delete all backup policies
         for backup_policy_name in backup_policies:
-            self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s" %
+            self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s --yes" %
                      (account_name, backup_policy_name))
 
         # validate that no backup policies exist
@@ -181,8 +180,8 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         monthly_backups_to_keep = 6
         enabled = False
         tags = "Tag1=Value2"
-        self.cmd("az netappfiles account backup-policy update -g {rg} -a %s --backup-policy-name %s -l %s -d %s -w %s "
-                 "-m %s -e %s --tags %s" % (account_name, backup_policy_name, LOCATION, daily_backups_to_keep,
+        self.cmd("az netappfiles account backup-policy update -g {rg} -a %s --backup-policy-name %s -d %s -w %s "
+                 "-m %s -e %s --tags %s" % (account_name, backup_policy_name, daily_backups_to_keep,
                                             weekly_backups_to_keep, monthly_backups_to_keep, enabled, tags)).get_output_in_json()
 
         # get updated backup policy and validate update
@@ -195,13 +194,21 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert backup_policy['tags']['Tag1'] == 'Value2'
 
 
+    # @unittest.skip('(servicedeployment) Backups has been deprecated, new backup API is in 2023-05-01-preview -> netappfiles-preview extension')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_', additional_tags={'owner': 'cli_test'})
     def test_assign_backup_policy_to_volume(self):
         # create account
-        account_name = self.create_random_name(prefix='cli-acc-', length=24)        
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        tags = "Tag1=Value1 Tag2=Value2"
 
+        self.kwargs.update({
+            'account_name': account_name,
+            'location': LOCATION,
+            'tags': tags,
+            'vault_name': self.create_random_name(prefix='cli-backupvault-', length=24)
+        })
         self.cmd("az netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION)).get_output_in_json()
 
         # create backup policy
@@ -221,17 +228,17 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert backup_policy_from_id['name'] == account_name + '/' + backup_policy_name
         assert backup_policy['dailyBackupsToKeep'] == 2
 
-        # get vault
-        vaults = self.get_vaults(account_name)
-
         # create account, pool and volume
         self.create_volume(account_name, pool_name, volume_name )
 
 
+        backup_vault = self.cmd("az netappfiles account backup-vault create -g {rg} -a {account_name} -n {vault_name} -l {location} --tags {tags}").get_output_in_json()
+
         # volume update with backup policy
-        self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --vault-id %s --backup-enabled %s --backup-policy-id %s" %
-                     (account_name, pool_name, volume_name, vaults[0]['id'], True, backup_policy['id']))
+        self.cmd("az netappfiles volume update -g {rg} -a {account_name} -p %s -v %s --backup-policy-id %s --backup-vault-id %s" %
+                     (pool_name, volume_name, backup_policy['id'], backup_vault['id']))
 
         volume = self.cmd("az netappfiles volume show --resource-group {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name)).get_output_in_json()
         assert volume['dataProtection'] is not None
         assert volume['dataProtection']['backup']['backupPolicyId'] is not None
+        assert volume['dataProtection']['backup']['backupVaultId'] is not None

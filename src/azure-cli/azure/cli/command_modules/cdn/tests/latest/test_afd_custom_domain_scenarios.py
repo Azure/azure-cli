@@ -9,7 +9,6 @@ from azure.mgmt.cdn.models import (AfdCertificateType, AfdMinimumTlsVersion)
 
 
 class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @record_only()  # This tests relies on a specific subscription with existing resources
     @ResourceGroupPreparer()
     def test_afd_custom_domain_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
@@ -38,11 +37,11 @@ class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         custom_domain_name = self.create_random_name(prefix='customdomain', length=24)
         host_name = f"{custom_domain_name}.localdev.cdn.azure.cn"
-        certificate_type = AfdCertificateType.customer_certificate
-        minimum_tls_version = AfdMinimumTlsVersion.tls12
+        certificate_type = AfdCertificateType.customer_certificate.value
+        minimum_tls_version = AfdMinimumTlsVersion.tls12.value
         azure_dns_zone = None
 
-        checks = [JMESPathCheck('domainValidationState', 'Pending')]
+        checks = [JMESPathCheck('domainValidationState', 'Approved')]
         self.afd_custom_domain_create_cmd(resource_group,
                                           profile_name,
                                           custom_domain_name,
@@ -54,7 +53,7 @@ class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                           checks=checks)
 
         show_checks = [JMESPathCheck('name', custom_domain_name),
-                       JMESPathCheck('domainValidationState', 'Pending'),
+                       JMESPathCheck('domainValidationState', 'Approved'),
                        JMESPathCheck('hostName', host_name),
                        JMESPathCheck('tlsSettings.certificateType', certificate_type),
                        JMESPathCheck('tlsSettings.minimumTlsVersion', minimum_tls_version),
@@ -63,7 +62,7 @@ class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         list_checks = [JMESPathCheck('length(@)', 1),
                        JMESPathCheck('@[0].name', custom_domain_name),
-                       JMESPathCheck('@[0].domainValidationState', 'Pending')]
+                       JMESPathCheck('@[0].domainValidationState', 'Approved')]
         self.afd_custom_domain_list_cmd(resource_group, profile_name, checks=list_checks)
 
         self.cmd(f"afd custom-domain regenerate-validation-token -g {resource_group} "

@@ -6,37 +6,37 @@
 
 def cf_dla_account(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_analytics.account import DataLakeAnalyticsAccountManagementClient
     return get_mgmt_service_client(cli_ctx, DataLakeAnalyticsAccountManagementClient).account
 
 
 def cf_dla_account_firewall(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_analytics.account import DataLakeAnalyticsAccountManagementClient
     return get_mgmt_service_client(cli_ctx, DataLakeAnalyticsAccountManagementClient).firewall_rules
 
 
 def cf_dla_account_compute_policy(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_analytics.account import DataLakeAnalyticsAccountManagementClient
     return get_mgmt_service_client(cli_ctx, DataLakeAnalyticsAccountManagementClient).compute_policies
 
 
 def cf_dla_account_storage(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_analytics.account import DataLakeAnalyticsAccountManagementClient
     return get_mgmt_service_client(cli_ctx, DataLakeAnalyticsAccountManagementClient).storage_accounts
 
 
 def cf_dla_account_adls(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_analytics.account import DataLakeAnalyticsAccountManagementClient
     return get_mgmt_service_client(cli_ctx, DataLakeAnalyticsAccountManagementClient).data_lake_store_accounts
 
 
 def cf_dla_catalog(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.datalake.analytics.catalog import DataLakeAnalyticsCatalogManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_analytics.catalog import DataLakeAnalyticsCatalogManagementClient
     return get_mgmt_service_client(
         cli_ctx,
         DataLakeAnalyticsCatalogManagementClient,
@@ -48,7 +48,7 @@ def cf_dla_catalog(cli_ctx, _):
 
 def cf_dla_job(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.datalake.analytics.job import DataLakeAnalyticsJobManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_analytics.job import DataLakeAnalyticsJobManagementClient
     return get_mgmt_service_client(
         cli_ctx,
         DataLakeAnalyticsJobManagementClient,
@@ -60,7 +60,7 @@ def cf_dla_job(cli_ctx, _):
 
 def cf_dla_job_recurrence(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.datalake.analytics.job import DataLakeAnalyticsJobManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_analytics.job import DataLakeAnalyticsJobManagementClient
     return get_mgmt_service_client(
         cli_ctx,
         DataLakeAnalyticsJobManagementClient,
@@ -72,7 +72,7 @@ def cf_dla_job_recurrence(cli_ctx, _):
 
 def cf_dla_job_pipeline(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.datalake.analytics.job import DataLakeAnalyticsJobManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_analytics.job import DataLakeAnalyticsJobManagementClient
     return get_mgmt_service_client(
         cli_ctx,
         DataLakeAnalyticsJobManagementClient,

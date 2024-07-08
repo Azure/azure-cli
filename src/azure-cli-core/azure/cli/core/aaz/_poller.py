@@ -12,6 +12,9 @@ from azure.core.polling import NoPolling
 from azure.core.polling.base_polling import LROBasePolling
 from azure.core.tracing.common import with_current_context
 from azure.core.tracing.decorator import distributed_trace
+# import requests in main thread to resolve import deadlock between threads in python
+# reference https://github.com/psf/requests/issues/2925 and https://github.com/Azure/azure-cli/issues/26272
+import requests  # pylint: disable=unused-import
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -120,13 +123,11 @@ class AAZLROPoller:
         """
         if self._thread is None:
             return
+
         self._thread.join(timeout=timeout)
-        try:
-            # Let's handle possible None in forgiveness here
-            # https://github.com/python/mypy/issues/8165
-            raise self._exception  # type: ignore
-        except TypeError:  # Was None
-            pass
+
+        if self._exception:  # derive from BaseException
+            raise self._exception
 
     def done(self):
         """Check status of the long running operation.

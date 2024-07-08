@@ -13,32 +13,33 @@ interactions:
       ParameterSetName:
       - -g -n --version --type
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_app_gateway_waf_policy_managed_rules_000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001","name":"cli_test_app_gateway_waf_policy_managed_rules_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T18:17:48Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001","name":"cli_test_app_gateway_waf_policy_managed_rules_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_network_app_gateway_waf_policy_with_version_and_type","date":"2024-05-09T15:54:00Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '382'
+      - '468'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:17:51 GMT
+      - Thu, 09 May 2024 15:54:04 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 676D83182C334256A23D38B6CF668622 Ref B: MAA201060514023 Ref C: 2024-05-09T15:54:05Z'
     status:
       code: 200
       message: OK
@@ -61,51 +62,41 @@ interactions:
       ParameterSetName:
       - -g -n --version --type
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"7a940698-a065-4904-97d0-24cb49dd3534\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": []\r\n        }\r\n      ],\r\n
-        \     \"exclusions\": []\r\n    }\r\n  }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"e7bc35b4-d8b0-4c50-85e4-818f9f02cece\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[]}],"exclusions":[]}}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c866ff1a-e682-4713-9dad-ac415c76d872?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/a46d11f0-fc4f-4fe5-8e3b-0ddd852aaf50?api-version=2023-11-01&t=638508668490755265&c=MIIHSDCCBjCgAwIBAgITfwMflOuJwgY9z84ARAAEAx-U6zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQwNDMwMDkwMTU2WhcNMjUwNDI1MDkwMTU2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM-5_zwJy-GBjIrC-HJCNM91Hjb5X2kuIasFlNBTyIldaQgZW-UFcaRA3zFi5NNdrzJNArsDfFigIVc_vx3hr1jAh4Zg0IFIAnrKi_yKZG2gGy2pdrRtvMmInPkDieDWxTjYFfxyQ0mtIZ6WCOwAqhUyUdB2r6C-jmAevQvdHD8gfpsQCStDXTfnBCJCF_BPm6uDnHcfaQGNCSp3BqkX_QwqT-xNHrBAwT-tc630jptBC-k2cYbA4ICSSpIjYKk0Mrr18H0HpLf5PTBwft9cZWZD7orNE5nl8ao_B8oO0EbtVLLuyf1mjGwer9HrWcxr6bW2x0M_q_4E9U30gBU1ddkCAwEAAaOCBDUwggQxMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBSk90Ox7wuf_dPlEESrNC7OrsUl5TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGm7Et00pmBgwI7MDGNOLKmdNgMy8QNTSDR0lzbxFgooP2LoyAHnXNAC0kuFVbiDK2M_rWWX3QE9vI4w8TFzRt_8qdq6g2wnI8J2DInnVuSgaNg1362a3ftFvhcj3TMGsPlhg9ewgrDiIKr4iOtllWysooh92_jRzNpnuSJJPsNMyzWHLNwH9Yt5sgbA8EMnv8j0c2hwkOkoJpQ7xUnpTx6EHh5uBAFLS0XxBsgZtqt8cwvXjwOlWbVqK3N09odqnnY10n5B1Re3PlYlzGczXdfpIlKGEBmP4uHhEdzvBc47vY89lfxwSbMYMEOedpzh5MAU1MVnkf-O5o01OWvLU3k&s=a9vGVoCo5rCaE2ZPxTnSWJSCXxXJ7zbweq8OMnfD_ebbJTYuX7Kfvf9ORf-R8XtKieIWwBVMCPWkcVoYRKXqdqTZ5R5CN19Pmx3cb5tb2ZRS-3JkcgYm4vO-bRD0HIXbxu1xcfYeuGlmlCB0pcK_GVARpEhE1_dSI-_fYD49oE7u0FG3OOT7SDZop4YCuwlvook8vQi8dYEqpj-OdglmbZd93F5ncuxnh0B_HP3kSXrriw5n5CeJotdBsO9_9jbVT9dvWzZFoJDC292zHpr7ALhLe0cxwH1-ZC-vOzv8oRrGsko9E_NI7MweCYy-HwCi3N5W8Ru1c-riAPvxEJCHPw&h=x4Ob_irvxMOaI9ZUr1xX2GpNj6bbs_OJTmto_uR6xmE
       cache-control:
       - no-cache
       content-length:
-      - '901'
+      - '695'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:17:53 GMT
+      - Thu, 09 May 2024 15:54:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c45b96bc-3305-4d2a-b5ab-3da2f85415f2
+      - fc6eda46-6cfe-48dc-8dda-3ea25770a06a
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1195'
+      x-msedge-ref:
+      - 'Ref A: D2023F08403D41E0A42BBFA544D47E2F Ref B: MAA201060516053 Ref C: 2024-05-09T15:54:06Z'
     status:
       code: 201
       message: Created
@@ -123,51 +114,37 @@ interactions:
       ParameterSetName:
       - -g --policy-name --type --version --group-name --rule --rule
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"f4a013db-ae98-4037-bf86-1f1f86113b6a\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": []\r\n        }\r\n      ],\r\n
-        \     \"exclusions\": []\r\n    }\r\n  }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"22a2e88d-f0b9-4308-816a-299ec5b51305\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[]}],"exclusions":[]}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '902'
+      - '696'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:17:54 GMT
+      - Thu, 09 May 2024 15:54:10 GMT
       etag:
-      - W/"f4a013db-ae98-4037-bf86-1f1f86113b6a"
+      - W/"22a2e88d-f0b9-4308-816a-299ec5b51305"
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2b80332f-0219-4bf6-a1d9-b73285c781a8
+      - 09011855-dc1d-40b7-86df-f96d23ecfa18
+      x-msedge-ref:
+      - 'Ref A: B5692CB5FFAA4FDC995B5A52DFE2C531 Ref B: MAA201060516027 Ref C: 2024-05-09T15:54:11Z'
     status:
       code: 200
       message: OK
@@ -194,60 +171,41 @@ interactions:
       ParameterSetName:
       - -g --policy-name --type --version --group-name --rule --rule
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"4beea8f5-a762-4494-9828-f5d9096a8582\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": [\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-921-PROTOCOL-ATTACK\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"921120\",\r\n                  \"state\":
-        \"Disabled\"\r\n                },\r\n                {\r\n                  \"ruleId\":
-        \"921110\",\r\n                  \"state\": \"Disabled\"\r\n                }\r\n
-        \             ]\r\n            }\r\n          ]\r\n        }\r\n      ],\r\n
-        \     \"exclusions\": []\r\n    }\r\n  }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"4d8c796e-a185-495e-9d63-9a69f676d808\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-921-PROTOCOL-ATTACK","rules":[{"ruleId":"921120","state":"Disabled"},{"ruleId":"921110","state":"Disabled"}]}]}],"exclusions":[]}}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/371820ff-15c6-42c5-b26d-624ccc2e70a6?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6f8629a2-766a-41be-99f8-582bc8e57fc5?api-version=2023-11-01&t=638508668526512310&c=MIIHSDCCBjCgAwIBAgITfwMflOuJwgY9z84ARAAEAx-U6zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQwNDMwMDkwMTU2WhcNMjUwNDI1MDkwMTU2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM-5_zwJy-GBjIrC-HJCNM91Hjb5X2kuIasFlNBTyIldaQgZW-UFcaRA3zFi5NNdrzJNArsDfFigIVc_vx3hr1jAh4Zg0IFIAnrKi_yKZG2gGy2pdrRtvMmInPkDieDWxTjYFfxyQ0mtIZ6WCOwAqhUyUdB2r6C-jmAevQvdHD8gfpsQCStDXTfnBCJCF_BPm6uDnHcfaQGNCSp3BqkX_QwqT-xNHrBAwT-tc630jptBC-k2cYbA4ICSSpIjYKk0Mrr18H0HpLf5PTBwft9cZWZD7orNE5nl8ao_B8oO0EbtVLLuyf1mjGwer9HrWcxr6bW2x0M_q_4E9U30gBU1ddkCAwEAAaOCBDUwggQxMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBSk90Ox7wuf_dPlEESrNC7OrsUl5TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGm7Et00pmBgwI7MDGNOLKmdNgMy8QNTSDR0lzbxFgooP2LoyAHnXNAC0kuFVbiDK2M_rWWX3QE9vI4w8TFzRt_8qdq6g2wnI8J2DInnVuSgaNg1362a3ftFvhcj3TMGsPlhg9ewgrDiIKr4iOtllWysooh92_jRzNpnuSJJPsNMyzWHLNwH9Yt5sgbA8EMnv8j0c2hwkOkoJpQ7xUnpTx6EHh5uBAFLS0XxBsgZtqt8cwvXjwOlWbVqK3N09odqnnY10n5B1Re3PlYlzGczXdfpIlKGEBmP4uHhEdzvBc47vY89lfxwSbMYMEOedpzh5MAU1MVnkf-O5o01OWvLU3k&s=pXKSAETozI8124mW3e6rLhdzy8YzLeghIBjo_oZkswDuPxg9WkGK8pvlLYBFU3fv1Btxm4fOV_SZ2ocGYB7KNpJfQmGL1iauRhoYzYBrOveeKwOgCir6AOL6VgmE2bjlQIYinu5eXb6e_AthE1JxG2_oGrw48ZHi981114_Ug_P31N5vc-RQPsJiTEY8Iu3q0Y4j2kEr4Svb0E6szEekbcXKMuOitujpPLADnYtBaxVfAqjjDT7IjT4LHHklzaEte8hAjyklz3H71BAjLAX6J_vvYE-lTyKlGHtstfJxTsN6iVuDGNKWmkizubSYUr8folymQ_L8fnQSdlt81uJAIw&h=8l3fdYRf8q3TOxpQGjw6L3JqqcwmmBcCzh_QHX1k0ic
       cache-control:
       - no-cache
       content-length:
-      - '1282'
+      - '830'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:17:55 GMT
+      - Thu, 09 May 2024 15:54:11 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 37c885ce-096f-40e5-9d02-cf9aca87ba1b
+      - 96a2908b-93db-49d1-a6c5-ad5583afc719
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
+      x-msedge-ref:
+      - 'Ref A: FEA03EFDA160449783D7C144D4AE3F77 Ref B: MAA201060516027 Ref C: 2024-05-09T15:54:12Z'
     status:
       code: 200
       message: OK
@@ -265,56 +223,37 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"6fb145b0-bf7a-4b60-b42d-60e63a2985a5\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": [\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-921-PROTOCOL-ATTACK\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"921120\",\r\n                  \"state\":
-        \"Disabled\"\r\n                },\r\n                {\r\n                  \"ruleId\":
-        \"921110\",\r\n                  \"state\": \"Disabled\"\r\n                }\r\n
-        \             ]\r\n            }\r\n          ]\r\n        }\r\n      ],\r\n
-        \     \"exclusions\": []\r\n    }\r\n  }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"df809a3e-14de-4358-aa56-012ddf4f9629\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-921-PROTOCOL-ATTACK","rules":[{"ruleId":"921120","state":"Disabled"},{"ruleId":"921110","state":"Disabled"}]}]}],"exclusions":[]}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1283'
+      - '831'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:17:55 GMT
+      - Thu, 09 May 2024 15:54:15 GMT
       etag:
-      - W/"6fb145b0-bf7a-4b60-b42d-60e63a2985a5"
+      - W/"df809a3e-14de-4358-aa56-012ddf4f9629"
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a901d65b-be82-409b-9906-dad851562633
+      - e8481092-02ee-4db6-9d3b-dbb8f1a536f9
+      x-msedge-ref:
+      - 'Ref A: CAF6135975754603BAB8FFA637670F0D Ref B: MAA201060515053 Ref C: 2024-05-09T15:54:14Z'
     status:
       code: 200
       message: OK
@@ -332,56 +271,37 @@ interactions:
       ParameterSetName:
       - -g --policy-name --type --version --group-name --rule
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"6fb145b0-bf7a-4b60-b42d-60e63a2985a5\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": [\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-921-PROTOCOL-ATTACK\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"921120\",\r\n                  \"state\":
-        \"Disabled\"\r\n                },\r\n                {\r\n                  \"ruleId\":
-        \"921110\",\r\n                  \"state\": \"Disabled\"\r\n                }\r\n
-        \             ]\r\n            }\r\n          ]\r\n        }\r\n      ],\r\n
-        \     \"exclusions\": []\r\n    }\r\n  }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"df809a3e-14de-4358-aa56-012ddf4f9629\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-921-PROTOCOL-ATTACK","rules":[{"ruleId":"921120","state":"Disabled"},{"ruleId":"921110","state":"Disabled"}]}]}],"exclusions":[]}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1283'
+      - '831'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:17:56 GMT
+      - Thu, 09 May 2024 15:54:17 GMT
       etag:
-      - W/"6fb145b0-bf7a-4b60-b42d-60e63a2985a5"
+      - W/"df809a3e-14de-4358-aa56-012ddf4f9629"
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c848ac47-3c67-45a5-826e-291cff91c8e1
+      - 9ea0b7a8-668f-440c-999e-401c29a7a782
+      x-msedge-ref:
+      - 'Ref A: D8F9D41931E24AC59BBBD3FEDDB2CF64 Ref B: MAA201060513035 Ref C: 2024-05-09T15:54:17Z'
     status:
       code: 200
       message: OK
@@ -409,62 +329,41 @@ interactions:
       ParameterSetName:
       - -g --policy-name --type --version --group-name --rule
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"93c6e64b-08ce-4ef1-8d27-968d801ac57c\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": [\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-921-PROTOCOL-ATTACK\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"921120\",\r\n                  \"state\":
-        \"Disabled\"\r\n                },\r\n                {\r\n                  \"ruleId\":
-        \"921110\",\r\n                  \"state\": \"Disabled\"\r\n                },\r\n
-        \               {\r\n                  \"ruleId\": \"921150\",\r\n                  \"state\":
-        \"Disabled\"\r\n                }\r\n              ]\r\n            }\r\n
-        \         ]\r\n        }\r\n      ],\r\n      \"exclusions\": []\r\n    }\r\n
-        \ }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"e61c7eeb-da21-48ca-bcec-cc0af1f35a11\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-921-PROTOCOL-ATTACK","rules":[{"ruleId":"921120","state":"Disabled"},{"ruleId":"921110","state":"Disabled"},{"ruleId":"921150","state":"Disabled"}]}]}],"exclusions":[]}}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/09f0954a-bc93-4339-b552-8139ba181068?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4b426ba8-8c69-4d36-aa51-237c907e5ca6?api-version=2023-11-01&t=638508668593798069&c=MIIHSDCCBjCgAwIBAgITfwMflOuJwgY9z84ARAAEAx-U6zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQwNDMwMDkwMTU2WhcNMjUwNDI1MDkwMTU2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM-5_zwJy-GBjIrC-HJCNM91Hjb5X2kuIasFlNBTyIldaQgZW-UFcaRA3zFi5NNdrzJNArsDfFigIVc_vx3hr1jAh4Zg0IFIAnrKi_yKZG2gGy2pdrRtvMmInPkDieDWxTjYFfxyQ0mtIZ6WCOwAqhUyUdB2r6C-jmAevQvdHD8gfpsQCStDXTfnBCJCF_BPm6uDnHcfaQGNCSp3BqkX_QwqT-xNHrBAwT-tc630jptBC-k2cYbA4ICSSpIjYKk0Mrr18H0HpLf5PTBwft9cZWZD7orNE5nl8ao_B8oO0EbtVLLuyf1mjGwer9HrWcxr6bW2x0M_q_4E9U30gBU1ddkCAwEAAaOCBDUwggQxMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBSk90Ox7wuf_dPlEESrNC7OrsUl5TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGm7Et00pmBgwI7MDGNOLKmdNgMy8QNTSDR0lzbxFgooP2LoyAHnXNAC0kuFVbiDK2M_rWWX3QE9vI4w8TFzRt_8qdq6g2wnI8J2DInnVuSgaNg1362a3ftFvhcj3TMGsPlhg9ewgrDiIKr4iOtllWysooh92_jRzNpnuSJJPsNMyzWHLNwH9Yt5sgbA8EMnv8j0c2hwkOkoJpQ7xUnpTx6EHh5uBAFLS0XxBsgZtqt8cwvXjwOlWbVqK3N09odqnnY10n5B1Re3PlYlzGczXdfpIlKGEBmP4uHhEdzvBc47vY89lfxwSbMYMEOedpzh5MAU1MVnkf-O5o01OWvLU3k&s=LEteblHapXrVHADPGn0grzmNQ9p5P8OamaStsm5EuXOIroON1b9eLre70mqdwOQ1KppUTsr2Kwp3kXJ0ujyXkvIivYORva5Ovx5sg9Ow5IBibx4uOPtLdl4PiZd-Ng2OuUEEZJPACArgTThr-gzkUMFfNcuoMkZc6ZfdKgLpkBwmeYZ5cOwyJu6osbsUCatSPKLgHrpcH5qpO854SAU0-MYStlsMwMfdH2PpJZZK1MPoObQjituem0heqwGOhcobMsQ22afTd98EKbm-hi1n3-MbbpeKo-mYHJdpH2gESLRYsXuVB76oAMHhrkHeJi-iXblIY-Ffhsv2HrzYojaFsg&h=42U5Nhvh3PRW0iy5ZJyCpw2pGzb8CWdcd0RMLElRSdQ
       cache-control:
       - no-cache
       content-length:
-      - '1399'
+      - '869'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:17:56 GMT
+      - Thu, 09 May 2024 15:54:19 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4f239b76-e8dc-4a44-8207-fa3cec0b062a
+      - 1e95e7e8-c5c4-4577-8db5-2f2318f3a597
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1196'
+      x-msedge-ref:
+      - 'Ref A: 5A0629C1AF5641A79ECFDC507414DA8B Ref B: MAA201060513035 Ref C: 2024-05-09T15:54:18Z'
     status:
       code: 200
       message: OK
@@ -482,58 +381,37 @@ interactions:
       ParameterSetName:
       - -g --policy-name
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"e4bfcc60-4ea7-4db3-b9a0-a24af83445e7\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": [\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-921-PROTOCOL-ATTACK\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"921120\",\r\n                  \"state\":
-        \"Disabled\"\r\n                },\r\n                {\r\n                  \"ruleId\":
-        \"921110\",\r\n                  \"state\": \"Disabled\"\r\n                },\r\n
-        \               {\r\n                  \"ruleId\": \"921150\",\r\n                  \"state\":
-        \"Disabled\"\r\n                }\r\n              ]\r\n            }\r\n
-        \         ]\r\n        }\r\n      ],\r\n      \"exclusions\": []\r\n    }\r\n
-        \ }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"835b09aa-9168-4ba8-906a-dc734acbc7a7\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-921-PROTOCOL-ATTACK","rules":[{"ruleId":"921120","state":"Disabled"},{"ruleId":"921110","state":"Disabled"},{"ruleId":"921150","state":"Disabled"}]}]}],"exclusions":[]}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1400'
+      - '870'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:17:57 GMT
+      - Thu, 09 May 2024 15:54:21 GMT
       etag:
-      - W/"e4bfcc60-4ea7-4db3-b9a0-a24af83445e7"
+      - W/"835b09aa-9168-4ba8-906a-dc734acbc7a7"
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b27737dc-23ae-4c65-b6b7-f23d28e0fb3d
+      - aae67146-4e66-485a-97b8-58548c2ff4ca
+      x-msedge-ref:
+      - 'Ref A: EB17CB3B2C7B45F9872190629FFD536E Ref B: MAA201060515017 Ref C: 2024-05-09T15:54:21Z'
     status:
       code: 200
       message: OK
@@ -551,58 +429,37 @@ interactions:
       ParameterSetName:
       - -g --policy-name --type --version --group-name --rule
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"e4bfcc60-4ea7-4db3-b9a0-a24af83445e7\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": [\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-921-PROTOCOL-ATTACK\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"921120\",\r\n                  \"state\":
-        \"Disabled\"\r\n                },\r\n                {\r\n                  \"ruleId\":
-        \"921110\",\r\n                  \"state\": \"Disabled\"\r\n                },\r\n
-        \               {\r\n                  \"ruleId\": \"921150\",\r\n                  \"state\":
-        \"Disabled\"\r\n                }\r\n              ]\r\n            }\r\n
-        \         ]\r\n        }\r\n      ],\r\n      \"exclusions\": []\r\n    }\r\n
-        \ }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"835b09aa-9168-4ba8-906a-dc734acbc7a7\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-921-PROTOCOL-ATTACK","rules":[{"ruleId":"921120","state":"Disabled"},{"ruleId":"921110","state":"Disabled"},{"ruleId":"921150","state":"Disabled"}]}]}],"exclusions":[]}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1400'
+      - '870'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:17:58 GMT
+      - Thu, 09 May 2024 15:54:24 GMT
       etag:
-      - W/"e4bfcc60-4ea7-4db3-b9a0-a24af83445e7"
+      - W/"835b09aa-9168-4ba8-906a-dc734acbc7a7"
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a9f9e184-a274-4827-81f6-135bb7d84601
+      - 8f650795-403c-49ff-b005-249c50d0e42a
+      x-msedge-ref:
+      - 'Ref A: 34B028C53B214C49B822F031DD525036 Ref B: MAA201060516011 Ref C: 2024-05-09T15:54:23Z'
     status:
       code: 200
       message: OK
@@ -632,65 +489,41 @@ interactions:
       ParameterSetName:
       - -g --policy-name --type --version --group-name --rule
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"9dd157e7-4947-41f3-9a04-923ca9854fe7\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": [\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-921-PROTOCOL-ATTACK\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"921120\",\r\n                  \"state\":
-        \"Disabled\"\r\n                },\r\n                {\r\n                  \"ruleId\":
-        \"921110\",\r\n                  \"state\": \"Disabled\"\r\n                },\r\n
-        \               {\r\n                  \"ruleId\": \"921150\",\r\n                  \"state\":
-        \"Disabled\"\r\n                }\r\n              ]\r\n            },\r\n
-        \           {\r\n              \"ruleGroupName\": \"REQUEST-913-SCANNER-DETECTION\",\r\n
-        \             \"rules\": [\r\n                {\r\n                  \"ruleId\":
-        \"913100\",\r\n                  \"state\": \"Disabled\"\r\n                }\r\n
-        \             ]\r\n            }\r\n          ]\r\n        }\r\n      ],\r\n
-        \     \"exclusions\": []\r\n    }\r\n  }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"40d08037-b774-4a60-8f52-f0c37489d240\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-921-PROTOCOL-ATTACK","rules":[{"ruleId":"921120","state":"Disabled"},{"ruleId":"921110","state":"Disabled"},{"ruleId":"921150","state":"Disabled"}]},{"ruleGroupName":"REQUEST-913-SCANNER-DETECTION","rules":[{"ruleId":"913100","state":"Disabled"}]}]}],"exclusions":[]}}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/869fbf9f-af74-482e-af57-a49abf5717f8?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/85f98c8c-84bc-4006-ac18-74e039750d2c?api-version=2023-11-01&t=638508668654414316&c=MIIHSDCCBjCgAwIBAgITfwMflOuJwgY9z84ARAAEAx-U6zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQwNDMwMDkwMTU2WhcNMjUwNDI1MDkwMTU2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM-5_zwJy-GBjIrC-HJCNM91Hjb5X2kuIasFlNBTyIldaQgZW-UFcaRA3zFi5NNdrzJNArsDfFigIVc_vx3hr1jAh4Zg0IFIAnrKi_yKZG2gGy2pdrRtvMmInPkDieDWxTjYFfxyQ0mtIZ6WCOwAqhUyUdB2r6C-jmAevQvdHD8gfpsQCStDXTfnBCJCF_BPm6uDnHcfaQGNCSp3BqkX_QwqT-xNHrBAwT-tc630jptBC-k2cYbA4ICSSpIjYKk0Mrr18H0HpLf5PTBwft9cZWZD7orNE5nl8ao_B8oO0EbtVLLuyf1mjGwer9HrWcxr6bW2x0M_q_4E9U30gBU1ddkCAwEAAaOCBDUwggQxMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBSk90Ox7wuf_dPlEESrNC7OrsUl5TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGm7Et00pmBgwI7MDGNOLKmdNgMy8QNTSDR0lzbxFgooP2LoyAHnXNAC0kuFVbiDK2M_rWWX3QE9vI4w8TFzRt_8qdq6g2wnI8J2DInnVuSgaNg1362a3ftFvhcj3TMGsPlhg9ewgrDiIKr4iOtllWysooh92_jRzNpnuSJJPsNMyzWHLNwH9Yt5sgbA8EMnv8j0c2hwkOkoJpQ7xUnpTx6EHh5uBAFLS0XxBsgZtqt8cwvXjwOlWbVqK3N09odqnnY10n5B1Re3PlYlzGczXdfpIlKGEBmP4uHhEdzvBc47vY89lfxwSbMYMEOedpzh5MAU1MVnkf-O5o01OWvLU3k&s=XdQNAjimWFJXMBPdlHHcIUv26zPE-0CCbXpeeabLAzDtw7Zcr7-jLlgrlz45bhYgk9FoW5lyCfzGpcAVyuo1TemFMAe6iSjSqchIN4FNQiv36dvSoIf974QITmmbXkw1j9c6PhNzTNyljtATWaJ4RiMm8xgpFunLNZ4CXfu-2X0HcmF7jXAHQeeI69IHLImWaHzCctoXmBUqHSoXIVMRFF9omqRHvSUldwNqrMahbS3kEgrNqXQEYbPXXMBmphvlgGvESC0yWbXBd40PRIqh87Pb-QTgkWtfP7J29xU6PpqwKmoyWE5NsIC14I5PWn6w5Fv3GbgDa6jmO182eHsPcA&h=e9B9RdKRd0AQTNGJi773PJ6AuFNOCMuEYeQRUk-V5yA
       cache-control:
       - no-cache
       content-length:
-      - '1654'
+      - '968'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:17:58 GMT
+      - Thu, 09 May 2024 15:54:25 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b1085b3c-9cc3-4d34-b549-16837cfe6606
+      - 30a37308-9284-4dab-9722-fd2a9adfb8de
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
+      x-msedge-ref:
+      - 'Ref A: 78CE9CD04DC542FBB7432976009CCB03 Ref B: MAA201060516011 Ref C: 2024-05-09T15:54:24Z'
     status:
       code: 200
       message: OK
@@ -708,61 +541,37 @@ interactions:
       ParameterSetName:
       - -g --policy-name
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"82c399a9-49e5-4267-85d3-436a5b19b904\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": [\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-921-PROTOCOL-ATTACK\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"921120\",\r\n                  \"state\":
-        \"Disabled\"\r\n                },\r\n                {\r\n                  \"ruleId\":
-        \"921110\",\r\n                  \"state\": \"Disabled\"\r\n                },\r\n
-        \               {\r\n                  \"ruleId\": \"921150\",\r\n                  \"state\":
-        \"Disabled\"\r\n                }\r\n              ]\r\n            },\r\n
-        \           {\r\n              \"ruleGroupName\": \"REQUEST-913-SCANNER-DETECTION\",\r\n
-        \             \"rules\": [\r\n                {\r\n                  \"ruleId\":
-        \"913100\",\r\n                  \"state\": \"Disabled\"\r\n                }\r\n
-        \             ]\r\n            }\r\n          ]\r\n        }\r\n      ],\r\n
-        \     \"exclusions\": []\r\n    }\r\n  }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"71b10fd5-63db-4c47-b14b-cee2cd20f109\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-921-PROTOCOL-ATTACK","rules":[{"ruleId":"921120","state":"Disabled"},{"ruleId":"921110","state":"Disabled"},{"ruleId":"921150","state":"Disabled"}]},{"ruleGroupName":"REQUEST-913-SCANNER-DETECTION","rules":[{"ruleId":"913100","state":"Disabled"}]}]}],"exclusions":[]}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1655'
+      - '969'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:17:59 GMT
+      - Thu, 09 May 2024 15:54:28 GMT
       etag:
-      - W/"82c399a9-49e5-4267-85d3-436a5b19b904"
+      - W/"71b10fd5-63db-4c47-b14b-cee2cd20f109"
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5220cc21-1584-466e-a5e2-a09952d1f947
+      - 5318f5a7-ff80-43bc-bee1-4340e4d8dd6b
+      x-msedge-ref:
+      - 'Ref A: 4304DE59374D4C41B8F5F319FE104F08 Ref B: MAA201060514031 Ref C: 2024-05-09T15:54:27Z'
     status:
       code: 200
       message: OK
@@ -780,61 +589,37 @@ interactions:
       ParameterSetName:
       - -g --policy-name --type --version --group-name --rule --rule
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"82c399a9-49e5-4267-85d3-436a5b19b904\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": [\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-921-PROTOCOL-ATTACK\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"921120\",\r\n                  \"state\":
-        \"Disabled\"\r\n                },\r\n                {\r\n                  \"ruleId\":
-        \"921110\",\r\n                  \"state\": \"Disabled\"\r\n                },\r\n
-        \               {\r\n                  \"ruleId\": \"921150\",\r\n                  \"state\":
-        \"Disabled\"\r\n                }\r\n              ]\r\n            },\r\n
-        \           {\r\n              \"ruleGroupName\": \"REQUEST-913-SCANNER-DETECTION\",\r\n
-        \             \"rules\": [\r\n                {\r\n                  \"ruleId\":
-        \"913100\",\r\n                  \"state\": \"Disabled\"\r\n                }\r\n
-        \             ]\r\n            }\r\n          ]\r\n        }\r\n      ],\r\n
-        \     \"exclusions\": []\r\n    }\r\n  }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"71b10fd5-63db-4c47-b14b-cee2cd20f109\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-921-PROTOCOL-ATTACK","rules":[{"ruleId":"921120","state":"Disabled"},{"ruleId":"921110","state":"Disabled"},{"ruleId":"921150","state":"Disabled"}]},{"ruleGroupName":"REQUEST-913-SCANNER-DETECTION","rules":[{"ruleId":"913100","state":"Disabled"}]}]}],"exclusions":[]}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1655'
+      - '969'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:17:59 GMT
+      - Thu, 09 May 2024 15:54:30 GMT
       etag:
-      - W/"82c399a9-49e5-4267-85d3-436a5b19b904"
+      - W/"71b10fd5-63db-4c47-b14b-cee2cd20f109"
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ea591732-82da-45ef-9072-a9f512ea2b71
+      - c70486d3-430c-4197-9272-b76a1847f669
+      x-msedge-ref:
+      - 'Ref A: AC2F599C31C645CBAADE6F7C1D25E0C3 Ref B: MAA201060514031 Ref C: 2024-05-09T15:54:30Z'
     status:
       code: 200
       message: OK
@@ -862,64 +647,41 @@ interactions:
       ParameterSetName:
       - -g --policy-name --type --version --group-name --rule --rule
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"fda933d2-add9-4c52-87d5-793cce4c5159\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": [\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-921-PROTOCOL-ATTACK\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"921130\",\r\n                  \"state\":
-        \"Disabled\"\r\n                },\r\n                {\r\n                  \"ruleId\":
-        \"921140\",\r\n                  \"state\": \"Disabled\"\r\n                }\r\n
-        \             ]\r\n            },\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-913-SCANNER-DETECTION\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"913100\",\r\n                  \"state\":
-        \"Disabled\"\r\n                }\r\n              ]\r\n            }\r\n
-        \         ]\r\n        }\r\n      ],\r\n      \"exclusions\": []\r\n    }\r\n
-        \ }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"a7ea628e-b76c-4891-868d-5fedeab6ef0f\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-921-PROTOCOL-ATTACK","rules":[{"ruleId":"921130","state":"Disabled"},{"ruleId":"921140","state":"Disabled"}]},{"ruleGroupName":"REQUEST-913-SCANNER-DETECTION","rules":[{"ruleId":"913100","state":"Disabled"}]}]}],"exclusions":[]}}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/65bf1054-30f9-4992-b8af-e6b577c71e3d?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8284f0ad-229a-4f84-a8de-00b66ce05649?api-version=2023-11-01&t=638508668718982604&c=MIIHSDCCBjCgAwIBAgITfwMflOuJwgY9z84ARAAEAx-U6zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQwNDMwMDkwMTU2WhcNMjUwNDI1MDkwMTU2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM-5_zwJy-GBjIrC-HJCNM91Hjb5X2kuIasFlNBTyIldaQgZW-UFcaRA3zFi5NNdrzJNArsDfFigIVc_vx3hr1jAh4Zg0IFIAnrKi_yKZG2gGy2pdrRtvMmInPkDieDWxTjYFfxyQ0mtIZ6WCOwAqhUyUdB2r6C-jmAevQvdHD8gfpsQCStDXTfnBCJCF_BPm6uDnHcfaQGNCSp3BqkX_QwqT-xNHrBAwT-tc630jptBC-k2cYbA4ICSSpIjYKk0Mrr18H0HpLf5PTBwft9cZWZD7orNE5nl8ao_B8oO0EbtVLLuyf1mjGwer9HrWcxr6bW2x0M_q_4E9U30gBU1ddkCAwEAAaOCBDUwggQxMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBSk90Ox7wuf_dPlEESrNC7OrsUl5TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGm7Et00pmBgwI7MDGNOLKmdNgMy8QNTSDR0lzbxFgooP2LoyAHnXNAC0kuFVbiDK2M_rWWX3QE9vI4w8TFzRt_8qdq6g2wnI8J2DInnVuSgaNg1362a3ftFvhcj3TMGsPlhg9ewgrDiIKr4iOtllWysooh92_jRzNpnuSJJPsNMyzWHLNwH9Yt5sgbA8EMnv8j0c2hwkOkoJpQ7xUnpTx6EHh5uBAFLS0XxBsgZtqt8cwvXjwOlWbVqK3N09odqnnY10n5B1Re3PlYlzGczXdfpIlKGEBmP4uHhEdzvBc47vY89lfxwSbMYMEOedpzh5MAU1MVnkf-O5o01OWvLU3k&s=vBnLjYHJMyL_JanZsPhpMg7K35m3DbptrFKXXqLq8Z5w-oieHbx3QbLztXdSgJa3Se1YIrxwB4rZ3XxWo_zrXpZgWl-CMP0bxWbHmiaKP0nt2Hu86R6wh5EYoL_bbbMpq1oPef5ZNVD43jS8mLYZnzeDZLY_lyxiHiMQj1IqdYce04QCZmij6URzHo-Yyk7lnUjOgV4O4lhyVELJTxkiQx3yl-qc-KJb9o9zQiwXDisGcJOsvHt_hmmQVOZM-8v9xO7MBmI0kzPNCCnzMfO72HJrZdNvTFxhoFOGBhCNKd0bsMAt5eBMv3IX_jyh-MwTPLcanW9CoU8je_6URqc7ow&h=WmqUoHq-xMMpG00IUwLBEA-6mvWOM_gxy3xBIaeT1hs
       cache-control:
       - no-cache
       content-length:
-      - '1537'
+      - '929'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:00 GMT
+      - Thu, 09 May 2024 15:54:31 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a56258da-a75d-475f-a7e6-c7aa1f7a6b05
+      - 1270e28a-2dca-4fc2-8373-1172026bb03d
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
+      x-msedge-ref:
+      - 'Ref A: 37A373B6C70C4CFEB16F3AA8D8D90F50 Ref B: MAA201060514031 Ref C: 2024-05-09T15:54:31Z'
     status:
       code: 200
       message: OK
@@ -937,60 +699,37 @@ interactions:
       ParameterSetName:
       - -g --policy-name
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"789f0762-45af-4da2-8b18-2386ef162312\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": [\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-921-PROTOCOL-ATTACK\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"921130\",\r\n                  \"state\":
-        \"Disabled\"\r\n                },\r\n                {\r\n                  \"ruleId\":
-        \"921140\",\r\n                  \"state\": \"Disabled\"\r\n                }\r\n
-        \             ]\r\n            },\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-913-SCANNER-DETECTION\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"913100\",\r\n                  \"state\":
-        \"Disabled\"\r\n                }\r\n              ]\r\n            }\r\n
-        \         ]\r\n        }\r\n      ],\r\n      \"exclusions\": []\r\n    }\r\n
-        \ }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"bf59f322-0b3f-4027-a575-f09d676d2b99\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-921-PROTOCOL-ATTACK","rules":[{"ruleId":"921130","state":"Disabled"},{"ruleId":"921140","state":"Disabled"}]},{"ruleGroupName":"REQUEST-913-SCANNER-DETECTION","rules":[{"ruleId":"913100","state":"Disabled"}]}]}],"exclusions":[]}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1538'
+      - '930'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:00 GMT
+      - Thu, 09 May 2024 15:54:34 GMT
       etag:
-      - W/"789f0762-45af-4da2-8b18-2386ef162312"
+      - W/"bf59f322-0b3f-4027-a575-f09d676d2b99"
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - efe879da-47ae-422e-bd8f-0e411e8a487c
+      - 480a8a8c-d86f-45cc-a229-80b94009a7d2
+      x-msedge-ref:
+      - 'Ref A: 34D558B076EF438DA2E6B3D41EBE5498 Ref B: MAA201060514047 Ref C: 2024-05-09T15:54:33Z'
     status:
       code: 200
       message: OK
@@ -1008,60 +747,37 @@ interactions:
       ParameterSetName:
       - -g --policy-name --type --version --group-name
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"789f0762-45af-4da2-8b18-2386ef162312\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": [\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-921-PROTOCOL-ATTACK\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"921130\",\r\n                  \"state\":
-        \"Disabled\"\r\n                },\r\n                {\r\n                  \"ruleId\":
-        \"921140\",\r\n                  \"state\": \"Disabled\"\r\n                }\r\n
-        \             ]\r\n            },\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-913-SCANNER-DETECTION\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"913100\",\r\n                  \"state\":
-        \"Disabled\"\r\n                }\r\n              ]\r\n            }\r\n
-        \         ]\r\n        }\r\n      ],\r\n      \"exclusions\": []\r\n    }\r\n
-        \ }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"bf59f322-0b3f-4027-a575-f09d676d2b99\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-921-PROTOCOL-ATTACK","rules":[{"ruleId":"921130","state":"Disabled"},{"ruleId":"921140","state":"Disabled"}]},{"ruleGroupName":"REQUEST-913-SCANNER-DETECTION","rules":[{"ruleId":"913100","state":"Disabled"}]}]}],"exclusions":[]}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1538'
+      - '930'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:01 GMT
+      - Thu, 09 May 2024 15:54:36 GMT
       etag:
-      - W/"789f0762-45af-4da2-8b18-2386ef162312"
+      - W/"bf59f322-0b3f-4027-a575-f09d676d2b99"
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - fa658593-90b6-459a-90ff-3ba4f34e092c
+      - 36fc2b39-ac3c-4a22-8313-fa3dd3b6d3bb
+      x-msedge-ref:
+      - 'Ref A: 241C068C8F3040E4B404CF3D32D70302 Ref B: MAA201060515053 Ref C: 2024-05-09T15:54:36Z'
     status:
       code: 200
       message: OK
@@ -1088,59 +804,41 @@ interactions:
       ParameterSetName:
       - -g --policy-name --type --version --group-name
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"8c9ed68c-e7c7-49b0-90b7-8bd6c1fd49c1\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": [\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-913-SCANNER-DETECTION\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"913100\",\r\n                  \"state\":
-        \"Disabled\"\r\n                }\r\n              ]\r\n            }\r\n
-        \         ]\r\n        }\r\n      ],\r\n      \"exclusions\": []\r\n    }\r\n
-        \ }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"b6d2f794-d5a6-44d9-abbf-c00c2ccc3e08\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-913-SCANNER-DETECTION","rules":[{"ruleId":"913100","state":"Disabled"}]}]}],"exclusions":[]}}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/629f7a6d-f403-41dd-8cec-a9d8cda55ed6?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f5e251f6-98f3-4e78-bb0a-8e7d92644cd2?api-version=2023-11-01&t=638508668781648396&c=MIIHSDCCBjCgAwIBAgITfwMflOuJwgY9z84ARAAEAx-U6zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQwNDMwMDkwMTU2WhcNMjUwNDI1MDkwMTU2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM-5_zwJy-GBjIrC-HJCNM91Hjb5X2kuIasFlNBTyIldaQgZW-UFcaRA3zFi5NNdrzJNArsDfFigIVc_vx3hr1jAh4Zg0IFIAnrKi_yKZG2gGy2pdrRtvMmInPkDieDWxTjYFfxyQ0mtIZ6WCOwAqhUyUdB2r6C-jmAevQvdHD8gfpsQCStDXTfnBCJCF_BPm6uDnHcfaQGNCSp3BqkX_QwqT-xNHrBAwT-tc630jptBC-k2cYbA4ICSSpIjYKk0Mrr18H0HpLf5PTBwft9cZWZD7orNE5nl8ao_B8oO0EbtVLLuyf1mjGwer9HrWcxr6bW2x0M_q_4E9U30gBU1ddkCAwEAAaOCBDUwggQxMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBSk90Ox7wuf_dPlEESrNC7OrsUl5TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGm7Et00pmBgwI7MDGNOLKmdNgMy8QNTSDR0lzbxFgooP2LoyAHnXNAC0kuFVbiDK2M_rWWX3QE9vI4w8TFzRt_8qdq6g2wnI8J2DInnVuSgaNg1362a3ftFvhcj3TMGsPlhg9ewgrDiIKr4iOtllWysooh92_jRzNpnuSJJPsNMyzWHLNwH9Yt5sgbA8EMnv8j0c2hwkOkoJpQ7xUnpTx6EHh5uBAFLS0XxBsgZtqt8cwvXjwOlWbVqK3N09odqnnY10n5B1Re3PlYlzGczXdfpIlKGEBmP4uHhEdzvBc47vY89lfxwSbMYMEOedpzh5MAU1MVnkf-O5o01OWvLU3k&s=U5LONkoF3zOkjTHX2i0y9jIV0BOLTBYvt7-k5Hwy3C8PGh0W_MlRWpiPTVx9j0US2HLfYYu_iL4syJVE0s87UKTKNFq2k1VdqjRcwYYumOdpwY0d-yTyX_U24PVpoiWKacUYpbgAl5hg4aXJbnVSy81Vt1n8JrH1I1hnTyCKj3FcKTiyq6vYCmAo1qfE3AqtJIqrQ528k0ZXLo1biqlu1YdJSlcmg9godCNai9LX90W05KwoKAM-Ghr6ebF5X0rwdf_8YA_upvSmX1hhw5kDeM7WwTELPr6CEwG0E8OHPuq_34V0sca71svoixskqiy8AlSKno2nZg4r-71pXaJIPg&h=Z86hwVSHirhxe4xASt45Ic5aa9mmCqawMjrki8wMbQY
       cache-control:
       - no-cache
       content-length:
-      - '1167'
+      - '793'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:01 GMT
+      - Thu, 09 May 2024 15:54:37 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7f9f87dd-a9c6-4336-bcc8-a1c5fab854d6
+      - 68872d7c-9eb0-4540-9481-96b5e946dbe0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1195'
+      x-msedge-ref:
+      - 'Ref A: 24F4736204BF485F881609F039E57011 Ref B: MAA201060515053 Ref C: 2024-05-09T15:54:37Z'
     status:
       code: 200
       message: OK
@@ -1158,51 +856,37 @@ interactions:
       ParameterSetName:
       - -g --policy-name
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2023-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\",\r\n
-        \ \"etag\": \"W/\\\"55ca4cfc-1f08-4a80-ab7a-186959c0a86e\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\",\r\n
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\n
-        \     \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\n
-        \     \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n
-        \     \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n      \"managedRuleSets\":
-        [\r\n        {\r\n          \"ruleSetType\": \"OWASP\",\r\n          \"ruleSetVersion\":
-        \"3.1\",\r\n          \"ruleGroupOverrides\": [\r\n            {\r\n              \"ruleGroupName\":
-        \"REQUEST-913-SCANNER-DETECTION\",\r\n              \"rules\": [\r\n                {\r\n
-        \                 \"ruleId\": \"913100\",\r\n                  \"state\":
-        \"Disabled\"\r\n                }\r\n              ]\r\n            }\r\n
-        \         ]\r\n        }\r\n      ],\r\n      \"exclusions\": []\r\n    }\r\n
-        \ }\r\n}"
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"3ba39c36-e2ae-4c8e-94bc-977edb195d97\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection"},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.1","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-913-SCANNER-DETECTION","rules":[{"ruleId":"913100","state":"Disabled"}]}]}],"exclusions":[]}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1168'
+      - '794'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:03 GMT
+      - Thu, 09 May 2024 15:54:39 GMT
       etag:
-      - W/"55ca4cfc-1f08-4a80-ab7a-186959c0a86e"
+      - W/"3ba39c36-e2ae-4c8e-94bc-977edb195d97"
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 784fb231-b3bf-4402-a450-3f68a747d867
+      - 5fa239dc-d2b0-4a40-8295-187f9d2237f2
+      x-msedge-ref:
+      - 'Ref A: 76E8D9E4E38944C4AB7B44B30482413B Ref B: MAA201060515019 Ref C: 2024-05-09T15:54:39Z'
     status:
       code: 200
       message: OK

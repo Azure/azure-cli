@@ -11,24 +11,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --dns-name --allocation-method
+      - -g -n --dns-name --dns-name-scope --allocation-method
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_public_ip000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001","name":"cli_test_public_ip000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T18:18:05Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001","name":"cli_test_public_ip000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","test":"test_network_public_ip","date":"2023-08-21T07:44:23Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '326'
+      - '382'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:07 GMT
+      - Mon, 21 Aug 2023 07:44:31 GMT
       expires:
       - '-1'
       pragma:
@@ -43,9 +43,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "properties": {"dnsSettings": {"domainNameLabel":
-      "woot1"}, "idleTimeoutInMinutes": 4, "publicIPAddressVersion": "IPv4", "publicIPAllocationMethod":
-      "Static"}}'
+    body: '{"location": "eastus2euap", "properties": {"dnsSettings": {"domainNameLabel":
+      "woot1", "domainNameLabelScope": "TenantReuse"}, "idleTimeoutInMinutes": 4,
+      "publicIPAllocationMethod": "Static"}}'
     headers:
       Accept:
       - application/json
@@ -56,40 +56,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '182'
+      - '192'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -n --dns-name --allocation-method
+      - -g -n --dns-name --dns-name-scope --allocation-method
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"pubipdns\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns\",\r\n
-        \ \"etag\": \"W/\\\"dfcf4fd7-d788-42d9-ab8b-3bf56a1354bb\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"c340d22f-3559-4b4e-8cfb-267d1d6355e6\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Static\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"dnsSettings\": {\r\n      \"domainNameLabel\": \"woot1\",\r\n
-        \     \"fqdn\": \"woot1.westus.cloudapp.azure.com\"\r\n    },\r\n    \"ipTags\":
-        []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\":
-        {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
+      string: '{"name":"pubipdns","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns","etag":"W/\"5bc076c2-7bcf-4d23-b415-8ea9d76d9b02\"","location":"eastus2euap","properties":{"provisioningState":"Updating","resourceGuid":"ba6c8d6a-1c21-4c9f-99cd-18d8bd606767","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"dnsSettings":{"domainNameLabel":"woot1","domainNameLabelScope":"TenantReuse","fqdn":"woot1.cvcha2gjbtgteafb.eastus2euap.sysgen.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0ef5055e-5308-40c8-8218-9a185616edf5?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/24612279-96de-417e-ae65-78839b2ee609?api-version=2022-11-01
       cache-control:
       - no-cache
       content-length:
-      - '751'
+      - '690'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:09 GMT
+      - Mon, 21 Aug 2023 07:44:37 GMT
       expires:
       - '-1'
       pragma:
@@ -102,9 +93,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0161a67b-96fe-46b0-9646-05f621e50fde
+      - af25d8ec-fd3f-40c8-b211-4d568985a8fc
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -120,24 +111,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --dns-name --allocation-method
+      - -g -n --dns-name --dns-name-scope --allocation-method
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0ef5055e-5308-40c8-8218-9a185616edf5?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/24612279-96de-417e-ae65-78839b2ee609?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+      string: '{"status":"InProgress"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '30'
+      - '23'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:10 GMT
+      - Mon, 21 Aug 2023 07:44:37 GMT
       expires:
       - '-1'
       pragma:
@@ -154,7 +144,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 51a45f21-f199-4525-b6a7-74e14d941632
+      - d295be40-f3d9-4a45-9778-38491fc3003b
     status:
       code: 200
       message: OK
@@ -170,24 +160,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --dns-name --allocation-method
+      - -g -n --dns-name --dns-name-scope --allocation-method
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0ef5055e-5308-40c8-8218-9a185616edf5?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/24612279-96de-417e-ae65-78839b2ee609?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: '{"status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:13 GMT
+      - Mon, 21 Aug 2023 07:44:40 GMT
       expires:
       - '-1'
       pragma:
@@ -204,7 +193,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8fcaa55b-42a3-4b4f-ab9c-868a677c3b6d
+      - 5dc978b0-e30c-4d09-a311-74d6c8156909
     status:
       code: 200
       message: OK
@@ -220,35 +209,25 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --dns-name --allocation-method
+      - -g -n --dns-name --dns-name-scope --allocation-method
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"pubipdns\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns\",\r\n
-        \ \"etag\": \"W/\\\"38c5476a-63ac-4370-b1ba-f61a731fa0db\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"c340d22f-3559-4b4e-8cfb-267d1d6355e6\",\r\n    \"ipAddress\":
-        \"20.66.91.65\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
-        \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"dnsSettings\": {\r\n
-        \     \"domainNameLabel\": \"woot1\",\r\n      \"fqdn\": \"woot1.westus.cloudapp.azure.com\"\r\n
-        \   },\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+      string: '{"name":"pubipdns","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns","etag":"W/\"304c7581-954d-4afe-862b-c6b24d65d82f\"","location":"eastus2euap","properties":{"provisioningState":"Succeeded","resourceGuid":"ba6c8d6a-1c21-4c9f-99cd-18d8bd606767","ipAddress":"20.221.181.82","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"dnsSettings":{"domainNameLabel":"woot1","domainNameLabelScope":"TenantReuse","fqdn":"woot1.cvcha2gjbtgteafb.eastus2euap.sysgen.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '785'
+      - '719'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:13 GMT
+      - Mon, 21 Aug 2023 07:44:40 GMT
       etag:
-      - W/"38c5476a-63ac-4370-b1ba-f61a731fa0db"
+      - W/"304c7581-954d-4afe-862b-c6b24d65d82f"
       expires:
       - '-1'
       pragma:
@@ -265,7 +244,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d99787c5-4e14-44dc-838d-2fed7354e1a3
+      - 539ad158-85c4-41fb-bd55-c434e1dc8d11
     status:
       code: 200
       message: OK
@@ -283,22 +262,22 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_public_ip000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001","name":"cli_test_public_ip000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T18:18:05Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001","name":"cli_test_public_ip000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","test":"test_network_public_ip","date":"2023-08-21T07:44:23Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '326'
+      - '382'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:14 GMT
+      - Mon, 21 Aug 2023 07:44:40 GMT
       expires:
       - '-1'
       pragma:
@@ -313,8 +292,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "properties": {"idleTimeoutInMinutes": 4, "publicIPAddressVersion":
-      "IPv4", "publicIPAllocationMethod": "Dynamic"}}'
+    body: '{"location": "eastus2euap", "properties": {"idleTimeoutInMinutes": 4, "publicIPAllocationMethod":
+      "Dynamic"}}'
     headers:
       Accept:
       - application/json
@@ -325,39 +304,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '138'
+      - '109'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"pubipnodns\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns\",\r\n
-        \ \"etag\": \"W/\\\"eb34e879-fbb0-42b5-b20c-590c15e6b149\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"598c4bf0-63d9-4b24-b669-aee7ec130e92\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+      string: '{"name":"pubipnodns","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns","etag":"W/\"9e591193-e157-4224-af20-13674035296d\"","location":"eastus2euap","properties":{"provisioningState":"Updating","resourceGuid":"debd77bc-83d3-4995-ae17-246066a5c8a9","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Dynamic","idleTimeoutInMinutes":4,"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4bacb975-5f90-43dd-9536-f95ada4aa87c?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/883aad2c-f16c-4d12-84fd-299858107d31?api-version=2022-11-01
       cache-control:
       - no-cache
       content-length:
-      - '642'
+      - '546'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:17 GMT
+      - Mon, 21 Aug 2023 07:44:47 GMT
       expires:
       - '-1'
       pragma:
@@ -370,9 +341,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6dd0ce74-a862-43b5-bfd8-5ae2f9300f0f
+      - 187278ad-f759-4297-b071-95b1d2d858c4
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -390,22 +361,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4bacb975-5f90-43dd-9536-f95ada4aa87c?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/883aad2c-f16c-4d12-84fd-299858107d31?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: '{"status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:18 GMT
+      - Mon, 21 Aug 2023 07:44:48 GMT
       expires:
       - '-1'
       pragma:
@@ -422,7 +392,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c883c119-4262-4e07-af4d-0194e6de522c
+      - d6e44385-c3c2-4380-8bba-197cf78768e1
     status:
       code: 200
       message: OK
@@ -440,31 +410,23 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"pubipnodns\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns\",\r\n
-        \ \"etag\": \"W/\\\"d07932cc-efc0-4dd9-b9be-fbcfe2b00953\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"598c4bf0-63d9-4b24-b669-aee7ec130e92\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+      string: '{"name":"pubipnodns","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns","etag":"W/\"2b022a03-93ac-48be-8d39-71e7cf659870\"","location":"eastus2euap","properties":{"provisioningState":"Succeeded","resourceGuid":"debd77bc-83d3-4995-ae17-246066a5c8a9","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Dynamic","idleTimeoutInMinutes":4,"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '643'
+      - '547'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:18 GMT
+      - Mon, 21 Aug 2023 07:44:48 GMT
       etag:
-      - W/"d07932cc-efc0-4dd9-b9be-fbcfe2b00953"
+      - W/"2b022a03-93ac-48be-8d39-71e7cf659870"
       expires:
       - '-1'
       pragma:
@@ -481,7 +443,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b54d66b3-339c-404a-985f-ad98e9cb2fe2
+      - 33588557-c1e9-425a-9834-79df1811af8c
     status:
       code: 200
       message: OK
@@ -506,36 +468,25 @@ interactions:
       ParameterSetName:
       - -g -n --version --sku --zone -l --ip-tags
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip3?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip3?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"pubip3\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip3\",\r\n
-        \ \"etag\": \"W/\\\"182a524c-857e-4269-b64a-640caac8797b\\\"\",\r\n  \"location\":
-        \"eastus2\",\r\n  \"zones\": [\r\n    \"1\",\r\n    \"2\",\r\n    \"3\"\r\n
-        \ ],\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"4b1088b6-1033-43b2-9503-dc39385545b0\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Static\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"ipTags\": [\r\n      {\r\n        \"ipTagType\": \"RoutingPreference\",\r\n
-        \       \"tag\": \"Internet\"\r\n      }\r\n    ],\r\n    \"ddosSettings\":
-        {\r\n      \"protectionMode\": \"VirtualNetworkInherited\"\r\n    }\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\": {\r\n    \"name\":
-        \"Standard\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
+      string: '{"name":"pubip3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip3","etag":"W/\"b96fac5b-edb9-4c58-8d74-e2d1f100d270\"","location":"eastus2","zones":["1","2","3"],"properties":{"provisioningState":"Updating","resourceGuid":"f4a8b36f-a30d-4c6b-8c7e-5953b1abadc8","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"ipTags":[{"ipTagType":"RoutingPreference","tag":"Internet"}],"ddosSettings":{"protectionMode":"VirtualNetworkInherited"}},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Standard","tier":"Regional"}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/e850b7d1-8c93-44fe-bd16-0012bb8f6667?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/2095ba6c-b106-4316-a6ec-ab1d3915bdaf?api-version=2022-11-01
       cache-control:
       - no-cache
       content-length:
-      - '862'
+      - '668'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:21 GMT
+      - Mon, 21 Aug 2023 07:44:55 GMT
       expires:
       - '-1'
       pragma:
@@ -548,9 +499,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1ee69361-2988-4a32-8e7d-db06a6f2a377
+      - c3f28b8f-f40a-4c2d-8029-3d6f6685d33a
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -568,22 +519,21 @@ interactions:
       ParameterSetName:
       - -g -n --version --sku --zone -l --ip-tags
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/e850b7d1-8c93-44fe-bd16-0012bb8f6667?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/2095ba6c-b106-4316-a6ec-ab1d3915bdaf?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: '{"status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:22 GMT
+      - Mon, 21 Aug 2023 07:44:55 GMT
       expires:
       - '-1'
       pragma:
@@ -600,7 +550,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3b31fa9e-34c7-4216-b3f5-f7e4cd5f7345
+      - 79a52616-78b9-43e4-a8db-a97e33274422
     status:
       code: 200
       message: OK
@@ -618,35 +568,23 @@ interactions:
       ParameterSetName:
       - -g -n --version --sku --zone -l --ip-tags
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip3?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip3?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"pubip3\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip3\",\r\n
-        \ \"etag\": \"W/\\\"2792b987-05bb-4f2f-8df4-75f607961933\\\"\",\r\n  \"location\":
-        \"eastus2\",\r\n  \"zones\": [\r\n    \"1\",\r\n    \"2\",\r\n    \"3\"\r\n
-        \ ],\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"4b1088b6-1033-43b2-9503-dc39385545b0\",\r\n    \"ipAddress\":
-        \"20.157.66.38\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
-        \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": [\r\n      {\r\n
-        \       \"ipTagType\": \"RoutingPreference\",\r\n        \"tag\": \"Internet\"\r\n
-        \     }\r\n    ],\r\n    \"ddosSettings\": {\r\n      \"protectionMode\":
-        \"VirtualNetworkInherited\"\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+      string: '{"name":"pubip3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip3","etag":"W/\"ec59a9da-8070-408b-8d30-7ad75d1a36dc\"","location":"eastus2","zones":["1","2","3"],"properties":{"provisioningState":"Succeeded","resourceGuid":"f4a8b36f-a30d-4c6b-8c7e-5953b1abadc8","ipAddress":"20.157.66.32","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"ipTags":[{"ipTagType":"RoutingPreference","tag":"Internet"}],"ddosSettings":{"protectionMode":"VirtualNetworkInherited"}},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Standard","tier":"Regional"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '897'
+      - '696'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:22 GMT
+      - Mon, 21 Aug 2023 07:44:56 GMT
       etag:
-      - W/"2792b987-05bb-4f2f-8df4-75f607961933"
+      - W/"ec59a9da-8070-408b-8d30-7ad75d1a36dc"
       expires:
       - '-1'
       pragma:
@@ -663,7 +601,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d9212861-5843-4e36-920d-13b5ecccf69b
+      - ff1df18d-b98e-4e26-8f84-2cda8422b010
     status:
       code: 200
       message: OK
@@ -679,33 +617,25 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --allocation-method --dns-name --idle-timeout --tags
+      - -g -n --allocation-method --dns-name --idle-timeout --ip-tags --tags
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"pubipnodns\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns\",\r\n
-        \ \"etag\": \"W/\\\"d07932cc-efc0-4dd9-b9be-fbcfe2b00953\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"598c4bf0-63d9-4b24-b669-aee7ec130e92\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+      string: '{"name":"pubipnodns","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns","etag":"W/\"2b022a03-93ac-48be-8d39-71e7cf659870\"","location":"eastus2euap","properties":{"provisioningState":"Succeeded","resourceGuid":"debd77bc-83d3-4995-ae17-246066a5c8a9","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Dynamic","idleTimeoutInMinutes":4,"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '643'
+      - '547'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:23 GMT
+      - Mon, 21 Aug 2023 07:44:58 GMT
       etag:
-      - W/"d07932cc-efc0-4dd9-b9be-fbcfe2b00953"
+      - W/"2b022a03-93ac-48be-8d39-71e7cf659870"
       expires:
       - '-1'
       pragma:
@@ -722,16 +652,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c8984419-7324-44a0-9563-e80a2780dee2
+      - 33088b6c-e426-4446-8db6-cd97669a29c8
     status:
       code: 200
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns",
-      "location": "westus", "properties": {"dnsSettings": {"domainNameLabel": "wowza2"},
-      "idleTimeoutInMinutes": 10, "ipTags": [], "publicIPAddressVersion": "IPv4",
-      "publicIPAllocationMethod": "Static"}, "sku": {"name": "Basic", "tier": "Regional"},
-      "tags": {"foo": "doo"}}'
+      "location": "eastus2euap", "properties": {"dnsSettings": {"domainNameLabel":
+      "wowza2"}, "idleTimeoutInMinutes": 10, "ipTags": [], "publicIPAddressVersion":
+      "IPv4", "publicIPAllocationMethod": "Static"}, "sku": {"name": "Basic", "tier":
+      "Regional"}, "tags": {"foo": "doo"}}'
     headers:
       Accept:
       - application/json
@@ -742,41 +672,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '426'
+      - '431'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -n --allocation-method --dns-name --idle-timeout --tags
+      - -g -n --allocation-method --dns-name --idle-timeout --ip-tags --tags
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"pubipnodns\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns\",\r\n
-        \ \"etag\": \"W/\\\"88c71844-e258-4bce-ad61-4c74d1081a17\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\": \"598c4bf0-63d9-4b24-b669-aee7ec130e92\",\r\n
-        \   \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
-        \"Static\",\r\n    \"idleTimeoutInMinutes\": 10,\r\n    \"dnsSettings\": {\r\n
-        \     \"domainNameLabel\": \"wowza2\",\r\n      \"fqdn\": \"wowza2.westus.cloudapp.azure.com\"\r\n
-        \   },\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+      string: '{"name":"pubipnodns","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns","etag":"W/\"a43534b7-8de7-4fce-837a-2f3ba62ba578\"","location":"eastus2euap","tags":{"foo":"doo"},"properties":{"provisioningState":"Updating","resourceGuid":"debd77bc-83d3-4995-ae17-246066a5c8a9","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":10,"dnsSettings":{"domainNameLabel":"wowza2","fqdn":"wowza2.eastus2euap.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3d6472fa-2b32-4a49-9324-482e1067c1e6?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/2e061f57-5512-482f-9aea-a6d3aa1121b9?api-version=2022-11-01
       cache-control:
       - no-cache
       content-length:
-      - '795'
+      - '657'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:24 GMT
+      - Mon, 21 Aug 2023 07:45:02 GMT
       expires:
       - '-1'
       pragma:
@@ -793,7 +713,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - cc24492a-fdb8-43dc-97a3-175543c098f7
+      - 423f0d4c-3c49-47a8-b8fb-3f9df1e4f6e6
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -811,24 +731,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --allocation-method --dns-name --idle-timeout --tags
+      - -g -n --allocation-method --dns-name --idle-timeout --ip-tags --tags
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3d6472fa-2b32-4a49-9324-482e1067c1e6?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/2e061f57-5512-482f-9aea-a6d3aa1121b9?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+      string: '{"status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '30'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:26 GMT
+      - Mon, 21 Aug 2023 07:45:03 GMT
       expires:
       - '-1'
       pragma:
@@ -845,7 +764,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 58d3b1d5-f5af-4fe8-b899-bd4be540d088
+      - 8db776ce-f5da-4af5-af01-3c7749e81b66
     status:
       code: 200
       message: OK
@@ -861,85 +780,25 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --allocation-method --dns-name --idle-timeout --tags
+      - -g -n --allocation-method --dns-name --idle-timeout --ip-tags --tags
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3d6472fa-2b32-4a49-9324-482e1067c1e6?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: '{"name":"pubipnodns","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns","etag":"W/\"f520a0cb-22be-4de8-b30e-e2021a4b7479\"","location":"eastus2euap","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","resourceGuid":"debd77bc-83d3-4995-ae17-246066a5c8a9","ipAddress":"20.1.51.205","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":10,"dnsSettings":{"domainNameLabel":"wowza2","fqdn":"wowza2.eastus2euap.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '684'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:28 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 1961be8e-6a7e-4371-bbdd-5aea4441754f
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network public-ip update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --allocation-method --dns-name --idle-timeout --tags
-      User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns?api-version=2022-05-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"pubipnodns\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns\",\r\n
-        \ \"etag\": \"W/\\\"a695587c-2470-49fa-9dfd-91275a459c45\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"598c4bf0-63d9-4b24-b669-aee7ec130e92\",\r\n
-        \   \"ipAddress\": \"20.66.91.114\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
-        \   \"publicIPAllocationMethod\": \"Static\",\r\n    \"idleTimeoutInMinutes\":
-        10,\r\n    \"dnsSettings\": {\r\n      \"domainNameLabel\": \"wowza2\",\r\n
-        \     \"fqdn\": \"wowza2.westus.cloudapp.azure.com\"\r\n    },\r\n    \"ipTags\":
-        []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\":
-        {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '830'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 07 Feb 2023 18:18:28 GMT
+      - Mon, 21 Aug 2023 07:45:03 GMT
       etag:
-      - W/"a695587c-2470-49fa-9dfd-91275a459c45"
+      - W/"f520a0cb-22be-4de8-b30e-e2021a4b7479"
       expires:
       - '-1'
       pragma:
@@ -956,7 +815,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5ca56b94-fc90-4437-ada7-aa423b41c071
+      - e0af4ab4-0693-4440-8e67-492574fa1aea
     status:
       code: 200
       message: OK
@@ -974,33 +833,34 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses?api-version=2022-11-01
   response:
     body:
-      string: '{"value":[{"name":"pubipdns","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns","etag":"W/\"38c5476a-63ac-4370-b1ba-f61a731fa0db\"","location":"westus","properties":{"provisioningState":"Succeeded","resourceGuid":"c340d22f-3559-4b4e-8cfb-267d1d6355e6","ipAddress":"20.66.91.65","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"dnsSettings":{"domainNameLabel":"woot1","fqdn":"woot1.westus.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}},{"name":"pubipnodns","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns","etag":"W/\"a695587c-2470-49fa-9dfd-91275a459c45\"","location":"westus","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","resourceGuid":"598c4bf0-63d9-4b24-b669-aee7ec130e92","ipAddress":"20.66.91.114","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":10,"dnsSettings":{"domainNameLabel":"wowza2","fqdn":"wowza2.westus.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}},{"name":"pubip3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip3","etag":"W/\"2792b987-05bb-4f2f-8df4-75f607961933\"","location":"eastus2","zones":["1","2","3"],"properties":{"provisioningState":"Succeeded","resourceGuid":"4b1088b6-1033-43b2-9503-dc39385545b0","ipAddress":"20.157.66.38","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"ipTags":[{"ipTagType":"RoutingPreference","tag":"Internet"}],"ddosSettings":{"protectionMode":"VirtualNetworkInherited"}},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Standard","tier":"Regional"}}]}'
+      string: '{"value":[{"name":"pubip3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip3","etag":"W/\"ec59a9da-8070-408b-8d30-7ad75d1a36dc\"","location":"eastus2","zones":["1","2","3"],"properties":{"provisioningState":"Succeeded","resourceGuid":"f4a8b36f-a30d-4c6b-8c7e-5953b1abadc8","ipAddress":"20.157.66.32","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"ipTags":[{"ipTagType":"RoutingPreference","tag":"Internet"}],"ddosSettings":{"protectionMode":"VirtualNetworkInherited"}},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Standard","tier":"Regional"}},{"name":"pubipdns","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns","etag":"W/\"304c7581-954d-4afe-862b-c6b24d65d82f\"","location":"eastus2euap","properties":{"provisioningState":"Succeeded","resourceGuid":"ba6c8d6a-1c21-4c9f-99cd-18d8bd606767","ipAddress":"20.221.181.82","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"dnsSettings":{"domainNameLabel":"woot1","domainNameLabelScope":"TenantReuse","fqdn":"woot1.cvcha2gjbtgteafb.eastus2euap.sysgen.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}},{"name":"pubipnodns","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns","etag":"W/\"f520a0cb-22be-4de8-b30e-e2021a4b7479\"","location":"eastus2euap","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","resourceGuid":"debd77bc-83d3-4995-ae17-246066a5c8a9","ipAddress":"20.1.51.205","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":10,"dnsSettings":{"domainNameLabel":"wowza2","fqdn":"wowza2.eastus2euap.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2031'
+      - '2113'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:29 GMT
+      - Mon, 21 Aug 2023 07:45:06 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-original-request-ids:
-      - cc86626d-6bee-46d8-b976-2d6c0ebf1593
-      - d9ac1442-13e9-40f3-8a85-8d6b5c75ae12
+      - 1289f292-4687-47b1-8917-062544c44060
+      - f171356d-6403-4d1d-a76a-969fc3c13ffa
     status:
       code: 200
       message: OK
@@ -1018,33 +878,23 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"pubipdns\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns\",\r\n
-        \ \"etag\": \"W/\\\"38c5476a-63ac-4370-b1ba-f61a731fa0db\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"c340d22f-3559-4b4e-8cfb-267d1d6355e6\",\r\n    \"ipAddress\":
-        \"20.66.91.65\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
-        \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"dnsSettings\": {\r\n
-        \     \"domainNameLabel\": \"woot1\",\r\n      \"fqdn\": \"woot1.westus.cloudapp.azure.com\"\r\n
-        \   },\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+      string: '{"name":"pubipdns","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns","etag":"W/\"304c7581-954d-4afe-862b-c6b24d65d82f\"","location":"eastus2euap","properties":{"provisioningState":"Succeeded","resourceGuid":"ba6c8d6a-1c21-4c9f-99cd-18d8bd606767","ipAddress":"20.221.181.82","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"dnsSettings":{"domainNameLabel":"woot1","domainNameLabelScope":"TenantReuse","fqdn":"woot1.cvcha2gjbtgteafb.eastus2euap.sysgen.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '785'
+      - '719'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:30 GMT
+      - Mon, 21 Aug 2023 07:45:08 GMT
       etag:
-      - W/"38c5476a-63ac-4370-b1ba-f61a731fa0db"
+      - W/"304c7581-954d-4afe-862b-c6b24d65d82f"
       expires:
       - '-1'
       pragma:
@@ -1054,10 +904,14 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e0f017d4-cf8e-48fa-a02c-c68420fa1f8e
+      - cd68ea69-db8a-4fd9-8b06-122d4449e563
     status:
       code: 200
       message: OK
@@ -1077,10 +931,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipdns?api-version=2022-11-01
   response:
     body:
       string: ''
@@ -1088,17 +941,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0ad5bf51-7672-49fd-88d5-0efa69236a50?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/179b194a-85f3-463e-bb18-4e2c54361064?api-version=2022-11-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 07 Feb 2023 18:18:32 GMT
+      - Mon, 21 Aug 2023 07:45:10 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/0ad5bf51-7672-49fd-88d5-0efa69236a50?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operationResults/179b194a-85f3-463e-bb18-4e2c54361064?api-version=2022-11-01
       pragma:
       - no-cache
       server:
@@ -1109,7 +962,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c96d2430-c549-42d7-b6f3-e303c1e8dd70
+      - c24caf66-b731-4e2f-ba55-22f30622ddc1
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
@@ -1129,22 +982,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0ad5bf51-7672-49fd-88d5-0efa69236a50?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/179b194a-85f3-463e-bb18-4e2c54361064?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: '{"status":"InProgress"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '23'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:43 GMT
+      - Mon, 21 Aug 2023 07:45:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1154,10 +1006,14 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b9fde4f7-f060-4d3a-966e-5633dfbb08cd
+      - 8fb278fc-1655-4627-9bf6-c39d54b4bfef
     status:
       code: 200
       message: OK
@@ -1175,10 +1031,107 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/0ad5bf51-7672-49fd-88d5-0efa69236a50?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/179b194a-85f3-463e-bb18-4e2c54361064?api-version=2022-11-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Aug 2023 07:45:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 58fef365-8623-4f6f-94b9-18e44a380ef8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/179b194a-85f3-463e-bb18-4e2c54361064?api-version=2022-11-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Aug 2023 07:45:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f6e0207c-5a6e-470c-be26-14d0db0b8a3d
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operationResults/179b194a-85f3-463e-bb18-4e2c54361064?api-version=2022-11-01
   response:
     body:
       string: ''
@@ -1186,17 +1139,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0ad5bf51-7672-49fd-88d5-0efa69236a50?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/179b194a-85f3-463e-bb18-4e2c54361064?api-version=2022-11-01
       cache-control:
       - no-cache
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:43 GMT
+      - Mon, 21 Aug 2023 07:45:42 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/0ad5bf51-7672-49fd-88d5-0efa69236a50?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operationResults/179b194a-85f3-463e-bb18-4e2c54361064?api-version=2022-11-01
       pragma:
       - no-cache
       server:
@@ -1207,7 +1160,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c96d2430-c549-42d7-b6f3-e303c1e8dd70
+      - c24caf66-b731-4e2f-ba55-22f30622ddc1
     status:
       code: 204
       message: No Content
@@ -1225,33 +1178,34 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses?api-version=2022-11-01
   response:
     body:
-      string: '{"value":[{"name":"pubipnodns","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns","etag":"W/\"a695587c-2470-49fa-9dfd-91275a459c45\"","location":"westus","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","resourceGuid":"598c4bf0-63d9-4b24-b669-aee7ec130e92","ipAddress":"20.66.91.114","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":10,"dnsSettings":{"domainNameLabel":"wowza2","fqdn":"wowza2.westus.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}},{"name":"pubip3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip3","etag":"W/\"2792b987-05bb-4f2f-8df4-75f607961933\"","location":"eastus2","zones":["1","2","3"],"properties":{"provisioningState":"Succeeded","resourceGuid":"4b1088b6-1033-43b2-9503-dc39385545b0","ipAddress":"20.157.66.38","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"ipTags":[{"ipTagType":"RoutingPreference","tag":"Internet"}],"ddosSettings":{"protectionMode":"VirtualNetworkInherited"}},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Standard","tier":"Regional"}}]}'
+      string: '{"value":[{"name":"pubip3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip3","etag":"W/\"ec59a9da-8070-408b-8d30-7ad75d1a36dc\"","location":"eastus2","zones":["1","2","3"],"properties":{"provisioningState":"Succeeded","resourceGuid":"f4a8b36f-a30d-4c6b-8c7e-5953b1abadc8","ipAddress":"20.157.66.32","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"ipTags":[{"ipTagType":"RoutingPreference","tag":"Internet"}],"ddosSettings":{"protectionMode":"VirtualNetworkInherited"}},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Standard","tier":"Regional"}},{"name":"pubipnodns","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubipnodns","etag":"W/\"f520a0cb-22be-4de8-b30e-e2021a4b7479\"","location":"eastus2euap","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","resourceGuid":"debd77bc-83d3-4995-ae17-246066a5c8a9","ipAddress":"20.1.51.205","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":10,"dnsSettings":{"domainNameLabel":"wowza2","fqdn":"wowza2.eastus2euap.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1384'
+      - '1393'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 18:18:44 GMT
+      - Mon, 21 Aug 2023 07:45:46 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-original-request-ids:
-      - 121df1b6-8a22-490c-906c-ca235222afd0
-      - deda46e7-b0e3-4cbc-be4d-b09fa18c394e
+      - 69c7ccc1-b10a-4873-a0fa-bae0c124003f
+      - e574e453-2c4a-43ca-8c35-4b4cee0c5171
     status:
       code: 200
       message: OK

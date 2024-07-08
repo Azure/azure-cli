@@ -107,6 +107,41 @@ class LogicappBasicE2ETest(ScenarioTest):
             JMESPathCheck('length([])', 0)
         ])
 
+
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @StorageAccountPreparer(location=DEFAULT_LOCATION)
+    def test_logicapp_e2etest_logicapp_versions_e2e(self, resource_group, storage_account):
+        logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
+        plan = self.create_random_name(prefix='logic-e2e-plan', length=24)
+        runtime_version = '~16'
+        functions_version = '4'
+        self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan)).get_output_in_json()['id']
+        self.cmd('appservice plan list -g {}'.format(resource_group))
+        self.cmd('logicapp create -g {} -n {} -p {} -s {} --runtime-version {} --functions-version {}'.format(
+            resource_group,
+            logicapp_name,
+            plan,
+            storage_account,
+            runtime_version,
+            functions_version
+            ),
+        checks=[
+                JMESPathCheck('state', 'Running'),
+                JMESPathCheck('name', logicapp_name),
+                JMESPathCheck('hostNames[0]', logicapp_name + '.azurewebsites.net')
+        ])
+
+        # show
+        result = self.cmd('logicapp config appsettings list -g {} -n {}'.format(
+            resource_group, logicapp_name)).get_output_in_json()
+        appsetting_runtime_version = next((x for x in result if x['name'] == 'WEBSITE_NODE_DEFAULT_VERSION'))
+        self.assertEqual(appsetting_runtime_version['name'], 'WEBSITE_NODE_DEFAULT_VERSION')
+        self.assertEqual(appsetting_runtime_version['value'], '~16')
+        appsetting_functions_version = next((x for x in result if x['name'] == 'FUNCTIONS_EXTENSION_VERSION'))
+        self.assertEqual(appsetting_functions_version['name'], 'FUNCTIONS_EXTENSION_VERSION')
+        self.assertEqual(appsetting_functions_version['value'], '~4')
+
+
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @StorageAccountPreparer()
     def test_logicapp_https_only(self, resource_group, storage_account):
@@ -136,12 +171,9 @@ class LogicappBasicE2ETest(ScenarioTest):
 
         # update through key value pairs
         self.cmd('logicapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(resource_group, logicapp_name)).assert_with_checks([
-            JMESPathCheck("length([?name=='s1'])", 1),
-            JMESPathCheck("length([?name=='s2'])", 1),
-            JMESPathCheck("length([?name=='s3'])", 1),
-            JMESPathCheck("length([?value=='foo'])", 1),
-            JMESPathCheck("length([?value=='bar'])", 1),
-            JMESPathCheck("length([?value=='bar2'])", 1)
+            JMESPathCheck("[?name=='s1']|[0].value", None),
+            JMESPathCheck("[?name=='s2']|[0].value", None),
+            JMESPathCheck("[?name=='s3']|[0].value", None)
         ])
 
         # show
@@ -152,11 +184,16 @@ class LogicappBasicE2ETest(ScenarioTest):
         self.assertEqual(s2['slotSetting'], False)
         self.assertEqual(s2['value'], 'bar')
         # delete
-        self.cmd('logicapp config appsettings delete -g {} -n {} --setting-names s1 s2'
-                 .format(resource_group, logicapp_name)).assert_with_checks([
-                     JMESPathCheck("length([?name=='s3'])", 1),
-                     JMESPathCheck("length([?name=='s1'])", 0),
-                     JMESPathCheck("length([?name=='s2'])", 0)])
+        self.cmd('logicapp config appsettings delete -g {} -n {} --setting-names s1 s2'.format(resource_group, logicapp_name)).assert_with_checks([
+            JMESPathCheck("[?name=='s3']|[0].value", None),
+            JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION']|[0].value", None)
+        ])
+        # show
+        self.cmd('logicapp config appsettings list -g {} -n {}'.format(
+            resource_group, logicapp_name)).assert_with_checks([
+                JMESPathCheck("length([?name=='s3'])", 1),
+                JMESPathCheck("length([?name=='s1'])", 0),
+                JMESPathCheck("length([?name=='s2'])", 0)])
 
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     def test_logicapp_scale_e2e(self, resource_group):
@@ -237,7 +274,6 @@ class LogicAppDeployTest(LiveScenarioTest):
             JMESPathCheck('status', 4),
             JMESPathCheck('complete', True),
         ])
-
 
 
 class LogicAppPlanTest(ScenarioTest):

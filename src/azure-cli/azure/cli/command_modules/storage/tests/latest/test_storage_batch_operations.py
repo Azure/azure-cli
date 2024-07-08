@@ -87,7 +87,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
                                   local_folder)
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     def test_storage_blob_batch_upload_scenarios(self, test_dir, storage_account_info):
         # upload files without pattern
@@ -102,6 +102,14 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage blob list -c {}', storage_account_info, container).assert_with_checks(
             JMESPathCheck('length(@)', 41))
 
+        # test upload-batch with tags
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --overwrite --tags key1=val1 key2=val2',
+                         storage_account_info, test_dir, container)
+        result = self.storage_cmd('storage blob list -c {} --prefix apple --include t',
+                                  storage_account_info, container).get_output_in_json()
+        self.assertEqual(len(result), 10)
+        for blob in result:
+            self.assertEqual(blob["tags"], {"key1": "val1", "key2": "val2"})
 
         # upload files with pattern apple/*
         container = self.create_container(storage_account_info)
@@ -153,7 +161,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
                                   container, test_dir, current).get_output_in_json()
         self.assertEqual(len(result), 41)
 
-        #check result url
+        # check result url
         container = self.create_container(storage_account_info)
         result = self.storage_cmd('storage blob upload-batch -s "{}" -d {}', storage_account_info,
                          test_dir, container).get_output_in_json()
@@ -298,6 +306,25 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
                                JMESPathCheck('properties.contentSettings.contentLanguage', 'en-US'),
                                JMESPathCheck('properties.contentSettings.contentType', 'multipart/form-data;'),
                                JMESPathCheck('metadata', {'key': 'val'}))
+
+        # parallel upload with max-connections
+        import time
+        start_time = time.time()
+        src_share = self.create_share(storage_account_info)
+        local_folder = self.create_temp_dir()
+        self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
+                         test_dir, src_share)
+        self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share, local_folder)
+        self.assertEqual(41, sum(len(f) for _, _, f in os.walk(local_folder)))
+        multi_thread_time = time.time() - start_time
+        start_time = time.time()
+        src_share = self.create_share(storage_account_info)
+        self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 1', storage_account_info,
+                         test_dir, src_share)
+        self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share, local_folder)
+        self.assertEqual(41, sum(len(f) for _, _, f in os.walk(local_folder)))
+        single_thread_time = time.time() - start_time
+        self.assertGreater(single_thread_time, multi_thread_time)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='src_account')

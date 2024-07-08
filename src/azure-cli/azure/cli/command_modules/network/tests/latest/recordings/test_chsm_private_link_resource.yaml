@@ -1,0 +1,553 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --resource-type --location --is-full-object --properties
+      User-Agent:
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HardwareSecurityModules?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HardwareSecurityModules","namespace":"Microsoft.HardwareSecurityModules","authorizations":[{"applicationId":"0eb690b7-d23e-4fb0-b43e-cd161ac80cc3","roleDefinitionId":"48397dc8-3910-486a-8165-ab2df987447f"},{"applicationId":"c1d9f466-6d5e-407a-9e7c-b4ec37f588f0","roleDefinitionId":"4d781af7-fdcd-4a1e-a425-cfe90f4d64c6"}],"resourceTypes":[{"resourceType":"cloudHsmClusters","locations":["UK
+        West","Central US EUAP","East US"],"apiVersions":["2022-08-31-preview"],"defaultApiVersion":"2022-08-31-preview","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"locations","locations":[],"apiVersions":["2021-11-30","2018-10-31-preview","2018-10-31"],"defaultApiVersion":"2018-10-31","capabilities":"None"},{"resourceType":"operations","locations":["Central
+        US EUAP","East US","East US 2","South Central US","Central US","West US","East
+        Asia","Southeast Asia","North Europe","West Europe","Canada Central","UK South","UK
+        West","Australia East","Australia Southeast","West US 2","South India","Central
+        India","Japan East","Japan West","Switzerland North","Switzerland West","West
+        Central US","East US 2 EUAP","Canada East"],"apiVersions":["2022-08-31-preview","2021-11-30","2018-10-31-preview","2018-10-31"],"defaultApiVersion":"2018-10-31","capabilities":"None"},{"resourceType":"dedicatedHSMs","locations":["West
+        Central US","East US 2 EUAP","Central US EUAP","East US","East US 2","West
+        US 2","South India","Central India","Japan East","Japan West","Switzerland
+        North","Switzerland West","South Central US","Central US","West US","East
+        Asia","Southeast Asia","North Europe","West Europe","Canada Central","Canada
+        East","UK South","UK West","Australia East","Australia Southeast"],"apiVersions":["2021-11-30","2018-10-31-preview","2018-10-31"],"defaultApiVersion":"2018-10-31","zoneMappings":[{"location":"Australia
+        East","zones":[]},{"location":"Canada Central","zones":[]},{"location":"Central
+        India","zones":[]},{"location":"Central US","zones":["3","1"]},{"location":"Central
+        US EUAP","zones":[]},{"location":"East Asia","zones":[]},{"location":"East
+        US","zones":[]},{"location":"East US 2","zones":[]},{"location":"East US 2
+        EUAP","zones":[]},{"location":"Japan East","zones":[]},{"location":"North
+        Europe","zones":[]},{"location":"South Central US","zones":[]},{"location":"Southeast
+        Asia","zones":["3","1","2"]},{"location":"Switzerland North","zones":[]},{"location":"UK
+        South","zones":[]},{"location":"West Europe","zones":[]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":[]}],"capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"locations/cloudHsmOperationResults","locations":["UK
+        West","Central US EUAP","East US"],"apiVersions":["2022-08-31-preview"],"defaultApiVersion":"2022-08-31-preview","capabilities":"None"},{"resourceType":"locations/operationResults","locations":["West
+        Central US","East US 2 EUAP","Central US EUAP","East US","East US 2","West
+        US 2","South India","Central India","Japan East","Japan West","Switzerland
+        North","Switzerland West","South Central US","Central US","West US","East
+        Asia","Southeast Asia","North Europe","West Europe","Canada Central","Canada
+        East","UK South","UK West","Australia East","Australia Southeast"],"apiVersions":["2021-11-30","2018-10-31-preview","2018-10-31"],"defaultApiVersion":"2018-10-31","capabilities":"None"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3542'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Apr 2023 14:29:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "ukwest", "tags": {"UseMockHfc": "true"}, "properties": {},
+      "sku": {"name": "Standard_B1", "family": "B"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '119'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --resource-type --location --is-full-object --properties
+      User-Agent:
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_chsm_plr_rg000001/providers/Microsoft.HardwareSecurityModules/cloudHsmClusters/cli-test-chsm-plr-000002?api-version=2022-08-31-preview
+  response:
+    body:
+      string: '{"name":"cli-test-chsm-plr-000002","type":"Microsoft.HardwareSecurityModules/cloudHsmClusters","location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_chsm_plr_rg000001/providers/Microsoft.HardwareSecurityModules/cloudHsmClusters/cli-test-chsm-plr-000002","sku":{"family":"B","name":"Standard_B1"},"properties":{"provisioningState":"Provisioning","autoGeneratedDomainNameLabelScope":"TenantReuse","securityDomain":{"fipsState":2,"activationStatus":null},"hsms":[],"publicNetworkAccess":"Disabled"},"tags":{"UseMockHfc":"true"},"systemData":{"createdBy":"doladugba@microsoft.com","createdByType":"User","createdAt":"2023-04-24T14:29:59.212Z","lastModifiedBy":"doladugba@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-04-24T14:29:59.212Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '803'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Apr 2023 14:30:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --resource-type --location --is-full-object --properties
+      User-Agent:
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_chsm_plr_rg000001/providers/Microsoft.HardwareSecurityModules/cloudHsmClusters/cli-test-chsm-plr-000002?api-version=2022-08-31-preview
+  response:
+    body:
+      string: '{"name":"cli-test-chsm-plr-000002","type":"Microsoft.HardwareSecurityModules/cloudHsmClusters","location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_chsm_plr_rg000001/providers/Microsoft.HardwareSecurityModules/cloudHsmClusters/cli-test-chsm-plr-000002","sku":{"family":"B","name":"Standard_B1"},"properties":{"provisioningState":"Provisioning","autoGeneratedDomainNameLabelScope":"TenantReuse","securityDomain":{"fipsState":2,"activationStatus":null},"hsms":[],"publicNetworkAccess":"Disabled"},"tags":{"UseMockHfc":"true"},"systemData":{"createdBy":"doladugba@microsoft.com","createdByType":"User","createdAt":"2023-04-24T14:29:59.212Z","lastModifiedBy":"doladugba@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-04-24T14:29:59.212Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '803'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Apr 2023 14:30:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --resource-type --location --is-full-object --properties
+      User-Agent:
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_chsm_plr_rg000001/providers/Microsoft.HardwareSecurityModules/cloudHsmClusters/cli-test-chsm-plr-000002?api-version=2022-08-31-preview
+  response:
+    body:
+      string: '{"name":"cli-test-chsm-plr-000002","type":"Microsoft.HardwareSecurityModules/cloudHsmClusters","location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_chsm_plr_rg000001/providers/Microsoft.HardwareSecurityModules/cloudHsmClusters/cli-test-chsm-plr-000002","sku":{"family":"B","name":"Standard_B1"},"properties":{"provisioningState":"Provisioning","autoGeneratedDomainNameLabelScope":"TenantReuse","securityDomain":{"fipsState":2,"activationStatus":null},"hsms":[],"publicNetworkAccess":"Disabled"},"tags":{"UseMockHfc":"true"},"systemData":{"createdBy":"doladugba@microsoft.com","createdByType":"User","createdAt":"2023-04-24T14:29:59.212Z","lastModifiedBy":"doladugba@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-04-24T14:29:59.212Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '803'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Apr 2023 14:30:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --resource-type --location --is-full-object --properties
+      User-Agent:
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_chsm_plr_rg000001/providers/Microsoft.HardwareSecurityModules/cloudHsmClusters/cli-test-chsm-plr-000002?api-version=2022-08-31-preview
+  response:
+    body:
+      string: '{"name":"cli-test-chsm-plr-000002","type":"Microsoft.HardwareSecurityModules/cloudHsmClusters","location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_chsm_plr_rg000001/providers/Microsoft.HardwareSecurityModules/cloudHsmClusters/cli-test-chsm-plr-000002","sku":{"family":"B","name":"Standard_B1"},"properties":{"provisioningState":"Provisioning","autoGeneratedDomainNameLabelScope":"TenantReuse","securityDomain":{"fipsState":2,"activationStatus":null},"hsms":[],"publicNetworkAccess":"Disabled"},"tags":{"UseMockHfc":"true"},"systemData":{"createdBy":"doladugba@microsoft.com","createdByType":"User","createdAt":"2023-04-24T14:29:59.212Z","lastModifiedBy":"doladugba@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-04-24T14:29:59.212Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '803'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Apr 2023 14:31:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --resource-type --location --is-full-object --properties
+      User-Agent:
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_chsm_plr_rg000001/providers/Microsoft.HardwareSecurityModules/cloudHsmClusters/cli-test-chsm-plr-000002?api-version=2022-08-31-preview
+  response:
+    body:
+      string: '{"name":"cli-test-chsm-plr-000002","type":"Microsoft.HardwareSecurityModules/cloudHsmClusters","location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_chsm_plr_rg000001/providers/Microsoft.HardwareSecurityModules/cloudHsmClusters/cli-test-chsm-plr-000002","sku":{"family":"B","name":"Standard_B1"},"properties":{"provisioningState":"Succeeded","autoGeneratedDomainNameLabelScope":"TenantReuse","securityDomain":{"fipsState":2,"activationStatus":null},"hsms":[],"publicNetworkAccess":"Disabled"},"tags":{"UseMockHfc":"true"},"systemData":{"createdBy":"doladugba@microsoft.com","createdByType":"User","createdAt":"2023-04-24T14:29:59.212Z","lastModifiedBy":"doladugba@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-04-24T14:29:59.212Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '800'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Apr 2023 14:31:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g --type
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.22621-SP0) AZURECLI/2.47.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_chsm_plr_rg000001/providers/Microsoft.HardwareSecurityModules/cloudHsmClusters/cli-test-chsm-plr-000002/privateLinkResources?api-version=2022-08-31-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_chsm_plr_rg000001/providers/Microsoft.HardwareSecurityModules/cloudHsmClusters/cli-test-chsm-plr-000002/privateLinkResources/cloudHsm","name":"cloudHsm","type":"Microsoft.HardwareSecurityModules/cloudHsmClusters/privateLinkResources","properties":{"groupId":"cloudhsm","requiredMembers":["hsm1","hsm2","hsm3"],"requiredZoneNames":["privatelink.cloudhsm.azure.net"]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '461'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Apr 2023 14:31:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g --resource-type
+      User-Agent:
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HardwareSecurityModules?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HardwareSecurityModules","namespace":"Microsoft.HardwareSecurityModules","authorizations":[{"applicationId":"0eb690b7-d23e-4fb0-b43e-cd161ac80cc3","roleDefinitionId":"48397dc8-3910-486a-8165-ab2df987447f"},{"applicationId":"c1d9f466-6d5e-407a-9e7c-b4ec37f588f0","roleDefinitionId":"4d781af7-fdcd-4a1e-a425-cfe90f4d64c6"}],"resourceTypes":[{"resourceType":"cloudHsmClusters","locations":["UK
+        West","Central US EUAP","East US"],"apiVersions":["2022-08-31-preview"],"defaultApiVersion":"2022-08-31-preview","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"locations","locations":[],"apiVersions":["2021-11-30","2018-10-31-preview","2018-10-31"],"defaultApiVersion":"2018-10-31","capabilities":"None"},{"resourceType":"operations","locations":["Central
+        US EUAP","East US","East US 2","South Central US","Central US","West US","East
+        Asia","Southeast Asia","North Europe","West Europe","Canada Central","UK South","UK
+        West","Australia East","Australia Southeast","West US 2","South India","Central
+        India","Japan East","Japan West","Switzerland North","Switzerland West","West
+        Central US","East US 2 EUAP","Canada East"],"apiVersions":["2022-08-31-preview","2021-11-30","2018-10-31-preview","2018-10-31"],"defaultApiVersion":"2018-10-31","capabilities":"None"},{"resourceType":"dedicatedHSMs","locations":["West
+        Central US","East US 2 EUAP","Central US EUAP","East US","East US 2","West
+        US 2","South India","Central India","Japan East","Japan West","Switzerland
+        North","Switzerland West","South Central US","Central US","West US","East
+        Asia","Southeast Asia","North Europe","West Europe","Canada Central","Canada
+        East","UK South","UK West","Australia East","Australia Southeast"],"apiVersions":["2021-11-30","2018-10-31-preview","2018-10-31"],"defaultApiVersion":"2018-10-31","zoneMappings":[{"location":"Australia
+        East","zones":[]},{"location":"Canada Central","zones":[]},{"location":"Central
+        India","zones":[]},{"location":"Central US","zones":["3","1"]},{"location":"Central
+        US EUAP","zones":[]},{"location":"East Asia","zones":[]},{"location":"East
+        US","zones":[]},{"location":"East US 2","zones":[]},{"location":"East US 2
+        EUAP","zones":[]},{"location":"Japan East","zones":[]},{"location":"North
+        Europe","zones":[]},{"location":"South Central US","zones":[]},{"location":"Southeast
+        Asia","zones":["3","1","2"]},{"location":"Switzerland North","zones":[]},{"location":"UK
+        South","zones":[]},{"location":"West Europe","zones":[]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":[]}],"capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"locations/cloudHsmOperationResults","locations":["UK
+        West","Central US EUAP","East US"],"apiVersions":["2022-08-31-preview"],"defaultApiVersion":"2022-08-31-preview","capabilities":"None"},{"resourceType":"locations/operationResults","locations":["West
+        Central US","East US 2 EUAP","Central US EUAP","East US","East US 2","West
+        US 2","South India","Central India","Japan East","Japan West","Switzerland
+        North","Switzerland West","South Central US","Central US","West US","East
+        Asia","Southeast Asia","North Europe","West Europe","Canada Central","Canada
+        East","UK South","UK West","Australia East","Australia Southeast"],"apiVersions":["2021-11-30","2018-10-31-preview","2018-10-31"],"defaultApiVersion":"2018-10-31","capabilities":"None"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3542'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Apr 2023 14:31:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name -g --resource-type
+      User-Agent:
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_chsm_plr_rg000001/providers/Microsoft.HardwareSecurityModules/cloudHsmClusters/cli-test-chsm-plr-000002?api-version=2022-08-31-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 24 Apr 2023 14:31:39 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HardwareSecurityModules/locations/ukwest/cloudHsmOperationResults/b1f1911f-116a-4bc6-819d-b266769d20a6?api-version=2022-08-31-preview
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g --resource-type
+      User-Agent:
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HardwareSecurityModules/locations/ukwest/cloudHsmOperationResults/b1f1911f-116a-4bc6-819d-b266769d20a6?api-version=2022-08-31-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 24 Apr 2023 14:31:39 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HardwareSecurityModules/locations/ukwest/cloudHsmOperationResults/b1f1911f-116a-4bc6-819d-b266769d20a6?api-version=2022-08-31-preview
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g --resource-type
+      User-Agent:
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HardwareSecurityModules/locations/ukwest/cloudHsmOperationResults/b1f1911f-116a-4bc6-819d-b266769d20a6?api-version=2022-08-31-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 24 Apr 2023 14:32:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

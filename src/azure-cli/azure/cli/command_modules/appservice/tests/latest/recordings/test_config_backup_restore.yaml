@@ -15,12 +15,12 @@ interactions:
       ParameterSetName:
       - --account-name --name --account-key
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-storage-blob/12.12.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-storage-blob/12.16.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Tue, 07 Feb 2023 13:08:30 GMT
+      - Wed, 15 Nov 2023 19:05:35 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: PUT
     uri: https://backup000002.blob.core.windows.net/backupcontainer000005?restype=container
   response:
@@ -30,15 +30,15 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Feb 2023 13:08:30 GMT
+      - Wed, 15 Nov 2023 19:05:35 GMT
       etag:
-      - '"0x8DB090C68F82004"'
+      - '"0x8DBE60DD927DAFB"'
       last-modified:
-      - Tue, 07 Feb 2023 13:08:30 GMT
+      - Wed, 15 Nov 2023 19:05:35 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 201
       message: Created
@@ -56,28 +56,30 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westeurope","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T13:07:59Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westeurope","tags":{"product":"azurecli","cause":"automation","test":"test_config_backup_restore","date":"2023-11-15T19:05:11Z","module":"appservice"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '314'
+      - '372'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 13:08:31 GMT
+      - Wed, 15 Nov 2023 19:05:34 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -103,25 +105,25 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003?api-version=2023-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003","name":"plan-backup000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"westeurope","properties":{"serverFarmId":18329,"name":"plan-backup000003","sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1},"workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-605_18329","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003","name":"plan-backup000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"westeurope","properties":{"serverFarmId":12145,"name":"plan-backup000003","sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1},"workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-759_12145","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2023-11-15T19:05:40.9066667"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1496'
+      - '1614'
       content-type:
       - application/json
       date:
-      - Tue, 07 Feb 2023 13:08:42 GMT
+      - Wed, 15 Nov 2023 19:05:43 GMT
       etag:
-      - '"1D93AF54BF8C4D5"'
+      - '"1DA17F6BA9D0FE0"'
       expires:
       - '-1'
       pragma:
@@ -159,24 +161,24 @@ interactions:
       ParameterSetName:
       - -g -n --plan
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003","name":"plan-backup000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        Europe","properties":{"serverFarmId":18329,"name":"plan-backup000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-605_18329","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
+        Europe","properties":{"serverFarmId":12145,"name":"plan-backup000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-759_12145","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2023-11-15T19:05:40.9066667"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1422'
+      - '1534'
       content-type:
       - application/json
       date:
-      - Tue, 07 Feb 2023 13:08:44 GMT
+      - Wed, 15 Nov 2023 19:05:44 GMT
       expires:
       - '-1'
       pragma:
@@ -185,10 +187,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
       x-content-type-options:
@@ -216,10 +214,10 @@ interactions:
       ParameterSetName:
       - -g -n --plan
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/checknameavailability?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/checknameavailability?api-version=2023-01-01
   response:
     body:
       string: '{"nameAvailable":true,"reason":"","message":""}'
@@ -231,7 +229,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 07 Feb 2023 13:08:44 GMT
+      - Wed, 15 Nov 2023 19:05:44 GMT
       expires:
       - '-1'
       pragma:
@@ -267,15 +265,16 @@ interactions:
       ParameterSetName:
       - -g -n --plan
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/providers/Microsoft.Web/webAppStacks?api-version=2022-03-01
+    uri: https://management.azure.com/providers/Microsoft.Web/webAppStacks?api-version=2023-01-01
   response:
     body:
       string: '{"value":[{"id":null,"name":"dotnet","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":".NET","value":"dotnet","preferredOs":"windows","majorVersions":[{"displayText":".NET
-        7 (STS)","value":"dotnet7","minorVersions":[{"displayText":".NET 7 (STS)","value":"7","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"v7.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"7.x"}},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|7.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"7.x"}}}}]},{"displayText":".NET
-        6","value":"dotnet6","minorVersions":[{"displayText":".NET 6 (LTS)","value":"6","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"v6.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"6.0.x"}},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|6.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"6.0.x"}}}}]},{"displayText":".NET
+        8 (LTS)","value":"dotnet8","minorVersions":[{"displayText":".NET 8 (LTS)","value":"8","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"v8.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8.x"},"isEarlyAccess":true},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|8.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8.x"},"supportedFeatures":{"disableSsh":true},"isEarlyAccess":true}}}]},{"displayText":".NET
+        7 (STS)","value":"dotnet7","minorVersions":[{"displayText":".NET 7 (STS)","value":"7","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"v7.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"7.x"}},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|7.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"7.x"},"supportedFeatures":{"disableSsh":true}}}}]},{"displayText":".NET
+        6","value":"dotnet6","minorVersions":[{"displayText":".NET 6 (LTS)","value":"6","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"v6.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"6.0.x"}},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|6.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"6.0.x"},"supportedFeatures":{"disableSsh":true}}}}]},{"displayText":".NET
         5","value":"dotnet5","minorVersions":[{"displayText":".NET 5","value":"5","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"v5.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"5.0.x"},"endOfLifeDate":"2022-05-08T00:00:00Z"},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|5.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"5.0.x"},"endOfLifeDate":"2022-05-08T00:00:00Z"}}}]},{"displayText":".NET
         Core 3","value":"dotnetcore3","minorVersions":[{"displayText":".NET Core 3.1
         (LTS)","value":"3.1","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"3.1","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.1.301"},"isDeprecated":true,"endOfLifeDate":"2022-12-03T00:00:00Z"},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|3.1","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.1.301"},"isDeprecated":true,"endOfLifeDate":"2022-12-03T00:00:00Z"}}},{"displayText":".NET
@@ -288,9 +287,10 @@ interactions:
         V4","value":"aspdotnetv4","minorVersions":[{"displayText":"ASP.NET V4.8","value":"v4.8","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"v4.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.1"}}}}]},{"displayText":"ASP.NET
         V3","value":"aspdotnetv3","minorVersions":[{"displayText":"ASP.NET V3.5","value":"v3.5","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"v2.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"2.1"}}}}]}]}},{"id":null,"name":"node","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":"Node","value":"node","preferredOs":"linux","majorVersions":[{"displayText":"Node
         LTS","value":"lts","minorVersions":[{"displayText":"Node LTS","value":"lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|lts","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true}}}}]},{"displayText":"Node
-        18","value":"18","minorVersions":[{"displayText":"Node 18 LTS","value":"18-lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|18-lts","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"18.x"}},"windowsRuntimeSettings":{"runtimeVersion":"~18","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"18.x"}}}}]},{"displayText":"Node
-        16","value":"16","minorVersions":[{"displayText":"Node 16 LTS","value":"16-lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|16-lts","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"16.x"},"endOfLifeDate":"2024-04-30T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"~16","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"16.x"},"endOfLifeDate":"2024-04-30T00:00:00Z"}}}]},{"displayText":"Node
-        14","value":"14","minorVersions":[{"displayText":"Node 14 LTS","value":"14-lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|14-lts","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"14.x"},"endOfLifeDate":"2023-04-30T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"~14","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"14.x"},"endOfLifeDate":"2023-04-30T00:00:00Z"}}}]},{"displayText":"Node
+        20","value":"20","minorVersions":[{"displayText":"Node 20 LTS","value":"20-lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|20-lts","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"20.x"},"supportedFeatures":{"disableSsh":true}},"windowsRuntimeSettings":{"runtimeVersion":"~20","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"20.x"},"isHidden":true}}}]},{"displayText":"Node
+        18","value":"18","minorVersions":[{"displayText":"Node 18 LTS","value":"18-lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|18-lts","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"18.x"},"supportedFeatures":{"disableSsh":true}},"windowsRuntimeSettings":{"runtimeVersion":"~18","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"18.x"}}}}]},{"displayText":"Node
+        16","value":"16","minorVersions":[{"displayText":"Node 16 LTS","value":"16-lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|16-lts","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"16.x"},"supportedFeatures":{"disableSsh":true},"endOfLifeDate":"2023-09-11T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"~16","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"16.x"},"endOfLifeDate":"2023-09-11T00:00:00Z"}}}]},{"displayText":"Node
+        14","value":"14","minorVersions":[{"displayText":"Node 14 LTS","value":"14-lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|14-lts","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"14.x"},"supportedFeatures":{"disableSsh":true},"endOfLifeDate":"2023-04-30T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"~14","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"14.x"},"endOfLifeDate":"2023-04-30T00:00:00Z"}}}]},{"displayText":"Node
         12","value":"12","minorVersions":[{"displayText":"Node 12 LTS","value":"12-lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|12-lts","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"12.x"},"endOfLifeDate":"2022-04-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"12.13.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2022-04-01T00:00:00Z"}}},{"displayText":"Node
         12.9","value":"12.9","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|12.9","isDeprecated":true,"remoteDebuggingSupported":true,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"12.x"},"endOfLifeDate":"2022-04-01T00:00:00Z"}}}]},{"displayText":"Node
         10","value":"10","minorVersions":[{"displayText":"Node 10 LTS","value":"10-LTS","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|10-lts","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"10.x"},"endOfLifeDate":"2021-04-01T00:00:00Z"}}},{"displayText":"Node
@@ -325,23 +325,24 @@ interactions:
         4","value":"4","minorVersions":[{"displayText":"Node 4.8","value":"4.8","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|4.8","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2018-04-30T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"4.8","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2018-04-30T00:00:00Z"}}},{"displayText":"Node
         4.5","value":"4.5","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|4.5","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2018-04-30T00:00:00Z"}}},{"displayText":"Node
         4.4","value":"4.4","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|4.4","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2018-04-30T00:00:00Z"}}}]}]}},{"id":null,"name":"python","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":"Python","value":"python","preferredOs":"linux","majorVersions":[{"displayText":"Python
-        3","value":"3","minorVersions":[{"displayText":"Python 3.11","value":"3.11","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.11","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.11"},"isHidden":false}}},{"displayText":"Python
-        3.10","value":"3.10","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.10","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.10"},"isHidden":false,"isEarlyAccess":false}}},{"displayText":"Python
-        3.9","value":"3.9","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.9","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.9"},"isHidden":false}}},{"displayText":"Python
-        3.8","value":"3.8","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.8","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.8"}}}},{"displayText":"Python
-        3.7","value":"3.7","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.7","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.7"}}}},{"displayText":"Python
+        3","value":"3","minorVersions":[{"displayText":"Python 3.12","value":"3.12","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.12","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.12"},"supportedFeatures":{"disableSsh":true}}}},{"displayText":"Python
+        3.11","value":"3.11","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.11","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.11"},"supportedFeatures":{"disableSsh":true},"isHidden":false}}},{"displayText":"Python
+        3.10","value":"3.10","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.10","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.10"},"supportedFeatures":{"disableSsh":true},"isHidden":false,"isEarlyAccess":false}}},{"displayText":"Python
+        3.9","value":"3.9","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.9","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.9"},"supportedFeatures":{"disableSsh":true},"isHidden":false}}},{"displayText":"Python
+        3.8","value":"3.8","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.8","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.8"},"supportedFeatures":{"disableSsh":true}}}},{"displayText":"Python
+        3.7","value":"3.7","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.7","remoteDebuggingSupported":false,"isDeprecated":true,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.7"},"supportedFeatures":{"disableSsh":true}}}},{"displayText":"Python
         3.6","value":"3.6","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.6","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.6"}},"windowsRuntimeSettings":{"runtimeVersion":"3.4.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.6"}}}}]},{"displayText":"Python
         2","value":"2","minorVersions":[{"displayText":"Python 2.7","value":"2.7","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|2.7","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"2.7"},"endOfLifeDate":"2020-02-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"2.7.3","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"2.7"},"endOfLifeDate":"2020-02-01T00:00:00Z"}}}]}]}},{"id":null,"name":"php","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":"PHP","value":"php","preferredOs":"linux","majorVersions":[{"displayText":"PHP
-        8","value":"8","minorVersions":[{"displayText":"PHP 8.2","value":"8.2","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|8.2","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8.2","notSupportedInCreates":true},"endOfLifeDate":"2025-11-30T00:00:00Z"}}},{"displayText":"PHP
-        8.1","value":"8.1","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|8.1","isHidden":false,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8.1","notSupportedInCreates":true},"endOfLifeDate":"2024-11-30T00:00:00Z"}}},{"displayText":"PHP
-        8.0","value":"8.0","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|8.0","isHidden":false,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8.0","notSupportedInCreates":true},"endOfLifeDate":"2023-11-30T00:00:00Z"}}}]},{"displayText":"PHP
+        8","value":"8","minorVersions":[{"displayText":"PHP 8.2","value":"8.2","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|8.2","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8.2"},"supportedFeatures":{"disableSsh":true},"endOfLifeDate":"2025-12-08T00:00:00Z"}}},{"displayText":"PHP
+        8.1","value":"8.1","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|8.1","isHidden":false,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8.1"},"supportedFeatures":{"disableSsh":true},"endOfLifeDate":"2023-11-26T00:00:00Z"}}},{"displayText":"PHP
+        8.0","value":"8.0","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|8.0","isHidden":false,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8.0"},"supportedFeatures":{"disableSsh":true},"endOfLifeDate":"2023-11-26T00:00:00Z"}}}]},{"displayText":"PHP
         7","value":"7","minorVersions":[{"displayText":"PHP 7.4","value":"7.4","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"7.4","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"7.4","notSupportedInCreates":true},"isDeprecated":true,"endOfLifeDate":"2022-11-30T00:00:00Z"},"linuxRuntimeSettings":{"runtimeVersion":"PHP|7.4","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"7.4","notSupportedInCreates":true},"isDeprecated":true,"endOfLifeDate":"2022-11-30T00:00:00Z"}}},{"displayText":"PHP
         7.3","value":"7.3","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|7.3","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"7.3","notSupportedInCreates":true},"endOfLifeDate":"2021-12-06T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"7.3","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"7.3","notSupportedInCreates":true},"endOfLifeDate":"2021-12-06T00:00:00Z"}}},{"displayText":"PHP
         7.2","value":"7.2","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|7.2","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-11-30T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"7.2","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2020-11-30T00:00:00Z"}}},{"displayText":"PHP
         7.1","value":"7.1","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"7.1","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-02-01T00:00:00Z"}}},{"displayText":"7.0","value":"7.0","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|7.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-02-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"7.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-02-01T00:00:00Z"}}}]},{"displayText":"PHP
         5","value":"5","minorVersions":[{"displayText":"PHP 5.6","value":"5.6","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|5.6","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2021-02-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"5.6","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2021-02-01T00:00:00Z"}}}]}]}},{"id":null,"name":"ruby","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":"Ruby","value":"ruby","preferredOs":"linux","majorVersions":[{"displayText":"Ruby
-        2","value":"2","minorVersions":[{"displayText":"Ruby 2.7","value":"2.7","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.7","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2023-03-31T00:00:00Z"}}},{"displayText":"Ruby
-        2.7.3","value":"2.7.3","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.7.3","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"isHidden":true,"endOfLifeDate":"2023-03-31T00:00:00Z"}}},{"displayText":"Ruby
+        2","value":"2","minorVersions":[{"displayText":"Ruby 2.7","value":"2.7","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.7","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2023-03-31T00:00:00Z"}}},{"displayText":"Ruby
+        2.7.3","value":"2.7.3","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.7.3","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"isHidden":true,"endOfLifeDate":"2023-03-31T00:00:00Z"}}},{"displayText":"Ruby
         2.6","value":"2.6","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.6","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2022-03-31T00:00:00Z"}}},{"displayText":"Ruby
         2.6.2","value":"2.6.2","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.6.2","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2022-03-31T00:00:00Z"}}},{"displayText":"Ruby
         2.5","value":"2.5","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.5","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2021-03-31T00:00:00Z"}}},{"displayText":"Ruby
@@ -352,9 +353,13 @@ interactions:
         2.3.8","value":"2.3.8","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.3.8","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2019-03-31T00:00:00Z"}}},{"displayText":"Ruby
         2.3.3","value":"2.3.3","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.3.3","remoteDebuggingSupported":false,"isDeprecated":true,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2019-03-31T00:00:00Z"}}}]}]}},{"id":null,"name":"java","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":"Java","value":"java","preferredOs":"linux","majorVersions":[{"displayText":"Java
         17","value":"17","minorVersions":[{"displayText":"Java 17","value":"17.0","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","isAutoUpdate":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"17"},"endOfLifeDate":"2031-09-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"17","isAutoUpdate":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"17"},"endOfLifeDate":"2031-09-01T00:00:00Z"}}},{"displayText":"Java
+        17.0.4","value":"17.0.4","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"17"},"endOfLifeDate":"2031-09-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"17.0.4","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"17"},"endOfLifeDate":"2031-09-01T00:00:00Z"}}},{"displayText":"Java
+        17.0.3","value":"17.0.3","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"17"},"endOfLifeDate":"2031-09-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"17.0.3","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"17"},"endOfLifeDate":"2031-09-01T00:00:00Z"}}},{"displayText":"Java
         17.0.2","value":"17.0.2","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"17"},"endOfLifeDate":"2031-09-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"17.0.2","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"17"},"endOfLifeDate":"2031-09-01T00:00:00Z"}}},{"displayText":"Java
         17.0.1","value":"17.0.1","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"17"},"endOfLifeDate":"2031-09-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"17.0.1","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"17"},"endOfLifeDate":"2031-09-01T00:00:00Z"}}}]},{"displayText":"Java
         11","value":"11","minorVersions":[{"displayText":"Java 11","value":"11.0","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","isAutoUpdate":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-09-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"11","isAutoUpdate":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-09-01T00:00:00Z"}}},{"displayText":"Java
+        11.0.16","value":"11.0.16","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-09-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"11.0.16","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-09-01T00:00:00Z"}}},{"displayText":"Java
+        11.0.15","value":"11.0.15","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-09-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"11.0.15","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-09-01T00:00:00Z"}}},{"displayText":"Java
         11.0.14","value":"11.0.14","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-09-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"11.0.14","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-09-01T00:00:00Z"}}},{"displayText":"Java
         11.0.13","value":"11.0.13","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-09-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"11.0.13","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-09-01T00:00:00Z"}}},{"displayText":"Java
         11.0.12","value":"11.0.12","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-09-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"11.0.12","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-09-01T00:00:00Z"}}},{"displayText":"Java
@@ -367,6 +372,7 @@ interactions:
         11.0.3","value":"11.0.3","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"11.0.3_ZULU","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-09-01T00:00:00Z"}}},{"displayText":"Java
         11.0.2","value":"11.0.2","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"11.0.2_ZULU","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-09-01T00:00:00Z"}}}]},{"displayText":"Java
         8","value":"8","minorVersions":[{"displayText":"Java 8","value":"8.0","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","isAutoUpdate":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-03-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"1.8","isAutoUpdate":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-03-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_345","value":"8.0.345","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_345","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-03-01T00:00:00Z"}}},{"displayText":"Java
         1.8.0_332","value":"8.0.332","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_332","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-03-01T00:00:00Z"}}},{"displayText":"Java
         1.8.0_322","value":"8.0.322","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_322","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-03-01T00:00:00Z"}}},{"displayText":"Java
         1.8.0_312","value":"8.0.312","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_312","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-03-01T00:00:00Z"}}},{"displayText":"Java
@@ -405,8 +411,12 @@ interactions:
         Containers","value":"javacontainers","majorVersions":[{"displayText":"Java
         SE (Embedded Web Server)","value":"javase","minorVersions":[{"displayText":"Java
         SE (Embedded Web Server)","value":"SE","stackSettings":{"windowsContainerSettings":{"javaContainer":"JAVA","javaContainerVersion":"SE","isAutoUpdate":true},"linuxContainerSettings":{"java17Runtime":"JAVA|17-java17","java11Runtime":"JAVA|11-java11","java8Runtime":"JAVA|8-jre8","isAutoUpdate":true}}},{"displayText":"Java
+        SE 17.0.4","value":"17.0.4","stackSettings":{"linuxContainerSettings":{"java17Runtime":"JAVA|17.0.4"}}},{"displayText":"Java
+        SE 17.0.3","value":"17.0.3","stackSettings":{"linuxContainerSettings":{"java17Runtime":"JAVA|17.0.3"}}},{"displayText":"Java
         SE 17.0.2","value":"17.0.2","stackSettings":{"linuxContainerSettings":{"java17Runtime":"JAVA|17.0.2"}}},{"displayText":"Java
         SE 17.0.1","value":"17.0.1","stackSettings":{"linuxContainerSettings":{"java17Runtime":"JAVA|17.0.1"}}},{"displayText":"Java
+        SE 11.0.16","value":"11.0.16","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.16"}}},{"displayText":"Java
+        SE 11.0.15","value":"11.0.15","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.15"}}},{"displayText":"Java
         SE 11.0.14","value":"11.0.14","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.14"}}},{"displayText":"Java
         SE 11.0.13","value":"11.0.13","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.13"}}},{"displayText":"Java
         SE 11.0.12","value":"11.0.12","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.12"}}},{"displayText":"Java
@@ -415,6 +425,7 @@ interactions:
         SE 11.0.7","value":"11.0.7","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.7"}}},{"displayText":"Java
         SE 11.0.6","value":"11.0.6","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.6"}}},{"displayText":"Java
         SE 11.0.5","value":"11.0.5","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.5"}}},{"displayText":"Java
+        SE 8u345","value":"1.8.345","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JAVA|8u345"}}},{"displayText":"Java
         SE 8u332","value":"1.8.332","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JAVA|8u332"}}},{"displayText":"Java
         SE 8u322","value":"1.8.322","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JAVA|8u322"}}},{"displayText":"Java
         SE 8u312","value":"1.8.312","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JAVA|8u312"}}},{"displayText":"Java
@@ -425,20 +436,27 @@ interactions:
         SE 8u242","value":"1.8.242","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JAVA|8u242"}}},{"displayText":"Java
         SE 8u232","value":"1.8.232","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JAVA|8u232"}}}]},{"displayText":"Red
         Hat JBoss EAP 7","value":"jbosseap","minorVersions":[{"displayText":"Red Hat
-        JBoss EAP 7","value":"7","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7-java8","java11Runtime":"JBOSSEAP|7-java11","isAutoUpdate":true}}},{"displayText":"Red
+        JBoss EAP 7","value":"7","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7-java8","java11Runtime":"JBOSSEAP|7-java11","java17Runtime":"JBOSSEAP|7-java17","isAutoUpdate":true}}},{"displayText":"Red
+        Hat JBoss EAP 7.4.7","value":"7.4.7","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.4.7-java8","java11Runtime":"JBOSSEAP|7.4.7-java11","java17Runtime":"JBOSSEAP|7.4.7-java17"}}},{"displayText":"Red
+        Hat JBoss EAP 7.4.5","value":"7.4.5","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.4.5-java8","java11Runtime":"JBOSSEAP|7.4.5-java11","java17Runtime":"JBOSSEAP|7.4.5-java17"}}},{"displayText":"Red
         Hat JBoss EAP 7.4.2","value":"7.4.2","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.4.2-java8","java11Runtime":"JBOSSEAP|7.4.2-java11"}}},{"displayText":"Red
         Hat JBoss EAP 7.4.1","value":"7.4.1","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.4.1-java8","java11Runtime":"JBOSSEAP|7.4.1-java11"}}},{"displayText":"Red
         Hat JBoss EAP 7.4.0","value":"7.4.0","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.4.0-java8","java11Runtime":"JBOSSEAP|7.4.0-java11"}}},{"displayText":"Red
+        Hat JBoss EAP 7.3.10","value":"7.3.10","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.3.10-java8","java11Runtime":"JBOSSEAP|7.3.10-java11"}}},{"displayText":"Red
         Hat JBoss EAP 7.3.9","value":"7.3.9","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.3.9-java8","java11Runtime":"JBOSSEAP|7.3.9-java11"}}},{"displayText":"Red
         Hat JBoss EAP 7.3","value":"7.3","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.3-java8","java11Runtime":"JBOSSEAP|7.3-java11","isAutoUpdate":true,"isHidden":true}}},{"displayText":"Red
         Hat JBoss EAP 7.4","value":"7.4","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.4-java8","java11Runtime":"JBOSSEAP|7.4-java11","isAutoUpdate":true,"isHidden":true}}},{"displayText":"JBoss
         EAP 7.2","value":"7.2.0","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.2-java8","isDeprecated":true}}}]},{"displayText":"Apache
         Tomcat 10.0","value":"tomcat10.0","minorVersions":[{"displayText":"Apache
         Tomcat 10.0","value":"10.0","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"10.0","isAutoUpdate":true},"linuxContainerSettings":{"java17Runtime":"TOMCAT|10.0-java17","java11Runtime":"TOMCAT|10.0-java11","java8Runtime":"TOMCAT|10.0-jre8","isAutoUpdate":true}}},{"displayText":"Apache
+        Tomcat 10.0.23","value":"10.0.23","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"10.0.23"},"linuxContainerSettings":{"java8Runtime":"TOMCAT|10.0.23-java8","java11Runtime":"TOMCAT|10.0.23-java11","java17Runtime":"TOMCAT|10.0.23-java17"}}},{"displayText":"Apache
+        Tomcat 10.0.21","value":"10.0.21","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"10.0.21"},"linuxContainerSettings":{"java8Runtime":"TOMCAT|10.0.21-java8","java11Runtime":"TOMCAT|10.0.21-java11","java17Runtime":"TOMCAT|10.0.21-java17"}}},{"displayText":"Apache
         Tomcat 10.0.20","value":"10.0.20","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"10.0.20"},"linuxContainerSettings":{"java8Runtime":"TOMCAT|10.0.20-java8","java11Runtime":"TOMCAT|10.0.20-java11","java17Runtime":"TOMCAT|10.0.20-java17"}}},{"displayText":"Apache
         Tomcat 10.0.12","value":"10.0.12","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"10.0.12"},"linuxContainerSettings":{"java8Runtime":"TOMCAT|10.0.12-java8","java11Runtime":"TOMCAT|10.0.12-java11","java17Runtime":"TOMCAT|10.0.12-java17"}}}]},{"displayText":"Apache
         Tomcat 9.0","value":"tomcat9.0","minorVersions":[{"displayText":"Apache Tomcat
         9.0","value":"9.0","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0","isAutoUpdate":true},"linuxContainerSettings":{"java17Runtime":"TOMCAT|9.0-java17","java11Runtime":"TOMCAT|9.0-java11","java8Runtime":"TOMCAT|9.0-jre8","isAutoUpdate":true}}},{"displayText":"Apache
+        Tomcat 9.0.65","value":"9.0.65","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.65"},"linuxContainerSettings":{"java8Runtime":"TOMCAT|9.0.65-java8","java11Runtime":"TOMCAT|9.0.65-java11","java17Runtime":"TOMCAT|9.0.65-java17"}}},{"displayText":"Apache
+        Tomcat 9.0.63","value":"9.0.63","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.63"},"linuxContainerSettings":{"java8Runtime":"TOMCAT|9.0.63-java8","java11Runtime":"TOMCAT|9.0.63-java11","java17Runtime":"TOMCAT|9.0.63-java17"}}},{"displayText":"Apache
         Tomcat 9.0.62","value":"9.0.62","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.62"},"linuxContainerSettings":{"java8Runtime":"TOMCAT|9.0.62-java8","java11Runtime":"TOMCAT|9.0.62-java11","java17Runtime":"TOMCAT|9.0.62-java17"}}},{"displayText":"Apache
         Tomcat 9.0.54","value":"9.0.54","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.54"},"linuxContainerSettings":{"java8Runtime":"TOMCAT|9.0.54-java8","java11Runtime":"TOMCAT|9.0.54-java11","java17Runtime":"TOMCAT|9.0.54-java17"}}},{"displayText":"Apache
         Tomcat 9.0.52","value":"9.0.52","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.52"},"linuxContainerSettings":{"java8Runtime":"TOMCAT|9.0.52-java8","java11Runtime":"TOMCAT|9.0.52-java11"}}},{"displayText":"Apache
@@ -457,6 +475,8 @@ interactions:
         Tomcat 9.0.0","value":"9.0.0","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.0"}}}]},{"displayText":"Apache
         Tomcat 8.5","value":"tomcat8.5","minorVersions":[{"displayText":"Apache Tomcat
         8.5","value":"8.5","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5","isAutoUpdate":true},"linuxContainerSettings":{"java11Runtime":"TOMCAT|8.5-java11","java8Runtime":"TOMCAT|8.5-jre8","isAutoUpdate":true}}},{"displayText":"Apache
+        Tomcat 8.5.82","value":"8.5.82","stackSettings":{"linuxContainerSettings":{"java8Runtime":"TOMCAT|8.5.82-java8","java11Runtime":"TOMCAT|8.5.82-java11"},"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.82"}}},{"displayText":"Apache
+        Tomcat 8.5.79","value":"8.5.79","stackSettings":{"linuxContainerSettings":{"java8Runtime":"TOMCAT|8.5.79-java8","java11Runtime":"TOMCAT|8.5.79-java11"},"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.79"}}},{"displayText":"Apache
         Tomcat 8.5.78","value":"8.5.78","stackSettings":{"linuxContainerSettings":{"java8Runtime":"TOMCAT|8.5.78-java8","java11Runtime":"TOMCAT|8.5.78-java11"},"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.78"}}},{"displayText":"Apache
         Tomcat 8.5.72","value":"8.5.72","stackSettings":{"linuxContainerSettings":{"java8Runtime":"TOMCAT|8.5.72-java8","java11Runtime":"TOMCAT|8.5.72-java11"},"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.72"}}},{"displayText":"Apache
         Tomcat 8.5.69","value":"8.5.69","stackSettings":{"linuxContainerSettings":{"java8Runtime":"TOMCAT|8.5.69-java8","java11Runtime":"TOMCAT|8.5.69-java11"},"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.69"}}},{"displayText":"Apache
@@ -495,17 +515,17 @@ interactions:
         (Static Content)","value":"staticsite","preferredOs":"linux","majorVersions":[{"displayText":"HTML
         (Static Content)","value":"1","minorVersions":[{"displayText":"HTML (Static
         Content)","value":"1.0","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"STATICSITE|1.0","isHidden":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false}}}}]}]}},{"id":null,"name":"go","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":"Go","value":"go","preferredOs":"linux","majorVersions":[{"displayText":"Go
-        1","value":"go1","minorVersions":[{"displayText":"Go 1.19 (Experimental)","value":"go1.19","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"GO|1.19","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true},"isHidden":false,"isEarlyAccess":false}}},{"displayText":"Go
-        1.18 (Experimental)","value":"go1.18","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"GO|1.18","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"isHidden":false,"isEarlyAccess":false}}}]}]}}],"nextLink":null,"id":null}'
+        1","value":"go1","minorVersions":[{"displayText":"Go 1.19 (Experimental)","value":"go1.19","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"GO|1.19","remoteDebuggingSupported":false,"isDeprecated":true,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true},"supportedFeatures":{"disableSsh":true},"isHidden":false,"isEarlyAccess":false}}},{"displayText":"Go
+        1.18 (Experimental)","value":"go1.18","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"GO|1.18","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"supportedFeatures":{"disableSsh":true},"isHidden":false,"isEarlyAccess":false,"isDeprecated":true}}}]}]}}],"nextLink":null,"id":null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '72373'
+      - '80259'
       content-type:
       - application/json
       date:
-      - Tue, 07 Feb 2023 13:08:44 GMT
+      - Wed, 15 Nov 2023 19:05:44 GMT
       expires:
       - '-1'
       pragma:
@@ -530,7 +550,7 @@ interactions:
 - request:
     body: '{"location": "West Europe", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003",
       "reserved": false, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
-      "v4.6", "appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "~14"}],
+      "v4.6", "appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "~16"}],
       "alwaysOn": true, "localMySqlEnabled": false, "http20Enabled": true}, "scmSiteAlsoStopped":
       false, "httpsOnly": false}}'
     headers:
@@ -549,27 +569,27 @@ interactions:
       ParameterSetName:
       - -g -n --plan
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004","name":"backup-webapp000004","type":"Microsoft.Web/sites","kind":"app","location":"West
-        Europe","properties":{"name":"backup-webapp000004","state":"Running","hostNames":["backup-webapp000004.azurewebsites.net"],"webSpace":"clitest.rg000001-WestEuropewebspace","selfLink":"https://waws-prod-am2-605.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestEuropewebspace/sites/backup-webapp000004","repositorySiteName":"backup-webapp000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["backup-webapp000004.azurewebsites.net","backup-webapp000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"backup-webapp000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"backup-webapp000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2023-02-07T13:08:50.2","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+        Europe","properties":{"name":"backup-webapp000004","state":"Running","hostNames":["backup-webapp000004.azurewebsites.net"],"webSpace":"clitest.rg000001-WestEuropewebspace","selfLink":"https://waws-prod-am2-759.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestEuropewebspace/sites/backup-webapp000004","repositorySiteName":"backup-webapp000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"afdEnabled":false,"enabledHostNames":["backup-webapp000004.azurewebsites.net","backup-webapp000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"backup-webapp000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"backup-webapp000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2023-11-15T19:05:49.05","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
         all","description":"Allow all access"}],"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
-        all","description":"Allow all access"}],"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":null,"elasticWebAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null},"deploymentId":"backup-webapp000004","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"253001F2FCF5A7B1CD759EB861E9BB1596370BE27E47A991F72184277B3D12F2","kind":"app","inboundIpAddress":"20.105.232.18","possibleInboundIpAddresses":"20.105.232.18","ftpUsername":"backup-webapp000004\\$backup-webapp000004","ftpsHostName":"ftps://waws-prod-am2-605.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.23.122.13,20.23.126.178,20.23.126.182,20.23.124.201,20.23.126.169,20.23.126.213,20.105.232.18","possibleOutboundIpAddresses":"20.23.122.13,20.23.126.178,20.23.126.182,20.23.124.201,20.23.126.169,20.23.126.213,20.23.126.238,20.23.126.237,20.23.127.36,20.23.127.138,20.103.77.126,20.103.77.246,20.103.76.163,20.76.136.137,20.76.137.83,20.76.137.99,20.76.137.225,20.76.138.6,20.76.138.42,20.76.138.54,20.76.138.62,20.76.138.170,20.76.139.235,20.76.139.238,20.76.140.61,20.76.140.192,20.76.140.201,20.76.141.170,20.76.141.218,20.76.141.230,20.105.232.18","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-605","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"backup-webapp000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null}}'
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":null,"elasticWebAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null},"daprConfig":null,"deploymentId":"backup-webapp000004","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"253001F2FCF5A7B1CD759EB861E9BB1596370BE27E47A991F72184277B3D12F2","kind":"app","managedEnvironmentId":null,"inboundIpAddress":"20.105.216.43","possibleInboundIpAddresses":"20.105.216.43","ftpUsername":"backup-webapp000004\\$backup-webapp000004","ftpsHostName":"ftps://waws-prod-am2-759.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.76.169.167,20.76.173.79,20.76.174.235,20.103.92.119,20.103.92.136,20.103.93.3,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.105.216.43","possibleOutboundIpAddresses":"20.76.169.167,20.76.173.79,20.76.174.235,20.103.92.119,20.103.92.136,20.103.93.3,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.103.93.7,20.103.93.33,20.103.93.41,20.103.93.49,20.103.93.147,20.103.93.170,20.103.93.174,20.103.93.203,20.103.93.249,20.103.95.107,20.126.161.180,20.126.162.83,20.126.163.1,20.126.164.235,20.126.166.35,20.126.167.163,20.31.81.171,20.31.82.177,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.238.130.220,20.238.131.32,20.238.131.50,20.238.131.93,20.238.131.127,20.238.131.141,20.105.216.43","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-759","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"backup-webapp000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","inFlightFeatures":null,"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '6790'
+      - '7661'
       content-type:
       - application/json
       date:
-      - Tue, 07 Feb 2023 13:09:09 GMT
+      - Wed, 15 Nov 2023 19:06:07 GMT
       etag:
-      - '"1D93AF552AE6660"'
+      - '"1DA17F6BF7001B5"'
       expires:
       - '-1'
       pragma:
@@ -611,26 +631,26 @@ interactions:
       ParameterSetName:
       - -g -n --plan
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/publishxml?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/publishxml?api-version=2023-01-01
   response:
     body:
       string: <publishData><publishProfile profileName="backup-webapp000004 - Web
         Deploy" publishMethod="MSDeploy" publishUrl="backup-webapp000004.scm.azurewebsites.net:443"
-        msdeploySite="backup-webapp000004" userName="$backup-webapp000004" userPWD="pFN7vYQEfghyheSBjqcvQ3qMhSctNFc7dLTMDyknmx2j3ykqZjDHFY60sXJP"
+        msdeploySite="backup-webapp000004" userName="$backup-webapp000004" userPWD="txlhxsKthszpamNgd22z494rzTwAH5M1DtWGePzwSHhzbmhZSwN4PH4vG3W5"
         destinationAppUrl="http://backup-webapp000004.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="backup-webapp000004
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-am2-605.ftp.azurewebsites.windows.net/site/wwwroot"
+        - FTP" publishMethod="FTP" publishUrl="ftps://waws-prod-am2-759.ftp.azurewebsites.windows.net/site/wwwroot"
         ftpPassiveMode="True" userName="backup-webapp000004\$backup-webapp000004"
-        userPWD="pFN7vYQEfghyheSBjqcvQ3qMhSctNFc7dLTMDyknmx2j3ykqZjDHFY60sXJP" destinationAppUrl="http://backup-webapp000004.azurewebsites.net"
+        userPWD="txlhxsKthszpamNgd22z494rzTwAH5M1DtWGePzwSHhzbmhZSwN4PH4vG3W5" destinationAppUrl="http://backup-webapp000004.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile><publishProfile profileName="backup-webapp000004 - Zip
         Deploy" publishMethod="ZipDeploy" publishUrl="backup-webapp000004.scm.azurewebsites.net:443"
-        userName="$backup-webapp000004" userPWD="pFN7vYQEfghyheSBjqcvQ3qMhSctNFc7dLTMDyknmx2j3ykqZjDHFY60sXJP"
+        userName="$backup-webapp000004" userPWD="txlhxsKthszpamNgd22z494rzTwAH5M1DtWGePzwSHhzbmhZSwN4PH4vG3W5"
         destinationAppUrl="http://backup-webapp000004.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile></publishData>
@@ -638,11 +658,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1602'
+      - '1603'
       content-type:
       - application/xml
       date:
-      - Tue, 07 Feb 2023 13:09:09 GMT
+      - Wed, 15 Nov 2023 19:06:08 GMT
       expires:
       - '-1'
       pragma:
@@ -676,25 +696,25 @@ interactions:
       ParameterSetName:
       - -g -n -s
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004","name":"backup-webapp000004","type":"Microsoft.Web/sites","kind":"app","location":"West
-        Europe","properties":{"name":"backup-webapp000004","state":"Running","hostNames":["backup-webapp000004.azurewebsites.net"],"webSpace":"clitest.rg000001-WestEuropewebspace","selfLink":"https://waws-prod-am2-605.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestEuropewebspace/sites/backup-webapp000004","repositorySiteName":"backup-webapp000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["backup-webapp000004.azurewebsites.net","backup-webapp000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"backup-webapp000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"backup-webapp000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2023-02-07T13:08:51.27","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null},"deploymentId":"backup-webapp000004","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"253001F2FCF5A7B1CD759EB861E9BB1596370BE27E47A991F72184277B3D12F2","kind":"app","inboundIpAddress":"20.105.232.18","possibleInboundIpAddresses":"20.105.232.18","ftpUsername":"backup-webapp000004\\$backup-webapp000004","ftpsHostName":"ftps://waws-prod-am2-605.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.23.122.13,20.23.126.178,20.23.126.182,20.23.124.201,20.23.126.169,20.23.126.213,20.105.232.18","possibleOutboundIpAddresses":"20.23.122.13,20.23.126.178,20.23.126.182,20.23.124.201,20.23.126.169,20.23.126.213,20.23.126.238,20.23.126.237,20.23.127.36,20.23.127.138,20.103.77.126,20.103.77.246,20.103.76.163,20.76.136.137,20.76.137.83,20.76.137.99,20.76.137.225,20.76.138.6,20.76.138.42,20.76.138.54,20.76.138.62,20.76.138.170,20.76.139.235,20.76.139.238,20.76.140.61,20.76.140.192,20.76.140.201,20.76.141.170,20.76.141.218,20.76.141.230,20.105.232.18","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-605","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"backup-webapp000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null}}'
+        Europe","properties":{"name":"backup-webapp000004","state":"Running","hostNames":["backup-webapp000004.azurewebsites.net"],"webSpace":"clitest.rg000001-WestEuropewebspace","selfLink":"https://waws-prod-am2-759.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestEuropewebspace/sites/backup-webapp000004","repositorySiteName":"backup-webapp000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"afdEnabled":false,"enabledHostNames":["backup-webapp000004.azurewebsites.net","backup-webapp000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"backup-webapp000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"backup-webapp000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2023-11-15T19:06:07.7566667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null},"daprConfig":null,"deploymentId":"backup-webapp000004","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"253001F2FCF5A7B1CD759EB861E9BB1596370BE27E47A991F72184277B3D12F2","kind":"app","managedEnvironmentId":null,"inboundIpAddress":"20.105.216.43","possibleInboundIpAddresses":"20.105.216.43","ftpUsername":"backup-webapp000004\\$backup-webapp000004","ftpsHostName":"ftps://waws-prod-am2-759.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.76.169.167,20.76.173.79,20.76.174.235,20.103.92.119,20.103.92.136,20.103.93.3,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.105.216.43","possibleOutboundIpAddresses":"20.76.169.167,20.76.173.79,20.76.174.235,20.103.92.119,20.103.92.136,20.103.93.3,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.103.93.7,20.103.93.33,20.103.93.41,20.103.93.49,20.103.93.147,20.103.93.170,20.103.93.174,20.103.93.203,20.103.93.249,20.103.95.107,20.126.161.180,20.126.162.83,20.126.163.1,20.126.164.235,20.126.166.35,20.126.167.163,20.31.81.171,20.31.82.177,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.238.130.220,20.238.131.32,20.238.131.50,20.238.131.93,20.238.131.127,20.238.131.141,20.105.216.43","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-759","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"backup-webapp000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","inFlightFeatures":[],"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '6571'
+      - '7444'
       content-type:
       - application/json
       date:
-      - Tue, 07 Feb 2023 13:09:10 GMT
+      - Wed, 15 Nov 2023 19:06:09 GMT
       etag:
-      - '"1D93AF552AE6660"'
+      - '"1DA17F6C9E66ECB"'
       expires:
       - '-1'
       pragma:
@@ -703,10 +723,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
       x-content-type-options:
@@ -730,25 +746,25 @@ interactions:
       ParameterSetName:
       - -g -n -s
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/config/web?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/config/web?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/config/web","name":"backup-webapp000004","type":"Microsoft.Web/sites/config","location":"West
         Europe","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","powerShellVersion":"","linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":[],"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$backup-webapp000004","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","vnetRouteAllEnabled":false,"vnetPrivatePortsCount":0,"publicNetworkAccess":null,"siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretSettingName":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"aadClaimsAuthorization":null,"googleClientId":null,"googleClientSecret":null,"googleClientSecretSettingName":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookAppSecretSettingName":null,"facebookOAuthScopes":null,"gitHubClientId":null,"gitHubClientSecret":null,"gitHubClientSecretSettingName":null,"gitHubOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"twitterConsumerSecretSettingName":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountClientSecretSettingName":null,"microsoftAccountOAuthScopes":null,"configVersion":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
         all","description":"Allow all access"}],"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
-        all","description":"Allow all access"}],"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":"1.2","ftpsState":"AllAllowed","preWarmedInstanceCount":0,"functionAppScaleLimit":null,"elasticWebAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":false,"functionsRuntimeScaleMonitoringEnabled":false,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":{},"http20ProxyFlag":0,"sitePort":null,"antivirusScanEnabled":false,"storageType":"StorageVolume"}}'
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":"1.2","ftpsState":"FtpsOnly","preWarmedInstanceCount":0,"functionAppScaleLimit":null,"elasticWebAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":false,"functionsRuntimeScaleMonitoringEnabled":false,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":{},"http20ProxyFlag":0,"sitePort":null,"antivirusScanEnabled":false,"storageType":"StorageVolume","sitePrivateLinkHostEnabled":false}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3998'
+      - '4031'
       content-type:
       - application/json
       date:
-      - Tue, 07 Feb 2023 13:09:11 GMT
+      - Wed, 15 Nov 2023 19:06:09 GMT
       expires:
       - '-1'
       pragma:
@@ -791,27 +807,27 @@ interactions:
       ParameterSetName:
       - -g -n -s
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot","name":"backup-webapp000004/slot","type":"Microsoft.Web/sites/slots","kind":"app","location":"West
-        Europe","properties":{"name":"backup-webapp000004(slot)","state":"Running","hostNames":["backup-webapp000004-slot.azurewebsites.net"],"webSpace":"clitest.rg000001-WestEuropewebspace","selfLink":"https://waws-prod-am2-605.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestEuropewebspace/sites/backup-webapp000004","repositorySiteName":"backup-webapp000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["backup-webapp000004-slot.azurewebsites.net","backup-webapp000004-slot.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"backup-webapp000004-slot.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"backup-webapp000004-slot.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2023-02-07T13:09:20.01","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+        Europe","properties":{"name":"backup-webapp000004(slot)","state":"Running","hostNames":["backup-webapp000004-slot.azurewebsites.net"],"webSpace":"clitest.rg000001-WestEuropewebspace","selfLink":"https://waws-prod-am2-759.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestEuropewebspace/sites/backup-webapp000004","repositorySiteName":"backup-webapp000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"afdEnabled":false,"enabledHostNames":["backup-webapp000004-slot.azurewebsites.net","backup-webapp000004-slot.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"backup-webapp000004-slot.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"backup-webapp000004-slot.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2023-11-15T19:06:15.65","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
         all","description":"Allow all access"}],"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
-        all","description":"Allow all access"}],"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":null,"elasticWebAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null},"deploymentId":"backup-webapp000004__6089","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"253001F2FCF5A7B1CD759EB861E9BB1596370BE27E47A991F72184277B3D12F2","kind":"app","inboundIpAddress":"20.105.232.18","possibleInboundIpAddresses":"20.105.232.18","ftpUsername":"backup-webapp000004__slot\\$backup-webapp000004__slot","ftpsHostName":"ftps://waws-prod-am2-605.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.23.122.13,20.23.126.178,20.23.126.182,20.23.124.201,20.23.126.169,20.23.126.213,20.105.232.18","possibleOutboundIpAddresses":"20.23.122.13,20.23.126.178,20.23.126.182,20.23.124.201,20.23.126.169,20.23.126.213,20.23.126.238,20.23.126.237,20.23.127.36,20.23.127.138,20.103.77.126,20.103.77.246,20.103.76.163,20.76.136.137,20.76.137.83,20.76.137.99,20.76.137.225,20.76.138.6,20.76.138.42,20.76.138.54,20.76.138.62,20.76.138.170,20.76.139.235,20.76.139.238,20.76.140.61,20.76.140.192,20.76.140.201,20.76.141.170,20.76.141.218,20.76.141.230,20.105.232.18","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-605","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"backup-webapp000004-slot.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null}}'
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":null,"elasticWebAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null},"daprConfig":null,"deploymentId":"backup-webapp000004__e8a0","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"253001F2FCF5A7B1CD759EB861E9BB1596370BE27E47A991F72184277B3D12F2","kind":"app","managedEnvironmentId":null,"inboundIpAddress":"20.105.216.43","possibleInboundIpAddresses":"20.105.216.43","ftpUsername":"backup-webapp000004__slot\\$backup-webapp000004__slot","ftpsHostName":"ftps://waws-prod-am2-759.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.76.169.167,20.76.173.79,20.76.174.235,20.103.92.119,20.103.92.136,20.103.93.3,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.105.216.43","possibleOutboundIpAddresses":"20.76.169.167,20.76.173.79,20.76.174.235,20.103.92.119,20.103.92.136,20.103.93.3,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.103.93.7,20.103.93.33,20.103.93.41,20.103.93.49,20.103.93.147,20.103.93.170,20.103.93.174,20.103.93.203,20.103.93.249,20.103.95.107,20.126.161.180,20.126.162.83,20.126.163.1,20.126.164.235,20.126.166.35,20.126.167.163,20.31.81.171,20.31.82.177,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.238.130.220,20.238.131.32,20.238.131.50,20.238.131.93,20.238.131.127,20.238.131.141,20.105.216.43","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-759","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"backup-webapp000004-slot.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","inFlightFeatures":null,"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '6867'
+      - '7737'
       content-type:
       - application/json
       date:
-      - Tue, 07 Feb 2023 13:09:38 GMT
+      - Wed, 15 Nov 2023 19:06:34 GMT
       etag:
-      - '"1D93AF552AE6660"'
+      - '"1DA17F6C9E66ECB"'
       expires:
       - '-1'
       pragma:
@@ -820,10 +836,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
       x-content-type-options:
@@ -837,7 +849,7 @@ interactions:
       message: OK
 - request:
     body: '{"properties": {"backupName": "backup-name000006", "storageAccountUrl":
-      "https://backup000002.blob.core.windows.net/backupcontainer000005?se=2023-02-08T16%3A08Z&sp=rwdl&sv=2021-06-08&sr=c&sig=mMmuYdzKKQUaWsVsN7LCqvtvPePbC3TrBPgoo2cRIok%3D"}}'
+      "https://backup000002.blob.core.windows.net/backupcontainer000005?se=2023-11-16T22%3A05Z&sp=rwdl&sv=2022-11-02&sr=c&sig=iw39sMUXK922OUIJkqt6RKBkH/LZF0KzhaMiCODMrnk%3D"}}'
     headers:
       Accept:
       - application/json
@@ -854,14 +866,14 @@ interactions:
       ParameterSetName:
       - -g --webapp-name --backup-name --container-url
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/backup?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/backup?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004","name":"backup-webapp000004","type":"Microsoft.Web/sites","location":"West
-        Europe","properties":{"id":1785,"storageAccountUrl":"https://backup000002.blob.core.windows.net/backupcontainer000005?se=2023-02-08T16%3A08Z&sp=rwdl&sv=2021-06-08&sr=c&sig=mMmuYdzKKQUaWsVsN7LCqvtvPePbC3TrBPgoo2cRIok%3D","blobName":"backup-name000006","name":"backup-name000006","backupName":"backup-name000006","status":"Created","sizeInBytes":0,"created":"2023-02-07T13:09:38.950178Z","log":null,"databases":null,"scheduled":false,"correlationId":"50de96ce-a1d1-451a-b9f3-be4246277d6b","websiteSizeInBytes":null}}'
+        Europe","properties":{"id":858,"storageAccountUrl":"https://backup000002.blob.core.windows.net/backupcontainer000005?se=2023-11-16T22%3A05Z&sp=rwdl&sv=2022-11-02&sr=c&sig=iw39sMUXK922OUIJkqt6RKBkH/LZF0KzhaMiCODMrnk%3D","blobName":"backup-name000006","name":"backup-name000006","backupName":"backup-name000006","status":"Created","sizeInBytes":0,"created":"2023-11-15T19:06:35.4565917Z","log":null,"databases":null,"scheduled":false,"correlationId":"473c29fa-7b10-49d4-bdcf-d7c684fddc80","websiteSizeInBytes":null}}'
     headers:
       cache-control:
       - no-cache
@@ -870,7 +882,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 07 Feb 2023 13:09:38 GMT
+      - Wed, 15 Nov 2023 19:06:34 GMT
       expires:
       - '-1'
       pragma:
@@ -895,7 +907,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"storageAccountUrl": "https://backup000002.blob.core.windows.net/backupcontainer000005?se=2023-02-08T16%3A08Z&sp=rwdl&sv=2021-06-08&sr=c&sig=mMmuYdzKKQUaWsVsN7LCqvtvPePbC3TrBPgoo2cRIok%3D",
+    body: '{"properties": {"storageAccountUrl": "https://backup000002.blob.core.windows.net/backupcontainer000005?se=2023-11-16T22%3A05Z&sp=rwdl&sv=2022-11-02&sr=c&sig=iw39sMUXK922OUIJkqt6RKBkH/LZF0KzhaMiCODMrnk%3D",
       "blobName": "backup-name000006.zip", "overwrite": true, "siteName": "backup-webapp000004",
       "ignoreConflictingHostNames": true, "ignoreDatabases": false, "operationType":
       "Default"}}'
@@ -915,10 +927,10 @@ interactions:
       ParameterSetName:
       - -g --webapp-name --target-name --backup-name --container-url --overwrite --ignore-hostname-conflict
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/backups/0/restore?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/backups/0/restore?api-version=2023-01-01
   response:
     body:
       string: ''
@@ -928,13 +940,13 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Feb 2023 13:13:54 GMT
+      - Wed, 15 Nov 2023 19:10:46 GMT
       etag:
-      - '"1D93AF5FF388675"'
+      - '"1DA17F76BB16600"'
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/0f35c127-2b5d-4a57-9e5c-3f15e00609aa?api-version=2022-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/66facb90-249f-4d52-8955-8f1b9c0161d5?api-version=2023-01-01
       pragma:
       - no-cache
       server:
@@ -946,7 +958,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
       x-powered-by:
       - ASP.NET
     status:
@@ -966,10 +978,10 @@ interactions:
       ParameterSetName:
       - -g --webapp-name --target-name --backup-name --container-url --overwrite --ignore-hostname-conflict
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/0f35c127-2b5d-4a57-9e5c-3f15e00609aa?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/66facb90-249f-4d52-8955-8f1b9c0161d5?api-version=2023-01-01
   response:
     body:
       string: ''
@@ -979,11 +991,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Feb 2023 13:14:09 GMT
+      - Wed, 15 Nov 2023 19:10:47 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/0f35c127-2b5d-4a57-9e5c-3f15e00609aa?api-version=2022-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/66facb90-249f-4d52-8955-8f1b9c0161d5?api-version=2023-01-01
       pragma:
       - no-cache
       server:
@@ -1013,10 +1025,10 @@ interactions:
       ParameterSetName:
       - -g --webapp-name --target-name --backup-name --container-url --overwrite --ignore-hostname-conflict
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/0f35c127-2b5d-4a57-9e5c-3f15e00609aa?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/66facb90-249f-4d52-8955-8f1b9c0161d5?api-version=2023-01-01
   response:
     body:
       string: ''
@@ -1026,11 +1038,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Feb 2023 13:14:24 GMT
+      - Wed, 15 Nov 2023 19:11:02 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/0f35c127-2b5d-4a57-9e5c-3f15e00609aa?api-version=2022-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/66facb90-249f-4d52-8955-8f1b9c0161d5?api-version=2023-01-01
       pragma:
       - no-cache
       server:
@@ -1060,10 +1072,10 @@ interactions:
       ParameterSetName:
       - -g --webapp-name --target-name --backup-name --container-url --overwrite --ignore-hostname-conflict
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/0f35c127-2b5d-4a57-9e5c-3f15e00609aa?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/66facb90-249f-4d52-8955-8f1b9c0161d5?api-version=2023-01-01
   response:
     body:
       string: ''
@@ -1073,11 +1085,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Feb 2023 13:14:39 GMT
+      - Wed, 15 Nov 2023 19:11:18 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/0f35c127-2b5d-4a57-9e5c-3f15e00609aa?api-version=2022-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/66facb90-249f-4d52-8955-8f1b9c0161d5?api-version=2023-01-01
       pragma:
       - no-cache
       server:
@@ -1107,119 +1119,25 @@ interactions:
       ParameterSetName:
       - -g --webapp-name --target-name --backup-name --container-url --overwrite --ignore-hostname-conflict
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/0f35c127-2b5d-4a57-9e5c-3f15e00609aa?api-version=2022-03-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Feb 2023 13:14:56 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/0f35c127-2b5d-4a57-9e5c-3f15e00609aa?api-version=2022-03-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp config backup restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --webapp-name --target-name --backup-name --container-url --overwrite --ignore-hostname-conflict
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/0f35c127-2b5d-4a57-9e5c-3f15e00609aa?api-version=2022-03-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Feb 2023 13:15:14 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/0f35c127-2b5d-4a57-9e5c-3f15e00609aa?api-version=2022-03-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp config backup restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --webapp-name --target-name --backup-name --container-url --overwrite --ignore-hostname-conflict
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/0f35c127-2b5d-4a57-9e5c-3f15e00609aa?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/operationresults/66facb90-249f-4d52-8955-8f1b9c0161d5?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004","name":"backup-webapp000004","type":"Microsoft.Web/sites","kind":"app","location":"West
-        Europe","properties":{"name":"backup-webapp000004","state":"Running","hostNames":["backup-webapp000004.azurewebsites.net"],"webSpace":"clitest.rg000001-WestEuropewebspace","selfLink":"https://waws-prod-am2-605.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestEuropewebspace/sites/backup-webapp000004","repositorySiteName":"backup-webapp000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["backup-webapp000004.azurewebsites.net","backup-webapp000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"backup-webapp000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"backup-webapp000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2023-02-07T13:15:26.2266667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null},"deploymentId":"backup-webapp000004","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"253001F2FCF5A7B1CD759EB861E9BB1596370BE27E47A991F72184277B3D12F2","kind":"app","inboundIpAddress":"20.105.232.18","possibleInboundIpAddresses":"20.105.232.18","ftpUsername":"backup-webapp000004\\$backup-webapp000004","ftpsHostName":"ftps://waws-prod-am2-605.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.23.122.13,20.23.126.178,20.23.126.182,20.23.124.201,20.23.126.169,20.23.126.213,20.105.232.18","possibleOutboundIpAddresses":"20.23.122.13,20.23.126.178,20.23.126.182,20.23.124.201,20.23.126.169,20.23.126.213,20.23.126.238,20.23.126.237,20.23.127.36,20.23.127.138,20.103.77.126,20.103.77.246,20.103.76.163,20.76.136.137,20.76.137.83,20.76.137.99,20.76.137.225,20.76.138.6,20.76.138.42,20.76.138.54,20.76.138.62,20.76.138.170,20.76.139.235,20.76.139.238,20.76.140.61,20.76.140.192,20.76.140.201,20.76.141.170,20.76.141.218,20.76.141.230,20.105.232.18","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-605","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"backup-webapp000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null}}'
+        Europe","properties":{"name":"backup-webapp000004","state":"Running","hostNames":["backup-webapp000004.azurewebsites.net"],"webSpace":"clitest.rg000001-WestEuropewebspace","selfLink":"https://waws-prod-am2-759.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestEuropewebspace/sites/backup-webapp000004","repositorySiteName":"backup-webapp000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"afdEnabled":false,"enabledHostNames":["backup-webapp000004.azurewebsites.net","backup-webapp000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"backup-webapp000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"backup-webapp000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2023-11-15T19:11:22.46","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null},"daprConfig":null,"deploymentId":"backup-webapp000004","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"253001F2FCF5A7B1CD759EB861E9BB1596370BE27E47A991F72184277B3D12F2","kind":"app","managedEnvironmentId":null,"inboundIpAddress":"20.105.216.43","possibleInboundIpAddresses":"20.105.216.43","ftpUsername":"backup-webapp000004\\$backup-webapp000004","ftpsHostName":"ftps://waws-prod-am2-759.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.76.169.167,20.76.173.79,20.76.174.235,20.103.92.119,20.103.92.136,20.103.93.3,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.105.216.43","possibleOutboundIpAddresses":"20.76.169.167,20.76.173.79,20.76.174.235,20.103.92.119,20.103.92.136,20.103.93.3,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.103.93.7,20.103.93.33,20.103.93.41,20.103.93.49,20.103.93.147,20.103.93.170,20.103.93.174,20.103.93.203,20.103.93.249,20.103.95.107,20.126.161.180,20.126.162.83,20.126.163.1,20.126.164.235,20.126.166.35,20.126.167.163,20.31.81.171,20.31.82.177,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.238.130.220,20.238.131.32,20.238.131.50,20.238.131.93,20.238.131.127,20.238.131.141,20.105.216.43","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-759","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"backup-webapp000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","inFlightFeatures":[],"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '6576'
+      - '7439'
       content-type:
       - application/json
       date:
-      - Tue, 07 Feb 2023 13:15:31 GMT
+      - Wed, 15 Nov 2023 19:11:33 GMT
       etag:
-      - '"1D93AF63E18012B"'
+      - '"1DA17F7857A59C0"'
       expires:
       - '-1'
       pragma:
@@ -1242,7 +1160,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"storageAccountUrl": "https://backup000002.blob.core.windows.net/backupcontainer000005?se=2023-02-08T16%3A08Z&sp=rwdl&sv=2021-06-08&sr=c&sig=mMmuYdzKKQUaWsVsN7LCqvtvPePbC3TrBPgoo2cRIok%3D",
+    body: '{"properties": {"storageAccountUrl": "https://backup000002.blob.core.windows.net/backupcontainer000005?se=2023-11-16T22%3A05Z&sp=rwdl&sv=2022-11-02&sr=c&sig=iw39sMUXK922OUIJkqt6RKBkH/LZF0KzhaMiCODMrnk%3D",
       "blobName": "backup-name000006.zip", "overwrite": true, "siteName": "backup-webapp000004",
       "ignoreConflictingHostNames": true, "ignoreDatabases": false, "operationType":
       "Default"}}'
@@ -1263,10 +1181,10 @@ interactions:
       - -g --webapp-name --target-name --slot --backup-name --container-url --overwrite
         --ignore-hostname-conflict
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/backups/0/restore?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/backups/0/restore?api-version=2023-01-01
   response:
     body:
       string: ''
@@ -1276,13 +1194,13 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Feb 2023 13:15:46 GMT
+      - Wed, 15 Nov 2023 19:11:49 GMT
       etag:
-      - '"1D93AF6420AA520"'
+      - '"1DA17F78D7602D5"'
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/operationresults/f90c3502-7c7a-44e9-ab02-d89d9c72845f?api-version=2022-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/operationresults/988d6ec7-da80-4a7c-8b5b-d98d155965ba?api-version=2023-01-01
       pragma:
       - no-cache
       server:
@@ -1315,10 +1233,10 @@ interactions:
       - -g --webapp-name --target-name --slot --backup-name --container-url --overwrite
         --ignore-hostname-conflict
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/operationresults/f90c3502-7c7a-44e9-ab02-d89d9c72845f?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/operationresults/988d6ec7-da80-4a7c-8b5b-d98d155965ba?api-version=2023-01-01
   response:
     body:
       string: ''
@@ -1328,11 +1246,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Feb 2023 13:16:01 GMT
+      - Wed, 15 Nov 2023 19:11:49 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/operationresults/f90c3502-7c7a-44e9-ab02-d89d9c72845f?api-version=2022-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/operationresults/988d6ec7-da80-4a7c-8b5b-d98d155965ba?api-version=2023-01-01
       pragma:
       - no-cache
       server:
@@ -1363,10 +1281,10 @@ interactions:
       - -g --webapp-name --target-name --slot --backup-name --container-url --overwrite
         --ignore-hostname-conflict
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/operationresults/f90c3502-7c7a-44e9-ab02-d89d9c72845f?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/operationresults/988d6ec7-da80-4a7c-8b5b-d98d155965ba?api-version=2023-01-01
   response:
     body:
       string: ''
@@ -1376,11 +1294,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Feb 2023 13:16:17 GMT
+      - Wed, 15 Nov 2023 19:12:04 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/operationresults/f90c3502-7c7a-44e9-ab02-d89d9c72845f?api-version=2022-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/operationresults/988d6ec7-da80-4a7c-8b5b-d98d155965ba?api-version=2023-01-01
       pragma:
       - no-cache
       server:
@@ -1411,25 +1329,73 @@ interactions:
       - -g --webapp-name --target-name --slot --backup-name --container-url --overwrite
         --ignore-hostname-conflict
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/operationresults/f90c3502-7c7a-44e9-ab02-d89d9c72845f?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/operationresults/988d6ec7-da80-4a7c-8b5b-d98d155965ba?api-version=2023-01-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 15 Nov 2023 19:12:20 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/operationresults/988d6ec7-da80-4a7c-8b5b-d98d155965ba?api-version=2023-01-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --webapp-name --target-name --slot --backup-name --container-url --overwrite
+        --ignore-hostname-conflict
+      User-Agent:
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot/operationresults/988d6ec7-da80-4a7c-8b5b-d98d155965ba?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/backup-webapp000004/slots/slot","name":"backup-webapp000004/slot","type":"Microsoft.Web/sites/slots","kind":"app","location":"West
-        Europe","properties":{"name":"backup-webapp000004(slot)","state":"Running","hostNames":["backup-webapp000004-slot.azurewebsites.net"],"webSpace":"clitest.rg000001-WestEuropewebspace","selfLink":"https://waws-prod-am2-605.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestEuropewebspace/sites/backup-webapp000004","repositorySiteName":"backup-webapp000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["backup-webapp000004-slot.azurewebsites.net","backup-webapp000004-slot.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"backup-webapp000004-slot.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"backup-webapp000004-slot.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2023-02-07T13:16:20.9033333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null},"deploymentId":"backup-webapp000004__6089","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"253001F2FCF5A7B1CD759EB861E9BB1596370BE27E47A991F72184277B3D12F2","kind":"app","inboundIpAddress":"20.105.232.18","possibleInboundIpAddresses":"20.105.232.18","ftpUsername":"backup-webapp000004__slot\\$backup-webapp000004__slot","ftpsHostName":"ftps://waws-prod-am2-605.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.23.122.13,20.23.126.178,20.23.126.182,20.23.124.201,20.23.126.169,20.23.126.213,20.105.232.18","possibleOutboundIpAddresses":"20.23.122.13,20.23.126.178,20.23.126.182,20.23.124.201,20.23.126.169,20.23.126.213,20.23.126.238,20.23.126.237,20.23.127.36,20.23.127.138,20.103.77.126,20.103.77.246,20.103.76.163,20.76.136.137,20.76.137.83,20.76.137.99,20.76.137.225,20.76.138.6,20.76.138.42,20.76.138.54,20.76.138.62,20.76.138.170,20.76.139.235,20.76.139.238,20.76.140.61,20.76.140.192,20.76.140.201,20.76.141.170,20.76.141.218,20.76.141.230,20.105.232.18","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-605","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"backup-webapp000004-slot.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null}}'
+        Europe","properties":{"name":"backup-webapp000004(slot)","state":"Running","hostNames":["backup-webapp000004-slot.azurewebsites.net"],"webSpace":"clitest.rg000001-WestEuropewebspace","selfLink":"https://waws-prod-am2-759.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestEuropewebspace/sites/backup-webapp000004","repositorySiteName":"backup-webapp000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"afdEnabled":false,"enabledHostNames":["backup-webapp000004-slot.azurewebsites.net","backup-webapp000004-slot.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"backup-webapp000004-slot.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"backup-webapp000004-slot.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-backup000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2023-11-15T19:12:26.1266667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null},"daprConfig":null,"deploymentId":"backup-webapp000004__e8a0","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"253001F2FCF5A7B1CD759EB861E9BB1596370BE27E47A991F72184277B3D12F2","kind":"app","managedEnvironmentId":null,"inboundIpAddress":"20.105.216.43","possibleInboundIpAddresses":"20.105.216.43","ftpUsername":"backup-webapp000004__slot\\$backup-webapp000004__slot","ftpsHostName":"ftps://waws-prod-am2-759.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.76.169.167,20.76.173.79,20.76.174.235,20.103.92.119,20.103.92.136,20.103.93.3,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.105.216.43","possibleOutboundIpAddresses":"20.76.169.167,20.76.173.79,20.76.174.235,20.103.92.119,20.103.92.136,20.103.93.3,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.103.93.7,20.103.93.33,20.103.93.41,20.103.93.49,20.103.93.147,20.103.93.170,20.103.93.174,20.103.93.203,20.103.93.249,20.103.95.107,20.126.161.180,20.126.162.83,20.126.163.1,20.126.164.235,20.126.166.35,20.126.167.163,20.31.81.171,20.31.82.177,20.31.85.2,20.31.85.63,20.238.129.45,20.238.129.71,20.238.129.157,20.238.129.171,20.238.129.237,20.31.80.103,20.31.86.107,20.238.130.173,20.238.130.187,20.238.130.208,20.238.130.220,20.238.131.32,20.238.131.50,20.238.131.93,20.238.131.127,20.238.131.141,20.105.216.43","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-am2-759","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"backup-webapp000004-slot.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","inFlightFeatures":[],"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '6652'
+      - '7520'
       content-type:
       - application/json
       date:
-      - Tue, 07 Feb 2023 13:16:32 GMT
+      - Wed, 15 Nov 2023 19:12:35 GMT
       etag:
-      - '"1D93AF65EAF0075"'
+      - '"1DA17F7AB6D1CEB"'
       expires:
       - '-1'
       pragma:

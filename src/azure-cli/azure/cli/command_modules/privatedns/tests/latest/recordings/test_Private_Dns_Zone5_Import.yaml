@@ -1,5 +1,48 @@
 interactions:
 - request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone import
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file-name
+      User-Agent:
+      - AZURECLI/2.51.0 (PIP) azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_private_dns_zone5_import000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001","name":"cli_private_dns_zone5_import000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_Private_Dns_Zone5_Import","date":"2023-08-14T04:07:27Z","module":"privatedns"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '407'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Aug 2023 04:07:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
     body: '{"location": "global"}'
     headers:
       Accept:
@@ -14,10 +57,12 @@ interactions:
       - '22'
       Content-Type:
       - application/json
+      If-None-Match:
+      - '*'
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com?api-version=2018-09-01
   response:
@@ -25,7 +70,7 @@ interactions:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTthOTcwYWQ4ZC1hYTY2LTQ5ZWItODhkNS1mZDA3Yjc2MzM3MjA=?api-version=2018-09-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTsxMGRjYjMyMy1lM2ZlLTRiZDctODM1My03YTc3MmY4ZTI1ODRfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
       cache-control:
       - private
       content-length:
@@ -33,9 +78,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:05 GMT
+      - Mon, 14 Aug 2023 04:07:38 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTthOTcwYWQ4ZC1hYTY2LTQ5ZWItODhkNS1mZDA3Yjc2MzM3MjA=?api-version=2018-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTsxMGRjYjMyMy1lM2ZlLTRiZDctODM1My03YTc3MmY4ZTI1ODRfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -45,7 +90,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11987'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -65,9 +110,105 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTthOTcwYWQ4ZC1hYTY2LTQ5ZWItODhkNS1mZDA3Yjc2MzM3MjA=?api-version=2018-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTsxMGRjYjMyMy1lM2ZlLTRiZDctODM1My03YTc3MmY4ZTI1ODRfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTsxMGRjYjMyMy1lM2ZlLTRiZDctODM1My03YTc3MmY4ZTI1ODRfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
+      cache-control:
+      - private
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Aug 2023 04:07:38 GMT
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTsxMGRjYjMyMy1lM2ZlLTRiZDctODM1My03YTc3MmY4ZTI1ODRfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone import
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file-name
+      User-Agent:
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTsxMGRjYjMyMy1lM2ZlLTRiZDctODM1My03YTc3MmY4ZTI1ODRfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTsxMGRjYjMyMy1lM2ZlLTRiZDctODM1My03YTc3MmY4ZTI1ODRfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
+      cache-control:
+      - private
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Aug 2023 04:08:08 GMT
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTsxMGRjYjMyMy1lM2ZlLTRiZDctODM1My03YTc3MmY4ZTI1ODRfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '498'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone import
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file-name
+      User-Agent:
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTsxMGRjYjMyMy1lM2ZlLTRiZDctODM1My03YTc3MmY4ZTI1ODRfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -79,7 +220,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:36 GMT
+      - Mon, 14 Aug 2023 04:08:39 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -93,7 +234,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '492'
+      - '497'
       x-powered-by:
       - ASP.NET
     status:
@@ -113,23 +254,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com","name":"zone5.com","type":"Microsoft.Network\/privateDnsZones","etag":"55a4cf90-8ef8-4afc-9868-a90b9408deb3","location":"global","properties":{"maxNumberOfRecordSets":25000,"maxNumberOfVirtualNetworkLinks":1000,"maxNumberOfVirtualNetworkLinksWithRegistration":100,"numberOfRecordSets":1,"numberOfVirtualNetworkLinks":0,"numberOfVirtualNetworkLinksWithRegistration":0,"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com","name":"zone5.com","type":"Microsoft.Network\/privateDnsZones","etag":"e91501fc-39e3-42aa-94c1-3490749e9deb","location":"global","properties":{"maxNumberOfRecordSets":25000,"maxNumberOfVirtualNetworkLinks":1000,"maxNumberOfVirtualNetworkLinksWithRegistration":100,"numberOfRecordSets":1,"numberOfVirtualNetworkLinks":0,"numberOfVirtualNetworkLinksWithRegistration":0,"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '613'
+      - '572'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:36 GMT
+      - Mon, 14 Aug 2023 04:08:40 GMT
       etag:
-      - 55a4cf90-8ef8-4afc-9868-a90b9408deb3
+      - e91501fc-39e3-42aa-94c1-3490749e9deb
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -143,7 +284,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '495'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:
@@ -163,23 +304,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/soa/@?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"65f89f52-8baf-4dc6-afe8-49d8f2f56b4c","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"azureprivatedns-host.microsoft.com","expireTime":2419200,"host":"azureprivatedns.net","minimumTtl":10,"refreshTime":3600,"retryTime":300,"serialNumber":1},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"e528a516-0a11-4350-a580-cc25aa894df5","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"azureprivatedns-host.microsoft.com","expireTime":2419200,"host":"azureprivatedns.net","minimumTtl":10,"refreshTime":3600,"retryTime":300,"serialNumber":1},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '575'
+      - '534'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:36 GMT
+      - Mon, 14 Aug 2023 04:08:40 GMT
       etag:
-      - 65f89f52-8baf-4dc6-afe8-49d8f2f56b4c
+      - e528a516-0a11-4350-a580-cc25aa894df5
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -193,7 +334,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '494'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:
@@ -219,23 +360,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/soa/@?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"adc4d611-9026-47bf-8886-211a13b4801a","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"hostmaster.zone5.com.","expireTime":1814400,"host":"azureprivatedns.net","minimumTtl":10800,"refreshTime":43200,"retryTime":900,"serialNumber":1},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"5846cf30-f2b0-45cc-a094-590ee6dc94cf","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"hostmaster.zone5.com.","expireTime":1814400,"host":"azureprivatedns.net","minimumTtl":10800,"refreshTime":43200,"retryTime":900,"serialNumber":1},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '566'
+      - '525'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:37 GMT
+      - Mon, 14 Aug 2023 04:08:41 GMT
       etag:
-      - adc4d611-9026-47bf-8886-211a13b4801a
+      - 5846cf30-f2b0-45cc-a094-590ee6dc94cf
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -249,7 +390,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11997'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -273,23 +414,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/a/@?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/A","etag":"e0276c01-e001-48c2-b4c2-5dc6e7f3763d","properties":{"fqdn":"zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/A","etag":"3843e62d-1f80-4320-8dc6-4e3c3fa731d0","properties":{"fqdn":"zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '433'
+      - '392'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:38 GMT
+      - Mon, 14 Aug 2023 04:08:43 GMT
       etag:
-      - e0276c01-e001-48c2-b4c2-5dc6e7f3763d
+      - 3843e62d-1f80-4320-8dc6-4e3c3fa731d0
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -299,7 +440,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11984'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -323,23 +464,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/a/default?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/default","name":"default","type":"Microsoft.Network\/privateDnsZones\/A","etag":"7f6d31e8-3aa8-48fd-985b-7a865a1209eb","properties":{"fqdn":"default.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"0.1.2.3"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/default","name":"default","type":"Microsoft.Network\/privateDnsZones\/A","etag":"26aa83cf-15a5-4d80-a622-45e10d0be980","properties":{"fqdn":"default.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"0.1.2.3"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '453'
+      - '412'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:39 GMT
+      - Mon, 14 Aug 2023 04:08:44 GMT
       etag:
-      - 7f6d31e8-3aa8-48fd-985b-7a865a1209eb
+      - 26aa83cf-15a5-4d80-a622-45e10d0be980
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -349,7 +490,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11983'
+      - '11998'
       x-powered-by:
       - ASP.NET
     status:
@@ -373,23 +514,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/cname/tc?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/tc","name":"tc","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"160f524f-357b-44be-b267-52b7f12a0ead","properties":{"fqdn":"tc.zone5.com.","ttl":3600,"cnameRecord":{"cname":"test.zone5.com."},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/tc","name":"tc","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"7c7ec15a-517d-4fb5-8110-0ff0c0806ef4","properties":{"fqdn":"tc.zone5.com.","ttl":3600,"cnameRecord":{"cname":"test.zone5.com."},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '449'
+      - '408'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:40 GMT
+      - Mon, 14 Aug 2023 04:08:45 GMT
       etag:
-      - 160f524f-357b-44be-b267-52b7f12a0ead
+      - 7c7ec15a-517d-4fb5-8110-0ff0c0806ef4
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -399,7 +540,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11993'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -423,23 +564,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/a/www?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www","name":"www","type":"Microsoft.Network\/privateDnsZones\/A","etag":"ad597d89-29f5-428c-86fe-a7acdba0b4d3","properties":{"fqdn":"www.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www","name":"www","type":"Microsoft.Network\/privateDnsZones\/A","etag":"14dda421-76bc-44a3-8fb2-a59c813a42ba","properties":{"fqdn":"www.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '441'
+      - '400'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:41 GMT
+      - Mon, 14 Aug 2023 04:08:46 GMT
       etag:
-      - ad597d89-29f5-428c-86fe-a7acdba0b4d3
+      - 14dda421-76bc-44a3-8fb2-a59c813a42ba
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -449,7 +590,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11982'
+      - '11997'
       x-powered-by:
       - ASP.NET
     status:
@@ -473,23 +614,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/cname/test-cname?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname","name":"test-cname","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"8aebf249-d51d-4238-bdc3-bbe8d244886d","properties":{"fqdn":"test-cname.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.zone5.com."},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname","name":"test-cname","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"c2cd8906-36da-433b-a057-cd1116589f71","properties":{"fqdn":"test-cname.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.zone5.com."},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '471'
+      - '430'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:42 GMT
+      - Mon, 14 Aug 2023 04:08:47 GMT
       etag:
-      - 8aebf249-d51d-4238-bdc3-bbe8d244886d
+      - c2cd8906-36da-433b-a057-cd1116589f71
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -499,7 +640,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11992'
+      - '11998'
       x-powered-by:
       - ASP.NET
     status:
@@ -524,23 +665,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/mx/test-mx?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx","name":"test-mx","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"54a534c5-f004-4e8a-8178-b07356b6749e","properties":{"fqdn":"test-mx.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.zone5.com.","preference":10}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx","name":"test-mx","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"8b6bf4db-dbbe-435f-b001-dde18c93b7a9","properties":{"fqdn":"test-mx.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.zone5.com.","preference":10}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '475'
+      - '434'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:43 GMT
+      - Mon, 14 Aug 2023 04:08:49 GMT
       etag:
-      - 54a534c5-f004-4e8a-8178-b07356b6749e
+      - 8b6bf4db-dbbe-435f-b001-dde18c93b7a9
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -550,7 +691,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11996'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -575,23 +716,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/srv/test-srv?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv","name":"test-srv","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"a7d06f90-19b0-47b9-871a-edfe71926da7","properties":{"fqdn":"test-srv.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.zone5.com.","weight":2}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv","name":"test-srv","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"c8fb496f-1776-4ab8-8fd3-765ce8943d7c","properties":{"fqdn":"test-srv.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.zone5.com.","weight":2}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '498'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:44 GMT
+      - Mon, 14 Aug 2023 04:08:50 GMT
       etag:
-      - a7d06f90-19b0-47b9-871a-edfe71926da7
+      - c8fb496f-1776-4ab8-8fd3-765ce8943d7c
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -601,7 +742,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11997'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -625,23 +766,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/cname/test-cname2?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname2","name":"test-cname2","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"33251d48-b181-4031-bf17-dfb48723e504","properties":{"fqdn":"test-cname2.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1."},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname2","name":"test-cname2","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"dd5af6e7-015f-4ead-9190-ab62127953a1","properties":{"fqdn":"test-cname2.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1."},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '464'
+      - '423'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:45 GMT
+      - Mon, 14 Aug 2023 04:08:51 GMT
       etag:
-      - 33251d48-b181-4031-bf17-dfb48723e504
+      - dd5af6e7-015f-4ead-9190-ab62127953a1
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -651,7 +792,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11991'
+      - '11997'
       x-powered-by:
       - ASP.NET
     status:
@@ -676,23 +817,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/mx/test-mx2?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx2","name":"test-mx2","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"451a5797-b3d6-4980-bf35-86b363d1a92c","properties":{"fqdn":"test-mx2.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.","preference":10}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx2","name":"test-mx2","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"d59b691d-533b-4879-b8fc-8eab9f34a8ae","properties":{"fqdn":"test-mx2.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.","preference":10}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '468'
+      - '427'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:46 GMT
+      - Mon, 14 Aug 2023 04:08:52 GMT
       etag:
-      - 451a5797-b3d6-4980-bf35-86b363d1a92c
+      - d59b691d-533b-4879-b8fc-8eab9f34a8ae
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -702,7 +843,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11995'
+      - '11998'
       x-powered-by:
       - ASP.NET
     status:
@@ -727,23 +868,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/srv/test-srv2?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv2","name":"test-srv2","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"9416d17b-0434-4733-a1dc-5227e06127a7","properties":{"fqdn":"test-srv2.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.","weight":2}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv2","name":"test-srv2","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"7a0e392d-3ca5-4866-a050-c8898b5abe72","properties":{"fqdn":"test-srv2.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.","weight":2}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '491'
+      - '450'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:47 GMT
+      - Mon, 14 Aug 2023 04:08:53 GMT
       etag:
-      - 9416d17b-0434-4733-a1dc-5227e06127a7
+      - 7a0e392d-3ca5-4866-a050-c8898b5abe72
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -753,7 +894,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11996'
+      - '11998'
       x-powered-by:
       - ASP.NET
     status:
@@ -777,23 +918,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/a/subzone?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/subzone","name":"subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"a2ec019b-960f-4b8d-b7f2-b3e892fc4021","properties":{"fqdn":"subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"3.4.5.6"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/subzone","name":"subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"e64c253e-42f5-4cf0-85fd-9e2b93ede661","properties":{"fqdn":"subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"3.4.5.6"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '453'
+      - '412'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:48 GMT
+      - Mon, 14 Aug 2023 04:08:54 GMT
       etag:
-      - a2ec019b-960f-4b8d-b7f2-b3e892fc4021
+      - e64c253e-42f5-4cf0-85fd-9e2b93ede661
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -803,7 +944,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11981'
+      - '11996'
       x-powered-by:
       - ASP.NET
     status:
@@ -827,23 +968,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/a/www.subzone?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www.subzone","name":"www.subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"54ba62ed-d388-4f4d-9ac5-d6c3ed2de796","properties":{"fqdn":"www.subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"4.5.6.7"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www.subzone","name":"www.subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"c773ccdb-8f22-4224-a83c-0f2340d72edf","properties":{"fqdn":"www.subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"4.5.6.7"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '465'
+      - '424'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:49 GMT
+      - Mon, 14 Aug 2023 04:08:55 GMT
       etag:
-      - 54ba62ed-d388-4f4d-9ac5-d6c3ed2de796
+      - c773ccdb-8f22-4224-a83c-0f2340d72edf
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -853,7 +994,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11980'
+      - '11995'
       x-powered-by:
       - ASP.NET
     status:
@@ -877,23 +1018,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/cname/test-cname.subzone?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname.subzone","name":"test-cname.subzone","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"202e790a-e41b-4994-b870-2aabe028cbc9","properties":{"fqdn":"test-cname.subzone.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.subzone.zone5.com."},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname.subzone","name":"test-cname.subzone","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"85b5da99-4914-4787-8747-afe345988cc0","properties":{"fqdn":"test-cname.subzone.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.subzone.zone5.com."},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '503'
+      - '462'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:50 GMT
+      - Mon, 14 Aug 2023 04:08:56 GMT
       etag:
-      - 202e790a-e41b-4994-b870-2aabe028cbc9
+      - 85b5da99-4914-4787-8747-afe345988cc0
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -903,7 +1044,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11990'
+      - '11996'
       x-powered-by:
       - ASP.NET
     status:
@@ -927,23 +1068,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/cname/record?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/record","name":"record","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"850dad7d-aadb-4b45-8e2d-1010ac7c378d","properties":{"fqdn":"record.zone5.com.","ttl":3600,"cnameRecord":{"cname":"bar.foo.com."},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/record","name":"record","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"ac14a295-b392-43b2-8c5a-3cc8266633c3","properties":{"fqdn":"record.zone5.com.","ttl":3600,"cnameRecord":{"cname":"bar.foo.com."},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '458'
+      - '417'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:51 GMT
+      - Mon, 14 Aug 2023 04:08:57 GMT
       etag:
-      - 850dad7d-aadb-4b45-8e2d-1010ac7c378d
+      - ac14a295-b392-43b2-8c5a-3cc8266633c3
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -953,7 +1094,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11989'
+      - '11995'
       x-powered-by:
       - ASP.NET
     status:
@@ -977,23 +1118,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/a/test?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/test","name":"test","type":"Microsoft.Network\/privateDnsZones\/A","etag":"e3515569-528c-4db2-9ef0-3d7ce5b130f1","properties":{"fqdn":"test.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"7.8.9.0"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/test","name":"test","type":"Microsoft.Network\/privateDnsZones\/A","etag":"da7539a4-e5d6-41ed-b973-16007b06f1de","properties":{"fqdn":"test.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"7.8.9.0"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '444'
+      - '403'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:52 GMT
+      - Mon, 14 Aug 2023 04:08:58 GMT
       etag:
-      - e3515569-528c-4db2-9ef0-3d7ce5b130f1
+      - da7539a4-e5d6-41ed-b973-16007b06f1de
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1003,7 +1144,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11979'
+      - '11994'
       x-powered-by:
       - ASP.NET
     status:
@@ -1023,21 +1164,21 @@ interactions:
       ParameterSetName:
       - -g -z
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/ALL?api-version=2018-09-01
   response:
     body:
-      string: '{"value":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/A","etag":"e0276c01-e001-48c2-b4c2-5dc6e7f3763d","properties":{"fqdn":"zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"adc4d611-9026-47bf-8886-211a13b4801a","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"hostmaster.zone5.com.","expireTime":1814400,"host":"azureprivatedns.net","minimumTtl":10800,"refreshTime":43200,"retryTime":900,"serialNumber":1},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/default","name":"default","type":"Microsoft.Network\/privateDnsZones\/A","etag":"7f6d31e8-3aa8-48fd-985b-7a865a1209eb","properties":{"fqdn":"default.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"0.1.2.3"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/record","name":"record","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"850dad7d-aadb-4b45-8e2d-1010ac7c378d","properties":{"fqdn":"record.zone5.com.","ttl":3600,"cnameRecord":{"cname":"bar.foo.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/subzone","name":"subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"a2ec019b-960f-4b8d-b7f2-b3e892fc4021","properties":{"fqdn":"subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"3.4.5.6"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname.subzone","name":"test-cname.subzone","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"202e790a-e41b-4994-b870-2aabe028cbc9","properties":{"fqdn":"test-cname.subzone.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.subzone.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www.subzone","name":"www.subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"54ba62ed-d388-4f4d-9ac5-d6c3ed2de796","properties":{"fqdn":"www.subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"4.5.6.7"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/tc","name":"tc","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"160f524f-357b-44be-b267-52b7f12a0ead","properties":{"fqdn":"tc.zone5.com.","ttl":3600,"cnameRecord":{"cname":"test.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/test","name":"test","type":"Microsoft.Network\/privateDnsZones\/A","etag":"e3515569-528c-4db2-9ef0-3d7ce5b130f1","properties":{"fqdn":"test.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"7.8.9.0"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname","name":"test-cname","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"8aebf249-d51d-4238-bdc3-bbe8d244886d","properties":{"fqdn":"test-cname.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname2","name":"test-cname2","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"33251d48-b181-4031-bf17-dfb48723e504","properties":{"fqdn":"test-cname2.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx","name":"test-mx","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"54a534c5-f004-4e8a-8178-b07356b6749e","properties":{"fqdn":"test-mx.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.zone5.com.","preference":10}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx2","name":"test-mx2","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"451a5797-b3d6-4980-bf35-86b363d1a92c","properties":{"fqdn":"test-mx2.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.","preference":10}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv","name":"test-srv","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"a7d06f90-19b0-47b9-871a-edfe71926da7","properties":{"fqdn":"test-srv.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.zone5.com.","weight":2}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv2","name":"test-srv2","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"9416d17b-0434-4733-a1dc-5227e06127a7","properties":{"fqdn":"test-srv2.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.","weight":2}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www","name":"www","type":"Microsoft.Network\/privateDnsZones\/A","etag":"ad597d89-29f5-428c-86fe-a7acdba0b4d3","properties":{"fqdn":"www.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}}]}'
+      string: '{"value":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/A","etag":"3843e62d-1f80-4320-8dc6-4e3c3fa731d0","properties":{"fqdn":"zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"5846cf30-f2b0-45cc-a094-590ee6dc94cf","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"hostmaster.zone5.com.","expireTime":1814400,"host":"azureprivatedns.net","minimumTtl":10800,"refreshTime":43200,"retryTime":900,"serialNumber":1},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/default","name":"default","type":"Microsoft.Network\/privateDnsZones\/A","etag":"26aa83cf-15a5-4d80-a622-45e10d0be980","properties":{"fqdn":"default.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"0.1.2.3"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/record","name":"record","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"ac14a295-b392-43b2-8c5a-3cc8266633c3","properties":{"fqdn":"record.zone5.com.","ttl":3600,"cnameRecord":{"cname":"bar.foo.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/subzone","name":"subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"e64c253e-42f5-4cf0-85fd-9e2b93ede661","properties":{"fqdn":"subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"3.4.5.6"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname.subzone","name":"test-cname.subzone","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"85b5da99-4914-4787-8747-afe345988cc0","properties":{"fqdn":"test-cname.subzone.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.subzone.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www.subzone","name":"www.subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"c773ccdb-8f22-4224-a83c-0f2340d72edf","properties":{"fqdn":"www.subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"4.5.6.7"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/tc","name":"tc","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"7c7ec15a-517d-4fb5-8110-0ff0c0806ef4","properties":{"fqdn":"tc.zone5.com.","ttl":3600,"cnameRecord":{"cname":"test.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/test","name":"test","type":"Microsoft.Network\/privateDnsZones\/A","etag":"da7539a4-e5d6-41ed-b973-16007b06f1de","properties":{"fqdn":"test.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"7.8.9.0"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname","name":"test-cname","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"c2cd8906-36da-433b-a057-cd1116589f71","properties":{"fqdn":"test-cname.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname2","name":"test-cname2","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"dd5af6e7-015f-4ead-9190-ab62127953a1","properties":{"fqdn":"test-cname2.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx","name":"test-mx","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"8b6bf4db-dbbe-435f-b001-dde18c93b7a9","properties":{"fqdn":"test-mx.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.zone5.com.","preference":10}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx2","name":"test-mx2","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"d59b691d-533b-4879-b8fc-8eab9f34a8ae","properties":{"fqdn":"test-mx2.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.","preference":10}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv","name":"test-srv","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"c8fb496f-1776-4ab8-8fd3-765ce8943d7c","properties":{"fqdn":"test-srv.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.zone5.com.","weight":2}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv2","name":"test-srv2","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"7a0e392d-3ca5-4866-a050-c8898b5abe72","properties":{"fqdn":"test-srv2.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.","weight":2}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www","name":"www","type":"Microsoft.Network\/privateDnsZones\/A","etag":"14dda421-76bc-44a3-8fb2-a59c813a42ba","properties":{"fqdn":"www.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}}]}'
     headers:
       cache-control:
       - private
       content-length:
-      - '7559'
+      - '6903'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:53 GMT
+      - Mon, 14 Aug 2023 04:08:58 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1051,9 +1192,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-entities-read:
-      - '59947'
+      - '59984'
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '497'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:
@@ -1073,21 +1214,21 @@ interactions:
       ParameterSetName:
       - -g -n --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/soa?api-version=2018-09-01
   response:
     body:
-      string: '{"value":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"adc4d611-9026-47bf-8886-211a13b4801a","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"hostmaster.zone5.com.","expireTime":1814400,"host":"azureprivatedns.net","minimumTtl":10800,"refreshTime":43200,"retryTime":900,"serialNumber":1},"isAutoRegistered":false}}]}'
+      string: '{"value":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"5846cf30-f2b0-45cc-a094-590ee6dc94cf","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"hostmaster.zone5.com.","expireTime":1814400,"host":"azureprivatedns.net","minimumTtl":10800,"refreshTime":43200,"retryTime":900,"serialNumber":1},"isAutoRegistered":false}}]}'
     headers:
       cache-control:
       - private
       content-length:
-      - '578'
+      - '537'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:53 GMT
+      - Mon, 14 Aug 2023 04:09:00 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1103,7 +1244,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-resource-entities-read:
       - '59999'
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '497'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:
@@ -1123,21 +1264,21 @@ interactions:
       ParameterSetName:
       - -g -n --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/ALL?api-version=2018-09-01
   response:
     body:
-      string: '{"value":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/A","etag":"e0276c01-e001-48c2-b4c2-5dc6e7f3763d","properties":{"fqdn":"zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"adc4d611-9026-47bf-8886-211a13b4801a","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"hostmaster.zone5.com.","expireTime":1814400,"host":"azureprivatedns.net","minimumTtl":10800,"refreshTime":43200,"retryTime":900,"serialNumber":1},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/default","name":"default","type":"Microsoft.Network\/privateDnsZones\/A","etag":"7f6d31e8-3aa8-48fd-985b-7a865a1209eb","properties":{"fqdn":"default.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"0.1.2.3"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/record","name":"record","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"850dad7d-aadb-4b45-8e2d-1010ac7c378d","properties":{"fqdn":"record.zone5.com.","ttl":3600,"cnameRecord":{"cname":"bar.foo.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/subzone","name":"subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"a2ec019b-960f-4b8d-b7f2-b3e892fc4021","properties":{"fqdn":"subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"3.4.5.6"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname.subzone","name":"test-cname.subzone","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"202e790a-e41b-4994-b870-2aabe028cbc9","properties":{"fqdn":"test-cname.subzone.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.subzone.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www.subzone","name":"www.subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"54ba62ed-d388-4f4d-9ac5-d6c3ed2de796","properties":{"fqdn":"www.subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"4.5.6.7"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/tc","name":"tc","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"160f524f-357b-44be-b267-52b7f12a0ead","properties":{"fqdn":"tc.zone5.com.","ttl":3600,"cnameRecord":{"cname":"test.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/test","name":"test","type":"Microsoft.Network\/privateDnsZones\/A","etag":"e3515569-528c-4db2-9ef0-3d7ce5b130f1","properties":{"fqdn":"test.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"7.8.9.0"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname","name":"test-cname","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"8aebf249-d51d-4238-bdc3-bbe8d244886d","properties":{"fqdn":"test-cname.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname2","name":"test-cname2","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"33251d48-b181-4031-bf17-dfb48723e504","properties":{"fqdn":"test-cname2.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx","name":"test-mx","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"54a534c5-f004-4e8a-8178-b07356b6749e","properties":{"fqdn":"test-mx.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.zone5.com.","preference":10}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx2","name":"test-mx2","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"451a5797-b3d6-4980-bf35-86b363d1a92c","properties":{"fqdn":"test-mx2.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.","preference":10}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv","name":"test-srv","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"a7d06f90-19b0-47b9-871a-edfe71926da7","properties":{"fqdn":"test-srv.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.zone5.com.","weight":2}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv2","name":"test-srv2","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"9416d17b-0434-4733-a1dc-5227e06127a7","properties":{"fqdn":"test-srv2.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.","weight":2}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www","name":"www","type":"Microsoft.Network\/privateDnsZones\/A","etag":"ad597d89-29f5-428c-86fe-a7acdba0b4d3","properties":{"fqdn":"www.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}}]}'
+      string: '{"value":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/A","etag":"3843e62d-1f80-4320-8dc6-4e3c3fa731d0","properties":{"fqdn":"zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"5846cf30-f2b0-45cc-a094-590ee6dc94cf","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"hostmaster.zone5.com.","expireTime":1814400,"host":"azureprivatedns.net","minimumTtl":10800,"refreshTime":43200,"retryTime":900,"serialNumber":1},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/default","name":"default","type":"Microsoft.Network\/privateDnsZones\/A","etag":"26aa83cf-15a5-4d80-a622-45e10d0be980","properties":{"fqdn":"default.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"0.1.2.3"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/record","name":"record","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"ac14a295-b392-43b2-8c5a-3cc8266633c3","properties":{"fqdn":"record.zone5.com.","ttl":3600,"cnameRecord":{"cname":"bar.foo.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/subzone","name":"subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"e64c253e-42f5-4cf0-85fd-9e2b93ede661","properties":{"fqdn":"subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"3.4.5.6"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname.subzone","name":"test-cname.subzone","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"85b5da99-4914-4787-8747-afe345988cc0","properties":{"fqdn":"test-cname.subzone.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.subzone.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www.subzone","name":"www.subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"c773ccdb-8f22-4224-a83c-0f2340d72edf","properties":{"fqdn":"www.subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"4.5.6.7"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/tc","name":"tc","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"7c7ec15a-517d-4fb5-8110-0ff0c0806ef4","properties":{"fqdn":"tc.zone5.com.","ttl":3600,"cnameRecord":{"cname":"test.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/test","name":"test","type":"Microsoft.Network\/privateDnsZones\/A","etag":"da7539a4-e5d6-41ed-b973-16007b06f1de","properties":{"fqdn":"test.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"7.8.9.0"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname","name":"test-cname","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"c2cd8906-36da-433b-a057-cd1116589f71","properties":{"fqdn":"test-cname.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname2","name":"test-cname2","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"dd5af6e7-015f-4ead-9190-ab62127953a1","properties":{"fqdn":"test-cname2.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx","name":"test-mx","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"8b6bf4db-dbbe-435f-b001-dde18c93b7a9","properties":{"fqdn":"test-mx.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.zone5.com.","preference":10}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx2","name":"test-mx2","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"d59b691d-533b-4879-b8fc-8eab9f34a8ae","properties":{"fqdn":"test-mx2.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.","preference":10}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv","name":"test-srv","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"c8fb496f-1776-4ab8-8fd3-765ce8943d7c","properties":{"fqdn":"test-srv.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.zone5.com.","weight":2}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv2","name":"test-srv2","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"7a0e392d-3ca5-4866-a050-c8898b5abe72","properties":{"fqdn":"test-srv2.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.","weight":2}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www","name":"www","type":"Microsoft.Network\/privateDnsZones\/A","etag":"14dda421-76bc-44a3-8fb2-a59c813a42ba","properties":{"fqdn":"www.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}}]}'
     headers:
       cache-control:
       - private
       content-length:
-      - '7559'
+      - '6903'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:49:53 GMT
+      - Mon, 14 Aug 2023 04:09:01 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1151,9 +1292,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-entities-read:
-      - '59928'
+      - '59984'
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '497'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:
@@ -1163,7 +1304,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1175,7 +1316,7 @@ interactions:
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com?api-version=2018-09-01
   response:
@@ -1183,15 +1324,15 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVQcml2YXRlRG5zWm9uZTs1ZmNiMzg2MC00MTMxLTRmNjEtODZlNS00MDMwNWExNDk1NTc=?api-version=2018-09-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVQcml2YXRlRG5zWm9uZTtkMzU2NTE0Yi01OTdiLTQ5M2ItOWY1NC1kMDU1ZjhhODFlZWJfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
       cache-control:
       - private
       content-length:
       - '0'
       date:
-      - Mon, 26 Apr 2021 09:49:57 GMT
+      - Mon, 14 Aug 2023 04:09:04 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVQcml2YXRlRG5zWm9uZTs1ZmNiMzg2MC00MTMxLTRmNjEtODZlNS00MDMwNWExNDk1NTc=?api-version=2018-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVQcml2YXRlRG5zWm9uZTtkMzU2NTE0Yi01OTdiLTQ5M2ItOWY1NC1kMDU1ZjhhODFlZWJfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1201,7 +1342,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11997'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -1221,9 +1362,57 @@ interactions:
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVQcml2YXRlRG5zWm9uZTs1ZmNiMzg2MC00MTMxLTRmNjEtODZlNS00MDMwNWExNDk1NTc=?api-version=2018-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVQcml2YXRlRG5zWm9uZTtkMzU2NTE0Yi01OTdiLTQ5M2ItOWY1NC1kMDU1ZjhhODFlZWJfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVQcml2YXRlRG5zWm9uZTtkMzU2NTE0Yi01OTdiLTQ5M2ItOWY1NC1kMDU1ZjhhODFlZWJfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
+      cache-control:
+      - private
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Aug 2023 04:09:04 GMT
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVQcml2YXRlRG5zWm9uZTtkMzU2NTE0Yi01OTdiLTQ5M2ItOWY1NC1kMDU1ZjhhODFlZWJfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVQcml2YXRlRG5zWm9uZTtkMzU2NTE0Yi01OTdiLTQ5M2ItOWY1NC1kMDU1ZjhhODFlZWJfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1235,7 +1424,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:50:28 GMT
+      - Mon, 14 Aug 2023 04:09:35 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1249,9 +1438,52 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '496'
+      - '498'
       x-powered-by:
       - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone import
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file-name
+      User-Agent:
+      - AZURECLI/2.51.0 (PIP) azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_private_dns_zone5_import000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001","name":"cli_private_dns_zone5_import000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_Private_Dns_Zone5_Import","date":"2023-08-14T04:07:27Z","module":"privatedns"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '407'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Aug 2023 04:09:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
     status:
       code: 200
       message: OK
@@ -1270,10 +1502,12 @@ interactions:
       - '22'
       Content-Type:
       - application/json
+      If-None-Match:
+      - '*'
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com?api-version=2018-09-01
   response:
@@ -1281,7 +1515,7 @@ interactions:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs5NGY5ZjczNi0yNTEwLTRjMWYtOWI0Ny05YTFkMjcyMmFiMjQ=?api-version=2018-09-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2ZTA2Mjg3NS1lZDZlLTRhZGMtOTNjOC0xNTc4NDBlMWJhMDBfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
       cache-control:
       - private
       content-length:
@@ -1289,9 +1523,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:50:45 GMT
+      - Mon, 14 Aug 2023 04:09:51 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs5NGY5ZjczNi0yNTEwLTRjMWYtOWI0Ny05YTFkMjcyMmFiMjQ=?api-version=2018-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2ZTA2Mjg3NS1lZDZlLTRhZGMtOTNjOC0xNTc4NDBlMWJhMDBfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1301,7 +1535,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11990'
+      - '11998'
       x-powered-by:
       - ASP.NET
     status:
@@ -1321,9 +1555,57 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs5NGY5ZjczNi0yNTEwLTRjMWYtOWI0Ny05YTFkMjcyMmFiMjQ=?api-version=2018-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2ZTA2Mjg3NS1lZDZlLTRhZGMtOTNjOC0xNTc4NDBlMWJhMDBfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2ZTA2Mjg3NS1lZDZlLTRhZGMtOTNjOC0xNTc4NDBlMWJhMDBfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
+      cache-control:
+      - private
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Aug 2023 04:09:51 GMT
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2ZTA2Mjg3NS1lZDZlLTRhZGMtOTNjOC0xNTc4NDBlMWJhMDBfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone import
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file-name
+      User-Agent:
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2ZTA2Mjg3NS1lZDZlLTRhZGMtOTNjOC0xNTc4NDBlMWJhMDBfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1335,7 +1617,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:16 GMT
+      - Mon, 14 Aug 2023 04:10:22 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1349,7 +1631,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '496'
+      - '498'
       x-powered-by:
       - ASP.NET
     status:
@@ -1369,23 +1651,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com","name":"zone5.com","type":"Microsoft.Network\/privateDnsZones","etag":"0e319455-d1d5-4de4-9dfe-87d4714d3af9","location":"global","properties":{"maxNumberOfRecordSets":25000,"maxNumberOfVirtualNetworkLinks":1000,"maxNumberOfVirtualNetworkLinksWithRegistration":100,"numberOfRecordSets":1,"numberOfVirtualNetworkLinks":0,"numberOfVirtualNetworkLinksWithRegistration":0,"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com","name":"zone5.com","type":"Microsoft.Network\/privateDnsZones","etag":"0949cc73-ce5d-4e65-b1c4-b1455aa2c4f5","location":"global","properties":{"maxNumberOfRecordSets":25000,"maxNumberOfVirtualNetworkLinks":1000,"maxNumberOfVirtualNetworkLinksWithRegistration":100,"numberOfRecordSets":1,"numberOfVirtualNetworkLinks":0,"numberOfVirtualNetworkLinksWithRegistration":0,"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '613'
+      - '572'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:17 GMT
+      - Mon, 14 Aug 2023 04:10:22 GMT
       etag:
-      - 0e319455-d1d5-4de4-9dfe-87d4714d3af9
+      - 0949cc73-ce5d-4e65-b1c4-b1455aa2c4f5
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1399,7 +1681,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '497'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:
@@ -1419,23 +1701,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/soa/@?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"fbe9bbff-89a7-4a2c-985b-87356d40207c","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"azureprivatedns-host.microsoft.com","expireTime":2419200,"host":"azureprivatedns.net","minimumTtl":10,"refreshTime":3600,"retryTime":300,"serialNumber":1},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"738514d0-52b4-4173-939a-ea19499a1b01","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"azureprivatedns-host.microsoft.com","expireTime":2419200,"host":"azureprivatedns.net","minimumTtl":10,"refreshTime":3600,"retryTime":300,"serialNumber":1},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '575'
+      - '534'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:17 GMT
+      - Mon, 14 Aug 2023 04:10:23 GMT
       etag:
-      - fbe9bbff-89a7-4a2c-985b-87356d40207c
+      - 738514d0-52b4-4173-939a-ea19499a1b01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1449,7 +1731,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '495'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:
@@ -1475,23 +1757,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/soa/@?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"b2279ca3-be08-443c-8a27-de865a7760ce","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"hostmaster.zone5.com.","expireTime":1814400,"host":"azureprivatedns.net","minimumTtl":10800,"refreshTime":43200,"retryTime":900,"serialNumber":1},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"113702b7-ff78-46f4-9ee1-4a2fe7271870","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"hostmaster.zone5.com.","expireTime":1814400,"host":"azureprivatedns.net","minimumTtl":10800,"refreshTime":43200,"retryTime":900,"serialNumber":1},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '566'
+      - '525'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:18 GMT
+      - Mon, 14 Aug 2023 04:10:24 GMT
       etag:
-      - b2279ca3-be08-443c-8a27-de865a7760ce
+      - 113702b7-ff78-46f4-9ee1-4a2fe7271870
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1505,7 +1787,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11997'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -1529,23 +1811,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/a/@?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/A","etag":"04d95317-dee4-4661-a012-57721d106572","properties":{"fqdn":"zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/A","etag":"b9fac390-3081-45f2-be35-a347221ebaf6","properties":{"fqdn":"zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '433'
+      - '392'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:19 GMT
+      - Mon, 14 Aug 2023 04:10:25 GMT
       etag:
-      - 04d95317-dee4-4661-a012-57721d106572
+      - b9fac390-3081-45f2-be35-a347221ebaf6
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1555,7 +1837,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11986'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -1579,23 +1861,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/a/default?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/default","name":"default","type":"Microsoft.Network\/privateDnsZones\/A","etag":"64b7e242-de71-46cf-a59a-111c03c90707","properties":{"fqdn":"default.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"0.1.2.3"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/default","name":"default","type":"Microsoft.Network\/privateDnsZones\/A","etag":"23f5c183-b9a9-4f05-88c8-51fb150c6a15","properties":{"fqdn":"default.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"0.1.2.3"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '453'
+      - '412'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:20 GMT
+      - Mon, 14 Aug 2023 04:10:26 GMT
       etag:
-      - 64b7e242-de71-46cf-a59a-111c03c90707
+      - 23f5c183-b9a9-4f05-88c8-51fb150c6a15
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1605,7 +1887,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11985'
+      - '11998'
       x-powered-by:
       - ASP.NET
     status:
@@ -1629,23 +1911,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/cname/record?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/record","name":"record","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"303851d1-f51b-49ed-8a6a-799b72e82098","properties":{"fqdn":"record.zone5.com.","ttl":3600,"cnameRecord":{"cname":"bar.foo.com."},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/record","name":"record","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"ba1f0b3d-7f89-4894-837e-15a7ade9a38c","properties":{"fqdn":"record.zone5.com.","ttl":3600,"cnameRecord":{"cname":"bar.foo.com."},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '458'
+      - '417'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:21 GMT
+      - Mon, 14 Aug 2023 04:10:27 GMT
       etag:
-      - 303851d1-f51b-49ed-8a6a-799b72e82098
+      - ba1f0b3d-7f89-4894-837e-15a7ade9a38c
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1655,7 +1937,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11997'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -1679,23 +1961,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/a/subzone?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/subzone","name":"subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"5b6dee43-5dd6-4458-90bc-8bec77fcdfca","properties":{"fqdn":"subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"3.4.5.6"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/subzone","name":"subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"64ab9171-59a6-4cfe-b729-267a29e5f773","properties":{"fqdn":"subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"3.4.5.6"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '453'
+      - '412'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:22 GMT
+      - Mon, 14 Aug 2023 04:10:28 GMT
       etag:
-      - 5b6dee43-5dd6-4458-90bc-8bec77fcdfca
+      - 64ab9171-59a6-4cfe-b729-267a29e5f773
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1705,7 +1987,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11984'
+      - '11997'
       x-powered-by:
       - ASP.NET
     status:
@@ -1729,23 +2011,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/cname/test-cname.subzone?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname.subzone","name":"test-cname.subzone","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"27ca4fed-a1a8-47b6-ab65-948fdf5178a6","properties":{"fqdn":"test-cname.subzone.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.subzone.zone5.com."},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname.subzone","name":"test-cname.subzone","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"40d45510-26b6-4fb5-95c7-3767a9b23cd4","properties":{"fqdn":"test-cname.subzone.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.subzone.zone5.com."},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '503'
+      - '462'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:23 GMT
+      - Mon, 14 Aug 2023 04:10:29 GMT
       etag:
-      - 27ca4fed-a1a8-47b6-ab65-948fdf5178a6
+      - 40d45510-26b6-4fb5-95c7-3767a9b23cd4
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1755,7 +2037,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11996'
+      - '11998'
       x-powered-by:
       - ASP.NET
     status:
@@ -1779,23 +2061,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/a/www.subzone?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www.subzone","name":"www.subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"9be53139-f01c-4ad6-a8b9-c4bee78b9f04","properties":{"fqdn":"www.subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"4.5.6.7"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www.subzone","name":"www.subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"4a95ca4f-fe21-4180-baeb-9617856746e1","properties":{"fqdn":"www.subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"4.5.6.7"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '465'
+      - '424'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:25 GMT
+      - Mon, 14 Aug 2023 04:10:30 GMT
       etag:
-      - 9be53139-f01c-4ad6-a8b9-c4bee78b9f04
+      - 4a95ca4f-fe21-4180-baeb-9617856746e1
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1805,7 +2087,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11983'
+      - '11996'
       x-powered-by:
       - ASP.NET
     status:
@@ -1829,23 +2111,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/cname/tc?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/tc","name":"tc","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"daf1e82c-d843-4902-a4df-3799f1835690","properties":{"fqdn":"tc.zone5.com.","ttl":3600,"cnameRecord":{"cname":"test.zone5.com."},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/tc","name":"tc","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"61d88a74-f9a6-4d7c-90c3-1fb54d514fbc","properties":{"fqdn":"tc.zone5.com.","ttl":3600,"cnameRecord":{"cname":"test.zone5.com."},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '449'
+      - '408'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:26 GMT
+      - Mon, 14 Aug 2023 04:10:31 GMT
       etag:
-      - daf1e82c-d843-4902-a4df-3799f1835690
+      - 61d88a74-f9a6-4d7c-90c3-1fb54d514fbc
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1855,7 +2137,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11995'
+      - '11997'
       x-powered-by:
       - ASP.NET
     status:
@@ -1879,23 +2161,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/a/test?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/test","name":"test","type":"Microsoft.Network\/privateDnsZones\/A","etag":"497d5645-99cb-48ec-ac99-2ea1a2881802","properties":{"fqdn":"test.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"7.8.9.0"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/test","name":"test","type":"Microsoft.Network\/privateDnsZones\/A","etag":"9d3b4627-a66d-4ed6-bccb-c94a7875c2ae","properties":{"fqdn":"test.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"7.8.9.0"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '444'
+      - '403'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:27 GMT
+      - Mon, 14 Aug 2023 04:10:32 GMT
       etag:
-      - 497d5645-99cb-48ec-ac99-2ea1a2881802
+      - 9d3b4627-a66d-4ed6-bccb-c94a7875c2ae
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1905,7 +2187,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11982'
+      - '11995'
       x-powered-by:
       - ASP.NET
     status:
@@ -1929,23 +2211,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/cname/test-cname?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname","name":"test-cname","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"e1362e05-fb90-464d-a2e2-5976043fde89","properties":{"fqdn":"test-cname.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.zone5.com."},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname","name":"test-cname","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"aac7052e-ffd5-45e4-a5a9-cce2f8b4120a","properties":{"fqdn":"test-cname.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.zone5.com."},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '471'
+      - '430'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:28 GMT
+      - Mon, 14 Aug 2023 04:10:33 GMT
       etag:
-      - e1362e05-fb90-464d-a2e2-5976043fde89
+      - aac7052e-ffd5-45e4-a5a9-cce2f8b4120a
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1955,7 +2237,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11994'
+      - '11996'
       x-powered-by:
       - ASP.NET
     status:
@@ -1979,23 +2261,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/cname/test-cname2?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname2","name":"test-cname2","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"a7a2cb86-2b17-4552-84d1-2165e20bf3d5","properties":{"fqdn":"test-cname2.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1."},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname2","name":"test-cname2","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"9c2b944c-0b0c-4e77-adc4-bfc38aa93b37","properties":{"fqdn":"test-cname2.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1."},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '464'
+      - '423'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:29 GMT
+      - Mon, 14 Aug 2023 04:10:34 GMT
       etag:
-      - a7a2cb86-2b17-4552-84d1-2165e20bf3d5
+      - 9c2b944c-0b0c-4e77-adc4-bfc38aa93b37
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -2005,7 +2287,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11993'
+      - '11995'
       x-powered-by:
       - ASP.NET
     status:
@@ -2030,23 +2312,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/mx/test-mx?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx","name":"test-mx","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"47d116cc-3b87-4884-a255-d52b96117a44","properties":{"fqdn":"test-mx.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.zone5.com.","preference":10}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx","name":"test-mx","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"73c28d14-2f21-4c2b-a66f-72b7c6d5c9e1","properties":{"fqdn":"test-mx.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.zone5.com.","preference":10}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '475'
+      - '434'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:30 GMT
+      - Mon, 14 Aug 2023 04:10:35 GMT
       etag:
-      - 47d116cc-3b87-4884-a255-d52b96117a44
+      - 73c28d14-2f21-4c2b-a66f-72b7c6d5c9e1
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -2056,7 +2338,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11995'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -2081,23 +2363,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/mx/test-mx2?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx2","name":"test-mx2","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"2e9b59a2-7be4-407a-beb4-1bd820ee6666","properties":{"fqdn":"test-mx2.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.","preference":10}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx2","name":"test-mx2","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"ab5c60a0-3263-4146-a2b4-bc032b085296","properties":{"fqdn":"test-mx2.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.","preference":10}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '468'
+      - '427'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:31 GMT
+      - Mon, 14 Aug 2023 04:10:37 GMT
       etag:
-      - 2e9b59a2-7be4-407a-beb4-1bd820ee6666
+      - ab5c60a0-3263-4146-a2b4-bc032b085296
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -2107,7 +2389,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11994'
+      - '11998'
       x-powered-by:
       - ASP.NET
     status:
@@ -2132,23 +2414,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/srv/test-srv?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv","name":"test-srv","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"c2e4e94d-bb66-4bb5-87b0-54d4bbba7357","properties":{"fqdn":"test-srv.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.zone5.com.","weight":2}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv","name":"test-srv","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"c6ede195-50d1-4ad3-b949-fac8c2032aa2","properties":{"fqdn":"test-srv.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.zone5.com.","weight":2}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '498'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:32 GMT
+      - Mon, 14 Aug 2023 04:10:38 GMT
       etag:
-      - c2e4e94d-bb66-4bb5-87b0-54d4bbba7357
+      - c6ede195-50d1-4ad3-b949-fac8c2032aa2
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -2158,7 +2440,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11995'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -2183,23 +2465,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/srv/test-srv2?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv2","name":"test-srv2","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"829c5d0b-7013-4e32-a6f0-c49d3903c2b6","properties":{"fqdn":"test-srv2.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.","weight":2}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv2","name":"test-srv2","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"d6c17466-d704-47ed-8697-c903d7d87815","properties":{"fqdn":"test-srv2.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.","weight":2}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '491'
+      - '450'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:33 GMT
+      - Mon, 14 Aug 2023 04:10:39 GMT
       etag:
-      - 829c5d0b-7013-4e32-a6f0-c49d3903c2b6
+      - d6c17466-d704-47ed-8697-c903d7d87815
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -2209,7 +2491,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11994'
+      - '11998'
       x-powered-by:
       - ASP.NET
     status:
@@ -2233,23 +2515,23 @@ interactions:
       ParameterSetName:
       - -n -g --file-name
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/a/www?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www","name":"www","type":"Microsoft.Network\/privateDnsZones\/A","etag":"d55a301f-60ad-4f06-ba4b-6d10b0ac9e63","properties":{"fqdn":"www.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www","name":"www","type":"Microsoft.Network\/privateDnsZones\/A","etag":"7beed10c-1abd-404c-b944-2323720040b1","properties":{"fqdn":"www.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '441'
+      - '400'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:35 GMT
+      - Mon, 14 Aug 2023 04:10:40 GMT
       etag:
-      - d55a301f-60ad-4f06-ba4b-6d10b0ac9e63
+      - 7beed10c-1abd-404c-b944-2323720040b1
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -2259,7 +2541,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11981'
+      - '11994'
       x-powered-by:
       - ASP.NET
     status:
@@ -2279,21 +2561,21 @@ interactions:
       ParameterSetName:
       - -g -z
       User-Agent:
-      - AZURECLI/2.22.1 azsdk-python-mgmt-privatedns/1.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone5_import000001/providers/Microsoft.Network/privateDnsZones/zone5.com/ALL?api-version=2018-09-01
   response:
     body:
-      string: '{"value":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/A","etag":"04d95317-dee4-4661-a012-57721d106572","properties":{"fqdn":"zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"b2279ca3-be08-443c-8a27-de865a7760ce","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"hostmaster.zone5.com.","expireTime":1814400,"host":"azureprivatedns.net","minimumTtl":10800,"refreshTime":43200,"retryTime":900,"serialNumber":1},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/default","name":"default","type":"Microsoft.Network\/privateDnsZones\/A","etag":"64b7e242-de71-46cf-a59a-111c03c90707","properties":{"fqdn":"default.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"0.1.2.3"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/record","name":"record","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"303851d1-f51b-49ed-8a6a-799b72e82098","properties":{"fqdn":"record.zone5.com.","ttl":3600,"cnameRecord":{"cname":"bar.foo.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/subzone","name":"subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"5b6dee43-5dd6-4458-90bc-8bec77fcdfca","properties":{"fqdn":"subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"3.4.5.6"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname.subzone","name":"test-cname.subzone","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"27ca4fed-a1a8-47b6-ab65-948fdf5178a6","properties":{"fqdn":"test-cname.subzone.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.subzone.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www.subzone","name":"www.subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"9be53139-f01c-4ad6-a8b9-c4bee78b9f04","properties":{"fqdn":"www.subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"4.5.6.7"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/tc","name":"tc","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"daf1e82c-d843-4902-a4df-3799f1835690","properties":{"fqdn":"tc.zone5.com.","ttl":3600,"cnameRecord":{"cname":"test.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/test","name":"test","type":"Microsoft.Network\/privateDnsZones\/A","etag":"497d5645-99cb-48ec-ac99-2ea1a2881802","properties":{"fqdn":"test.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"7.8.9.0"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname","name":"test-cname","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"e1362e05-fb90-464d-a2e2-5976043fde89","properties":{"fqdn":"test-cname.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname2","name":"test-cname2","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"a7a2cb86-2b17-4552-84d1-2165e20bf3d5","properties":{"fqdn":"test-cname2.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx","name":"test-mx","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"47d116cc-3b87-4884-a255-d52b96117a44","properties":{"fqdn":"test-mx.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.zone5.com.","preference":10}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx2","name":"test-mx2","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"2e9b59a2-7be4-407a-beb4-1bd820ee6666","properties":{"fqdn":"test-mx2.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.","preference":10}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv","name":"test-srv","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"c2e4e94d-bb66-4bb5-87b0-54d4bbba7357","properties":{"fqdn":"test-srv.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.zone5.com.","weight":2}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv2","name":"test-srv2","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"829c5d0b-7013-4e32-a6f0-c49d3903c2b6","properties":{"fqdn":"test-srv2.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.","weight":2}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www","name":"www","type":"Microsoft.Network\/privateDnsZones\/A","etag":"d55a301f-60ad-4f06-ba4b-6d10b0ac9e63","properties":{"fqdn":"www.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}}]}'
+      string: '{"value":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/A","etag":"b9fac390-3081-45f2-be35-a347221ebaf6","properties":{"fqdn":"zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"113702b7-ff78-46f4-9ee1-4a2fe7271870","properties":{"fqdn":"zone5.com.","ttl":3600,"soaRecord":{"email":"hostmaster.zone5.com.","expireTime":1814400,"host":"azureprivatedns.net","minimumTtl":10800,"refreshTime":43200,"retryTime":900,"serialNumber":1},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/default","name":"default","type":"Microsoft.Network\/privateDnsZones\/A","etag":"23f5c183-b9a9-4f05-88c8-51fb150c6a15","properties":{"fqdn":"default.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"0.1.2.3"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/record","name":"record","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"ba1f0b3d-7f89-4894-837e-15a7ade9a38c","properties":{"fqdn":"record.zone5.com.","ttl":3600,"cnameRecord":{"cname":"bar.foo.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/subzone","name":"subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"64ab9171-59a6-4cfe-b729-267a29e5f773","properties":{"fqdn":"subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"3.4.5.6"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname.subzone","name":"test-cname.subzone","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"40d45510-26b6-4fb5-95c7-3767a9b23cd4","properties":{"fqdn":"test-cname.subzone.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.subzone.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www.subzone","name":"www.subzone","type":"Microsoft.Network\/privateDnsZones\/A","etag":"4a95ca4f-fe21-4180-baeb-9617856746e1","properties":{"fqdn":"www.subzone.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"4.5.6.7"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/tc","name":"tc","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"61d88a74-f9a6-4d7c-90c3-1fb54d514fbc","properties":{"fqdn":"tc.zone5.com.","ttl":3600,"cnameRecord":{"cname":"test.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/test","name":"test","type":"Microsoft.Network\/privateDnsZones\/A","etag":"9d3b4627-a66d-4ed6-bccb-c94a7875c2ae","properties":{"fqdn":"test.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"7.8.9.0"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname","name":"test-cname","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"aac7052e-ffd5-45e4-a5a9-cce2f8b4120a","properties":{"fqdn":"test-cname.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1.zone5.com."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/CNAME\/test-cname2","name":"test-cname2","type":"Microsoft.Network\/privateDnsZones\/CNAME","etag":"9c2b944c-0b0c-4e77-adc4-bfc38aa93b37","properties":{"fqdn":"test-cname2.zone5.com.","ttl":3600,"cnameRecord":{"cname":"r1."},"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx","name":"test-mx","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"73c28d14-2f21-4c2b-a66f-72b7c6d5c9e1","properties":{"fqdn":"test-mx.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.zone5.com.","preference":10}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/MX\/test-mx2","name":"test-mx2","type":"Microsoft.Network\/privateDnsZones\/MX","etag":"ab5c60a0-3263-4146-a2b4-bc032b085296","properties":{"fqdn":"test-mx2.zone5.com.","ttl":3600,"mxRecords":[{"exchange":"m1.","preference":10}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv","name":"test-srv","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"c6ede195-50d1-4ad3-b949-fac8c2032aa2","properties":{"fqdn":"test-srv.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.zone5.com.","weight":2}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/SRV\/test-srv2","name":"test-srv2","type":"Microsoft.Network\/privateDnsZones\/SRV","etag":"d6c17466-d704-47ed-8697-c903d7d87815","properties":{"fqdn":"test-srv2.zone5.com.","ttl":3600,"srvRecords":[{"port":3,"priority":1,"target":"srv1.","weight":2}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_private_dns_zone5_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone5.com\/A\/www","name":"www","type":"Microsoft.Network\/privateDnsZones\/A","etag":"7beed10c-1abd-404c-b944-2323720040b1","properties":{"fqdn":"www.zone5.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}}]}'
     headers:
       cache-control:
       - private
       content-length:
-      - '7559'
+      - '6903'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Apr 2021 09:51:35 GMT
+      - Mon, 14 Aug 2023 04:10:41 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -2307,9 +2589,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-entities-read:
-      - '59931'
+      - '59984'
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '496'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:

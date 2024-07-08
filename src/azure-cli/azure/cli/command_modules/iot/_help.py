@@ -10,7 +10,6 @@ from knack.help_files import helps  # pylint: disable=unused-import
 helps['iot'] = """
 type: group
 short-summary: Manage Internet of Things (IoT) assets.
-long-summary: Comprehensive IoT data-plane functionality is available in the Azure IoT CLI Extension. For more info and install guide go to https://github.com/Azure/azure-iot-cli-extension
 """
 
 helps['iot dps'] = """
@@ -184,10 +183,10 @@ short-summary: Create a linked IoT hub in an Azure IoT Hub Device Provisioning S
 examples:
   - name: Create a linked IoT hub in an Azure IoT Hub Device Provisioning Service instance
     text: >
-        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string "HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0=" --location westus
+        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --location westus --connection-string 'HostName=myhub.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=12345'
   - name: Create a linked IoT hub in an Azure IoT Hub Device Provisioning Service which applies allocation weight and weight being 10
     text: >
-        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string "HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0=" --location westus --allocation-weight 10 --apply-allocation-policy True
+        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --location westus --allocation-weight 10 --apply-allocation-policy True --connection-string 'HostName=myhub.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=12345'
 """
 
 helps['iot dps linked-hub delete'] = """
@@ -699,10 +698,10 @@ examples:
   - name: Add a new endpoint "E2" of type EventHub to "MyIotHub" IoT Hub.
     text: >
         az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub --endpoint-name E2 --endpoint-type eventhub --endpoint-resource-group {ResourceGroup} --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString}
-  - name: Add a new endpoint "S1" of type AzureStorageContainer to "MyIotHub" IoT Hub.
+  - name: Add a new endpoint "S1" of type AzureStorageContainer to the "MyIotHub" IoT Hub within the endpoint resource group "MyEndpointResourceGroup".
     text: |
         az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub \\
-        --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group "[Resource Group]" \\
+        --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group MyEndpointResourceGroup \\
         --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString} \\
         --container-name {ContainerName} --batch-frequency 100 --chunk-size 100 \\
         --ff {iothub}-{partition}-{YYYY}-{MM}-{DD}-{HH}-{mm}

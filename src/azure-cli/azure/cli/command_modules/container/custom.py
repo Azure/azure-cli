@@ -36,7 +36,8 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequest, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupSubnetId,
                                                  ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity,
-                                                 ContainerGroupPriority, ContainerGroupSku, ConfidentialComputeProperties)
+                                                 ContainerGroupPriority, ContainerGroupSku, ConfidentialComputeProperties,
+                                                 SecurityContextDefinition, SecurityContextCapabilitiesDefinition)
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics_workspace,
@@ -115,7 +116,14 @@ def create_container(cmd,
                      zone=None,
                      priority=None,
                      sku=None,
-                     cce_policy=None):
+                     cce_policy=None,
+                     add_capabilities=None,
+                     drop_capabilities=None,
+                     privileged=False,
+                     allow_privilege_escalation=False,
+                     run_as_group=None,
+                     run_as_user=None,
+                     seccomp_profile=None):
     """Create a container group. """
     if file:
         return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file, no_wait)
@@ -218,9 +226,17 @@ def create_container(cmd,
 
     # Set up Container Group Sku.
     confidential_compute_properties = None
+    security_context = None
     if sku == "Confidential":
         sku = ContainerGroupSku.Confidential
         confidential_compute_properties = ConfidentialComputeProperties(cce_policy=cce_policy)
+        security_context_capabilities = SecurityContextCapabilitiesDefinition(add=add_capabilities, drop=drop_capabilities)
+        security_context = SecurityContextDefinition(privileged=privileged,
+                                                     allow_privilege_escalation=allow_privilege_escalation,
+                                                     capabilities=security_context_capabilities,
+                                                     run_as_group=run_as_group,
+                                                     run_as_user=run_as_user,
+                                                     seccomp_profile=seccomp_profile)
 
     container = Container(name=name,
                           image=image,
@@ -229,7 +245,8 @@ def create_container(cmd,
                           ports=[ContainerPort(
                               port=p, protocol=protocol) for p in ports] if cgroup_ip_address else None,
                           environment_variables=environment_variables,
-                          volume_mounts=mounts or None)
+                          volume_mounts=mounts or None,
+                          security_context=security_context)
 
     cgroup = ContainerGroup(location=location,
                             identity=identity,

@@ -7,6 +7,7 @@ from knack.log import get_logger
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
     AAZStrArg, AAZArgEnum
+from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from ..aaz.latest.network.lb import Delete as _LBDelete, Update as _LBUpdate, List as _LBList, Show as _LBShow
 from ..aaz.latest.network.lb.frontend_ip import Create as _LBFrontendIPCreate, Update as _LBFrontendIPUpdate, \
     Show as _LBFrontendIPShow, Delete as _LBFrontendIPDelete, List as _LBFrontendIPList
@@ -25,19 +26,11 @@ from ..aaz.latest.network.lb.address_pool.address import Add as _LBAddressPoolAd
 from ..aaz.latest.network.lb.address_pool.basic import Create as _LBAddressPoolBasicCreate, \
     Delete as _LBAddressPoolBasicDelete
 from ..aaz.latest.network.lb.address_pool.tunnel_interface import Add as _LBAddressPoolTunnelInterfaceAdd, \
-    Update as _LBAddressPoolTunnelInterfaceUpdate, Remove as _LBAddressPoolTunnelInterfaceRemove
+    Update as _LBAddressPoolTunnelInterfaceUpdate
 from ..aaz.latest.network.lb.probe import Create as _LBProbeCreate, Update as _LBProbeUpdate
 
 
 logger = get_logger(__name__)
-
-
-class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-    def __call__(self, ctx, value):
-        if value._data == "":
-            logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-            value._data = None
-        return super().__call__(ctx, value)
 
 
 class LBFrontendIPCreate(_LBFrontendIPCreate):
@@ -100,16 +93,16 @@ class LBFrontendIPUpdate(_LBFrontendIPUpdate):
             options=['--vnet-name'],
             help="The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id)."
         )
-        args_schema.subnet._fmt = EmptyResourceIdArgFormat(
+        args_schema.subnet._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet_name}/subnets/{}",
         )
-        args_schema.public_ip_prefix._fmt = EmptyResourceIdArgFormat(
+        args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIpPrefixes/{}",
         )
-        args_schema.public_ip_address._fmt = EmptyResourceIdArgFormat(
+        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}",
         )
-        args_schema.gateway_lb._fmt = EmptyResourceIdArgFormat(
+        args_schema.gateway_lb._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}"
         )
 
@@ -169,7 +162,7 @@ class LBInboundNatPoolUpdate(_LBInboundNatPoolUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.frontend_ip_name._fmt = EmptyResourceIdArgFormat(
+        args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
         )
         return args_schema
@@ -283,6 +276,20 @@ class LBRuleCreate(_LBRuleCreate):
             element_transformer=lambda _, id: {"id": id}
         )
 
+    def post_instance_create(self, instance):
+        args = self.ctx.args
+        if has_value(args.frontend_ip_name):
+            curr_id = args.frontend_ip_name.to_serialized_data()
+            curr_name = parse_resource_id(curr_id)["resource_name"] if is_valid_resource_id(curr_id) else curr_id
+
+            parent = self.ctx.vars.instance
+            frontend_ip_configurations = parent.properties.frontend_ip_configurations
+            for fip in frontend_ip_configurations:
+                if fip.name == curr_name:
+                    if has_value(fip.properties.gateway_load_balancer):
+                        rid = fip.properties.gateway_load_balancer.id.to_serialized_data()
+                        self.ctx.update_aux_subscriptions(parse_resource_id(rid)["subscription"])
+
 
 class LBRuleUpdate(_LBRuleUpdate):
 
@@ -292,7 +299,7 @@ class LBRuleUpdate(_LBRuleUpdate):
         args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
         )
-        args_schema.probe_name._fmt = EmptyResourceIdArgFormat(
+        args_schema.probe_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/probes/{}"
         )
 
@@ -331,6 +338,19 @@ class LBRuleUpdate(_LBRuleUpdate):
             instance.properties.probe = None
         # always remove backend_address_pool in update request, service will fill this property based on backend_address_pools property.
         instance.properties.backend_address_pool = None
+
+        args = self.ctx.args
+        if has_value(args.frontend_ip_name):
+            curr_id = args.frontend_ip_name.to_serialized_data()
+            curr_name = parse_resource_id(curr_id)["resource_name"] if is_valid_resource_id(curr_id) else curr_id
+
+            parent = self.ctx.vars.instance
+            frontend_ip_configurations = parent.properties.frontend_ip_configurations
+            for fip in frontend_ip_configurations:
+                if fip.name == curr_name:
+                    if has_value(fip.properties.gateway_load_balancer):
+                        rid = fip.properties.gateway_load_balancer.id.to_serialized_data()
+                        self.ctx.update_aux_subscriptions(parse_resource_id(rid)["subscription"])
 
 
 class LBOutboundRuleCreate(_LBOutboundRuleCreate):
@@ -454,6 +474,7 @@ class LBAddressPoolCreate(_LBAddressPoolBasicCreate):
         args_schema.backend_addresses.Element.name._required = True
         args_schema.backend_addresses.Element.ip_address._required = True
         args_schema.backend_addresses.Element.frontend_ip_address._registered = False
+        args_schema.vnet_id._registered = False
         return args_schema
 
     def _execute_operations(self):
@@ -472,9 +493,12 @@ class LBAddressPoolCreate(_LBAddressPoolBasicCreate):
         self.post_operations()
 
     def pre_operations(self):
-        from azure.mgmt.core.tools import is_valid_resource_id
+        from azure.cli.core.aaz import AAZUndefined
 
         args = self.ctx.args
+        if has_value(args.sync_mode) and has_value(args.vnet):
+            args.vnet_id = args.vnet
+            args.vnet = AAZUndefined
         if has_value(args.backend_addresses):
             for backend_address in args.backend_addresses:
                 if not has_value(backend_address.admin_state) and has_value(args.admin_state):
@@ -540,12 +564,16 @@ class LBAddressPoolUpdate(_LBAddressPoolUpdate):
         args_schema.backend_addresses.Element.name._nullable = False
         args_schema.backend_addresses.Element.ip_address._nullable = False
         args_schema.backend_addresses.Element.frontend_ip_address._registered = False
+        args_schema.vnet_id._registered = False
         return args_schema
 
     def pre_operations(self):
-        from azure.mgmt.core.tools import is_valid_resource_id
+        from azure.cli.core.aaz import AAZUndefined
 
         args = self.ctx.args
+        if has_value(args.sync_mode) and has_value(args.vnet):
+            args.vnet_id = args.vnet
+            args.vnet = AAZUndefined
         if has_value(args.backend_addresses) and args.backend_addresses.to_serialized_data() is not None:
             for backend_address in args.backend_addresses:
                 if not has_value(backend_address.admin_state) and has_value(args.admin_state):
@@ -597,8 +625,6 @@ class LBAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
         return args_schema
 
     def pre_operations(self):
-        from azure.mgmt.core.tools import is_valid_resource_id
-
         args = self.ctx.args
         virtual_network = args.virtual_network.to_serialized_data()
         subnet = args.subnet.to_serialized_data()
@@ -621,18 +647,6 @@ class LBAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
         return result
 
 
-class LBAddressPoolAddressRemove(_LBAddressPoolAddressRemove):
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):  # pylint: disable=unused-argument
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
 class LBAddressPoolAddressUpdate(_LBAddressPoolAddressUpdate):
 
     @classmethod
@@ -647,8 +661,6 @@ class LBAddressPoolAddressUpdate(_LBAddressPoolAddressUpdate):
         return args_schema
 
     def pre_operations(self):
-        from azure.mgmt.core.tools import is_valid_resource_id
-
         args = self.ctx.args
         virtual_network = args.virtual_network.to_serialized_data()
         subnet = args.subnet.to_serialized_data()
@@ -684,18 +696,6 @@ class LBAddressPoolTunnelInterfaceAdd(_LBAddressPoolTunnelInterfaceAdd):
         return args_schema
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class LBAddressPoolTunnelInterfaceRemove(_LBAddressPoolTunnelInterfaceRemove):
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):  # pylint: disable=unused-argument
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
@@ -869,10 +869,10 @@ class CrossRegionLoadBalancerFrontendIPUpdate(_LBFrontendIPUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.public_ip_prefix._fmt = EmptyResourceIdArgFormat(
+        args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIpPrefixes/{}",
         )
-        args_schema.public_ip_address._fmt = EmptyResourceIdArgFormat(
+        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}",
         )
         args_schema.zones.Element.enum = AAZArgEnum({
@@ -956,6 +956,8 @@ class CrossRegionLoadBalancerRuleCreate(_LBRuleCreate):
         args_schema.backend_port._required = True
         args_schema.backend_address_pools._registered = False
         args_schema.disable_outbound_snat._registered = False   # it's not required for cross-region-lb
+        args_schema.idle_timeout_in_minutes._registered = False
+        args_schema.enable_tcp_reset._registered = False
         return args_schema
 
     def pre_instance_create(self):
@@ -997,7 +999,7 @@ class CrossRegionLoadBalancerRuleUpdate(_LBRuleUpdate):
         args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
         )
-        args_schema.probe_name._fmt = EmptyResourceIdArgFormat(
+        args_schema.probe_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/probes/{}"
         )
         # not support multi backend pools because the loadbalance SKU is not Gateway
@@ -1016,6 +1018,8 @@ class CrossRegionLoadBalancerRuleUpdate(_LBRuleUpdate):
         args_schema.backend_port._nullable = False
         args_schema.backend_address_pools._registered = False
         args_schema.disable_outbound_snat._registered = False   # it's not required for cross-region-lb
+        args_schema.idle_timeout_in_minutes._registered = False
+        args_schema.enable_tcp_reset._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -1159,19 +1163,9 @@ class CrossRegionLoadBalancerAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
 @register_command("network cross-region-lb address-pool address remove")
 class CrossRegionLoadBalancerAddressPoolAddressRemove(_LBAddressPoolAddressRemove):
     """Remove one backend address from the load balance backend address pool.
-
     :example: Remove one backend address from the load balance backend address pool.
         az network cross-region-lb address-pool address remove -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress
     """
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):  # pylint: disable=unused-argument
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 
 
 @register_command("network cross-region-lb address-pool address update")

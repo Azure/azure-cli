@@ -172,7 +172,7 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
         ns.location = None
         self.ns = ns
 
-    @mock.patch('azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.vnet.List', _mock_network_client_with_existing_vnet)
+    @mock.patch('azure.cli.command_modules.vm.aaz.profile_2020_09_01_hybrid.network.vnet.List', _mock_network_client_with_existing_vnet)
     def test_no_matching_vnet(self):
         self._set_ns('emptyrg', 'eastus')
         _validate_vm_vmss_create_vnet(_get_test_cmd(), self.ns)
@@ -180,7 +180,7 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
         self.assertIsNone(self.ns.subnet)
         self.assertEqual(self.ns.vnet_type, 'new')
 
-    @mock.patch('azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.vnet.List', _mock_network_client_with_existing_vnet_location)
+    @mock.patch('azure.cli.command_modules.vm.aaz.profile_2020_09_01_hybrid.network.vnet.List', _mock_network_client_with_existing_vnet_location)
     def test_matching_vnet_specified_location(self):
         self._set_ns('rg1', 'eastus')
         _validate_vm_vmss_create_vnet(_get_test_cmd(), self.ns)
@@ -202,7 +202,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         ns.disable_overprovision = None
         return ns
 
-    @mock.patch('azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.vnet.List', _mock_network_client_with_existing_vnet_location)
+    @mock.patch('azure.cli.command_modules.vm.aaz.profile_2020_09_01_hybrid.network.vnet.List', _mock_network_client_with_existing_vnet_location)
     def test_matching_vnet_subnet_size_matching(self):
         ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.instance_count = 5
@@ -211,7 +211,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         self.assertEqual(ns.subnet, 'vnet1subnet')
         self.assertEqual(ns.vnet_type, 'existing')
 
-    @mock.patch('azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.vnet.List', _mock_network_client_with_existing_subnet)
+    @mock.patch('azure.cli.command_modules.vm.aaz.profile_2020_09_01_hybrid.network.vnet.List', _mock_network_client_with_existing_subnet)
     def test_matching_vnet_no_subnet_size_matching(self):
         ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.instance_count = 1000

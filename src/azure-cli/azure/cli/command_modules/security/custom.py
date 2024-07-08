@@ -6,8 +6,7 @@ import string
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.security.models import (SecurityContact,
-                                        AutoProvisioningSetting,
+from azure.mgmt.security.models import (AutoProvisioningSetting,
                                         SecurityAssessment,
                                         SecurityAssessmentMetadata,
                                         AzureResourceDetails,
@@ -17,10 +16,6 @@ from azure.mgmt.security.models import (SecurityContact,
                                         Pricing,
                                         WorkspaceSetting,
                                         AdvancedThreatProtectionSetting,
-                                        RuleResultsInput,
-                                        RulesResultsInput,
-                                        AlertSyncSettings,
-                                        DataExportSettings,
                                         AlertsSuppressionRule,
                                         SuppressionAlertsScope,
                                         ScopeElement,
@@ -31,8 +26,9 @@ from azure.mgmt.security.models import (SecurityContact,
                                         AutomationActionLogicApp,
                                         AutomationActionEventHub,
                                         AutomationRuleSet,
-                                        AutomationTriggeringRule,
-                                        SettingName)
+                                        AutomationTriggeringRule)
+from azure.mgmt.security.v2020_07_01_preview.models import (RuleResultsInput, RulesResultsInput)
+from azure.mgmt.security.v2023_01_01.models import (Extension)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError)
 from msrestazure.tools import resource_id
@@ -226,71 +222,6 @@ def delete_security_alerts_suppression_rule_scope(client, rule_name, field):
 
 
 # --------------------------------------------------------------------------------------------
-# Security Settings
-# --------------------------------------------------------------------------------------------
-
-
-def list_security_settings(client):
-
-    return client.list()
-
-
-def get_security_setting(client, setting_name):
-
-    return client.get(setting_name)
-
-
-def update_security_setting(client, setting_name, enabled):
-
-    if setting_name == SettingName.SENTINEL:
-        setting = AlertSyncSettings()
-    else:
-        setting = DataExportSettings()
-
-    setting.enabled = enabled
-    return client.update(setting_name, setting)
-
-
-# --------------------------------------------------------------------------------------------
-# Security Contacts
-# --------------------------------------------------------------------------------------------
-
-
-def list_security_contacts(client):
-
-    return client.list()
-
-
-def get_security_contact(client, resource_name):
-
-    return client.get(resource_name)
-
-
-def create_security_contact(client, resource_name, email, phone=None, alert_notifications=None, alerts_admins=None):
-
-    if alert_notifications is None:
-        alert_notifications = ''
-
-    if alerts_admins is None:
-        alerts_admins = ''
-
-    if phone is None:
-        phone = ''
-
-    new_contact = SecurityContact(email=email,
-                                  phone=phone,
-                                  alert_notifications=alert_notifications,
-                                  alerts_to_admins=alerts_admins)
-
-    return client.create(resource_name, new_contact)
-
-
-def delete_security_contact(client, resource_name):
-
-    return client.delete(resource_name)
-
-
-# --------------------------------------------------------------------------------------------
 # Security Automatic Provisioning Settings
 # --------------------------------------------------------------------------------------------
 
@@ -433,9 +364,10 @@ def get_security_pricing(client, resource_name):
     return client.get(resource_name)
 
 
-def create_security_pricing(client, resource_name, tier):
-
-    return client.update(resource_name, Pricing(pricing_tier=tier))
+def create_security_pricing(client, resource_name, tier, subplan, extensions):
+    if extensions is not None:
+        extensions = [Extension(**extension) for extension in extensions]
+    return client.update(resource_name, Pricing(pricing_tier=tier, sub_plan=subplan, extensions=extensions))
 
 # --------------------------------------------------------------------------------------------
 # Security Topology
@@ -1094,7 +1026,7 @@ def create_security_automation_object(location, scopes, sources, actions, etag=N
     actionsAsObjectList = []
     for action in actions:
         if action['actionType'] == 'LogicApp':
-            actionAsObject = AutomationActionLogicApp(logic_app_resource_id=action['logicAppResourceId'], uri=action['ruleSets'])
+            actionAsObject = AutomationActionLogicApp(logic_app_resource_id=action['logicAppResourceId'], uri=action['uri'])
         elif action['actionType'] == 'EventHub':
             actionAsObject = AutomationActionEventHub(event_hub_resource_id=action['eventHubResourceId'], connection_string=action['connectionString'])
         elif action['actionType'] == 'Workspace':
@@ -1137,7 +1069,7 @@ def get_security_automation_rules_object(rules):
 
 def sanitize_json_as_string(value: string):
     valueLength = len(value)
-    if((value[0] == '\'' and value[valueLength - 1] == '\'') or (value[0] == '\"' and value[valueLength - 1] == '\"')):
+    if ((value[0] == '\'' and value[valueLength - 1] == '\'') or (value[0] == '\"' and value[valueLength - 1] == '\"')):
         value = value[1:]
         value = value[:-1]
     return value

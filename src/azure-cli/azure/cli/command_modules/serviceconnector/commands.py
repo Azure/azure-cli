@@ -4,8 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
+from knack.log import get_logger
 from ._transformers import (
     transform_support_types,
+    transform_linkers_properties,
     transform_linker_properties,
     transform_validation_result,
     transform_local_linker_properties
@@ -13,9 +15,13 @@ from ._transformers import (
 from ._resource_config import (
     RESOURCE,
     SOURCE_RESOURCES,
-    SUPPORTED_AUTH_TYPE
+    SUPPORTED_AUTH_TYPE,
+    TARGET_RESOURCES_DEPRECATED
 )
 from ._utils import should_load_source
+
+
+logger = get_logger(__name__)
 
 
 def load_command_table(self, _):  # pylint: disable=too-many-statements
@@ -36,10 +42,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         # if source resource is released as an extension, load our command groups
         # only when the extension is installed
         if should_load_source(source):
+            is_preview_source = (source == RESOURCE.KubernetesCluster)
 
             with self.command_group('{} connection'.format(source.value), connection_type,
-                                    client_factory=cf_linker) as og:
-                og.custom_command('list', 'connection_list')
+                                    client_factory=cf_linker, is_preview=is_preview_source) as og:
+                og.custom_command('list', 'connection_list', transform=transform_linkers_properties)
                 og.custom_show_command('show', 'connection_show', transform=transform_linker_properties)
                 og.custom_command('delete', 'connection_delete', confirmation=True, supports_no_wait=True)
                 og.custom_command('list-configuration', 'connection_list_configuration')
@@ -51,11 +58,14 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
             # use SUPPORTED_AUTH_TYPE to decide target resource, as some
             # target resources are not avialable for certain source resource
             supported_target_resources = list(SUPPORTED_AUTH_TYPE.get(source).keys())
-            supported_target_resources.remove(RESOURCE.ConfluentKafka)
+            if RESOURCE.ConfluentKafka in supported_target_resources:
+                supported_target_resources.remove(RESOURCE.ConfluentKafka)
+            else:
+                logger.warning("ConfluentKafka is not in supported target resources for %s", source.value)
             for target in supported_target_resources:
                 with self.command_group('{} connection create'.format(source.value),
                                         connection_type, client_factory=cf_linker) as ig:
-                    if target == RESOURCE.Mysql:
+                    if target in TARGET_RESOURCES_DEPRECATED:
                         ig.custom_command(target.value, 'connection_create', deprecate_info=self.deprecate(hide=False),
                                           supports_no_wait=True, transform=transform_linker_properties)
                     else:
@@ -63,7 +73,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                                           supports_no_wait=True, transform=transform_linker_properties)
                 with self.command_group('{} connection update'.format(source.value),
                                         connection_type, client_factory=cf_linker) as ig:
-                    if target == RESOURCE.Mysql:
+                    if target in TARGET_RESOURCES_DEPRECATED:
                         ig.custom_command(target.value, 'connection_update', deprecate_info=self.deprecate(hide=False),
                                           supports_no_wait=True, transform=transform_linker_properties)
                     else:
@@ -97,7 +107,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     supported_target_resources = list(
         SUPPORTED_AUTH_TYPE.get(RESOURCE.Local).keys())
-    supported_target_resources.remove(RESOURCE.ConfluentKafka)
+    if RESOURCE.ConfluentKafka in supported_target_resources:
+        supported_target_resources.remove(RESOURCE.ConfluentKafka)
+    else:
+        logger.warning("ConfluentKafka is not in supported target resources for %s", RESOURCE.Local.value)
     for target in supported_target_resources:
         with self.command_group('connection preview-configuration', client_factory=cf_configuration_names) as ig:
             ig.custom_command(target.value, 'connection_preview_configuration')

@@ -18,13 +18,13 @@ class Create(AAZCommand):
     """Create an AuthorizationRule for the specified Event Hub. Creation/update of the AuthorizationRule will take a few seconds to take effect.
 
     :example: Creates Authorizationrule for the given Eventhub
-        az eventhub authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule --rights Listen
+        az eventhubs eventhub authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule --rights Listen
     """
 
     _aaz_info = {
-        "version": "2022-01-01-preview",
+        "version": "2023-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/authorizationrules/{}", "2022-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/authorizationrules/{}", "2023-01-01-preview"],
         ]
     }
 
@@ -162,7 +162,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01-preview",
+                    "api-version", "2023-01-01-preview",
                     required=True,
                 ),
             }

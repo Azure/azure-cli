@@ -127,6 +127,10 @@ examples:
     text: az sql db create -g mygroup -s myserver -n mydb -e Hyperscale -f Gen5 -c 2 --read-replicas 2
   - name: Create a GeneralPurpose database with locally redundant backup storage
     text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose --backup-storage-redundancy Local
+  - name: Create a database with VBS enclave enabled.
+    text: az sql db create -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
+  - name: Create a database with free limit applied
+    text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen5 -c 2 --compute-model Serverless --use-free-limit --free-limit-exhaustion-behavior AutoPause
 """
 
 helps['sql db delete'] = """
@@ -161,7 +165,7 @@ examples:
 
 helps['sql db import'] = """
 type: command
-short-summary: Imports a bacpac into an existing database.
+short-summary: Imports a bacpac into a new database, or an existing empty database.
 examples:
   - name: Get an SAS key for use in import operation.
     text: |
@@ -238,7 +242,7 @@ type: command
 short-summary: Update long term retention settings for a database.
 examples:
   - name: Set long term retention for a database.
-    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26
+    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26 --access-tier "Archive" --make-backups-immutable true
 """
 
 helps['sql db ltr-policy show'] = """
@@ -259,7 +263,7 @@ type: command
 short-summary: Get a long term retention backup for a database.
 examples:
   - name: Show long term retention backup for a database.
-    text: az sql db ltr-backup show -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: az sql db ltr-backup show -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000;Hot"
 """
 
 helps['sql db ltr-backup list'] = """
@@ -531,6 +535,10 @@ examples:
     text: az sql db update -g mygroup -s myserver -n mydb --edition GeneralPurpose --capacity 2 --family Gen5 --compute-model Serverless
   - name: Update database with locally redundant backup storage
     text: az sql db update -g mygroup -s myserver -n mydb --backup-storage-redundancy Local
+  - name: Update database with VBS enclave enabled.
+    text: az sql db update -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
+  - name: Update exhaustion behavior of free limit database to BillOverUsage
+    text: az sql db update -g mygroup -s myserver -n mydb --free-limit-exhaustion-behavior BillOverUsage
 
 """
 
@@ -603,6 +611,8 @@ examples:
     text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen4 -c 1
   - name: Create an elastic pool with Hyperscale edition, Gen5 hardware, 4 vcore and 2 high availability replicas.
     text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e Hyperscale -f Gen5 -c 4 --ha-replicas 2
+  - name: Create an elastic pool with VBS enclave.
+    text: az sql elastic-pool create -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
 """
 
 helps['sql elastic-pool list-editions'] = """
@@ -642,6 +652,8 @@ examples:
     text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z false
   - name: Update elastic pool with 2 high availability replicas
     text: az sql elastic-pool update -g mygroup -s myserver -n mypool --ha-replicas 2
+  - name: Update elastic pool with VBS enclave
+    text: az sql elastic-pool update -g mygroup -s myserver -n mypool --preferred-enclave-type VBS
 """
 
 helps['sql failover-group'] = """
@@ -703,7 +715,7 @@ type: command
 short-summary: Create an instance pool.
 examples:
   - name: Example to create an instance pool (include --no-wait in the end to get an asynchronous experience)
-    text: az sql instance-pool create -g resource_group_name -n instance_pool_name -l location --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --license-type LicenseIncluded --capacity 8 -e GeneralPurpose -f Gen5 --no-wait
+    text: az sql instance-pool create -g resource_group_name -n instance_pool_name -l location --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --license-type LicenseIncluded --capacity 8 -e GeneralPurpose -f Gen5 -m SQL_{Region}_{MaintenanceConfigName} --no-wait
   - name: Example to create an instance pool with subnet name and vnet-name
     text: az sql instance-pool create --license-type LicenseIncluded -l northcentralus -n myinstancepool -c 8 -e GeneralPurpose -f Gen5 -g billingPools --subnet mysubnetname --vnet-name myvnetname
 """
@@ -739,7 +751,7 @@ type: command
 short-summary: Update an instance pool.
 examples:
   - name: Update an instance pool with new tags (make sure they are space separated if there are multiple tags)
-    text: az sql instance-pool update -n myinstancepool -g mygroup --tags mykey1=myvalue1 mykey2=myvalue2
+    text: az sql instance-pool update -n myinstancepool -g mygroup --tags mykey1=myvalue1 mykey2=myvalue2 --license-type LicenseIncluded --capacity 8 -e GeneralPurpose -f Gen5 -m SQL_{Region}_{MaintenanceConfigName}
   - name: Clear the tags assigned to an instance pool
     text: az sql instance-pool update -n myinstancepool -g mygroup --tags ""
 """
@@ -793,7 +805,7 @@ examples:
 
 helps['sql mi'] = """
 type: group
-short-summary: Manage SQL managed instances.
+short-summary: Manage SQL Managed Instances.
 """
 
 helps['sql mi ad-admin'] = """
@@ -884,6 +896,10 @@ examples:
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -z
   - name: Create managed instance with zone redundancy explicitly disabled
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -z false
+  - name: Create managed instance with instance pool name
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --instance-pool-name myinstancepool
+  - name: Create managed instance with database format and pricing model
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --database-format AlwaysUpToDate --pricing-model Regular
 """
 
 helps['sql mi delete'] = """
@@ -906,12 +922,12 @@ examples:
 
 helps['sql mi advanced-threat-protection-setting'] = """
 type: group
-short-summary: Manage a SQL managed instance's advanced threat protection setting.
+short-summary: Manage a SQL Managed Instance's advanced threat protection setting.
 """
 
 helps['sql mi advanced-threat-protection-setting update'] = """
 type: command
-short-summary: Update a SQL managed instance's advanced threat protection setting.
+short-summary: Update a SQL Managed Instance's advanced threat protection setting.
 parameters:
   - name: --state
     type: string
@@ -1013,21 +1029,27 @@ examples:
     text: az sql mi update -g mygroup -n myinstance --bsr Local
   - name: Enable zone redundancy on a managed instance
     text: az sql mi update -g mygroup -n myinstance -z
+  - name: Move managed instance to instance pool
+    text: az sql mi update -g mygroup -n myinstance --instance-pool-name myinstancepool
+  - name: Move managed instance out of instance pool
+    text: az sql mi update -g mygroup -n myinstance --remove instancePoolId --capacity vcorecapacity
+  - name: Update mi database format and pricing model
+    text: az sql mi update -g mygroup -n myinstance --database-format AlwaysUpToDate --pricing-model Regular
 """
 
 helps['sql midb'] = """
 type: group
-short-summary: Manage SQL managed instance databases.
+short-summary: Manage SQL Managed Instance databases.
 """
 
 helps['sql midb advanced-threat-protection-setting'] = """
 type: group
-short-summary: Manage a SQL managed instance database's advanced threat protection setting.
+short-summary: Manage a SQL Managed Instance database's advanced threat protection setting.
 """
 
 helps['sql midb advanced-threat-protection-setting update'] = """
 type: command
-short-summary: Update a SQL managed instance database's advanced threat protection setting.
+short-summary: Update a SQL Managed Instance database's advanced threat protection setting.
 parameters:
   - name: --state
     type: string
@@ -1892,4 +1914,102 @@ short-summary: Show the current ledger digest settings.
 examples:
   - name: Show the settings for uploading ledger digests.
     text: az sql db ledger-digest-uploads show --name mydb --resource-group MyResourceGroup --server myserver
+"""
+
+helps['sql midb move'] = """
+type: group
+short-summary: Start, complete, cancel and list managed database move operations.
+"""
+
+helps['sql midb move start'] = """
+type: command
+short-summary: Start managed database move operation.
+examples:
+  - name: Start cross resource group move operation.
+    text: az sql midb move start --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
+  - name: Start move operation inside same resource group.
+    text: az sql midb move start --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""
+
+helps['sql midb move complete'] = """
+type: command
+short-summary: Complete managed database move operation.
+examples:
+  - name: Complete cross resource group move operation.
+    text: az sql midb move complete --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
+  - name: Complete move operation inside same resource group.
+    text: az sql midb move complete --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""
+
+helps['sql midb move cancel'] = """
+type: command
+short-summary: Cancel managed database move operation.
+examples:
+  - name: Cancel cross resource group move operation.
+    text: az sql midb move cancel --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
+  - name: Cancel move operation inside same resource group.
+    text: az sql midb move cancel --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""
+
+helps['sql midb move list'] = """
+type: command
+short-summary: List managed database move operations.
+examples:
+  - name: List all move operations from given resource group and managed instance.
+    text: az sql midb move list --resource-group MyResourceGroup --managed-instance MyInstance
+  - name: List all move operations for specific managed database from given resource group and managed instance.
+    text: az sql midb move list --name mydb --resource-group MyResourceGroup --managed-instance MyInstance
+  - name: List latest move operation for specific managed database from given resource group and managed instance.
+    text: az sql midb move list --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --latest
+  - name: List all move operation from given resource group and managed instance into specific destination managed instance.
+    text: az sql midb move list --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""
+
+helps['sql midb copy'] = """
+type: group
+short-summary: Start, complete, cancel and list managed database copy operations.
+"""
+
+helps['sql midb copy start'] = """
+type: command
+short-summary: Start managed database copy operation.
+examples:
+  - name: Start cross resource group copy operation.
+    text: az sql midb copy start --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
+  - name: Start copy operation inside same resource group.
+    text: az sql midb copy start --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""
+
+helps['sql midb copy complete'] = """
+type: command
+short-summary: Complete managed database copy operation.
+examples:
+  - name: Complete cross resource group copy operation.
+    text: az sql midb copy complete --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
+  - name: Complete copy operation inside same resource group.
+    text: az sql midb copy complete --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""
+
+helps['sql midb copy cancel'] = """
+type: command
+short-summary: Cancel managed database copy operation.
+examples:
+  - name: Cancel cross resource group copy operation.
+    text: az sql midb copy cancel --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
+  - name: Cancel copy operation inside same resource group.
+    text: az sql midb copy cancel --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""
+
+helps['sql midb copy list'] = """
+type: command
+short-summary: List managed database copy operations.
+examples:
+  - name: List all copy operations from given resource group and managed instance.
+    text: az sql midb copy list --resource-group MyResourceGroup --managed-instance MyInstance
+  - name: List all copy operations for specific managed database from given resource group and managed instance.
+    text: az sql midb copy list --name mydb --resource-group MyResourceGroup --managed-instance MyInstance
+  - name: List latest copy operation for specific managed database from given resource group and managed instance.
+    text: az sql midb copy list --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --latest
+  - name: List all copy operation from given resource group and managed instance into specific destination managed instance.
+    text: az sql midb copy list --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
 """

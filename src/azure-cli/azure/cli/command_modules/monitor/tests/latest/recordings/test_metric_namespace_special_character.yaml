@@ -24,25 +24,26 @@ interactions:
       ParameterSetName:
       - -g -n --scopes --region --description --condition
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-monitor/4.0.1 Python/3.8.9 (macOS-12.5-x86_64-i386-64bit)
+      - AZURECLI/2.49.0 azsdk-python-azure-mgmt-monitor/5.0.0 Python/3.10.6 (macOS-13.4-x86_64-i386-64bit)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
-        \ \"name\": \"alert1\",\r\n  \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
-        \ \"location\": \"global\",\r\n  \"properties\": {\r\n    \"description\":
-        \"Test\",\r\n    \"severity\": 2,\r\n    \"enabled\": true,\r\n    \"scopes\":
-        [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Storage/storageAccounts/clitest000002\"\r\n
-        \   ],\r\n    \"evaluationFrequency\": \"PT1M\",\r\n    \"windowSize\": \"PT5M\",\r\n
-        \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"threshold\":
-        10.0,\r\n          \"name\": \"cond0\",\r\n          \"metricNamespace\":
-        \"My-Ns\",\r\n          \"metricName\": \"UnemittedMetric\",\r\n          \"operator\":
-        \"GreaterThanOrEqual\",\r\n          \"timeAggregation\": \"Average\",\r\n
-        \         \"skipMetricValidation\": true,\r\n          \"criterionType\":
-        \"StaticThresholdCriterion\"\r\n        }\r\n      ],\r\n      \"odata.type\":
-        \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n    },\r\n
-        \   \"targetResourceRegion\": \"westus\",\r\n    \"actions\": []\r\n  }\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Insights/metricAlerts/alert1\"\
+        ,\r\n  \"name\": \"alert1\",\r\n  \"type\": \"Microsoft.Insights/metricAlerts\"\
+        ,\r\n  \"location\": \"global\",\r\n  \"properties\": {\r\n    \"description\"\
+        : \"Test\",\r\n    \"severity\": 2,\r\n    \"enabled\": true,\r\n    \"scopes\"\
+        : [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Storage/storageAccounts/clitest000002\"\
+        \r\n    ],\r\n    \"evaluationFrequency\": \"PT1M\",\r\n    \"windowSize\"\
+        : \"PT5M\",\r\n    \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n\
+        \          \"threshold\": 10.0,\r\n          \"name\": \"cond0\",\r\n    \
+        \      \"metricNamespace\": \"My-Ns\",\r\n          \"metricName\": \"UnemittedMetric\"\
+        ,\r\n          \"operator\": \"GreaterThanOrEqual\",\r\n          \"timeAggregation\"\
+        : \"Average\",\r\n          \"skipMetricValidation\": true,\r\n          \"\
+        criterionType\": \"StaticThresholdCriterion\"\r\n        }\r\n      ],\r\n\
+        \      \"odata.type\": \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\
+        \r\n    },\r\n    \"targetResourceRegion\": \"westus\",\r\n    \"actions\"\
+        : []\r\n  }\r\n}"
     headers:
       api-supported-versions:
       - 2017-09-01-preview, 2018-03-01
@@ -55,7 +56,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Aug 2022 09:09:44 GMT
+      - Wed, 07 Jun 2023 04:38:21 GMT
       expires:
       - '-1'
       pragma:
@@ -73,7 +74,88 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '298'
+      - '299'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "global", "properties": {"description": "Test", "severity":
+      2, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
+      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "targetResourceRegion":
+      "westus", "criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"criterionType": "StaticThresholdCriterion", "name": "cond0", "metricName":
+      "\\LogicalDisk(C:)\\% Free Space", "metricNamespace": "My-Ns", "timeAggregation":
+      "Average", "dimensions": [], "skipMetricValidation": true, "operator": "Equals",
+      "threshold": 1.0}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor metrics alert create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '732'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --scopes --region --description --condition
+      User-Agent:
+      - AZURECLI/2.49.0 azsdk-python-azure-mgmt-monitor/5.0.0 Python/3.10.6 (macOS-13.4-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Insights/metricAlerts/alert2?api-version=2018-03-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Insights/metricAlerts/alert2\"\
+        ,\r\n  \"name\": \"alert2\",\r\n  \"type\": \"Microsoft.Insights/metricAlerts\"\
+        ,\r\n  \"location\": \"global\",\r\n  \"properties\": {\r\n    \"description\"\
+        : \"Test\",\r\n    \"severity\": 2,\r\n    \"enabled\": true,\r\n    \"scopes\"\
+        : [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Storage/storageAccounts/clitest000002\"\
+        \r\n    ],\r\n    \"evaluationFrequency\": \"PT1M\",\r\n    \"windowSize\"\
+        : \"PT5M\",\r\n    \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n\
+        \          \"threshold\": 1.0,\r\n          \"name\": \"cond0\",\r\n     \
+        \     \"metricNamespace\": \"My-Ns\",\r\n          \"metricName\": \"\\\\\
+        LogicalDisk(C:)\\\\% Free Space\",\r\n          \"operator\": \"Equals\",\r\
+        \n          \"timeAggregation\": \"Average\",\r\n          \"skipMetricValidation\"\
+        : true,\r\n          \"criterionType\": \"StaticThresholdCriterion\"\r\n \
+        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\
+        \r\n    },\r\n    \"targetResourceRegion\": \"westus\",\r\n    \"actions\"\
+        : []\r\n  }\r\n}"
+    headers:
+      api-supported-versions:
+      - 2017-09-01-preview, 2018-03-01
+      arr-disable-session-affinity:
+      - 'true'
+      cache-control:
+      - no-cache
+      content-length:
+      - '1185'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Jun 2023 04:38:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
       x-powered-by:
       - ASP.NET
     status:

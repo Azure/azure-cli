@@ -4,13 +4,22 @@ afd profile create:
         origin_response_timeout_seconds:
             rule_exclusions:
             - option_length_too_long
+        user_assigned_identities:
+            rule_exclusions:
+            - option_length_too_long
 afd profile update:
     parameters:
         origin_response_timeout_seconds:
             rule_exclusions:
             - option_length_too_long
+        user_assigned_identities:
+            rule_exclusions:
+            - option_length_too_long
 afd origin create:
     parameters:
+        shared_private_link_resource:
+            rule_exclusions:
+            - option_length_too_long
         private_link_location:
             rule_exclusions:
             - option_length_too_long
@@ -28,6 +37,9 @@ afd origin create:
             - option_length_too_long
 afd origin update:
     parameters:
+        shared_private_link_resource:
+            rule_exclusions:
+            - option_length_too_long
         private_link_location:
             rule_exclusions:
             - option_length_too_long
@@ -45,6 +57,15 @@ afd origin update:
             - option_length_too_long
 afd origin-group create:
     parameters:
+        additional_latency_in_milliseconds:
+            rule_exclusions:
+            - option_length_too_long
+        successful_samples_required:
+            rule_exclusions:
+            - option_length_too_long
+        traffic_restoration_time_to_healed_or_new_endpoints_in_minutes:
+            rule_exclusions:
+            - option_length_too_long
         load_balancing_additional_latency_in_milliseconds:
             rule_exclusions:
             - option_length_too_long
@@ -59,6 +80,15 @@ afd origin-group create:
             - option_length_too_long
 afd origin-group update:
     parameters:
+        additional_latency_in_milliseconds:
+            rule_exclusions:
+            - option_length_too_long
+        successful_samples_required:
+            rule_exclusions:
+            - option_length_too_long
+        traffic_restoration_time_to_healed_or_new_endpoints_in_minutes:
+            rule_exclusions:
+            - option_length_too_long
         load_balancing_additional_latency_in_milliseconds:
             rule_exclusions:
             - option_length_too_long
@@ -73,6 +103,9 @@ afd origin-group update:
             - option_length_too_long
 afd route create:
     parameters:
+        formatted_custom_domains:
+            rule_exclusions:
+            - option_length_too_long
         content_types_to_compress:
             rule_exclusions:
             - option_length_too_long
@@ -84,6 +117,9 @@ afd route create:
             - option_length_too_long
 afd route update:
     parameters:
+        formatted_custom_domains:
+            rule_exclusions:
+            - option_length_too_long
         content_types_to_compress:
             rule_exclusions:
             - option_length_too_long
@@ -104,12 +140,63 @@ afd rule create:
         match_processing_behavior:
             rule_exclusions:
             - option_length_too_long
+afd rule update:
+    parameters:
+        preserve_unmatched_path:
+            rule_exclusions:
+            - option_length_too_long
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        match_processing_behavior:
+            rule_exclusions:
+            - option_length_too_long
+afd rule action:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+afd rule action list:
+    rule_exclusions:
+    - no_ids_for_list_commands
+afd rule condition:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+afd rule condition list:
+    rule_exclusions:
+    - no_ids_for_list_commands
 afd rule action add:
     parameters:
         preserve_unmatched_path:
             rule_exclusions:
             - option_length_too_long
         query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        match_processing_behavior:
+            rule_exclusions:
+            - option_length_too_long     
+afd rule action remove:
+    parameters:
+        match_processing_behavior:
+            rule_exclusions:
+            - option_length_too_long
+afd rule condition add:
+    parameters:
+        match_processing_behavior:
+            rule_exclusions:
+            - option_length_too_long     
+afd rule condition remove:
+    parameters:
+        match_processing_behavior:
+            rule_exclusions:
+            - option_length_too_long     
+afd security-policy create:
+    parameters:
+        web_application_firewall:
+            rule_exclusions:
+            - option_length_too_long
+afd security-policy update:
+    parameters:
+        web_application_firewall:
             rule_exclusions:
             - option_length_too_long
 cdn endpoint waf policy set:
@@ -123,4 +210,135 @@ cdn endpoint:
 afd endpoint:
     rule_exclusions:
     - require_wait_command_if_no_wait
+cdn endpoint create:
+    parameters:
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn endpoint rule action add:
+    parameters:
+        content_types_to_compress:
+            rule_exclusions:
+            - option_length_too_long
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn endpoint rule action remove:
+    parameters:
+        content_types_to_compress:
+            rule_exclusions:
+            - option_length_too_long
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn endpoint rule add:
+    parameters:
+        content_types_to_compress:
+            rule_exclusions:
+            - option_length_too_long
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn endpoint rule condition add:
+    parameters:
+        content_types_to_compress:
+            rule_exclusions:
+            - option_length_too_long
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn endpoint rule condition remove:
+    parameters:
+        content_types_to_compress:
+            rule_exclusions:
+            - option_length_too_long
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn endpoint rule remove:
+    parameters:
+        content_types_to_compress:
+            rule_exclusions:
+            - option_length_too_long
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn endpoint update:
+    parameters:
+        query_string_caching_behavior:
+            rule_exclusions:
+            - option_length_too_long
+        web_application_firewall_policy_link:
+            rule_exclusions:
+            - option_length_too_long
+cdn origin create:
+    parameters:
+        private_link_approval_message:
+            rule_exclusions:
+            - option_length_too_long
+        private_link_resource_id:
+            rule_exclusions:
+            - option_length_too_long
+cdn origin-group create:
+    parameters:
+        response_based_origin_error_detection_settings:
+            rule_exclusions:
+            - option_length_too_long
+        response_error_detection_error_types:
+            rule_exclusions:
+            - option_length_too_long
+        response_error_detection_failover_threshold:
+            rule_exclusions:
+            - option_length_too_long
+        response_error_detection_status_code_ranges:
+            rule_exclusions:
+            - option_length_too_long
+        traffic_restoration_time_to_healed_or_new_endpoints_in_minutes:
+            rule_exclusions:
+            - option_length_too_long
+cdn origin-group update:
+    parameters:
+        response_based_origin_error_detection_settings:
+            rule_exclusions:
+            - option_length_too_long
+        response_error_detection_error_types:
+            rule_exclusions:
+            - option_length_too_long
+        response_error_detection_failover_threshold:
+            rule_exclusions:
+            - option_length_too_long
+        response_error_detection_status_code_ranges:
+            rule_exclusions:
+            - option_length_too_long
+        traffic_restoration_time_to_healed_or_new_endpoints_in_minutes:
+            rule_exclusions:
+            - option_length_too_long
+cdn profile create:
+    parameters:
+        origin_response_timeout_seconds:
+            rule_exclusions:
+            - option_length_too_long
+cdn profile update:
+    parameters:
+        origin_response_timeout_seconds:
+            rule_exclusions:
+            - option_length_too_long
 ...

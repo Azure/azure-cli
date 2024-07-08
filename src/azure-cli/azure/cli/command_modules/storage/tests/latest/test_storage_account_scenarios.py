@@ -1784,6 +1784,62 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage container create -n {container} --account-name {sa1} --blob-endpoint {endpoint} --account-key {storage_key}') \
             .assert_with_checks(self.check('created', True))
 
+    @ResourceGroupPreparer(location='eastus2euap')
+    @StorageAccountPreparer(location='eastus2euap', kind='StorageV2')
+    def test_storage_account_migration(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account
+        })
+        self.cmd('az storage account migration start --account-name {sa} -g {rg} --sku Standard_ZRS --no-wait')
+        # other status would take days to months
+        self.cmd('az storage account migration show -n default -g {rg} --account-name {sa}',
+                 checks=[JMESPathCheck('migrationStatus', 'SubmittedForConversion')])
+
+    @ResourceGroupPreparer(location='eastus')
+    def test_storage_account_upgrade_to_storagev2(self, resource_group):
+        self.kwargs.update({
+            'sastorage': self.create_random_name('sa', 24),
+            'sastoragewithtier': self.create_random_name('sa', 24),
+            'sablobstorage': self.create_random_name('sa', 24),
+            'sablobstoragewithtier': self.create_random_name('sa', 24),
+            'sastoragev2': self.create_random_name('sa', 24)
+        })
+        # Storagev1
+        self.cmd('az storage account create --kind Storage -n {sastorage} -g {rg}',
+                 checks=[JMESPathCheck('kind', 'Storage'),
+                         JMESPathCheck('accessTier', None)])
+        self.cmd('az storage account update --upgrade-to-storagev2 -n {sastorage} -g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Hot')])
+
+        self.cmd('az storage account create --kind Storage -n {sastoragewithtier} -g {rg}')
+        self.cmd('az storage account update --upgrade-to-storagev2 --access-tier Cool -n {sastoragewithtier} '
+                 '-g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Cool')])
+        # BlobStorage
+        self.cmd('az storage account create --kind BlobStorage --access-tier Cool -n {sablobstorage} -g {rg}',
+                 checks=[JMESPathCheck('kind', 'BlobStorage'),
+                         JMESPathCheck('accessTier', 'Cool')])
+        self.cmd('az storage account update --upgrade-to-storagev2 -n {sablobstorage} -g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Hot')])
+
+        self.cmd('az storage account create --kind Storage -n {sablobstoragewithtier} -g {rg}')
+        self.cmd('az storage account update --upgrade-to-storagev2 --access-tier Cool -n {sablobstoragewithtier} '
+                 '-g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Cool')])
+
+        # StorageV2
+        self.cmd('az storage account create -n {sastoragev2} -g {rg}',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Hot')])
+        self.cmd('az storage account update --access-tier Cool -n {sastoragev2} -g {rg} -y',
+                 checks=[JMESPathCheck('accessTier', 'Cool')])
+
+
+
 
 class RoleScenarioTest(LiveScenarioTest):
     def run_under_service_principal(self):
@@ -2027,6 +2083,33 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
 
         result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
+
+    @ResourceGroupPreparer(name_prefix="cli_test_sa_blob_cors")
+    @StorageAccountPreparer(location="eastus2", kind="StorageV2")
+    def test_storage_account_blob_cors_rule(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group
+        })
+
+        self.cmd('storage account blob-service-properties cors-rule add -n {sa} -g {rg} '
+                 '--allowed-origins "http://*.contoso.com" "http://www.fabrikam.com" --allowed-methods PUT GET '
+                 '--allowed-headers x-ms-meta-data* --max-age 200')\
+            .assert_with_checks(
+                        JMESPathCheck('length(@)', 1),
+                        JMESPathCheck('[0].allowedOrigins', ['http://*.contoso.com', 'http://www.fabrikam.com']),
+                        JMESPathCheck('[0].allowedMethods', ['PUT', 'GET']),
+                        JMESPathCheck('[0].allowedHeaders', ['x-ms-meta-data*']),
+                        JMESPathCheck('[0].exposedHeaders', []),
+                        JMESPathCheck('[0].maxAgeInSeconds', 200))
+
+        self.cmd('storage account blob-service-properties cors-rule list -n {sa} -g {rg}') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        self.cmd('storage account blob-service-properties cors-rule clear -n {sa} -g {rg}')\
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
+        self.cmd('storage account blob-service-properties cors-rule list -n {sa} -g {rg}')\
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
 
 
 class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
@@ -2428,6 +2511,10 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['rules'][0]['destinationContainer'], dest_container)
         self.assertEqual(result['rules'][0]['filters']['minCreationTime'], '2020-02-19T16:05:00Z')
 
+        src_policy_id = result["policyId"]
+        self.kwargs.update({"src_policy_id": src_policy_id})
+        self.cmd('storage account or-policy update -g {rg} -n {src_sc} -p @"{policy}" --policy-id {src_policy_id}')
+
         # Service behavior change: (InvalidObjectReplicationPolicy) SourceAccount can not be overwritten
         # # Update ORS policy
         # result = self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(
@@ -2558,6 +2645,7 @@ class StorageAccountBlobInventoryScenarioTest(StorageScenarioMixin, ScenarioTest
                          JMESPathCheck("policy.rules[0].definition.filters.includeSnapshots", True),
                          JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[0]", "inventoryprefix1"),
                          JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[1]", "inventoryprefix2"),
+                         JMESPathCheck("policy.rules[0].definition.filters.creationTime.lastNDays", 3),
                          JMESPathCheck("policy.rules[0].definition.format", "Csv"),
                          JMESPathCheck("policy.rules[0].definition.objectType", "Blob"),
                          JMESPathCheck("policy.rules[0].definition.schedule", "Daily"),

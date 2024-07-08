@@ -14,7 +14,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
 
     def _prepare_vm(self, resource_group, vm):
         vm_create_cmd_tpl = 'vm create -g {rg} --name {vm} ' \
-                            '--image UbuntuLTS ' \
+                            '--image Canonical:UbuntuServer:18.04-LTS:latest ' \
                             '--nsg {vm} ' \
                             '--generate-ssh-keys '\
                             '--nsg-rule None '

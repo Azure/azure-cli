@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import in_cloud_console
-
 
 def mgmt_batch_account_client_factory(cli_ctx, _):
     return batch_client_factory(cli_ctx).batch_account
@@ -89,12 +87,7 @@ def batch_data_service_factory(cli_ctx, kwargs):
     if not account_key:
         from azure.cli.core._profile import Profile
         profile = Profile(cli_ctx=cli_ctx)
-        # in order to use AAD auth in cloud shell mode, we will use mgmt AAD token
-        # instead of Batch AAD token to auth
-        if in_cloud_console():
-            resource = cli_ctx.cloud.endpoints.active_directory_resource_id
-        else:
-            resource = cli_ctx.cloud.endpoints.batch_resource_id
+        resource = cli_ctx.cloud.endpoints.batch_resource_id
         credentials, _, _ = profile.get_login_credentials(resource=resource)
     else:
         # Verify all values are populated and display readable error

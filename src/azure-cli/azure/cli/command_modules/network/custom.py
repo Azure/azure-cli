@@ -12,7 +12,8 @@ import socket
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
-from azure.cli.core.aaz import has_value
+from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client
+from azure.cli.core.aaz._client import AAZMgmtClient
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
@@ -29,8 +30,7 @@ from .aaz.latest.network.application_gateway import Update as _ApplicationGatewa
 from .aaz.latest.network.application_gateway.address_pool import Create as _AddressPoolCreate, \
     Update as _AddressPoolUpdate
 from .aaz.latest.network.application_gateway.auth_cert import Create as _AuthCertCreate, Update as _AuthCertUpdate
-from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCertAdd, Remove as _ClientCertRemove, \
-    Update as _ClientCertUpdate
+from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCertAdd, Update as _ClientCertUpdate
 from .aaz.latest.network.application_gateway.frontend_ip import Create as _FrontendIPCreate, Update as _FrontendIPUpdate
 from .aaz.latest.network.application_gateway.http_listener import Create as _HTTPListenerCreate, \
     Update as _HTTPListenerUpdate
@@ -52,8 +52,7 @@ from .aaz.latest.network.application_gateway.rule import Create as _RuleCreate, 
 from .aaz.latest.network.application_gateway.settings import Create as _SettingsCreate, Update as _SettingsUpdate
 from .aaz.latest.network.application_gateway.ssl_cert import Create as _SSLCertCreate, Update as _SSLCertUpdate
 from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
-from .aaz.latest.network.application_gateway.ssl_profile import Add as _SSLProfileAdd, Update as _SSLProfileUpdate, \
-    Remove as _SSLProfileRemove
+from .aaz.latest.network.application_gateway.ssl_profile import Add as _SSLProfileAdd, Update as _SSLProfileUpdate
 from .aaz.latest.network.application_gateway.url_path_map import Create as _URLPathMapCreate, \
     Update as _URLPathMapUpdate
 from .aaz.latest.network.application_gateway.url_path_map.rule import Create as _URLPathMapRuleCreate
@@ -62,8 +61,8 @@ from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condit
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
 from .aaz.latest.network.custom_ip.prefix import Update as _CustomIpPrefixUpdate
-from .aaz.latest.network.dns.record_set import Create as _DNSRecordSetCreate, Delete as _DNSRecordSetDelete, \
-    ListByType as _DNSRecordSetListByType, Show as _DNSRecordSetShow, Update as _DNSRecordSetUpdate
+from .aaz.latest.network.dns.record_set import List as _DNSRecordSetListByZone
+from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
     Update as _ExpressRouteGatewayUpdate
@@ -83,11 +82,10 @@ from .aaz.latest.network.nsg import Create as _NSGCreate
 from .aaz.latest.network.nsg.rule import Create as _NSGRuleCreate, Update as _NSGRuleUpdate
 from .aaz.latest.network.public_ip import Create as _PublicIPCreate, Update as _PublicIPUpdate
 from .aaz.latest.network.private_endpoint import Create as _PrivateEndpointCreate, Update as _PrivateEndpointUpdate
-from .aaz.latest.network.private_endpoint.asg import Add as _PrivateEndpointAsgAdd, Remove as _PrivateEndpointAsgRemove
+from .aaz.latest.network.private_endpoint.asg import Add as _PrivateEndpointAsgAdd
 from .aaz.latest.network.private_endpoint.dns_zone_group import Create as _PrivateEndpointPrivateDnsZoneGroupCreate, \
-    Add as _PrivateEndpointPrivateDnsZoneAdd, Remove as _PrivateEndpointPrivateDnsZoneRemove
-from .aaz.latest.network.private_endpoint.ip_config import Remove as _PrivateEndpointIpConfigRemove, \
-    Add as _PrivateEndpointIpConfigAdd
+    Add as _PrivateEndpointPrivateDnsZoneAdd
+from .aaz.latest.network.private_endpoint.ip_config import Add as _PrivateEndpointIpConfigAdd
 from .aaz.latest.network.private_link_service import Create as _PrivateLinkServiceCreate, \
     Update as _PrivateLinkServiceUpdate
 from .aaz.latest.network.private_link_service.connection import Update as _PrivateEndpointConnectionUpdate
@@ -99,7 +97,7 @@ from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdat
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
 from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
 from .aaz.latest.network.vnet_gateway import Create as _VnetGatewayCreate, Update as _VnetGatewayUpdate, \
-    DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect
+    DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect, Show as _VNetGatewayShow, List as _VNetGatewayList
 from .aaz.latest.network.vnet_gateway.aad import Assign as _VnetGatewayAadAssign
 from .aaz.latest.network.vnet_gateway.ipsec_policy import Add as _VnetGatewayIpsecPolicyAdd
 from .aaz.latest.network.vnet_gateway.nat_rule import Add as _VnetGatewayNatRuleAdd, List as _VnetGatewayNatRuleShow, \
@@ -113,8 +111,62 @@ from .aaz.latest.network.vpn_connection import Update as _VpnConnectionUpdate, \
 from .aaz.latest.network.vpn_connection.ipsec_policy import Add as _VpnConnIpsecPolicyAdd
 from .aaz.latest.network.vpn_connection.packet_capture import Stop as _VpnConnPackageCaptureStop
 from .aaz.latest.network.vpn_connection.shared_key import Update as _VpnConnSharedKeyUpdate
+from .operations.dns import (RecordSetAShow as DNSRecordSetAShow, RecordSetAAAAShow as DNSRecordSetAAAAShow,  # pylint: disable=unused-import
+                             RecordSetDSShow as DNSRecordSetDSShow, RecordSetMXShow as DNSRecordSetMXShow,
+                             RecordSetNSShow as DNSRecordSetNSShow, RecordSetPTRShow as DNSRecordSetPTRShow,
+                             RecordSetSRVShow as DNSRecordSetSRVShow, RecordSetTLSAShow as DNSRecordSetTLSAShow,
+                             RecordSetTXTShow as DNSRecordSetTXTShow, RecordSetCAAShow as DNSRecordSetCAAShow,
+                             RecordSetCNAMEShow as DNSRecordSetCNAMEShow, RecordSetSOAShow as DNSRecordSetSOAShow)
+from .operations.dns import (RecordSetACreate as DNSRecordSetACreate, RecordSetAAAACreate as DNSRecordSetAAAACreate,  # pylint: disable=unused-import
+                             RecordSetDSCreate as DNSRecordSetDSCreate, RecordSetMXCreate as DNSRecordSetMXCreate,
+                             RecordSetNSCreate as DNSRecordSetNSCreate, RecordSetPTRCreate as DNSRecordSetPTRCreate,
+                             RecordSetSRVCreate as DNSRecordSetSRVCreate, RecordSetTLSACreate as DNSRecordSetTLSACreate,
+                             RecordSetTXTCreate as DNSRecordSetTXTCreate, RecordSetCAACreate as DNSRecordSetCAACreate,
+                             RecordSetCNAMECreate as DNSRecordSetCNAMECreate, RecordSetSOACreate as DNSRecordSetSOACreate)
+from .operations.dns import (RecordSetAUpdate as DNSRecordSetAUpdate, RecordSetAAAAUpdate as DNSRecordSetAAAAUpdate,  # pylint: disable=unused-import
+                             RecordSetDSUpdate as DNSRecordSetDSUpdate, RecordSetMXUpdate as DNSRecordSetMXUpdate,
+                             RecordSetNSUpdate as DNSRecordSetNSUpdate, RecordSetPTRUpdate as DNSRecordSetPTRUpdate,
+                             RecordSetSRVUpdate as DNSRecordSetSRVUpdate, RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate,
+                             RecordSetTXTUpdate as DNSRecordSetTXTUpdate, RecordSetCAAUpdate as DNSRecordSetCAAUpdate,
+                             RecordSetCNAMEUpdate as DNSRecordSetCNAMEUpdate)
+from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetAAAADelete as DNSRecordSetAAAADelete,  # pylint: disable=unused-import
+                             RecordSetDSDelete as DNSRecordSetDSDelete, RecordSetMXDelete as DNSRecordSetMXDelete,
+                             RecordSetNSDelete as DNSRecordSetNSDelete, RecordSetPTRDelete as DNSRecordSetPTRDelete,
+                             RecordSetSRVDelete as DNSRecordSetSRVDelete, RecordSetTLSADelete as DNSRecordSetTLSADelete,
+                             RecordSetTXTDelete as DNSRecordSetTXTDelete, RecordSetCAADelete as DNSRecordSetCAADelete,
+                             RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)
+RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "2.1": "2.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
+
+remove_basic_option_msg = "It's recommended to create with `%s`. " \
+                          "Please be aware that Basic option will be removed in the future."
+
+subnet_disable_ple_msg = ("`--disable-private-endpoint-network-policies` will be deprecated in the future, if you wanna"
+                          "disable network policy for private endpoint, please use "
+                          "`--private-endpoint-network-policies Disabled` instead.")
+
+subnet_disable_pls_msg = ("`--disable-private-link-service-network-policies` will be deprecated in the future, if you "
+                          "wanna disable network policy for private link service, please use "
+                          "`--private-link-service-network-policies Disabled` instead.")
+
+
+@register_client("NonRetryableClient")
+class AAZNonRetryableClient(AAZMgmtClient):
+    @classmethod
+    def _build_configuration(cls, ctx, credential, **kwargs):
+        from azure.cli.core.auth.util import resource_to_scopes
+        from azure.core.pipeline.policies import RetryPolicy
+
+        retry_policy = RetryPolicy(**kwargs)
+        retry_policy._retry_on_status_codes.discard(429)
+        kwargs["retry_policy"] = retry_policy
+
+        return AAZClientConfiguration(
+            credential=credential,
+            credential_scopes=resource_to_scopes(ctx.cli_ctx.cloud.endpoints.active_directory_resource_id),
+            **kwargs
+        )
 
 
 # region Utility methods
@@ -151,6 +203,14 @@ def _get_default_value(balancer, property_name, option_name, return_name):
 # pylint: disable=too-many-statements
 def _is_v2_sku(sku):
     return 'v2' in sku
+
+
+def _add_aux_subscription(aux_subscriptions, added_resource_id):
+    if added_resource_id and is_valid_resource_id(added_resource_id):
+        res_parts = parse_resource_id(added_resource_id)
+        aux_sub = res_parts['subscription']
+        if aux_sub and aux_sub not in aux_subscriptions:
+            aux_subscriptions.append(aux_sub)
 
 
 def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
@@ -395,6 +455,19 @@ class AddressPoolUpdate(_AddressPoolUpdate):
         )
         args_schema.backend_addresses._registered = False
         return args_schema
+
+    class NonRetryableCreateOrUpdate(_AddressPoolUpdate.ApplicationGatewaysCreateOrUpdate):
+        CLIENT_TYPE = "NonRetryableClient"
+
+    def _execute_operations(self):
+        self.pre_operations()
+        self.ApplicationGatewaysGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.selectors.subresource.required())
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.selectors.subresource.required())
+        yield self.NonRetryableCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
 
     def pre_operations(self):
         args = self.ctx.args
@@ -852,17 +925,6 @@ class ClientCertAdd(_ClientCertAdd):
         return result
 
 
-class ClientCertRemove(_ClientCertRemove):
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
 class ClientCertUpdate(_ClientCertUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -1019,17 +1081,6 @@ class SSLProfileUpdate(_SSLProfileUpdate):
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
-
-
-class SSLProfileRemove(_SSLProfileRemove):
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 # endregion
 
 
@@ -1100,20 +1151,12 @@ class HTTPSettingsCreate(_HTTPSettingsCreate):
 class HTTPSettingsUpdate(_HTTPSettingsUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZListArgFormat, AAZIntArg, AAZIntArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
+        from azure.cli.core.aaz import AAZListArg, AAZIntArg, AAZIntArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
 
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.auth_certs = AAZListArg(
             options=["--auth-certs"],
             help="Space-separated list of authentication certificates (Names and IDs) to associate with the HTTP settings.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.auth_certs.Element = AAZResourceIdArg(
@@ -1127,7 +1170,6 @@ class HTTPSettingsUpdate(_HTTPSettingsUpdate):
             options=["--root-certs"],
             help="Space-separated list of trusted root certificates (Names and IDs) to associate with the HTTP settings. "
                  "`--host-name` or `--host-name-from-backend-pool` is required when this field is set.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.root_certs.Element = AAZResourceIdArg(
@@ -1219,21 +1261,12 @@ class SettingsCreate(_SettingsCreate):
 class SettingsUpdate(_SettingsUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZListArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.root_certs = AAZListArg(
             options=["--root-certs"],
             help="Space-separated list of trusted root certificates (Names and IDs) to associate with the HTTP settings. "
                  "`--host-name` or `--backend-pool-host-name` is required when this field is set.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.root_certs.Element = AAZResourceIdArg(
@@ -1755,29 +1788,21 @@ class URLPathMapUpdate(_URLPathMapUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZResourceIdArgFormat
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         # apply templates for resource id
-        args_schema.default_address_pool._fmt = EmptyResourceIdArgFormat(
+        args_schema.default_address_pool._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/backendAddressPools/{}",
         )
-        args_schema.default_http_settings._fmt = EmptyResourceIdArgFormat(
+        args_schema.default_http_settings._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
         )
-        args_schema.default_redirect_config._fmt = EmptyResourceIdArgFormat(
+        args_schema.default_redirect_config._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
         )
-        args_schema.default_rewrite_rule_set._fmt = EmptyResourceIdArgFormat(
+        args_schema.default_rewrite_rule_set._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
         )
@@ -1919,14 +1944,15 @@ class WAFCreate(_WAFCreate):
         args_schema.rule_set_type = AAZStrArg(
             options=["--type"],
             help="Type of the web application firewall rule set.",
-            default="OWASP",
-            enum={"Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet", "OWASP": "OWASP"},
+            default="Microsoft_DefaultRuleSet",
+            enum={"Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet", "Microsoft_DefaultRuleSet": "Microsoft_DefaultRuleSet", "OWASP": "OWASP"},
         )
         args_schema.rule_set_version = AAZStrArg(
             options=["--version"],
-            help="Version of the web application firewall rule set type, 0.1 is used for Microsoft_BotManagerRuleSet",
-            default="3.0",
-            enum={"0.1": "0.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"},
+            help="Version of the web application firewall rule set type. "
+                 "0.1 and 1.0 are used for Microsoft_BotManagerRuleSet",
+            default="2.1",
+            enum=RULESET_VERSION
         )
         return args_schema
 
@@ -2457,96 +2483,59 @@ def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
     if all([parent_zone_name, parent_rg, child_zone_name, child_zone]) and child_zone_name.endswith(parent_zone_name):
         record_set_name = child_zone_name.replace('.' + parent_zone_name, '')
         try:
-            for dname in child_zone.name_servers:
+            for dname in child_zone["nameServers"]:
                 add_dns_ns_record(cmd, parent_rg, parent_zone_name, record_set_name, dname, parent_subscription_id)
-            print('Delegation added succesfully in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
+            print('Delegation added successfully in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
         except HttpResponseError as ex:
             logger.error(ex)
             print('Could not add delegation in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
 
 
-def create_dns_zone(cmd, client, resource_group_name, zone_name, parent_zone_name=None, tags=None,
-                    if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
-    Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    zone = Zone(location='global', tags=tags)
+def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, tags=None, if_none_match=False):
+    created_zone = _DNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "zone_name": zone_name,
+        "if_none_match": '*' if if_none_match else None,
+        "location": 'global',
+        "tags": tags
+    })
 
-    if hasattr(zone, 'zone_type'):
-        zone.zone_type = zone_type
-        zone.registration_virtual_networks = registration_vnets
-        zone.resolution_virtual_networks = resolution_vnets
-
-    created_zone = client.create_or_update(resource_group_name, zone_name, zone,
-                                           if_none_match='*' if if_none_match else None)
-
-    if cmd.supported_api_version(min_api='2016-04-01', resource_type=ResourceType.MGMT_NETWORK_DNS) and parent_zone_name is not None:
+    if parent_zone_name is not None:
         logger.info('Attempting to add delegation in the parent zone')
         add_dns_delegation(cmd, created_zone, parent_zone_name, resource_group_name, zone_name)
     return created_zone
 
 
-def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, registration_vnets=None):
-
-    if tags is not None:
-        instance.tags = tags
-
-    if zone_type:
-        instance.zone_type = zone_type
-
-    if resolution_vnets == ['']:
-        instance.resolution_virtual_networks = None
-    elif resolution_vnets:
-        instance.resolution_virtual_networks = resolution_vnets
-
-    if registration_vnets == ['']:
-        instance.registration_virtual_networks = None
-    elif registration_vnets:
-        instance.registration_virtual_networks = registration_vnets
-    return instance
-
-
-def list_dns_zones(cmd, resource_group_name=None):
-    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS).zones
-    if resource_group_name:
-        return ncf.list_by_resource_group(resource_group_name)
-    return ncf.list()
-
-
-def create_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_set_type,
-                          metadata=None, if_match=None, if_none_match=None, ttl=3600, target_resource=None):
-    record_set = {
-        "ttl": ttl,
-        "metadata": metadata,
-        "target_resource": {"id": target_resource} if target_resource else None
-    }
-
-    return _DNSRecordSetCreate(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": record_set_name,
-        "zone_name": zone_name,
-        "resource_group": resource_group_name,
-        "record_type": record_set_type,
-        "if_match": if_match,
-        "if_none_match": "*" if if_none_match else None,
-        **record_set
-    })
-
-
-def list_dns_record_set(cmd, resource_group_name, zone_name, record_type):
-    return _DNSRecordSetListByType(cli_ctx=cmd.cli_ctx)(command_args={
-        "record_type": record_type,
+def show_dns_soa_record_set(cmd, resource_group_name, zone_name, record_type):
+    return DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "zone_name": zone_name
     })
 
 
-def update_dns_record_set(instance, cmd, metadata=None, target_resource=None):
-    if metadata is not None:
-        instance.metadata = metadata
-    if target_resource == '':
-        instance.target_resource = None
-    elif target_resource is not None:
-        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
-        instance.target_resource = SubResource(id=target_resource)
-    return instance
+def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=None,
+                          serial_number=None, refresh_time=None, retry_time=None, expire_time=None,
+                          minimum_ttl=3600, if_none_match=None):
+    record_set_name = '@'
+    record_type = 'soa'
+
+    record_set = DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "zone_name": zone_name,
+        "resource_group": resource_group_name
+    })
+
+    record_camal = record_set["SOARecord"]
+    record = dict()
+    record["host"] = host or record_camal.get("host", None)
+    record["email"] = email or record_camal.get("email", None)
+    record["serial_number"] = serial_number or record_camal.get("serialNumber", None)
+    record["refresh_time"] = refresh_time or record_camal.get("refreshTime", None)
+    record["retry_time"] = retry_time or record_camal.get("retryTime", None)
+    record["expire_time"] = expire_time or record_camal.get("expireTime", None)
+    record["minimum_ttl"] = minimum_ttl or record_camal.get("minimumTTL", None)
+
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            is_list=False, if_none_match=if_none_match)
 
 
 def _type_to_property_name(key):
@@ -2556,12 +2545,14 @@ def _type_to_property_name(key):
         'aaaa': ('aaaa_records', "AAAARecords"),
         'caa': ('caa_records', "caaRecords"),
         'cname': ('cname_record', "CNAMERecord"),
+        'ds': ('ds_records', "DSRecords"),
         'mx': ('mx_records', "MXRecords"),
         'ns': ('ns_records', "NSRecords"),
         'ptr': ('ptr_records', "PTRRecords"),
         'soa': ('soa_record', "SOARecord"),
         'spf': ('txt_records', "TXTRecords"),
         'srv': ('srv_records', "SRVRecords"),
+        'tlsa': ('tlsa_records', "TLSARecords"),
         'txt': ('txt_records', "TXTRecords"),
         'alias': ('target_resource', "targetResource"),
     }
@@ -2571,8 +2562,10 @@ def _type_to_property_name(key):
 def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint: disable=too-many-branches
     from time import localtime, strftime
 
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS)
-    record_sets = client.record_sets.list_by_dns_zone(resource_group_name, zone_name)
+    record_sets = _DNSRecordSetListByZone(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "zone_name": zone_name
+    })
 
     zone_obj = OrderedDict({
         '$origin': zone_name.rstrip('.') + '.',
@@ -2582,9 +2575,10 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
     })
 
     for record_set in record_sets:
-        record_type = record_set.type.rsplit('/', 1)[1].lower()
-        record_set_name = record_set.name
-        record_data = getattr(record_set, _type_to_property_name(record_type)[0], None)
+        record_set = _convert_to_snake_case(record_set)
+        record_type = record_set["type"].rsplit('/', 1)[1].lower()
+        record_set_name = record_set["name"]
+        record_data = record_set.get(_type_to_property_name(record_type)[0])
 
         if not record_data:
             record_data = []
@@ -2595,48 +2589,54 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
             zone_obj[record_set_name] = OrderedDict()
 
         for record in record_data:
-            record_obj = {'ttl': record_set.ttl}
+            record_obj = {'ttl': record_set["ttl"]}
 
             if record_type not in zone_obj[record_set_name]:
                 zone_obj[record_set_name][record_type] = []
             if record_type == 'aaaa':
-                record_obj.update({'ip': record.ipv6_address})
+                record_obj.update({'ip': record["ipv6_address"]})
             elif record_type == 'a':
-                record_obj.update({'ip': record.ipv4_address})
+                record_obj.update({'ip': record["ipv4_address"]})
             elif record_type == 'caa':
-                record_obj.update({'val': record.value, 'tag': record.tag, 'flags': record.flags})
+                record_obj.update({'val': record["value"], 'tag': record["tag"], 'flags': record["flags"]})
             elif record_type == 'cname':
-                record_obj.update({'alias': record.cname.rstrip('.') + '.'})
+                record_obj.update({'alias': record["cname"].rstrip('.') + '.'})
+            elif record_type == 'ds':
+                record_obj.update({'key_tag': record["key_tag"], 'algorithm': record["algorithm"], 'digest_type': record["digest"]["algorithm_type"], 'digest': record["digest"]["value"]})
             elif record_type == 'mx':
-                record_obj.update({'preference': record.preference, 'host': record.exchange.rstrip('.') + '.'})
+                record_obj.update({'preference': record["preference"], 'host': record["exchange"].rstrip('.') + '.'})
             elif record_type == 'ns':
-                record_obj.update({'host': record.nsdname.rstrip('.') + '.'})
+                record_obj.update({'host': record["nsdname"].rstrip('.') + '.'})
             elif record_type == 'ptr':
-                record_obj.update({'host': record.ptrdname.rstrip('.') + '.'})
+                record_obj.update({'host': record["ptrdname"].rstrip('.') + '.'})
             elif record_type == 'soa':
                 record_obj.update({
-                    'mname': record.host.rstrip('.') + '.',
-                    'rname': record.email.rstrip('.') + '.',
-                    'serial': int(record.serial_number), 'refresh': record.refresh_time,
-                    'retry': record.retry_time, 'expire': record.expire_time,
-                    'minimum': record.minimum_ttl
+                    'mname': record["host"].rstrip('.') + '.',
+                    'rname': record["email"].rstrip('.') + '.',
+                    'serial': int(record["serial_number"]),
+                    'refresh': record["refresh_time"],
+                    'retry': record["retry_time"],
+                    'expire': record["expire_time"],
+                    'minimum': record["minimum_ttl"]
                 })
-                zone_obj['$ttl'] = record.minimum_ttl
+                zone_obj['$ttl'] = record["minimum_ttl"]
             elif record_type == 'srv':
-                record_obj.update({'priority': record.priority, 'weight': record.weight,
-                                   'port': record.port, 'target': record.target.rstrip('.') + '.'})
+                record_obj.update({'priority': record["priority"], 'weight': record["weight"],
+                                   'port': record["port"], 'target': record["target"].rstrip('.') + '.'})
+            elif record_type == 'tlsa':
+                record_obj.update({'usage': record["usage"], 'selector': record["selector"], 'matching_type': record["matching_type"], 'certificate': record["cert_association_data"]})
             elif record_type == 'txt':
-                record_obj.update({'txt': ''.join(record.value)})
+                record_obj.update({'txt': ''.join(record["value"])})
             zone_obj[record_set_name][record_type].append(record_obj)
 
         if len(record_data) == 0:
-            record_obj = {'ttl': record_set.ttl}
+            record_obj = {'ttl': record_set["ttl"]}
 
             if record_type not in zone_obj[record_set_name]:
                 zone_obj[record_set_name][record_type] = []
             # Checking for alias record
-            if (record_type == 'a' or record_type == 'aaaa' or record_type == 'cname') and record_set.target_resource.id:
-                target_resource_id = record_set.target_resource.id
+            if (record_type == 'a' or record_type == 'aaaa' or record_type == 'cname') and record_set["target_resource"]["id"]:
+                target_resource_id = record_set["target_resource"]["id"]
                 record_obj.update({'target-resource-id': record_type.upper() + " " + target_resource_id})
                 record_type = 'alias'
                 if record_type not in zone_obj[record_set_name]:
@@ -2668,19 +2668,25 @@ def _build_record(cmd, data):
             return {"value": data["val"], "flags": int(data["flags"]), "tag": data["tag"]}
         if record_type == 'cname':
             return {"cname": data["alias"]}
+        if record_type == 'ds':
+            return {"key_tag": int(data["key_tag"]), "algorithm": int(data["algorithm"]),
+                    "digest": {"algorithm_type": int(data["digest_type"]), "value": data["digest"]}}
         if record_type == 'mx':
-            return {"preference": data["preference"], "exchange": data["host"]}
+            return {"preference": int(data["preference"]), "exchange": data["host"]}
         if record_type == 'ns':
             return {"nsdname": data["host"]}
         if record_type == 'ptr':
             return {"ptrdname": data["host"]}
         if record_type == 'soa':
-            return {"host": data["host"], "email": data["email"], "serial_number": data["serial"],
+            return {"host": data["host"], "email": data["email"], "serial_number": int(data["serial"]),
                     "refresh_time": data["refresh"], "retry_time": data["retry"], "expire_time": data["expire"],
                     "minimum_ttl": data["minimum"]}
         if record_type == 'srv':
             return {"priority": int(data["priority"]), "weight": int(data["weight"]), "port": int(data["port"]),
                     "target": data["target"]}
+        if record_type == 'tlsa':
+            return {"usage": int(data["usage"]), "selector": int(data["selector"]),
+                    "matching_type": int(data["matching_type"]), "cert_association_data": data["certificate"]}
         if record_type in ['txt', 'spf']:
             text_data = data['txt']
             return {"value": text_data} if isinstance(text_data, list) else {"value": [text_data]}
@@ -2717,7 +2723,6 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
     for record_set_name in zone_obj:
         for record_set_type in zone_obj[record_set_name]:
             record_set_obj = zone_obj[record_set_name][record_set_type]
-
             if record_set_type == 'soa':
                 origin = record_set_name.rstrip('.')
 
@@ -2735,11 +2740,13 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
                     record_set_key = '{}{}'.format(record_set_name.lower(), alias_record_type)
 
                 record = _build_record(cmd, entry)
+
                 if not record:
                     logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['delim'].lower())
                     continue
 
                 record_set = record_sets.get(record_set_key, None)
+
                 if not record_set:
 
                     # Workaround for issue #2824
@@ -2752,6 +2759,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
                     record_set = {"ttl": record_set_ttl}
                     record_sets[record_set_key] = record_set
+
                 _add_record(record_set, record, record_set_type,
                             is_list=record_set_type.lower() not in ['soa', 'cname', 'alias'])
 
@@ -2760,40 +2768,63 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
         rs_name, rs_type = key.lower().rsplit('.', 1)
         rs_name = rs_name[:-(len(origin) + 1)] if rs_name != origin else '@'
         try:
-            record_count = len(rs[_type_to_property_name(rs_type)[0]])
-        except TypeError:
+            records_temp = rs[_type_to_property_name(rs_type)[0]]
+            record_count = len(records_temp) if isinstance(records_temp, list) else 1
+        except (TypeError, KeyError):
+            # There is some bug with `alias records` being mapped from `AZURE ALIAS A` to `ARecords`,
+            # but `rs` does not contain `a_records`.  We could fix it, but this is just logging, so
+            # lets not fail the whole import and hope someone refactors this method
             record_count = 1
         total_records += record_count
     cum_records = 0
 
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS)
     print('== BEGINNING ZONE IMPORT: {} ==\n'.format(zone_name), file=sys.stderr)
 
-    Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    client.zones.create_or_update(resource_group_name, zone_name, Zone(location='global'))
-    for key, rs in record_sets.items():
+    _DNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'zone_name': zone_name,
+        'location': 'global'
+    })
 
+    for key, rs in record_sets.items():
         rs_name, rs_type = key.lower().rsplit('.', 1)
         rs_name = '@' if rs_name == origin else rs_name
+
         if rs_name.endswith(origin):
             rs_name = rs_name[:-(len(origin) + 1)]
 
         try:
-            record_count = len(rs[_type_to_property_name(rs_type)[0]])
-        except TypeError:
+            records_temp = rs[_type_to_property_name(rs_type)[0]]
+            record_count = len(records_temp) if isinstance(records_temp, list) else 1
+        except (TypeError, KeyError):
             record_count = 1
+
         if rs_name == '@' and rs_type == 'soa':
-            root_soa = client.record_sets.get(resource_group_name, zone_name, '@', 'SOA')
-            rs["soa_record"]["host"] = root_soa.soa_record.host
+            root_soa = DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'zone_name': zone_name,
+            })
+            rs["soa_record"]["host"] = root_soa["SOARecord"]["host"]
             rs_name = '@'
         elif rs_name == '@' and rs_type == 'ns':
-            root_ns = client.record_sets.get(resource_group_name, zone_name, '@', 'NS')
-            root_ns.ttl = rs["ttl"]
-            rs = root_ns
-            rs_type = rs.type.rsplit('/', 1)[1]
+            root_ns = DNSRecordSetNSShow(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'zone_name': zone_name,
+                'name': '@'
+            })
+            root_ns["ttl"] = rs["ttl"]
+            rs = _convert_to_snake_case(root_ns)
         try:
-            client.record_sets.create_or_update(
-                resource_group_name, zone_name, rs_name, rs_type, rs)
+            rs["target_resource"] = rs.get("target_resource").get("id") if rs.get("target_resource") else None
+
+            _record_create = _record_create_func(rs_type)
+            _record_create(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'zone_name': zone_name,
+                'name': rs_name,
+                **rs
+            })
+
             cum_records += record_count
             print("({}/{}) Imported {} records of type '{}' and name '{}'"
                   .format(cum_records, total_records, record_count, rs_type, rs_name), file=sys.stderr)
@@ -2834,6 +2865,14 @@ def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, c
                             is_list=False, ttl=ttl, if_none_match=if_none_match)
 
 
+def add_dns_ds_record(cmd, resource_group_name, zone_name, record_set_name, key_tag, algorithm, digest_type, digest,
+                      ttl=3600, if_none_match=None):
+    record = {"algorithm": algorithm, "key_tag": key_tag, "digest": {"algorithm_type": digest_type, "value": digest}}
+    record_type = 'ds'
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl, if_none_match=if_none_match)
+
+
 def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
                       ttl=3600, if_none_match=None):
     record = {"preference": int(preference), "exchange": exchange}
@@ -2857,40 +2896,20 @@ def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dna
                             ttl=ttl, if_none_match=if_none_match)
 
 
-def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=None,
-                          serial_number=None, refresh_time=None, retry_time=None, expire_time=None,
-                          minimum_ttl=3600, if_none_match=None):
-    record_set_name = '@'
-    record_type = 'soa'
-
-    from .aaz.latest.network.dns.record_set import Show
-    record_set = Show(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": record_set_name,
-        "zone_name": zone_name,
-        "resource_group": resource_group_name,
-        "record_type": record_type
-    })
-
-    record_camal = record_set["SOARecord"]
-    record = dict()
-    record["host"] = host or record_camal.get("host", None)
-    record["email"] = email or record_camal.get("email", None)
-    record["serial_number"] = serial_number or record_camal.get("serialNumber", None)
-    record["refresh_time"] = refresh_time or record_camal.get("refreshTime", None)
-    record["retry_time"] = retry_time or record_camal.get("retryTime", None)
-    record["expire_time"] = expire_time or record_camal.get("expireTime", None)
-    record["minimum_ttl"] = minimum_ttl or record_camal.get("minimumTTL", None)
-
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            is_list=False, if_none_match=if_none_match)
-
-
 def add_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, priority, weight,
                        port, target, if_none_match=None):
     record = {"priority": priority, "weight": weight, "port": port, "target": target}
     record_type = 'srv'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             if_none_match=if_none_match)
+
+
+def add_dns_tlsa_record(cmd, resource_group_name, zone_name, record_set_name, certificate_usage, selector, matching_type, certificate_data,
+                        ttl=3600, if_none_match=None):
+    record = {"cert_association_data": certificate_data, "matching_type": matching_type, "selector": selector, "usage": certificate_usage}
+    record_type = 'tlsa'
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl, if_none_match=if_none_match)
 
 
 def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, value, if_none_match=None):
@@ -2942,6 +2961,13 @@ def remove_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name
                           is_list=False, keep_empty_record_set=keep_empty_record_set)
 
 
+def remove_dns_ds_record(cmd, resource_group_name, zone_name, record_set_name, key_tag, algorithm, digest_type, digest, keep_empty_record_set=False):
+    record = {"algorithm": algorithm, "key_tag": key_tag, "digest": {"algorithm_type": digest_type, "value": digest}}
+    record_type = 'ds'
+    return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
+
+
 def remove_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
                          keep_empty_record_set=False):
     record = {"preference": int(preference), "exchange": exchange}
@@ -2970,6 +2996,13 @@ def remove_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, 
                           port, target, keep_empty_record_set=False):
     record = {"priority": priority, "weight": weight, "port": port, "target": target}
     record_type = 'srv'
+    return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
+
+
+def remove_dns_tlsa_record(cmd, resource_group_name, zone_name, record_set_name, certificate_usage, selector, matching_type, certificate_data, keep_empty_record_set=False):
+    record = {"cert_association_data": certificate_data, "matching_type": matching_type, "selector": selector, "usage": certificate_usage}
+    record_type = 'tlsa'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
 
@@ -3010,6 +3043,13 @@ def _check_cname_record_exist(record, exist_list):
     return False
 
 
+def _check_ds_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r["algorithm"], r["key_tag"], r["digest"]["algorithm_type"], r["digest"]["value"]) == (record["algorithm"], record["key_tag"], record["digest"]["algorithm_type"], record["digest"]["value"]):
+            return True
+    return False
+
+
 def _check_mx_record_exist(record, exist_list):
     for r in exist_list:
         if (r["preference"], r["exchange"]) == (record["preference"], record["exchange"]):
@@ -3034,6 +3074,13 @@ def _check_ptr_record_exist(record, exist_list):
 def _check_srv_record_exist(record, exist_list):
     for r in exist_list:
         if (r["priority"], r["weight"], r["port"], r["target"]) == (record["priority"], record["weight"], record["port"], record["target"]):
+            return True
+    return False
+
+
+def _check_tlsa_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r["cert_association_data"], r["matching_type"], r["selector"], r["usage"]) == (record["cert_association_data"], record["matching_type"], record["selector"], record["usage"]):
             return True
     return False
 
@@ -3065,18 +3112,34 @@ def _add_record(record_set, record, record_type, is_list=False):
         record_set[record_property] = record
 
 
+def _record_show_func(record_type):
+    return globals()["DNSRecordSet{}Show".format(record_type.upper())]
+
+
+def _record_create_func(record_type):
+    return globals()["DNSRecordSet{}Create".format(record_type.upper())]
+
+
+def _record_delete_func(record_type):
+    return globals()["DNSRecordSet{}Delete".format(record_type.upper())]
+
+
+def _record_update_func(record_type):
+    return globals()["DNSRecordSet{}Update".format(record_type.upper())]
+
+
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                      is_list=True, subscription_id=None, ttl=None, if_none_match=None):
     from azure.core.exceptions import HttpResponseError
 
     record_snake, record_camel = _type_to_property_name(record_type)
     try:
-        ret = _DNSRecordSetShow(cli_ctx=cmd.cli_ctx)(command_args={
+        _record_show = _record_show_func(record_type)
+        ret = _record_show(cli_ctx=cmd.cli_ctx)(command_args={
             "name": record_set_name,
             "zone_name": zone_name,
             "subscription": subscription_id,
-            "resource_group": resource_group_name,
-            "record_type": record_type
+            "resource_group": resource_group_name
         })
         record_set = dict()
         record_set["ttl"] = ret.get("TTL", None)
@@ -3090,12 +3153,13 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
 
     _add_record(record_set, record, record_type, is_list)
 
-    return _DNSRecordSetCreate(cli_ctx=cmd.cli_ctx)(command_args={
+    record_set["target_resource"] = record_set.get("target_resource").get("id") if record_set.get("target_resource") else None
+    _record_create = _record_create_func(record_type)
+    return _record_create(cli_ctx=cmd.cli_ctx)(command_args={
         "name": record_set_name,
         "zone_name": zone_name,
         "subscription": subscription_id,
         "resource_group": resource_group_name,
-        "record_type": record_type,
         "if_none_match": "*" if if_none_match else None,
         **record_set
     })
@@ -3104,7 +3168,9 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
 def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                    keep_empty_record_set, is_list=True):
     record_snake, record_camel = _type_to_property_name(record_type)
-    ret = _DNSRecordSetShow(cli_ctx=cli_ctx)(command_args={
+
+    _record_show = _record_show_func(record_type)
+    ret = _record_show(cli_ctx=cli_ctx)(command_args={
         "name": record_set_name,
         "zone_name": zone_name,
         "resource_group": resource_group_name,
@@ -3114,6 +3180,8 @@ def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group
     record_set["ttl"] = ret.get("TTL", None)
     record_set[record_snake] = ret.get(record_camel, None)
     record_set = _convert_to_snake_case(record_set)
+
+    logger.debug('Retrieved record: %s', str(record_set))
 
     if is_list:
         record_list = record_set[record_snake]
@@ -3127,24 +3195,25 @@ def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group
         record_set[record_snake] = None
 
     if is_list:
-        records_remaining = len(record_set[record_snake])
+        records_remaining = len(record_set[record_snake]) if record_set[record_snake] is not None else 0
     else:
         records_remaining = 1 if record_set[record_snake] is not None else 0
 
     if not records_remaining and not keep_empty_record_set:
         logger.info('Removing empty %s record set: %s', record_type, record_set_name)
-        return _DNSRecordSetDelete(cli_ctx=cli_ctx)(command_args={
+
+        _record_delete = _record_delete_func(record_type)
+        return _record_delete(cli_ctx=cli_ctx)(command_args={
             "name": record_set_name,
             "zone_name": zone_name,
-            "resource_group": resource_group_name,
-            "record_type": record_type
+            "resource_group": resource_group_name
         })
 
-    return _DNSRecordSetUpdate(cli_ctx=cli_ctx)(command_args={
+    _record_update = _record_update_func(record_type)
+    return _record_update(cli_ctx=cli_ctx)(command_args={
         "name": record_set_name,
         "zone_name": zone_name,
         "resource_group": resource_group_name,
-        "record_type": record_type,
         **record_set
     })
 
@@ -3200,7 +3269,6 @@ class ExpressRouteCreate(_ExpressRouteCreate):
 
 
 class ExpressRouteUpdate(_ExpressRouteUpdate):
-
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
@@ -3208,31 +3276,37 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
         args_schema.bandwidth = AAZListArg(
             options=["--bandwidth"],
             help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.",
-            nullable=True,
+            nullable=True
         )
         args_schema.bandwidth.Element = AAZStrArg(nullable=True)
         args_schema.bandwidth_in_mbps._registered = False
         args_schema.bandwidth_in_gbps._registered = False
         args_schema.sku_name._registered = False
         args_schema.express_route_port._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRoutePorts/{}",
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/expressRoutePorts/{}"
         )
+
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
         if has_value(args.sku_tier) and has_value(args.sku_family):
-            args.sku_name = '{}_{}'.format(args.sku_tier, args.sku_family)
+            args.sku_name = f"{args.sku_tier}_{args.sku_family}"
+
         if has_value(args.bandwidth):
             converted_bandwidth = _validate_bandwidth(args.bandwidth)
-            args.bandwidth_in_gbps = (converted_bandwidth / 1000.0)
+            args.bandwidth_in_gbps = converted_bandwidth / 1000
             args.bandwidth_in_mbps = int(converted_bandwidth)
 
     def post_instance_update(self, instance):
-        if instance.properties.expressRoutePort is not None:
-            instance.properties.serviceProviderProperties = None
+        if not has_value(instance.properties.express_route_port.id):
+            instance.properties.express_route_port = None
+
+        if has_value(instance.properties.express_route_port):
+            instance.properties.service_provider_properties = None
         else:
-            instance.properties.bandwidthInGbps = None
+            instance.properties.bandwidth_in_gbps = None
 
 
 def _validate_ipv6_address_prefixes(prefixes):
@@ -3758,31 +3832,7 @@ class PrivateEndpointPrivateDnsZoneAdd(_PrivateEndpointPrivateDnsZoneAdd):
         return result
 
 
-class PrivateEndpointPrivateDnsZoneRemove(_PrivateEndpointPrivateDnsZoneRemove):
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
 class PrivateEndpointIpConfigAdd(_PrivateEndpointIpConfigAdd):
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class PrivateEndpointIpConfigRemove(_PrivateEndpointIpConfigRemove):
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -3797,18 +3847,6 @@ class PrivateEndpointAsgAdd(_PrivateEndpointAsgAdd):
         args_schema.asg_id._required = False
 
         return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class PrivateEndpointAsgRemove(_PrivateEndpointAsgRemove):
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -3912,6 +3950,13 @@ class PrivateEndpointConnectionUpdate(_PrivateEndpointConnectionUpdate):
 
 
 # region LoadBalancers
+def _get_lb_create_aux_subscriptions(public_ip_address, subnet):
+    aux_subscriptions = []
+    _add_aux_subscription(aux_subscriptions, public_ip_address)
+    _add_aux_subscription(aux_subscriptions, subnet)
+    return aux_subscriptions
+
+
 def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=None, tags=None,
                          backend_pool_name=None, frontend_ip_name='LoadBalancerFrontEnd',
                          private_ip_address=None, public_ip_address=None,
@@ -3927,12 +3972,16 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         build_load_balancer_resource, build_public_ip_resource, build_vnet_resource)
 
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    aux_subscriptions = _get_lb_create_aux_subscriptions(public_ip_address, subnet)
 
     if public_ip_address is None:
         logger.warning(
             "Please note that the default public IP used for creation will be changed from Basic to Standard "
             "in the future."
         )
+
+    if sku.lower() == "basic":
+        logger.warning(remove_basic_option_msg, "--sku standard")
 
     tags = tags or {}
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
@@ -3988,7 +4037,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
 
     # deploy ARM template
     deployment_name = 'lb_deploy_' + random_string(32)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     deployment = Deployment(properties=properties)
@@ -4053,6 +4102,7 @@ def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
 
         subnet = vnet + f'/subnets/{subnet}'
     return subnet
+# endregion
 
 
 # region cross-region lb
@@ -4273,33 +4323,17 @@ class NICCreate(_NICCreate):
 class NICUpdate(_NICUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_security_group = AAZResourceIdArg(
             options=["--network-security-group"],
             help="Name or ID of an existing network security group",
-            fmt=EmptyResourceIdArgFormat(
+            fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                          "/networkSecurityGroups/{}",
             ),
             nullable=True,
         )
-        args_schema.dns_servers._fmt = EmptyListArgFormat()
         args_schema.nsg._registered = False
         return args_schema
 
@@ -4447,22 +4481,7 @@ class NICIPConfigCreate(_NICIPConfigCreate):
 class NICIPConfigUpdate(_NICIPConfigUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet_name = AAZStrArg(
             options=["--vnet-name"],
@@ -4470,15 +4489,15 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             help="Name of the virtual network.",
             nullable=True,
         )
-        args_schema.subnet._fmt = EmptyResourceIdArgFormat(
+        args_schema.subnet._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/virtualNetworks/{vnet_name}/subnets/{}",
         )
-        args_schema.public_ip_address._fmt = EmptyResourceIdArgFormat(
+        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
                      "publicIPAddresses/{}"
         )
-        args_schema.gateway_lb._fmt = EmptyResourceIdArgFormat(
+        args_schema.gateway_lb._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
                      "loadBalancers/{}/frontendIPConfigurations/{}",
         )
@@ -4486,7 +4505,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             options=["--application-security-groups", "--asgs"],
             arg_group="IP Configuration",
             help="Space-separated list of application security groups.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.application_security_groups.Element = AAZResourceIdArg(
@@ -4507,7 +4525,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             arg_group="Application Gateway",
             help="Space-separated list of names or IDs of application gateway backend address pools to "
                  "associate with the NIC. If names are used, `--gateway-name` must be specified.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.app_gateway_address_pools.Element = AAZResourceIdArg(
@@ -4528,7 +4545,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             arg_group="Load Balancer",
             help="Space-separated list of names or IDs of load balancer address pools to associate with the NIC. "
                  "If names are used, `--lb-name` must be specified.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.lb_address_pools.Element = AAZResourceIdArg(
@@ -4543,7 +4559,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             arg_group="Load Balancer",
             help="Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. "
                  "If names are used, `--lb-name` must be specified.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.lb_inbound_nat_rules.Element = AAZResourceIdArg(
@@ -4640,28 +4655,8 @@ def add_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_n
 
 def remove_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_name, ip_config_name,
                                       backend_address_pool, load_balancer_name=None, application_gateway_name=None):
-    from .aaz.latest.network.nic.ip_config.lb_pool import Remove as _LBPoolRemove
-    from .aaz.latest.network.nic.ip_config.ag_pool import Remove as _AGPoolRemove
-
-    class LBPoolRemove(_LBPoolRemove):
-        def _handler(self, command_args):
-            lro_poller = super()._handler(command_args)
-            lro_poller._result_callback = self._output
-            return lro_poller
-
-        def _output(self, *args, **kwargs):
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            return result["ipConfigurations"][0]
-
-    class AGPoolRemove(_AGPoolRemove):
-        def _handler(self, command_args):
-            lro_poller = super()._handler(command_args)
-            lro_poller._result_callback = self._output
-            return lro_poller
-
-        def _output(self, *args, **kwargs):
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            return result["ipConfigurations"][0]
+    from .aaz.latest.network.nic.ip_config.lb_pool import Remove as LBPoolRemove
+    from .aaz.latest.network.nic.ip_config.ag_pool import Remove as AGPoolRemove
 
     arguments = {
         "ip_config_name": ip_config_name,
@@ -4696,10 +4691,6 @@ class NICIPConfigNATAdd(_NICIPConfigNATAdd):
 
 
 class NICIPConfigNATRemove(_NICIPConfigNATRemove):
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -4714,10 +4705,6 @@ class NICIPConfigNATRemove(_NICIPConfigNATRemove):
                      "/loadBalancers/{lb_name}/inboundNatRules/{}",
         )
         return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result["ipConfigurations"][0]
 # endregion
 
 
@@ -4796,15 +4783,7 @@ class NSGRuleCreate(_NSGRuleCreate):
 class NSGRuleUpdate(_NSGRuleUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.destination_asgs = AAZListArg(
             options=["--destination-asgs"],
@@ -4812,7 +4791,6 @@ class NSGRuleUpdate(_NSGRuleUpdate):
             help="Space-separated list of application security group names or IDs. Limited by backend server, "
                  "temporarily this argument only supports one application security group name or ID.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.destination_asgs.Element = AAZResourceIdArg(
             nullable=True,
@@ -4827,7 +4805,6 @@ class NSGRuleUpdate(_NSGRuleUpdate):
             help="Space-separated list of application security group names or IDs. Limited by backend server, "
                  "temporarily this argument only supports one application security group name or ID.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.source_asgs.Element = AAZResourceIdArg(
             nullable=True,
@@ -4908,7 +4885,7 @@ def _create_network_watchers(cmd, resource_group_name, locations, tags):
     from .aaz.latest.network.watcher import Create
     for location in locations:
         Create(cli_ctx=cmd.cli_ctx)(command_args={
-            'name': '{}-watcher'.format(location),
+            'name': 'NetworkWatcher_{}'.format(location),
             'resource_group': resource_group_name,
             'location': location,
             'tags': tags
@@ -5169,7 +5146,7 @@ def update_nw_flow_log_setter(client, watcher_rg, watcher_name, flow_log_name, p
 
 # region PublicIPAddresses
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
-                     allocation_method=None, dns_name=None,
+                     allocation_method=None, dns_name=None, dns_name_scope=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None, edge_zone=None, ip_address=None,
                      protection_mode=None, ddos_protection_plan=None):
@@ -5198,11 +5175,8 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         tier = pip_obj['sku']['tier']
         zone = pip_obj['zones'] if 'zones' in pip_obj else None
 
-    if sku is None:
-        logger.warning(
-            "Please note that the default public IP used for creation will be changed from Basic to Standard "
-            "in the future."
-        )
+    if sku.lower() == "basic":
+        logger.warning(remove_basic_option_msg, "--sku standard")
 
     if not allocation_method:
         if sku and sku.lower() == 'standard':
@@ -5220,8 +5194,9 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
             public_ip_args['sku'] = 'Basic'
         public_ip_args['tier'] = tier
 
-    if dns_name or reverse_fqdn:
+    if dns_name or dns_name_scope or reverse_fqdn:
         public_ip_args['dns_name'] = dns_name
+        public_ip_args['dns_name_scope'] = dns_name_scope
         public_ip_args['reverse_fqdn'] = reverse_fqdn
 
     if edge_zone:
@@ -5254,7 +5229,7 @@ class PublicIPCreate(_PublicIPCreate):
 class PublicIPUpdate(_PublicIPUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZStrArg, AAZDictArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
@@ -5264,7 +5239,23 @@ class PublicIPUpdate(_PublicIPUpdate):
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/ddosProtectionPlans/{}",
         )
+        args_schema.ip_tags = AAZDictArg(
+            options=["--ip-tags"],
+            help="Space-separated list of IP tags in `TYPE=VAL` format.",
+            nullable=True
+        )
+        args_schema.ip_tags.Element = AAZStrArg()
+        args_schema.ip_tags_list._registered = False
+
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.ip_tags):
+            if ip_tags := args.ip_tags.to_serialized_data() is None:
+                args.ip_tags_list = []
+            else:
+                args.ip_tags_list = [{"ip_tag_type": k, "tag": v} for k, v in ip_tags.items()]
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.ddos_settings.ddos_protection_plan.id):
@@ -5293,7 +5284,7 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        args.sku = {'name': 'Standard'}
+        args.sku = 'Standard'
         if has_value(args.edge_zone):
             args.type = 'EdgeZone'
         if has_value(args.ip_tags):
@@ -5312,8 +5303,6 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    ttl=30, tags=None, interval=None, timeout=None, max_failures=None,
                                    monitor_custom_headers=None, status_code_ranges=None, max_return=None):
     from .aaz.latest.network.traffic_manager.profile import Create
-    Create_Profile = Create(cmd.loader)
-
     if monitor_path is None and monitor_protocol == 'HTTP':
         monitor_path = '/'
     args = {
@@ -5336,7 +5325,7 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
         "max_failures": max_failures
     }
 
-    return Create_Profile(args)
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_group_name,
@@ -5345,8 +5334,6 @@ def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    ttl=None, timeout=None, interval=None, max_failures=None,
                                    monitor_custom_headers=None, status_code_ranges=None, max_return=None):
     from .aaz.latest.network.traffic_manager.profile import Update
-    Update_Profile = Update(cmd.loader)
-
     args = {
         "name": traffic_manager_profile_name,
         "resource_group": resource_group_name
@@ -5378,7 +5365,7 @@ def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
     if max_failures is not None:
         args["max_failures"] = max_failures
 
-    return Update_Profile(args)
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endpoint_type, endpoint_name,
@@ -5388,8 +5375,6 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     min_child_endpoints=None, min_child_ipv4=None, min_child_ipv6=None,
                                     geo_mapping=None, monitor_custom_headers=None, subnets=None, always_serve=None):
     from .aaz.latest.network.traffic_manager.endpoint import Create
-    Create_Endpoint = Create(cmd.loader)
-
     args = {
         "name": endpoint_name,
         "type": endpoint_type,
@@ -5411,7 +5396,7 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
         "always_serve": always_serve,
     }
 
-    return Create_Endpoint(args)
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endpoint_name,
@@ -5422,8 +5407,6 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     min_child_ipv6=None, geo_mapping=None,
                                     subnets=None, monitor_custom_headers=None, always_serve=None):
     from .aaz.latest.network.traffic_manager.endpoint import Update
-    Update_Endpoint = Update(cmd.loader)
-
     args = {
         "name": endpoint_name,
         "type": endpoint_type,
@@ -5459,20 +5442,17 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
     if always_serve is not None:
         args["always_serve"] = always_serve
 
-    return Update_Endpoint(args)
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpoint_type=None):
     from .aaz.latest.network.traffic_manager.profile import Show
-    Show_Profile = Show(cmd.loader)
-
-    args = {
+    profile = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "profile_name": profile_name,
         "resource_group": resource_group_name,
-        "profile_name": profile_name
-    }
-    profile = Show_Profile(args)
+    })
 
-    return [e for e in profile['endpoints'] if not endpoint_type or e['type'].endswith(endpoint_type)]
+    return [endpoint for endpoint in profile["endpoints"] if not endpoint_type or endpoint["type"].endswith(endpoint_type)]
 # endregion
 
 
@@ -5544,26 +5524,10 @@ class VNetCreate(_VNetCreate):
 class VNetUpdate(_VNetUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         # handle detach logic
-        args_schema.dns_servers._fmt = EmptyListArgFormat()
-        args_schema.ddos_protection_plan._fmt = EmptyResourceIdArgFormat(
+        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/ddosProtectionPlans/{}",
         )
@@ -5604,8 +5568,7 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         # add ple/pls arguments
         args_schema.disable_private_endpoint_network_policies = AAZStrArg(
             options=["--disable-private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet.",
-            nullable=True,
+            help="Disable private endpoint network policies on the subnet. Please note that it will be replaced by `--private-endpoint-network-policies` soon.",
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
                 "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
@@ -5614,8 +5577,7 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         )
         args_schema.disable_private_link_service_network_policies = AAZStrArg(
             options=["--disable-private-link-service-network-policies"],
-            help="Disable private link service network policies on the subnet.",
-            nullable=True,
+            help="Disable private link service network policies on the subnet. Please note that it will be replaced by `--private-link-service-network-policies` soon.",
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
                 "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
@@ -5638,8 +5600,6 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         args_schema.policies._registered = False
         args_schema.endpoints._registered = False
         args_schema.delegated_services._registered = False
-        args_schema.private_endpoint_network_policies._registered = False
-        args_schema.private_link_service_network_policies._registered = False
         args_schema.address_prefix._registered = False
         return args_schema
 
@@ -5675,30 +5635,17 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         )
         # use string instead of bool
         if has_value(args.disable_private_endpoint_network_policies):
+            logger.warning(subnet_disable_ple_msg)
             args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
         if has_value(args.disable_private_link_service_network_policies):
+            logger.warning(subnet_disable_pls_msg)
             args.private_link_service_network_policies = args.disable_private_link_service_network_policies
 
 
 class VNetSubnetUpdate(_VNetSubnetUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.delegations = AAZListArg(
             options=["--delegations"],
@@ -5714,7 +5661,6 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             help="Space-separated list of services allowed private access to this subnet. "
                  "Values from: az network vnet list-endpoint-services.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.service_endpoints.Element = AAZStrArg(
             nullable=True,
@@ -5723,7 +5669,6 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             options=["--service-endpoint-policy"],
             help="Space-separated list of names or IDs of service endpoint policies to apply.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.service_endpoint_policy.Element = AAZResourceIdArg(
             nullable=True,
@@ -5735,7 +5680,7 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         # add ple/pls arguments
         args_schema.disable_private_endpoint_network_policies = AAZStrArg(
             options=["--disable-private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet.",
+            help="Disable private endpoint network policies on the subnet. Please note that it will be replaced by `--private-endpoint-network-policies` soon.",
             nullable=True,
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
@@ -5745,7 +5690,7 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         )
         args_schema.disable_private_link_service_network_policies = AAZStrArg(
             options=["--disable-private-link-service-network-policies"],
-            help="Disable private link service network policies on the subnet.",
+            help="Disable private link service network policies on the subnet. Please note that it will be replaced by `--private-link-service-network-policies` soon.",
             nullable=True,
             enum={
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
@@ -5758,18 +5703,16 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         args_schema.delegated_services._registered = False
         args_schema.endpoints._registered = False
         args_schema.policies._registered = False
-        args_schema.private_endpoint_network_policies._registered = False
-        args_schema.private_link_service_network_policies._registered = False
         # handle detach logic
-        args_schema.nat_gateway._fmt = EmptyResourceIdArgFormat(
+        args_schema.nat_gateway._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/natGateways/{}",
         )
-        args_schema.network_security_group._fmt = EmptyResourceIdArgFormat(
+        args_schema.network_security_group._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/networkSecurityGroups/{}",
         )
-        args_schema.route_table._fmt = EmptyResourceIdArgFormat(
+        args_schema.route_table._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/routeTables/{}",
         )
@@ -5807,8 +5750,10 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         )
         # use string instead of bool
         if has_value(args.disable_private_endpoint_network_policies):
+            logger.warning(subnet_disable_ple_msg)
             args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
         if has_value(args.disable_private_link_service_network_policies):
+            logger.warning(subnet_disable_pls_msg)
             args.private_link_service_network_policies = args.disable_private_link_service_network_policies
 
     def post_instance_update(self, instance):
@@ -5816,6 +5761,8 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             instance.properties.network_security_group = None
         if not has_value(instance.properties.route_table.id):
             instance.properties.route_table = None
+        if not has_value(instance.properties.nat_gateway.id):
+            instance.properties.nat_gateway = None
 
 
 class VNetPeeringCreate(_VNetPeeringCreate):
@@ -5824,6 +5771,7 @@ class VNetPeeringCreate(_VNetPeeringCreate):
         from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.sync_remote._registered = False
+        args_schema.remote_vnet._required = True
         args_schema.remote_vnet._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}",
         )
@@ -5881,8 +5829,7 @@ def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_ne
         err_msg = f"Virtual network peering {virtual_network_name} doesn't exist."
         raise ResourceNotFoundError(err_msg)
 
-    from .aaz.latest.network.vnet.peering import Create
-    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+    return VNetPeeringCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "name": virtual_network_peering_name,
         "resource_group": resource_group_name,
         "vnet_name": virtual_network_name,
@@ -6134,6 +6081,42 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
             elif not instance.properties.active_active and active:
                 logger.info('Placing gateway in active-active mode.')
             args.active = active
+
+
+class VNetGatewayShow(_VNetGatewayShow):
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+
+        # resolve flatten conflict
+        # when the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        props = self.ctx.vars.instance.properties
+        if has_value(props.nat_rules):
+            for rule in props.nat_rules:
+                if has_value(rule.properties) and has_value(rule.properties.type):
+                    rule.properties.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+
+        return result
+
+
+class VNetGatewayList(_VNetGatewayList):
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+
+        # resolve flatten conflict
+        # when the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        for item in self.ctx.vars.instance.value:
+            props = item.properties
+            if has_value(props.nat_rules):
+                for rule in props.nat_rules:
+                    if has_value(rule.properties) and has_value(rule.properties.type):
+                        rule.properties.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+
+        return result, next_link
 
 
 def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, processor_architecture=None,

@@ -5,6 +5,7 @@
 
 
 import os
+import unittest
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 from azure.cli.testsdk.scenario_tests import record_only
@@ -50,6 +51,7 @@ class HDInsightClusterTests(ScenarioTest):
 
     # Uses 'rg' kwarg
     # _rest_proxy_arguments() will override location to southcentralus, so use this location for rg and sa
+    @unittest.skip('https://github.com/Azure/azure-cli/issues/28860')
     @ResourceGroupPreparer(name_prefix='hdicli-', location='southcentralus', random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location='southcentralus', parameter_name='storage_account')
     def test_hdinsight_cluster_kafka_with_rest_proxy(self, storage_account_info):

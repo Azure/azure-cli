@@ -10,6 +10,7 @@ import json
 from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, \
     HttpResponseError
 from azure.cli.core.azclierror import InvalidArgumentValueError
+from urllib.parse import parse_qs, urljoin, urlparse
 
 from ._arg_browser import AAZArgBrowser
 from ._base import AAZUndefined, AAZBaseValue, AAZBaseType, has_value
@@ -292,9 +293,14 @@ class AAZHttpOperation(AAZOperation):
         """
         if self.ctx.next_link:
             # support making request for next link
+            _parsed_next_link = urlparse(self.ctx.next_link)
+            _next_request_params = {
+                key: [quote(v) for v in value]
+                for key, value in parse_qs(_parsed_next_link.query).items()
+            }
             request = self.client._request(
-                "GET", self.ctx.next_link, {}, self.header_parameters,
-                self.content, self.form_content, None)
+                "GET", urljoin(self.ctx.next_link, _parsed_next_link.path), _next_request_params,
+                self.header_parameters, self.content, self.form_content, None)
 
         elif self.method in ("GET",):
             request = self.client._request(

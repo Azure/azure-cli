@@ -28,6 +28,8 @@ def show_webapp_access_restrictions(cmd, resource_group_name, name, slot=None):
     scm_access_restrictions = json.dumps(configs.scm_ip_security_restrictions, default=lambda x: x.__dict__)
     access_rules = {
         "scmIpSecurityRestrictionsUseMain": configs.scm_ip_security_restrictions_use_main,
+        "ipSecurityRestrictionsDefaultAction": configs.ip_security_restrictions_default_action,
+        "scmIpSecurityRestrictionsDefaultAction": configs.scm_ip_security_restrictions_default_action,
         "ipSecurityRestrictions": json.loads(access_restrictions),
         "scmIpSecurityRestrictions": json.loads(scm_access_restrictions)
     }
@@ -136,17 +138,29 @@ def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=N
     return result.scm_ip_security_restrictions if scm_site else result.ip_security_restrictions
 
 
-def set_webapp_access_restriction(cmd, resource_group_name, name, use_same_restrictions_for_scm_site, slot=None):
+def set_webapp_access_restriction(cmd, resource_group_name, name, use_same_restrictions_for_scm_site=None,
+                                  default_action=None, scm_default_action=None, slot=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
-    setattr(configs, 'scm_ip_security_restrictions_use_main', bool(use_same_restrictions_for_scm_site))
 
-    use_main = _generic_site_operation(
+    if use_same_restrictions_for_scm_site is not None:
+        setattr(configs, 'scm_ip_security_restrictions_use_main', bool(use_same_restrictions_for_scm_site))
+    if default_action is not None:
+        setattr(configs, 'ip_security_restrictions_default_action', default_action)
+    if scm_default_action is not None:
+        setattr(configs, 'scm_ip_security_restrictions_default_action', scm_default_action)
+
+    app_config = _generic_site_operation(
         cmd.cli_ctx, resource_group_name, name, 'update_configuration',
-        slot, configs).scm_ip_security_restrictions_use_main
-    use_main_json = {
-        "scmIpSecurityRestrictionsUseMain": use_main
+        slot, configs)
+    app_use_main = app_config.scm_ip_security_restrictions_use_main
+    app_default_action = app_config.ip_security_restrictions_default_action
+    app_scm_default_action = app_config.scm_ip_security_restrictions_default_action
+    config_json = {
+        "scmIpSecurityRestrictionsUseMain": app_use_main,
+        "ipSecurityRestrictionsDefaultAction": app_default_action,
+        "scmIpSecurityRestrictionsDefaultAction": app_scm_default_action
     }
-    return use_main_json
+    return config_json
 
 
 def _validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):
@@ -178,7 +192,7 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
                                  ' Use --ignore-missing-endpoint or -i to'
                                  ' skip validation and manually verify service endpoint.')
     # ad-hoc api version 2019-02-01
-    Subnet = import_module("azure.cli.command_modules.appservice.aaz.2019_03_01_hybrid.network.vnet.subnet")
+    Subnet = import_module("azure.cli.command_modules.appservice.aaz.profile_2019_03_01_hybrid.network.vnet.subnet")
     subnet_obj = Subnet.Show(cli_ctx=cli_ctx)(command_args={
         "name": subnet_name,
         "vnet_name": subnet_vnet_name,

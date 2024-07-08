@@ -124,6 +124,7 @@ def _validate_subnet(cmd, namespace):
 @Completer
 def sku_name_completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     names = {x.name for x in _sku_filter(cmd, namespace)}
+    # TODO: For deployment
     return sorted(list(names))
 
 
@@ -146,8 +147,11 @@ def load_arguments(self, _):
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
                    completer=location_completer)
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('sku_name', options_list=['--sku'], help='Name of the Sku of cognitive services account',
+        c.argument('sku_name', options_list=['--sku', '--sku-name'],
+                   help='Name of the Sku of Cognitive Services account/deployment',
                    completer=sku_name_completer)
+        c.argument('sku_capacity', options_list=['--capacity', '--sku-capacity'],
+                   help='Capacity value of the Sku of Cognitive Services account/deployment.')
         c.argument('kind', help='the API name of cognitive services account',
                    completer=kind_completer)
         c.argument('tags', tags_type)
@@ -173,6 +177,7 @@ def load_arguments(self, _):
         c.argument('model_name', help='Cognitive Services account deployment model name.')
         c.argument('model_format', help='Cognitive Services account deployment model format.')
         c.argument('model_version', help='Cognitive Services account deployment model version.')
+        c.argument('model_source', help='Cognitive Services account deployment model source.')
 
     with self.argument_context('cognitiveservices account deployment', arg_group='DeploymentScaleSettings') as c:
         c.argument(

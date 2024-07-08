@@ -68,8 +68,8 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                           profile_name,
                                           custom_domain_name,
                                           host_name,
-                                          AfdCertificateType.managed_certificate,
-                                          AfdMinimumTlsVersion.tls12,
+                                          AfdCertificateType.managed_certificate.value,
+                                          AfdMinimumTlsVersion.tls12.value,
                                           None,
                                           None)
 
@@ -88,6 +88,34 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                           JMESPathCheck('httpsRedirect', "Enabled"),
                           JMESPathCheck('enabledState', "Enabled"),
                           JMESPathCheck('cacheConfiguration.queryStringCachingBehavior', None),
+                          JMESPathCheck('originGroup.id', origin_group_id)]
+        self.afd_route_create_cmd(resource_group,
+                                  profile_name,
+                                  endpoint_name,
+                                  route_name_1,
+                                  create_options_1,
+                                  create_checks_1)
+
+        self.afd_route_delete_cmd(resource_group, profile_name, endpoint_name, route_name_1)
+
+        create_options_1 = f"--origin-group {origin_group_name} " \
+                         + "--supported-protocols Https Http --link-to-default-domain Disabled " \
+                         + "--https-redirect Enabled --forwarding-protocol MatchRequest " \
+                         + "--enable-caching true --query-string-caching-behavior UseQueryString --enable-compression true " \
+                         + f"--custom-domains {custom_domain_name} --patterns-to-match /test2/*"
+        route_name_1 = self.create_random_name(prefix='route-wd', length=16)
+        
+        create_checks_1 = [JMESPathCheck('supportedProtocols[0]', "Https"),
+                          JMESPathCheck('supportedProtocols[1]', "Http"),
+                          JMESPathCheck('customDomains[0].id', custom_domain_id, False),
+                          JMESPathCheck('patternsToMatch[0]', "/test2/*"),
+                          JMESPathCheck('linkToDefaultDomain', "Disabled"),
+                          JMESPathCheck('forwardingProtocol', "MatchRequest"),
+                          JMESPathCheck('httpsRedirect', "Enabled"),
+                          JMESPathCheck('cacheConfiguration.queryStringCachingBehavior', "UseQueryString"),
+                          JMESPathCheck('enabledState', "Enabled"),
+                          JMESPathCheck('cacheConfiguration.compressionSettings.isCompressionEnabled', True),
+                          JMESPathCheck('length(cacheConfiguration.compressionSettings.contentTypesToCompress)', 41),
                           JMESPathCheck('originGroup.id', origin_group_id)]
         self.afd_route_create_cmd(resource_group,
                                   profile_name,
@@ -198,7 +226,7 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('originGroup.id', origin_group_id),
                          JMESPathCheck('length(ruleSets)', 0),
                          JMESPathCheck('cacheConfiguration.queryStringCachingBehavior', "UseQueryString")]
-        options = '--rule-sets --https-redirect Disabled'
+        options = '--rule-sets null --https-redirect Disabled'
         self.afd_route_update_cmd(resource_group,
                                   profile_name,
                                   endpoint_name,

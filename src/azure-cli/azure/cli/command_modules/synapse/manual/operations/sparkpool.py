@@ -8,6 +8,7 @@ from azure.mgmt.synapse.models import BigDataPoolResourceInfo, AutoScaleProperti
 from .._client_factory import cf_synapse_client_workspace_factory
 from .artifacts import get_workspace_package
 from pathlib import Path
+from azure.core.exceptions import ResourceNotFoundError
 
 
 # Synapse sparkpool
@@ -22,6 +23,14 @@ def create_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
                       enable_auto_pause=None, delay=None, spark_events_folder="/events",
                       spark_log_folder="/logs", enable_dynamic_executor_allocation=None, min_executors=None,
                       max_executors=None, tags=None, no_wait=False):
+    try:
+        existing_spark_pool = client.get(resource_group_name, workspace_name, spark_pool_name)
+        if existing_spark_pool.id:
+            from azure.cli.core.azclierror import ValidationError
+            err_msg = 'The input spark pool is existing.'
+            raise ValidationError(err_msg)
+    except ResourceNotFoundError:
+        pass
 
     workspace_client = cf_synapse_client_workspace_factory(cmd.cli_ctx)
     workspace_object = workspace_client.get(resource_group_name, workspace_name)
