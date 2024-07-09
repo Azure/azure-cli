@@ -77,7 +77,8 @@ def acr_import(cmd,  # pylint: disable=too-many-locals
                                   credentials=ImportSourceCredentials(password=source_registry_password,
                                                                       username=source_registry_username))
         else:
-            registry = get_registry_from_name_or_login_server(cmd.cli_ctx, registry_uri)
+            if registry_uri.endswith('azurecr.io') or registry_uri.endswith('.azurecr-test.io'):
+                registry = get_registry_from_name_or_login_server(cmd.cli_ctx, registry_uri)
             if registry:
                 # For Azure container registry
                 source = ImportSource(resource_id=registry.id, source_image=source_image)
