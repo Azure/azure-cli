@@ -1209,7 +1209,8 @@ class AFDSecretUpdate(_AFDSecretUpdate):
         })
 
         para = existing['parameters']
-        secret_source = args.secret_source.to_serialized_data() if has_value(args.secret_source) else para['secretSource']['id']
+        secret_source = args.secret_source.to_serialized_data() if has_value(args.secret_source) \
+            else para['secretSource']['id']
         if 'secretVersion' in para and para['secretVersion'] in secret_source:
             existing_secret_version = para['secretVersion']
             version_start = secret_source.lower().rindex(f'/{existing_secret_version}')
