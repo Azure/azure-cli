@@ -251,10 +251,6 @@ def _fetch_default_cvm_policy(cli_ctx, vault_url):
                     'authority': attest_uri,
                     'allOf': [
                         {
-                            'claim': 'x-ms-attestation-type',
-                            'equals': 'sevsnpvm'
-                        },
-                        {
                             'claim': 'x-ms-compliance-status',
                             'equals': 'azure-compliant-cvm'
                         }
