@@ -3729,15 +3729,15 @@ class VMDiskAttachDetachTest(ScenarioTest):
 
         self.cmd(
             'vm create -g {rg} -n {vm} --image OpenLogic:CentOS:7.5:latest --size Standard_D2s_v3 --zone 2 --location eastus2 '
-            '--admin-username azureuser --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+            '--admin-username azureuser --admin-password testPassword0 --authentication-type password --public-ip-sku Standard --nsg-rule NONE')
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm update -g {rg} -n {vm} --ultra-ssd-enabled', checks=[
             self.check('additionalCapabilities.ultraSsdEnabled', True)
         ])
-            # 'vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image Debian:debian-10:10:latest --ultra-ssd-enabled --zone 2 --location eastus --vm-sku Standard_D2s_v3 --lb "" --orchestration-mode Uniform'
+
         self.cmd(
             'vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --vm-sku Standard_D2s_v3 --zone 2 --admin-username azureuser '
-            '--admin-password testPassword0 --authentication-type password --lb "" --location eastus2 --orchestration-mode Uniform')
+            '--admin-password testPassword0 --authentication-type password --lb "" --location eastus2 --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss deallocate -g {rg} -n {vmss}')
         self.cmd('vmss update -g {rg} -n {vmss} --ultra-ssd-enabled', checks=[
             self.check('additionalCapabilities.ultraSsdEnabled', True)
@@ -4869,7 +4869,6 @@ class ApplicationSecurityGroup(ScenarioTest):
 
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
-    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
     @KeyVaultPreparer(name_prefix='vmlinuxkv', name_len=20, key='vault',
                       additional_params='--enabled-for-deployment true --enabled-for-template-deployment true')
@@ -4882,15 +4881,12 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
             'auth': 'ssh',
             'ssh_key': TEST_SSH_KEY_PUB,
             'vm': 'vm-name',
-            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}]),
-            'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}])
         })
 
         message = 'Secret is missing vaultCertificates array or it is empty at index 0'
         with self.assertRaisesRegex(CLIError, message):
-            self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} '
-                     '--ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\' --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+            self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\' --nsg-rule NONE')
 
         vault_out = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()
 
@@ -4900,11 +4896,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
         vm_format = self.cmd('vm secret format -s {secret_out}').get_output_in_json()
         self.kwargs['secrets'] = json.dumps(vm_format)
 
-        self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\' --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
-
-        # Disable default outbound access
-        self.cmd(
-            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+        self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\' --nsg-rule NONE')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -4912,42 +4904,37 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
             self.check('osProfile.secrets[0].vaultCertificates[0].certificateUrl', '{secret_out}')
         ])
 
-    @AllowLargeResponse(size_kb=99999)
+
     @ResourceGroupPreparer()
     @KeyVaultPreparer(name_prefix='vmkeyvault', name_len=20, key='vault',
                       additional_params='--enabled-for-deployment true --enabled-for-template-deployment true')
     def test_vm_create_windows_secrets(self, resource_group, resource_group_location, key_vault):
-
         self.kwargs.update({
             'admin': 'windowsUser',
             'loc': 'westus',
-            'image': 'Win2022Datacenter',
+            'image': 'Win2012R2Datacenter',
             'vm': 'vm-name',
-            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}]),
-            'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}])
         })
 
         message = 'Secret is missing certificateStore within vaultCertificates array at secret index 0 and ' \
                   'vaultCertificate index 0'
         with self.assertRaisesRegex(CLIError, message):
-            self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} '
-                     '--secrets \'{secrets}\' --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+            self.cmd(
+                'vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets \'{secrets}\' --nsg-rule NONE')
 
         vault_out = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()
 
         self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
         self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
 
-        self.kwargs['secret_out'] = self.cmd('keyvault secret list-versions --vault-name {vault} -n cert1 --query "[?attributes.enabled].id" -o tsv').output.strip()
-        self.kwargs['secrets'] = self.cmd('vm secret format -s {secret_out} --certificate-store "My"').get_output_in_json()
+        self.kwargs['secret_out'] = self.cmd(
+            'keyvault secret list-versions --vault-name {vault} -n cert1 --query "[?attributes.enabled].id" -o tsv').output.strip()
+        self.kwargs['secrets'] = self.cmd(
+            'vm secret format -s {secret_out} --certificate-store "My"').get_output_in_json()
 
-        self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc}'
-                 ' --secrets "{secrets}" --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
-
-        # Disable default outbound access
         self.cmd(
-            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+            'vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets "{secrets}" --nsg-rule NONE')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -5982,10 +5969,9 @@ class VMRunCommandScenarioTest(ScenarioTest):
         self.cmd(
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        self.cmd('vm run-command create -g {rg} --vm-name {vm} --name {run_cmd}', checks=[
+        self.cmd('vm run-command create -g {rg} --vm-name {vm} --name {run_cmd} --script "Write-Host Hello World!"', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{run_cmd}'),
-            self.check('source.script', None),
             self.check('asyncExecution', False),
             self.check('timeoutInSeconds', 0),
             self.check('type', 'Microsoft.Compute/virtualMachines/runCommands')
@@ -5994,7 +5980,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{run_cmd}'),
         ])
-        self.cmd('vm run-command update -g {rg} --vm-name {vm} --name {run_cmd}  --vm-name {vm} --script script1 --parameters arg1=f1 --run-as-user user1 --timeout-in-seconds 3600', checks=[
+        self.cmd('vm run-command update -g {rg} --vm-name {vm} --name {run_cmd} --script script1 --parameters arg1=f1 --run-as-user user1 --timeout-in-seconds 3600', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{run_cmd}'),
             self.check('source.script', 'script1'),
@@ -6174,25 +6160,20 @@ class VMDiskEncryptionTest(ScenarioTest):
         self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
         self.cmd('vm encryption disable -g {rg} -n {vm}')
 
-    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='eastus2')
-    @KeyVaultPreparer(name_prefix='vault', name_len=10, location='eastus2', key='vault', additional_params='--enabled-for-disk-encryption')
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, location='eastus2', key='vault',
+                      additional_params='--enabled-for-disk-encryption')
     def test_vm_disk_encryption_with_key(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
-            'key': 'KEK',
-            'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'key': 'KEK'
         })
-        self.cmd('vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
-
-        # Disable default outbound access
         self.cmd(
-            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
-
+            'vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789! --nsg-rule NONE')
         self.cmd('keyvault key create --vault-name {vault} --name {key} --protection software')
         self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --key-encryption-key {key}')
-        self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
+        self.cmd('vm encryption show -g {rg} -n {vm}',
+                 checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
         self.cmd('vm encryption disable -g {rg} -n {vm}')
 
     @AllowLargeResponse(size_kb=99999)
