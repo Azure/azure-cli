@@ -403,7 +403,7 @@ jobs:
 
 - job: BuildDockerImageAzureLinux
   displayName: Build Docker Image Azure Linux
-  dependsOn: BuildRpmPackageMariner
+  dependsOn: BuildRpmPackageAzureLinux
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
@@ -766,19 +766,20 @@ jobs:
     displayName: 'Test Homebrew Package'
 
 
-- job: BuildRpmPackageMariner
+- job: BuildRpmPackageAzureLinux
   displayName: Build Rpm Package Mariner
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   strategy:
     matrix:
-      2.0 AMD64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-amd64
-        pool: ${{ variables.ubuntu_pool }}
-      2.0 ARM64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-arm64
-        pool: ${{ variables.ubuntu_arm64_pool }}
+      ${{ each arch in parameters.architectures }}:
+        Mariner 2.0 ${{ arch.name }}:
+          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+          artifact: rpm-mariner2.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
+        Azure Linux 3.0 ${{ arch.name }}:
+          image: azurelinuxpreview.azurecr.io/public/azurelinux/base/core:3.0
+          artifact: rpm-azurelinux3.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
   pool:
     name: $(pool)
   steps:
@@ -802,25 +803,26 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: $(artifact)
 
-- job: TestRpmPackageMariner
+- job: TestRpmPackageAzureLinux
   displayName: Test Rpm Package Mariner
   timeoutInMinutes: 120
   dependsOn:
-  - BuildRpmPackageMariner
+  - BuildRpmPackageAzureLinux
   - ExtractMetadata
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     name: $(pool)
   strategy:
     matrix:
-      2.0 AMD64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-amd64
-        pool: ${{ variables.ubuntu_pool }}
-      2.0 ARM64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-arm64
-        pool: ${{ variables.ubuntu_arm64_pool }}
+      ${{ each arch in parameters.architectures }}:
+        Mariner 2.0 ${{ arch.name }}:
+          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+          artifact: rpm-mariner2.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
+        Azure Linux 3.0 ${{ arch.name }}:
+          image: azurelinuxpreview.azurecr.io/public/azurelinux/base/core:3.0
+          artifact: rpm-azurelinux3.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -841,7 +843,7 @@ jobs:
       set -ex
 
       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.cm2.*.rpm" -printf '%f\n')
+      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.*.rpm" -printf '%f\n')
 
       echo "== Test rpm package on ${IMAGE} =="
       docker pull $IMAGE
@@ -1253,7 +1255,7 @@ jobs:
     - BuildHomebrewFormula
     - TestHomebrewFormula
     - TestHomebrewPackage
-    - BuildRpmPackageMariner
+    - BuildRpmPackageAzureLinux
     - BuildRpmPackages
     - TestRpmPackage
     - BuildDebPackages
