@@ -438,13 +438,17 @@ def set_key(cmd,
     retry_interval = 1
 
     label = label if label and label != SearchFilterOptions.EMPTY_LABEL else None
+
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     for i in range(0, retry_times):
         retrieved_kv = None
         set_kv = None
         new_kv = None
 
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
         except ResourceNotFoundError:
             logger.debug("Key '%s' with label '%s' not found. A new key-value will be created.", key, label)
         except HttpResponseError as exception:
@@ -495,9 +499,9 @@ def set_key(cmd,
 
         try:
             if set_kv.etag is None:
-                new_kv = azconfig_client.add_configuration_setting(set_kv)
+                new_kv = azconfig_client.add_configuration_setting(set_kv, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
             else:
-                new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified)
+                new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
             return convert_configurationsetting_to_keyvalue(new_kv)
 
         except ResourceReadOnlyError:
@@ -530,13 +534,17 @@ def set_keyvault(cmd,
     retry_interval = 1
 
     label = label if label and label != SearchFilterOptions.EMPTY_LABEL else None
+
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     for i in range(0, retry_times):
         retrieved_kv = None
         set_kv = None
         new_kv = None
 
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
         except ResourceNotFoundError:
             logger.debug("Key '%s' with label '%s' not found. A new key-vault reference will be created.", key, label)
         except HttpResponseError as exception:
@@ -570,9 +578,9 @@ def set_keyvault(cmd,
 
         try:
             if set_kv.etag is None:
-                new_kv = azconfig_client.add_configuration_setting(set_kv)
+                new_kv = azconfig_client.add_configuration_setting(set_kv, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
             else:
-                new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified)
+                new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
             return convert_configurationsetting_to_keyvalue(new_kv)
 
         except ResourceReadOnlyError:
@@ -603,9 +611,13 @@ def delete_key(cmd,
     # In delete, import and export commands, we treat missing --label as null label
     # In list, restore and revision commands, we treat missing --label as all labels
 
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     entries = __read_kv_from_config_store(azconfig_client,
                                           key=key,
-                                          label=label if label else SearchFilterOptions.EMPTY_LABEL)
+                                          label=label if label else SearchFilterOptions.EMPTY_LABEL,
+                                          correlationRequestId=correlationRequestId)
     confirmation_message = "Found '{}' key-values matching the specified key and label. Are you sure you want to delete these key-values?".format(len(entries))
     user_confirmation(confirmation_message, yes)
 
@@ -616,7 +628,8 @@ def delete_key(cmd,
             deleted_kv = azconfig_client.delete_configuration_setting(key=entry.key,
                                                                       label=entry.label,
                                                                       etag=entry.etag,
-                                                                      match_condition=MatchConditions.IfNotModified)
+                                                                      match_condition=MatchConditions.IfNotModified,
+                                                                      headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
             deleted_entries.append(convert_configurationsetting_to_keyvalue(deleted_kv))
 
         except ResourceReadOnlyError:
@@ -650,11 +663,14 @@ def lock_key(cmd,
              endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Key '{}' with label '{}' does not exist.".format(key, label))
         except HttpResponseError as exception:
@@ -664,7 +680,7 @@ def lock_key(cmd,
         user_confirmation(confirmation_message, yes)
 
         try:
-            new_kv = azconfig_client.set_read_only(retrieved_kv, match_condition=MatchConditions.IfNotModified)
+            new_kv = azconfig_client.set_read_only(retrieved_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
             return convert_configurationsetting_to_keyvalue(new_kv)
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
@@ -687,11 +703,14 @@ def unlock_key(cmd,
                endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Key '{}' with label '{}' does not exist.".format(key, label))
         except HttpResponseError as exception:
@@ -701,7 +720,7 @@ def unlock_key(cmd,
         user_confirmation(confirmation_message, yes)
 
         try:
-            new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, match_condition=MatchConditions.IfNotModified)
+            new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
             return convert_configurationsetting_to_keyvalue(new_kv)
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:

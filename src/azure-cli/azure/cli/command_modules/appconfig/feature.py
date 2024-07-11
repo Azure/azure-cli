@@ -9,6 +9,7 @@ import json
 import time
 import re
 import copy
+import uuid
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -85,6 +86,10 @@ def set_feature(cmd,
     retry_interval = 1
 
     label = label if label and label != SearchFilterOptions.EMPTY_LABEL else None
+
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     for i in range(0, retry_times):
         retrieved_kv = None
         set_kv = None
@@ -92,7 +97,7 @@ def set_feature(cmd,
         new_kv = None
 
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
         except ResourceNotFoundError:
             logger.debug("Feature flag '%s' with label '%s' not found. A new feature flag will be created.", feature, label)
         except HttpResponseError as exception:
@@ -146,9 +151,9 @@ def set_feature(cmd,
 
         try:
             if set_configsetting.etag is None:
-                new_kv = azconfig_client.add_configuration_setting(set_configsetting)
+                new_kv = azconfig_client.add_configuration_setting(set_configsetting, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
             else:
-                new_kv = azconfig_client.set_configuration_setting(set_configsetting, match_condition=MatchConditions.IfNotModified)
+                new_kv = azconfig_client.set_configuration_setting(set_configsetting, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
             return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv))
 
         except ResourceReadOnlyError:
@@ -185,9 +190,13 @@ def delete_feature(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
                                                key_filter=key_filter,
-                                               label=SearchFilterOptions.EMPTY_LABEL if label is None else label)
+                                               label=SearchFilterOptions.EMPTY_LABEL if label is None else label,
+                                               correlationRequestId=correlationRequestId)
 
     confirmation_message = "Found '{}' feature flags matching the specified feature and label. Are you sure you want to delete these feature flags?".format(len(retrieved_keyvalues))
     user_confirmation(confirmation_message, yes)
@@ -200,7 +209,8 @@ def delete_feature(cmd,
             deleted_kv = azconfig_client.delete_configuration_setting(key=entry.key,
                                                                       label=entry.label,
                                                                       etag=entry.etag,
-                                                                      match_condition=MatchConditions.IfNotModified)
+                                                                      match_condition=MatchConditions.IfNotModified,
+                                                                      headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
             deleted_kvs.append(convert_configurationsetting_to_keyvalue(deleted_kv))
         except ResourceReadOnlyError:
             exception = "Failed to delete read-only feature '{}' with label '{}'. Unlock the feature flag before deleting it.".format(feature_name, entry.label)
@@ -322,11 +332,14 @@ def lock_feature(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Feature '{}' with label '{}' does not exist.".format(feature, label))
         except HttpResponseError as exception:
@@ -339,7 +352,7 @@ def lock_feature(cmd,
         user_confirmation(confirmation_message, yes)
 
         try:
-            new_kv = azconfig_client.set_read_only(retrieved_kv, match_condition=MatchConditions.IfNotModified)
+            new_kv = azconfig_client.set_read_only(retrieved_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
             return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv),
                                                show_conditions=False)
         except HttpResponseError as exception:
@@ -373,11 +386,14 @@ def unlock_feature(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Feature '{}' with label '{}' does not exist.".format(feature, label))
         except HttpResponseError as exception:
@@ -390,7 +406,7 @@ def unlock_feature(cmd,
         user_confirmation(confirmation_message, yes)
 
         try:
-            new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, match_condition=MatchConditions.IfNotModified)
+            new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
             return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv),
                                                show_conditions=False)
         except HttpResponseError as exception:
@@ -424,11 +440,14 @@ def enable_feature(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Feature flag '{}' with label '{}' not found.".format(feature, label))
         except HttpResponseError as exception:
@@ -451,7 +470,8 @@ def enable_feature(cmd,
                                                             retrieved_kv=retrieved_kv,
                                                             updated_value=json.dumps(feature_flag_value,
                                                                                      default=lambda o: o.__dict__,
-                                                                                     ensure_ascii=False))
+                                                                                     ensure_ascii=False),
+                                                            correlationRequestId=correlationRequestId)
 
             return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_conditions=False)
 
@@ -486,11 +506,14 @@ def disable_feature(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Feature flag '{}' with label '{}' not found.".format(feature, label))
         except HttpResponseError as exception:
@@ -513,7 +536,8 @@ def disable_feature(cmd,
                                                             retrieved_kv=retrieved_kv,
                                                             updated_value=json.dumps(feature_flag_value,
                                                                                      default=lambda o: o.__dict__,
-                                                                                     ensure_ascii=False))
+                                                                                     ensure_ascii=False),
+                                                            correlationRequestId=correlationRequestId)
 
             return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_conditions=False)
 
@@ -562,11 +586,14 @@ def add_filter(cmd,
         filter_parameters = {}
     new_filter = FeatureFilter(filter_name, filter_parameters)
 
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Feature flag '{}' with label '{}' not found.".format(feature, label))
         except HttpResponseError as exception:
@@ -602,7 +629,8 @@ def add_filter(cmd,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
                                                                  default=lambda o: o.__dict__,
-                                                                 ensure_ascii=False))
+                                                                 ensure_ascii=False),
+                                        correlationRequestId=correlationRequestId)
 
             return new_filter
 
@@ -654,12 +682,16 @@ def update_filter(cmd,
         filter_parameters = {}
     new_filter = FeatureFilter(filter_name, filter_parameters)
 
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
             retrieved_kv = azconfig_client.get_configuration_setting(
-                key=key, label=label)
+                key=key, label=label,
+                headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError(
                 "Feature flag '{}' with label '{}' not found.".format(feature, label))
@@ -733,7 +765,8 @@ def update_filter(cmd,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
                                                                  default=lambda o: o.__dict__,
-                                                                 ensure_ascii=False))
+                                                                 ensure_ascii=False),
+                                        correlationRequestId=correlationRequestId)
 
             return new_filter
 
@@ -771,6 +804,9 @@ def delete_filter(cmd,
     # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
     feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
 
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     if index is None:
@@ -786,7 +822,7 @@ def delete_filter(cmd,
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Feature flag '{}' with label '{}' not found.".format(feature, label))
         except HttpResponseError as exception:
@@ -852,7 +888,8 @@ def delete_filter(cmd,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
                                                                  default=lambda o: o.__dict__,
-                                                                 ensure_ascii=False))
+                                                                 ensure_ascii=False),
+                                        correlationRequestId=correlationRequestId)
 
             return display_filter
 
@@ -1079,12 +1116,16 @@ def __list_features(
 def __clear_filter(azconfig_client, feature, label=None, yes=False):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
 
+    # generate correlation request id for operations in the same activity
+    correlationRequestId = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
             retrieved_kv = azconfig_client.get_configuration_setting(
-                key=key, label=label
+                key=key, label=label,
+                headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId}
             )
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError(
@@ -1159,7 +1200,8 @@ def __clear_filter(azconfig_client, feature, label=None, yes=False):
 
 def __update_existing_key_value(azconfig_client,
                                 retrieved_kv,
-                                updated_value):
+                                updated_value,
+                                correlationRequestId=None):
     '''
         To update the value of a pre-existing KeyValue
 
@@ -1181,7 +1223,7 @@ def __update_existing_key_value(azconfig_client,
                                   last_modified=retrieved_kv.last_modified)
 
     try:
-        new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified)
+        new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
         return convert_configurationsetting_to_keyvalue(new_kv)
     except ResourceReadOnlyError:
         raise CLIError("Failed to update read only feature flag. Unlock the feature flag before updating it.")
