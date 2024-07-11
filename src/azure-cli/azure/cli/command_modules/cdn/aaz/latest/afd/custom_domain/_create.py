@@ -21,7 +21,7 @@ class Create(AAZCommand):
         az afd custom-domain create -g group --custom-domain-name customDomain --profile-name profile --host-name www.contoso.com --minimum-tls-version TLS12 --certificate-type ManagedCertificate
 
     :example: Create a custom domain that uses your own certificate for SSL/TLS encryption, the certificate is stored in Azure Key Vault and referenced by an AFD secret.
-        az afd custom-domain create -g group --custom-domain-name customDomain --profile-name profile --host-name www.contoso.com --minimum-tls-version TLS12 --certificate-type CustomerCertificate --secret secretName
+        az afd custom-domain create -g group --custom-domain-name example-custom-domain --profile-name profile --host-name www.contoso.com --minimum-tls-version TLS12 --certificate-type CustomerCertificate --secret secretName
     """
 
     _aaz_info = {

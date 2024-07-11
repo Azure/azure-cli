@@ -162,6 +162,13 @@ class CosmosDBBackupRestoreScenarioTest(ScenarioTest):
         account_oldest_restorable_time = restorable_database_account['oldestRestorableTime']
         assert account_oldest_restorable_time is not None
 
+    '''
+    This test will be rewritten to follow RBAC guidelines:
+    https://learn.microsoft.com/en-us/azure/container-registry/container-registry-tutorial-sign-build-push
+    Essentially, set-policy needs to be rewritten using RBAC instead.
+    Disabling the test for now.
+    '''
+    @unittest.skip('Needs to be rewritten to follow updated guidelines')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_system_identity_restore', location='eastus2')
     def test_cosmosdb_system_identity_restore(self, resource_group):

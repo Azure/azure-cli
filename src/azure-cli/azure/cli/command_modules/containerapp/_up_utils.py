@@ -56,7 +56,7 @@ from ._utils import (
 
 )
 
-from ._constants import (MAXIMUM_SECRET_LENGTH,
+from ._constants import (MAXIMUM_ACR_LENGTH,
                          LOG_ANALYTICS_RP,
                          CONTAINER_APPS_RP,
                          ACR_IMAGE_SUFFIX,
@@ -767,11 +767,14 @@ def _validate_up_args(cmd, source, image, repo, registry_server):
             "Cannot use --source and --repo togther. "
             "Can either deploy from a local directory or a Github repo"
         )
+
     if repo and registry_server and "azurecr.io" in registry_server:
         parsed = urlparse(registry_server)
         registry_name = (parsed.netloc if parsed.scheme else parsed.path).split(".")[0]
-        if registry_name and len(registry_name) > MAXIMUM_SECRET_LENGTH:
-            raise ValidationError(f"--registry-server ACR name must be less than {MAXIMUM_SECRET_LENGTH} "
+        # The length limit of secret name is 253, we use {registry_name}azurecrio-{acr-username} as the registry's secret name.
+        # The value of {acr-username} is registry_name. So the length of registry_name need to <= 121
+        if registry_name and len(registry_name) > MAXIMUM_ACR_LENGTH:
+            raise ValidationError(f"--registry-server ACR name must be less than {MAXIMUM_ACR_LENGTH} "
                                   "characters when using --repo")
 
 
@@ -817,23 +820,31 @@ def _get_dockerfile_content(repo, branch, token, source, context_path, dockerfil
 def _get_app_env_and_group(
         cmd, name, resource_group: "ResourceGroup", env: "ContainerAppEnvironment", location
 ):
+    matched_apps = []
+    # If no resource group is provided, we need to search for the app in all resource groups
     if not resource_group.name and not resource_group.exists:
         matched_apps = [c for c in list_containerapp(cmd) if c["name"].lower() == name.lower()]
-        if env.name:
-            matched_apps = [c for c in matched_apps if
-                            parse_resource_id(c["properties"]["environmentId"])["name"].lower() == env.name.lower()]
-        if location:
-            matched_apps = [c for c in matched_apps if format_location(c["location"]) == format_location(location)]
-        if len(matched_apps) == 1:
-            resource_group.name = parse_resource_id(matched_apps[0]["id"])[
-                "resource_group"
-            ]
-            env.set_name(matched_apps[0]["properties"]["environmentId"])
-        elif len(matched_apps) > 1:
-            raise ValidationError(
-                f"There are multiple containerapps with name {name} on the subscription. "
-                "Please specify which resource group your Containerapp is in."
-            )
+
+    # If a resource group is provided, we need to search for the app in that resource group
+    if resource_group.name and resource_group.exists:
+        matched_apps = [c for c in list_containerapp(cmd, resource_group_name=resource_group.name) if
+                        c["name"].lower() == name.lower()]
+
+    if env.name:
+        matched_apps = [c for c in matched_apps if
+                        parse_resource_id(c["properties"]["environmentId"])["name"].lower() == env.name.lower()]
+    if location:
+        matched_apps = [c for c in matched_apps if format_location(c["location"]) == format_location(location)]
+    if len(matched_apps) == 1:
+        resource_group.name = parse_resource_id(matched_apps[0]["id"])[
+            "resource_group"
+        ]
+        env.set_name(matched_apps[0]["properties"]["environmentId"])
+    elif len(matched_apps) > 1:
+        raise ValidationError(
+            f"There are multiple containerapps with name {name} on the subscription. "
+            "Please specify which resource group your Containerapp is in."
+        )
 
 
 def _get_env_and_group_from_log_analytics(

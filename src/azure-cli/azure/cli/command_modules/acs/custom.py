@@ -65,6 +65,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
+    CONST_AZURE_SERVICE_MESH_MODE_ISTIO,
 )
 
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster
@@ -627,6 +628,8 @@ def aks_create(
     storage_pool_size=None,
     storage_pool_sku=None,
     storage_pool_option=None,
+    ephemeral_disk_volume_type=None,
+    ephemeral_disk_nvme_perf_tier=None,
     # misc
     yes=False,
     no_wait=False,
@@ -779,6 +782,8 @@ def aks_update(
     storage_pool_sku=None,
     storage_pool_option=None,
     azure_container_storage_nodepools=None,
+    ephemeral_disk_volume_type=None,
+    ephemeral_disk_nvme_perf_tier=None,
     # misc
     yes=False,
     no_wait=False,
@@ -1128,11 +1133,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               enable_sgxquotehelper=enable_sgxquotehelper,
                               enable_secret_rotation=enable_secret_rotation,
                               rotation_poll_interval=rotation_poll_interval,
-                              no_wait=no_wait,
-                              enable_syslog=enable_syslog,
-                              data_collection_settings=data_collection_settings,
-                              ampls_resource_id=ampls_resource_id,
-                              enable_high_log_scale_mode=enable_high_log_scale_mode)
+                              no_wait=no_wait,)
 
     enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
         and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
@@ -1219,11 +1220,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    enable_secret_rotation=False,
                    disable_secret_rotation=False,
                    rotation_poll_interval=None,
-                   no_wait=False,
-                   enable_syslog=False,
-                   data_collection_settings=None,
-                   ampls_resource_id=None,
-                   enable_high_log_scale_mode=False):
+                   no_wait=False,):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
                                                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                 operation_group='managed_clusters')
@@ -2955,6 +2952,16 @@ def aks_mesh_upgrade_rollback(
         mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK)
 
 
+def _aks_mesh_get_supported_revisions(
+        cmd,
+        client,
+        location):
+
+    revisions = aks_mesh_get_revisions(cmd, client, location)
+    supported_revisions = [r.revision for r in revisions.mesh_revisions]
+    return supported_revisions
+
+
 def _aks_mesh_update(
         cmd,
         client,
@@ -2988,6 +2995,28 @@ def _aks_mesh_update(
     try:
         mc = aks_update_decorator.fetch_mc()
         mc = aks_update_decorator.update_azure_service_mesh_profile(mc)
+
+        # check for unsupported asm revision once the smp in mc object has been updated
+        # skip the warning incase upgrade is in progress
+        service_mesh_profile = mc.service_mesh_profile
+        if (
+            service_mesh_profile and
+            service_mesh_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_ISTIO and
+            service_mesh_profile.istio and
+            service_mesh_profile.istio.revisions and
+            len(service_mesh_profile.istio.revisions) == 1
+        ):
+            revision = service_mesh_profile.istio.revisions[0]
+            supported_revisions = _aks_mesh_get_supported_revisions(cmd, client, mc.location)
+            if revision not in supported_revisions:
+                msg = (
+                    f"Istio mesh revision {revision} currently in use in your cluster is no longer supported.\n"
+                    "Please upgrade for continued support. Use `az aks mesh get-upgrades` to check for available "
+                    "upgrades.\nMore information about mesh upgrades and version support can be found here:"
+                    " https://aka.ms/asm-aks-upgrade-docs"
+                )
+                logger.warning(msg)
+
     except DecoratorEarlyExitException:
         return None
 

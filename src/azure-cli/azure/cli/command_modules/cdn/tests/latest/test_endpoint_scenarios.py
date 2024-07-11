@@ -10,7 +10,7 @@ from azure.mgmt.cdn.models import SkuName
 
 
 class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_endpoint_crud(self, resource_group):
         profile_name = 'profile123'
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
@@ -79,7 +79,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         self.endpoint_delete_cmd(resource_group, endpoint_name, profile_name)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_endpoint_compression(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=24)
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
@@ -149,7 +149,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.endpoint_delete_cmd(resource_group, endpoint_name, profile_name)
 
     @record_only()  # This test relies on existing resources in a specific subscription
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_private_link(self, resource_group):
         profile_name = 'profile123'
         self.profile_create_cmd(resource_group, profile_name, sku='Standard_Microsoft')
@@ -185,7 +185,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
                        JMESPathCheck('@[0].origins[0].privateLinkApprovalMessage', private_link_message)]
         self.endpoint_list_cmd(resource_group, profile_name, checks=list_checks)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_endpoint_start_and_stop(self, resource_group):
         profile_name = 'profile123'
         self.profile_create_cmd(resource_group, profile_name)
@@ -202,7 +202,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.endpoint_start_cmd(resource_group, endpoint_name, profile_name)
         self.endpoint_show_cmd(resource_group, endpoint_name, profile_name, checks=checks)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_endpoint_load_and_purge(self, resource_group):
         profile_name = 'profile123'
         self.profile_create_cmd(resource_group, profile_name, sku='Standard_Verizon')

@@ -384,7 +384,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'public access setting for a container is required to enable anonymous access.')
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
-                        'The default interpretation is TLS 1.0 for this property')
+                        'While the default setting is TLS 1.0 for this property, '
+                        'Microsoft recommends setting MinimumTlsVersion to 1.2 or above.')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('edge_zone', edge_zone_type, min_api='2020-08-01-preview')
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
@@ -488,7 +489,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'public access setting for a container is required to enable anonymous access.')
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
-                        'The default interpretation is TLS 1.0 for this property')
+                        'While the default setting is TLS 1.0 for this property, '
+                        'Microsoft recommends setting MinimumTlsVersion to 1.2 or above.')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
                    help='The identity type.')

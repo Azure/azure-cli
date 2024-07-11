@@ -38,6 +38,8 @@ def transform_acl_edit(result):
 
 
 def transform_acl_datetime(result):
+    if result is None:
+        return result
     result = todict(result)
     if result['start']:
         result['start'] = result["start"].split('.')[0] + '+00:00'

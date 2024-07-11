@@ -6,25 +6,25 @@
 
 def cf_dls_account(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.datalake.store import DataLakeStoreAccountManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_store import DataLakeStoreAccountManagementClient
     return get_mgmt_service_client(cli_ctx, DataLakeStoreAccountManagementClient).accounts
 
 
 def cf_dls_account_firewall(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.datalake.store import DataLakeStoreAccountManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_store import DataLakeStoreAccountManagementClient
     return get_mgmt_service_client(cli_ctx, DataLakeStoreAccountManagementClient).firewall_rules
 
 
 def cf_dls_account_virtual_network(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.datalake.store import DataLakeStoreAccountManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_store import DataLakeStoreAccountManagementClient
     return get_mgmt_service_client(cli_ctx, DataLakeStoreAccountManagementClient).virtual_network_rules
 
 
 def cf_dls_account_trusted_provider(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.datalake.store import DataLakeStoreAccountManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_store import DataLakeStoreAccountManagementClient
     return get_mgmt_service_client(cli_ctx, DataLakeStoreAccountManagementClient).trusted_id_providers
 
 

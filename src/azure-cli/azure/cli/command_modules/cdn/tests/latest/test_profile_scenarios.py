@@ -9,7 +9,7 @@ from .scenario_mixin import CdnScenarioMixin
 
 
 class CdnProfileScenarioTest(CdnScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_cdn_profile_crud(self, resource_group):
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.profile_list_cmd(resource_group, checks=list_checks)
@@ -30,7 +30,7 @@ class CdnProfileScenarioTest(CdnScenarioMixin, ScenarioTest):
 
 
 class CdnProfileDeleteDoesNotExistScenarioTest(CdnScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_cdn_profile_delete_not_found(self, resource_group):
         # see https://github.com/Azure/azure-cli/issues/3304
         # request should respond with a 204 rather than a 404
@@ -39,7 +39,7 @@ class CdnProfileDeleteDoesNotExistScenarioTest(CdnScenarioMixin, ScenarioTest):
 
 
 class CdnProfileMicrosoftScenarioTest(CdnScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_cdn_microsoft_standard_sku(self, resource_group):
         # https://github.com/Azure/azure-cli/issues/7635
         self.kwargs.update({

@@ -368,6 +368,10 @@ def ensure_container_insights_for_monitoring(
     if (not is_private_cluster or not aad_route) and ampls_resource_id is not None:
         raise ArgumentUsageError("--ampls-resource-id can only be used with private cluster in MSI mode.")
 
+    is_use_ampls = False
+    if ampls_resource_id is not None:
+        is_use_ampls = True
+
     # workaround for this addon key which has been seen lowercased in the wild
     for key in list(addon.config):
         if (
@@ -421,48 +425,31 @@ def ensure_container_insights_for_monitoring(
         )
         dataCollectionRuleName = f"MSCI-{location}-{cluster_name}"
         # Max length of the DCR name is 64 chars
-        dataCollectionRuleName = dataCollectionRuleName[0:64]
+        dataCollectionRuleName = _trim_suffix_if_needed(dataCollectionRuleName[0:64])
         dcr_resource_id = (
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         )
 
-        dataCollectionEndpointName = f"MSCI-{location}-{cluster_name}"
+        # ingestion DCE MUST be in workspace region
+        ingestionDataCollectionEndpointName = f"MSCI-ingest-{location}-{cluster_name}"
         # Max length of the DCE name is 44 chars
-        dataCollectionEndpointName = dataCollectionEndpointName[0:43]
-        dce_resource_id = None
+        ingestionDataCollectionEndpointName = _trim_suffix_if_needed(ingestionDataCollectionEndpointName[0:43])
+        ingestion_dce_resource_id = None
 
-        if enable_high_log_scale_mode or (ampls_resource_id is not None):
-            dce_resource_id = (
-                f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
-                f"providers/Microsoft.Insights/dataCollectionEndpoints/{dataCollectionEndpointName}"
-            )
-            dce_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{dce_resource_id}?api-version=2022-06-01"
-            # create the DCE
-            dce_creation_body_common = {
-                "location": location,
-                "kind": "Linux",
-                "properties": {
-                    "networkAcls": {
-                        "publicNetworkAccess": "Enabled"
-                    }
-                }
-            }
-            if ampls_resource_id is not None:
-                dce_creation_body_common["properties"]["networkAcls"]["publicNetworkAccess"] = "Disabled"
-            dce_creation_body_ = json.dumps(dce_creation_body_common)
-            for _ in range(3):
-                try:
-                    send_raw_request(
-                        cmd.cli_ctx, "PUT", dce_url, body=dce_creation_body_
-                    )
-                    error = None
-                    break
-                except AzCLIError as e:
-                    error = e
-            else:
-                raise error
+        # config DCE MUST be in cluster region
+        configDataCollectionEndpointName = f"MSCI-config-{cluster_region}-{cluster_name}"
+        # Max length of the DCE name is 44 chars
+        configDataCollectionEndpointName = _trim_suffix_if_needed(configDataCollectionEndpointName[0:43])
+        config_dce_resource_id = None
+
+        # create ingestion DCE if high log scale mode enabled
+        if enable_high_log_scale_mode:
+            ingestion_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, location, ingestionDataCollectionEndpointName, is_use_ampls)
+
+        # create config DCE if AMPLS resource specified
+        if is_use_ampls:
+            config_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, cluster_region, configDataCollectionEndpointName, is_use_ampls)
 
         if create_dcr:
             # first get the association between region display names and region IDs (because for some reason
@@ -547,7 +534,7 @@ def ensure_container_insights_for_monitoring(
                                 }
                             ]
                         },
-                        "dataCollectionEndpointId": dce_resource_id
+                        "dataCollectionEndpointId": ingestion_dce_resource_id
                     },
                 }
             )
@@ -628,7 +615,7 @@ def ensure_container_insights_for_monitoring(
                                 }
                             ]
                         },
-                        "dataCollectionEndpointId": dce_resource_id
+                        "dataCollectionEndpointId": ingestion_dce_resource_id
                     },
                 }
             )
@@ -652,110 +639,132 @@ def ensure_container_insights_for_monitoring(
 
         if create_dcra:
             # only create or delete the association between the DCR and cluster
-            association_body = json.dumps(
-                {
-                    "location": cluster_region,
-                    "properties": {
-                        "dataCollectionRuleId": dcr_resource_id,
-                        "description": "routes monitoring data to a Log Analytics workspace",
-                    },
-                }
+            create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, cluster_resource_id, dcr_resource_id)
+            if is_use_ampls:
+                # associate config DCE to the cluster
+                create_dce_association(cmd, cluster_region, cluster_resource_id, config_dce_resource_id)
+                # link config DCE to AMPLS
+                create_ampls_scope(cmd, ampls_resource_id, configDataCollectionEndpointName, config_dce_resource_id)
+                # link workspace to AMPLS
+                create_ampls_scope(cmd, ampls_resource_id, workspace_name, workspace_resource_id)
+                # link ingest DCE to AMPLS
+                if enable_high_log_scale_mode:
+                    create_ampls_scope(cmd, ampls_resource_id, ingestionDataCollectionEndpointName, ingestion_dce_resource_id)
+
+
+def create_dce_association(cmd, cluster_region, cluster_resource_id, config_dce_resource_id):
+    association_body = json.dumps(
+        {
+            "location": cluster_region,
+            "properties": {
+                "dataCollectionEndpointId": config_dce_resource_id,
+                "description": "associates config dataCollectionEndpoint to AKS cluster resource",
+            },
+        }
+    )
+    association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+        f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint?api-version=2022-06-01"
+    for _ in range(3):
+        try:
+            send_raw_request(
+                cmd.cli_ctx,
+                "PUT",
+                association_url,
+                body=association_body,
             )
-            association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2022-06-01"
-            for _ in range(3):
-                try:
-                    send_raw_request(
-                        cmd.cli_ctx,
-                        "PUT" if not remove_monitoring else "DELETE",
-                        association_url,
-                        body=association_body,
-                    )
-                    error = None
-                    break
-                except AzCLIError as e:
-                    error = e
-            else:
-                raise error
-            # create dce association
-            if enable_high_log_scale_mode or (ampls_resource_id is not None):
-                association_body = json.dumps(
-                    {
-                        "location": cluster_region,
-                        "properties": {
-                            "dataCollectionEndpointId": dce_resource_id,
-                            "description": "routes monitoring data to a Log Analytics workspace",
-                        },
-                    }
-                )
-                association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                    f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint?api-version=2022-06-01"
-                for _ in range(3):
-                    try:
-                        send_raw_request(
-                            cmd.cli_ctx,
-                            "PUT" if not remove_monitoring else "DELETE",
-                            association_url,
-                            body=association_body,
-                        )
-                        error = None
-                        break
-                    except AzCLIError as e:
-                        error = e
-                else:
-                    raise error
-                if ampls_resource_id is not None:
-                    # link DCE to AMPLS
-                    link_dce_ampls_body = json.dumps(
-                        {
-                            "properties": {
-                                "linkedResourceId": dce_resource_id,
-                            },
-                        }
-                    )
-                    link_dce_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                        f"{ampls_resource_id}/scopedresources/{dataCollectionEndpointName}-connection?api-version=2021-07-01-preview"
+            error = None
+            break
+        except AzCLIError as e:
+            error = e
+    else:
+        raise error
 
-                    for _ in range(3):
-                        try:
-                            send_raw_request(
-                                cmd.cli_ctx,
-                                "PUT",
-                                link_dce_ampls_url,
-                                body=link_dce_ampls_body,
-                            )
-                            error = None
-                            break
-                        except AzCLIError as e:
-                            error = e
-                    else:
-                        raise error
 
-                    # link workspace to AMPLS
-                    link_ws_ampls_body = json.dumps(
-                        {
-                            "properties": {
-                                "linkedResourceId": workspace_resource_id,
-                            },
-                        }
-                    )
-                    link_ws_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                        f"{ampls_resource_id}/scopedresources/{workspace_name}-connection?api-version=2021-07-01-preview"
+def create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, cluster_resource_id, dcr_resource_id):
+    association_body = json.dumps(
+        {
+            "location": cluster_region,
+            "properties": {
+                "dataCollectionRuleId": dcr_resource_id,
+                "description": "associates dataCollectionRule to the AKS",
+            },
+        }
+    )
+    association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+        f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2022-06-01"
+    for _ in range(3):
+        try:
+            send_raw_request(
+                cmd.cli_ctx,
+                "PUT" if not remove_monitoring else "DELETE",
+                association_url,
+                body=association_body,
+            )
+            error = None
+            break
+        except AzCLIError as e:
+            error = e
+    else:
+        raise error
 
-                    for _ in range(3):
-                        try:
-                            send_raw_request(
-                                cmd.cli_ctx,
-                                "PUT",
-                                link_ws_ampls_url,
-                                body=link_ws_ampls_body,
-                            )
-                            error = None
-                            break
-                        except AzCLIError as e:
-                            error = e
-                    else:
-                        raise error
+
+def create_ampls_scope(cmd, ampls_resource_id, dce_endpoint_name, dce_resource_id):
+    link_dce_ampls_body = json.dumps(
+        {
+            "properties": {
+                "linkedResourceId": dce_resource_id,
+            },
+        }
+    )
+    link_dce_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+        f"{ampls_resource_id}/scopedresources/{dce_endpoint_name}-connection?api-version=2021-07-01-preview"
+
+    for _ in range(3):
+        try:
+            send_raw_request(
+                cmd.cli_ctx,
+                "PUT",
+                link_dce_ampls_url,
+                body=link_dce_ampls_body,
+            )
+            error = None
+            break
+        except AzCLIError as e:
+            error = e
+    else:
+        raise error
+
+
+def create_data_collection_endpoint(cmd, subscription, resource_group, region, endpoint_name, is_ampls):
+    dce_resource_id = (
+        f"/subscriptions/{subscription}/resourceGroups/{resource_group}/"
+        f"providers/Microsoft.Insights/dataCollectionEndpoints/{endpoint_name}"
+    )
+    dce_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+        f"{dce_resource_id}?api-version=2022-06-01"
+    # create the DCE
+    dce_creation_body_common = {
+        "location": region,
+        "kind": "Linux",
+        "properties": {
+            "networkAcls": {
+                "publicNetworkAccess": "Enabled"
+            }
+        }
+    }
+    if is_ampls:
+        dce_creation_body_common["properties"]["networkAcls"]["publicNetworkAccess"] = "Disabled"
+    dce_creation_body_ = json.dumps(dce_creation_body_common)
+    for _ in range(3):
+        try:
+            send_raw_request(cmd.cli_ctx, "PUT", dce_url, body=dce_creation_body_)
+            error = None
+            break
+        except AzCLIError as e:
+            error = e
+    else:
+        raise error
+    return dce_resource_id
 
 
 def validate_data_collection_settings(dataCollectionSettings):
@@ -1006,3 +1015,9 @@ def _get_data_collection_settings(file_path):
         msg = "Error reading data_collection_settings."
         raise InvalidArgumentValueError(msg.format(file_path))
     return data_collection_settings
+
+
+def _trim_suffix_if_needed(s, suffix="-"):
+    if s.endswith(suffix):
+        s = s[:-len(suffix)]
+    return s

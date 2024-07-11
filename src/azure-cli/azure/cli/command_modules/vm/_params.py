@@ -828,7 +828,7 @@ def load_arguments(self, _):
         c.argument('enable_secure_boot', enable_secure_boot_type)
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
-        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch"]), min_api='2020-06-01', help='Specify the security type of the virtual machine scale set.')
+        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch", "Standard"]), min_api='2020-06-01', help='Specify the security type of the virtual machine scale set.')
         c.argument('security_posture_reference_id', min_api='2023-03-01',
                    options_list=['--security-posture-reference-id', '--security-posture-id'],
                    help='The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest')
@@ -872,6 +872,9 @@ def load_arguments(self, _):
             c.argument('enable_osimage_notification', arg_type=get_three_state_flag(), min_api='2022-11-01', help='Specify whether the OS Image Scheduled event is enabled or disabled.')
             c.argument('enable_resilient_creation', arg_type=get_three_state_flag(), min_api='2023-09-01', help='Automatically recover customers from OS Provisioning Timeout and VM Start Timeout errors experienced during a VM Create operation by deleting and recreating the affected VM.')
             c.argument('enable_resilient_deletion', arg_type=get_three_state_flag(), min_api='2023-09-01', help='Retry VM Delete requests asynchronously in the event of a failed delete operation.')
+            c.argument('additional_scheduled_events', options_list=['--additional-scheduled-events', '--scheduled-event-additional-publishing-target-event-grid-and-resource-graph', '--additional-events'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='The configuration parameter used while creating event grid and resource graph scheduled event setting.')
+            c.argument('enable_user_reboot_scheduled_events', options_list=['--enable-user-reboot-scheduled-events', '--enable-reboot'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='The configuration parameter used while publishing scheduled events additional publishing targets.')
+            c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
 
     for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
         with self.argument_context(scope) as c:

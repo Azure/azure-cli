@@ -34,8 +34,8 @@ examples:
     text: >
         az postgres flexible-server create --location northeurope --resource-group testGroup \\
           --name testserver --admin-user username --admin-password password \\
-          --sku-name Standard_B1ms --tier Burstable --public-access 153.24.26.117 --storage-size 128 \\
-          --tags "key=value" --version 13 --high-availability ZoneRedundant --zone 1 \\
+          --sku-name Standard_D2s_v3 --tier GeneralPurpose --public-access 153.24.26.117 --storage-size 128 \\
+          --tags "key=value" --version 16 --high-availability ZoneRedundant --zone 1 \\
           --standby-zone 3
   - name: >
       Create a PostgreSQL flexible server using Premium SSD v2 Disks.
@@ -590,10 +590,28 @@ examples:
         --migration-name testmigration --properties "migrationConfig.json"
   - name: >
       Start a private endpoint enabled migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file.
-      Use --migrationRuntimeResourceId to define the migration runtime server that is responsible for migrating data between source and target server.
+      Pass in MigrationRuntimeResourceId to define the migration runtime server that is responsible for migrating data between source and target server. Sample migrationConfig.json will look like this: \n
+      {
+        "properties": {
+          "SourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
+          "MigrationRuntimeResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testsourcemigration",
+          "SecretParameters": {
+            "AdminCredentials": {
+              "SourceServerPassword": "password",
+              "TargetServerPassword": "password"
+            },
+            "SourceServerUserName": "testuser@pg-single-1",
+            "TargetServerUserName": "fspguser"
+          },
+          "dBsToMigrate": [
+            "postgres"
+          ],
+          "OverwriteDbsInTarget": "true"
+        }
+      }
     text: >
       az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration
-      --properties "migrationConfig.json" --migrationRuntimeResourceId /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testsourcemigration
+      --properties "migrationConfig.json"
 """
 
 helps['postgres flexible-server migration list'] = """
@@ -829,8 +847,8 @@ helps['postgres flexible-server upgrade'] = """
 type: command
 short-summary: Upgrade the major version of a flexible server.
 examples:
-  - name: Upgrade server 'testsvr' to PostgreSQL major version 14.
-    text: az postgres flexible-server upgrade -g testgroup -n testsvr -v 14
+  - name: Upgrade server 'testsvr' to PostgreSQL major version 16.
+    text: az postgres flexible-server upgrade -g testgroup -n testsvr -v 16
 """
 
 helps['postgres flexible-server identity'] = """

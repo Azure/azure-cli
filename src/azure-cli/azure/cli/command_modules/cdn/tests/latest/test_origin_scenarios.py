@@ -8,8 +8,8 @@ from .scenario_mixin import CdnScenarioMixin
 
 class CdnOriginScenarioTest(CdnScenarioMixin, ScenarioTest):
 
-    @record_only()  # This tests relies on a specific subscription with existing resources
-    @ResourceGroupPreparer()
+    # @record_only()  # This tests relies on a specific subscription with existing resources
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_origin_crud(self, resource_group):
 
         pls_subscription_id = '27cafca8-b9a4-4264-b399-45d0c9cca1ab'
@@ -252,7 +252,7 @@ class CdnOriginScenarioTest(CdnScenarioMixin, ScenarioTest):
         checks = [JMESPathCheck('length(@)', 2)]
         self.origin_list_cmd(resource_group, endpoint_name, profile_name, checks=checks)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_microsoft_sku_origingroup_override(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
         self.profile_create_cmd(resource_group, profile_name, sku='Standard_Microsoft')

@@ -158,6 +158,7 @@ def load_arguments(self, _):
         c.argument('infrastructure_encryption', infrastructure_encryption_type)
         c.argument('mi_user_assigned', mi_user_assigned_type)
         c.argument('mi_system_assigned', mi_system_assigned_type)
+        c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
 
     with self.argument_context('backup vault encryption show') as c:
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')

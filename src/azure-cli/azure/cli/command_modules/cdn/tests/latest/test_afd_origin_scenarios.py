@@ -8,7 +8,7 @@ from .afdx_scenario_mixin import CdnAfdScenarioMixin
 
 
 class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_origin_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
         self.afd_profile_create_cmd(resource_group, profile_name, sku="Premium_AzureFrontDoor")

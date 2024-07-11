@@ -14,7 +14,7 @@ from knack.util import CLIError
 
 
 class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_cdn_domain')
+    @ResourceGroupPreparer(name_prefix='cli_test_cdn_domain', additional_tags={'owner': 'jingnanxu'})
     def test_cdn_custom_domain_errors(self, resource_group):
         self.kwargs.update({
             'profile': 'cdnprofile1',
@@ -45,7 +45,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
             self.cmd(
                 'cdn custom-domain disable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_cdn_custom_domain_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=24)
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
@@ -92,7 +92,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.custom_domain_list_cmd(resource_group, profile_name, endpoint_name, checks=list_checks)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_cdn_custom_domain_https_verizon(self, resource_group):
         profile_name = 'profile123'
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
@@ -130,7 +130,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     @KeyVaultPreparer(location='centralus', name_prefix='cdncli-byoc', name_len=24)
     def test_cdn_custom_domain_https_msft(self, resource_group, key_vault):
         profile_name = 'profile123'
@@ -200,7 +200,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                                                     user_cert_protocol_type='sni')
 
     @unittest.skip("Duplicate cdn endpoint name, cannot rerun live.")
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     @KeyVaultPreparer(location='centralus', name_prefix='cdnclibyoc-latest', name_len=24)
     def test_cdn_custom_domain_byoc_latest(self, resource_group, key_vault):
         profile_name = 'profile123'

@@ -83,6 +83,22 @@ network application-gateway rewrite-rule set:
 network application-gateway rewrite-rule:
     rule_exclusions:
     - require_wait_command_if_no_wait
+network application-gateway rewrite-rule create:
+    parameters:
+        request_header_configurations:
+            rule_exclusions:
+            - option_length_too_long
+        response_header_configurations:
+            rule_exclusions:
+            - option_length_too_long
+network application-gateway rewrite-rule update:
+    parameters:
+        request_header_configurations:
+            rule_exclusions:
+            - option_length_too_long
+        response_header_configurations:
+            rule_exclusions:
+            - option_length_too_long
 network application-gateway root-cert:
     rule_exclusions:
     - require_wait_command_if_no_wait

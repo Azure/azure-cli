@@ -15,9 +15,7 @@ class CosmosdbBurstCapacityScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_burst_capacity', location='australiaeast')
     def test_cosmosdb_burst_capacity(self, resource_group):
-        # Assumption: There exists a cosmosTest resource group.
         self.kwargs.update({
-            'rg' : 'cosmosTest',
             'acc': self.create_random_name(prefix='burst-test-', length=20),
             'loc': 'australiaeast',
             'tar': '0=1200 1=1200',

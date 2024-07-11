@@ -6,7 +6,7 @@
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.mgmt.datalake.store.models import (
+from .vendored_sdks.azure_mgmt_datalake_store.models import (
     UpdateDataLakeStoreAccountParameters,
     CreateDataLakeStoreAccountParameters,
     EncryptionConfigType,

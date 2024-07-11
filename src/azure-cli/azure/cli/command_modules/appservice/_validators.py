@@ -348,7 +348,7 @@ def _validate_service_tag_format(cmd, namespace):
         service_tag_full_list = ListServiceTags(cli_ctx=cmd.cli_ctx)(command_args={
             "location": webapp.location
         })
-        if service_tag_full_list is None:
+        if service_tag_full_list is None or "values" not in service_tag_full_list:
             logger.warning('Not able to get full Service Tag list. Cannot validate Service Tag.')
             return
         for tag in input_tags:

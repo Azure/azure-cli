@@ -126,7 +126,7 @@ def load_arguments(self, _):
                         'Role Based Access Control (RBAC) for authorization of data actions, and the access policies '
                         'specified in vault properties will be ignored. When false, the key vault will use the access '
                         'policies specified in vault properties, and any policy stored on Azure Resource Manager will '
-                        'be ignored. If null or not specified, the vault is created with the default value of false. '
+                        'be ignored. If null or not specified, the vault is created with the default value of true. '
                         'Note that management actions are always authorized with RBAC.')
         c.argument('enable_purge_protection', arg_type=get_three_state_flag(),
                    help='Property specifying whether protection against purge is enabled for this vault/managed HSM '

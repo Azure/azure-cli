@@ -165,7 +165,7 @@ examples:
 
 helps['dms project task'] = """
 type: group
-short-summary: Manage tasks for a Azure Database Migration Service (classic) instance's project.
+short-summary: Manage tasks for an Azure Database Migration Service (classic) instance's project.
 """
 
 helps['dms project task cancel'] = """

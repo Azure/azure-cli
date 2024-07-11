@@ -595,7 +595,6 @@ class CDNEndpointUpdate(_CDNEndpointUpdate):
             'Content won\'t be compressed on CDN when requested content is smaller than 1 byte or larger than 1 MB.',
             blank=True
         )
-        args_schema.origins._registered = False
         args_schema.is_http_allowed._registered = False
         args_schema.is_https_allowed._registered = False
         args_schema.is_compression_enabled._registered = False

@@ -10,7 +10,7 @@ from azure.core.exceptions import (HttpResponseError)
 
 
 class CdnAfdSecurityPolicyScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_security_policy_crud(self, resource_group):
         profile_name = 'profilesecuritytest'
         self.afd_security_policy_list_cmd(resource_group, profile_name, expect_failure=True)

@@ -825,6 +825,15 @@ helps['containerapp env certificate'] = """
     short-summary: Commands to manage certificates for the Container Apps environment.
 """
 
+helps['containerapp env certificate create'] = """
+    type: command
+    short-summary: Create a managed certificate.
+    examples:
+    - name: Create a managed certificate.
+      text: |
+          az containerapp env certificate create -g MyResourceGroup --name MyEnvironment --certificate-name MyCertificate --hostname MyHostname --validation-method CNAME
+"""
+
 helps['containerapp env certificate list'] = """
     type: command
     short-summary: List certificates for an environment.
@@ -841,6 +850,12 @@ helps['containerapp env certificate list'] = """
     - name: List certificates by certificate thumbprint.
       text: |
           az containerapp env certificate list -g MyResourceGroup --name MyEnvironment --thumbprint MyCertificateThumbprint
+    - name: List managed certificates for an environment.
+      text: |
+          az containerapp env certificate list -g MyResourceGroup --name MyEnvironment --managed-certificates-only
+    - name: List private key certificates for an environment.
+      text: |
+          az containerapp env certificate list -g MyResourceGroup --name MyEnvironment --private-key-certificates-only
 """
 
 helps['containerapp env certificate upload'] = """
