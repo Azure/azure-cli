@@ -2339,8 +2339,8 @@ def load_arguments(self, _):
 
         c.argument('dns_zone_partner',
                    required=False,
-                   help='The resource id of the partner Managed Server to inherit DnsZone property from for Managed '
-                        'instance creation.')
+                   help='The resource id of the partner Managed Instance to inherit DnsZone property from for Managed '
+                        'Instance creation.')
 
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -2366,7 +2366,7 @@ def load_arguments(self, _):
                 'instance_pool_name',
                 'database_format',
                 'pricing_model',
-                'dns_partner_zone'
+                'dns_zone_partner'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
