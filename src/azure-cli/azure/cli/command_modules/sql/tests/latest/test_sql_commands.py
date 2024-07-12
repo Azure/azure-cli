@@ -6213,12 +6213,12 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
     @record_only()
     def test_sql_midb_cross_subscription_move_copy(self):
 
-        source_rg_name = "source-rg"
-        target_rg_name = "target-rg"
-        source_instance_name = "source-mi"
-        target_instance_name = "target-mi"
-        target_subscription_id = "000000-0000-0000-000000"
-        managed_db_name = "db-name"
+        source_rg_name = "sqlmigeodr"
+        target_rg_name = "kmatijevic-ha-testenv-canary"
+        source_instance_name = "sqlmigeodr-eus2euap-gp-dbmovetest-mi1"
+        target_instance_name = "ha-testenv-canary-gp-1"
+        target_subscription_id = "00000000-0000-0000-0000-000000000000"
+        managed_db_name = "CLITest"
 
         self.kwargs.update({
             'rg': source_rg_name,
