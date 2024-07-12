@@ -20,8 +20,6 @@ from azure.cli.command_modules.cdn.aaz.latest.cdn.origin_group import Create as 
 from azure.cli.command_modules.cdn.aaz.latest.cdn.endpoint import Create as _CDNEndpointCreate, \
     Update as _CDNEndpointUpdate, Show as _CDNEndpointShow
 from azure.cli.command_modules.cdn.aaz.latest.cdn.profile_migration import Migrate as _Migrate
-from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDProfileShow, \
-    Update as _AFDProfileUpdate
 from azure.cli.command_modules.cdn.aaz.latest.cdn._name_exists import NameExists
 from .custom_rule_util import (create_condition, create_action, create_delivery_policy_from_existing)
 import argparse
