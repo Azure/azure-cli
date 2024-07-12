@@ -16,13 +16,13 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class CheckCompatibility(AAZCommand):
-    """Migrate the CDN profile to Azure Frontdoor(Standard/Premium) profile. This step prepares the profile for migration and will be followed by Commit to finalize the migration.
+    """Checks if CDN profile can be migrated to Azure Frontdoor(Standard/Premium) profile.
     """
 
     _aaz_info = {
         "version": "2024-05-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/cdnmigratetoafd", "2024-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/cdncanmigratetoafd", "2024-05-01-preview"],
         ]
     }
 
@@ -57,43 +57,11 @@ class CheckCompatibility(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "MigrationParameters"
-
-        _args_schema = cls._args_schema
-        _args_schema.migration_endpoint_mappings = AAZListArg(
-            options=["--migration-endpoint-mappings"],
-            arg_group="MigrationParameters",
-            help="A name map between classic CDN endpoints and AFD Premium/Standard endpoints.",
-        )
-
-        migration_endpoint_mappings = cls._args_schema.migration_endpoint_mappings
-        migration_endpoint_mappings.Element = AAZObjectArg()
-
-        _element = cls._args_schema.migration_endpoint_mappings.Element
-        _element.migrated_from = AAZStrArg(
-            options=["migrated-from"],
-            help="The name of the old endpoint.",
-        )
-        _element.migrated_to = AAZStrArg(
-            options=["migrated-to"],
-            help="The name for the new endpoint.",
-        )
-
-        # define Arg Group "Sku"
-
-        _args_schema = cls._args_schema
-        _args_schema.sku = AAZStrArg(
-            options=["--sku"],
-            arg_group="Sku",
-            help="Name of the pricing tier.",
-            enum={"Custom_Verizon": "Custom_Verizon", "Premium_AzureFrontDoor": "Premium_AzureFrontDoor", "Premium_Verizon": "Premium_Verizon", "StandardPlus_955BandWidth_ChinaCdn": "StandardPlus_955BandWidth_ChinaCdn", "StandardPlus_AvgBandWidth_ChinaCdn": "StandardPlus_AvgBandWidth_ChinaCdn", "StandardPlus_ChinaCdn": "StandardPlus_ChinaCdn", "Standard_955BandWidth_ChinaCdn": "Standard_955BandWidth_ChinaCdn", "Standard_Akamai": "Standard_Akamai", "Standard_AvgBandWidth_ChinaCdn": "Standard_AvgBandWidth_ChinaCdn", "Standard_AzureFrontDoor": "Standard_AzureFrontDoor", "Standard_ChinaCdn": "Standard_ChinaCdn", "Standard_Microsoft": "Standard_Microsoft", "Standard_Verizon": "Standard_Verizon"},
-        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.CdnProfilesCdnMigrateToAfd(ctx=self.ctx)()
+        yield self.CdnProfilesCdnCanMigrateToAfd(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -108,7 +76,7 @@ class CheckCompatibility(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class CdnProfilesCdnMigrateToAfd(AAZHttpOperation):
+    class CdnProfilesCdnCanMigrateToAfd(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -138,7 +106,7 @@ class CheckCompatibility(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/cdnMigrateToAfd",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/cdnCanMigrateToAfd",
                 **self.url_parameters
             )
 
@@ -182,38 +150,10 @@ class CheckCompatibility(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
-            )
-            _builder.set_prop("migrationEndpointMappings", AAZListType, ".migration_endpoint_mappings")
-            _builder.set_prop("sku", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
-
-            migration_endpoint_mappings = _builder.get(".migrationEndpointMappings")
-            if migration_endpoint_mappings is not None:
-                migration_endpoint_mappings.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".migrationEndpointMappings[]")
-            if _elements is not None:
-                _elements.set_prop("migratedFrom", AAZStrType, ".migrated_from")
-                _elements.set_prop("migratedTo", AAZStrType, ".migrated_to")
-
-            sku = _builder.get(".sku")
-            if sku is not None:
-                sku.set_prop("name", AAZStrType, ".sku")
-
-            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -244,12 +184,35 @@ class CheckCompatibility(AAZCommand):
             )
 
             properties = cls._schema_on_200.properties
-            properties.migrated_profile_resource_id = AAZObjectType(
-                serialized_name="migratedProfileResourceId",
+            properties.can_migrate = AAZBoolType(
+                serialized_name="canMigrate",
+                flags={"read_only": True},
             )
+            properties.default_sku = AAZStrType(
+                serialized_name="defaultSku",
+                flags={"read_only": True},
+            )
+            properties.errors = AAZListType()
 
-            migrated_profile_resource_id = cls._schema_on_200.properties.migrated_profile_resource_id
-            migrated_profile_resource_id.id = AAZStrType()
+            errors = cls._schema_on_200.properties.errors
+            errors.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.errors.Element
+            _element.code = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.error_message = AAZStrType(
+                serialized_name="errorMessage",
+                flags={"read_only": True},
+            )
+            _element.next_steps = AAZStrType(
+                serialized_name="nextSteps",
+                flags={"read_only": True},
+            )
+            _element.resource_name = AAZStrType(
+                serialized_name="resourceName",
+                flags={"read_only": True},
+            )
 
             return cls._schema_on_200
 

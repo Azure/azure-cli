@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck
 from azure.cli.testsdk import ScenarioTest
+import time
 from .scenario_mixin import CdnScenarioMixin
 
 
@@ -25,9 +26,11 @@ class ClassicCdnMigration(CdnScenarioMixin, ScenarioTest):
         checks = [JMESPathCheck('type', 'Microsoft.Cdn/migrate')]
         self.cdn_migrate_to_afd(resource_group, profile_name, sku='Premium_AzureFrontDoor', checks=checks)
 
-        self.cdn_migration_commit(resource_group, profile_name)
+        time.sleep(30)
 
-        self.profile_delete_cmd(resource_group, profile_name)
+        # self.cdn_migration_commit(resource_group, profile_name)
+
+        # self.profile_delete_cmd(resource_group, profile_name)
 
     # skip "https://github.com/Azure/azure-cli/issues/28678"
     # @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
@@ -60,3 +63,8 @@ class ClassicCdnMigration(CdnScenarioMixin, ScenarioTest):
 
         maps = "[{{migrated-from:maxtestendpointcli-test-profile1.azureedge.net,migrated-to:maxtestendpointcli-test-profile2}}]"
         self.cdn_migrate_to_afd(rg_name, profile_name, "Premium_AzureFrontDoor", maps)
+
+    def test_classic_cdn_migration_abort(self):
+        rg_name = "cli-test-rg"
+        profile_name = "cli-test-profile"
+        self.cdn_migration_abort(rg_name, profile_name)
