@@ -1803,7 +1803,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             version_used_create = '|'.join(runtime.split('|')[1:])
             runtime_version = "{}|{}".format(language, version_used_create) if \
                 version_used_create != "-" else version_used_create
-            current_stack = get_current_stack_from_runtime(runtime_version) if get_current_stack_from_runtime(runtime_version) != "tomcat" else "java"
+            current_stack = get_current_stack_from_runtime(runtime_version) if \
+                get_current_stack_from_runtime(runtime_version) != "tomcat" else "java"
             _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
 
     if number_of_workers is not None:
@@ -3839,10 +3840,12 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
     def get_stack_names_only(self, delimiter=None, show_runtime_details=False):
         windows_stacks = [s.display_name for s in self.stacks if not s.linux and not s.is_auto_update]
         linux_stacks = [s.display_name for s in self.stacks if s.linux and not s.is_auto_update]
-        windows_auto_updates = [s.display_name for s in self.stacks if not \
-            s.linux and ('java' not in s.display_name.casefold() or s.is_auto_update)]        
-        linux_auto_updates = [s.display_name for s in self.stacks if \
-            s.linux and ('java' not in s.display_name.casefold() or s.is_auto_update)]        
+        windows_auto_updates = [
+            s.display_name for s in self.stacks if not
+            s.linux and ('java' not in s.display_name.casefold() or s.is_auto_update)]
+        linux_auto_updates = [
+            s.display_name for s in self.stacks if
+            s.linux and ('java' not in s.display_name.casefold() or s.is_auto_update)]
         if delimiter is not None:
             windows_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in windows_stacks]
             linux_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in linux_stacks]
@@ -3995,7 +3998,11 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 java_container = container_settings.java_container
                 container_version = container_settings.java_container_version
                 for java in javas:
-                    runtime = self.get_windows_java_runtime(java, java_container, container_version, container_settings.is_auto_update)
+                    runtime = self.get_windows_java_runtime(
+                        java,
+                        java_container,
+                        container_version,
+                        container_settings.is_auto_update)
                     parsed_results.append(runtime)
         else:
             minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=False)
@@ -4022,16 +4029,24 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
                 parsed_results.append(runtime)
 
-    def get_windows_java_runtime(self, java_version=None, java_container=None, container_version=None, is_auto_update=False):
+    def get_windows_java_runtime(self, java_version=None,
+                                 java_container=None, container_version=None,
+                                 is_auto_update=False):
         github_action_container_version = container_version
         if container_version.upper() == "SE":
             java_container = "JAVA SE"
             if java_version.startswith("1.8"):
                 container_version = "8"
             else:
-                container_version = java_version.split('.')[0] 
-        runtime_name = "{}|{}-{}{}".format(java_container, container_version, "java", java_version if not java_version.startswith("1.8") else "8") \
-            if java_container != "JAVA SE" else "{}|{}".format("JAVA", java_version if not java_version.startswith("1.8") or not is_auto_update else "8")
+                container_version = java_version.split('.')[0]
+        runtime_name = "{}|{}-{}{}".format(
+            java_container,
+            container_version,
+            "java",
+            java_version if not java_version.startswith("1.8") else "8") \
+            if java_container != "JAVA SE" else "{}|{}".format(
+                "JAVA",
+                java_version if not java_version.startswith("1.8") or not is_auto_update else "8")
         gh_actions_version = "8" if java_version == "1.8" else java_version
         gh_actions_runtime = "{}, {}, {}".format(java_version,
                                                  java_container.lower().replace(" se", ""),
@@ -4044,8 +4059,8 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                                      "java_container": java_container,
                                      "java_container_version": container_version},
                             github_actions_properties={"github_actions_version": gh_actions_version,
-                                                        "app_runtime": "java",
-                                                        "app_runtime_version": gh_actions_runtime},
+                                                       "app_runtime": "java",
+                                                       "app_runtime_version": gh_actions_runtime},
                             linux=False,
                             is_auto_update=is_auto_update)
 
@@ -4055,10 +4070,12 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             se_containers = [minor_java_container_versions[0]]
             for java in ["21", "17", "11", "1.8"]:
                 se_java_containers = [c for c in minor_java_container_versions if c.value.startswith(java)]
-                se_containers = se_containers + se_java_containers[:len(se_java_containers) if len(se_java_containers) < 2 else 2]
+                se_containers = se_containers + se_java_containers[:len(se_java_containers) if len(se_java_containers) < 2 else 2]    # pylint: disable=line-too-long
             minor_java_container_versions = se_containers
         if minor_java_container_versions:
-            leng = len(minor_java_container_versions) if len(minor_java_container_versions) < 3 else 3 if not "SE" in major_version.display_text else len(minor_java_container_versions)
+            leng = len(minor_java_container_versions) if \
+                len(minor_java_container_versions) < 3 else 3 if \
+                "SE" not in major_version.display_text else len(minor_java_container_versions)
             for minor in minor_java_container_versions[:leng]:
                 linux_container_settings = minor.stack_settings.linux_container_settings
                 runtimes = [
@@ -4068,11 +4085,10 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                     (linux_container_settings.java8_runtime, "8", linux_container_settings.is_auto_update)]
                 for runtime_name, version, auto_update in [(r, v, au) for (r, v, au) in runtimes if r is not None]:
                     runtime = self.Runtime(display_name=runtime_name,
-                                        configs={"linux_fx_version": runtime_name},
-                                        github_actions_properties={"github_actions_version": version},
-                                        linux=True,
-                                        is_auto_update=auto_update
-                                        )
+                                           configs={"linux_fx_version": runtime_name},
+                                           github_actions_properties={"github_actions_version": version},
+                                           linux=True,
+                                           is_auto_update=auto_update)
                     parsed_results.append(runtime)
         else:
             minor_versions = self._get_valid_minor_versions(major_version, linux=True, java=False)
