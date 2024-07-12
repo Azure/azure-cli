@@ -1322,7 +1322,7 @@ def load_arguments(self, _):
                        arg_group='Sharing Profile',
                        min_api='2020-09-30',
                        help='This property allows you to specify the permission of sharing gallery.')
-            c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
+            c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True, hide=True,
                        help='Enable soft-deletion for resources in this gallery, '
                             'allowing them to be recovered within retention time.')
             c.argument('publisher_uri', help='Community gallery publisher uri.')
