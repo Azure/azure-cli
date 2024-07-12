@@ -35,7 +35,6 @@ from azure.mgmt.sql.models import (
     FreemiumType,
     ManagedInstanceDatabaseFormat
 )
-from knack.arguments import CLIArgumentType, ignore_type
 
 from azure.cli.core.commands.parameters import (
     get_three_state_flag,
@@ -45,15 +44,13 @@ from azure.cli.core.commands.parameters import (
     tags_type,
     resource_group_name_type
 )
+
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group
 )
-from ._validators import (
-    create_args_for_complex_type,
-    validate_managed_instance_storage_size,
-    validate_backup_storage_redundancy,
-    validate_subnet
-)
+
+from knack.arguments import CLIArgumentType, ignore_type
+
 from .custom import (
     AlwaysEncryptedEnclaveType,
     ClientAuthenticationType,
@@ -70,6 +67,12 @@ from .custom import (
     FreeLimitExhaustionBehavior
 )
 
+from ._validators import (
+    create_args_for_complex_type,
+    validate_managed_instance_storage_size,
+    validate_backup_storage_redundancy,
+    validate_subnet
+)
 
 #####
 #        SizeWithUnitConverter - consider moving to common code (azure.cli.core.commands.parameters)
@@ -2903,11 +2906,11 @@ def load_arguments(self, _):
     ######
     with self.argument_context('sql midb move') as c:
         c.argument('dest_subscription_id',
-                    required=False,
-                    options_list=['--dest-subscription-id', '--dest-sub-id'],
-                    help='Id of the subscription to move the managed database to.'
-                    ' If unspecified, defaults to the origin subscription id.')
-                
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
+
         c.argument('dest_resource_group_name',
                    required=False,
                    options_list=['--dest-resource-group', '--dest-rg'],
@@ -2921,11 +2924,11 @@ def load_arguments(self, _):
 
     with self.argument_context('sql midb copy') as c:
         c.argument('dest_subscription_id',
-                    required=False,
-                    options_list=['--dest-subscription-id', '--dest-sub-id'],
-                    help='Id of the subscription to move the managed database to.'
-                    ' If unspecified, defaults to the origin subscription id.')
-                
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
+
         c.argument('dest_resource_group_name',
                    required=False,
                    options_list=['--dest-resource-group', '--dest-rg'],
@@ -2949,11 +2952,11 @@ def load_arguments(self, _):
                    help='Name of the source managed instance.')
 
         c.argument('dest_subscription_id',
-                    required=False,
-                    options_list=['--dest-subscription-id', '--dest-sub-id'],
-                    help='Id of the subscription to move the managed database to.'
-                    ' If unspecified, defaults to the origin subscription id.')
-        
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
+
         c.argument('dest_instance_name',
                    required=False,
                    options_list=['--dest-mi'],
@@ -2981,11 +2984,11 @@ def load_arguments(self, _):
                    help='Name of the source managed instance.')
 
         c.argument('dest_subscription_id',
-                    required=False,
-                    options_list=['--dest-subscription-id', '--dest-sub-id'],
-                    help='Id of the subscription to move the managed database to.'
-                    ' If unspecified, defaults to the origin subscription id.')
-        
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
+
         c.argument('dest_instance_name',
                    required=False,
                    options_list=['--dest-mi'],
