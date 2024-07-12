@@ -246,7 +246,7 @@ def _get_shared_identity(
     identity_template: str,
     identity_prefix: str,
     identity_max_id: str,
-    identity_id: str = None,
+    identity_id: int = 0,
     designated_identity: str = None,
     excluded_identity: str = None,
 ):
@@ -256,7 +256,7 @@ def _get_shared_identity(
     identity = None
     if identity_template and identity_prefix:
         if identity_id:
-            identity = identity_template.format(identity_prefix, identity_id)
+            identity = identity_template.format(identity_prefix, str(identity_id))
         elif identity_max_id:
             tries = 0
             while tries < 10:
@@ -280,7 +280,7 @@ def get_shared_control_plane_identity(
         os.getenv("SHARED_CP_IDENTITY_TEMPLATE"),
         os.getenv("SHARED_CP_IDENTITY_PREFIX"),
         os.getenv("SHARED_CP_IDENTITY_MAX_ID"),
-        identity_id=None,
+        identity_id=0,
         designated_identity=designated_identity,
         excluded_identity=excluded_identity,
     )
@@ -304,16 +304,18 @@ def get_shared_kubelet_identity(
     )
 
 
-def _get_id_from_shared_control_plane_identity(shared_identity):
+def _get_id_from_shared_control_plane_identity(shared_identity) -> int:
     if (
         os.getenv("SHARED_CP_IDENTITY_TEMPLATE") and
         os.getenv("SHARED_CP_IDENTITY_PREFIX") and
         shared_identity
     ):
-        return shared_identity.replace(
-            os.getenv("SHARED_CP_IDENTITY_TEMPLATE").format(
-                os.getenv("SHARED_CP_IDENTITY_PREFIX"), ""
-            ),
-            "",
+        return int(
+            shared_identity.replace(
+                os.getenv("SHARED_CP_IDENTITY_TEMPLATE").format(
+                    os.getenv("SHARED_CP_IDENTITY_PREFIX"), ""
+                ),
+                "",
+            )
         )
-    return None
+    return 0
