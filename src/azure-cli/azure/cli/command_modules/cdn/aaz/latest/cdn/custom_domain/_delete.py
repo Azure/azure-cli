@@ -81,7 +81,6 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-
     class CustomDomainsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
