@@ -314,7 +314,7 @@ class TestProfile(unittest.TestCase):
                                   create_subscription_client_mock):
         login_with_auth_code_mock.return_value = self.user_identity_mock
 
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -336,7 +336,7 @@ class TestProfile(unittest.TestCase):
                                     create_subscription_client_mock):
         login_with_device_code_mock.return_value = self.user_identity_mock
 
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -356,7 +356,7 @@ class TestProfile(unittest.TestCase):
                                                create_subscription_client_mock):
         login_with_device_code_mock.return_value = self.user_identity_mock
 
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -377,7 +377,7 @@ class TestProfile(unittest.TestCase):
                                                      create_subscription_client_mock):
         login_with_username_password_mock.return_value = self.user_identity_mock
 
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -396,7 +396,7 @@ class TestProfile(unittest.TestCase):
     def test_login_with_service_principal(self, login_with_service_principal_mock,
                                           get_service_principal_credential_mock,
                                           create_subscription_client_mock):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -428,7 +428,7 @@ class TestProfile(unittest.TestCase):
     def test_login_in_cloud_shell(self, msi_auth_mock, create_subscription_client_mock):
         msi_auth_mock.return_value = MSRestAzureAuthStub()
 
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -457,7 +457,7 @@ class TestProfile(unittest.TestCase):
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         create_subscription_client_mock.return_value = mock_subscription_client
 
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
 
@@ -490,7 +490,7 @@ class TestProfile(unittest.TestCase):
         mock_subscription_client.subscriptions.list.return_value = []
         create_subscription_client_mock.return_value = mock_subscription_client
 
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
 
@@ -525,7 +525,7 @@ class TestProfile(unittest.TestCase):
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         create_subscription_client_mock.return_value = mock_subscription_client
 
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
 
@@ -580,7 +580,7 @@ class TestProfile(unittest.TestCase):
                     raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
                                              'Get Token request returned http error: 400, reason: Bad Request')
 
-        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
+        profile = Profile(cli_ctx=DummyCli(random_config_dir=True), storage={'subscriptions': None})
 
         mock_msi_auth.side_effect = AuthStub
         test_object_id = '54826b22-38d6-4fb2-bad9-b7b93a3e9999'
@@ -601,7 +601,7 @@ class TestProfile(unittest.TestCase):
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         create_subscription_client_mock.return_value = mock_subscription_client
 
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
 
@@ -634,7 +634,7 @@ class TestProfile(unittest.TestCase):
                                    create_subscription_client_mock):
         login_with_auth_code_mock.return_value = self.user_identity_mock
 
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
         mock_subscription_client.subscriptions.list.return_value = []
@@ -660,7 +660,7 @@ class TestProfile(unittest.TestCase):
                              create_subscription_client_mock):
         login_with_auth_code_mock.return_value = self.user_identity_mock
 
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.tenants.list.return_value = []
         mock_subscription_client.subscriptions.list.return_value = []
@@ -679,7 +679,7 @@ class TestProfile(unittest.TestCase):
     def test_login_with_auth_code_adfs(self, can_launch_browser_mock,
                                        login_with_auth_code_mock, get_user_credential_mock,
                                        create_subscription_client_mock):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         TEST_ADFS_AUTH_URL = 'https://adfs.local.azurestack.external/adfs'
 
         def login_with_auth_code_mock_side_effect(identity_self, *args, **kwargs):
@@ -707,7 +707,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(self.subscription1_with_tenant_info_output, subs)
 
     def test_normalize(self):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
         consolidated = profile._normalize_properties(self.user1, [self.subscription1], False)
@@ -717,7 +717,7 @@ class TestProfile(unittest.TestCase):
         self.assertIsNotNone(json.dumps(consolidated[0]))
 
     def test_normalize_v2016_06_01(self):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
         from azure.mgmt.resource.subscriptions.v2016_06_01.models import Subscription \
@@ -748,7 +748,7 @@ class TestProfile(unittest.TestCase):
         self.assertIsNotNone(json.dumps(consolidated[0]))
 
     def test_update_add_two_different_subscriptions(self):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
 
@@ -782,7 +782,7 @@ class TestProfile(unittest.TestCase):
         self.assertFalse(storage_mock['subscriptions'][0]['isDefault'])
 
     def test_update_with_same_subscription_added_twice(self):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
 
@@ -805,7 +805,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(storage_mock['subscriptions'][0]['isDefault'])
 
     def test_set_active_subscription(self):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
 
@@ -826,7 +826,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(storage_mock['subscriptions'][0]['isDefault'])
 
     def test_default_active_subscription_to_non_disabled_one(self):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
 
@@ -840,7 +840,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(storage_mock['subscriptions'][1]['isDefault'])
 
     def test_get_subscription(self):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
 
@@ -860,7 +860,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.profiles.get_api_version', autospec=True)
     def test_subscription_finder_constructor(self, get_api_mock):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         get_api_mock.return_value = '2019-11-01'
         cli.cloud.endpoints.resource_manager = 'http://foo_arm'
         finder = SubscriptionFinder(cli)
@@ -868,7 +868,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(result._client._base_url, 'http://foo_arm')
 
     def test_get_current_account_user(self):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
 
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
@@ -882,7 +882,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', return_value=credential_mock)
     def test_get_login_credentials(self, get_user_credential_mock):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         # setup
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
@@ -906,7 +906,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', return_value=credential_mock)
     def test_get_login_credentials_aux_subscriptions(self, get_user_credential_mock):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
 
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
@@ -935,7 +935,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', return_value=credential_mock)
     def test_get_login_credentials_aux_tenants(self, get_user_credential_mock):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
 
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
@@ -973,7 +973,7 @@ class TestProfile(unittest.TestCase):
     def test_get_login_credentials_msi_system_assigned(self):
 
         # setup an existing msi subscription
-        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
+        profile = Profile(cli_ctx=DummyCli(random_config_dir=True), storage={'subscriptions': None})
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
         test_user = 'systemAssignedIdentity'
@@ -996,7 +996,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', MSRestAzureAuthStub)
     def test_get_login_credentials_msi_user_assigned_with_client_id(self):
         # setup an existing msi subscription
-        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
+        profile = Profile(cli_ctx=DummyCli(random_config_dir=True), storage={'subscriptions': None})
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
         test_user = 'userAssignedIdentity'
@@ -1020,7 +1020,7 @@ class TestProfile(unittest.TestCase):
     def test_get_login_credentials_msi_user_assigned_with_object_id(self):
 
         # setup an existing msi subscription
-        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
+        profile = Profile(cli_ctx=DummyCli(random_config_dir=True), storage={'subscriptions': None})
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_object_id = '12345678-38d6-4fb2-bad9-b7b93a3e9999'
         msi_subscription = SubscriptionStub('/subscriptions/12345678-1bf0-4dda-aec3-cb9272f09590',
@@ -1043,7 +1043,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', MSRestAzureAuthStub)
     def test_get_login_credentials_msi_user_assigned_with_res_id(self):
         # setup an existing msi subscription
-        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
+        profile = Profile(cli_ctx=DummyCli(random_config_dir=True), storage={'subscriptions': None})
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_res_id = ('/subscriptions/{}/resourceGroups/r1/providers/Microsoft.ManagedIdentity/'
                        'userAssignedIdentities/id1').format(test_subscription_id)
@@ -1068,7 +1068,7 @@ class TestProfile(unittest.TestCase):
     def test_get_raw_token(self, get_user_credential_mock):
         credential_mock_temp = CredentialMock()
         get_user_credential_mock.return_value = credential_mock_temp
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         # setup
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
@@ -1115,7 +1115,7 @@ class TestProfile(unittest.TestCase):
     def test_get_raw_token_for_sp(self, get_service_principal_credential_mock):
         credential_mock_temp = CredentialMock()
         get_service_principal_credential_mock.return_value = credential_mock_temp
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         # setup
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
@@ -1154,7 +1154,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     def test_get_raw_token_msi_system_assigned(self, mock_msi_auth):
         # setup an existing msi subscription
-        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
+        profile = Profile(cli_ctx=DummyCli(random_config_dir=True), storage={'subscriptions': None})
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
         test_user = 'systemAssignedIdentity'
@@ -1201,7 +1201,7 @@ class TestProfile(unittest.TestCase):
         mock_in_cloud_console.return_value = True
 
         # setup an existing msi subscription
-        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
+        profile = Profile(cli_ctx=DummyCli(random_config_dir=True), storage={'subscriptions': None})
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
         msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id,
@@ -1244,7 +1244,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.identity.Identity.logout_user')
     def test_logout(self, logout_user_mock):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
 
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
@@ -1262,7 +1262,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.identity.Identity.logout_all_users')
     def test_logout_all(self, logout_all_users_mock):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         # setup
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
@@ -1290,7 +1290,7 @@ class TestProfile(unittest.TestCase):
         mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         create_subscription_client_mock.return_value = mock_arm_client
 
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
         consolidated = profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False, None, None)
@@ -1320,7 +1320,7 @@ class TestProfile(unittest.TestCase):
     def test_refresh_accounts_one_user_account_one_sp_account(self, get_user_credential_mock,
                                                               get_service_principal_credential_mock,
                                                               create_subscription_client_mock):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         sp_id = '44fee498-c798-4ebb-a41f-7bb523bed8d8'
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
@@ -1355,7 +1355,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
     def test_refresh_accounts_with_nothing(self, get_user_credential_mock, create_subscription_client_mock):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
         consolidated = profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False, None, None)
@@ -1376,7 +1376,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
     def test_login_common_tenant_mfa_warning(self, get_user_credential_mock, create_subscription_client_mock):
         # Assume 2 tenants. Home tenant tenant1 doesn't require MFA, but tenant2 does
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         mock_arm_client = mock.MagicMock()
         tenant2_mfa_id = 'tenant2-0000-0000-0000-000000000000'
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id), TenantStub(tenant2_mfa_id)]
@@ -1416,7 +1416,7 @@ class TestProfile(unittest.TestCase):
         # With pytest, use -o log_cli=True to manually check the log
 
     def test_get_auth_info_for_newly_created_service_principal(self):
-        cli = DummyCli()
+        cli = DummyCli(random_config_dir=True)
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
         consolidated = profile._normalize_properties(self.user1, [self.subscription1], False)
