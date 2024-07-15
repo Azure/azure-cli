@@ -5584,6 +5584,14 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             location=self.context.get_location(),
         )
 
+        # we should not set a default network_plugin in the CLI. Defaulting should
+        # be handled by the AKS RP. The Python SDK has historically used "kubenet"
+        # as the default network_plugin but this can change in the future and ownership
+        # of the default when a customer does not provide it should be belong to AKS RP
+        # not the CLI or SDK. Only do this in AKSManagedClusterCreateDecorator because
+        # other operations will read from the existing mc data model.
+        mc.network_profile.network_plugin = None
+
         # attach mc to AKSContext
         self.context.attach_mc(mc)
         return mc
@@ -5902,7 +5910,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         else:
             if load_balancer_sku == CONST_LOAD_BALANCER_SKU_STANDARD or load_balancer_profile:
                 network_profile = self.models.ContainerServiceNetworkProfile(
-                    network_plugin="kubenet",
+                    network_plugin=network_plugin,
                     load_balancer_sku=load_balancer_sku,
                     load_balancer_profile=load_balancer_profile,
                     outbound_type=outbound_type,
@@ -5910,6 +5918,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             if load_balancer_sku == CONST_LOAD_BALANCER_SKU_BASIC:
                 # load balancer sku must be standard when load balancer profile is provided
                 network_profile = self.models.ContainerServiceNetworkProfile(
+                    network_plugin=network_plugin,
                     load_balancer_sku=load_balancer_sku,
                 )
 

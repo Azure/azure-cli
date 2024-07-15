@@ -6231,7 +6231,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "load_balancer_idle_timeout": None,
                 "load_balancer_backend_pool_type": CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
                 "outbound_type": None,
-                "network_plugin": None,
                 "pod_cidr": None,
                 "service_cidr": None,
                 "dns_service_ip": None,
@@ -6248,7 +6247,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_mc_1 = dec_1.set_up_network_profile(mc_1)
 
         network_profile_1 = self.models.ContainerServiceNetworkProfile(
-            network_plugin="kubenet",  # default value in SDK
+            network_plugin=None,
             pod_cidr="10.244.0.0/16",  # default value in SDK
             service_cidr="10.0.0.0/16",  # default value in SDK
             dns_service_ip="10.0.0.10",  # default value in SDK
@@ -6332,7 +6331,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_mc_3 = dec_3.set_up_network_profile(mc_3)
 
         network_profile_3 = self.models.ContainerServiceNetworkProfile(
-            network_plugin="kubenet",  # default value in SDK
+            network_plugin=None,  # None is overriden in the CLI because we don't want the default from the SDK
             pod_cidr="10.244.0.0/16",  # default value in SDK
             service_cidr="10.0.0.0/16",  # default value in SDK
             dns_service_ip="10.0.0.10",  # default value in SDK
