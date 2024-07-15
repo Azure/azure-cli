@@ -6336,7 +6336,8 @@ class VMCreateWithExistingNic(ScenarioTest):
         self.cmd('network nsg create -g {rg} -n nsg')
         self.cmd('network nic create -g {rg} -n my-nic --subnet my-subnet1 --vnet-name my-vnet --public-ip-address my-pip --network-security-group nsg')
         self.cmd('network nic ip-config create -n my-ipconfig2 -g {rg} --nic-name my-nic --private-ip-address-version IPv6')
-        self.cmd('vm create -g {rg} -n vm1 --image OpenLogic:CentOS:7.5:latest --nics my-nic --generate-ssh-keys --admin-username ubuntuadmin')
+        self.cmd('vm create -g {rg} -n vm1 --image OpenLogic:CentOS:7.5:latest --nics my-nic --generate-ssh-keys '
+                 '--admin-username ubuntuadmin --public-ip-sku Standard')
         result = self.cmd('vm show -g {rg} -n vm1 -d').get_output_in_json()
         self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['publicIps']))
         self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['privateIps']))
@@ -6373,13 +6374,21 @@ class VMSecretTest(ScenarioTest):
 
 
 class VMOsDiskSwap(ScenarioTest):
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer()
     def test_vm_os_disk_swap(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1',
             'backupDisk': 'disk1',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
-        self.cmd('vm create -g {rg} -n {vm} --image OpenLogic:CentOS:7.5:latest --admin-username clitest123 --generate-ssh-keys --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image OpenLogic:CentOS:7.5:latest --admin-username clitest123 '
+                 '--generate-ssh-keys --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         res = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
         original_disk_id = res['storageProfile']['osDisk']['managedDisk']['id']
         backup_disk_id = self.cmd('disk create -g {{rg}} -n {{backupDisk}} --source {}'.format(original_disk_id)).get_output_in_json()['id']
@@ -6393,13 +6402,20 @@ class VMOsDiskSwap(ScenarioTest):
 
 
 class VMGenericUpdate(ScenarioTest):
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer()
     def test_vm_generic_update(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --data-disk-sizes-gb 1 2 --admin-username cligenerics --generate-ssh-keys --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --data-disk-sizes-gb 1 2 '
+                 '--admin-username cligenerics --generate-ssh-keys --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         # we will try all kinds of generic updates we can
         self.cmd('vm update -g {rg} -n {vm} --set identity.type="SystemAssigned"', checks=[
