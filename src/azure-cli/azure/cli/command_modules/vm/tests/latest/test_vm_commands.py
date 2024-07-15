@@ -7247,7 +7247,7 @@ class VMGalleryImage(ScenarioTest):
         ])
 
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
-                 '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1')
+                 '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
 
         vm_id = self.cmd(
             'vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 '
