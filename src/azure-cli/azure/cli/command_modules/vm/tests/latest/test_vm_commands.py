@@ -10406,8 +10406,8 @@ class VMCreateCountScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_count_', location='eastus')
     def test_vm_create_count(self, resource_group):
         self.cmd('az network vnet create -g {rg} -n vnet --address-prefix 10.0.0.0/16')
-        self.cmd('az network vnet subnet create -g {rg} --vnet-name vnet -n subnet1 --address-prefixes 10.0.0.0/24')
-        self.cmd('az network vnet subnet create -g {rg} --vnet-name vnet -n subnet2 --address-prefixes 10.0.1.0/24')
+        self.cmd('az network vnet subnet create -g {rg} --vnet-name vnet -n subnet1 --address-prefixes 10.0.0.0/24 --default-outbound false')
+        self.cmd('az network vnet subnet create -g {rg} --vnet-name vnet -n subnet2 --address-prefixes 10.0.1.0/24 --default-outbound false')
         self.cmd('vm create -g {rg} -n vma --image Canonical:UbuntuServer:18.04-LTS:latest --count 3 --vnet-name vnet --subnet subnet1 --nsg-rule None '
                  '--generate-ssh-keys --nic-delete-option Delete --admin-username vmtest')
         self.cmd('vm list -g {rg}', checks=[

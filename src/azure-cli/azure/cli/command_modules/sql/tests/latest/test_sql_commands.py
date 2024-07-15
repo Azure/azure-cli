@@ -4370,7 +4370,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 
         # Vnet 1 without service endpoints to test ignore-missing-vnet-service-endpoint feature
         self.cmd('network vnet create -g {} -n {}'.format(resource_group, vnetName1))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {}'
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --default-outbound false'
                  .format(resource_group, vnetName1, subnetName, addressPrefix))
 
         vnet1 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'
@@ -4379,7 +4379,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 
         # Vnet 2
         self.cmd('network vnet create -g {} -n {}'.format(resource_group, vnetName2))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {}'
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {} --default-outbound false'
                  .format(resource_group, vnetName2, subnetName, addressPrefix, endpoint),
                  checks=JMESPathCheck('serviceEndpoints[0].service', 'Microsoft.Sql'))
 

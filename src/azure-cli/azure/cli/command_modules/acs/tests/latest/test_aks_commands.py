@@ -504,7 +504,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             --resource-group={resource_group} \
             --vnet-name={name} \
             --name proxy-subnet \
-            --address-prefix 10.42.3.0/24'
+            --address-prefix 10.42.3.0/24 \
+            --default-outbound false'
 
         show_subnet_cmd = 'network vnet subnet show \
             --resource-group={resource_group} \
@@ -3394,7 +3395,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ]).get_output_in_json()
 
         create_subnet = 'network vnet subnet create -n appgw-subnet --resource-group={resource_group} --vnet-name {vnet_name} ' \
-                        '--address-prefixes 11.0.1.0/24  -o json'
+                        '--address-prefixes 11.0.1.0/24 --default-outbound false -o json'
         self.cmd(create_subnet, checks=[
             self.check('provisioningState', 'Succeeded')
         ])
@@ -3449,7 +3450,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ]).get_output_in_json()
 
         create_subnet = 'network vnet subnet create -n appgw-subnet --resource-group={resource_group} --vnet-name {vnet_name} ' \
-                        '--address-prefixes 11.0.1.0/24  -o json'
+                        '--address-prefixes 11.0.1.0/24 --default-outbound false -o json'
         self.cmd(create_subnet, checks=[
             self.check('provisioningState', 'Succeeded')
         ])
@@ -6608,7 +6609,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # dedicated subnet for Azure Firewall (Firewall name cannot be changed)
         fw_subnet_cmd = 'network vnet subnet create -g {resource_group} --vnet-name {vnet_name} ' \
-                         '--address-prefixes 10.42.2.0/24 --name {fw_subnet_name}'
+                         '--address-prefixes 10.42.2.0/24 --name {fw_subnet_name} --default-outbound false'
         self.cmd(fw_subnet_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('addressPrefix', '10.42.2.0/24'),
