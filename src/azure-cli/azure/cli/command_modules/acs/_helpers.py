@@ -3,7 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
+import random
 import re
+import semver
 from typing import Any, List, TypeVar
 
 from azure.cli.command_modules.acs._client_factory import get_snapshots_client, get_msi_client
@@ -211,3 +214,108 @@ def get_user_assigned_identity(cli_ctx, subscription_id, resource_group_name, id
             raise ResourceNotFoundError("Identity '{}' not found.".format(identity_name))
         raise ServiceError(ex.message)
     return identity
+
+
+def sort_asm_revisions(revisions):
+    def _convert_revision_to_semver(rev):
+        sr = rev.replace("asm-", "")
+        sv = sr.replace("-", ".", 1)
+        # Add a custom patch version of 0
+        sv += ".0"
+        return semver.VersionInfo.parse(sv)
+
+    sorted_revisions = sorted(revisions, key=_convert_revision_to_semver)
+    return sorted_revisions
+
+
+def _get_test_sp_client_id() -> str:
+    return os.getenv("AZURE_CLI_TEST_DEV_SP_CLIENT_ID")
+
+
+def _get_test_sp_object_id(sp_client_id: str) -> str:
+    if sp_client_id.replace("-", "").lower() == _get_test_sp_client_id().replace("-", "").lower():
+        return os.getenv("AZURE_CLI_TEST_DEV_SP_OBJECT_ID")
+    return None
+
+
+def use_shared_identity() -> bool:
+    return os.getenv("USE_SHARED_IDENTITY")
+
+
+def _get_shared_identity(
+    identity_template: str,
+    identity_prefix: str,
+    identity_max_id: str,
+    identity_id: int = 0,
+    designated_identity: str = None,
+    excluded_identity: str = None,
+):
+    if designated_identity:
+        return designated_identity
+
+    identity = None
+    if identity_template and identity_prefix:
+        if identity_id:
+            identity = identity_template.format(identity_prefix, str(identity_id))
+        elif identity_max_id:
+            tries = 0
+            while tries < 10:
+                try:
+                    max_id = int(identity_max_id)
+                    random_id = random.randint(0, max_id - 2)
+                except ValueError:
+                    return None
+                identity = identity_template.format(identity_prefix, random_id)
+                if excluded_identity and identity == excluded_identity:
+                    tries += 1
+                    continue
+                break
+    return identity
+
+
+def get_shared_control_plane_identity(
+    designated_identity: str = None, excluded_identity: str = None
+) -> str:
+    return _get_shared_identity(
+        os.getenv("SHARED_CP_IDENTITY_TEMPLATE"),
+        os.getenv("SHARED_CP_IDENTITY_PREFIX"),
+        os.getenv("SHARED_CP_IDENTITY_MAX_ID"),
+        identity_id=0,
+        designated_identity=designated_identity,
+        excluded_identity=excluded_identity,
+    )
+
+
+def get_shared_kubelet_identity(
+    designated_identity: str = None,
+    excluded_identity: str = None,
+    shared_control_plane_identity: str = None,
+    index_shift: int = 0,
+) -> str:
+    return _get_shared_identity(
+        os.getenv("SHARED_KUBELET_IDENTITY_TEMPLATE"),
+        os.getenv("SHARED_KUBELET_IDENTITY_PREFIX"),
+        os.getenv("SHARED_KUBELET_IDENTITY_MAX_ID"),
+        identity_id=_get_id_from_shared_control_plane_identity(
+            shared_control_plane_identity
+        ) + index_shift,
+        designated_identity=designated_identity,
+        excluded_identity=excluded_identity,
+    )
+
+
+def _get_id_from_shared_control_plane_identity(shared_identity) -> int:
+    if (
+        os.getenv("SHARED_CP_IDENTITY_TEMPLATE") and
+        os.getenv("SHARED_CP_IDENTITY_PREFIX") and
+        shared_identity
+    ):
+        return int(
+            shared_identity.replace(
+                os.getenv("SHARED_CP_IDENTITY_TEMPLATE").format(
+                    os.getenv("SHARED_CP_IDENTITY_PREFIX"), ""
+                ),
+                "",
+            )
+        )
+    return 0
