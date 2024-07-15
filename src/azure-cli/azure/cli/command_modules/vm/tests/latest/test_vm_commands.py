@@ -1498,6 +1498,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('maxShares', 1)
         ])
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_create_disk_from_diff_gallery_image_version_', location='westus')
     def test_create_disk_from_diff_gallery_image_version(self):
         self.kwargs.update({
@@ -1512,12 +1513,19 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk2': 'disk2',
             'disk3': 'disk3',
             'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',
-            'tenantId': '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'
+            'tenantId': '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
         self.kwargs['vm_id'] = \
             self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --data-disk-sizes-gb 10 --admin-username clitest1 '
-                     '--generate-ssh-key --nsg-rule NONE').get_output_in_json()['id']
+                     '--generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()['id']
+
+        # Disable default outbound access
+        self.cmd(
+            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         time.sleep(70)
 
         self.cmd('sig create -g {rg} --gallery-name {gallery1} --permissions community --publisher-uri publisher1 '
@@ -1525,7 +1533,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('sig share enable-community -g {rg} -r {gallery1}')
 
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery1} --gallery-image-definition {image1} '
-                 '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1')
+                 '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery1} --gallery-image-definition {image1} '
                  '--gallery-image-version {version} --virtual-machine {vm_id}')
 
@@ -1552,7 +1560,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
 
         self.cmd('sig create -g {rg} --gallery-name {gallery2} --permissions groups')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery2} --gallery-image-definition {image2} '
-                 '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1')
+                 '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
 
         compute_gallery_image_version = self.cmd(
             'sig image-version create -g {rg} --gallery-name {gallery2} --gallery-image-definition {image2} '
@@ -7234,7 +7242,7 @@ class VMGalleryImage(ScenarioTest):
             'sig image-version create -g {rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name} --gallery-image-version {version} --managed-image {image_id} --replica-count 1',
             checks=self.check('name', self.kwargs['version']))
 
-
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(location='westus')
     def test_create_vm_with_shared_gallery_image(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -7250,11 +7258,18 @@ class VMGalleryImage(ScenarioTest):
             'location': resource_group_location,
             'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',  # share the gallery to tester's subscription, so the tester can get shared galleries
             'tenantId': '2f4a9838-26b7-47ee-be60-ccc1fdec5953',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions groups')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1')
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --nsg-rule None')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+
+        # Disable default outbound access
+        self.cmd(
+            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         if self.is_live:
             time.sleep(70)
         self.cmd('vm deallocate -g {rg} -n {vm}')
@@ -7268,7 +7283,7 @@ class VMGalleryImage(ScenarioTest):
 
         self.kwargs['shared_gallery_image_version'] = self.cmd('sig image-version show-shared --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location} --gallery-image-version {version}').get_output_in_json()['uniqueId']
 
-        self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
 
         self.cmd('vm show -g {rg} -n {vm_with_shared_gallery_version}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -7279,7 +7294,7 @@ class VMGalleryImage(ScenarioTest):
         with self.assertRaises(ArgumentUsageError):
             self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version2} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --nsg-rule None --os-type windows')
 
-        self.cmd('vmss create -g {rg} -n {vmss_with_shared_gallery_version} --image {shared_gallery_image_version} --generate-ssh-keys --admin-username clitest1 ')
+        self.cmd('vmss create -g {rg} -n {vmss_with_shared_gallery_version} --image {shared_gallery_image_version} --generate-ssh-keys --admin-username clitest1 --orchestration-mode Flexible')
 
         self.cmd('vmss show -g {rg} -n {vmss_with_shared_gallery_version}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -7292,6 +7307,7 @@ class VMGalleryImage(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_soft_delete_', location='westus')
     def test_gallery_soft_delete(self, resource_group_location):
         self.kwargs.update({
@@ -7299,6 +7315,8 @@ class VMGalleryImage(ScenarioTest):
             'gallery': self.create_random_name('sig_', 10),
             'image_name': self.create_random_name('img_', 10),
             'version': '1.1.1',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
         self.cmd('sig create -g {rg} -r {gallery} --soft-delete True', checks=[
@@ -7321,8 +7339,13 @@ class VMGalleryImage(ScenarioTest):
 
         vm_id = self.cmd(
             'vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 '
-            '--admin-username clitest1 --generate-ssh-key --nsg-rule NONE').get_output_in_json()['id']
+            '--admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()['id']
         self.kwargs.update({"vm_id": vm_id})
+
+
+        # Disable default outbound access
+        self.cmd(
+            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
                  '--gallery-image-version {version} --virtual-machine {vm_id}',
