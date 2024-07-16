@@ -5368,7 +5368,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # Values of existing resources in order to test this feature
         location = 'eastus2euap'
         resource_group = 'sqlmigeodr'
-        subnet = ('/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sqlmigeodr/providers/'
+        subnet = ('/subscriptions/self.get_subscription_id()/resourceGroups/sqlmigeodr/providers/'
                   'Microsoft.Network/virtualNetworks/cl_geodr_eus2_euap_vnet/subnets/subnet_1')
 
         instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
@@ -5379,7 +5379,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
             'managed_instance_name': instance_name,
             'username': 'admin123',
             'admin_password': 'SecretPassword123',
-            'dns_zone_partner': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kmatijevic-ha-testenv-canary/providers/Microsoft.Sql/managedInstances/ha-testenv-canary-gp-1'
+            'dns_zone_partner': '/subscriptions/self.get_subscription_id()/resourceGroups/kmatijevic-ha-testenv-canary/providers/Microsoft.Sql/managedInstances/ha-testenv-canary-gp-1'
         })
 
         expected_dns_zone = '7773cdecf1ff'
