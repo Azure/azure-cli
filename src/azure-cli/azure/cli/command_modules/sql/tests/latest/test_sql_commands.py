@@ -5363,6 +5363,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
     @AllowLargeResponse()
+    @record_only()
     def test_sql_managed_instance_create(self):
         # Values of existing resources in order to test this feature
         location = 'eastus2euap'
