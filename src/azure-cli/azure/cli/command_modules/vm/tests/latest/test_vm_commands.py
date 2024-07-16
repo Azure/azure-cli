@@ -7342,7 +7342,6 @@ class VMGalleryImage(ScenarioTest):
             '--admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()['id']
         self.kwargs.update({"vm_id": vm_id})
 
-
         # Disable default outbound access
         self.cmd(
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -7409,6 +7408,7 @@ class VMGalleryImage(ScenarioTest):
 
         self.cmd('sig delete -g {rg} -r {gallery}')
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(location='westus')
     def test_replication_mode(self, resource_group):
         self.kwargs.update({
@@ -7419,12 +7419,19 @@ class VMGalleryImage(ScenarioTest):
             'sku_name': self.create_random_name('sku_', 10),
             'vm_name': self.create_random_name('vm_', 10),
             'img_name': self.create_random_name('img_', 10),
-            'img_ver_name': self.create_random_name('ver_', 10)
+            'img_ver_name': self.create_random_name('ver_', 10),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
         self.cmd('sig create -g {rg} -r {sig_name}')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {sig_name} '
+        self.cmd('sig image-definition create -g {rg} --gallery-name {sig_name} --hyper-v-generation v1 '
                  '--gallery-image-definition {img_def_name} --os-type linux -p {pub_name} -f {of_name} -s {sku_name}')
-        self.cmd('vm create -g {rg} -n {vm_name} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest')
+        self.cmd('vm create -g {rg} -n {vm_name} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest '
+                 '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.cmd('vm deallocate -g {rg} -n {vm_name}')
         self.cmd('vm generalize -g {rg} -n {vm_name}')
         self.cmd('image create -g {rg} -n {img_name} --source {vm_name}')
@@ -7447,6 +7454,7 @@ class VMGalleryImage(ScenarioTest):
             self.check('publishingProfile.replicationMode', 'Shallow')
         ])
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_community_gallery_operations_', location='CentralUSEUAP')
     def test_community_gallery_operations(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -7456,13 +7464,17 @@ class VMGalleryImage(ScenarioTest):
             'version': '1.1.2',
             'captured': 'managedImage1',
             'location': resource_group_location,
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions Community --publisher-uri puburi --publisher-email abc@123.com --eula eula --public-name-prefix pubname')
         self.cmd('sig share enable-community -r {gallery} -g {rg}')
 
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1')
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username gallerytest --generate-ssh-keys --nsg-rule None')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username gallerytest '
+                 '--generate-ssh-keys --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
 
@@ -7511,6 +7523,7 @@ class VMGalleryImage(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(location='eastus2')
     def test_create_vm_with_community_gallery_image(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -7520,14 +7533,22 @@ class VMGalleryImage(ScenarioTest):
             'gallery': self.create_random_name('gellery', 16),
             'image': self.create_random_name('image', 16),
             'version': '1.1.2',
-            'captured': 'managedImage1'
+            'captured': 'managedImage1',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions Community --publisher-uri puburi --publisher-email abc@123.com --eula eula --public-name-prefix pubname')
         self.cmd('sig share enable-community -r {gallery} -g {rg}')
 
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1')
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username gallerytest --generate-ssh-keys --nsg-rule None')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username gallerytest '
+                 '--generate-ssh-keys --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
 
@@ -7542,14 +7563,16 @@ class VMGalleryImage(ScenarioTest):
             ])
 
         self.kwargs['community_gallery_image_version'] = self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} --location eastus2 --gallery-image-version {version}').get_output_in_json()['uniqueId']
-        self.cmd('vm create -g {rg} -n {vm_with_community_gallery} --image {community_gallery_image_version} --admin-username gallerytest --generate-ssh-keys --nsg-rule None --accept-term')
+        self.cmd('vm create -g {rg} -n {vm_with_community_gallery} --image {community_gallery_image_version} '
+                 '--admin-username gallerytest --generate-ssh-keys --nsg-rule None --accept-term --subnet {subnet} --vnet-name {vnet}')
 
         self.cmd('vm show -g {rg} -n {vm_with_community_gallery}', checks=[
             self.check('storageProfile.imageReference.exactVersion','{version}'),
             self.check('storageProfile.imageReference.communityGalleryImageId', '{community_gallery_image_version}')
         ])
 
-        self.cmd('vmss create -g {rg} -n {vmss_with_community_gallery_version} --admin-username gallerytest --generate-ssh-keys --image {community_gallery_image_version} --accept-term')
+        self.cmd('vmss create -g {rg} -n {vmss_with_community_gallery_version} --admin-username gallerytest --generate-ssh-keys '
+                 '--image {community_gallery_image_version} --accept-term --orchestration-mode Flexible')
 
         self.cmd('vmss show -g {rg} -n {vmss_with_community_gallery_version}', checks=[
             self.check('virtualMachineProfile.storageProfile.imageReference.communityGalleryImageId', '{community_gallery_image_version}')
@@ -7775,6 +7798,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             self.check('length(intent.vmSizes)', '1')
         ])
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_ppg_vm_vmss_')
     def test_ppg_with_related_resources(self, resource_group):
 
@@ -7783,14 +7807,21 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             'vm': 'vm1',
             'vmss': 'vmss1',
             'avset': 'avset1',
-            'ssh_key': TEST_SSH_KEY_PUB
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
         self.kwargs['ppg_id'] = self.cmd('ppg create -n {ppg} -t standard -g {rg}').get_output_in_json()['id']
 
-        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg} --nsg-rule NONE').get_output_in_json()['id']
+        self.kwargs['vm_id'] = self.cmd(
+            'vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --admin-username debian '
+            '--ssh-key-value \'{ssh_key}\' --ppg {ppg} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()['id']
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg_id}')
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg_id} --orchestration-mode Flexible')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.kwargs['avset_id'] = self.cmd('vm availability-set create -g {rg} -n {avset} --ppg {ppg}').get_output_in_json()['id']
@@ -7803,6 +7834,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         self._assert_ids_equal(ppg_resource['virtualMachines'][0]['id'], self.kwargs['vm_id'], rg_prefix='cli_test_ppg_vm_vmss_')
         self._assert_ids_equal(ppg_resource['virtualMachineScaleSets'][0]['id'], self.kwargs['vmss_id'], 'cli_test_ppg_vm_vmss_')
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_ppg_update_')
     def test_ppg_update(self, resource_group):
         self.kwargs.update({
@@ -7810,18 +7842,25 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             'vm': 'vm1',
             'vmss': 'vmss1',
             'avset': 'avset1',
-            'ssh_key': TEST_SSH_KEY_PUB
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
         self.kwargs['ppg_id'] = self.cmd('ppg create -g {rg} -n {ppg} -t standard').get_output_in_json()['id']
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --orchestration-mode Uniform --lb-sku Standard')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
         self.cmd('vmss deallocate -g {rg} -n {vmss}')
         time.sleep(30)
         self.cmd('vmss update -g {rg} -n {vmss} --ppg {ppg_id}')
 
-        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --admin-username debian '
+                 '--ssh-key-value \'{ssh_key}\' --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.kwargs['vm_id'] = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()['id']
         self.cmd('vm deallocate -g {rg} -n {vm}')
         time.sleep(30)
@@ -7942,7 +7981,9 @@ class DedicatedHostScenarioTest(ScenarioTest):
         self.kwargs.update({
             'host-group': 'my-host-group',
             'host-name': 'my-host',
-            'vm-name': 'ded-host-vm'
+            'vm-name': 'ded-host-vm',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
         # create resources
@@ -7983,7 +8024,10 @@ class DedicatedHostScenarioTest(ScenarioTest):
         })
 
         self.cmd('vm create -n {vm-name} --image Debian:debian-10:10:latest -g {rg} --size Standard_D4s_v3 '
-                 '--host {host_id} --generate-ssh-keys --admin-username azureuser --nsg-rule NONE')
+                 '--host {host_id} --generate-ssh-keys --admin-username azureuser --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         # validate resources created successfully
         vm_json = self.cmd('vm show -n {vm-name} -g {rg}', checks=[
@@ -8019,8 +8063,10 @@ class DedicatedHostScenarioTest(ScenarioTest):
         self.kwargs.update({
             'host_id': host_id
         })
-        self.cmd('vm create -g {rg2} -n vm1 --image OpenLogic:CentOS:7.5:latest --host {host_id} --size Standard_D4s_v3 --nsg-rule NONE --generate-ssh-keys --admin-username azureuser')
-        self.cmd('vm create -g {rg2} -n vm2 --image OpenLogic:CentOS:7.5:latest --host-group {host-group} --size Standard_D4s_v3 --nsg-rule NONE --generate-ssh-keys --admin-username azureuser')
+        self.cmd('vm create -g {rg2} -n vm1 --image OpenLogic:CentOS:7.5:latest --host {host_id} --size Standard_D4s_v3 '
+                 '--nsg-rule NONE --generate-ssh-keys --admin-username azureuser --subnet {subnet} --vnet-name {vnet}')
+        self.cmd('vm create -g {rg2} -n vm2 --image OpenLogic:CentOS:7.5:latest --host-group {host-group} --size Standard_D4s_v3 '
+                 '--nsg-rule NONE --generate-ssh-keys --admin-username azureuser --subnet {subnet} --vnet-name {vnet}')
         self.cmd('vm show -g {rg2} -n vm1', checks=[
             self.check_pattern('host.id', '.*/{host-name}$')
         ])
@@ -8040,6 +8086,8 @@ class DedicatedHostScenarioTest(ScenarioTest):
             'host2-group': 'my-host2-group',
             'host2-name': 'my-host2',
             'vm-name': 'ded-host-vm',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
         # create resources
@@ -8113,7 +8161,10 @@ class DedicatedHostScenarioTest(ScenarioTest):
         })
 
         self.cmd('vm create -n {vm-name} --image Debian:debian-10:10:latest -g {rg} --size Standard_D4s_v3 '
-                 '--generate-ssh-keys --admin-username azureuser --nsg-rule NONE')
+                 '--generate-ssh-keys --admin-username azureuser --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         # validate resources created successfully
         vm_json = self.cmd('vm show -n {vm-name} -g {rg}', checks=[
