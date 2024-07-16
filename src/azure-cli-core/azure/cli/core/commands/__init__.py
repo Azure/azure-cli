@@ -824,9 +824,9 @@ class AzCliCommandInvoker(CommandInvoker):
 
             for bc in iter_command_breaking_changes(cmd.name):
                 if isinstance(bc, str):
-                    print(bc, file=sys.stderr)
+                    logger.warning(bc)
                 elif isinstance(bc, BreakingChange):
-                    print(bc.message, file=sys.stderr)
+                    logger.warning(bc.message)
 
     def _resolve_output_sensitive_data_warning(self, cmd, result):
         if not cmd.cli_ctx.config.getboolean('clients', 'show_secrets_warning', False):
