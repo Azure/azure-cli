@@ -6210,6 +6210,75 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                                     self.check('[0].resourceGroup', '{rg}'),
                                     self.check('[0].operationMode', 'Copy')])
 
+    @record_only()
+    def test_sql_midb_cross_subscription_move_copy(self):
+
+        source_rg_name = "sqlmigeodr"
+        target_rg_name = "kmatijevic-ha-testenv-canary"
+        source_instance_name = "sqlmigeodr-eus2euap-gp-dbmovetest-mi1"
+        target_instance_name = "ha-testenv-canary-gp-1"
+        target_subscription_id = "00000000-0000-0000-0000-000000000000"
+        managed_db_name = "CLITest"
+
+        self.kwargs.update({
+            'rg': source_rg_name,
+            'database_name': managed_db_name,
+            'source_rg_name': source_rg_name,
+            'target_rg_name': target_rg_name,
+            'source_mi_name': source_instance_name,
+            'target_mi_name': target_instance_name,
+            'target_subscription_id': target_subscription_id
+        })
+
+        # Show source and target instance
+        source_mi = self.cmd('sql mi show -g {source_rg_name} -n {source_mi_name}').get_output_in_json()
+
+        self.kwargs.update({
+            'loc': source_mi['location'],
+        })
+
+        # Create managed database to be moved and copied
+        mdb = self.cmd('sql midb create -g {source_rg_name} --mi {source_mi_name} -n {database_name}',
+                       checks=[
+                           self.check('resourceGroup', '{source_rg_name}'),
+                           self.check('name', '{database_name}'),
+                           self.check('location', '{loc}'),
+                           self.check('status', 'Online')]).get_output_in_json()
+
+        self.kwargs.update({
+            'database_id': mdb['id']
+        })
+
+        # Start the copy operation from source to target instance
+        self.cmd('sql midb copy start -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # Cancel the move operation from source to target instance
+        self.cmd('sql midb copy cancel -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # List the copy operation
+        self.cmd('sql midb copy list -g {rg} --mi {source_mi_name} -n {database_name}',
+                 checks=[
+                     self.check('[0].state', 'Cancelled'),
+                     self.check('[0].sourceManagedInstanceName', '{source_mi_name}'),
+                     self.check('[0].targetManagedInstanceName', '{target_mi_name}'),
+                     self.check('[0].resourceGroup', '{rg}'),
+                     self.check('[0].operationMode', 'Copy')])
+
+        # Start the move operation from source to target instance
+        self.cmd('sql midb move start -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # Complete the move operation from source to target instance
+        self.cmd('sql midb move complete -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # List the move operation
+        self.cmd('sql midb move list -g {rg} --mi {source_mi_name} -n {database_name}',
+                 checks=[
+                     self.check('[0].state', 'Succeeded'),
+                     self.check('[0].sourceManagedInstanceName', '{source_mi_name}'),
+                     self.check('[0].targetManagedInstanceName', '{target_mi_name}'),
+                     self.check('[0].resourceGroup', '{rg}'),
+                     self.check('[0].operationMode', 'Move')])
+
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     # This MI AAD test needs special AD setup, please contact MI AAD team for new recording.
