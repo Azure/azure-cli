@@ -5362,6 +5362,42 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_managed_instance_create(self):
+        # Values of existing resources in order to test this feature
+        location = 'eastus2euap'
+        resource_group = 'sqlmigeodr'
+        subnet = ('/subscriptions/self.get_subscription_id()/resourceGroups/sqlmigeodr/providers/'
+                  'Microsoft.Network/virtualNetworks/cl_geodr_eus2_euap_vnet/subnets/subnet_1')
+
+        instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+        self.kwargs.update({
+            'loc': location,
+            'rg': resource_group,
+            'subnet': subnet,
+            'managed_instance_name': instance_name,
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'dns_zone_partner': '/subscriptions/self.get_subscription_id()/resourceGroups/kmatijevic-ha-testenv-canary/providers/Microsoft.Sql/managedInstances/ha-testenv-canary-gp-1'
+        })
+
+        expected_dns_zone = '7773cdecf1ff'
+        # test create sql managed_instance with dns-zone-partner property
+        managed_instance = self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --dns-zone-partner {'
+                                    'dns_zone_partner}',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('dnsZone', expected_dns_zone),
+                                        self.check('location', '{loc}')]).get_output_in_json()
+
+        # test delete sql managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
 class SqlManagedInstanceStartStopMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2', v_core=8)

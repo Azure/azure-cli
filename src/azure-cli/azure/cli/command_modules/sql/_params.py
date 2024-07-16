@@ -2336,6 +2336,11 @@ def load_arguments(self, _):
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
 
+        c.argument('dns_zone_partner',
+                   required=False,
+                   help='The resource id of the partner Managed Instance to inherit DnsZone property from for Managed '
+                        'Instance creation.')
+
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
             c, 'parameters', ManagedInstance, [
@@ -2359,7 +2364,8 @@ def load_arguments(self, _):
                 'zone_redundant',
                 'instance_pool_name',
                 'database_format',
-                'pricing_model'
+                'pricing_model',
+                'dns_zone_partner'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
