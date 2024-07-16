@@ -272,7 +272,7 @@ def __read_kv_from_config_store(azconfig_client,
                                 cli_ctx=None,
                                 prefix_to_remove="",
                                 prefix_to_add="",
-                                correlationRequestId=None):
+                                correlation_request_id=None):
     # pylint: disable=too-many-branches too-many-statements
 
     # list_configuration_settings returns kv with null label when:
@@ -298,7 +298,7 @@ def __read_kv_from_config_store(azconfig_client,
             ).list_snapshot_kv(
                 name=snapshot,
                 fields=query_fields,
-                headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId}
+                headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id}
             )
 
         except HttpResponseError as exception:
@@ -310,7 +310,7 @@ def __read_kv_from_config_store(azconfig_client,
                                                                                  label_filter=label,
                                                                                  accept_datetime=datetime,
                                                                                  fields=query_fields,
-                                                                                 headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId}
+                                                                                 headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id}
                                                                                  )
 
         except HttpResponseError as exception:
@@ -356,7 +356,7 @@ def __read_kv_from_config_store(azconfig_client,
     # We first check if the snapshot exists before returning an empty result.
     if snapshot and len(retrieved_kvs) == 0:
         try:
-            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
 
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.NOT_FOUND:
@@ -371,7 +371,7 @@ def __write_kv_and_features_to_config_store(azconfig_client,
                                             label=None,
                                             preserve_labels=False,
                                             content_type=None,
-                                            correlationRequestId=None):
+                                            correlation_request_id=None):
     if not key_values and not features:
         logger.warning('\nSource configuration is empty. No changes will be made.')
         return
@@ -389,7 +389,7 @@ def __write_kv_and_features_to_config_store(azconfig_client,
         if content_type and not is_feature_flag(set_kv) and not __is_key_vault_ref(set_kv):
             set_kv.content_type = content_type
 
-        __write_configuration_setting_to_config_store(azconfig_client, set_kv, correlationRequestId)
+        __write_configuration_setting_to_config_store(azconfig_client, set_kv, correlation_request_id)
 
 
 def __is_key_vault_ref(kv):
@@ -839,7 +839,7 @@ def __resolve_secret(cli_ctx, keyvault_reference):
         raise CLIError(str(exception))
 
 
-def __import_kvset_from_file(client, path, strict, yes, import_mode=ImportMode.IGNORE_MATCH, correlationRequestId=None):
+def __import_kvset_from_file(client, path, strict, yes, import_mode=ImportMode.IGNORE_MATCH, correlation_request_id=None):
     new_kvset = __read_with_appropriate_encoding(file_path=path, format_='json')
     if KVSetConstants.KVSETRootElementName not in new_kvset:
         raise FileOperationError("file '{0}' is not in a valid '{1}' format.".format(path, ImportExportProfiles.KVSET))
@@ -880,7 +880,7 @@ def __import_kvset_from_file(client, path, strict, yes, import_mode=ImportMode.I
         kvset_to_import_iter = kvset_from_file
 
     for config_setting in kvset_to_import_iter:
-        __write_configuration_setting_to_config_store(client, config_setting, correlationRequestId)
+        __write_configuration_setting_to_config_store(client, config_setting, correlation_request_id)
 
 
 def __validate_import_keyvault_ref(kv):
@@ -954,9 +954,9 @@ def __validate_import_tags(kv):
     return True
 
 
-def __write_configuration_setting_to_config_store(azconfig_client, configuration_setting, correlationRequestId=None):
+def __write_configuration_setting_to_config_store(azconfig_client, configuration_setting, correlation_request_id=None):
     try:
-        azconfig_client.set_configuration_setting(configuration_setting, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+        azconfig_client.set_configuration_setting(configuration_setting, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
     except ResourceReadOnlyError:
         logger.warning(
             "Failed to set read only key-value with key '%s' and label '%s'. Unlock the key-value before updating it.",

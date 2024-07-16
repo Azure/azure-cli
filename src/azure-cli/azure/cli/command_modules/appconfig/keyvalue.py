@@ -86,13 +86,13 @@ def import_config(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
-    # generate correlationRequestId for bulk operation
-    correlationRequestId = str(uuid.uuid4())
+    # generate correlation_request_id for bulk operation
+    correlation_request_id = str(uuid.uuid4())
 
     # fetch key values from source
     if source == 'file':
         if profile == ImportExportProfiles.KVSET:
-            __import_kvset_from_file(client=azconfig_client, path=path, strict=strict, yes=yes, import_mode=import_mode, correlationRequestId=correlationRequestId)
+            __import_kvset_from_file(client=azconfig_client, path=path, strict=strict, yes=yes, import_mode=import_mode, correlation_request_id=correlation_request_id)
             return
         if format_ and content_type:
             # JSON content type is only supported with JSON format.
@@ -134,7 +134,7 @@ def import_config(cmd,
                                               snapshot=src_snapshot,
                                               label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL,
                                               prefix_to_add=prefix,
-                                              correlationRequestId=correlationRequestId)
+                                              correlation_request_id=correlation_request_id)
 
         if not skip_features:
             if src_snapshot:
@@ -144,7 +144,7 @@ def import_config(cmd,
                 all_features = __read_kv_from_config_store(src_azconfig_client,
                                                            key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
                                                            label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL,
-                                                           correlationRequestId=correlationRequestId)
+                                                           correlation_request_id=correlation_request_id)
 
             for feature in all_features:
                 if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
@@ -162,7 +162,7 @@ def import_config(cmd,
         dest_kvs = __read_kv_from_config_store(azconfig_client,
                                                key=prefix + SearchFilterOptions.ANY_KEY if prefix else SearchFilterOptions.ANY_KEY,
                                                label=label if label else SearchFilterOptions.EMPTY_LABEL,
-                                               correlationRequestId=correlationRequestId)
+                                               correlation_request_id=correlation_request_id)
         __discard_features_from_retrieved_kv(dest_kvs)
 
     # if customer needs preview & confirmation
@@ -186,7 +186,7 @@ def import_config(cmd,
         all_features = __read_kv_from_config_store(azconfig_client,
                                                    key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + SearchFilterOptions.ANY_KEY,
                                                    label=label if label else SearchFilterOptions.EMPTY_LABEL,
-                                                   correlationRequestId=correlationRequestId)
+                                                   correlation_request_id=correlation_request_id)
 
         # Append all features to dest_features list
         for feature in all_features:
@@ -237,7 +237,7 @@ def import_config(cmd,
                                             label=label,
                                             preserve_labels=preserve_labels,
                                             content_type=content_type,
-                                            correlationRequestId=correlationRequestId)
+                                            correlation_request_id=correlation_request_id)
 
 
 def export_config(cmd,
@@ -281,8 +281,8 @@ def export_config(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
-    # generate correlationRequestId for bulk operation
-    correlationRequestId = str(uuid.uuid4())
+    # generate correlation_request_id for bulk operation
+    correlation_request_id = str(uuid.uuid4())
 
     dest_azconfig_client = None
     if destination == 'appconfig':
@@ -302,7 +302,7 @@ def export_config(cmd,
                                           prefix_to_remove=prefix if not export_as_reference else "",
                                           snapshot=snapshot,
                                           cli_ctx=cmd.cli_ctx if resolve_keyvault else None,
-                                          correlationRequestId=correlationRequestId)
+                                          correlation_request_id=correlation_request_id)
 
     if skip_keyvault:
         src_kvs = [keyvalue for keyvalue in src_kvs if keyvalue.content_type != KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
@@ -328,7 +328,7 @@ def export_config(cmd,
                     all_=True,
                     auth_mode=auth_mode,
                     endpoint=endpoint,
-                    correlationRequestId=correlationRequestId,
+                    correlation_request_id=correlation_request_id,
                 )
 
     # We need to separate KV from feature flags for the default export profile and only need to discard
@@ -352,7 +352,7 @@ def export_config(cmd,
         dest_kvs = __read_kv_from_config_store(dest_azconfig_client,
                                                key=SearchFilterOptions.ANY_KEY,
                                                label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL,
-                                               correlationRequestId=correlationRequestId)
+                                               correlation_request_id=correlation_request_id)
         __discard_features_from_retrieved_kv(dest_kvs)
 
         if not skip_features:
@@ -366,7 +366,7 @@ def export_config(cmd,
                 all_=True,
                 auth_mode=dest_auth_mode,
                 endpoint=dest_endpoint,
-                correlationRequestId=correlationRequestId,
+                correlation_request_id=correlation_request_id,
             )
 
     elif destination == 'appservice':
@@ -410,7 +410,7 @@ def export_config(cmd,
     elif destination == 'appconfig':
         __write_kv_and_features_to_config_store(dest_azconfig_client, key_values=src_kvs, features=src_features,
                                                 label=dest_label, preserve_labels=preserve_labels,
-                                                correlationRequestId=correlationRequestId)
+                                                correlation_request_id=correlation_request_id)
     elif destination == 'appservice':
         __write_kv_to_app_service(cmd, key_values=src_kvs, appservice_account=appservice_account)
 
@@ -440,7 +440,7 @@ def set_key(cmd,
     label = label if label and label != SearchFilterOptions.EMPTY_LABEL else None
 
     # generate correlation request id for operations in the same activity
-    correlationRequestId = str(uuid.uuid4())
+    correlation_request_id = str(uuid.uuid4())
 
     for i in range(0, retry_times):
         retrieved_kv = None
@@ -448,7 +448,7 @@ def set_key(cmd,
         new_kv = None
 
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
         except ResourceNotFoundError:
             logger.debug("Key '%s' with label '%s' not found. A new key-value will be created.", key, label)
         except HttpResponseError as exception:
@@ -499,9 +499,9 @@ def set_key(cmd,
 
         try:
             if set_kv.etag is None:
-                new_kv = azconfig_client.add_configuration_setting(set_kv, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+                new_kv = azconfig_client.add_configuration_setting(set_kv, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             else:
-                new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+                new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             return convert_configurationsetting_to_keyvalue(new_kv)
 
         except ResourceReadOnlyError:
@@ -536,7 +536,7 @@ def set_keyvault(cmd,
     label = label if label and label != SearchFilterOptions.EMPTY_LABEL else None
 
     # generate correlation request id for operations in the same activity
-    correlationRequestId = str(uuid.uuid4())
+    correlation_request_id = str(uuid.uuid4())
 
     for i in range(0, retry_times):
         retrieved_kv = None
@@ -544,7 +544,7 @@ def set_keyvault(cmd,
         new_kv = None
 
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
         except ResourceNotFoundError:
             logger.debug("Key '%s' with label '%s' not found. A new key-vault reference will be created.", key, label)
         except HttpResponseError as exception:
@@ -578,9 +578,9 @@ def set_keyvault(cmd,
 
         try:
             if set_kv.etag is None:
-                new_kv = azconfig_client.add_configuration_setting(set_kv, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+                new_kv = azconfig_client.add_configuration_setting(set_kv, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             else:
-                new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+                new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             return convert_configurationsetting_to_keyvalue(new_kv)
 
         except ResourceReadOnlyError:
@@ -612,12 +612,12 @@ def delete_key(cmd,
     # In list, restore and revision commands, we treat missing --label as all labels
 
     # generate correlation request id for operations in the same activity
-    correlationRequestId = str(uuid.uuid4())
+    correlation_request_id = str(uuid.uuid4())
 
     entries = __read_kv_from_config_store(azconfig_client,
                                           key=key,
                                           label=label if label else SearchFilterOptions.EMPTY_LABEL,
-                                          correlationRequestId=correlationRequestId)
+                                          correlation_request_id=correlation_request_id)
     confirmation_message = "Found '{}' key-values matching the specified key and label. Are you sure you want to delete these key-values?".format(len(entries))
     user_confirmation(confirmation_message, yes)
 
@@ -629,7 +629,7 @@ def delete_key(cmd,
                                                                       label=entry.label,
                                                                       etag=entry.etag,
                                                                       match_condition=MatchConditions.IfNotModified,
-                                                                      headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+                                                                      headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             deleted_entries.append(convert_configurationsetting_to_keyvalue(deleted_kv))
 
         except ResourceReadOnlyError:
@@ -664,13 +664,13 @@ def lock_key(cmd,
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     # generate correlation request id for operations in the same activity
-    correlationRequestId = str(uuid.uuid4())
+    correlation_request_id = str(uuid.uuid4())
 
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Key '{}' with label '{}' does not exist.".format(key, label))
         except HttpResponseError as exception:
@@ -680,7 +680,7 @@ def lock_key(cmd,
         user_confirmation(confirmation_message, yes)
 
         try:
-            new_kv = azconfig_client.set_read_only(retrieved_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+            new_kv = azconfig_client.set_read_only(retrieved_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             return convert_configurationsetting_to_keyvalue(new_kv)
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
@@ -704,13 +704,13 @@ def unlock_key(cmd,
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     # generate correlation request id for operations in the same activity
-    correlationRequestId = str(uuid.uuid4())
+    correlation_request_id = str(uuid.uuid4())
 
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Key '{}' with label '{}' does not exist.".format(key, label))
         except HttpResponseError as exception:
@@ -720,7 +720,7 @@ def unlock_key(cmd,
         user_confirmation(confirmation_message, yes)
 
         try:
-            new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+            new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             return convert_configurationsetting_to_keyvalue(new_kv)
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
@@ -799,19 +799,19 @@ def restore_key(cmd,
                 endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
-    # generate correlationRequestId for bulk operation
-    correlationRequestId = str(uuid.uuid4())
+    # generate correlation_request_id for bulk operation
+    correlation_request_id = str(uuid.uuid4())
 
     exception_messages = []
     restore_keyvalues = __read_kv_from_config_store(azconfig_client,
                                                     key=key if key else SearchFilterOptions.ANY_KEY,
                                                     label=label if label else SearchFilterOptions.ANY_LABEL,
                                                     datetime=datetime,
-                                                    correlationRequestId=correlationRequestId)
+                                                    correlation_request_id=correlation_request_id)
     current_keyvalues = __read_kv_from_config_store(azconfig_client,
                                                     key=key if key else SearchFilterOptions.ANY_KEY,
                                                     label=label if label else SearchFilterOptions.ANY_LABEL,
-                                                    correlationRequestId=correlationRequestId)
+                                                    correlation_request_id=correlation_request_id)
 
     try:
         comparer = KVComparer(restore_keyvalues, CompareFieldsMap["restore"])
@@ -836,7 +836,7 @@ def restore_key(cmd,
         for kv in chain(kvs_to_restore, kvs_to_modify):
             set_kv = convert_keyvalue_to_configurationsetting(kv)
             try:
-                azconfig_client.set_configuration_setting(set_kv, headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+                azconfig_client.set_configuration_setting(set_kv, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
                 restored_so_far += 1
             except ResourceReadOnlyError:
                 exception = "Failed to update read-only key-value with key '{}' and label '{}'. Unlock the key-value before updating it.".format(set_kv.key, set_kv.label)
@@ -851,7 +851,7 @@ def restore_key(cmd,
                                                              label=kv.label,
                                                              etag=kv.etag,
                                                              match_condition=MatchConditions.IfNotModified,
-                                                             headers={HttpHeaders.CORRELATIONREQUESTID: correlationRequestId})
+                                                             headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
                 restored_so_far += 1
             except ResourceReadOnlyError:
                 exception = "Failed to delete read-only key-value with key '{}' and label '{}'. Unlock the key-value before deleting it.".format(kv.key, kv.label)
