@@ -166,9 +166,9 @@ def update_search_service(instance, partition_count=0, replica_count=0, public_n
 
     replica_count = int(replica_count)
     partition_count = int(partition_count)
-    if replica_count > 0:
+    if replica_count > 0:  # pylint: disable=consider-using-min-builtin
         instance.replica_count = replica_count
-    if partition_count > 0:
+    if partition_count > 0:  # pylint: disable=consider-using-min-builtin
         instance.partition_count = partition_count
     if public_network_access:
         if (public_network_access.lower() not in ["enabled", "disabled"]):
