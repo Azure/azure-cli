@@ -132,7 +132,7 @@ upcoming_breaking_changes['bar foo'] = AzCLIRenameChange('az bar foo', 'az bar b
 # `az bar foo` will be renamed to `az bar baz` in next breaking change release(2.61.0).
 ```
 
-**OutputChange**
+**Output Change**
 
 ```python
 from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIOutputChange, NextBreakingChangeWindow
