@@ -224,6 +224,8 @@ for source in SOURCE_RESOURCES:
                 auth_params = '--enable-csi'
             else:
                 auth_params = get_auth_info_params(AUTH_TYPE.SecretAuto)
+        elif auth_types[0] == AUTH_TYPE.Null:
+            auth_params = ''
         else:
             auth_params = get_auth_info_params(auth_types[0])
 
