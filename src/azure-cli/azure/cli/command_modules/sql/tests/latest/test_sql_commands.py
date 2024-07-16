@@ -5378,7 +5378,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
             'managed_instance_name': instance_name,
             'username': 'admin123',
             'admin_password': 'SecretPassword123',
-            'dns_zone_partner': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kmatijevic-ha-testenv-canary/providers/Microsoft.Sql/managedInstances/ha-testenv-canary-gp-1'
+            'dns_zone_partner': '/subscriptions/self.get_subscription_id()/resourceGroups/kmatijevic-ha-testenv-canary/providers/Microsoft.Sql/managedInstances/ha-testenv-canary-gp-1'
         })
 
         expected_dns_zone = '7773cdecf1ff'
