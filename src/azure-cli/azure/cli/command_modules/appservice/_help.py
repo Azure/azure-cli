@@ -1671,6 +1671,9 @@ examples:
     text: >
         AppServicePlanID=$(az appservice plan show -n SharedAppServicePlan -g MyASPRG --query "id" --out tsv)
         az webapp create -g MyResourceGroup -p "$AppServicePlanID" -n MyUniqueAppName
+  - name: create a container webapp with an image pulled from a private Azure Container Registry using a User Assigned Managed Identity
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --container-image-name myregistry.azurecr.io/docker-image:tag --assign-identity MyAssignIdentities --acr-use-identity --acr-identity MyUserAssignedIdentityResourceId
 """
 
 helps['webapp create-remote-connection'] = """
