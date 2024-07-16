@@ -2300,8 +2300,11 @@ class AKSManagedClusterContext(BaseAKSContext):
         network_plugin = self.raw_param.get("network_plugin")
 
         # try to read the property value corresponding to the parameter from the `mc` object
+        # only when we are not in CREATE mode. In Create, if nothing is given from the raw
+        # input, then it should be None as no defaulting should happen in the CLI.
         if (
             not network_plugin and
+            self.decorator_mode != DecoratorMode.CREATE and
             self.mc and
             self.mc.network_profile and
             self.mc.network_profile.network_plugin is not None
@@ -5583,14 +5586,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.models.ManagedCluster(
             location=self.context.get_location(),
         )
-
-        # we should not set a default network_plugin in the CLI. Defaulting should
-        # be handled by the AKS RP. The Python SDK has historically used "kubenet"
-        # as the default network_plugin but this can change in the future and ownership
-        # of the default when a customer does not provide it should be belong to AKS RP
-        # not the CLI or SDK. Only do this in AKSManagedClusterCreateDecorator because
-        # other operations will read from the existing mc data model.
-        mc.network_profile.network_plugin = None
 
         # attach mc to AKSContext
         self.context.attach_mc(mc)
