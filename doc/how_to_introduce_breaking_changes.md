@@ -143,7 +143,7 @@ upcoming_breaking_changes['bar foo'] = AzCLIOutputChange('Reduce the output fiel
 # The output will be changed in next breaking change release(2.61.0). Reduce the output field `baz`. 
 ```
 
-**LogicChange**
+**Logic Change**
 
 ```python
 from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLILogicChange, NextBreakingChangeWindow
@@ -155,7 +155,7 @@ upcoming_breaking_changes['bar foo'] = AzCLILogicChange('Update the validator',
 # Update the validator in next breaking change release(2.61.0). The xxx will not be accepted.
 ```
 
-**DefaultChange**
+**Default Change**
 
 ```python
 from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIDefaultChange, NextBreakingChangeWindow
@@ -166,7 +166,7 @@ upcoming_breaking_changes['bar foo'] = AzCLIDefaultChange('--type', 'TypeA', 'Ty
 # The default value of `--type` will be changed to `TypeB` from `TypeA` in next breaking change release(2.61.0).
 ```
 
-**BeRequired**
+**Be Required**
 
 ```python
 from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIBeRequired, NextBreakingChangeWindow
@@ -176,7 +176,7 @@ upcoming_breaking_changes['bar foo'] = AzCLIBeRequired('--type', target_version=
 # The argument `--type` will become required in next breaking change release(2.61.0).
 ```
 
-**OtherChange**
+**Other Changes**
 
 ```python
 from azure.cli.core.breaking_change import upcoming_breaking_changes, AzCLIOtherChange, NextBreakingChangeWindow
