@@ -1943,7 +1943,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 }
             ),
             self.models,
-            DecoratorMode.CREATE,
+            DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_1.get_network_plugin(), None)
         network_profile_1 = self.models.ContainerServiceNetworkProfile(network_plugin="test_network_plugin")
@@ -1962,9 +1962,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.CREATE,
         )
-        # fail on network_plugin not specified
-        with self.assertRaises(RequiredArgumentMissingError):
-            ctx_2.get_network_plugin()
+        self.assertIsNone(ctx_2.get_network_plugin())
 
         # custom
         ctx_3 = AKSManagedClusterContext(
@@ -2029,6 +2027,22 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_6)
         ctx_6.attach_mc(mc)
         self.assertEqual(ctx_6.get_network_plugin(), "azure")
+
+        # do not use default from SDK when CREATE and nothing provided by user
+        ctx_7 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        network_profile_7 = self.models.ContainerServiceNetworkProfile()
+        self.assertEqual(network_profile_7.network_plugin, "kubenet") # kubenet is the default that comes from the SDK
+        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_7)
+        ctx_7.attach_mc(mc)
+        self.assertIsNone(ctx_7.get_network_plugin())
 
     def test_mc_get_network_dataplane(self):
         # Default, not set.
@@ -2196,7 +2210,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             pod_cidr="test_pod_cidr",
             service_cidr="test_service_cidr",
             dns_service_ip="test_dns_service_ip",
-            network_policy="test_network_policy",
         )
         mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_1)
         ctx_1.attach_mc(mc)
@@ -2207,7 +2220,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 "test_service_cidr",
                 "test_dns_service_ip",
                 None,
-                "test_network_policy",
+                None,
             ),
         )
 
@@ -2223,8 +2236,16 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         # fail on network_plugin not specified
-        with self.assertRaises(RequiredArgumentMissingError):
-            ctx_2.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+        self.assertEqual(
+            ctx_2.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(),
+            (
+                "test_pod_cidr",
+                None,
+                None,
+                None,
+                None,
+            )
+        )
 
         # invalid parameter
         ctx_3 = AKSManagedClusterContext(
@@ -2242,6 +2263,21 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_3.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+
+        # require network_plugin when netpol is provided
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "network_policy": "test_network_policy",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        # fail on network_plugin not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_4.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
 
     def test_get_addon_consts(self):
         # default
@@ -7620,6 +7656,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         linux_profile_1 = self.models.ContainerServiceLinuxProfile(admin_username="azureuser", ssh=ssh_config_1)
         network_profile_1 = self.models.ContainerServiceNetworkProfile(
             load_balancer_sku="standard",
+            network_plugin=None,
         )
         identity_1 = self.models.ManagedClusterIdentity(type="SystemAssigned")
         storage_profile_1 = self.models.ManagedClusterStorageProfile(
