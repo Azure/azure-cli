@@ -63,6 +63,10 @@ class BreakingChange(abc.ABC):
     def target_version(self):
         pass
 
+    @staticmethod
+    def format_doc_link(doc_link):
+        return f' To know more about the Breaking Change, please visit {doc_link}.' if doc_link else ''
+
 
 class AzCLIRemoveChange(BreakingChange):
     """
@@ -84,7 +88,7 @@ class AzCLIRemoveChange(BreakingChange):
     @property
     def message(self):
         alter = f' Please use {self.alter} instead.' if self.alter else ''
-        doc = f' To know more about the Breaking Change, please visit {self.doc_link}.' if self.doc_link else ''
+        doc = self.format_doc_link(self.doc_link)
         return f'`{self.target}` will be removed {str(self._target_version)}.{alter}{doc}'
 
     @property
@@ -112,7 +116,7 @@ class AzCLIRenameChange(BreakingChange):
 
     @property
     def message(self):
-        doc = f' To know more about the Breaking Change, please visit {self.doc_link}.' if self.doc_link else ''
+        doc = self.format_doc_link(self.doc_link)
         return f'`{self.target}` will be renamed to `{self.new_name}` {str(self._target_version)}.{doc}'
 
     @property
@@ -146,7 +150,7 @@ class AzCLIOutputChange(BreakingChange):
                 guide = guide + '.'
         else:
             guide = ''
-        doc = f' To know more about the Breaking Change, please visit {self.doc_link}.' if self.doc_link else ''
+        doc = self.format_doc_link(self.doc_link)
         return f'The output will be changed {str(self._target_version)}. {desc} {guide}{doc}'
 
     @property
@@ -172,8 +176,7 @@ class AzCLILogicChange(BreakingChange):
     @property
     def message(self):
         detail = f' {self.detail}' if self.detail else ''
-        doc = f' To know more about the Breaking Change, please visit {self.doc_link}.' if self.doc_link else ''
-        return f'{self.summary} {str(self._target_version)}.{detail}{doc}'
+        return f'{self.summary} {str(self._target_version)}.{detail}{self.format_doc_link(self.doc_link)}'
 
     @property
     def target_version(self):
@@ -199,7 +202,7 @@ class AzCLIDefaultChange(BreakingChange):
 
     @property
     def message(self):
-        doc = f' To know more about the Breaking Change, please visit {self.doc_link}.' if self.doc_link else ''
+        doc = self.format_doc_link(self.doc_link)
         return (f'The default value of `{self.target}` will be changed to `{self.new_default}` from '
                 f'`{self.current_default}` {str(self._target_version)}.{doc}')
 
@@ -223,7 +226,7 @@ class AzCLIBeRequired(BreakingChange):
 
     @property
     def message(self):
-        doc = f' To know more about the Breaking Change, please visit {self.doc_link}.' if self.doc_link else ''
+        doc = self.format_doc_link(self.doc_link)
         return f'The argument `{self.target}` will become required {str(self._target_version)}.{doc}'
 
     @property
