@@ -1017,6 +1017,12 @@ class ContainerAppsJobClient():
                 cls.api_version)
 
         r = send_raw_request(cmd.cli_ctx, "POST", request_url, body=json.dumps(job_execution_names))
+
+        # if stop is called for a single job execution and status code is 200, return generic response
+        if job_execution_name and r.status_code == 200:
+            return "Job Execution: "+job_execution_name +", stopped successfully."
+
+        # else return the response
         return r.json()
 
     @classmethod
