@@ -99,10 +99,11 @@ class Update(AAZCommand):
             arg_group="Encryption",
             help="The name of KeyVault key.",
         )
-        _args_schema.key_vault_resource_id = AAZStrArg(
+        _args_schema.key_vault_resource_id = AAZResourceIdArg(
             options=["--keyvault-resource-id", "--key-vault-resource-id"],
             arg_group="Encryption",
             help="The resource ID of KeyVault.",
+            nullable=True,
         )
         _args_schema.key_vault_uri = AAZStrArg(
             options=["-v", "--key-vault-uri"],
@@ -648,7 +649,7 @@ class Update(AAZCommand):
             key_vault_properties = _builder.get(".properties.encryption.keyVaultProperties")
             if key_vault_properties is not None:
                 key_vault_properties.set_prop("keyName", AAZStrType, ".key_name", typ_kwargs={"flags": {"required": True}})
-                key_vault_properties.set_prop("keyVaultResourceId", AAZStrType, ".key_vault_resource_id", typ_kwargs={"flags": {"required": True}})
+                key_vault_properties.set_prop("keyVaultResourceId", AAZStrType, ".key_vault_resource_id")
                 key_vault_properties.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri", typ_kwargs={"flags": {"required": True}})
 
             tags = _builder.get(".tags")
@@ -875,7 +876,6 @@ class _UpdateHelper:
         )
         key_vault_properties.key_vault_resource_id = AAZStrType(
             serialized_name="keyVaultResourceId",
-            flags={"required": True},
         )
         key_vault_properties.key_vault_uri = AAZStrType(
             serialized_name="keyVaultUri",
