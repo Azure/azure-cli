@@ -1628,7 +1628,7 @@ def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=Non
 
         # if stop is called for a single job execution, return generic response
         if job_execution_name:
-            return "Job Execution: "+job_execution_name +", stopped successfully."
+            return "Job Execution: " + job_execution_name + ", stopped successfully."
 
         # else return the response
         return r

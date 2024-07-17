@@ -39,7 +39,7 @@ def handle_raw_exception(e):
 
     if "Error starting job" in stringErr:
         raise CLIInternalError("There was an error starting the job execution. Please check input parameters and try again.")
-    
+
     if "Requested job execution" in stringErr and "not found" in stringErr:
         raise CLIInternalError("Requested job execution not found. Please check input parameters and try again.")
 
