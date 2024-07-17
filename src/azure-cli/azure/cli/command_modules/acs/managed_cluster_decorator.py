@@ -2300,8 +2300,11 @@ class AKSManagedClusterContext(BaseAKSContext):
         network_plugin = self.raw_param.get("network_plugin")
 
         # try to read the property value corresponding to the parameter from the `mc` object
+        # only when we are not in CREATE mode. In Create, if nothing is given from the raw
+        # input, then it should be None as no defaulting should happen in the CLI.
         if (
             not network_plugin and
+            self.decorator_mode != DecoratorMode.CREATE and
             self.mc and
             self.mc.network_profile and
             self.mc.network_profile.network_plugin is not None
@@ -2313,10 +2316,10 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             (
                 pod_cidr,
-                service_cidr,
-                dns_service_ip,
-                docker_bridge_address,
-                network_policy,
+                _,
+                _,
+                _,
+                _,
             ) = self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
                 enable_validation=False
             )
@@ -2327,17 +2330,6 @@ class AKSManagedClusterContext(BaseAKSContext):
                         "Please specify network plugin mode `overlay` when using --pod-cidr or "
                         "use network plugin `kubenet`. For more information about Azure CNI "
                         "Overlay please see https://aka.ms/aks/azure-cni-overlay"
-                    )
-            else:
-                if (
-                    pod_cidr or
-                    service_cidr or
-                    dns_service_ip or
-                    docker_bridge_address or
-                    network_policy
-                ):
-                    raise RequiredArgumentMissingError(
-                        "Please explicitly specify the network plugin type"
                     )
         return network_plugin
 
@@ -2439,10 +2431,12 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             network_plugin = self._get_network_plugin(enable_validation=False)
             if not network_plugin:
+                # ideally, we shouldn't do any validation like this in the CLI
+                # but since there is no default network_policy then if it is
+                # non-None then it must mean it was provided by the user. If
+                # a user provides a network policy then it is reasonable to require
+                # a network_plugin to also be provided.
                 if (
-                    pod_cidr or
-                    service_cidr or
-                    dns_service_ip or
                     network_policy
                 ):
                     raise RequiredArgumentMissingError(
@@ -5902,7 +5896,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         else:
             if load_balancer_sku == CONST_LOAD_BALANCER_SKU_STANDARD or load_balancer_profile:
                 network_profile = self.models.ContainerServiceNetworkProfile(
-                    network_plugin="kubenet",
+                    network_plugin=network_plugin,
                     load_balancer_sku=load_balancer_sku,
                     load_balancer_profile=load_balancer_profile,
                     outbound_type=outbound_type,
@@ -5910,6 +5904,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             if load_balancer_sku == CONST_LOAD_BALANCER_SKU_BASIC:
                 # load balancer sku must be standard when load balancer profile is provided
                 network_profile = self.models.ContainerServiceNetworkProfile(
+                    network_plugin=network_plugin,
                     load_balancer_sku=load_balancer_sku,
                 )
 
