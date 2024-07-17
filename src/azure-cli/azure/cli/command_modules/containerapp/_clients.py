@@ -1018,12 +1018,6 @@ class ContainerAppsJobClient():
 
         r = send_raw_request(cmd.cli_ctx, "POST", request_url, body=json.dumps(job_execution_names))
         return r.json()
-        # try:
-        #     r = send_raw_request(cmd.cli_ctx, "POST", request_url, body=json.dumps(job_execution_names))
-        #     return r.json()
-        # except Exception as e:  # pylint: disable=broad-except
-        #     print(str(e))
-        #     return str(e)
 
     @classmethod
     def get_executions(cls, cmd, resource_group_name, name):
