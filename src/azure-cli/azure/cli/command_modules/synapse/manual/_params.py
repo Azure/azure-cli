@@ -572,6 +572,8 @@ def load_arguments(self, _):
                    help='Optional arguments to the job (Note: please use storage URIs for file arguments).')
         c.argument('archives', nargs='+', help='The array of archives.')
         c.argument('job_name', arg_type=name_type, help='The Spark job name.')
+        c.argument('python_files', nargs='+',
+                   help='The array of files used for refenence in the main python definition file.  Examples include custom whl files and custom python files.  May pass multiple files such as "az synapse spark job sumbit <other_args> --python_files abfss://file1 abss://file2"')
         c.argument('reference_files', nargs='+',
                    help='Additional files used for reference in the main definition file.')
         c.argument('configuration', type=shell_safe_json_parse, help='The configuration of Spark job.')
