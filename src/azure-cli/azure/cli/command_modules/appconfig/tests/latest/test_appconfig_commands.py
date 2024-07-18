@@ -80,13 +80,14 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('tags', structured_tag),
                          self.check('identity.type', 'SystemAssigned')])
 
+        new_sku = "premium"
         tag_key = "Env"
         tag_value = "Prod"
         updated_tag = tag_key + '=' + tag_value
         structured_tag = {tag_key: tag_value}
         self.kwargs.update({
             'updated_tag': updated_tag,
-            'update_sku': sku   # we currently only can test on standard sku
+            'update_sku': new_sku   # update to premium sku
         })
 
         self.cmd('appconfig update -n {config_store_name} -g {rg} --tags {updated_tag} --sku {update_sku}',
