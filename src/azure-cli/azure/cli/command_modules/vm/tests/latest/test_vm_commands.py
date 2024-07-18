@@ -4651,6 +4651,19 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('vmss.orchestrationMode', 'Flexible')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_enable_auto_os_upgrade', location='eastus')
+    def test_vmss_update_enable_auto_os_upgrade(self):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:0001-com-ubuntu-server-jammy:22_04-LTS-Gen2:latest --orchestration-mode uniform --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --admin-password Test123456789#', checks=[
+            self.check('vmss.upgradePolicy.mode', 'Rolling'),
+            self.check('vmss.orchestrationMode', 'Uniform')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss} --enable-auto-os-upgrade true', checks=[
+            self.check('upgradePolicy.automaticOsUpgradePolicy.enableAutomaticOsUpgrade', True)
+        ])
+
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_', location='westus')
     def test_vmss_update_image(self):
