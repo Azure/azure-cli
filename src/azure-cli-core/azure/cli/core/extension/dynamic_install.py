@@ -108,6 +108,18 @@ def _get_extension_run_after_dynamic_install_config(cli_ctx):
                                                               default_value) if cli_ctx else default_value
     return run_after_extension_installed
 
+def _get_extension_allow_preview_install_config(cli_ctx):
+    default_value = True
+    if cli_ctx and cli_ctx.config.get('extension', 'dynamic_install_allow_preview', None) is None:
+        logger.warning("Default enabled preview versions for extension installation now. "
+                       "Disabled in future release. "
+                       "Please run 'az config set extension.dynamic_install_allow_preview=true or false' "
+                       "to config it specifically. ")
+    dynamic_install_allow_preview = cli_ctx.config.getboolean('extension',
+                                                              'dynamic_install_allow_preview',
+                                                              default_value) if cli_ctx else default_value
+    return dynamic_install_allow_preview
+
 
 def try_install_extension(parser, args):
     # parser.cli_ctx is None when parser.prog is beyond 'az', such as 'az iot'.
@@ -181,13 +193,14 @@ def _check_value_in_extensions(cli_ctx, parser, args, no_prompt):  # pylint: dis
     # extension is already installed and return if yes as the error is not caused by extension not installed.
     from azure.cli.core.extension import get_extension, ExtensionNotInstalledException
     from azure.cli.core.extension._resolve import resolve_from_index, NoExtensionCandidatesError
+    extension_allow_preview = _get_extension_allow_preview_install_config(cli_ctx)
     try:
         ext = get_extension(ext_name)
     except ExtensionNotInstalledException:
         pass
     else:
         try:
-            resolve_from_index(ext_name, cur_version=ext.version, cli_ctx=cli_ctx)
+            resolve_from_index(ext_name, cur_version=ext.version, cli_ctx=cli_ctx, allow_preview=extension_allow_preview)
         except NoExtensionCandidatesError:
             return
 
@@ -224,7 +237,7 @@ def _check_value_in_extensions(cli_ctx, parser, args, no_prompt):  # pylint: dis
     print_error = True
     if install_ext:
         from azure.cli.core.extension.operations import add_extension
-        add_extension(cli_ctx=cli_ctx, extension_name=ext_name, upgrade=True)
+        add_extension(cli_ctx=cli_ctx, extension_name=ext_name, upgrade=True, allow_preview=extension_allow_preview)
         if run_after_extension_installed:
             import subprocess
             import platform
