@@ -233,3 +233,48 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
         for connection in connections:
             connection_id = connection.get('id')
             self.cmd('containerapp connection delete --id {} --yes'.format(connection_id))
+
+    def test_aca2aca_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'clitest',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'app': 'servicelinker-cli-aca-test',
+            'target_app_name': 'containerapptargetresource'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.ContainerApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.ContainerApp).format(**self.kwargs)
+
+        # create connection
+        self.cmd('containerapp connection create containerapp --connection {} --source-id {} --target-id {} '
+                 '--client-type python -c {}'.format(name, source_id, target_id, self.default_container_name))
+
+        # list connection
+        connections = self.cmd(
+            'containerapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo', 'None'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('containerapp connection update containerapp --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
+
+        # list configuration
+        self.cmd('containerapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('containerapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('containerapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('containerapp connection delete --id {} --yes'.format(connection_id))
