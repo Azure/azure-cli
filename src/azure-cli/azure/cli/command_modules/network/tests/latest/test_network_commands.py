@@ -5110,7 +5110,7 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
             'vnet_id': vnet_id
         })
         # create the gateway on vnet2
-        self.cmd('network vnet-gateway create -g {rg} -n gateway1 --public-ip-address {ip_id} --vnet {vnet_id} --tags foo=doo')
+        self.cmd('network vnet-gateway create -g {rg} -n gateway1 --public-ip-address {ip_id} --vnet {vnet_id} --tags foo=doo --sku VpnGw1')
 
         vnet1_id = self.cmd('network vnet show -g {rg} -n vnet1 --query id').get_output_in_json()
         vnet2_id = self.cmd('network vnet show -g {rg} -n vnet2 --query id').get_output_in_json()
@@ -5164,7 +5164,7 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
             'vnet_id': vnet_id
         })
         # create the gateway on vnet2
-        self.cmd('network vnet-gateway create -g {rg} -n gateway1 --public-ip-address {ip_id} --vnet {vnet_id} --tags foo=doo')
+        self.cmd('network vnet-gateway create -g {rg} -n gateway1 --public-ip-address {ip_id} --vnet {vnet_id} --tags foo=doo --sku VpnGw1')
 
         vnet1_id = self.cmd('network vnet show -g {rg} -n vnet1 --query id').get_output_in_json()
         vnet2_id = self.cmd('network vnet show -g {rg} -n vnet2 --query id').get_output_in_json()
@@ -5187,6 +5187,32 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network vnet peering sync -g {rg} -n peering1 --vnet-name vnet1')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vnet_peering_with_params')
+    def test_network_vnet_peering_with_params(self, resource_group):
+
+        # create two vnets with non-overlapping prefixes
+        self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name Subnet1 --address-prefixes 10.0.0.0/27 10.0.1.0/27 --subnet-prefixes 10.0.0.0/27')
+        self.cmd('network vnet create -g {rg} -n vnet2 --subnet-name Subnet2 --address-prefixes 20.0.0.0/27 --subnet-prefixes 20.0.0.0/27')
+
+        vnet1_id = self.cmd('network vnet show -g {rg} -n vnet1 --query id').get_output_in_json()
+        vnet2_id = self.cmd('network vnet show -g {rg} -n vnet2 --query id').get_output_in_json()
+
+        self.kwargs.update({
+            'vnet1_id': vnet1_id,
+            'vnet2_id': vnet2_id
+        })
+        self.cmd('network vnet peering create -g {rg} -n peering2 --vnet-name vnet2 --remote-vnet {vnet1_id} --peer-complete-vnets false --local-subnet-names Subnet2 --remote-subnet-names Subnet1 --allow-vnet-access --allow-forwarded-traffic --allow-gateway-transit false --use-remote-gateways false --enable-only-ipv6 false', checks=[
+            self.check('allowForwardedTraffic', True),
+            self.check('allowGatewayTransit', False),
+            self.check('allowVirtualNetworkAccess', True),
+            self.check('useRemoteGateways', False),
+            self.check('peerCompleteVnets', False),
+            self.check('enableOnlyIPv6Peering', False),
+            self.check('remoteVirtualNetwork.id', '{vnet1_id}'),
+            self.check('remoteSubnetNames[0]', 'Subnet1'),
+            self.check('localSubnetNames[0]', 'Subnet2'),
+        ])
 
 
 class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
