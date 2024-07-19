@@ -589,6 +589,44 @@ def extract_comma_separated_string(
     return result
 
 
+def extract_key_value_pair(
+    raw_string,
+    enable_strip=False,
+    allow_empty_value=False,
+    keep_none=False,
+    default_value=None,
+):
+    if raw_string is None:
+        if keep_none:
+            return None
+        return default_value
+    if enable_strip:
+        raw_string = raw_string.strip()
+    if raw_string == "":
+        return default_value
+
+    result = {} 
+    kv_list = raw_string.split("=")
+    if len(kv_list) in [1, 2]:
+        key = kv_list[0]
+        value = ""
+        if len(kv_list) == 2:
+            value = kv_list[1]
+        if not allow_empty_value and (value == "" or value.isspace()):
+            raise InvalidArgumentValueError(
+                f"Empty value not allowed. The value '{value}' of key '{key}' in '{raw_string}' is empty."
+            )
+        if enable_strip:
+            key = key.strip()
+            value = value.strip()
+        result[key] = value
+    else:
+        raise InvalidArgumentValueError(
+            f"The format of '{raw_string}' is incorrect, correct format should be 'Key=Value' or 'Key=Value1,Value2'"
+        )
+    return result
+
+
 def validate_credential_format(namespace):
     if namespace.credential_format and \
         namespace.credential_format.lower() != "azure" and \
