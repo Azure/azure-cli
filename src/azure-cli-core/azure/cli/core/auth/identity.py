@@ -20,7 +20,7 @@ from .msal_authentication import UserCredential, ServicePrincipalCredential
 from .persistence import load_persisted_token_cache, file_extensions, load_secret_store
 from .util import check_result
 
-AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
+AZURE_CLI_CLIENT_ID = '8fa0bc17-6dbb-44fc-a4c6-f11fb7786b9a'
 
 
 # For environment credential
