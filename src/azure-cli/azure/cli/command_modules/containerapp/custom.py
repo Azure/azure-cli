@@ -1624,7 +1624,14 @@ def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=Non
         if execution_name_list is not None:
             execution_name_list = execution_name_list.split(",")
             execution_name_list = json.dumps({'jobExecutionName': execution_name_list})
-        return ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name, job_execution_names=execution_name_list)
+        r = ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name, job_execution_names=execution_name_list)
+
+        # if stop is called for a single job execution, return generic response
+        if job_execution_name:
+            return "Job Execution: " + job_execution_name + ", stopped successfully."
+
+        # else return the response
+        return r
     except CLIError as e:
         handle_raw_exception(e)
 

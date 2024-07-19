@@ -1016,7 +1016,7 @@ class ContainerAppsJobClient():
                 job_execution_name,
                 cls.api_version)
 
-        r = send_raw_request(cmd.cli_ctx, "POST", request_url, body=json.dumps(job_execution_names))
+        r = send_raw_request(cmd.cli_ctx, "POST", request_url, body=job_execution_names)
         return r.json()
 
     @classmethod
