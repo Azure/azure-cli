@@ -391,19 +391,14 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: dictionary or None
         """
         if cluster_autoscaler_profile is not None:
-            # convert list to dict
-            if isinstance(cluster_autoscaler_profile, list):
-                params_dict = {}
-                for item in cluster_autoscaler_profile:
-                    params_dict.update(
-                        extract_comma_separated_string(
-                            item,
-                            extract_kv=True,
-                            allow_empty_value=True,
-                            default_value={},
-                        )
-                    )
-                cluster_autoscaler_profile = params_dict
+            # convert string to dict
+            cluster_autoscaler_profile = extract_comma_separated_string(
+                cluster_autoscaler_profile,
+                extract_kv=True,
+                allow_empty_value=True,
+                default_value={},
+                allow_appending_values_to_same_key=True,
+            )
             # check if the type is dict
             if not isinstance(cluster_autoscaler_profile, dict):
                 raise InvalidArgumentValueError(
