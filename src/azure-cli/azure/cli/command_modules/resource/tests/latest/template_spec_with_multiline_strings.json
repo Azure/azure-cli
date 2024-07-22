@@ -242,26 +242,14 @@
   
       "resourceType": "[replace(parameters('resource'), concat(variables('provider'), '/'), '')]",
   
-      "hyphenedName": "[format('[0]-[1]-[2]-[3]-[4]-[5]',
-                               parameters('customer'),
-                               variables('environments')[parameters('environment')],
-                               variables('locations')[parameters('location')],
-                               parameters('group'),
-                               parameters('service'),
-                               if(equals(parameters('kind'), ''), 
-                                  variables('resources')[variables('provider')][variables('resourceType')],
-                                  variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]",
-  
+      "hyphenedName": "[format('[0]-[1]-[2]-[3]-[4]-[5]', parameters('customer'), variables('environments')[parameters('environment')], variables('locations')[parameters('location')], parameters('group'), parameters('service'), if(equals(parameters('kind'), ''), variables('resources')[variables('provider')][variables('resourceType')], variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]",
+
       "removeOptionalsFromHyphenedName": "[replace(variables('hyphenedName'), '--', '-')]",
-  
+
       "isInstanceCount": "[greater(parameters('instance'), -1)]",
-      "hyphenedNameAfterInstanceCount": "[if(variables('isInstanceCount'),
-                                             format('[0]-[1]', variables('removeOptionalsFromHyphenedName'), string(parameters('instance'))),
-                                             variables('removeOptionalsFromHyphenedName'))]",
-  
-      "name": "[if(parameters('useHyphen'),
-                   variables('hyphenedNameAfterInstanceCount'),
-                   replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]"
+      "hyphenedNameAfterInstanceCount": "[if(variables('isInstanceCount'), format('[0]-[1]', variables('removeOptionalsFromHyphenedName'), string(parameters('instance'))), variables('removeOptionalsFromHyphenedName'))]",
+
+      "name": "[if(parameters('useHyphen'), variables('hyphenedNameAfterInstanceCount'), replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]"
     },
     "resources": [
     ],
