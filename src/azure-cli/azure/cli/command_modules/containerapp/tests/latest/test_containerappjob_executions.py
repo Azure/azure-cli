@@ -82,7 +82,8 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
         # stop the most recently started execution
         self.cmd("az containerapp job stop --resource-group {} --name {} --job-execution-name {}".format(resource_group, job, execution['name'])).get_output_in_json()
         
-        # get stopped execution for the job and check status
+        # get stopped execution for the job and check status after waiting for 5 seconds to ensure job has stopped
+        time.sleep(5)
         singleExecution = self.cmd("az containerapp job execution show --resource-group {} --name {} --job-execution-name {}".format(resource_group, job, execution['name'])).get_output_in_json()
         self.assertEqual(job in singleExecution['name'], True)
         self.assertEqual(singleExecution['properties']['status'], "Stopped")

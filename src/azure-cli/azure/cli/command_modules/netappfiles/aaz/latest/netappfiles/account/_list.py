@@ -22,10 +22,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/netappaccounts", "2023-11-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/netappaccounts", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts", "2024-03-01"],
         ]
     }
 
@@ -116,7 +116,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -345,7 +345,6 @@ class List(AAZCommand):
             )
             key_vault_properties.key_vault_resource_id = AAZStrType(
                 serialized_name="keyVaultResourceId",
-                flags={"required": True},
             )
             key_vault_properties.key_vault_uri = AAZStrType(
                 serialized_name="keyVaultUri",
@@ -420,7 +419,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -649,7 +648,6 @@ class List(AAZCommand):
             )
             key_vault_properties.key_vault_resource_id = AAZStrType(
                 serialized_name="keyVaultResourceId",
-                flags={"required": True},
             )
             key_vault_properties.key_vault_uri = AAZStrType(
                 serialized_name="keyVaultUri",
