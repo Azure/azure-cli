@@ -34,7 +34,7 @@ _USE_CERT_SN_ISSUER = 'use_cert_sn_issuer'
 logger = get_logger(__name__)
 
 
-class UserCredential(PublicClientApplication):
+class UserCredential:
 
     def __init__(self, client_id, username, **kwargs):
         """User credential implementing get_token interface.
@@ -42,12 +42,12 @@ class UserCredential(PublicClientApplication):
         :param client_id: Client ID of the CLI.
         :param username: The username for user credential.
         """
-        super().__init__(client_id, **kwargs)
+        self._msal_app = PublicClientApplication(client_id, **kwargs)
 
         # Make sure username is specified, otherwise MSAL returns all accounts
         assert username, "username must be specified, got {!r}".format(username)
 
-        accounts = self.get_accounts(username)
+        accounts = self._msal_app.get_accounts(username)
 
         # Usernames are usually unique. We are collecting corner cases to better understand its behavior.
         if len(accounts) > 1:
@@ -65,8 +65,9 @@ class UserCredential(PublicClientApplication):
 
         if claims:
             logger.warning('Acquiring new access token silently for tenant %s with claims challenge: %s',
-                           self.authority.tenant, claims)
-        result = self.acquire_token_silent_with_error(list(scopes), self._account, claims_challenge=claims, **kwargs)
+                           self._msal_app.authority.tenant, claims)
+        result = self._msal_app.acquire_token_silent_with_error(list(scopes), self._account, claims_challenge=claims,
+                                                                **kwargs)
 
         from azure.cli.core.azclierror import AuthenticationError
         try:
@@ -82,13 +83,14 @@ class UserCredential(PublicClientApplication):
                 logger.warning(ex)
                 logger.warning("\nThe default web browser has been opened at %s for scope '%s'. "
                                "Please continue the login in the web browser.",
-                               self.authority.authorization_endpoint, ' '.join(scopes))
+                               self._msal_app.authority.authorization_endpoint, ' '.join(scopes))
 
                 from .util import read_response_templates
                 success_template, error_template = read_response_templates()
 
-                result = self.acquire_token_interactive(
-                    list(scopes), login_hint=self._account['username'], port=8400 if self.authority.is_adfs else None,
+                result = self._msal_app.acquire_token_interactive(
+                    list(scopes), login_hint=self._account['username'],
+                    port=8400 if self._msal_app.authority.is_adfs else None,
                     success_template=success_template, error_template=error_template, **kwargs)
                 check_result(result)
 
@@ -99,42 +101,18 @@ class UserCredential(PublicClientApplication):
         return build_sdk_access_token(result)
 
 
-class ServicePrincipalCredential(ConfidentialClientApplication):
+class ServicePrincipalCredential:
 
-    def __init__(self, service_principal_auth, **kwargs):
+    def __init__(self, client_id, client_credential, **kwargs):
         """Service principal credential implementing get_token interface.
 
         :param service_principal_auth: An instance of ServicePrincipalAuth.
         """
-        client_credential = None
-
-        # client_secret
-        client_secret = getattr(service_principal_auth, _CLIENT_SECRET, None)
-        if client_secret:
-            client_credential = client_secret
-
-        # certificate
-        certificate = getattr(service_principal_auth, _CERTIFICATE, None)
-        if certificate:
-            client_credential = {
-                "private_key": getattr(service_principal_auth, 'certificate_string'),
-                "thumbprint": getattr(service_principal_auth, 'thumbprint')
-            }
-            public_certificate = getattr(service_principal_auth, 'public_certificate', None)
-            if public_certificate:
-                client_credential['public_certificate'] = public_certificate
-
-        # client_assertion
-        client_assertion = getattr(service_principal_auth, _CLIENT_ASSERTION, None)
-        if client_assertion:
-            client_credential = {'client_assertion': client_assertion}
-
-        super().__init__(service_principal_auth.client_id, client_credential=client_credential, **kwargs)
+        self._msal_app = ConfidentialClientApplication(client_id, client_credential, **kwargs)
 
     def get_token(self, *scopes, **kwargs):
         logger.debug("ServicePrincipalCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
 
-        scopes = list(scopes)
-        result = self.acquire_token_for_client(scopes, **kwargs)
+        result = self._msal_app.acquire_token_for_client(list(scopes), **kwargs)
         check_result(result)
         return build_sdk_access_token(result)

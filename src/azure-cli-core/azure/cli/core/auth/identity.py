@@ -11,7 +11,7 @@ import sys
 from azure.cli.core._environment import get_config_dir
 from knack.log import get_logger
 from knack.util import CLIError
-from msal import PublicClientApplication
+from msal import PublicClientApplication, ConfidentialClientApplication
 
 # Service principal entry properties
 from .msal_authentication import _CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _CLIENT_ASSERTION, \
@@ -187,10 +187,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         `credential` is a dict returned by ServicePrincipalAuth.build_credential
         """
         sp_auth = ServicePrincipalAuth.build_from_credential(self.tenant_id, client_id, credential)
-
-        # This cred means SDK credential object
-        cred = ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
-        result = cred.acquire_token_for_client(scopes)
+        client_credential = _build_msal_client_credential(sp_auth)
+        cca = ConfidentialClientApplication(client_id, client_credential=client_credential, **self._msal_app_kwargs)
+        result = cca.acquire_token_for_client(scopes)
         check_result(result)
 
         # Only persist the service principal after a successful login
@@ -237,7 +236,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def get_service_principal_credential(self, client_id):
         entry = self._service_principal_store.load_entry(client_id, self.tenant_id)
         sp_auth = ServicePrincipalAuth(entry)
-        return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
+        client_credential = _build_msal_client_credential(sp_auth)
+        return ServicePrincipalCredential(client_id, client_credential, **self._msal_app_kwargs)
 
     def get_managed_identity_credential(self, client_id=None):
         raise NotImplementedError
@@ -405,3 +405,39 @@ def get_environment_credential():
         getenv(AZURE_TENANT_ID))
     credentials = ServicePrincipalCredential(sp_auth, authority=authority)
     return credentials
+
+
+def _build_msal_client_credential(service_principal_auth):
+    client_credential = None
+
+    # client_secret
+    # "your client secret"
+    client_secret = getattr(service_principal_auth, _CLIENT_SECRET, None)
+    if client_secret:
+        client_credential = client_secret
+
+    # certificate
+    # {
+    #     "private_key": "...-----BEGIN PRIVATE KEY-----... in PEM format",
+    #     "thumbprint": "A1B2C3D4E5F6...",
+    #     "public_certificate": "...-----BEGIN CERTIFICATE-----...",
+    # }
+    certificate = getattr(service_principal_auth, _CERTIFICATE, None)
+    if certificate:
+        client_credential = {
+            "private_key": getattr(service_principal_auth, 'certificate_string'),
+            "thumbprint": getattr(service_principal_auth, 'thumbprint')
+        }
+        public_certificate = getattr(service_principal_auth, 'public_certificate', None)
+        if public_certificate:
+            client_credential['public_certificate'] = public_certificate
+
+    # client_assertion
+    # {
+    #     "client_assertion": "...a JWT with claims aud, exp, iss, jti, nbf, and sub..."
+    # }
+    client_assertion = getattr(service_principal_auth, _CLIENT_ASSERTION, None)
+    if client_assertion:
+        client_credential = {'client_assertion': client_assertion}
+
+    return client_credential
