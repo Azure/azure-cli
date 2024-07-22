@@ -35,10 +35,7 @@ def process_template(template, preserve_order=True, file_path=None):
     template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
 
     # In order to solve the package conflict introduced by jsmin, the jsmin code is referenced into json_min
-    minified = json_min(template)
-
-    # Remove extra spaces, compress multiline string(s)
-    result = re.sub(r'\s\s+', ' ', minified, flags=re.DOTALL)
+    result = json_min(template)
 
     try:
         return shell_safe_json_parse(result, preserve_order)
