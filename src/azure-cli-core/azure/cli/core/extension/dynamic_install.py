@@ -108,6 +108,7 @@ def _get_extension_run_after_dynamic_install_config(cli_ctx):
                                                               default_value) if cli_ctx else default_value
     return run_after_extension_installed
 
+
 def _get_extension_allow_preview_install_config(cli_ctx):
     default_value = True
     if cli_ctx and cli_ctx.config.get('extension', 'dynamic_install_allow_preview', None) is None:
@@ -200,7 +201,8 @@ def _check_value_in_extensions(cli_ctx, parser, args, no_prompt):  # pylint: dis
         pass
     else:
         try:
-            resolve_from_index(ext_name, cur_version=ext.version, cli_ctx=cli_ctx, allow_preview=extension_allow_preview)
+            resolve_from_index(ext_name, cur_version=ext.version, cli_ctx=cli_ctx,
+                               allow_preview=extension_allow_preview)
         except NoExtensionCandidatesError:
             return
 
