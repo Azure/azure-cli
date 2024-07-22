@@ -19,9 +19,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2024-03-01"],
         ]
     }
 
@@ -50,7 +50,7 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -62,7 +62,7 @@ class Update(AAZCommand):
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -153,14 +153,14 @@ class Update(AAZCommand):
             nullable=True,
             fmt=AAZIntArgFormat(
                 maximum=183,
-                minimum=7,
+                minimum=2,
             ),
         )
         _element.creation_token = AAZStrArg(
             options=["creation-token"],
             help="A unique file path for the volume. Used when creating mount targets",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-]{0,79}$",
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$",
                 max_length=80,
                 min_length=1,
             ),
@@ -310,7 +310,7 @@ class Update(AAZCommand):
             help="Maximum storage quota allowed for a file system in bytes. This is a soft quota used for alerting only. Minimum size is 100 GiB. Upper limit is 100TiB, 500Tib for LargeVolume or 2400Tib for LargeVolume on exceptional basis. Specified in bytes.",
             fmt=AAZIntArgFormat(
                 maximum=2638827906662400,
-                minimum=107374182400,
+                minimum=53687091200,
             ),
         )
         _element.volume_spec_name = AAZStrArg(
@@ -620,7 +620,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -723,7 +723,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
