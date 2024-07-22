@@ -581,10 +581,9 @@ def load_arguments(self, _):
         c.argument('sd_exchange_key', help='The exchange key for security domain.')
         c.argument('sd_wrapping_keys', nargs='*',
                    help='Space-separated file paths to PEM files containing private keys.')
-        c.argument('passwords', nargs='*', required=True,
-                   help='Space-separated password list for --sd-wrapping-keys. '
-                        'CLI will match them in order. Can be omitted if your keys are without '
-                        'password protection.')
+        c.argument('passwords', nargs='*', help='Space-separated password list for --sd-wrapping-keys. '
+                                                'CLI will match them in order. Can be omitted if your keys are without '
+                                                'password protection.')
 
     with self.argument_context('keyvault security-domain restore-blob') as c:
         c.argument('sd_file', help='This file contains security domain encrypted using SD Exchange file downloaded '
