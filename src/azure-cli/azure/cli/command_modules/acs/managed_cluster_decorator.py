@@ -6,7 +6,6 @@
 
 import copy
 import os
-import semver
 import re
 import time
 from types import SimpleNamespace
@@ -47,9 +46,12 @@ from azure.cli.command_modules.acs._helpers import (
     check_is_private_cluster,
     format_parameter_name_to_option_name,
     get_user_assigned_identity_by_resource_id,
+    get_shared_control_plane_identity,
     map_azure_error_to_cli_error,
     safe_list_get,
     safe_lower,
+    sort_asm_revisions,
+    use_shared_identity,
 )
 from azure.cli.command_modules.acs._loadbalancer import create_load_balancer_profile
 from azure.cli.command_modules.acs._loadbalancer import update_load_balancer_profile as _update_load_balancer_profile
@@ -1699,6 +1701,15 @@ class AKSManagedClusterContext(BaseAKSContext):
                 if value_obtained_from_mc is not None:
                     assign_identity = value_obtained_from_mc
 
+        # override to use shared identity in managed live test
+        if use_shared_identity():
+            if self._get_enable_managed_identity(enable_validation=False):
+                if (
+                    self.decorator_mode == DecoratorMode.CREATE or
+                    (self.decorator_mode == DecoratorMode.UPDATE and not assign_identity)
+                ):
+                    assign_identity = get_shared_control_plane_identity(designated_identity=assign_identity)
+
         # this parameter does not need dynamic completion
         # validation
         if enable_validation:
@@ -2289,8 +2300,11 @@ class AKSManagedClusterContext(BaseAKSContext):
         network_plugin = self.raw_param.get("network_plugin")
 
         # try to read the property value corresponding to the parameter from the `mc` object
+        # only when we are not in CREATE mode. In Create, if nothing is given from the raw
+        # input, then it should be None as no defaulting should happen in the CLI.
         if (
             not network_plugin and
+            self.decorator_mode != DecoratorMode.CREATE and
             self.mc and
             self.mc.network_profile and
             self.mc.network_profile.network_plugin is not None
@@ -2302,10 +2316,10 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             (
                 pod_cidr,
-                service_cidr,
-                dns_service_ip,
-                docker_bridge_address,
-                network_policy,
+                _,
+                _,
+                _,
+                _,
             ) = self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
                 enable_validation=False
             )
@@ -2316,17 +2330,6 @@ class AKSManagedClusterContext(BaseAKSContext):
                         "Please specify network plugin mode `overlay` when using --pod-cidr or "
                         "use network plugin `kubenet`. For more information about Azure CNI "
                         "Overlay please see https://aka.ms/aks/azure-cni-overlay"
-                    )
-            else:
-                if (
-                    pod_cidr or
-                    service_cidr or
-                    dns_service_ip or
-                    docker_bridge_address or
-                    network_policy
-                ):
-                    raise RequiredArgumentMissingError(
-                        "Please explicitly specify the network plugin type"
                     )
         return network_plugin
 
@@ -2428,10 +2431,12 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             network_plugin = self._get_network_plugin(enable_validation=False)
             if not network_plugin:
+                # ideally, we shouldn't do any validation like this in the CLI
+                # but since there is no default network_policy then if it is
+                # non-None then it must mean it was provided by the user. If
+                # a user provides a network policy then it is reasonable to require
+                # a network_plugin to also be provided.
                 if (
-                    pod_cidr or
-                    service_cidr or
-                    dns_service_ip or
                     network_policy
                 ):
                     raise RequiredArgumentMissingError(
@@ -4270,7 +4275,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                 if len(new_profile.istio.revisions) < 2:
                     raise ArgumentUsageError('Azure Service Mesh upgrade is not in progress.')
 
-                sorted_revisons = self._sort_revisions(new_profile.istio.revisions)
+                sorted_revisons = sort_asm_revisions(new_profile.istio.revisions)
                 if mesh_upgrade_command == CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE:
                     revision_to_remove = sorted_revisons[0]
                     revision_to_keep = sorted_revisons[-1]
@@ -4368,6 +4373,14 @@ class AKSManagedClusterContext(BaseAKSContext):
         enable_ingress_gateway = self.raw_param.get("enable_ingress_gateway", False)
         disable_ingress_gateway = self.raw_param.get("disable_ingress_gateway", False)
         ingress_gateway_type = self.raw_param.get("ingress_gateway_type", None)
+
+        # disallow disable ingress gateway on a cluser with no asm enabled
+        if disable_ingress_gateway:
+            if new_profile is None or new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_DISABLED:
+                raise ArgumentUsageError(
+                    "Istio has not been enabled for this cluster, please refer to https://aka.ms/asm-aks-addon-docs "
+                    "for more details on enabling Azure Service Mesh."
+                )
 
         if enable_ingress_gateway and disable_ingress_gateway:
             raise MutuallyExclusiveArgumentError(
@@ -4485,17 +4498,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         if updated:
             return new_profile
         return self.mc.service_mesh_profile
-
-    def _sort_revisions(self, revisions):
-        def _convert_revision_to_semver(rev):
-            sr = rev.replace("asm-", "")
-            sv = sr.replace("-", ".", 1)
-            # Add a custom patch version of 0
-            sv += ".0"
-            return semver.VersionInfo.parse(sv)
-
-        sorted_revisions = sorted(revisions, key=_convert_revision_to_semver)
-        return sorted_revisions
 
     def _get_uptime_sla(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of uptime_sla.
@@ -5748,22 +5750,29 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 need_post_creation_vnet_permission_granting = True
             else:
                 scope = vnet_subnet_id
-                identity_client_id = ""
                 if assign_identity:
-                    identity_client_id = (
-                        self.context.get_user_assigned_identity_client_id()
-                    )
+                    identity_object_id = self.context.get_user_assigned_identity_object_id()
+                    if not self.context.external_functions.add_role_assignment(
+                        self.cmd,
+                        "Network Contributor",
+                        identity_object_id,
+                        is_service_principal=False,
+                        scope=scope,
+                    ):
+                        logger.warning(
+                            "Could not create a role assignment for subnet. Are you an Owner on this subscription?"
+                        )
                 else:
                     identity_client_id = service_principal_profile.client_id
-                if not self.context.external_functions.add_role_assignment(
-                    self.cmd,
-                    "Network Contributor",
-                    identity_client_id,
-                    scope=scope,
-                ):
-                    logger.warning(
-                        "Could not create a role assignment for subnet. Are you an Owner on this subscription?"
-                    )
+                    if not self.context.external_functions.add_role_assignment(
+                        self.cmd,
+                        "Network Contributor",
+                        identity_client_id,
+                        scope=scope,
+                    ):
+                        logger.warning(
+                            "Could not create a role assignment for subnet. Are you an Owner on this subscription?"
+                        )
         # store need_post_creation_vnet_permission_granting as an intermediate
         self.context.set_intermediate(
             "need_post_creation_vnet_permission_granting",
@@ -5887,7 +5896,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         else:
             if load_balancer_sku == CONST_LOAD_BALANCER_SKU_STANDARD or load_balancer_profile:
                 network_profile = self.models.ContainerServiceNetworkProfile(
-                    network_plugin="kubenet",
+                    network_plugin=network_plugin,
                     load_balancer_sku=load_balancer_sku,
                     load_balancer_profile=load_balancer_profile,
                     outbound_type=outbound_type,
@@ -5895,6 +5904,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             if load_balancer_sku == CONST_LOAD_BALANCER_SKU_BASIC:
                 # load balancer sku must be standard when load balancer profile is provided
                 network_profile = self.models.ContainerServiceNetworkProfile(
+                    network_plugin=network_plugin,
                     load_balancer_sku=load_balancer_sku,
                 )
 

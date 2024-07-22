@@ -3597,8 +3597,8 @@ interactions:
       message: OK
 - request:
     body: '{"name": "testsubnet2", "properties": {"addressPrefix": "172.1.1.0/24",
-      "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
-      "Enabled"}}'
+      "defaultOutboundAccess": false, "privateEndpointNetworkPolicies": "Disabled",
+      "privateLinkServiceNetworkPolicies": "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -3609,11 +3609,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '166'
+      - '198'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -n --address-prefixes --vnet-name
+      - -g -n --address-prefixes --vnet-name --default-outbound
       User-Agent:
       - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: PUT
@@ -3624,8 +3624,8 @@ interactions:
         \ \"etag\": \"W/\\\"71e51766-4c15-425d-9545-102e6c68fe7d\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"172.1.1.0/24\",\r\n
         \   \"ipamPoolPrefixAllocations\": [],\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
-        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
-        \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\",\r\n
+        \   \"defaultOutboundAccess\": false\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
@@ -3634,7 +3634,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '577'
+      - '614'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -3670,7 +3670,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --address-prefixes --vnet-name
+      - -g -n --address-prefixes --vnet-name --default-outbound
       User-Agent:
       - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
@@ -3716,7 +3716,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --address-prefixes --vnet-name
+      - -g -n --address-prefixes --vnet-name --default-outbound
       User-Agent:
       - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
@@ -3727,13 +3727,13 @@ interactions:
         \ \"etag\": \"W/\\\"93425561-ee74-4af7-9d48-6bf2835a31b2\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"172.1.1.0/24\",\r\n
         \   \"ipamPoolPrefixAllocations\": [],\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
-        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
-        \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\",\r\n
+        \   \"defaultOutboundAccess\": false\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '578'
+      - '615'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5288,15 +5288,15 @@ interactions:
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"172.1.1.0/24\",\r\n          \"ipamPoolPrefixAllocations\":
         [],\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
-        \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
-        \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\",\r\n
+        \         \"defaultOutboundAccess\": false\r\n        },\r\n        \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n      }\r\n    ],\r\n    \"virtualNetworkPeerings\":
+        [],\r\n    \"enableDdosProtection\": false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2778'
+      - '2821'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -5365,14 +5365,15 @@ interactions:
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"172.1.1.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        \"Enabled\",\r\n          \"defaultOutboundAccess\": false\r\n        },\r\n
+        \       \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n      }\r\n
+        \   ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2650'
+      - '2693'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -6862,13 +6863,13 @@ interactions:
         \ \"etag\": \"W/\\\"93425561-ee74-4af7-9d48-6bf2835a31b2\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"172.1.1.0/24\",\r\n
         \   \"ipamPoolPrefixAllocations\": [],\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
-        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
-        \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\",\r\n
+        \   \"defaultOutboundAccess\": false\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '578'
+      - '615'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8358,13 +8359,13 @@ interactions:
         \ \"etag\": \"W/\\\"93425561-ee74-4af7-9d48-6bf2835a31b2\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"172.1.1.0/24\",\r\n
         \   \"ipamPoolPrefixAllocations\": [],\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
-        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
-        \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\",\r\n
+        \   \"defaultOutboundAccess\": false\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '578'
+      - '615'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8411,13 +8412,13 @@ interactions:
         \ \"etag\": \"W/\\\"93425561-ee74-4af7-9d48-6bf2835a31b2\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"172.1.1.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
-        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\",\r\n    \"defaultOutboundAccess\":
+        false\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '540'
+      - '577'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8464,13 +8465,13 @@ interactions:
         \ \"etag\": \"W/\\\"93425561-ee74-4af7-9d48-6bf2835a31b2\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"172.1.1.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
-        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\",\r\n    \"defaultOutboundAccess\":
+        false\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '540'
+      - '577'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8532,8 +8533,8 @@ interactions:
         \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
         \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
         \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
-        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\",\r\n    \"defaultOutboundAccess\":
+        false\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
@@ -8542,7 +8543,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1249'
+      - '1286'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8642,13 +8643,13 @@ interactions:
         \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
         \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
         \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
-        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\",\r\n    \"defaultOutboundAccess\":
+        false\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1250'
+      - '1287'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8724,15 +8725,15 @@ interactions:
         \               \"actions\": [\r\n                  \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
         \               ]\r\n              },\r\n              \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
         \           }\r\n          ],\r\n          \"privateEndpointNetworkPolicies\":
-        \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
-        \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\",\r\n
+        \         \"defaultOutboundAccess\": false\r\n        },\r\n        \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n      }\r\n    ],\r\n    \"virtualNetworkPeerings\":
+        [],\r\n    \"enableDdosProtection\": false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3444'
+      - '3487'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -8787,13 +8788,13 @@ interactions:
         \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
         \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
         \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
-        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\",\r\n    \"defaultOutboundAccess\":
+        false\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1288'
+      - '1325'
       content-type:
       - application/json; charset=utf-8
       date:

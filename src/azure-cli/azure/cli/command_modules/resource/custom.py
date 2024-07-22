@@ -1278,14 +1278,14 @@ def _prepare_stacks_excluded_actions(deny_settings_excluded_actions):
     return excluded_actions_array
 
 
-def _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum, delete_management_groups_enum):
+def _build_stacks_confirmation_string(rcf, yes, name, stack_scope, delete_resources_enum, delete_resource_groups_enum, delete_management_groups_enum):
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
 
     if not yes:
         from knack.prompting import prompt_y_n
-        build_confirmation_string = "The DeploymentStack {} you're trying to create already exists in the current subscription.\n".format(
-            name)
-        build_confirmation_string += "The following actions will be applied to any resources that are no longer managed by the deployment stack after the template is applied:\n"
+
+        build_confirmation_string = f"The Deployment stack '{name}' you're trying to create already exists in the current {stack_scope}.\n"
+        build_confirmation_string += "The following actions will be applied to any resources that are no longer managed by the Deployment stack after the template is applied:\n"
 
         detaching_entities = []
         deleting_entities = []
@@ -1306,11 +1306,13 @@ def _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, del
             deleting_entities.append("management groups")
 
         if len(detaching_entities) > 0:
-            build_confirmation_string += f"\nDetach: {', '.join(detaching_entities)}\n"
+            build_confirmation_string += f"\nDetachment: {', '.join(detaching_entities)}\n"
         if len(deleting_entities) > 0:
-            build_confirmation_string += f"\nDeleting: {', '.join(deleting_entities)}\n"
+            build_confirmation_string += f"\nDeletion: {', '.join(deleting_entities)}\n"
 
-        confirmation = prompt_y_n(build_confirmation_string + "\n")
+        build_confirmation_string += "\nAre you sure you want to continue?"
+
+        confirmation = prompt_y_n(build_confirmation_string)
         if not confirmation:
             return None
 
@@ -2483,7 +2485,7 @@ def create_deployment_stack_at_subscription(
                 raise CLIError("Cannot change location of an already existing stack at subscription scope.")
             # bypass if yes flag is true
             built_string = _build_stacks_confirmation_string(
-                rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
+                rcf, yes, name, "subscription", aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
@@ -2628,7 +2630,7 @@ def create_deployment_stack_at_resource_group(
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
             built_string = _build_stacks_confirmation_string(
-                rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
+                rcf, yes, name, "resource group", aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
@@ -2924,7 +2926,7 @@ def create_deployment_stack_at_management_group(
         get_mg_response = rcf.deployment_stacks.get_at_management_group(management_group_id, name)
         if get_mg_response:
             built_string = _build_stacks_confirmation_string(
-                rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
+                rcf, yes, name, "management group", aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
