@@ -665,7 +665,7 @@ TARGET_RESOURCES_PARAMS = {
             'help': 'Name of the target container app',
             'placeholder': 'MyTargetContainerApp'
         }
-	}
+    }
 }
 
 
@@ -922,9 +922,9 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        
+
         RESOURCE.ContainerApp: [AUTH_TYPE.Null]
-	},
+    },
 }
 SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloud]
 SUPPORTED_AUTH_TYPE[RESOURCE.FunctionApp] = SUPPORTED_AUTH_TYPE[RESOURCE.WebApp]
@@ -1178,17 +1178,17 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.ContainerApp: [
             CLIENT_TYPE.Dotnet,
-			CLIENT_TYPE.DotnetInternal,
-			CLIENT_TYPE.Java,
-			CLIENT_TYPE.Python,
-			CLIENT_TYPE.Nodejs,
-			CLIENT_TYPE.Go,
+            CLIENT_TYPE.DotnetInternal,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Go,
             CLIENT_TYPE.Php,
             CLIENT_TYPE.Ruby,
             CLIENT_TYPE.Django,
-			CLIENT_TYPE.SpringBoot,
-			CLIENT_TYPE.Blank
-		]
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
+        ]
     }
 }
 

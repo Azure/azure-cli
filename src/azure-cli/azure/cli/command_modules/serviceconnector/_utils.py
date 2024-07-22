@@ -432,7 +432,7 @@ def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
         all_auth_info.append(service_principal_auth_info_secret)
     if len(all_auth_info) == 0:
         if (auth_action == 'optOutAllAuth' and config_action == 'optOut') \
-         	or target_type == RESOURCE.ContainerApp:
+           or target_type == RESOURCE.ContainerApp:
             return None
         raise ValidationError('At least one auth info is needed')
     if not new_addon and len(all_auth_info) != 1:
