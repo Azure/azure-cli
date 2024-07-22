@@ -605,7 +605,7 @@ def extract_key_value_pair(
     if raw_string == "":
         return default_value
 
-    result = {} 
+    result = {}
     kv_list = raw_string.split("=")
     if len(kv_list) in [1, 2]:
         key = kv_list[0]
