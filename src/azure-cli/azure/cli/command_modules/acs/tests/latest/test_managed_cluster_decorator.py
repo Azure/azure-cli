@@ -4132,11 +4132,15 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 "expander": "least-waste",
             },
         )
+        print(ctx_2.get_cluster_autoscaler_profile())
         self.assertEqual(
             ctx_2.get_cluster_autoscaler_profile(),
             {
                 "additional_properties": {},
                 "balance_similar_node_groups": None,
+                "daemonset_eviction_for_empty_nodes": None,
+                "daemonset_eviction_for_occupied_nodes": None,
+                "ignore_daemonsets_utilization": None,
                 "expander": "least-waste",
                 "max_empty_bulk_delete": None,
                 "max_graceful_termination_sec": None,
