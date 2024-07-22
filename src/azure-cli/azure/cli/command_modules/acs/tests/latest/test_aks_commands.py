@@ -8501,7 +8501,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         random_name_length=17,
         name_prefix="clitest",
         location="eastus",
-        preserve_default_location=True,
     )
     def test_aks_uninstall_azure_npm(
         self, resource_group, resource_group_location
@@ -8561,7 +8560,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         random_name_length=17,
         name_prefix="clitest",
         location="eastus",
-        preserve_default_location=True,
     )
     def test_aks_install_azure_npm(
         self, resource_group, resource_group_location
@@ -8621,7 +8619,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         random_name_length=17,
         name_prefix="clitest",
         location="eastus",
-        preserve_default_location=True,
     )
     def test_aks_uninstall_calico_npm(
         self, resource_group, resource_group_location
@@ -8681,7 +8678,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         random_name_length=17,
         name_prefix="clitest",
         location="eastus",
-        preserve_default_location=True,
     )
     def test_aks_install_calico_npm(
         self, resource_group, resource_group_location
