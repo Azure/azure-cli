@@ -316,7 +316,7 @@ for source in SOURCE_RESOURCES:
             - name: Null auth info
               short-summary: Null auth info
               long-summary: Auth info for ACA-to-ACA connection is not required.
-        ''' if AUTH_TYPE.Null in auth_types else ''              
+        ''' if AUTH_TYPE.Null in auth_types else ''
         # create with `--new` examples
         provision_example = '''
             - name: Create a new {target} and connect {source_display_name} to it interactively
