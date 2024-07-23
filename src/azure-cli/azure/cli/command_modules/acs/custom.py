@@ -869,10 +869,6 @@ def aks_upgrade(cmd,
     if k8s_support_plan is not None:
         instance.support_plan = k8s_support_plan
 
-    if (instance.support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT
-            and instance.tier is not None and instance.tier.lower() != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM.lower()):
-        raise CLIError("AKS Long Term Support is only available for Premium tier clusters.")
-
     instance = _update_upgrade_settings(
         cmd,
         instance,
