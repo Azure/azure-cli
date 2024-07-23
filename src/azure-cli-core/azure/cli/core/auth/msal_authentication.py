@@ -34,7 +34,7 @@ _USE_CERT_SN_ISSUER = 'use_cert_sn_issuer'
 logger = get_logger(__name__)
 
 
-class UserCredential:
+class UserCredential:  # pylint: disable=too-few-public-methods
 
     def __init__(self, client_id, username, **kwargs):
         """User credential implementing get_token interface.
@@ -101,7 +101,7 @@ class UserCredential:
         return build_sdk_access_token(result)
 
 
-class ServicePrincipalCredential:
+class ServicePrincipalCredential:  # pylint: disable=too-few-public-methods
 
     def __init__(self, client_id, client_credential, **kwargs):
         """Service principal credential implementing get_token interface.
