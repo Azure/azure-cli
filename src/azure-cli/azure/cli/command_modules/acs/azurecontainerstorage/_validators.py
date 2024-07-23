@@ -429,7 +429,7 @@ def _validate_storage_pool_size(storage_pool_size, storage_pool_type):
             )
 
 
-def _validate_nodepools(  # pylint: disable=too-many-branches
+def _validate_nodepools(  # pylint: disable=too-many-branches,too-many-locals
     nodepool_list,
     agentpool_details,
     storage_pool_type,
