@@ -661,7 +661,7 @@ TARGET_RESOURCES_PARAMS = {
             'placeholder': 'TargetContainerAppRG'
         },
         'target_app_name': {
-            'options': ['--target-app-name', '--tn'],
+            'options': ['--target-app-name'],
             'help': 'Name of the target container app',
             'placeholder': 'MyTargetContainerApp'
         }

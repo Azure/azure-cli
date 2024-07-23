@@ -312,7 +312,11 @@ for source in SOURCE_RESOURCES:
                 object-id      : Optional. Object id of the service principal (Enterprise Application).
                 secret         : Required. Secret of the service principal.
         ''' if AUTH_TYPE.ServicePrincipalSecret in auth_types else ''
-
+        null_param = '''
+            - name: Null auth info
+              short-summary: Null auth info
+              long-summary: Auth info for ACA-to-ACA connection is not required.
+        ''' if AUTH_TYPE.Null in auth_types else ''              
         # create with `--new` examples
         provision_example = '''
             - name: Create a new {target} and connect {source_display_name} to it interactively
@@ -361,6 +365,7 @@ for source in SOURCE_RESOURCES:
             {user_identity_param}
             {workload_identity_param}
             {service_principal_param}
+            {null_param}
           examples:
             - name: Create a connection between {source_display_name} and {target} interactively
               text: |-
@@ -384,6 +389,7 @@ for source in SOURCE_RESOURCES:
             user_identity_param=user_identity_param,
             workload_identity_param=workload_identity_param,
             service_principal_param=service_principal_param,
+            null_param=null_param,
             source_params=source_params,
             target_params=target_params,
             auth_params=auth_params,
@@ -401,6 +407,7 @@ for source in SOURCE_RESOURCES:
             {user_identity_param}
             {workload_identity_param}
             {service_principal_param}
+            {null_param}
           examples:
             - name: Update the client type of a connection with resource name
               text: |-
@@ -417,6 +424,7 @@ for source in SOURCE_RESOURCES:
             user_identity_param=user_identity_param,
             workload_identity_param=workload_identity_param,
             service_principal_param=service_principal_param,
+            null_param=null_param,
             source_params=source_params,
             connection_id=connection_id,
             source_display_name=source_display_name)
