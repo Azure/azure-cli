@@ -681,6 +681,21 @@ def flexible_server_import_create(cmd, client,
                           None, firewall_name, subnet_id)
 
 
+def flexible_server_import_replica_stop(client, resource_group_name, server_name):
+    try:
+        server_object = client.get(resource_group_name, server_name)
+    except Exception as e:
+        raise ResourceNotFoundError(e)
+
+    server_module_path = server_object.__module__
+    module = import_module(server_module_path)  # replacement not needed for update in flex servers
+    ServerForUpdate = getattr(module, 'ServerForUpdate')
+
+    params = ServerForUpdate(replication_role='None')
+
+    return client.begin_update(resource_group_name, server_name, params)
+
+
 # pylint: disable=too-many-locals, too-many-statements, raise-missing-from
 def flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time=None, zone=None,
                             no_wait=False, subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,

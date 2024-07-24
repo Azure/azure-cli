@@ -56,7 +56,7 @@ DEPENDENCIES = [
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
-    'azure-datalake-store~=0.0.49',
+    'azure-datalake-store~=0.0.53',
     'azure-graphrbac~=0.60.0',
     'azure-keyvault-administration==4.4.0b2',
     'azure-keyvault-certificates==4.7.0',
