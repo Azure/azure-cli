@@ -217,6 +217,48 @@ for source in SOURCE_RESOURCES:
         # target resource params
         target_params = get_target_resource_params(target)
 
+        # special target resource to pass linter check with no auth params
+        if target == RESOURCE.ContainerApp:
+            helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
+            type: command
+            short-summary: Create a {source_display_name} connection to {target}. No auth info is required.
+            examples:
+                - name: Create a connection between {source_display_name} and {target} interactively
+                  text: |-
+                        az {source} connection create {target}
+                - name: Create a connection between {source_display_name} and {target} with resource name
+                  text: |-
+                        az {source} connection create {target} {source_params} {target_params}
+                - name: Create a connection between {source_display_name} and {target} with resource id
+                  text: |-
+                        az {source} connection create {target} --source-id {source_id} --target-id {target_id}
+            """.format(
+                source=source.value,
+                target=target.value,
+                source_id=source_id,
+                target_id=target_id,
+                source_params=source_params,
+                target_params=target_params,
+                source_display_name=source_display_name)
+
+            helps['{source} connection update {target}'.format(source=source.value, target=target.value)] = """
+            type: command
+            short-summary: Update a {source_display_name} to {target} connection.
+            examples:
+                - name: Update the client type of a connection with resource name
+                  text: |-
+                        az {source} connection update {target} {source_params} --connection MyConnection --client-type dotnet
+                - name: Update the client type of a connection with resource id
+                  text: |-
+                        az {source} connection update {target} --id {connection_id} --client-type dotnet
+            """.format(
+                source=source.value,
+                target=target.value,
+                source_params=source_params,
+                connection_id=connection_id,
+                source_display_name=source_display_name)
+            continue
+
         # auth info params
         auth_types = SUPPORTED_AUTH_TYPE.get(source).get(target)
         if auth_types[0] == AUTH_TYPE.WorkloadIdentity:
@@ -312,11 +354,6 @@ for source in SOURCE_RESOURCES:
                 object-id      : Optional. Object id of the service principal (Enterprise Application).
                 secret         : Required. Secret of the service principal.
         ''' if AUTH_TYPE.ServicePrincipalSecret in auth_types else ''
-        null_param = '''
-            - name: Null auth info
-              short-summary: Null auth info
-              long-summary: Auth info for ACA-to-ACA connection is not required.
-        ''' if AUTH_TYPE.Null in auth_types else ''
         # create with `--new` examples
         provision_example = '''
             - name: Create a new {target} and connect {source_display_name} to it interactively
@@ -365,7 +402,6 @@ for source in SOURCE_RESOURCES:
             {user_identity_param}
             {workload_identity_param}
             {service_principal_param}
-            {null_param}
           examples:
             - name: Create a connection between {source_display_name} and {target} interactively
               text: |-
@@ -389,7 +425,6 @@ for source in SOURCE_RESOURCES:
             user_identity_param=user_identity_param,
             workload_identity_param=workload_identity_param,
             service_principal_param=service_principal_param,
-            null_param=null_param,
             source_params=source_params,
             target_params=target_params,
             auth_params=auth_params,
@@ -407,7 +442,6 @@ for source in SOURCE_RESOURCES:
             {user_identity_param}
             {workload_identity_param}
             {service_principal_param}
-            {null_param}
           examples:
             - name: Update the client type of a connection with resource name
               text: |-
@@ -424,7 +458,6 @@ for source in SOURCE_RESOURCES:
             user_identity_param=user_identity_param,
             workload_identity_param=workload_identity_param,
             service_principal_param=service_principal_param,
-            null_param=null_param,
             source_params=source_params,
             connection_id=connection_id,
             source_display_name=source_display_name)
@@ -472,7 +505,6 @@ for source in SOURCE_RESOURCES:
                server_params=server_params,
                registry_params=registry_params,
                source_display_name=source_display_name)
-
 
 source = RESOURCE.Local
 connection_id = (
