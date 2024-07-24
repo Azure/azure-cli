@@ -742,7 +742,6 @@ def load_arguments(self, _):
         c.argument('vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.')
         c.argument('instance_count', help='Number of VMs in the scale set.', type=int)
         c.argument('disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
-        c.argument('upgrade_policy_mode', help=None, arg_type=get_enum_type(UpgradeMode))
         c.argument('health_probe', help='Probe name from the existing load balancer, mainly used for rolling upgrade or automatic repairs')
         c.argument('vm_sku', help='Size of VMs in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.')
         c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
@@ -876,6 +875,7 @@ def load_arguments(self, _):
             c.argument('enable_user_reboot_scheduled_events', options_list=['--enable-user-reboot-scheduled-events', '--enable-reboot'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='The configuration parameter used while publishing scheduled events additional publishing targets.')
             c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
             c.argument('enable_auto_os_upgrade', enable_auto_os_upgrade_type)
+            c.argument('upgrade_policy_mode', help=None, arg_type=get_enum_type(UpgradeMode))
 
     for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
         with self.argument_context(scope) as c:

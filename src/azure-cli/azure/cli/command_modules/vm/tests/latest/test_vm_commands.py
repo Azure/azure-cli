@@ -4662,13 +4662,33 @@ class VMSSUpdateTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_enable_auto_os_upgrade', location='eastus')
     def test_vmss_update_enable_auto_os_upgrade(self):
         self.kwargs.update({
-            'vmss': self.create_random_name('vmss', 10)
+            'uniform_vmss': self.create_random_name('vmss', 10),
+            'flexible_vmss': self.create_random_name('vmss', 10)
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:0001-com-ubuntu-server-jammy:22_04-LTS-Gen2:latest --orchestration-mode uniform --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --admin-password Test123456789#', checks=[
+        self.cmd('vmss create -g {rg} -n {uniform_vmss} --image Canonical:0001-com-ubuntu-server-jammy:22_04-LTS-Gen2:latest --orchestration-mode uniform --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --admin-password Test123456789#', checks=[
             self.check('vmss.upgradePolicy.mode', 'Rolling'),
             self.check('vmss.orchestrationMode', 'Uniform')
         ])
-        self.cmd('vmss update -g {rg} -n {vmss} --enable-auto-os-upgrade true', checks=[
+        time.sleep(150)
+        self.cmd('vmss update -g {rg} -n {uniform_vmss} --enable-auto-os-upgrade true', checks=[
+            self.check('upgradePolicy.mode', 'Rolling'),
+            self.check('orchestrationMode', 'Uniform'),
+            self.check('upgradePolicy.automaticOsUpgradePolicy.enableAutomaticOsUpgrade', True)
+        ])
+        self.cmd('vmss update -g {rg} -n {uniform_vmss} --upgrade-policy-mode manual', checks=[
+            self.check('upgradePolicy.mode', 'Manual'),
+            self.check('orchestrationMode', 'Uniform'),
+            self.check('upgradePolicy.automaticOsUpgradePolicy.enableAutomaticOsUpgrade', True)
+        ])
+
+        self.cmd('vmss create -g {rg} -n {flexible_vmss} --image ubuntu2204 --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --orchestration-mode Flexible --admin-username clitester1 --admin-password Testqwer1234!', checks=[
+            self.check('vmss.upgradePolicy.mode', 'Rolling'),
+            self.check('vmss.orchestrationMode', 'Flexible')
+        ])
+        time.sleep(150)
+        self.cmd('vmss update -g {rg} -n {flexible_vmss} --enable-auto-os-upgrade true --upgrade-policy-mode manual', checks=[
+            self.check('upgradePolicy.mode', 'Manual'),
+            self.check('orchestrationMode', 'Flexible'),
             self.check('upgradePolicy.automaticOsUpgradePolicy.enableAutomaticOsUpgrade', True)
         ])
 

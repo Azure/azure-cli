@@ -3933,7 +3933,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None,
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
-                enable_auto_os_upgrade=None, **kwargs):
+                upgrade_policy_mode=None, enable_auto_os_upgrade=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4153,6 +4153,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.upgrade_policy.rolling_upgrade_policy.enable_cross_zone_upgrade = enable_cross_zone_upgrade
             vmss.upgrade_policy.rolling_upgrade_policy.prioritize_unhealthy_instances = prioritize_unhealthy_instances
             vmss.upgrade_policy.rolling_upgrade_policy.max_surge = max_surge
+
+    if upgrade_policy_mode is not None:
+        vmss.upgrade_policy.mode = upgrade_policy_mode
 
     if enable_auto_os_upgrade is not None:
         if vmss.upgrade_policy.automatic_os_upgrade_policy is None:
