@@ -90,7 +90,7 @@ class ContainerAppAuthTest(ScenarioTest):
                           "blob-storage-token-store-sasurl-secret"),
         ])
 
-        self.cmd('containerapp auth update -g {} -n {} --proxy-convention Standard --redirect-provider Facebook --unauthenticated-client-action AllowAnonymous'.format(
+        self.cmd('containerapp auth update -g {} -n {} --proxy-convention Standard --redirect-provider Facebook --unauthenticated-client-action AllowAnonymous --set "identityProviders.azureActiveDirectory.login.loginParameters=[scope=openid offline_access api://<backend-client-id>/user_impersonation]"'.format(
                 resource_group, app), checks=[
                 JMESPathCheck('name', 'current'),
                 JMESPathCheck('properties.httpSettings.forwardProxy.convention', 'Standard'),
@@ -99,7 +99,8 @@ class ContainerAppAuthTest(ScenarioTest):
                 JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.clientId', client_id),
                 JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.clientSecretSettingName', "microsoft-provider-authentication-secret"),
                 JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.openIdIssuer', issuer),
-            ])
+                JMESPathCheck('properties.identityProviders.azureActiveDirectory.login.loginParameters', "[scope=openid offline_access api://<backend-client-id>/user_impersonation]"),
+        ])
 
         self.cmd('containerapp show  -g {} -n {}'.format(resource_group, app), checks=[
             JMESPathCheck('properties.provisioningState', "Succeeded")
