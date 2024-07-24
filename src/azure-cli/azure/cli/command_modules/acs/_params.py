@@ -576,7 +576,7 @@ def load_arguments(self, _):
         c.argument(
             "disable_azure_container_storage",
             arg_type=get_enum_type(disable_storage_pool_types),
-            help="disable azure container storage or any one of the storagepool types",
+            help="disable azure container storage or any one of the storage pool types",
         )
         c.argument(
             "storage_pool_name",
