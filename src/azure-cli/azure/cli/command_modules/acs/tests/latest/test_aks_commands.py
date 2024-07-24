@@ -101,7 +101,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         return create_version, upgrade_version
 
     def _get_lts_versions(self, location):
-        """Return the AKS versions that are marked as LTS, only major.minor is returned."""
+        """Return the AKS versions that are marked as LTS in ascending order."""
         lts_versions = self.cmd(
             '''az aks get-versions -l {} --query "values[?contains(capabilities.supportPlan, 'AKSLongTermSupport')].patchVersions.keys(@)[]"'''.format(location)
         ).get_output_in_json()
@@ -109,7 +109,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         return sorted_lts_versions
     
     def _get_newer_non_lts_version(self, location, version):
-        """Return the newer non-lts version of the specified version."""
+        """Return the nearest newer non-lts version of the specified version."""
         supported_versions = self.cmd(
             '''az aks get-versions -l {} --query "values[?!(contains(capabilities.supportPlan, 'AKSLongTermSupport'))].patchVersions.keys(@)[]"'''.format(location)
         ).get_output_in_json()

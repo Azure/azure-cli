@@ -66,6 +66,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
     CONST_AZURE_SERVICE_MESH_MODE_ISTIO,
+    CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
 )
 
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster
@@ -95,6 +96,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import in_cloud_console, sdk_no_wait
 from azure.core.exceptions import ResourceNotFoundError as ResourceNotFoundErrorAzCore
+from azure.mgmt.containerservice.models import KubernetesSupportPlan
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
@@ -866,6 +868,9 @@ def aks_upgrade(cmd,
 
     if k8s_support_plan is not None:
         instance.support_plan = k8s_support_plan
+
+    if (instance.support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT and instance.tier is not None and instance.tier.lower() != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM.lower()):
+        raise CLIError("AKS Long Term Support is only available for Premium tier clusters.")
 
     instance = _update_upgrade_settings(
         cmd,
