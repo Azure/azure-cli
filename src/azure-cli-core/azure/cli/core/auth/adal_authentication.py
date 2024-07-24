@@ -10,7 +10,7 @@ import requests
 from knack.log import get_logger
 from msrestazure.azure_active_directory import MSIAuthentication
 
-from .util import AccessToken, _normalize_scopes, scopes_to_resource
+from .util import _normalize_scopes, scopes_to_resource, AccessToken
 
 logger = get_logger(__name__)
 
@@ -32,9 +32,9 @@ class MSIAuthenticationWrapper(MSIAuthentication):
             if in_cloud_console():
                 # Use MSAL to get VM SSH certificate
                 import msal
+                from .util import check_result, build_sdk_access_token
 
                 from .identity import AZURE_CLI_CLIENT_ID
-                from .util import build_sdk_access_token, check_result
                 app = msal.PublicClientApplication(
                     AZURE_CLI_CLIENT_ID,  # Use a real client_id, so that cache would work
                     # TODO: This PoC does not currently maintain a token cache;
@@ -86,15 +86,14 @@ class MSIAuthenticationWrapper(MSIAuthentication):
             retry_delay = int(os.getenv(MSI_RETRY_DELAY_ENVIRONMENT_VARIABLE, MSI_RETRY_DELAY_DEFAULT))
 
         import traceback
-
-        from azure.cli.core.azclierror import (AzureConnectionError,
-                                               AzureResponseError)
+        from azure.cli.core.azclierror import AzureConnectionError, AzureResponseError
 
         attempts = 0
         error_msg = None
         while attempts < max_attempts:
             try:
                 super().set_token()
+                error_msg = None
                 break
             except requests.exceptions.HTTPError as err:
                 logger.debug('throw requests.exceptions.HTTPError when doing MSIAuthentication: \n%s',
