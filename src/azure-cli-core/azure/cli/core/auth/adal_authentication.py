@@ -3,14 +3,23 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
+import time
+
 import requests
 from knack.log import get_logger
 from msrestazure.azure_active_directory import MSIAuthentication
 
-from .util import _normalize_scopes, scopes_to_resource, AccessToken
+from .util import AccessToken, _normalize_scopes, scopes_to_resource
 
 logger = get_logger(__name__)
 
+# Environment variables to enable retrying MSI connections when there is a nondeterministic failure (e.g. connection issue or timeout)
+MSI_RETRY_ENABLED_ENVIRONMENT_VARIABLE = 'AZURE_CLI_MSI_RETRY_ENABLED'
+MSI_RETRY_COUNT_ENVIRONMENT_VARIABLE = 'AZURE_CLI_MSI_RETRY_COUNT'
+MSI_RETRY_COUNT_DEFAULT = '3'
+MSI_RETRY_DELAY_ENVIRONMENT_VARIABLE = 'AZURE_CLI_MSI_RETRY_DELAY'
+MSI_RETRY_DELAY_DEFAULT = '15'
 
 class MSIAuthenticationWrapper(MSIAuthentication):
     # This method is exposed for Azure Core. Add *scopes, **kwargs to fit azure.core requirement
@@ -23,8 +32,9 @@ class MSIAuthenticationWrapper(MSIAuthentication):
             if in_cloud_console():
                 # Use MSAL to get VM SSH certificate
                 import msal
-                from .util import check_result, build_sdk_access_token
+
                 from .identity import AZURE_CLI_CLIENT_ID
+                from .util import build_sdk_access_token, check_result
                 app = msal.PublicClientApplication(
                     AZURE_CLI_CLIENT_ID,  # Use a real client_id, so that cache would work
                     # TODO: This PoC does not currently maintain a token cache;
@@ -69,30 +79,51 @@ class MSIAuthenticationWrapper(MSIAuthentication):
         return AccessToken(self.token['access_token'], _normalize_expires_on(self.token['expires_on']))
 
     def set_token(self):
+        max_attempts = 1
+        retry_delay = None
+        if os.getenv(MSI_RETRY_ENABLED_ENVIRONMENT_VARIABLE, 'false').lower() == 'true':
+            max_attempts = int(os.getenv(MSI_RETRY_COUNT_ENVIRONMENT_VARIABLE, MSI_RETRY_COUNT_DEFAULT))
+            retry_delay = int(os.getenv(MSI_RETRY_DELAY_ENVIRONMENT_VARIABLE, MSI_RETRY_DELAY_DEFAULT))
+
         import traceback
-        from azure.cli.core.azclierror import AzureConnectionError, AzureResponseError
-        try:
-            super().set_token()
-        except requests.exceptions.ConnectionError as err:
-            logger.debug('throw requests.exceptions.ConnectionError when doing MSIAuthentication: \n%s',
-                         traceback.format_exc())
-            raise AzureConnectionError('Failed to connect to MSI. Please make sure MSI is configured correctly '
-                                       'and check the network connection.\nError detail: {}'.format(str(err)))
-        except requests.exceptions.HTTPError as err:
-            logger.debug('throw requests.exceptions.HTTPError when doing MSIAuthentication: \n%s',
-                         traceback.format_exc())
+
+        from azure.cli.core.azclierror import (AzureConnectionError,
+                                               AzureResponseError)
+
+        attempts = 0
+        error_msg = None
+        while attempts < max_attempts:
             try:
-                raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
-                                         'Get Token request returned http error: {}, reason: {}'
-                                         .format(err.response.status, err.response.reason))
-            except AttributeError:
-                raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
-                                         'Get Token request returned: {}'.format(err.response))
-        except TimeoutError as err:
-            logger.debug('throw TimeoutError when doing MSIAuthentication: \n%s',
-                         traceback.format_exc())
-            raise AzureConnectionError('MSI endpoint is not responding. Please make sure MSI is configured correctly.\n'
-                                       'Error detail: {}'.format(str(err)))
+                super().set_token()
+                break
+            except requests.exceptions.HTTPError as err:
+                logger.debug('throw requests.exceptions.HTTPError when doing MSIAuthentication: \n%s',
+                            traceback.format_exc())
+                try:
+                    raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
+                                            'Get Token request returned http error: {}, reason: {}'
+                                            .format(err.response.status, err.response.reason))
+                except AttributeError:
+                    raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
+                                            'Get Token request returned: {}'.format(err.response))
+            except requests.exceptions.ConnectionError as err:
+                logger.debug('throw requests.exceptions.ConnectionError when doing MSIAuthentication: \n%s',
+                            traceback.format_exc())
+                error_msg = 'Failed to connect to MSI. Please make sure MSI is configured correctly ' \
+                            'and check the network connection.\nError detail: {}'.format(str(err))
+            except TimeoutError as err:
+                logger.debug('throw TimeoutError when doing MSIAuthentication: \n%s',
+                            traceback.format_exc())
+                error_msg = 'MSI endpoint is not responding. Please make sure MSI is configured correctly.\n' \
+                            'Error detail: {}'.format(str(err))
+
+            attempts += 1
+            if attempts < max_attempts:
+                logger.debug('Retryable MSI connection error, trying again after %d seconds', retry_delay)
+                time.sleep(retry_delay)
+
+        if error_msg:
+            raise AzureConnectionError(error_msg)
 
     def signed_session(self, session=None):
         logger.debug("MSIAuthenticationWrapper.signed_session invoked by Track 1 SDK")
