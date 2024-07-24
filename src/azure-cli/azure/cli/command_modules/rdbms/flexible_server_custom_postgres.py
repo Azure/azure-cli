@@ -203,8 +203,6 @@ def flexible_server_restore(cmd, client,
     else:
         source_server_id = source_server
 
-    instance = client.get(resource_group_name, source_server)
-
     restore_point_in_time = validate_and_format_restore_point_in_time(restore_point_in_time)
 
     try:
@@ -225,6 +223,7 @@ def flexible_server_restore(cmd, client,
 
         pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
+        instance = client.get(resource_group_name, id_parts['name'])
         storage = postgresql_flexibleservers.models.Storage(type=storage_type if instance.storage.type != "PremiumV2_LRS" else None)
 
         parameters = postgresql_flexibleservers.models.Server(
