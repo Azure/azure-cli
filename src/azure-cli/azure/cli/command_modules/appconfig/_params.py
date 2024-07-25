@@ -125,7 +125,7 @@ def load_arguments(self, _):
         c.argument('top', arg_type=top_arg_type)
         c.argument('all_', options_list=['--all'], action='store_true', help="List all items.")
         c.argument('fields', arg_type=fields_arg_type)
-        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Standard', 'Premium']))
+        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Premium', 'Standard']))
         c.argument('endpoint', help='If auth mode is "login", provide endpoint URL of the App Configuration store. The endpoint can be retrieved using "az appconfig show" command. You can configure the default endpoint using `az configure --defaults appconfig_endpoint=<endpoint>`', configured_default='appconfig_endpoint')
         c.argument('auth_mode', arg_type=get_enum_type(['login', 'key']), configured_default='appconfig_auth_mode', validator=validate_auth_mode,
                    help='This parameter can be used for indicating how a data operation is to be authorized. ' +
