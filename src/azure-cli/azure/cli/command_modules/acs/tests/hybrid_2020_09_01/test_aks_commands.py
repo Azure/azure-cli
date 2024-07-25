@@ -215,7 +215,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('networkProfile.loadBalancerSku', 'standard'),
             self.exists(
                 'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
