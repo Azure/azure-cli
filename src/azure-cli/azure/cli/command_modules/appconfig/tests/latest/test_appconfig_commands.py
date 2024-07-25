@@ -32,7 +32,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     def test_azconfig_mgmt(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='MgmtTest', length=24)
 
-        location = 'eastus'
+        location = 'centraluseuap'
         standard_sku = 'standard'
         premium_sku = 'premium'
         tag_key = "key"

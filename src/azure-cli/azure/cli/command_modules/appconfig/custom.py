@@ -175,14 +175,10 @@ def update_configstore(cmd,
             config_store_name=name,
             config_store_update_parameters=update_params,
         )
+    # Incase premium sku is not available in a given region yet. Temporary fix will be removed when premium is in all regions
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.BAD_REQUEST:
-            error_message_start = exception.message.find("Message: ") + len("Message: ")
-            error_message_end = exception.message.find("\n", error_message_start)
-            error_message = exception.message[
-                error_message_start:error_message_end
-            ].strip()
-            if error_message == "The property 'Sku' is not valid.":
+            if exception.error and exception.error.message == "The property 'Sku' is not valid.":
                 logger.error("The Sku is not supported in this region.")
             else:
                 raise exception
