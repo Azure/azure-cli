@@ -59,9 +59,6 @@ def flexible_server_create(cmd, client,
                            active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, create_default_db='Enabled', yes=False):
 
-    # Warning for upcoming breaking change to default value of pg version
-    logger.warning('In the next release, the default value for the PostgreSQL server major version will be updated to 16')
-
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'postgres')
