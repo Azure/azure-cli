@@ -7,7 +7,8 @@
 from azure.cli.command_modules.appconfig._client_factory import cf_configstore, cf_replicas
 from azure.cli.core.util import user_confirmation
 from knack.log import get_logger
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
+from azure.cli.command_modules.appconfig._constants import StatusCodes
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
                                                 ConfigurationStore,
@@ -168,9 +169,25 @@ def update_configstore(cmd,
 
         update_params.encryption = EncryptionProperties(key_vault_properties=key_vault_properties)
 
-    return client.begin_update(resource_group_name=resource_group_name,
-                               config_store_name=name,
-                               config_store_update_parameters=update_params)
+    try:
+        return client.begin_update(
+            resource_group_name=resource_group_name,
+            config_store_name=name,
+            config_store_update_parameters=update_params,
+        )
+    except HttpResponseError as exception:
+        if exception.status_code == StatusCodes.BAD_REQUEST:
+            error_message_start = exception.message.find("Message: ") + len("Message: ")
+            error_message_end = exception.message.find("\n", error_message_start)
+            error_message = exception.message[
+                error_message_start:error_message_end
+            ].strip()
+            if error_message == "The property 'Sku' is not valid.":
+                logger.error("The Sku is not supported in this region.")
+            else:
+                raise exception
+        else:
+            raise exception
 
 
 def assign_managed_identity(cmd, client, name, resource_group_name=None, identities=None):
