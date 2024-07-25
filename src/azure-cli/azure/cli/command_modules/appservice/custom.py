@@ -1401,7 +1401,7 @@ def list_instances(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot)
 
 
-def list_runtimes(cmd, os_type=None, linux=False):
+def list_runtimes(cmd, os_type=None, linux=False, show_runtime_details=False):
     if os_type is not None and linux:
         raise MutuallyExclusiveArgumentError("Cannot use both --os-type and --linux")
 
@@ -1418,7 +1418,7 @@ def list_runtimes(cmd, os_type=None, linux=False):
             windows = False
 
     runtime_helper = _StackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
-    return runtime_helper.get_stack_names_only(delimiter=":")
+    return runtime_helper.get_stack_names_only(delimiter=":", show_runtime_details=show_runtime_details)
 
 
 def list_function_app_runtimes(cmd, os_type=None):
@@ -1803,7 +1803,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             version_used_create = '|'.join(runtime.split('|')[1:])
             runtime_version = "{}|{}".format(language, version_used_create) if \
                 version_used_create != "-" else version_used_create
-            current_stack = get_current_stack_from_runtime(runtime_version)
+            current_stack = get_current_stack_from_runtime(runtime_version) if \
+                get_current_stack_from_runtime(runtime_version) != "tomcat" else "java"
             _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
 
     if number_of_workers is not None:
@@ -3812,11 +3813,17 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
     # pylint: disable=too-few-public-methods
     class Runtime:
-        def __init__(self, display_name=None, configs=None, github_actions_properties=None, linux=False):
+        def __init__(self,
+                     display_name=None,
+                     configs=None,
+                     github_actions_properties=None,
+                     linux=False,
+                     is_auto_update=None):
             self.display_name = display_name
             self.configs = configs if configs is not None else dict()
             self.github_actions_properties = github_actions_properties
             self.linux = linux
+            self.is_auto_update = is_auto_update
 
     def __init__(self, cmd, linux=False, windows=False):
         # TODO try and get API support for this so it isn't hardcoded
@@ -3830,12 +3837,23 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         }
         super().__init__(cmd, linux=linux, windows=windows)
 
-    def get_stack_names_only(self, delimiter=None):
-        windows_stacks = [s.display_name for s in self.stacks if not s.linux]
-        linux_stacks = [s.display_name for s in self.stacks if s.linux]
+    def get_stack_names_only(self, delimiter=None, show_runtime_details=False):
+        windows_stacks = [s.display_name for s in self.stacks if not s.linux and not s.is_auto_update]
+        linux_stacks = [s.display_name for s in self.stacks if s.linux and not s.is_auto_update]
+        windows_auto_updates = [
+            s.display_name for s in self.stacks if not
+            s.linux and ('java' not in s.display_name.casefold() or s.is_auto_update)]
+        linux_auto_updates = [
+            s.display_name for s in self.stacks if
+            s.linux and ('java' not in s.display_name.casefold() or s.is_auto_update)]
         if delimiter is not None:
             windows_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in windows_stacks]
             linux_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in linux_stacks]
+            windows_auto_updates = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in windows_auto_updates]
+            linux_auto_updates = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in linux_auto_updates]
+        if not show_runtime_details:
+            linux_stacks = linux_auto_updates
+            windows_stacks = windows_auto_updates
         if self._linux and not self._windows:
             return linux_stacks
         if self._windows and not self._linux:
@@ -3847,10 +3865,10 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
     def _parse_raw_stacks(self, stacks):
         for lang in stacks:
-            if lang.display_text.lower() == "java":
-                continue  # info on java stacks is taken from the "java containers" stacks
             for major_version in lang.major_versions:
                 if self._linux:
+                    if lang.display_text.lower() == "java":
+                        continue
                     self._parse_major_version_linux(major_version, self._stacks)
                 if self._windows:
                     self._parse_major_version_windows(major_version, self._stacks, self.windows_config_mappings)
@@ -3969,74 +3987,109 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return [m for m in major_version.minor_versions if _filter(m)]
 
     def _parse_major_version_windows(self, major_version, parsed_results, config_mappings):
-        minor_java_versions = self._get_valid_minor_versions(major_version, linux=False, java=True)
-        default_java_version = next(iter(minor_java_versions), None)
-        if default_java_version:
-            container_settings = default_java_version.stack_settings.windows_container_settings
-            # TODO get the API to return java versions in a more parseable way
-            for java_version in ["1.8", "11", "17", "21"]:
+        java_container_minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=True)
+        if java_container_minor_versions:
+            javas = ["21", "17", "11", "1.8"]
+            if len(java_container_minor_versions) > 0:
+                leng = len(java_container_minor_versions) if len(java_container_minor_versions) < 3 else 3
+                java_container_minor_versions = java_container_minor_versions[:leng]
+            for container in java_container_minor_versions:
+                container_settings = container.stack_settings.windows_container_settings
                 java_container = container_settings.java_container
                 container_version = container_settings.java_container_version
-                if container_version.upper() == "SE":
-                    java_container = "Java SE"
-                    if java_version == "1.8":
-                        container_version = "8"
-                    else:
-                        container_version = java_version
-                runtime_name = "{}|{}|{}|{}".format("java",
-                                                    java_version,
-                                                    java_container,
-                                                    container_version)
-                gh_actions_version = "8" if java_version == "1.8" else java_version
-                gh_actions_runtime = "{}, {}, {}".format(java_version,
-                                                         java_container.lower().replace(" se", ""),
-                                                         container_settings.java_container_version.lower())
-                if java_container == "Java SE":  # once runtime name is set, reset configs to correct values
-                    java_container = "JAVA"
-                    container_version = "SE"
-                runtime = self.Runtime(display_name=runtime_name,
-                                       configs={"java_version": java_version,
-                                                "java_container": java_container,
-                                                "java_container_version": container_version},
-                                       github_actions_properties={"github_actions_version": gh_actions_version,
-                                                                  "app_runtime": "java",
-                                                                  "app_runtime_version": gh_actions_runtime},
-                                       linux=False)
-                parsed_results.append(runtime)
+                for java in javas:
+                    runtime = self.get_windows_java_runtime(
+                        java,
+                        java_container,
+                        container_version,
+                        container_settings.is_auto_update)
+                    parsed_results.append(runtime)
         else:
             minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=False)
+            if "Java" in major_version.display_text:
+                if len(minor_versions) > 0:
+                    leng = len(minor_versions) if len(minor_versions) < 3 else 3
+                    minor_versions = minor_versions[1:leng]
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.windows_runtime_settings
-                runtime_name = self._format_windows_display_text(minor_version.display_text)
+                if "Java" not in minor_version.display_text:
+                    runtime_name = self._format_windows_display_text(minor_version.display_text)
 
-                runtime = self.Runtime(display_name=runtime_name, linux=False)
-                lang_name = runtime_name.split("|")[0].lower()
-                config_key = config_mappings.get(lang_name)
+                    runtime = self.Runtime(display_name=runtime_name, linux=False)
+                    lang_name = runtime_name.split("|")[0].lower()
+                    config_key = config_mappings.get(lang_name)
 
-                if config_key:
-                    runtime.configs[config_key] = settings.runtime_version
-                gh_properties = settings.git_hub_action_settings
-                if gh_properties.is_supported:
-                    runtime.github_actions_properties = {"github_actions_version": gh_properties.supported_version}
+                    if config_key:
+                        runtime.configs[config_key] = settings.runtime_version
+                    gh_properties = settings.git_hub_action_settings
+                    if gh_properties.is_supported:
+                        runtime.github_actions_properties = {"github_actions_version": gh_properties.supported_version}
+                else:
+                    runtime = self.get_windows_java_runtime(settings.runtime_version, "JAVA", "SE", False)
 
                 parsed_results.append(runtime)
+
+    def get_windows_java_runtime(self, java_version=None,
+                                 java_container=None, container_version=None,
+                                 is_auto_update=False):
+        github_action_container_version = container_version
+        if container_version.upper() == "SE":
+            java_container = "JAVA SE"
+            if java_version.startswith("1.8"):
+                container_version = "8"
+            else:
+                container_version = java_version.split('.')[0]
+        runtime_name = "{}|{}-{}{}".format(
+            java_container,
+            container_version,
+            "java",
+            java_version if not java_version.startswith("1.8") else "8") \
+            if java_container != "JAVA SE" else "{}|{}".format(
+                "JAVA",
+                java_version if not java_version.startswith("1.8") or not is_auto_update else "8")
+        gh_actions_version = "8" if java_version == "1.8" else java_version
+        gh_actions_runtime = "{}, {}, {}".format(java_version,
+                                                 java_container.lower().replace(" se", ""),
+                                                 github_action_container_version.lower())
+        if java_container == "JAVA SE":  # once runtime name is set, reset configs to correct values
+            java_container = "JAVA"
+            container_version = "SE"
+        return self.Runtime(display_name=runtime_name,
+                            configs={"java_version": java_version,
+                                     "java_container": java_container,
+                                     "java_container_version": container_version},
+                            github_actions_properties={"github_actions_version": gh_actions_version,
+                                                       "app_runtime": "java",
+                                                       "app_runtime_version": gh_actions_runtime},
+                            linux=False,
+                            is_auto_update=is_auto_update)
 
     def _parse_major_version_linux(self, major_version, parsed_results):
-        minor_java_versions = self._get_valid_minor_versions(major_version, linux=True, java=True)
-        default_java_version_linux = next(iter(minor_java_versions), None)
-        if default_java_version_linux:
-            linux_container_settings = default_java_version_linux.stack_settings.linux_container_settings
-            runtimes = [(linux_container_settings.additional_properties.get("java21Runtime"), "21"),
-                        (linux_container_settings.additional_properties.get("java17Runtime"), "17"),
-                        (linux_container_settings.java11_runtime, "11"),
-                        (linux_container_settings.java8_runtime, "8")]
-            for runtime_name, version in [(r, v) for (r, v) in runtimes if r is not None]:
-                runtime = self.Runtime(display_name=runtime_name,
-                                       configs={"linux_fx_version": runtime_name},
-                                       github_actions_properties={"github_actions_version": version},
-                                       linux=True,
-                                       )
-                parsed_results.append(runtime)
+        minor_java_container_versions = self._get_valid_minor_versions(major_version, linux=True, java=True)
+        if "SE" in major_version.display_text:
+            se_containers = [minor_java_container_versions[0]]
+            for java in ["21", "17", "11", "1.8"]:
+                se_java_containers = [c for c in minor_java_container_versions if c.value.startswith(java)]
+                se_containers = se_containers + se_java_containers[:len(se_java_containers) if len(se_java_containers) < 2 else 2]    # pylint: disable=line-too-long
+            minor_java_container_versions = se_containers
+        if minor_java_container_versions:
+            leng = len(minor_java_container_versions) if \
+                len(minor_java_container_versions) < 3 else 3 if \
+                "SE" not in major_version.display_text else len(minor_java_container_versions)
+            for minor in minor_java_container_versions[:leng]:
+                linux_container_settings = minor.stack_settings.linux_container_settings
+                runtimes = [
+                    (linux_container_settings.additional_properties.get("java21Runtime"), "21", linux_container_settings.is_auto_update),    # pylint: disable=line-too-long
+                    (linux_container_settings.additional_properties.get("java17Runtime"), "17", linux_container_settings.is_auto_update),    # pylint: disable=line-too-long
+                    (linux_container_settings.java11_runtime, "11", linux_container_settings.is_auto_update),
+                    (linux_container_settings.java8_runtime, "8", linux_container_settings.is_auto_update)]
+                for runtime_name, version, auto_update in [(r, v, au) for (r, v, au) in runtimes if r is not None]:
+                    runtime = self.Runtime(display_name=runtime_name,
+                                           configs={"linux_fx_version": runtime_name},
+                                           github_actions_properties={"github_actions_version": version},
+                                           linux=True,
+                                           is_auto_update=auto_update)
+                    parsed_results.append(runtime)
         else:
             minor_versions = self._get_valid_minor_versions(major_version, linux=True, java=False)
             for minor_version in minor_versions:
@@ -4161,7 +4214,7 @@ class _FlexFunctionAppStackRuntimeHelper:
                             'isDefault': runtime_settings.get('isDefault', False),
                             'sku': sku,
                             'applicationInsights': runtime_settings['appInsightsSettings']['isSupported'],
-                            'endOfLifeDate': runtime_settings['endOfLifeDate'],
+                            'endOfLifeDate': runtime_settings.get('endOfLifeDate'),
                             'github_actions_properties': self.GithubActionsProperties(**github_actions_properties)
                         }
 
@@ -5453,7 +5506,9 @@ def _get_or_create_user_assigned_identity(cmd, resource_group_name, functionapp_
     msi_client = get_mgmt_service_client(cmd.cli_ctx, ManagedServiceIdentityClient)
     if user_assigned_identity:
         if is_valid_resource_id(user_assigned_identity):
-            user_assigned_identity = parse_resource_id(user_assigned_identity)['name']
+            parse_result = parse_resource_id(user_assigned_identity)
+            user_assigned_identity = parse_result['name']
+            resource_group_name = parse_result['resource_group']
         identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
                                                            resource_name=user_assigned_identity)
     else:
@@ -5688,7 +5743,8 @@ def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     app_is_linux_webapp = is_linux_webapp(app)
-    if not app_is_linux_webapp:
+    # TODO: enable tracking for slot deployments again once site warmup is fixed for slots
+    if not app_is_linux_webapp or slot is not None:
         response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                                      slot, timeout)
     else:
