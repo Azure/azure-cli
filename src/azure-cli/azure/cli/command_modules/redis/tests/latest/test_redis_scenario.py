@@ -340,7 +340,8 @@ class RedisCacheTests(ScenarioTest):
             self.kwargs['containersasURL'] = self.kwargs['containersasURL'].split('?')[0]
             self.kwargs['filesasURL'] = self.kwargs['filesasURL'].split('?')[0]
         self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\' --preferred-data-archive-auth-method ManagedIdentity --storage-subscription-id {storageSubscriptionId}')
-        self.cmd('az redis import -n {name} -g {rg} --files {filesasURL} --preferred-data-archive-auth-method ManagedIdentity --storage-subscription-id {storageSubscriptionId}')
+        # TODO: un comment after July DP release
+        # self.cmd('az redis import -n {name} -g {rg} --files {filesasURL} --preferred-data-archive-auth-method ManagedIdentity --storage-subscription-id {storageSubscriptionId}')
 
         self.cmd('az redis delete -n {name} -g {rg} -y')
 
