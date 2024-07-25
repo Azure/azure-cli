@@ -4159,8 +4159,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if enable_auto_os_upgrade is not None:
         if vmss.upgrade_policy.automatic_os_upgrade_policy is None:
-            automatic_os_upgrade_policy = {'enableAutomaticOSUpgrade': enable_auto_os_upgrade}
-            vmss.upgrade_policy.automatic_os_upgrade_policy = automatic_os_upgrade_policy
+            vmss.upgrade_policy.automatic_os_upgrade_policy = {'enableAutomaticOSUpgrade': enable_auto_os_upgrade}
         else:
             vmss.upgrade_policy.automatic_os_upgrade_policy.enable_automatic_os_upgrade = enable_auto_os_upgrade
 
