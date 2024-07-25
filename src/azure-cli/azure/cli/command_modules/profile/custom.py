@@ -116,7 +116,8 @@ def account_clear(cmd):
 
 # pylint: disable=inconsistent-return-statements, too-many-branches
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None):
+          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None,
+          federated_identity=None):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
@@ -143,7 +144,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
     if username:
-        if not (password or client_assertion):
+        if not (password or client_assertion or federated_identity):
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
@@ -153,7 +154,9 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
     if service_principal:
         from azure.cli.core.auth.identity import ServicePrincipalAuth
-        password = ServicePrincipalAuth.build_credential(password, client_assertion, use_cert_sn_issuer)
+        password = ServicePrincipalAuth.build_credential(
+            secret_or_certificate=password, client_assertion=client_assertion,
+            use_cert_sn_issuer=use_cert_sn_issuer, federated_identity=federated_identity)
 
     login_experience_v2 = cmd.cli_ctx.config.getboolean('core', 'login_experience_v2', fallback=True)
     # Send login_experience_v2 config to telemetry

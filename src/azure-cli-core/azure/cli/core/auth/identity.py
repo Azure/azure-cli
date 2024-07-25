@@ -29,6 +29,8 @@ AZURE_TENANT_ID = "AZURE_TENANT_ID"
 AZURE_CLIENT_ID = "AZURE_CLIENT_ID"
 AZURE_CLIENT_SECRET = "AZURE_CLIENT_SECRET"
 
+FEDERATED_IDENTITY = "FEDERATED_IDENTITY"
+
 WAM_PROMPT = (
     "Select the account you want to log in with. "
     "For more information on login with Azure CLI, see https://go.microsoft.com/fwlink/?linkid=2271136")
@@ -275,7 +277,8 @@ class ServicePrincipalAuth:
         return ServicePrincipalAuth(entry)
 
     @classmethod
-    def build_credential(cls, secret_or_certificate=None, client_assertion=None, use_cert_sn_issuer=None):
+    def build_credential(cls, secret_or_certificate=None, client_assertion=None, use_cert_sn_issuer=None,
+                         federated_identity=None):
         """Build credential from user input. The credential looks like below, but only one key can exist.
         {
             'client_secret': 'my_secret',
@@ -294,6 +297,9 @@ class ServicePrincipalAuth:
                 entry[_CLIENT_SECRET] = secret_or_certificate
         elif client_assertion:
             entry[_CLIENT_ASSERTION] = client_assertion
+        elif federated_identity:
+            # Reuse client_assertion and set it to a const
+            entry[_CLIENT_ASSERTION] = FEDERATED_IDENTITY
         return entry
 
     def get_entry_to_persist(self):

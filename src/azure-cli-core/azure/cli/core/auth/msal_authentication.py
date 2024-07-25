@@ -127,7 +127,9 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
         # client_assertion
         client_assertion = getattr(service_principal_auth, _CLIENT_ASSERTION, None)
         if client_assertion:
-            client_credential = {'client_assertion': get_id_token_on_github}
+            if client_assertion == FEDERATED_IDENTITY:
+                client_assertion = get_id_token_on_github
+            client_credential = {'client_assertion': client_assertion}
 
         super().__init__(service_principal_auth.client_id, client_credential=client_credential, **kwargs)
 
