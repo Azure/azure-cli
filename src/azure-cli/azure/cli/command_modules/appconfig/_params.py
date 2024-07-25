@@ -79,6 +79,21 @@ def load_arguments(self, _):
         help='Name of the App Configuration store. You can configure the default name using `az configure --defaults app_configuration_store=<name>`.',
         configured_default='app_configuration_store'
     )
+
+    store_creation_replica_name_arg_type = CLIArgumentType(
+        options_list=['--replica-name'],
+        type=str,
+        help='Name of the replica of the App Configuration store.',
+        configured_default=None
+    )
+ 
+    replica_location_arg_type = CLIArgumentType(
+        options_list=['--replica-location'],
+        type=str,
+        help='The location of the replica of the App Configuration store.',
+        configured_default=None
+    )
+
     replica_name_arg_type = CLIArgumentType(
         options_list=['--name', '-n'],
         type=str,
@@ -144,6 +159,8 @@ def load_arguments(self, _):
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
         c.argument('retention_days', arg_type=retention_days_arg_type)
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
+        c.argument('replica_name', arg_type=store_creation_replica_name_arg_type, help='Name of the replica of the App Configuration store')
+        c.argument('replica_location', arg_type=replica_location_arg_type, help='Name of the replica of the App Configuration store')
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)

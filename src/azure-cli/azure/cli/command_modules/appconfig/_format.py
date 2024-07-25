@@ -54,6 +54,10 @@ def _output_format(result, format_group):
 
 
 def _configstore_format_group(item):
+    config_store = item.config_store
+    replica = item.replica
+    logger.warning(config_store)
+    logger.warning(replica)
     sku_value = _get_value(item, 'sku')
 
     try:
@@ -62,18 +66,28 @@ def _configstore_format_group(item):
         logger.debug("No valid sku %s found", sku_value)
         sku = ""
 
-    return OrderedDict([
-        ('CREATION DATE', _format_datetime(_get_value(item, 'creationDate'))),
-        ('ENDPOINT', _get_value(item, 'endpoint')),
-        ('LOCATION', _get_value(item, 'location')),
-        ('NAME', _get_value(item, 'name')),
-        ('PROVISIONING STATE', _get_value(item, 'provisioningState')),
-        ('RESOURCE GROUP', _get_value(item, 'resourceGroup')),
+    config_store_ordered_dict =  OrderedDict([
+        ('CREATION DATE', _format_datetime(_get_value(config_store, 'creationDate'))),
+        ('ENDPOINT', _get_value(config_store, 'endpoint')),
+        ('LOCATION', _get_value(config_store, 'location')),
+        ('NAME', _get_value(config_store, 'name')),
+        ('PROVISIONING STATE', _get_value(config_store, 'provisioningState')),
+        ('RESOURCE GROUP', _get_value(config_store, 'resourceGroup')),
         ('SKU', sku),
-        ('PURGE PROTECTION', 'ENABLED' if _get_value(item, 'enablePurgeProtection').lower() == 'true' else 'DISABLED'),
-        ('SOFT DELETE RETENTION PERIOD', _get_value(item, 'softDeleteRetentionInDays') + ' DAYS')
+        ('PURGE PROTECTION', 'ENABLED' if _get_value(config_store, 'enablePurgeProtection').lower() == 'true' else 'DISABLED'),
+        ('SOFT DELETE RETENTION PERIOD', _get_value(config_store, 'softDeleteRetentionInDays') + ' DAYS')
     ])
 
+    replica_ordered_dict = OrderedDict([
+        ('CREATION DATE', _format_datetime(_get_value(replica, 'systemData', 'createdAt'))),
+        ('ENDPOINT', _get_value(replica, 'endpoint')),
+        ('LOCATION', _get_value(replica, 'location')),
+        ('NAME', _get_value(replica, 'name')),
+        ('PROVISIONING STATE', _get_value(replica, 'provisioningState')),
+        ('RESOURCE GROUP', _get_value(replica, 'resourceGroup'))
+    ])
+
+    return config_store_ordered_dict, replica_ordered_dict
 
 def _deleted_configstore_format_group(item):
     return OrderedDict([

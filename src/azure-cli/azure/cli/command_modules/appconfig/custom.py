@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+from azure.cli.command_modules.appconfig._client_factory import cf_configstore, cf_replicas
+from azure.cli.core.util import user_confirmation
 from knack.log import get_logger
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError
@@ -27,7 +29,8 @@ SYSTEM_USER_ASSIGNED = 'SystemAssigned, UserAssigned'
 SYSTEM_ASSIGNED_IDENTITY = '[system]'
 
 
-def create_configstore(client,
+def create_configstore(cmd, 
+                       client,
                        resource_group_name,
                        name,
                        location,
@@ -37,7 +40,10 @@ def create_configstore(client,
                        enable_public_network=None,
                        disable_local_auth=None,
                        retention_days=None,
-                       enable_purge_protection=None):
+                       enable_purge_protection=None,
+                       yes=False,
+                       replica_name=None,
+                       replica_location=None): 
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 
@@ -46,9 +52,12 @@ def create_configstore(client,
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
     if sku.lower() == 'free' and (enable_purge_protection or retention_days):
-        logger.warning("Options '--enable-purge-protection' and '--retention-days' will be ignored when creating a free store.")
+        logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' and '--retention-days' will be ignored when creating a free store.")
         retention_days = None
         enable_purge_protection = None
+
+    if not yes and sku.lower() == 'premium' and replica_name is None:
+        user_confirmation("You haven't created a replica. To achieve a 99.99% SLA with premium sku, you need to create a replica. Do you want to continue? \n")
 
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
@@ -60,8 +69,17 @@ def create_configstore(client,
                                             enable_purge_protection=enable_purge_protection,
                                             create_mode=CreateMode.DEFAULT)
 
-    return client.begin_create(resource_group_name, name, configstore_params)
+    config_store = client.begin_create(resource_group_name, name, configstore_params)
 
+    # poll request and create replica after store is created
+    while config_store.status() != "Succeeded":
+        config_store.wait(3) #how long should we wait - we can customize this.
+
+    if config_store.done() and replica_name is not None:
+        replica_client = cf_replicas(cmd.cli_ctx)
+        store_replica = create_replica(cmd, replica_client, name, replica_name, replica_location, resource_group_name)
+
+    return {"store": config_store.result(), "replica": store_replica.result()}
 
 def recover_deleted_configstore(cmd, client, name, resource_group_name=None, location=None):
     if resource_group_name is None or location is None:
@@ -269,14 +287,30 @@ def create_replica(cmd, client, store_name, name, location, resource_group_name=
                                replica_creation_parameters=replica_creation_params)
 
 
-def delete_replica(cmd, client, store_name, name, resource_group_name=None):
+def delete_replica(cmd, client, store_name, name, yes=False, resource_group_name=None):
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, store_name)
 
-    return client.begin_delete(resource_group_name=resource_group_name,
-                               config_store_name=store_name,
-                               replica_name=name)
+    config_store_client = cf_configstore(cmd.cli_ctx)
+    config_store = show_configstore(
+        cmd, config_store_client, store_name, resource_group_name
+    )
+    sku = config_store.sku.name
 
+    if not yes:
+        replicas = list_replica(cmd, client, store_name, resource_group_name)
+        if sku.lower() == "premium" and len(list(replicas)) == 1:
+            user_confirmation(
+                "You need a replica to achieve 99.99% SLA. Do you wish to continue with this operation?"
+            )
+        else:
+            user_confirmation("Are you sure you want to continue with this operation?")
+
+    return client.begin_delete(
+        resource_group_name=resource_group_name,
+        config_store_name=store_name,
+        replica_name=name,
+    )
 
 def __get_resource_identity(assign_identity):
     system_assigned = False
