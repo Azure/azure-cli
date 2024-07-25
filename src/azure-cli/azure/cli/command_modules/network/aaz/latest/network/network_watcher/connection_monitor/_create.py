@@ -91,24 +91,10 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Determines if the connection monitor will start automatically once created.",
         )
-        _args_schema.destination = AAZObjectArg(
-            options=["--destination"],
-            arg_group="Properties",
-            help="Describes the destination of connection monitor.",
-        )
         _args_schema.endpoints = AAZListArg(
             options=["--endpoints"],
             arg_group="Properties",
             help="List of connection monitor endpoints.",
-        )
-        _args_schema.monitoring_interval_in_seconds = AAZIntArg(
-            options=["--monitoring-interval-in-seconds"],
-            arg_group="Properties",
-            help="Monitoring interval in seconds.",
-            fmt=AAZIntArgFormat(
-                maximum=1800,
-                minimum=30,
-            ),
         )
         _args_schema.notes = AAZStrArg(
             options=["--notes"],
@@ -120,11 +106,6 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="List of connection monitor outputs.",
         )
-        _args_schema.source = AAZObjectArg(
-            options=["--source"],
-            arg_group="Properties",
-            help="Describes the source of connection monitor.",
-        )
         _args_schema.test_configurations = AAZListArg(
             options=["--test-configurations"],
             arg_group="Properties",
@@ -134,24 +115,6 @@ class Create(AAZCommand):
             options=["--test-groups"],
             arg_group="Properties",
             help="List of connection monitor test groups.",
-        )
-
-        destination = cls._args_schema.destination
-        destination.address = AAZStrArg(
-            options=["address"],
-            help="Address of the connection monitor destination (IP or domain name).",
-        )
-        destination.port = AAZIntArg(
-            options=["port"],
-            help="The destination port used by connection monitor.",
-            fmt=AAZIntArgFormat(
-                maximum=65535,
-                minimum=0,
-            ),
-        )
-        destination.resource_id = AAZStrArg(
-            options=["resource-id"],
-            help="The ID of the resource used as the destination by connection monitor.",
         )
 
         endpoints = cls._args_schema.endpoints
@@ -251,21 +214,6 @@ class Create(AAZCommand):
         workspace_settings.workspace_resource_id = AAZStrArg(
             options=["workspace-resource-id"],
             help="Log analytics workspace resource ID.",
-        )
-
-        source = cls._args_schema.source
-        source.port = AAZIntArg(
-            options=["port"],
-            help="The source port used by connection monitor.",
-            fmt=AAZIntArgFormat(
-                maximum=65535,
-                minimum=0,
-            ),
-        )
-        source.resource_id = AAZStrArg(
-            options=["resource-id"],
-            help="The ID of the resource used as the source by connection monitor.",
-            required=True,
         )
 
         test_configurations = cls._args_schema.test_configurations
@@ -568,20 +516,11 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("autoStart", AAZBoolType, ".auto_start")
-                properties.set_prop("destination", AAZObjectType, ".destination")
                 properties.set_prop("endpoints", AAZListType, ".endpoints")
-                properties.set_prop("monitoringIntervalInSeconds", AAZIntType, ".monitoring_interval_in_seconds")
                 properties.set_prop("notes", AAZStrType, ".notes")
                 properties.set_prop("outputs", AAZListType, ".outputs")
-                properties.set_prop("source", AAZObjectType, ".source")
                 properties.set_prop("testConfigurations", AAZListType, ".test_configurations")
                 properties.set_prop("testGroups", AAZListType, ".test_groups")
-
-            destination = _builder.get(".properties.destination")
-            if destination is not None:
-                destination.set_prop("address", AAZStrType, ".address")
-                destination.set_prop("port", AAZIntType, ".port")
-                destination.set_prop("resourceId", AAZStrType, ".resource_id")
 
             endpoints = _builder.get(".properties.endpoints")
             if endpoints is not None:
@@ -636,11 +575,6 @@ class Create(AAZCommand):
             workspace_settings = _builder.get(".properties.outputs[].workspaceSettings")
             if workspace_settings is not None:
                 workspace_settings.set_prop("workspaceResourceId", AAZStrType, ".workspace_resource_id")
-
-            source = _builder.get(".properties.source")
-            if source is not None:
-                source.set_prop("port", AAZIntType, ".port")
-                source.set_prop("resourceId", AAZStrType, ".resource_id", typ_kwargs={"flags": {"required": True}})
 
             test_configurations = _builder.get(".properties.testConfigurations")
             if test_configurations is not None:
