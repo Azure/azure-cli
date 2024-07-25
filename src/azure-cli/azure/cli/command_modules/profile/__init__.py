@@ -5,7 +5,7 @@
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.commands.parameters import get_enum_type
+from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
 
 from azure.cli.command_modules.profile._format import transform_account_list
 import azure.cli.command_modules.profile._help  # pylint: disable=unused-import
@@ -58,7 +58,8 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('use_cert_sn_issuer', action='store_true', help='used with a service principal configured with Subject Name and Issuer Authentication in order to support automatic certificate rolls')
             c.argument('scopes', options_list=['--scope'], nargs='+', help='Used in the /authorize request. It can cover only one static resource.')
             c.argument('client_assertion', options_list=['--federated-token'], help='Federated token that can be used for OIDC token exchange.')
-            c.argument('federated_identity', options_list=['--federated-identity'], help='Use federated identity credential.')
+            c.argument('federated_identity', options_list=['--federated-identity'], arg_type=get_three_state_flag(),
+                       help='Use federated identity credential.')
 
         with self.argument_context('logout') as c:
             c.argument('username', help='account user, if missing, logout the current active account')

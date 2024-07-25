@@ -129,6 +129,9 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
         raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
+    if client_assertion and federated_identity:
+        raise CLIError('usage error: Only one of --federated-token and --federated-identity can be specified')
+
     if username and not service_principal and not identity:
         logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING)
 
@@ -155,8 +158,9 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     if service_principal:
         from azure.cli.core.auth.identity import ServicePrincipalAuth
         password = ServicePrincipalAuth.build_credential(
-            secret_or_certificate=password, client_assertion=client_assertion,
-            use_cert_sn_issuer=use_cert_sn_issuer, federated_identity=federated_identity)
+            secret_or_certificate=password,
+            client_assertion='FEDERATED_IDENTITY' if federated_identity else client_assertion,
+            use_cert_sn_issuer=use_cert_sn_issuer)
 
     login_experience_v2 = cmd.cli_ctx.config.getboolean('core', 'login_experience_v2', fallback=True)
     # Send login_experience_v2 config to telemetry

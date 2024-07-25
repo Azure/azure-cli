@@ -295,8 +295,7 @@ class ServicePrincipalAuth:
         return ServicePrincipalAuth(entry)
 
     @classmethod
-    def build_credential(cls, secret_or_certificate=None, client_assertion=None, use_cert_sn_issuer=None,
-                         federated_identity=None):
+    def build_credential(cls, secret_or_certificate=None, client_assertion=None, use_cert_sn_issuer=None):
         """Build credential from user input. The credential looks like below, but only one key can exist.
         {
             'client_secret': 'my_secret',
@@ -315,9 +314,6 @@ class ServicePrincipalAuth:
                 entry[_CLIENT_SECRET] = secret_or_certificate
         elif client_assertion:
             entry[_CLIENT_ASSERTION] = client_assertion
-        elif federated_identity:
-            # Reuse client_assertion and set it to a const
-            entry[_CLIENT_ASSERTION] = FEDERATED_IDENTITY
         return entry
 
     def get_entry_to_persist(self):
@@ -352,7 +348,9 @@ class ServicePrincipalAuth:
         #     "client_assertion": "...a JWT with claims aud, exp, iss, jti, nbf, and sub..."
         # }
         if self.client_assertion:
-            client_credential = {'client_assertion': self.client_assertion}
+            client_credential = {
+                'client_assertion': get_id_token_on_github if self.client_assertion == FEDERATED_IDENTITY
+                else self.client_assertion}
 
         return client_credential
 
@@ -461,3 +459,22 @@ def get_environment_credential():
         getenv(AZURE_TENANT_ID))
     credentials = ServicePrincipalCredential(sp_auth, authority=authority)
     return credentials
+
+
+def get_id_token_on_github():
+    import os
+    from urllib.parse import quote
+    import requests
+    token = os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']
+    url = os.environ['ACTIONS_ID_TOKEN_REQUEST_URL']
+    encodedAudience = quote('api://AzureADTokenExchange')
+    url = f'{url}&audience={encodedAudience}'
+    headers = {
+        'Authorization': f'bearer {token}',
+        'Accept': 'application/json; api-version=2.0',
+        'Content-Type': 'application/json'
+    }
+    result = requests.get(url, headers=headers)
+    id_token = result.json()['value']
+    logger.warning('Got ID token: %s', id_token)
+    return id_token

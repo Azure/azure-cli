@@ -107,22 +107,3 @@ class ServicePrincipalCredential:  # pylint: disable=too-few-public-methods
         result = self._msal_app.acquire_token_for_client(list(scopes), **kwargs)
         check_result(result)
         return build_sdk_access_token(result)
-
-
-def get_id_token_on_github():
-    import os
-    from urllib.parse import quote
-    import requests
-    token = os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']
-    url = os.environ['ACTIONS_ID_TOKEN_REQUEST_URL']
-    encodedAudience = quote('api://AzureADTokenExchange')
-    url = f'{url}&audience={encodedAudience}'
-    headers = {
-        'Authorization': f'bearer {token}',
-        'Accept': 'application/json; api-version=2.0',
-        'Content-Type': 'application/json'
-    }
-    result = requests.get(url, headers=headers)
-    id_token = result.json()['value']
-    logger.warning('Got ID token: %s', id_token)
-    return id_token
