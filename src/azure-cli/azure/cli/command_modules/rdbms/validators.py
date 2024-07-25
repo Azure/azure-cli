@@ -576,14 +576,14 @@ def _validate_ip(ips):
 
 def _validate_ranges_in_ip(ip):
     parsed_ip = ip.split('.')
-    if len(parsed_ip) == 4 and _valid_range(int(parsed_ip[0])) and _valid_range(int(parsed_ip[1])) \
-       and _valid_range(int(parsed_ip[2])) and _valid_range(int(parsed_ip[3])):
+    if len(parsed_ip) == 4 and _valid_range(parsed_ip[0]) and _valid_range(parsed_ip[1]) \
+       and _valid_range(parsed_ip[2]) and _valid_range(parsed_ip[3]):
         return True
     return False
 
 
 def _valid_range(addr_range):
-    if 0 <= addr_range <= 255:
+    if addr_range.isdigit() and 0 <= int(addr_range) <= 255:
         return True
     return False
 
@@ -597,6 +597,8 @@ def virtual_endpoint_name_validator(ns):
 
 
 def firewall_rule_name_validator(ns):
+    if not ns.firewall_rule_name:
+        return
     if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,126}[_a-zA-Z0-9]$', ns.firewall_rule_name):
         raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
                               "Additionally, the name of the firewall rule must be at least 3 characters "
@@ -625,6 +627,19 @@ def validate_server_name(db_context, server_name, type_):
 
     if not result.name_available:
         raise ValidationError(result.message)
+
+
+def validate_migration_runtime_server(cmd, migrationInstanceResourceId, target_resource_group_name, target_server_name):
+    id_comps = parse_resource_id(migrationInstanceResourceId)
+    runtime_server_resource_resource_type = id_comps['resource_type'].lower()
+    if "flexibleservers" != runtime_server_resource_resource_type:
+        raise ValidationError("Migration Runtime Resource ID provided should be Flexible server.")
+
+    server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    target_server = server_operations_client.get(target_resource_group_name, target_server_name)
+    if target_server.id.lower() == migrationInstanceResourceId.lower():
+        raise ValidationError("Migration Runtime server is same as Target Flexible server. "
+                              "Please change the values accordingly.")
 
 
 def validate_private_dns_zone(db_context, server_name, private_dns_zone, private_dns_zone_suffix):

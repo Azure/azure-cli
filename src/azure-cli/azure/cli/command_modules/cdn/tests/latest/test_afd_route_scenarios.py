@@ -9,7 +9,7 @@ from azure.mgmt.cdn.models import (AfdCertificateType, AfdMinimumTlsVersion)
 
 
 class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_route_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
         self.afd_profile_create_cmd(resource_group, profile_name)

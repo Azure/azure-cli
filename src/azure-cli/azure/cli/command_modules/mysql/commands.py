@@ -113,11 +113,13 @@ def load_command_table(self, _):
         g.custom_command('upgrade', 'flexible_server_version_upgrade', custom_command_type=mysql_custom)
         g.custom_wait_command('wait', 'flexible_server_mysql_get')
         g.custom_command('restart', 'flexible_server_restart')
+        g.custom_command('detach-vnet', 'flexible_server_detach_vnet')
 
     with self.command_group('mysql flexible-server import', mysql_flexible_servers_sdk,
                             custom_command_type=mysql_custom,
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('create', 'flexible_server_import_create', table_transformer=table_transform_output)
+        g.custom_command('stop-replication', 'flexible_server_import_replica_stop', confirmation=True)
 
     with self.command_group('mysql flexible-server firewall-rule', mysql_flexible_firewall_rule_sdk,
                             custom_command_type=mysql_custom,

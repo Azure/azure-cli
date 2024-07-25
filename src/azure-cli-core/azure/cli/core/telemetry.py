@@ -70,11 +70,13 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.suppress_new_event = False
         self.poll_start_time = None
         self.poll_end_time = None
-        self.enable_broker_on_windows = None
-        self.msal_telemetry = None
         self.secrets_detected = None
         self.secret_keys = None
         self.user_agent = None
+        # authentication-related
+        self.enable_broker_on_windows = None
+        self.msal_telemetry = None
+        self.login_experience_v2 = None
 
     def add_event(self, name, properties):
         for key in self.instrumentation_key:
@@ -222,11 +224,13 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'ShowSurveyMessage', str(self.show_survey_message))
         set_custom_properties(result, 'RegionInput', self.region_input)
         set_custom_properties(result, 'RegionIdentified', self.region_identified)
-        set_custom_properties(result, 'EnableBrokerOnWindows', str(self.enable_broker_on_windows))
-        set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
         set_custom_properties(result, 'SecretsWarning', _get_secrets_warning_config())
         set_custom_properties(result, 'SecretsDetected', str(self.secrets_detected))
         set_custom_properties(result, 'SecretKeys', ','.join(self.secret_keys or []))
+        # authentication-related
+        set_custom_properties(result, 'EnableBrokerOnWindows', str(self.enable_broker_on_windows))
+        set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
+        set_custom_properties(result, 'LoginExperienceV2', str(self.login_experience_v2))
 
         return result
 
@@ -473,6 +477,11 @@ def set_broker_info(enable_broker_on_windows):
 def set_msal_telemetry(msal_telemetry):
     if not _session.msal_telemetry:
         _session.msal_telemetry = msal_telemetry
+
+
+@decorators.suppress_all_exceptions()
+def set_login_experience_v2(login_experience_v2):
+    _session.login_experience_v2 = login_experience_v2
 
 
 @decorators.suppress_all_exceptions()

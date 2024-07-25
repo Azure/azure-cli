@@ -21,11 +21,11 @@ class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_adls_access')
     def test_dls_file_access_mgmt(self):
 
-        user_id = '470c0ccf-c91a-4597-98cd-48507d2f1486'
+        user_id = 'ac37fe14-8b7a-4883-b02b-c7ed6f871165'
 
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
-            'loc': 'eastus2',
+            'loc': 'westus2',
             'dir': 'adltestfolder01',
             'user_id': user_id,
             'acl_to_add': 'user:{}:rwx'.format(user_id),
@@ -53,9 +53,10 @@ class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
         ])
 
         # set the owner and owning group for the file and confirm them
+ 
         self.kwargs.update({
-            'group_id': '80a3ed5f-959e-4696-ba3c-d3c8b2db6766',
-            'user_id': '6361e05d-c381-4275-a932-5535806bb323'
+            'group_id': 'a0fe7455-56dd-498f-b7d1-bacbdb573abd',
+            'user_id': 'ac37fe14-8b7a-4883-b02b-c7ed6f871165'
         })
         self.cmd('dls fs access set-owner -n {dls} --path "{dir}" --group {group_id} --owner {user_id}')
 
@@ -142,7 +143,7 @@ class DataLakeStoreFileScenarioTest(ScenarioTest):
         local_folder = 'adls_resources'
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
-            'loc': 'eastus2',
+            'loc': 'westus2',
             'dir': local_folder,
             'local_folder': os.path.join(os.getcwd(), local_folder),
             'local_file': os.path.join(local_folder, 'sample_file.txt'),
@@ -306,7 +307,7 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
-            'loc': 'eastus2',
+            'loc': 'westus2',
             'updated_subnet': 'updatedSubnet'
         })
 

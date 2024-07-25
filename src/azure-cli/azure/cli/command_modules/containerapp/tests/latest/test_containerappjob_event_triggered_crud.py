@@ -61,7 +61,16 @@ class ContainerAppJobsEventTriggeredCRUDOperationsTest(ScenarioTest):
         self.assertTrue(len(jobs_list) == 1)
 
         # update the Container App Job resource
-        self.cmd("az containerapp job update --resource-group {} --name {} --replica-timeout 300 --replica-retry-limit 1 --image mcr.microsoft.com/k8se/quickstart-jobs:latest --max-executions 9 --cpu '0.5' --memory '1.0Gi'".format(resource_group, job))
+        self.cmd("az containerapp job update --resource-group {} --name {} --replica-timeout 300 --replica-retry-limit 1 --image mcr.microsoft.com/k8se/quickstart-jobs:latest --max-executions 9 --cpu '0.5' --memory '1.0Gi'".format(resource_group, job), checks=[
+            JMESPathCheck('properties.provisioningState', "Succeeded"),
+            JMESPathCheck('properties.configuration.replicaTimeout', 300),
+            JMESPathCheck('properties.configuration.replicaRetryLimit', 1),
+            JMESPathCheck('properties.configuration.triggerType', "event", case_sensitive=False),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 9),
+            JMESPathCheck('properties.template.containers[0].image', "mcr.microsoft.com/k8se/quickstart-jobs:latest"),
+            JMESPathCheck('properties.template.containers[0].resources.cpu', "0.5"),
+            JMESPathCheck('properties.template.containers[0].resources.memory', "1Gi"),
+        ])
 
         # verify the updated Container App Job resource
         self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job), checks=[
@@ -85,7 +94,13 @@ class ContainerAppJobsEventTriggeredCRUDOperationsTest(ScenarioTest):
 
         # update scale rules for event triggered job
         # scenario 1: update existing scale rule
-        self.cmd("az containerapp job update --resource-group {} --name {} --scale-rule-name 'queue' --scale-rule-type 'azure-queue' --scale-rule-metadata 'accountName=containerappextension' 'queueName=testeventdrivenjobs' 'queueLength=2' 'connectionFromEnv=AZURE_STORAGE_CONNECTION_STRING' --scale-rule-auth 'connection=connection-string-secret'".format(resource_group, job))
+        self.cmd("az containerapp job update --resource-group {} --name {} --scale-rule-name 'queue' --scale-rule-type 'azure-queue' --scale-rule-metadata 'accountName=containerappextension' 'queueName=testeventdrivenjobs' 'queueLength=2' 'connectionFromEnv=AZURE_STORAGE_CONNECTION_STRING' --scale-rule-auth 'connection=connection-string-secret'".format(resource_group, job), checks=[
+            JMESPathCheck('properties.provisioningState', "Succeeded"),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].metadata.queueLength', ""), # The transform_sensitive_values will remove the value for update command
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.pollingInterval', 60),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 0),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 9),
+        ])
 
         # verify the updated Container App Job resource
         self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job), checks=[
@@ -109,7 +124,13 @@ class ContainerAppJobsEventTriggeredCRUDOperationsTest(ScenarioTest):
                 break
 
         # scenario 2: add new scale rule
-        self.cmd("az containerapp job update --resource-group {} --name {} --min-executions 1 --max-executions 5 --polling-interval 30 --scale-rule-name 'queue2' --scale-rule-type 'azure-queue' --scale-rule-metadata 'accountName=containerappextension' 'queueName=testeventdrivenjobs' 'queueLength=3' 'connectionFromEnv=AZURE_STORAGE_CONNECTION_STRING' --scale-rule-auth 'connection=connection-string-secret'".format(resource_group, job))
+        self.cmd("az containerapp job update --resource-group {} --name {} --min-executions 1 --max-executions 5 --polling-interval 30 --scale-rule-name 'queue2' --scale-rule-type 'azure-queue' --scale-rule-metadata 'accountName=containerappextension' 'queueName=testeventdrivenjobs' 'queueLength=3' 'connectionFromEnv=AZURE_STORAGE_CONNECTION_STRING' --scale-rule-auth 'connection=connection-string-secret'".format(resource_group, job), checks=[
+            JMESPathCheck('properties.provisioningState', "Succeeded"),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[1].metadata.queueLength', ""), # The transform_sensitive_values will remove the value for update command
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.pollingInterval', 30),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 1),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 5),
+        ])
 
         # verify the updated Container App Job resource
         self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job), checks=[

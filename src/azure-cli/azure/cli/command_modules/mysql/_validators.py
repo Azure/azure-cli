@@ -150,7 +150,7 @@ def _mysql_import_data_source_type_validator(data_source_type, data_source_backu
 
 
 def _mysql_import_mode_validator(mode):
-    allowed_values = ['offline']
+    allowed_values = ['offline', 'online']
     if mode is not None and mode.lower() not in allowed_values:
         raise InvalidArgumentValueError('Incorrect value for --mode. Allowed values : {}'.format(allowed_values))
 
@@ -543,3 +543,13 @@ def validate_byok_identity(cmd, namespace):
 def validate_identities(cmd, namespace):
     if namespace.identities:
         namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
+
+
+def validate_action_name(namespace):
+    if not re.search(r'^[-_a-zA-Z0-9]+$', namespace.action_name):
+        raise ValidationError("The action name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'.")
+
+
+def validate_branch(namespace):
+    if not re.search(r'^[-_a-zA-Z0-9]+$', namespace.branch):
+        raise ValidationError("The branch can only contain 0-9, a-z, A-Z, \'-\' and \'_\'.")

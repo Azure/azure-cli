@@ -10,6 +10,7 @@ import os
 import random
 import subprocess
 import secrets
+import shlex
 import string
 import yaml
 from knack.log import get_logger
@@ -315,10 +316,11 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
 
 
 def run_subprocess(command, stdout_show=None):
+    commands = shlex.split(command)
     if stdout_show:
-        process = subprocess.Popen(command, shell=True)
+        process = subprocess.Popen(commands)
     else:
-        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     process.wait()
     if process.returncode:
         logger.warning(process.stderr.read().strip().decode('UTF-8'))

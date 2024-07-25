@@ -22,7 +22,7 @@ def update_network_rules(client, signalr_name, resource_group_name, public_netwo
                 x.allow = allow
                 x.deny = deny
 
-    return client.begin_update(resource_group_name, signalr_name, SignalRResource(location="", network_ac_ls=network_acl))
+    return client.begin_update(resource_group_name, signalr_name, SignalRResource(location=None, network_ac_ls=network_acl))
 
 
 def list_network_rules(client, signalr_name, resource_group_name):

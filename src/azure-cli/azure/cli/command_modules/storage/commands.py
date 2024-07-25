@@ -471,9 +471,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('exists', 'exists',
                                 transform=create_boolean_result_output_transformer('exists'),
                                 table_transformer=transform_boolean_for_table)
-        g.storage_custom_command_oauth('set-permission', 'set_container_permission')
-        g.storage_command_oauth('show-permission', 'get_container_access_policy',
-                                transform=transform_container_permission_output)
+        g.storage_custom_command('set-permission', 'set_container_permission')
+        g.storage_command('show-permission', 'get_container_access_policy',
+                          transform=transform_container_permission_output)
         g.storage_command_oauth('metadata update', 'set_container_metadata')
         g.storage_command_oauth('metadata show', 'get_container_properties',
                                 exception_handler=show_exception_handler,
@@ -519,13 +519,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                client_factory=cf_container_client,
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
         from ._transformers import transform_acl_list_output, transform_acl_edit, transform_acl_datetime
-        g.storage_custom_command_oauth('create', 'create_acl_policy', transform=transform_acl_edit)
-        g.storage_custom_command_oauth('delete', 'delete_acl_policy', transform=transform_acl_edit)
-        g.storage_custom_command_oauth(
+        g.storage_custom_command('create', 'create_acl_policy', transform=transform_acl_edit)
+        g.storage_custom_command('delete', 'delete_acl_policy', transform=transform_acl_edit)
+        g.storage_custom_command(
             'update', 'set_acl_policy', transform=transform_acl_edit)
-        g.storage_custom_command_oauth(
+        g.storage_custom_command(
             'show', 'get_acl_policy', transform=transform_acl_datetime, exception_handler=show_exception_handler)
-        g.storage_custom_command_oauth(
+        g.storage_custom_command(
             'list', 'list_acl_policies', table_transformer=transform_acl_list_output)
 
     blob_container_mgmt_sdk = CliCommandType(

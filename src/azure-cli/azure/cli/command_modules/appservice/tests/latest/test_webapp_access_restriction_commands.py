@@ -18,7 +18,7 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
-WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
+WINDOWS_ASP_LOCATION_WEBAPP = 'northeurope'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
@@ -38,14 +38,16 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
         ])
 
         self.cmd('webapp config access-restriction show -g {rg} -n {app_name}', checks=[
-            JMESPathCheck('length(@)', 3),
+            JMESPathCheck('length(@)', 5),
             JMESPathCheck('length(ipSecurityRestrictions)', 1),
             JMESPathCheck('ipSecurityRestrictions[0].name', 'Allow all'),
             JMESPathCheck('ipSecurityRestrictions[0].action', 'Allow'),
             JMESPathCheck('length(scmIpSecurityRestrictions)', 1),
             JMESPathCheck('scmIpSecurityRestrictions[0].name', 'Allow all'),
             JMESPathCheck('scmIpSecurityRestrictions[0].action', 'Allow'),
-            JMESPathCheck('scmIpSecurityRestrictionsUseMain', False)
+            JMESPathCheck('scmIpSecurityRestrictionsUseMain', False),
+            JMESPathCheck('pSecurityRestrictionsDefaultAction', None),
+            JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
         ])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -62,6 +64,21 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
 
         self.cmd('webapp config access-restriction set -g {rg} -n {app_name} --use-same-restrictions-for-scm-site true', checks=[
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', True)
+        ])
+
+        self.cmd('webapp config access-restriction set -g {rg} -n {app_name} --default-action Deny', checks=[
+            JMESPathCheck('ipSecurityRestrictionsDefaultAction', 'Deny'),
+            JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
+        ])
+
+        self.cmd('webapp config access-restriction set -g {rg} -n {app_name} --default-action Allow --scm-default-action Deny', checks=[
+            JMESPathCheck('ipSecurityRestrictionsDefaultAction', 'Allow'),
+            JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', 'Deny')
+        ])
+
+        self.cmd('webapp config access-restriction set -g {rg} -n {app_name} --default-action Deny', checks=[
+            JMESPathCheck('ipSecurityRestrictionsDefaultAction', 'Deny'),
+            JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', 'Deny')
         ])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -386,14 +403,16 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
         ])
 
         self.cmd('webapp config access-restriction show -g {rg} -n {app_name} --slot {slot_name}', checks=[
-            JMESPathCheck('length(@)', 3),
+            JMESPathCheck('length(@)', 5),
             JMESPathCheck('length(ipSecurityRestrictions)', 1),
             JMESPathCheck('ipSecurityRestrictions[0].name', 'Allow all'),
             JMESPathCheck('ipSecurityRestrictions[0].action', 'Allow'),
             JMESPathCheck('length(scmIpSecurityRestrictions)', 1),
             JMESPathCheck('scmIpSecurityRestrictions[0].name', 'Allow all'),
             JMESPathCheck('scmIpSecurityRestrictions[0].action', 'Allow'),
-            JMESPathCheck('scmIpSecurityRestrictionsUseMain', False)
+            JMESPathCheck('scmIpSecurityRestrictionsUseMain', False),
+            JMESPathCheck('pSecurityRestrictionsDefaultAction', None),
+            JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
         ])
 
         self.cmd('webapp config access-restriction add -g {rg} -n {app_name} --rule-name developers --action Allow --ip-address 130.220.0.0/27 --priority 200 --slot {slot_name}', checks=[

@@ -1172,6 +1172,52 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
         self.cmd('sql db op cancel -g {} -s {} -d {} -n {}'
                  .format(resource_group, server, database_name, ops[0]['name']))
 
+class SqlServerDbForwardMigrationScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='eastasia')
+    @SqlServerPreparer(location='eastasia')
+    def test_sql_db_forward_migration_manual_cutover(self, resource_group, resource_group_location, server):
+        database_name = "cliautomationdb01"
+        current_service_objective = 'GP_Gen5_2'
+        update_service_objective = 'HS_Gen5_2'
+
+        # Create db
+        self.cmd('sql db create -g {} -s {} -n {} --service-objective {} --yes'
+                 .format(resource_group, server, database_name, current_service_objective),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('status', 'Online')])
+
+        # Update DB with --manual-cutover --no-wait
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --manual-cutover --no-wait'
+                 .format(resource_group, server, database_name, update_service_objective))
+
+        operationPhaseDetailsObject = None
+        operationPhaseDetailsPhase = None
+
+        # Wait until UpdateSlo from GeneralPurpose to Hyperscale is in WaitingForCutover
+        # When run live, this may take like 10 minutes. Unforunately there's no way to speed this up
+        while operationPhaseDetailsObject is None or operationPhaseDetailsPhase != 'WaitingForCutover':
+            time.sleep(60)
+            # List operations
+            ops = list(
+                self.cmd('sql db op list -g {} -s {} -d {}'
+                        .format(resource_group, server, database_name),
+                        checks=[
+                            JMESPathCheck('length(@)', 1),
+                            JMESPathCheck('[0].resourceGroup', resource_group),
+                            JMESPathCheck('[0].databaseName', database_name)
+                        ])
+                        .get_output_in_json())
+
+            operationPhaseDetailsObject = ops[0]['operationPhaseDetails']
+
+            if operationPhaseDetailsObject is not None:
+                operationPhaseDetailsPhase = operationPhaseDetailsObject['phase']
+
+        # Perform cutover to complete UpdateSlo with --perform-cutover --no-wait
+        self.cmd('sql db update -g {} -s {} -n {} --perform-cutover --no-wait'
+                 .format(resource_group, server, database_name))
 
 class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_short_term_retention(self):
@@ -4324,7 +4370,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 
         # Vnet 1 without service endpoints to test ignore-missing-vnet-service-endpoint feature
         self.cmd('network vnet create -g {} -n {}'.format(resource_group, vnetName1))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {}'
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --default-outbound false'
                  .format(resource_group, vnetName1, subnetName, addressPrefix))
 
         vnet1 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'
@@ -4333,7 +4379,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 
         # Vnet 2
         self.cmd('network vnet create -g {} -n {}'.format(resource_group, vnetName2))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {}'
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {} --default-outbound false'
                  .format(resource_group, vnetName2, subnetName, addressPrefix, endpoint),
                  checks=JMESPathCheck('serviceEndpoints[0].service', 'Microsoft.Sql'))
 
@@ -5316,6 +5362,42 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_managed_instance_create(self):
+        # Values of existing resources in order to test this feature
+        location = 'eastus2euap'
+        resource_group = 'sqlmigeodr'
+        subnet = ('/subscriptions/self.get_subscription_id()/resourceGroups/sqlmigeodr/providers/'
+                  'Microsoft.Network/virtualNetworks/cl_geodr_eus2_euap_vnet/subnets/subnet_1')
+
+        instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+        self.kwargs.update({
+            'loc': location,
+            'rg': resource_group,
+            'subnet': subnet,
+            'managed_instance_name': instance_name,
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'dns_zone_partner': '/subscriptions/self.get_subscription_id()/resourceGroups/kmatijevic-ha-testenv-canary/providers/Microsoft.Sql/managedInstances/ha-testenv-canary-gp-1'
+        })
+
+        expected_dns_zone = '7773cdecf1ff'
+        # test create sql managed_instance with dns-zone-partner property
+        managed_instance = self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --dns-zone-partner {'
+                                    'dns_zone_partner}',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('dnsZone', expected_dns_zone),
+                                        self.check('location', '{loc}')]).get_output_in_json()
+
+        # test delete sql managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
 class SqlManagedInstanceStartStopMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2', v_core=8)
@@ -6163,6 +6245,75 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                                     self.check('[0].targetManagedInstanceName', '{source_mi_name}'),
                                     self.check('[0].resourceGroup', '{rg}'),
                                     self.check('[0].operationMode', 'Copy')])
+
+    @record_only()
+    def test_sql_midb_cross_subscription_move_copy(self):
+
+        source_rg_name = "sqlmigeodr"
+        target_rg_name = "kmatijevic-ha-testenv-canary"
+        source_instance_name = "sqlmigeodr-eus2euap-gp-dbmovetest-mi1"
+        target_instance_name = "ha-testenv-canary-gp-1"
+        target_subscription_id = "00000000-0000-0000-0000-000000000000"
+        managed_db_name = "CLITest"
+
+        self.kwargs.update({
+            'rg': source_rg_name,
+            'database_name': managed_db_name,
+            'source_rg_name': source_rg_name,
+            'target_rg_name': target_rg_name,
+            'source_mi_name': source_instance_name,
+            'target_mi_name': target_instance_name,
+            'target_subscription_id': target_subscription_id
+        })
+
+        # Show source and target instance
+        source_mi = self.cmd('sql mi show -g {source_rg_name} -n {source_mi_name}').get_output_in_json()
+
+        self.kwargs.update({
+            'loc': source_mi['location'],
+        })
+
+        # Create managed database to be moved and copied
+        mdb = self.cmd('sql midb create -g {source_rg_name} --mi {source_mi_name} -n {database_name}',
+                       checks=[
+                           self.check('resourceGroup', '{source_rg_name}'),
+                           self.check('name', '{database_name}'),
+                           self.check('location', '{loc}'),
+                           self.check('status', 'Online')]).get_output_in_json()
+
+        self.kwargs.update({
+            'database_id': mdb['id']
+        })
+
+        # Start the copy operation from source to target instance
+        self.cmd('sql midb copy start -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # Cancel the move operation from source to target instance
+        self.cmd('sql midb copy cancel -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # List the copy operation
+        self.cmd('sql midb copy list -g {rg} --mi {source_mi_name} -n {database_name}',
+                 checks=[
+                     self.check('[0].state', 'Cancelled'),
+                     self.check('[0].sourceManagedInstanceName', '{source_mi_name}'),
+                     self.check('[0].targetManagedInstanceName', '{target_mi_name}'),
+                     self.check('[0].resourceGroup', '{rg}'),
+                     self.check('[0].operationMode', 'Copy')])
+
+        # Start the move operation from source to target instance
+        self.cmd('sql midb move start -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # Complete the move operation from source to target instance
+        self.cmd('sql midb move complete -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # List the move operation
+        self.cmd('sql midb move list -g {rg} --mi {source_mi_name} -n {database_name}',
+                 checks=[
+                     self.check('[0].state', 'Succeeded'),
+                     self.check('[0].sourceManagedInstanceName', '{source_mi_name}'),
+                     self.check('[0].targetManagedInstanceName', '{target_mi_name}'),
+                     self.check('[0].resourceGroup', '{rg}'),
+                     self.check('[0].operationMode', 'Move')])
 
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):

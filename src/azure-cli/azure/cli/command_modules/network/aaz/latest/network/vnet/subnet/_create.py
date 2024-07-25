@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-09-01",
+        "version": "2024-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2024-01-01"],
         ]
     }
 
@@ -114,6 +114,11 @@ class Create(AAZCommand):
         _args_schema.endpoints = AAZListArg(
             options=["--endpoints"],
             help="An array of service endpoints.",
+        )
+        _args_schema.sharing_scope = AAZStrArg(
+            options=["--sharing-scope"],
+            help="Set this property to Tenant to allow sharing subnet with other subscriptions in your AAD tenant. This property can only be set if defaultOutboundAccess is set to false, both properties can only be set if subnet is empty.",
+            enum={"DelegatedServices": "DelegatedServices", "Tenant": "Tenant"},
         )
 
         address_prefixes = cls._args_schema.address_prefixes
@@ -223,6 +228,10 @@ class Create(AAZCommand):
         _element.locations = AAZListArg(
             options=["locations"],
             help="A list of locations.",
+        )
+        _element.network_identifier = AAZStrArg(
+            options=["network-identifier"],
+            help="SubResource as network identifier.",
         )
         _element.service = AAZStrArg(
             options=["service"],
@@ -374,7 +383,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2024-01-01",
                     required=True,
                 ),
             }
@@ -415,6 +424,7 @@ class Create(AAZCommand):
                 properties.set_prop("routeTable", AAZObjectType)
                 properties.set_prop("serviceEndpointPolicies", AAZListType, ".policies")
                 properties.set_prop("serviceEndpoints", AAZListType, ".endpoints")
+                properties.set_prop("sharingScope", AAZStrType, ".sharing_scope")
 
             address_prefixes = _builder.get(".properties.addressPrefixes")
             if address_prefixes is not None:
@@ -502,11 +512,16 @@ class Create(AAZCommand):
             _elements = _builder.get(".properties.serviceEndpoints[]")
             if _elements is not None:
                 _elements.set_prop("locations", AAZListType, ".locations")
+                _elements.set_prop("networkIdentifier", AAZObjectType)
                 _elements.set_prop("service", AAZStrType, ".service")
 
             locations = _builder.get(".properties.serviceEndpoints[].locations")
             if locations is not None:
                 locations.set_elements(AAZStrType, ".")
+
+            network_identifier = _builder.get(".properties.serviceEndpoints[].networkIdentifier")
+            if network_identifier is not None:
+                network_identifier.set_prop("id", AAZStrType, ".network_identifier")
 
             return self.serialize_content(_content_value)
 
@@ -734,7 +749,9 @@ class _CreateHelper:
             _schema.properties = cls._schema_ip_configuration_read.properties
             return
 
-        cls._schema_ip_configuration_read = _schema_ip_configuration_read = AAZObjectType()
+        cls._schema_ip_configuration_read = _schema_ip_configuration_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
         ip_configuration_read = _schema_ip_configuration_read
         ip_configuration_read.etag = AAZStrType(
@@ -815,6 +832,10 @@ class _CreateHelper:
         properties.private_ip_address = AAZStrType(
             serialized_name="privateIPAddress",
         )
+        properties.private_ip_address_prefix_length = AAZIntType(
+            serialized_name="privateIPAddressPrefixLength",
+            nullable=True,
+        )
         properties.private_ip_address_version = AAZStrType(
             serialized_name="privateIPAddressVersion",
         )
@@ -823,6 +844,7 @@ class _CreateHelper:
         )
         properties.private_link_connection_properties = AAZObjectType(
             serialized_name="privateLinkConnectionProperties",
+            flags={"read_only": True},
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
@@ -922,6 +944,7 @@ class _CreateHelper:
         properties.location = AAZStrType()
         properties.outbound_rule = AAZObjectType(
             serialized_name="outboundRule",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.outbound_rule)
         properties.outbound_rules = AAZListType(
@@ -977,6 +1000,7 @@ class _CreateHelper:
         cls._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
         properties.network_interface_ip_configuration = AAZObjectType(
             serialized_name="networkInterfaceIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.network_interface_ip_configuration)
         properties.subnet = AAZObjectType()
@@ -1040,6 +1064,7 @@ class _CreateHelper:
         cls._build_schema_sub_resource_read(properties.backend_address_pool)
         properties.backend_ip_configuration = AAZObjectType(
             serialized_name="backendIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_network_interface_ip_configuration_read(properties.backend_ip_configuration)
         properties.backend_port = AAZIntType(
@@ -1195,6 +1220,7 @@ class _CreateHelper:
         )
         properties.dscp_configuration = AAZObjectType(
             serialized_name="dscpConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.dscp_configuration)
         properties.enable_accelerated_networking = AAZBoolType(
@@ -1229,6 +1255,7 @@ class _CreateHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_link_service = AAZObjectType(
@@ -1248,6 +1275,7 @@ class _CreateHelper:
         )
         properties.virtual_machine = AAZObjectType(
             serialized_name="virtualMachine",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.virtual_machine)
         properties.vnet_encryption_supported = AAZBoolType(
@@ -1417,6 +1445,7 @@ class _CreateHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_endpoint_location = AAZStrType(
@@ -1533,6 +1562,7 @@ class _CreateHelper:
             flags={"read_only": True},
         )
         _element.id = AAZStrType()
+        _element.identity = AAZObjectType()
         _element.location = AAZStrType()
         _element.name = AAZStrType(
             flags={"read_only": True},
@@ -1542,6 +1572,33 @@ class _CreateHelper:
         )
         _element.tags = AAZDictType()
         _element.type = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        identity = _schema_network_security_group_read.properties.flow_logs.Element.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType()
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_network_security_group_read.properties.flow_logs.Element.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
+
+        _element = _schema_network_security_group_read.properties.flow_logs.Element.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
             flags={"read_only": True},
         )
 
@@ -1640,7 +1697,9 @@ class _CreateHelper:
             _schema.type = cls._schema_private_endpoint_read.type
             return
 
-        cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType()
+        cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
         private_endpoint_read = _schema_private_endpoint_read
         private_endpoint_read.etag = AAZStrType(
@@ -1897,6 +1956,7 @@ class _CreateHelper:
         )
         properties.ip_configuration = AAZObjectType(
             serialized_name="ipConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_ip_configuration_read(properties.ip_configuration)
         properties.ip_tags = AAZListType(
@@ -2156,7 +2216,9 @@ class _CreateHelper:
             _schema.id = cls._schema_sub_resource_read.id
             return
 
-        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
         sub_resource_read = _schema_sub_resource_read
         sub_resource_read.id = AAZStrType()
@@ -2254,6 +2316,9 @@ class _CreateHelper:
         )
         properties.service_endpoints = AAZListType(
             serialized_name="serviceEndpoints",
+        )
+        properties.sharing_scope = AAZStrType(
+            serialized_name="sharingScope",
         )
 
         address_prefixes = _schema_subnet_read.properties.address_prefixes
@@ -2571,6 +2636,10 @@ class _CreateHelper:
 
         _element = _schema_subnet_read.properties.service_endpoints.Element
         _element.locations = AAZListType()
+        _element.network_identifier = AAZObjectType(
+            serialized_name="networkIdentifier",
+        )
+        cls._build_schema_sub_resource_read(_element.network_identifier)
         _element.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},

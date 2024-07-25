@@ -326,6 +326,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                  'This value can only be updated if flexible server is using Premium SSD v2 Disks.'
         )
 
+        create_default_db_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            options_list=['--create-default-database', '-c'],
+            help='Enable or disable the creation of default database flexibleserverdb. Default value is Enabled.'
+        )
+
         auto_grow_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--storage-auto-grow'],
@@ -337,6 +343,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             options_list=['--storage-type'],
             help='Storage type for the server. Allowed values are Premium_LRS and PremiumV2_LRS. Default value is Premium_LRS.'
                  'Must set iops and throughput if using PremiumV2_LRS.'
+        )
+
+        storage_type_restore_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['PremiumV2_LRS']),
+            options_list=['--storage-type'],
+            help='Storage type for the new server. Allowed value is PremiumV2_LRS. Default value is none.'
         )
 
         auto_scale_iops_arg_type = CLIArgumentType(
@@ -554,7 +566,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('tier', default='GeneralPurpose', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_D2s_v3', arg_type=sku_name_arg_type)
                 c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
-                c.argument('version', default='13', arg_type=version_arg_type)
+                c.argument('version', default='16', arg_type=version_arg_type)
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', default='Enabled', arg_type=password_auth_arg_type)
@@ -563,6 +575,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('iops', default=None, arg_type=iops_v2_arg_type)
                 c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
+                c.argument('create_default_db', default='Enabled', arg_type=create_default_db_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
@@ -621,6 +634,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
                 c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
                 c.argument('backup_byok_key', arg_type=backup_key_arg_type)
+                c.argument('storage_type', default=None, arg_type=storage_type_restore_arg_type)
 
         with self.argument_context('{} flexible-server geo-restore'. format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
@@ -680,6 +694,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
             c.argument('backup_byok_key', arg_type=backup_key_arg_type)
+            c.argument('public_access', arg_type=public_access_update_arg_type)
             if command_group == 'mysql':
                 c.argument('auto_grow', arg_type=auto_grow_arg_type)
                 c.argument('auto_scale_iops', arg_type=auto_scale_iops_arg_type)
@@ -689,7 +704,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
                 c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
                 c.argument('disable_data_encryption', arg_type=disable_data_encryption_arg_type)
-                c.argument('public_access', arg_type=public_access_update_arg_type)
             elif command_group == 'postgres':
                 c.argument('auto_grow', arg_type=auto_grow_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)

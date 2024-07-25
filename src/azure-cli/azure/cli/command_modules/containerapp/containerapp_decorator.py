@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, consider-using-f-string, no-else-return, duplicate-string-formatting-argument, expression-not-assigned, too-many-locals, logging-fstring-interpolation, broad-except, pointless-statement, bare-except, too-many-public-methods, logging-format-interpolation, too-many-boolean-expressions, too-many-branches, useless-parent-delegation
+from copy import deepcopy
 from typing import Dict, Any
 
 from azure.cli.core.commands import AzCliCommand
@@ -278,7 +279,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
         self, cmd: AzCliCommand, client: Any, raw_parameters: Dict, models: str
     ):
         super().__init__(cmd, client, raw_parameters, models)
-        self.containerapp_def = ContainerAppModel
+        self.containerapp_def = deepcopy(ContainerAppModel)
 
     def validate_arguments(self):
         validate_container_app_name(self.get_argument_name(), AppType.ContainerApp.name)
@@ -334,7 +335,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
 
         ingress_def = None
         if self.get_argument_target_port() is not None and self.get_argument_ingress() is not None:
-            ingress_def = IngressModel
+            ingress_def = deepcopy(IngressModel)
             ingress_def["external"] = external_ingress
             ingress_def["targetPort"] = self.get_argument_target_port()
             ingress_def["transport"] = self.get_argument_transport()
@@ -347,7 +348,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
 
         registries_def = None
         if self.get_argument_registry_server() is not None and not is_registry_msi_system(self.get_argument_registry_identity()):
-            registries_def = RegistryCredentialsModel
+            registries_def = deepcopy(RegistryCredentialsModel)
             registries_def["server"] = self.get_argument_registry_server()
 
             # Infer credentials if not supplied and its azurecr
@@ -370,7 +371,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
 
         dapr_def = None
         if self.get_argument_dapr_enabled():
-            dapr_def = DaprModel
+            dapr_def = deepcopy(DaprModel)
             dapr_def["enabled"] = True
             dapr_def["appId"] = self.get_argument_dapr_app_id()
             dapr_def["appPort"] = self.get_argument_dapr_app_port()
@@ -380,7 +381,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
             dapr_def["logLevel"] = self.get_argument_dapr_log_level()
             dapr_def["enableApiLogging"] = self.get_argument_dapr_enable_api_logging()
 
-        config_def = ConfigurationModel
+        config_def = deepcopy(ConfigurationModel)
         config_def["secrets"] = secrets_def
         config_def["activeRevisionsMode"] = self.get_argument_revisions_mode()
         config_def["ingress"] = ingress_def
@@ -388,7 +389,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
         config_def["dapr"] = dapr_def
 
         # Identity actions
-        identity_def = ManagedServiceIdentityModel
+        identity_def = deepcopy(ManagedServiceIdentityModel)
         identity_def["type"] = "None"
 
         assign_system_identity = self.get_argument_system_assigned()
@@ -416,11 +417,11 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
 
         resources_def = None
         if self.get_argument_cpu() is not None or self.get_argument_memory() is not None:
-            resources_def = ContainerResourcesModel
+            resources_def = deepcopy(ContainerResourcesModel)
             resources_def["cpu"] = self.get_argument_cpu()
             resources_def["memory"] = self.get_argument_memory()
 
-        container_def = ContainerModel
+        container_def = deepcopy(ContainerModel)
         container_def["name"] = self.get_argument_container_name() if self.get_argument_container_name() else self.get_argument_name()
         container_def["image"] = self.get_argument_image() if not is_registry_msi_system(self.get_argument_registry_identity()) else HELLO_WORLD_IMAGE
         if self.get_argument_env_vars() is not None:
@@ -432,14 +433,14 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
         if resources_def is not None:
             container_def["resources"] = resources_def
 
-        template_def = TemplateModel
+        template_def = deepcopy(TemplateModel)
 
         template_def["containers"] = [container_def]
         template_def["scale"] = scale_def
 
         if self.get_argument_secret_volume_mount() is not None:
-            volume_def = VolumeModel
-            volume_mount_def = VolumeMountModel
+            volume_def = deepcopy(VolumeModel)
+            volume_mount_def = deepcopy(VolumeMountModel)
             # generate a volume name
             volume_def["name"] = _generate_secret_volume_name()
             volume_def["storageType"] = "Secret"
@@ -497,7 +498,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
 
             safe_set(self.containerapp_def, "properties", "template", "revisionSuffix", value=self.get_argument_revision_suffix())
 
-            registries_def = RegistryCredentialsModel
+            registries_def = deepcopy(RegistryCredentialsModel)
             registries_def["server"] = self.get_argument_registry_server()
             registries_def["identity"] = self.get_argument_registry_identity()
             safe_set(self.containerapp_def, "properties", "configuration", "registries", value=[registries_def])
@@ -608,7 +609,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
     def set_up_scale_rule(self):
         scale_def = None
         if self.get_argument_min_replicas() is not None or self.get_argument_max_replicas() is not None:
-            scale_def = ScaleModel
+            scale_def = deepcopy(ScaleModel)
             scale_def["minReplicas"] = self.get_argument_min_replicas()
             scale_def["maxReplicas"] = self.get_argument_max_replicas()
 
@@ -621,28 +622,39 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
             if not scale_rule_type:
                 scale_rule_type = "http"
             scale_rule_type = scale_rule_type.lower()
-            scale_rule_def = ScaleRuleModel
+            scale_rule_def = deepcopy(ScaleRuleModel)
             curr_metadata = {}
             if self.get_argument_scale_rule_http_concurrency():
-                if scale_rule_type in ('http', 'tcp'):
+                if scale_rule_type == 'http':
                     curr_metadata["concurrentRequests"] = str(scale_rule_http_concurrency)
+                elif scale_rule_type == 'tcp':
+                    curr_metadata["concurrentConnections"] = str(scale_rule_http_concurrency)
             metadata_def = parse_metadata_flags(scale_rule_metadata, curr_metadata)
             auth_def = parse_auth_flags(scale_rule_auth)
             if scale_rule_type == "http":
                 scale_rule_def["name"] = scale_rule_name
                 scale_rule_def["custom"] = None
+                scale_rule_def["tcp"] = None
                 scale_rule_def["http"] = {}
                 scale_rule_def["http"]["metadata"] = metadata_def
                 scale_rule_def["http"]["auth"] = auth_def
+            elif scale_rule_type == "tcp":
+                scale_rule_def["name"] = scale_rule_name
+                scale_rule_def["custom"] = None
+                scale_rule_def["http"] = None
+                scale_rule_def["tcp"] = {}
+                scale_rule_def["tcp"]["metadata"] = metadata_def
+                scale_rule_def["tcp"]["auth"] = auth_def
             else:
                 scale_rule_def["name"] = scale_rule_name
                 scale_rule_def["http"] = None
+                scale_rule_def["tcp"] = None
                 scale_rule_def["custom"] = {}
                 scale_rule_def["custom"]["type"] = scale_rule_type
                 scale_rule_def["custom"]["metadata"] = metadata_def
                 scale_rule_def["custom"]["auth"] = auth_def
             if not scale_def:
-                scale_def = ScaleModel
+                scale_def = deepcopy(ScaleModel)
             scale_def["rules"] = [scale_rule_def]
 
         return scale_def

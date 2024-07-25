@@ -50,6 +50,12 @@ CREDENTIAL_WARNING = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
+CLASSIC_ADMINISTRATOR_WARNING = (
+    "Azure classic subscription administrators will be retired on August 31, 2024. "
+    "After August 31, 2024, all classic administrators risk losing access to the subscription. "
+    "Delete classic administrators who no longer need access or assign an Azure RBAC role for fine-grained access "
+    "control. Learn more: https://go.microsoft.com/fwlink/?linkid=2238474")
+
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines, protected-access
@@ -213,6 +219,9 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     :param include_groups: include extra assignments to the groups of which the user is a
     member(transitively).
     '''
+    if include_classic_administrators:
+        logger.warning(CLASSIC_ADMINISTRATOR_WARNING)
+
     graph_client = _graph_client_factory(cmd.cli_ctx)
     authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = authorization_client.role_assignments

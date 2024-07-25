@@ -67,8 +67,10 @@ class ConfigCredentialReplacer(RecordingProcessor):
     def process_request(self, request):
         if is_text_payload(request) and request.body and isinstance(request.body, str):
             request.body = self._replace_ids_str(request.body)
+            request.body = self._replace_name_value_keys_str(request.body)
         elif is_text_payload(request) and request.body and isinstance(request.body, bytes):
             request.body = self._replace_ids_bytes(request.body)
+            request.body = self._replace_name_value_keys_bytes(request.body)
         
         return request
     
@@ -87,6 +89,28 @@ class ConfigCredentialReplacer(RecordingProcessor):
                 res = re.sub(r'("name":( ?)"[^"]*{}[^"]*",( ?)"value":( ?))"[^"]*"'.format(key), 
                              r'\1"HIDDEN"', 
                              res, flags=re.IGNORECASE)
+
+        if 'vault' in res.lower() or 'rawvalue' in res.lower():
+            res = re.sub(r'("value":( ?))"[^"]*"',
+                         r'\1"HIDDEN"',
+                         res, flags=re.IGNORECASE)
+
+        return res
+    
+    def _replace_name_value_keys_bytes(self, res):
+        import re
+        sensitive_key = [b'secret', b'key', b'clientid']
+
+        for key in sensitive_key:
+            if key in res.lower():
+                res = re.sub(rb'("name":( ?)"[^"]*' + key + rb'[^"]*",( ?)"value":( ?))"[^"]*"', 
+                             rb'\1"HIDDEN"', 
+                             res, flags=re.IGNORECASE)
+
+        if b'vault' in res.lower() or b'rawvalue' in res.lower():
+            res = re.sub(rb'("value":( ?))"[^"]*"',
+                         rb'\1"HIDDEN"',
+                         res, flags=re.IGNORECASE)
 
         return res
 

@@ -65,6 +65,9 @@ examples:
   - name: Update shared access policy 'MyPolicy' in an Azure IoT Hub Device Provisioning Service instance with EnrollmentWrite right
     text: >
         az iot dps policy update --dps-name MyDps --resource-group MyResourceGroup --policy-name MyPolicy --rights EnrollmentWrite
+  - name: Regenerate keys for access policy 'MyPolicy' by updating keys to empty values
+    text: >
+        az iot dps policy update --dps-name MyDps --resource-group MyResourceGroup --policy-name MyPolicy --primary-key "" --secondary-key ""
 """
 
 helps['iot dps certificate'] = """
