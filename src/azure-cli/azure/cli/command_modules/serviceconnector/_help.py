@@ -221,9 +221,9 @@ for source in SOURCE_RESOURCES:
         if target == RESOURCE.ContainerApp:
             helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
             type: command
-            short-summary: Create a {source_display_name} connection to {target}. No auth info is required.
+            short-summary: Create a containerapp-to-containerapp connection.
             examples:
-                - name: Create a connection between {source_display_name} and {target} interactively
+                - name: Create a connection between containerapp and containerapp interactively
                   text: |-
                         az {source} connection create {target}
                 - name: Create a connection between {source_display_name} and {target} with resource name
@@ -243,7 +243,7 @@ for source in SOURCE_RESOURCES:
 
             helps['{source} connection update {target}'.format(source=source.value, target=target.value)] = """
             type: command
-            short-summary: Update a {source_display_name} to {target} connection.
+            short-summary: Update a containerapp-to-containerapp connection.
             examples:
                 - name: Update the client type of a connection with resource name
                   text: |-
@@ -255,8 +255,7 @@ for source in SOURCE_RESOURCES:
                 source=source.value,
                 target=target.value,
                 source_params=source_params,
-                connection_id=connection_id,
-                source_display_name=source_display_name)
+                connection_id=connection_id)
             continue
 
         # auth info params
