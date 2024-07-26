@@ -177,8 +177,8 @@ examples:
   - name: Scale an Azure Cache for Redis Instance in/out using Redis Cluster.
     text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set shardCount=2
     crafted: true
-  - name: Disable access keys authentication for Redis
-    text: az redis update -name MyRedisCache --resource-group MyResourceGroup --set "disableAccessKeyAuthentication=true"
+  - name: Disable access keys authentication for Redis.
+    text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "disableAccessKeyAuthentication=true"
 """
 
 helps['redis force-reboot'] = """
