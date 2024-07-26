@@ -100,6 +100,23 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_version = next(x for x in sorted_supported_versions if not x.startswith(prefix))
         return create_version, upgrade_version
 
+    def _get_lts_versions(self, location):
+        """Return the AKS versions that are marked as LTS in ascending order."""
+        lts_versions = self.cmd(
+            '''az aks get-versions -l {} --query "values[?contains(capabilities.supportPlan, 'AKSLongTermSupport')].patchVersions.keys(@)[]"'''.format(location)
+        ).get_output_in_json()
+        sorted_lts_versions = sorted(lts_versions, key=version_to_tuple, reverse=False)
+        return sorted_lts_versions
+    
+    def _get_newer_non_lts_version(self, location, version):
+        """Return the nearest newer non-lts version of the specified version."""
+        supported_versions = self.cmd(
+            '''az aks get-versions -l {} --query "values[?!(contains(capabilities.supportPlan, 'AKSLongTermSupport'))].patchVersions.keys(@)[]"'''.format(location)
+        ).get_output_in_json()
+        newer_versions = [x for x in supported_versions if version_to_tuple(x) > version_to_tuple(version)]
+        sorted_newer_versions = sorted(newer_versions, key=version_to_tuple, reverse=False)
+        return sorted_newer_versions[0] if newer_versions else None
+
     def _get_user_assigned_identity(
         self,
         resource_group,
@@ -10423,6 +10440,67 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('upgradeSettings.overrideSettings.forceUpgrade', False),
             self.check('upgradeSettings.overrideSettings.until', '2020-02-22T22:30:17+00:00')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_upgrade_with_tier_switch(self, resource_group, resource_group_location):
+        """ This test case exercises enabling LTS tier with upgrade command.
+        """
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        lts_versions = self._get_lts_versions(resource_group_location)
+        if len(lts_versions) == 0:
+            self.skipTest('No LTS versions found in the location')
+        create_version = lts_versions[0]
+        upgrade_version = self._get_newer_non_lts_version(resource_group_location, create_version)
+        if upgrade_version is None:
+            self.skipTest('No newer non-LTS versions found in the location')
+            
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'k8s_version': create_version,
+            'upgrade_k8s_version': upgrade_version,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create with LTS premium tier
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '-k {k8s_version} --enable-managed-identity ' \
+                     '--ssh-key-value={ssh_key_value} --tier premium --k8s-support-plan AKSLongTermSupport'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check("sku.tier", "Premium"),
+            self.check("supportPlan", "AKSLongTermSupport"),
+        ])
+
+        # AKSLongTermSupport support plan does not work with standard tier
+        fail_upgrade_cmd = (
+            "aks upgrade --resource-group={resource_group} --name={name} "
+            "--tier standard -k {upgrade_k8s_version} --yes"
+        )
+
+        self.cmd(fail_upgrade_cmd, expect_failure=True)
+
+        upgrade_cmd = (
+            "aks upgrade --resource-group={resource_group} --name={name} "
+            "--tier standard --k8s-support-plan KubernetesOfficial -k {upgrade_k8s_version} --yes"
+        )
+
+        # upgrade upgrade settings
+        self.cmd(upgrade_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check("sku.tier", "Standard"),
+            self.check("supportPlan", "KubernetesOfficial"),
         ])
 
         # delete
