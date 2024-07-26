@@ -26,7 +26,10 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'rg': resource_group,
             'acc': self.create_random_name(prefix='cli', length=24),
             'vnet': 'vnet1',
-            'subnet': 'subnet1'
+            'subnet': 'subnet1',
+            'ip1': '25.1.2.3',
+            'ip2': '25.2.0.0/24',
+            'ip3': '25.1.2.3/32'
         }
         self.cmd('storage account create -g {rg} -n {acc} --bypass Metrics --default-action Deny --https-only'.format(**kwargs),
                  checks=[
@@ -46,11 +49,14 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage'.format(
                 **kwargs))
 
-        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1}'.format(**kwargs))
         # test network-rule add idempotent
-        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1}'.format(**kwargs))
         self.cmd(
-            'storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.2.0.0/24'.format(**kwargs))
+            'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip2}'.format(**kwargs))
+        # test add multiple ip addresses
+        self.cmd(
+            'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1} {ip2}'.format(**kwargs))
         self.cmd(
             'storage account network-rule add -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(
                 **kwargs))
@@ -66,13 +72,30 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(ipRules)', 2),
             JMESPathCheck('length(virtualNetworkRules)', 1)
         ])
+        # test add multiple ip addresses with overlaps between them
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd(
+                'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1} {ip3}'.format(
+                    **kwargs))
+        # test add multiple ip addresses with some overlaps with the server
         self.cmd(
-            'storage account network-rule remove -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+            'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip2} {ip3}'.format(
+                **kwargs))
+        self.cmd('storage account network-rule list -g {rg} --account-name {acc}'.format(**kwargs), checks=[
+            JMESPathCheck('length(ipRules)', 2),
+            JMESPathCheck('length(virtualNetworkRules)', 1)
+        ])
+        self.cmd(
+            'storage account network-rule remove -g {rg} --account-name {acc} --ip-address {ip1}'.format(**kwargs))
+        # test remove multiple ip addresses
+        self.cmd(
+            'storage account network-rule remove -g {rg} --account-name {acc} --ip-address {ip1} {ip2}'.format(**kwargs))
         self.cmd(
             'storage account network-rule remove -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(
                 **kwargs))
         self.cmd('storage account network-rule list -g {rg} --account-name {acc}'.format(**kwargs), checks=[
-            JMESPathCheck('length(ipRules)', 1),
+            JMESPathCheck('length(ipRules)', 0),
             JMESPathCheck('length(virtualNetworkRules)', 0)
         ])
 
@@ -186,6 +209,21 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.assertIn('publicNetworkAccess', result)
         self.assertTrue(result['publicNetworkAccess'] == 'Disabled')
+
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-09-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_dns')
+    def test_create_storage_account_with_dns_endpoint_type(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'sa1': self.create_random_name(prefix='cli', length=24),
+            'sa2': self.create_random_name(prefix='cli', length=24),
+            'loc': 'eastus'
+        })
+        self.cmd('storage account create -n {sa1} -g {rg} -l {loc} --hns true --dns-endpoint-type Standard',
+                 checks=[JMESPathCheck('dnsEndpointType', 'Standard')])
+        self.cmd('storage account create -n {sa2} -g {rg} -l {loc} --hns true --dns-endpoint-type AzureDnsZone',
+                 checks=[JMESPathCheck('dnsEndpointType', 'AzureDnsZone')])
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -373,6 +411,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_2'.format(name4, resource_group),
                  checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
+        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_3'.format(name4, resource_group),
+                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     @StorageAccountPreparer(name_prefix='tls')
@@ -385,6 +426,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_2'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
+
+        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_3'.format(
+            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_0'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
@@ -838,7 +882,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer(location='southcentralus')
-    @KeyVaultPreparer(location='southcentralus')
+    @KeyVaultPreparer(location='southcentralus', additional_params='--enable-rbac-authorization false')
     def test_customer_managed_key(self, resource_group, storage_account, key_vault):
         self.kwargs = {'rg': resource_group, 'sa': storage_account, 'vt': key_vault}
 
@@ -1729,9 +1773,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'rg': resource_group,
             'container': self.create_random_name(prefix='container', length=24),
         }
-        self.cmd('storage account create -n {sa1} -g {rg} --edge-zone microsoftrrdclab1 -l eastus2euap --sku Premium_LRS',
+        self.cmd('storage account create -n {sa1} -g {rg} --edge-zone microsoftrrdclab3 -l eastus2euap --sku Premium_LRS',
                  checks=[
-                     JMESPathCheck('extendedLocation.name', 'microsoftrrdclab1'),
+                     JMESPathCheck('extendedLocation.name', 'microsoftrrdclab3'),
                      JMESPathCheck('extendedLocation.type', 'EdgeZone')
                  ])
         self.cmd('storage account create -n {sa2} -g {rg} --edge-zone microsoftlosangeles1 --sku Premium_LRS',
@@ -1745,6 +1789,70 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.kwargs['storage_key'] = str(self.cmd('az storage account keys list -n {sa1} -g {rg} --query "[0].value"').output)
         self.cmd('storage container create -n {container} --account-name {sa1} --blob-endpoint {endpoint} --account-key {storage_key}') \
             .assert_with_checks(self.check('created', True))
+
+    @ResourceGroupPreparer(location='eastus2euap')
+    @StorageAccountPreparer(location='eastus2euap', kind='StorageV2')
+    def test_storage_account_migration(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account
+        })
+        self.cmd('az storage account migration start --account-name {sa} -g {rg} --sku Standard_ZRS --no-wait')
+        # other status would take days to months
+        self.cmd('az storage account migration show -n default -g {rg} --account-name {sa}',
+                 checks=[JMESPathCheck('migrationStatus', 'SubmittedForConversion')])
+
+    @ResourceGroupPreparer(location='eastus')
+    def test_storage_account_upgrade_to_storagev2(self, resource_group):
+        self.kwargs.update({
+            'sastorage': self.create_random_name('sa', 24),
+            'sastoragewithtier': self.create_random_name('sa', 24),
+            'sablobstorage': self.create_random_name('sa', 24),
+            'sablobstoragewithtier': self.create_random_name('sa', 24),
+            'sastoragev2': self.create_random_name('sa', 24),
+            'sastoragecold': self.create_random_name('sa', 24)
+        })
+        # Storagev1
+        self.cmd('az storage account create --kind Storage -n {sastorage} -g {rg}',
+                 checks=[JMESPathCheck('kind', 'Storage'),
+                         JMESPathCheck('accessTier', None)])
+        self.cmd('az storage account update --upgrade-to-storagev2 -n {sastorage} -g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Hot')])
+
+        self.cmd('az storage account create --kind Storage -n {sastoragewithtier} -g {rg}')
+        self.cmd('az storage account update --upgrade-to-storagev2 --access-tier Cool -n {sastoragewithtier} '
+                 '-g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Cool')])
+        # BlobStorage
+        self.cmd('az storage account create --kind BlobStorage --access-tier Cool -n {sablobstorage} -g {rg}',
+                 checks=[JMESPathCheck('kind', 'BlobStorage'),
+                         JMESPathCheck('accessTier', 'Cool')])
+        self.cmd('az storage account update --upgrade-to-storagev2 -n {sablobstorage} -g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Hot')])
+
+        self.cmd('az storage account create --kind Storage -n {sablobstoragewithtier} -g {rg}')
+        self.cmd('az storage account update --upgrade-to-storagev2 --access-tier Cool -n {sablobstoragewithtier} '
+                 '-g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Cool')])
+
+        # StorageV2
+        self.cmd('az storage account create -n {sastoragev2} -g {rg}',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Hot')])
+        self.cmd('az storage account update --access-tier Cool -n {sastoragev2} -g {rg} -y',
+                 checks=[JMESPathCheck('accessTier', 'Cool')])
+
+        # need to uncomment when GA in September 2024 test Cold
+        # self.cmd('az storage account create -n {sastoragecold} -g {rg} --access-tier Cold',
+        #          checks=[JMESPathCheck('accessTier', 'Cold')])
+        # self.cmd('az storage account update --access-tier Cool -n {sastoragecold} -g {rg} -y',
+        #          checks=[JMESPathCheck('accessTier', 'Cool')])
+        # self.cmd('az storage account update --access-tier Cold -n {sastoragecold} -g {rg} -y',
+        #          checks=[JMESPathCheck('accessTier', 'Cold')])
+
 
 
 class RoleScenarioTest(LiveScenarioTest):
@@ -1990,6 +2098,33 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
 
+    @ResourceGroupPreparer(name_prefix="cli_test_sa_blob_cors")
+    @StorageAccountPreparer(location="eastus2", kind="StorageV2")
+    def test_storage_account_blob_cors_rule(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group
+        })
+
+        self.cmd('storage account blob-service-properties cors-rule add -n {sa} -g {rg} '
+                 '--allowed-origins "http://*.contoso.com" "http://www.fabrikam.com" --allowed-methods PUT GET '
+                 '--allowed-headers x-ms-meta-data* --max-age 200')\
+            .assert_with_checks(
+                        JMESPathCheck('length(@)', 1),
+                        JMESPathCheck('[0].allowedOrigins', ['http://*.contoso.com', 'http://www.fabrikam.com']),
+                        JMESPathCheck('[0].allowedMethods', ['PUT', 'GET']),
+                        JMESPathCheck('[0].allowedHeaders', ['x-ms-meta-data*']),
+                        JMESPathCheck('[0].exposedHeaders', []),
+                        JMESPathCheck('[0].maxAgeInSeconds', 200))
+
+        self.cmd('storage account blob-service-properties cors-rule list -n {sa} -g {rg}') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        self.cmd('storage account blob-service-properties cors-rule clear -n {sa} -g {rg}')\
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
+        self.cmd('storage account blob-service-properties cors-rule list -n {sa} -g {rg}')\
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
+
 
 class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_file_soft_delete')
@@ -2230,7 +2365,7 @@ class StorageAccountSkuScenarioTest(ScenarioTest):
 
 
 class StorageAccountFailoverScenarioTest(ScenarioTest):
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-09-01')
     @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
     def test_storage_account_failover(self, resource_group):
         self.kwargs = {
@@ -2254,7 +2389,7 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
         ])
 
         time.sleep(900)
-        self.cmd('storage account failover -n {sa} -g {rg} --no-wait -y')
+        self.cmd('storage account failover -n {sa} -g {rg} --failover-type Planned --no-wait -y')
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
             self.check('name', '{sa}'),
@@ -2390,6 +2525,10 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['rules'][0]['destinationContainer'], dest_container)
         self.assertEqual(result['rules'][0]['filters']['minCreationTime'], '2020-02-19T16:05:00Z')
 
+        src_policy_id = result["policyId"]
+        self.kwargs.update({"src_policy_id": src_policy_id})
+        self.cmd('storage account or-policy update -g {rg} -n {src_sc} -p @"{policy}" --policy-id {src_policy_id}')
+
         # Service behavior change: (InvalidObjectReplicationPolicy) SourceAccount can not be overwritten
         # # Update ORS policy
         # result = self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(
@@ -2414,8 +2553,7 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
             'src_sc': self.create_random_name(prefix='clicor', length=24),
         })
 
-        self.cmd('storage account create -n {src_sc} -g {rg} ', checks=[
-            JMESPathCheck('allowCrossTenantReplication', None)])
+        self.cmd('storage account create -n {src_sc} -g {rg} ')
 
         self.cmd('storage account update -n {src_sc} -g {rg} -r false', checks=[
             JMESPathCheck('allowCrossTenantReplication', False)])
@@ -2520,6 +2658,7 @@ class StorageAccountBlobInventoryScenarioTest(StorageScenarioMixin, ScenarioTest
                          JMESPathCheck("policy.rules[0].definition.filters.includeSnapshots", True),
                          JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[0]", "inventoryprefix1"),
                          JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[1]", "inventoryprefix2"),
+                         JMESPathCheck("policy.rules[0].definition.filters.creationTime.lastNDays", 3),
                          JMESPathCheck("policy.rules[0].definition.format", "Csv"),
                          JMESPathCheck("policy.rules[0].definition.objectType", "Blob"),
                          JMESPathCheck("policy.rules[0].definition.schedule", "Daily"),

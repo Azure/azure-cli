@@ -21,9 +21,9 @@ interactions:
       ParameterSetName:
       - -n -g --routing-method --unique-dns-name --custom-headers --status-code-ranges
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1?api-version=2018-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1?api-version=2022-04-01
   response:
     body:
       string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1","name":"tm1","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Subnet","dnsConfig":{"relativeName":"testtm000002","fqdn":"testtm000002.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10,"customHeaders":[{"name":"foo","value":"bar"}],"expectedStatusCodeRanges":[{"min":200,"max":202}]},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled","maxReturn":null}}'
@@ -35,7 +35,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 01 Oct 2022 20:05:29 GMT
+      - Tue, 25 Jul 2023 08:31:55 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -65,28 +65,29 @@ interactions:
       ParameterSetName:
       - -g -n --dns-name --query
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_traffic_manager_subnet000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_traffic_manager_subnet000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001","name":"cli_test_traffic_manager_subnet000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-10-01T20:05:21Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001","name":"cli_test_traffic_manager_subnet000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_network_traffic_manager_subnet_routing","date":"2023-07-25T08:31:43Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '352'
+      - '424'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 01 Oct 2022 20:05:30 GMT
+      - Tue, 25 Jul 2023 08:31:55 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -94,8 +95,7 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "properties": {"dnsSettings": {"domainNameLabel":
-      "testpip000003"}, "idleTimeoutInMinutes": 4, "publicIPAddressVersion": "IPv4",
-      "publicIPAllocationMethod": "Dynamic"}}'
+      "testpip000003"}, "idleTimeoutInMinutes": 4, "publicIPAllocationMethod": "Dynamic"}}'
     headers:
       Accept:
       - application/json
@@ -106,41 +106,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '191'
+      - '157'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --dns-name --query
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"ip1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1\",\r\n
-        \ \"etag\": \"W/\\\"c59027f3-c733-4e2a-a0ae-04c23992d374\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"85848270-69fc-4bfd-89d9-fc96ac85ede7\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"dnsSettings\": {\r\n      \"domainNameLabel\": \"testpip000003\",\r\n
-        \     \"fqdn\": \"testpip000003.westus.cloudapp.azure.com\"\r\n    },\r\n
-        \   \"ipTags\": [],\r\n    \"ddosSettings\": {\r\n      \"protectionMode\":
-        \"VirtualNetworkInherited\"\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+      string: '{"name":"ip1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1","etag":"W/\"d6922649-8046-4a69-a6b2-1922d94eb93b\"","location":"westus","properties":{"provisioningState":"Updating","resourceGuid":"9fb4b96f-a234-4727-8ab7-2b1b50a5bf33","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Dynamic","idleTimeoutInMinutes":4,"dnsSettings":{"domainNameLabel":"testpip000003","fqdn":"testpip000003.westus.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/955365c0-efc0-4007-be0f-f3b6cb21c44f?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d80f9097-a7a5-4ee7-9a33-f9653bccdfe6?api-version=2022-11-01
       cache-control:
       - no-cache
       content-length:
-      - '853'
+      - '639'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 01 Oct 2022 20:05:37 GMT
+      - Tue, 25 Jul 2023 08:32:03 GMT
       expires:
       - '-1'
       pragma:
@@ -153,9 +143,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0073055a-1ae1-4b5a-ae1a-a9e95401fd35
+      - 22f5df9a-5fab-4e16-abaf-54bbcc3c259a
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -173,21 +163,21 @@ interactions:
       ParameterSetName:
       - -g -n --dns-name --query
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/955365c0-efc0-4007-be0f-f3b6cb21c44f?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d80f9097-a7a5-4ee7-9a33-f9653bccdfe6?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: '{"status":"InProgress"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '23'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 01 Oct 2022 20:05:38 GMT
+      - Tue, 25 Jul 2023 08:32:03 GMT
       expires:
       - '-1'
       pragma:
@@ -204,7 +194,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 16276a18-ff80-495c-9ad3-e73b6ff3bfa0
+      - a5f20eda-6573-49e7-9224-e772717456a5
     status:
       code: 200
       message: OK
@@ -222,33 +212,21 @@ interactions:
       ParameterSetName:
       - -g -n --dns-name --query
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d80f9097-a7a5-4ee7-9a33-f9653bccdfe6?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"ip1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1\",\r\n
-        \ \"etag\": \"W/\\\"d4709ab3-9320-47d9-a161-a8d46d5810f2\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"85848270-69fc-4bfd-89d9-fc96ac85ede7\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"dnsSettings\": {\r\n      \"domainNameLabel\": \"testpip000003\",\r\n
-        \     \"fqdn\": \"testpip000003.westus.cloudapp.azure.com\"\r\n    },\r\n
-        \   \"ipTags\": [],\r\n    \"ddosSettings\": {\r\n      \"protectionMode\":
-        \"VirtualNetworkInherited\"\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+      string: '{"status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '854'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 01 Oct 2022 20:05:39 GMT
-      etag:
-      - W/"d4709ab3-9320-47d9-a161-a8d46d5810f2"
+      - Tue, 25 Jul 2023 08:32:05 GMT
       expires:
       - '-1'
       pragma:
@@ -265,7 +243,58 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a8d38935-86e7-4b9e-ac29-124c8d4efc4a
+      - ba70746b-49b5-4d54-b6a2-3911b6e1da54
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --dns-name --query
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"ip1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1","etag":"W/\"6e50aaad-6480-4546-8600-a1ef74f2545f\"","location":"westus","properties":{"provisioningState":"Succeeded","resourceGuid":"9fb4b96f-a234-4727-8ab7-2b1b50a5bf33","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Dynamic","idleTimeoutInMinutes":4,"dnsSettings":{"domainNameLabel":"testpip000003","fqdn":"testpip000003.westus.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '640'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jul 2023 08:32:06 GMT
+      etag:
+      - W/"6e50aaad-6480-4546-8600-a1ef74f2545f"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 02af3395-5e68-4c63-86eb-9f8c6c5429b1
     status:
       code: 200
       message: OK
@@ -283,9 +312,9 @@ interactions:
       ParameterSetName:
       - -n -g --status-code-ranges --custom-headers
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1?api-version=2018-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1?api-version=2022-04-01
   response:
     body:
       string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1","name":"tm1","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Subnet","dnsConfig":{"relativeName":"testtm000002","fqdn":"testtm000002.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10,"customHeaders":[{"name":"foo","value":"bar"}],"expectedStatusCodeRanges":[{"min":200,"max":202}]},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled","maxReturn":null}}'
@@ -297,11 +326,15 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 01 Oct 2022 20:05:39 GMT
+      - Tue, 25 Jul 2023 08:32:07 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
       x-content-type-options:
@@ -338,9 +371,9 @@ interactions:
       ParameterSetName:
       - -n -g --status-code-ranges --custom-headers
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1?api-version=2018-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1?api-version=2022-04-01
   response:
     body:
       string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1","name":"tm1","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Subnet","dnsConfig":{"relativeName":"testtm000002","fqdn":"testtm000002.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10,"customHeaders":[{"name":"foo","value":"doo"},{"name":"test","value":"best"}],"expectedStatusCodeRanges":[{"min":200,"max":204}]},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled","maxReturn":null}}'
@@ -352,11 +385,15 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 01 Oct 2022 20:05:45 GMT
+      - Tue, 25 Jul 2023 08:32:13 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
       x-content-type-options:
@@ -387,22 +424,22 @@ interactions:
       ParameterSetName:
       - -n --profile-name -g --type --target-resource-id --subnets --custom-headers
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2018-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2022-04-01
   response:
     body:
       string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
-        US","minChildEndpoints":null,"minChildEndpointsIPv4":null,"minChildEndpointsIPv6":null,"customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0"}]}}'
+        US","minChildEndpoints":null,"customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0"}],"alwaysServe":"Disabled"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '815'
+      - '782'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 01 Oct 2022 20:05:47 GMT
+      - Tue, 25 Jul 2023 08:32:15 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -432,22 +469,22 @@ interactions:
       ParameterSetName:
       - -n --type --profile-name -g --subnets
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2018-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2022-04-01
   response:
     body:
       string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
-        US","minChildEndpoints":null,"minChildEndpointsIPv4":null,"minChildEndpointsIPv6":null,"customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0"}]}}'
+        US","minChildEndpoints":null,"customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0"}],"alwaysServe":"Disabled"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '815'
+      - '782'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 01 Oct 2022 20:05:48 GMT
+      - Tue, 25 Jul 2023 08:32:16 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -461,7 +498,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '1999'
       x-powered-by:
       - ASP.NET
     status:
@@ -469,11 +506,11 @@ interactions:
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficManagerProfiles/tm1/azureEndpoints/ep1",
-      "name": "ep1", "properties": {"customHeaders": [{"name": "test", "value": "best"}],
-      "endpointLocation": "West US", "endpointMonitorStatus": "CheckingEndpoint",
-      "endpointStatus": "Enabled", "priority": 1, "subnets": [{"first": "10.0.0.0",
-      "scope": 24}], "target": "testpip000003.westus.cloudapp.azure.com", "targetResourceId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1",
+      "name": "ep1", "properties": {"alwaysServe": "Disabled", "customHeaders": [{"name":
+      "test", "value": "best"}], "endpointLocation": "West US", "endpointMonitorStatus":
+      "CheckingEndpoint", "endpointStatus": "Enabled", "priority": 1, "subnets": [{"first":
+      "10.0.0.0", "scope": 24}], "target": "testpip000003.westus.cloudapp.azure.com",
+      "targetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1",
       "weight": 1}, "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints"}'
     headers:
       Accept:
@@ -485,28 +522,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '753'
+      - '780'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n --type --profile-name -g --subnets
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2018-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2022-04-01
   response:
     body:
       string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
-        US","minChildEndpoints":null,"minChildEndpointsIPv4":null,"minChildEndpointsIPv6":null,"customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0","scope":24}]}}'
+        US","minChildEndpoints":null,"customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0","scope":24}],"alwaysServe":"Disabled"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '826'
+      - '793'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 01 Oct 2022 20:05:49 GMT
+      - Tue, 25 Jul 2023 08:32:17 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -536,32 +573,36 @@ interactions:
       ParameterSetName:
       - -n --type --profile-name -g --subnets
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2018-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2022-04-01
   response:
     body:
       string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
-        US","minChildEndpoints":null,"minChildEndpointsIPv4":null,"minChildEndpointsIPv6":null,"customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0","scope":24}]}}'
+        US","minChildEndpoints":null,"customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0","scope":24}],"alwaysServe":"Disabled"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '826'
+      - '793'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 01 Oct 2022 20:05:49 GMT
+      - Tue, 25 Jul 2023 08:32:18 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '1999'
       x-powered-by:
       - ASP.NET
     status:
@@ -569,11 +610,11 @@ interactions:
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficManagerProfiles/tm1/azureEndpoints/ep1",
-      "name": "ep1", "properties": {"customHeaders": [{"name": "test", "value": "best"}],
-      "endpointLocation": "West US", "endpointMonitorStatus": "CheckingEndpoint",
-      "endpointStatus": "Enabled", "priority": 1, "subnets": [{"first": "10.0.0.0",
-      "last": "11.0.0.0"}], "target": "testpip000003.westus.cloudapp.azure.com", "targetResourceId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1",
+      "name": "ep1", "properties": {"alwaysServe": "Disabled", "customHeaders": [{"name":
+      "test", "value": "best"}], "endpointLocation": "West US", "endpointMonitorStatus":
+      "CheckingEndpoint", "endpointStatus": "Enabled", "priority": 1, "subnets": [{"first":
+      "10.0.0.0", "last": "11.0.0.0"}], "target": "testpip000003.westus.cloudapp.azure.com",
+      "targetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1",
       "weight": 1}, "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints"}'
     headers:
       Accept:
@@ -585,28 +626,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '760'
+      - '787'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n --type --profile-name -g --subnets
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2018-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2022-04-01
   response:
     body:
       string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
-        US","minChildEndpoints":null,"minChildEndpointsIPv4":null,"minChildEndpointsIPv6":null,"customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0","last":"11.0.0.0"}]}}'
+        US","minChildEndpoints":null,"customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0","last":"11.0.0.0"}],"alwaysServe":"Disabled"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '833'
+      - '800'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 01 Oct 2022 20:05:51 GMT
+      - Tue, 25 Jul 2023 08:32:19 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:

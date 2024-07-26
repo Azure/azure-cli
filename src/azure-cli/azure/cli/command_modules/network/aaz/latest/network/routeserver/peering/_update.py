@@ -83,10 +83,30 @@ class Update(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.VirtualHubBgpConnectionGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.vars.instance)
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.vars.instance)
         yield self.VirtualHubBgpConnectionCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
+
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
+
+    @register_callback
+    def post_instance_update(self, instance):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -175,7 +195,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_bgp_connection_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_bgp_connection_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -290,7 +310,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_bgp_connection_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_bgp_connection_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -324,61 +344,63 @@ class Update(AAZCommand):
             )
 
 
-_schema_bgp_connection_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_bgp_connection_read = None
 
-def _build_schema_bgp_connection_read(_schema):
-    global _schema_bgp_connection_read
-    if _schema_bgp_connection_read is not None:
-        _schema.etag = _schema_bgp_connection_read.etag
-        _schema.id = _schema_bgp_connection_read.id
-        _schema.name = _schema_bgp_connection_read.name
-        _schema.properties = _schema_bgp_connection_read.properties
-        _schema.type = _schema_bgp_connection_read.type
-        return
+    @classmethod
+    def _build_schema_bgp_connection_read(cls, _schema):
+        if cls._schema_bgp_connection_read is not None:
+            _schema.etag = cls._schema_bgp_connection_read.etag
+            _schema.id = cls._schema_bgp_connection_read.id
+            _schema.name = cls._schema_bgp_connection_read.name
+            _schema.properties = cls._schema_bgp_connection_read.properties
+            _schema.type = cls._schema_bgp_connection_read.type
+            return
 
-    _schema_bgp_connection_read = AAZObjectType()
+        cls._schema_bgp_connection_read = _schema_bgp_connection_read = AAZObjectType()
 
-    bgp_connection_read = _schema_bgp_connection_read
-    bgp_connection_read.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    bgp_connection_read.id = AAZStrType()
-    bgp_connection_read.name = AAZStrType()
-    bgp_connection_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    bgp_connection_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        bgp_connection_read = _schema_bgp_connection_read
+        bgp_connection_read.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        bgp_connection_read.id = AAZStrType()
+        bgp_connection_read.name = AAZStrType()
+        bgp_connection_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        bgp_connection_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    properties = _schema_bgp_connection_read.properties
-    properties.connection_state = AAZStrType(
-        serialized_name="connectionState",
-        flags={"read_only": True},
-    )
-    properties.hub_virtual_network_connection = AAZObjectType(
-        serialized_name="hubVirtualNetworkConnection",
-    )
-    properties.peer_asn = AAZIntType(
-        serialized_name="peerAsn",
-    )
-    properties.peer_ip = AAZStrType(
-        serialized_name="peerIp",
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
+        properties = _schema_bgp_connection_read.properties
+        properties.connection_state = AAZStrType(
+            serialized_name="connectionState",
+            flags={"read_only": True},
+        )
+        properties.hub_virtual_network_connection = AAZObjectType(
+            serialized_name="hubVirtualNetworkConnection",
+        )
+        properties.peer_asn = AAZIntType(
+            serialized_name="peerAsn",
+        )
+        properties.peer_ip = AAZStrType(
+            serialized_name="peerIp",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
 
-    hub_virtual_network_connection = _schema_bgp_connection_read.properties.hub_virtual_network_connection
-    hub_virtual_network_connection.id = AAZStrType()
+        hub_virtual_network_connection = _schema_bgp_connection_read.properties.hub_virtual_network_connection
+        hub_virtual_network_connection.id = AAZStrType()
 
-    _schema.etag = _schema_bgp_connection_read.etag
-    _schema.id = _schema_bgp_connection_read.id
-    _schema.name = _schema_bgp_connection_read.name
-    _schema.properties = _schema_bgp_connection_read.properties
-    _schema.type = _schema_bgp_connection_read.type
+        _schema.etag = cls._schema_bgp_connection_read.etag
+        _schema.id = cls._schema_bgp_connection_read.id
+        _schema.name = cls._schema_bgp_connection_read.name
+        _schema.properties = cls._schema_bgp_connection_read.properties
+        _schema.type = cls._schema_bgp_connection_read.type
 
 
 __all__ = ["Update"]

@@ -4,13 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 # Management Clients
-from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.web import WebSiteManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.privatedns import PrivateDnsManagementClient
 
 # Models
-from azure.mgmt.network.models import (RouteTable, Route, NetworkSecurityGroup, SecurityRule, Delegation)
 from azure.mgmt.resource.resources.models import (DeploymentProperties, Deployment, SubResource)
 from azure.mgmt.privatedns.models import (PrivateZone, VirtualNetworkLink, RecordSet, ARecord)
 
@@ -21,11 +19,19 @@ from azure.cli.core.commands.arm import ArmTemplateBuilder
 from azure.cli.core.util import (sdk_no_wait, random_string)
 from azure.cli.core.azclierror import (ResourceNotFoundError, ValidationError,
                                        MutuallyExclusiveArgumentError)
+from importlib import import_module
 from knack.log import get_logger
 from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource_id)
 
 VERSION_2019_08_01 = "2019-08-01"
 VERSION_2019_10_01 = "2019-10-01"
+# ad-hoc api version 2020-04-01
+appservice = "azure.cli.command_modules.appservice"
+NSG = import_module(".aaz.profile_2020_09_01_hybrid.network.nsg", package=appservice)
+NSGRule = import_module(".aaz.profile_2020_09_01_hybrid.network.nsg.rule", package=appservice)
+RouteTable = import_module(".aaz.profile_2020_09_01_hybrid.network.route_table", package=appservice)
+RouteTableRoute = import_module(".aaz.profile_2020_09_01_hybrid.network.route_table.route", package=appservice)
+Subnet = import_module(".aaz.profile_2020_09_01_hybrid.network.vnet.subnet", package=appservice)
 
 logger = get_logger(__name__)
 
@@ -44,7 +50,7 @@ def show_appserviceenvironment(cmd, name, resource_group_name=None):
     return ase_client.get(resource_group_name, name)
 
 
-def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kind='ASEv2',
+def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kind='ASEv3',
                                      vnet_name=None, ignore_route_table=False,
                                      ignore_network_security_group=False, virtual_ip_type='Internal',
                                      front_end_scale_factor=None, front_end_sku=None, force_route_table=False,
@@ -97,21 +103,37 @@ def delete_appserviceenvironment(cmd, name, resource_group_name=None, no_wait=Fa
 
 
 def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_scale_factor=None,
-                                 front_end_sku=None, allow_new_private_endpoint_connections=None, no_wait=False):
+                                 front_end_sku=None, allow_new_private_endpoint_connections=None,
+                                 allow_incoming_ftp_connections=None, allow_remote_debugging=None,
+                                 no_wait=False):
     ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     ase_def = ase_client.get(resource_group_name, name)
     if ase_def.kind.lower() == 'asev3':
-        if allow_new_private_endpoint_connections is not None:
-            ase_networking_conf = ase_client.get_ase_v3_networking_configuration(resource_group_name, name)
+        ase_networking_conf = ase_client.get_ase_v3_networking_configuration(resource_group_name, name)
+        config_update = False
+        if front_end_scale_factor is not None or front_end_sku is not None:
+            raise ValidationError('No updates were applied. The version of ASE may not be applicable to this update.')
+        if allow_remote_debugging is not None or allow_incoming_ftp_connections is not None \
+           or allow_new_private_endpoint_connections is not None:
+            if ase_networking_conf.remote_debug_enabled != allow_remote_debugging:
+                ase_networking_conf.remote_debug_enabled = allow_remote_debugging
+                config_update = True
+            if ase_networking_conf.ftp_enabled != allow_incoming_ftp_connections:
+                ase_networking_conf.ftp_enabled = allow_incoming_ftp_connections
+                config_update = True
             if ase_networking_conf.allow_new_private_endpoint_connections != allow_new_private_endpoint_connections:
                 ase_networking_conf.allow_new_private_endpoint_connections = allow_new_private_endpoint_connections
-                return ase_client.update_ase_networking_configuration(resource_group_name=resource_group_name,
-                                                                      name=name,
-                                                                      ase_networking_configuration=ase_networking_conf)
-            return ase_networking_conf
+                config_update = True
+        if config_update:
+            return ase_client.update_ase_networking_configuration(resource_group_name=resource_group_name,
+                                                                  name=name,
+                                                                  ase_networking_configuration=ase_networking_conf)
     elif ase_def.kind.lower() == 'asev2':
+        if allow_new_private_endpoint_connections is not None or allow_incoming_ftp_connections is not None or \
+           allow_remote_debugging is not None:
+            raise ValidationError('No updates were applied. The version of ASE may not be applicable to this update.')
         if front_end_scale_factor is not None or front_end_sku is not None:
             worker_sku = _map_worker_sku(front_end_sku)
             ase_def.internal_load_balancing_mode = None  # Workaround issue with flag enums in Swagger
@@ -122,7 +144,44 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
 
             return sdk_no_wait(no_wait, ase_client.begin_create_or_update, resource_group_name=resource_group_name,
                                name=name, hosting_environment_envelope=ase_def)
-    logger.warning('No updates were applied. The version of ASE may not be applicable to this update.')
+    raise ValidationError('No updates were applied. The version of ASE may not be applicable to this update.')
+
+
+def upgrade_appserviceenvironment(cmd, name, resource_group_name=None, no_wait=False):
+    ase_client = _get_ase_client_factory(cmd.cli_ctx)
+    if resource_group_name is None:
+        resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
+    ase_def = ase_client.get(resource_group_name, name)
+    if ase_def.kind.lower() == 'asev3':
+        if ase_def.upgrade_preference == "Manual":
+            if ase_def.upgrade_availability == "Ready":
+                sdk_no_wait(no_wait, ase_client.begin_upgrade,
+                            resource_group_name=resource_group_name, name=name)
+            else:
+                raise ValidationError('An upgrade is not available for your ASEv3.')
+        else:
+            raise ValidationError('Upgrade preference in ASEv3 must be set to manual, please check \
+https://learn.microsoft.com/azure/app-service/environment/how-to-upgrade-preference for more information.')
+    else:
+        raise ValidationError('No upgrade has been applied. This version of ASE not support upgrade.')
+
+
+def send_test_notification_appserviceenvironment(cmd, name, resource_group_name=None):
+    ase_client = _get_ase_client_factory(cmd.cli_ctx)
+    if resource_group_name is None:
+        resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
+    ase_def = ase_client.get(resource_group_name, name)
+    if ase_def.kind.lower() == 'asev3':
+        if ase_def.upgrade_preference == "Manual":
+            ase_client.test_upgrade_available_notification(resource_group_name=resource_group_name,
+                                                           name=name)
+            logger.info('The test notification is being processed.')
+        else:
+            raise ValidationError('Upgrade preference in ASEv3 must be set to manual, please check \
+https://learn.microsoft.com/azure/app-service/environment/how-to-upgrade-preference for more information.')
+    else:
+        raise ValidationError('The test notification has not been processed. \
+This version of ASE does not support test notification.')
 
 
 def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
@@ -183,16 +242,6 @@ def _get_resource_client_factory(cli_ctx, api_version=None):
         client.api_version = api_version
     else:
         client.api_version = VERSION_2019_10_01
-    return client
-
-
-def _get_network_client_factory(cli_ctx, api_version=None):
-    from azure.cli.core.profiles import AD_HOC_API_VERSIONS, ResourceType
-    client = get_mgmt_service_client(cli_ctx, NetworkManagementClient)
-    if api_version:
-        client.api_version = api_version
-    else:
-        client.api_version = AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]['appservice_network']
     return client
 
 
@@ -264,9 +313,12 @@ def _validate_subnet_empty(cli_ctx, subnet_id):
     vnet_resource_group = subnet_id_parts['resource_group']
     vnet_name = subnet_id_parts['name']
     subnet_name = subnet_id_parts['resource_name']
-    network_client = _get_network_client_factory(cli_ctx)
-    subnet_obj = network_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
-    if subnet_obj.resource_navigation_links or subnet_obj.service_association_links:
+    subnet_obj = Subnet.Show(cli_ctx=cli_ctx)(command_args={
+        "name": subnet_name,
+        "vnet_name": vnet_name,
+        "resource_group": vnet_resource_group
+    })
+    if subnet_obj.get("resourceNavigationLinks", None) or subnet_obj.get("serviceAssociationLinks", None):
         raise ValidationError('Subnet is not empty.')
 
 
@@ -275,9 +327,12 @@ def _validate_subnet_size(cli_ctx, subnet_id):
     vnet_resource_group = subnet_id_parts['resource_group']
     vnet_name = subnet_id_parts['name']
     subnet_name = subnet_id_parts['resource_name']
-    network_client = _get_network_client_factory(cli_ctx)
-    subnet_obj = network_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
-    address = subnet_obj.address_prefix
+    subnet_obj = Subnet.Show(cli_ctx=cli_ctx)(command_args={
+        "name": subnet_name,
+        "vnet_name": vnet_name,
+        "resource_group": vnet_resource_group
+    })
+    address = subnet_obj["addressPrefix"]
     size = int(address[address.index('/') + 1:])
     if size > 24:
         err_msg = 'Subnet size could cause scaling issues. Recommended size is at least /24.'
@@ -288,24 +343,30 @@ def _validate_subnet_size(cli_ctx, subnet_id):
 
 
 def _ensure_subnet_delegation(cli_ctx, subnet_id, delegation_service_name):
-    network_client = _get_network_client_factory(cli_ctx)
     subnet_id_parts = parse_resource_id(subnet_id)
     vnet_resource_group = subnet_id_parts['resource_group']
     vnet_name = subnet_id_parts['name']
     subnet_name = subnet_id_parts['resource_name']
-    subnet_obj = network_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
+    subnet_obj = Subnet.Show(cli_ctx=cli_ctx)(command_args={
+        "name": subnet_name,
+        "vnet_name": vnet_name,
+        "resource_group": vnet_resource_group
+    })
 
-    delegations = subnet_obj.delegations
+    delegations = subnet_obj["delegations"]
     delegated = False
     for d in delegations:
-        if d.service_name.lower() == delegation_service_name.lower():
+        if d["serviceName"].lower() == delegation_service_name.lower():
             delegated = True
 
     if not delegated:
-        subnet_obj.delegations = [Delegation(name="delegation", service_name=delegation_service_name)]
         try:
-            poller = network_client.subnets.begin_create_or_update(
-                vnet_resource_group, vnet_name, subnet_name, subnet_parameters=subnet_obj)
+            poller = Subnet.Update(cli_ctx=cli_ctx)(command_args={
+                "name": subnet_name,
+                "vnet_name": vnet_name,
+                "resource_group": vnet_resource_group,
+                "delegated_services": [{"name": "delegation", "service_name": delegation_service_name}]
+            })
             LongRunningOperation(cli_ctx)(poller)
         except Exception:
             err_msg = 'Subnet must be delegated to {}.'.format(delegation_service_name)
@@ -322,40 +383,56 @@ def _ensure_route_table(cli_ctx, resource_group_name, ase_name, location, subnet
     subnet_name = subnet_id_parts['resource_name']
     ase_route_table_name = ase_name + '-Route-Table'
     ase_route_name = ase_name + '-route'
-    network_client = _get_network_client_factory(cli_ctx)
 
-    subnet_obj = network_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
-    if subnet_obj.route_table is None or force:
-        rt_list = network_client.route_tables.list(resource_group_name)
+    subnet_obj = Subnet.Show(cli_ctx=cli_ctx)(command_args={
+        "name": subnet_name,
+        "vnet_name": vnet_name,
+        "resource_group": vnet_resource_group
+    })
+    if subnet_obj.get("routeTable", None) is None or force:
+        rt_list = RouteTable.List(cli_ctx=cli_ctx)(command_args={
+            "resource_group": resource_group_name
+        })
         rt_found = False
         for rt in list(rt_list):
-            if rt.name.lower() == ase_route_table_name.lower():
+            if rt["name"].lower() == ase_route_table_name.lower():
                 rt_found = True
                 break
 
         if not rt_found:
             logger.info('Ensure Route Table...')
-            ase_route_table = RouteTable(location=location)
-            poller = network_client.route_tables.begin_create_or_update(resource_group_name,
-                                                                        ase_route_table_name, ase_route_table)
+            poller = RouteTable.Create(cli_ctx=cli_ctx)(command_args={
+                "name": ase_route_table_name,
+                "resource_group": resource_group_name,
+                "location": location
+            })
             LongRunningOperation(cli_ctx)(poller)
 
             logger.info('Ensure Internet Route...')
-            internet_route = Route(address_prefix='0.0.0.0/0', next_hop_type='Internet')
-            poller = network_client.routes.begin_create_or_update(resource_group_name, ase_route_table_name,
-                                                                  ase_route_name, internet_route)
+            poller = RouteTableRoute.Create(cli_ctx=cli_ctx)(command_args={
+                "name": ase_route_name,
+                "route_table_name": ase_route_table_name,
+                "resource_group": resource_group_name,
+                "address_prefix": '0.0.0.0/0',
+                "next_hop_type": 'Internet'
+            })
             LongRunningOperation(cli_ctx)(poller)
 
-        rt = network_client.route_tables.get(resource_group_name, ase_route_table_name)
-        if not subnet_obj.route_table or subnet_obj.route_table.id != rt.id:
+        rt = RouteTableRoute.Show(cli_ctx=cli_ctx)(command_args={
+            "name": ase_route_table_name,
+            "resource_group": resource_group_name
+        })
+        if not subnet_obj.get("routeTable", None) or subnet_obj["routeTable"]["id"] != rt["id"]:
             logger.info('Associate Route Table with Subnet...')
-            subnet_obj.route_table = rt
-            poller = network_client.subnets.begin_create_or_update(
-                vnet_resource_group, vnet_name,
-                subnet_name, subnet_parameters=subnet_obj)
+            poller = Subnet.Update(cli_ctx=cli_ctx)(command_args={
+                "name": subnet_name,
+                "vnet_name": vnet_name,
+                "resource_group": vnet_resource_group,
+                "route_table": {"id": rt["id"]}
+            })
             LongRunningOperation(cli_ctx)(poller)
     else:
-        route_table_id_parts = parse_resource_id(subnet_obj.route_table.id)
+        route_table_id_parts = parse_resource_id(subnet_obj["routeTable"]["id"])
         rt_name = route_table_id_parts['name']
         if rt_name.lower() != ase_route_table_name.lower():
             err_msg = 'Route table already exists.'
@@ -372,36 +449,49 @@ def _ensure_network_security_group(cli_ctx, resource_group_name, ase_name, locat
     vnet_name = subnet_id_parts['name']
     subnet_name = subnet_id_parts['resource_name']
     ase_nsg_name = ase_name + '-NSG'
-    network_client = _get_network_client_factory(cli_ctx)
 
-    subnet_obj = network_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
-    subnet_address_prefix = subnet_obj.address_prefix
-    if subnet_obj.network_security_group is None or force:
-        nsg_list = network_client.network_security_groups.list(resource_group_name)
+    subnet_obj = Subnet.Show(cli_ctx=cli_ctx)(command_args={
+        "name": subnet_name,
+        "vnet_name": vnet_name,
+        "resource_group": vnet_resource_group
+    })
+    subnet_address_prefix = subnet_obj["addressPrefix"]
+    if subnet_obj.get("networkSecurityGroup", None) is None or force:
+        nsg_list = NSG.List(cli_ctx=cli_ctx)(command_args={
+            "resource_group": resource_group_name
+        })
         nsg_found = False
         for nsg in list(nsg_list):
-            if nsg.name.lower() == ase_nsg_name.lower():
+            if nsg["name"].lower() == ase_nsg_name.lower():
                 nsg_found = True
                 break
 
         if not nsg_found:
             logger.info('Ensure Network Security Group...')
-            ase_nsg = NetworkSecurityGroup(location=location)
-            poller = network_client.network_security_groups.begin_create_or_update(resource_group_name,
-                                                                                   ase_nsg_name, ase_nsg)
+            poller = NSG.Create(cli_ctx=cli_ctx)(command_args={
+                "name": ase_nsg_name,
+                "resource_group": resource_group_name,
+                "location": location
+            })
             LongRunningOperation(cli_ctx)(poller)
 
             _create_asev2_nsg_rules(cli_ctx, resource_group_name, ase_nsg_name, subnet_address_prefix)
 
-        nsg = network_client.network_security_groups.get(resource_group_name, ase_nsg_name)
-        if not subnet_obj.network_security_group or subnet_obj.network_security_group.id != nsg.id:
+        nsg = NSG.Show(cli_ctx=cli_ctx)(command_args={
+            "name": ase_nsg_name,
+            "resource_group": resource_group_name
+        })
+        if not subnet_obj.get("networkSecurityGroup", None) or subnet_obj["networkSecurityGroup"]["id"] != nsg["id"]:
             logger.info('Associate Network Security Group with Subnet...')
-            subnet_obj.network_security_group = NetworkSecurityGroup(id=nsg.id)
-            poller = network_client.subnets.begin_create_or_update(
-                vnet_resource_group, vnet_name, subnet_name, subnet_parameters=subnet_obj)
+            poller = Subnet.Update(cli_ctx=cli_ctx)(command_args={
+                "name": subnet_name,
+                "vnet_name": vnet_name,
+                "resource_group": vnet_resource_group,
+                "network_security_group": {"id": nsg["id"]}
+            })
             LongRunningOperation(cli_ctx)(poller)
     else:
-        nsg_id_parts = parse_resource_id(subnet_obj.network_security_group.id)
+        nsg_id_parts = parse_resource_id(subnet_obj["networkSecurityGroup"]["id"])
         nsg_name = nsg_id_parts['name']
         if nsg_name.lower() != ase_nsg_name.lower():
             err_msg = 'Network Security Group already exists.'
@@ -515,16 +605,20 @@ def _create_nsg_rule(cli_ctx, resource_group_name, network_security_group_name, 
                      priority, description=None, protocol=None, access=None, direction=None,
                      source_port_range='*', source_address_prefix='*',
                      destination_port_range=80, destination_address_prefix='*'):
-    settings = SecurityRule(protocol=protocol, source_address_prefix=source_address_prefix,
-                            destination_address_prefix=destination_address_prefix, access=access,
-                            direction=direction,
-                            description=description, source_port_range=source_port_range,
-                            destination_port_range=destination_port_range, priority=priority,
-                            name=security_rule_name)
-
-    network_client = _get_network_client_factory(cli_ctx)
-    poller = network_client.security_rules.begin_create_or_update(
-        resource_group_name, network_security_group_name, security_rule_name, settings)
+    poller = NSGRule.Create(cli_ctx=cli_ctx)(command_args={
+        "name": security_rule_name,
+        "nsg_name": network_security_group_name,
+        "resource_group": resource_group_name,
+        "protocol": protocol,
+        "source_address_prefix": source_address_prefix,
+        "destination_address_prefix": destination_address_prefix,
+        "access": access,
+        "direction": direction,
+        "description": description,
+        "source_port_range": source_port_range,
+        "destination_port_range": destination_port_range,
+        "priority": priority
+    })
     LongRunningOperation(cli_ctx)(poller)
 
 

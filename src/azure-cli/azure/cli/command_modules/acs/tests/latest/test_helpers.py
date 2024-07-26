@@ -7,9 +7,11 @@ import unittest
 from unittest.mock import Mock, patch
 
 from azure.cli.command_modules.acs._helpers import (
+    check_is_apiserver_vnet_integration_cluster,
     check_is_managed_aad_cluster,
     check_is_msi_cluster,
     check_is_private_cluster,
+    check_is_private_link_cluster,
     format_parameter_name_to_option_name,
     get_property_from_dict_or_object,
     get_snapshot,
@@ -118,6 +120,73 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
             location="test_location",
         )
         self.assertEqual(check_is_private_cluster(mc_4), False)
+
+    def test_check_is_apiserver_vnet_integration_cluster(self):
+        self.assertEqual(check_is_apiserver_vnet_integration_cluster(None), False)
+
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(),
+        )
+        mc_1.api_server_access_profile.additional_properties={'enableVnetIntegration': True}
+        self.assertEqual(check_is_apiserver_vnet_integration_cluster(mc_1), True)
+
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(),
+        )
+        mc_2.api_server_access_profile.additional_properties={'enableVnetIntegration': False}
+        self.assertEqual(check_is_apiserver_vnet_integration_cluster(mc_2), False)
+
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(),
+        )
+        self.assertEqual(check_is_apiserver_vnet_integration_cluster(mc_3), False)
+
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(check_is_apiserver_vnet_integration_cluster(mc_4), False)
+
+    def test_check_is_private_link_cluster(self):
+        self.assertEqual(check_is_private_link_cluster(None), False)
+
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=True,
+            ),
+        )
+        self.assertEqual(check_is_private_link_cluster(mc_1), True)
+
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=False,
+            ),
+        )
+        self.assertEqual(check_is_private_link_cluster(mc_2), False)
+
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=True,
+            ),
+        )
+        mc_3.api_server_access_profile.additional_properties={'enableVnetIntegration': True}
+        self.assertEqual(check_is_private_link_cluster(mc_3), False)
+
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(),
+        )
+        self.assertEqual(check_is_private_link_cluster(mc_4), False)
+
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(check_is_private_link_cluster(mc_5), False)
 
     def test_check_is_managed_aad_cluster(self):
         self.assertEqual(check_is_managed_aad_cluster(None), False)

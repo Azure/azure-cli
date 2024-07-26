@@ -15,13 +15,18 @@ from azure.cli.core.aaz import *
     "sql mi link create",
 )
 class Create(AAZCommand):
-    """Create a distributed availability group between Sql On-Prem and Sql Managed Instance.
+    """Creates a new instance link.
+
+    This command creates an Azure SQL Managed Instance link by joining distributed availability group on SQL Server based on the parameters passed.
+
+    :example: Creates an instance link.
+        az sql mi link create -g 'rg1' --instance-name 'mi1' --name 'link1' --primary-availability-group-name 'primaryag1' --secondary-availability-group-name 'secondaryag1' --source-endpoint '"tcp://server1:5022" --target-database 'db1' --no-wait')
     """
 
     _aaz_info = {
-        "version": "2022-02-01-preview",
+        "version": "2022-08-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2022-02-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2022-08-01-preview"],
         ]
     }
 
@@ -43,18 +48,17 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.distributed_availability_group_name = AAZStrArg(
-            options=["-n", "--name", "--distributed-availability-group-name"],
-            help="Distributed availability group name.",
+            options=["-n", "--link", "--name", "--distributed-availability-group-name"],
+            help="Name of the instance link.",
             required=True,
-            id_part="child_name_1",
         )
         _args_schema.managed_instance_name = AAZStrArg(
             options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
-            help="Name of the managed instance.",
+            help="Name of Azure SQL Managed Instance.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            help="Name of the resource group.",
             required=True,
         )
 
@@ -64,23 +68,17 @@ class Create(AAZCommand):
         _args_schema.primary_availability_group_name = AAZStrArg(
             options=["--primary-ag", "--primary-availability-group-name"],
             arg_group="Properties",
-            help="Primary availability group name",
-        )
-        _args_schema.replication_mode = AAZStrArg(
-            options=["--replication-mode"],
-            arg_group="Properties",
-            help="Replication mode of a distributed availability group. Parameter will be ignored during link creation.",
-            enum={"Async": "Async", "Sync": "Sync"},
+            help="Name of the primary availability group.",
         )
         _args_schema.secondary_availability_group_name = AAZStrArg(
             options=["--secondary-ag", "--secondary-availability-group-name"],
             arg_group="Properties",
-            help="Secondary availability group name",
+            help="Name of the secondary availability group.",
         )
         _args_schema.source_endpoint = AAZStrArg(
             options=["--source-endpoint"],
             arg_group="Properties",
-            help="Source endpoint",
+            help="IP adress of the source endpoint.",
         )
         _args_schema.target_database = AAZStrArg(
             options=["--target-db", "--target-database"],
@@ -90,7 +88,17 @@ class Create(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         yield self.DistributedAvailabilityGroupsCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -164,7 +172,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-02-01-preview",
+                    "api-version", "2022-08-01-preview",
                     required=True,
                 ),
             }
@@ -194,7 +202,6 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("primaryAvailabilityGroupName", AAZStrType, ".primary_availability_group_name")
-                properties.set_prop("replicationMode", AAZStrType, ".replication_mode")
                 properties.set_prop("secondaryAvailabilityGroupName", AAZStrType, ".secondary_availability_group_name")
                 properties.set_prop("sourceEndpoint", AAZStrType, ".source_endpoint")
                 properties.set_prop("targetDatabase", AAZStrType, ".target_database")
@@ -237,6 +244,10 @@ class Create(AAZCommand):
                 serialized_name="distributedAvailabilityGroupId",
                 flags={"read_only": True},
             )
+            properties.instance_role = AAZStrType(
+                serialized_name="instanceRole",
+                flags={"read_only": True},
+            )
             properties.last_hardened_lsn = AAZStrType(
                 serialized_name="lastHardenedLsn",
                 flags={"read_only": True},
@@ -270,6 +281,10 @@ class Create(AAZCommand):
             )
 
             return cls._schema_on_200_201
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]

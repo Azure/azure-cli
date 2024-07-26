@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.42.0"
+VERSION = "2.62.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -35,29 +35,31 @@ CLASSIFIERS = [
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
     'License :: OSI Approved :: MIT License',
 ]
 
 DEPENDENCIES = [
-    'argcomplete~=1.8',
-    'azure-cli-telemetry==1.0.8.*',
+    'argcomplete~=3.3.0',
+    'azure-cli-telemetry==1.1.0.*',
     'azure-mgmt-core>=1.2.0,<2',
     'cryptography',
+    # On Linux, the distribution (Ubuntu, Debian, etc) and version are logged in telemetry
+    'distro; sys_platform == "linux"',
     'humanfriendly~=10.0',
     'jmespath',
-    'knack~=0.10.0',
-    'msal-extensions~=1.0.0',
-    'msal[broker]==1.20.0',
+    'knack~=0.11.0',
+    'msal-extensions==1.2.0',
+    'msal[broker]==1.30.0',
     'msrestazure~=0.6.4',
-    'packaging>=20.9,<22.0',
-    'paramiko>=2.0.8,<3.0.0',
+    'packaging>=20.9',
+    'paramiko>=2.0.8,<4.0.0',
     'pkginfo>=1.5.0.1',
     # psutil can't install on cygwin: https://github.com/Azure/azure-cli/issues/9399
-    'psutil~=5.9; sys_platform != "cygwin"',
+    'psutil>=5.9; sys_platform != "cygwin"',
     'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'requests[socks]'
@@ -79,6 +81,6 @@ setup(
     classifiers=CLASSIFIERS,
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
-    python_requires='>=3.7.0',
+    python_requires='>=3.8.0',
     package_data={'azure.cli.core': ['auth/landing_pages/*.html']}
 )

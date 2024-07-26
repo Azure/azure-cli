@@ -5,6 +5,9 @@
 # pylint: disable=line-too-long, too-few-public-methods
 
 import abc
+import base64
+import json
+import os.path
 import re
 import math
 
@@ -717,4 +720,88 @@ class AAZSubscriptionIdArgFormat(AAZBaseArgFormat):
             value._data = sub_id
         else:
             logger.warning("Subscription '%s' not recognized.", value._data)
+        return value
+
+
+class AAZFileArgFormat(AAZBaseArgFormat):
+
+    def __call__(self, ctx, value):
+        assert isinstance(value, AAZSimpleValue)
+        data = value._data
+        if data == AAZUndefined or data is None or value._is_patch:
+            return value
+
+        assert isinstance(data, str)
+
+        if not os.path.isfile(data):
+            raise AAZInvalidArgValueError("File '{}' doesn't exist".format(data))
+
+        data = self.read_file(data)
+        value._data = data
+        return value
+
+    @abc.abstractmethod
+    def read_file(self, file_path):
+        raise NotImplementedError()
+
+
+class AAZFileArgTextFormat(AAZFileArgFormat):
+
+    def __init__(self, encoding=None):
+        self._encoding = encoding  # use platform default encoding when it's None
+
+    def read_file(self, file_path):
+        with open(file_path, 'r', encoding=self._encoding) as f:
+            data = f.read()
+        return data
+
+
+class AAZFileArgBase64EncodeFormat(AAZFileArgFormat):
+
+    def read_file(self, file_path):
+        with open(file_path, 'rb') as f:
+            contents = f.read()
+            base64_data = base64.b64encode(contents)
+            try:
+                data = base64_data.decode('utf-8')
+            except UnicodeDecodeError:
+                data = str(base64_data)
+        return data
+
+
+class AAZPaginationTokenArgFormat(AAZBaseArgFormat):
+    def __call__(self, ctx, value):
+        def validate_json(s):
+            try:
+                obj = json.loads(s)
+            except json.JSONDecodeError:
+                raise AAZInvalidArgValueError("Invalid JSON object.")
+
+            if not isinstance(obj, dict):
+                raise AAZInvalidArgValueError("Decoded object is not a dictionary.")
+
+            try:
+                _, _ = obj["next_link"], obj["offset"]
+            except KeyError:
+                raise AAZInvalidArgValueError("`next_link` or `offset` doesn't exist.")
+
+        assert isinstance(value, AAZSimpleValue)
+        data = value._data
+        if data == AAZUndefined or data is None or value._is_patch:
+            return value
+
+        assert isinstance(data, str)
+        try:
+            decoded_bytes = base64.b64decode(data)
+        except base64.binascii.Error:
+            raise AAZInvalidArgValueError("Invalid Base64 string.")
+
+        try:
+            decoded_string = decoded_bytes.decode("utf-8")
+        except UnicodeDecodeError:
+            raise AAZInvalidArgValueError("Error decoding UTF-8.")
+
+        validate_json(decoded_string)
+        value._data = decoded_string
+
         return value

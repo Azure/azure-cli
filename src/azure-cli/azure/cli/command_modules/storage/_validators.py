@@ -6,8 +6,9 @@
 # pylint: disable=protected-access
 import os
 import argparse
+from ipaddress import ip_network
 
-from azure.cli.core.commands.validators import validate_key_value_pairs
+from azure.cli.core.commands.validators import validate_key_value_pairs, validate_tags
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.cli.core.azclierror import UnrecognizedArgumentError
@@ -399,6 +400,8 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
         prefix = cmd.command_kwargs['resource_type'].value[0]
         if valid_file_source and (ns.get('container_name', None) or not same_account):
             dir_name, file_name = os.path.split(path) if path else (None, '')
+            if dir_name == '':
+                dir_name = None
             if is_storagev2(prefix):
                 source_sas = create_short_lived_file_sas_v2(cmd, source_account_name, source_account_key, share,
                                                             dir_name, file_name)
@@ -624,6 +627,8 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
                 filename = ns.get('file_name')
                 account_kwargs["share_name"] = share
                 account_kwargs["snapshot"] = ns.get('snapshot')
+                if ns.get('enable_file_backup_request_intent', None):
+                    account_kwargs["enable_file_backup_request_intent"] = ns.get("enable_file_backup_request_intent")
                 if is_storagev2(prefix):
                     client = cf_share_client(cmd.cli_ctx, account_kwargs).\
                         get_directory_client(directory_path=directory).\
@@ -1247,6 +1252,7 @@ def process_blob_upload_batch_parameters(cmd, namespace):
     get_content_setting_validator(t_blob_content_settings, update=False)(cmd, namespace)
     add_progress_callback(cmd, namespace)
     blob_tier_validator_track2(cmd, namespace)
+    validate_tags(namespace)
 
 
 def process_blob_delete_batch_parameters(cmd, namespace):
@@ -2010,7 +2016,7 @@ def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, re
             logger.info("Cannot generate sas token. %s", ex)
             sas_token = None
     if sas_token:
-        return'{}?{}'.format(url, sas_token)
+        return '{}?{}'.format(url, sas_token)
     return url
 
 
@@ -2227,6 +2233,24 @@ def validate_fs_file_set_expiry(namespace):
         namespace.expires_on = get_datetime_type(False)(namespace.expires_on)
     except ValueError:
         pass
+
+
+def validate_ip_address(namespace):
+    # if there are overlapping ip ranges, throw an exception
+    ip_address = namespace.ip_address
+
+    if not ip_address:
+        return
+
+    ip_address_networks = [ip_network(ip) for ip in ip_address]
+    for idx, ip_address_network in enumerate(ip_address_networks):
+        for idx2, ip_address_network2 in enumerate(ip_address_networks):
+            if idx == idx2:
+                continue
+            if ip_address_network.overlaps(ip_address_network2):
+                from azure.cli.core.azclierror import InvalidArgumentValueError
+                raise InvalidArgumentValueError(f"ip addresses {ip_address_network} and {ip_address_network2} "
+                                                f"provided are overlapping: --ip_address ip1 [ip2]...")
 
 
 # pylint: disable=too-few-public-methods

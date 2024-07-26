@@ -84,11 +84,13 @@ def process_assignment_namespace(cmd, namespace):  # pylint: disable=unused-argu
     non_empty_msg = "usage error: {} can't be an empty string. Either omit it or provide a non-empty string."
 
     for arg in non_empty_args:
-        if getattr(namespace, arg) == "":
+        if getattr(namespace, arg, None) == "":
             # Get option name, like resource_group_name -> --resource-group
             option_name = cmd.arguments[arg].type.settings['options_list'][0]
             raise CLIError(non_empty_msg.format(option_name))
 
-    resource_group = namespace.resource_group_name
-    if namespace.scope and resource_group and getattr(resource_group, 'is_default', None):
-        namespace.resource_group_name = None  # drop configured defaults
+    # `az role assignment create` doesn't support resource_group_name
+    if hasattr(namespace, "resource_group_name"):
+        resource_group = namespace.resource_group_name
+        if namespace.scope and resource_group and getattr(resource_group, 'is_default', None):
+            namespace.resource_group_name = None  # drop configured defaults

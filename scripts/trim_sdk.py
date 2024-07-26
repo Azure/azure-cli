@@ -17,7 +17,6 @@ import re
 import shutil
 
 import azure.mgmt
-import azure.mgmt.network
 
 from azure.cli.core.profiles import AD_HOC_API_VERSIONS, AZURE_API_PROFILES, ResourceType
 
@@ -57,7 +56,11 @@ def remove_aio_folders():
 
 def remove_unused_api_versions(resource_type):
     _LOGGER.info(f"Removing unused api folders for {resource_type.import_prefix}:")
-    sdk_path = importlib.import_module(resource_type.import_prefix).__path__[0]
+    try:
+        sdk_path = importlib.import_module(resource_type.import_prefix).__path__[0]
+    except ImportError:
+        _LOGGER.info(f'{resource_type} is not installed, skip')
+        return
 
     used_api_versions = set()
 
@@ -71,6 +74,9 @@ def remove_unused_api_versions(resource_type):
         if resource_type in profile:
             # value is str like '2022-01-01' or SDKProfile
             value = profile[resource_type]
+            if value is None:
+                _LOGGER.info(f'{resource_type}\'s API version is None, skip')
+                return
             if isinstance(value, str):
                 used_api_versions.add(value)
             else:
@@ -113,41 +119,6 @@ def _get_all_sdks_to_trim():
     return resource_types
 
 
-def _get_biggest_sdks_to_trim():
-    # Return top biggest SDKs. This list was retrieved by running
-    # ncdu /opt/az/lib/python3.10/site-packages/azure/mgmt
-    resource_types = [
-        # /network
-        ResourceType.MGMT_NETWORK,
-        # /web
-        ResourceType.MGMT_APPSERVICE,
-        # /compute
-        ResourceType.MGMT_COMPUTE,
-        # /containerservice
-        ResourceType.MGMT_CONTAINERSERVICE,
-        # /resource
-        ResourceType.MGMT_RESOURCE_FEATURES,
-        ResourceType.MGMT_RESOURCE_LINKS,
-        ResourceType.MGMT_RESOURCE_LOCKS,
-        ResourceType.MGMT_RESOURCE_POLICY,
-        ResourceType.MGMT_RESOURCE_RESOURCES,
-        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
-        ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS,
-        ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
-        ResourceType.MGMT_RESOURCE_PRIVATELINKS,
-        # /storage
-        ResourceType.MGMT_STORAGE,
-        # /databoxedge
-        ResourceType.MGMT_DATABOXEDGE,
-        # /containerregistry
-        ResourceType.MGMT_CONTAINERREGISTRY,
-        # /iothub
-        ResourceType.MGMT_IOTHUB,
-    ]
-
-    return resource_types
-
-
 def main():
     mgmt_sdk_dir = azure.mgmt.__path__[0]
 
@@ -158,7 +129,7 @@ def main():
     _print_folder_size(mgmt_sdk_dir)
 
     # Removed unused API versions
-    resource_types = _get_biggest_sdks_to_trim()
+    resource_types = _get_all_sdks_to_trim()
 
     for r in resource_types:
         remove_unused_api_versions(r)

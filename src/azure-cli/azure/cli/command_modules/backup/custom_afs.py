@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from datetime import datetime, timedelta, timezone
 import azure.cli.command_modules.backup.custom_help as helper
+# pylint: disable=too-many-locals
 # pylint: disable=import-error
 # pylint: disable=unused-argument
 
@@ -65,8 +66,9 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
                                            source_resource_id=storage_account.properties.container_id,
                                            workload_type="AzureFileShare")
         param = ProtectionContainerResource(properties=properties)
-        result = protection_containers_client.register(vault_name, resource_group_name, fabric_name,
-                                                       storage_account.name, param, cls=helper.get_pipeline_response)
+        result = protection_containers_client.begin_register(vault_name, resource_group_name, fabric_name,
+                                                             storage_account.name, param, polling=False,
+                                                             cls=helper.get_pipeline_response).result()
         helper.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, storage_account.name)
 
     protectable_item = _get_protectable_item_for_afs(cmd.cli_ctx, vault_name, resource_group_name, afs_name,
@@ -171,20 +173,22 @@ def _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, 
 
 def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name, item, restore_mode,
                            resolve_conflict, restore_request_type, source_file_type=None, source_file_path=None,
-                           target_storage_account_name=None, target_file_share_name=None, target_folder=None):
+                           target_storage_account_name=None, target_file_share_name=None, target_folder=None,
+                           target_resource_group_name=None, tenant_id=None):
 
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)
 
-    sa_name = item.properties.container_name
+    # sa_name = item.properties.container_name
 
     afs_restore_request = AzureFileShareRestoreRequest()
     target_details = None
 
     afs_restore_request.copy_options = resolve_conflict
     afs_restore_request.recovery_type = restore_mode
-    afs_restore_request.source_resource_id = _get_storage_account_id(cmd.cli_ctx, sa_name.split(';')[-1],
-                                                                     sa_name.split(';')[-2])
+    afs_restore_request.source_resource_id = _get_storage_account_id(cmd.cli_ctx,
+                                                                     item.properties.container_name.split(';')[-1],
+                                                                     item.properties.container_name.split(';')[-2])
     afs_restore_request.restore_request_type = restore_request_type
 
     restore_file_specs = None
@@ -201,7 +205,11 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
                                                        target_folder_path=target_folder))
 
     if restore_mode == "AlternateLocation":
-        target_sa_name, target_sa_rg = helper.get_resource_name_and_rg(resource_group_name, target_storage_account_name)
+        if target_resource_group_name is None:
+            target_resource_group_name = resource_group_name
+        target_sa_name, target_sa_rg = helper.get_resource_name_and_rg(
+            target_resource_group_name,
+            target_storage_account_name)
         target_details = TargetAFSRestoreInfo()
         target_details.name = target_file_share_name
         target_details.target_resource_id = _get_storage_account_id(cmd.cli_ctx, target_sa_name, target_sa_rg)
@@ -211,6 +219,16 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
 
     trigger_restore_request = RestoreRequestResource(properties=afs_restore_request)
 
+    if helper.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore"):
+        # Cross Tenant scenario
+        if tenant_id is not None:
+            client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                             aux_tenants=[tenant_id]).restores
+        trigger_restore_request.properties.resource_guard_operation_requests = [
+            helper.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore")]
+
+    # Trigger restore
     result = client.begin_trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
                                   trigger_restore_request, cls=helper.get_pipeline_response, polling=False).result()
 
@@ -290,16 +308,33 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
-def disable_protection(cmd, client, resource_group_name, vault_name, item):
+def disable_protection(cmd, client, resource_group_name, vault_name, item,
+                       retain_recovery_points_as_per_policy=False, tenant_id=None):
     # Get container and item URIs
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)
 
     afs_item_properties = AzureFileshareProtectedItem()
     afs_item_properties.policy_id = ''
-    afs_item_properties.protection_state = ProtectionState.protection_stopped
+    if retain_recovery_points_as_per_policy:
+        afs_item_properties.protection_state = ProtectionState.backups_suspended
+    else:
+        afs_item_properties.protection_state = ProtectionState.protection_stopped
     afs_item_properties.source_resource_id = item.properties.source_resource_id
     afs_item = ProtectedItemResource(properties=afs_item_properties)
+
+    # ResourceGuard scenario: if we are stopping backup and there is MUA setup for the scenario,
+    # we want to set the appropriate parameters.
+    if afs_item.properties.protection_state == ProtectionState.protection_stopped:
+        if helper.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
+                                             vault_name, "RecoveryServicesStopProtection"):
+            # Cross Tenant scenario
+            if tenant_id is not None:
+                client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                 aux_tenants=[tenant_id]).protected_item
+            afs_item.properties.resource_guard_operation_requests = [helper.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesStopProtection")]
+
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, afs_item, cls=helper.get_pipeline_response)
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)

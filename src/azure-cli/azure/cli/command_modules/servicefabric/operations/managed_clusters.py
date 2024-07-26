@@ -13,9 +13,15 @@ from azure.cli.command_modules.servicefabric._sf_utils import (
     _create_resource_group_name
 )
 from azure.mgmt.servicefabricmanagedclusters.models import (
+    NetworkSecurityRule,
     ManagedCluster,
     Sku,
     ClientCertificate
+)
+
+from azure.cli.command_modules.servicefabric._sf_utils import (
+    update_in_collection,
+    find_in_collection
 )
 
 from knack.log import get_logger
@@ -124,6 +130,12 @@ def update_cluster(cmd,
         if tags is not None:
             cluster.tags = tags
 
+        if not cluster.public_ip_prefix_id:
+            cluster.public_ip_prefix_id = None
+
+        if not cluster.public_i_pv6_prefix_id:
+            cluster.public_i_pv6_prefix_id = None
+
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
     except HttpResponseError as ex:
@@ -152,7 +164,13 @@ def add_client_cert(cmd,
                 issuer_thumbprint = ','.join(issuer_thumbprint)
             cluster.clients.append(ClientCertificate(is_admin=is_admin, common_name=common_name, issuer_thumbprint=issuer_thumbprint))
         else:
-            CLIError("Thumbprint and Common name are empty")
+            raise CLIError("Thumbprint and Common name are empty")
+
+        if not cluster.public_ip_prefix_id:
+            cluster.public_ip_prefix_id = None
+
+        if not cluster.public_i_pv6_prefix_id:
+            cluster.public_i_pv6_prefix_id = None
 
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
@@ -169,6 +187,12 @@ def delete_client_cert(cmd,
                        common_name=None):
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
+
+        if not cluster.public_ip_prefix_id:
+            cluster.public_ip_prefix_id = None
+
+        if not cluster.public_i_pv6_prefix_id:
+            cluster.public_i_pv6_prefix_id = None
 
         if cluster.clients is not None:
             initial_size = len(cluster.clients)
@@ -206,3 +230,165 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
     resource_client = resource_client_factory(cli_ctx).resource_groups
     rg = resource_client.get(resource_group_name)
     return rg.location
+
+
+def add_network_security_rule(cmd,
+                              client,
+                              resource_group_name,
+                              cluster_name,
+                              name=None,
+                              access=None,
+                              description=None,
+                              direction=None,
+                              protocol=None,
+                              priority=None,
+                              source_port_ranges=None,
+                              dest_port_ranges=None,
+                              dest_addr_prefixes=None,
+                              source_addr_prefixes=None):
+    try:
+        cluster = client.managed_clusters.get(resource_group_name, cluster_name)
+
+        if cluster.network_security_rules is None:
+            cluster.network_security_rules = []
+
+        new_network_securityRule = NetworkSecurityRule(name=name,
+                                                       access=access,
+                                                       description=description,
+                                                       direction=direction,
+                                                       protocol='*' if protocol == 'any' else protocol,
+                                                       priority=priority,
+                                                       source_port_ranges=source_port_ranges,
+                                                       destination_port_ranges=dest_port_ranges,
+                                                       destination_address_prefixes=dest_addr_prefixes,
+                                                       source_address_prefixes=source_addr_prefixes)
+
+        cluster.network_security_rules.append(new_network_securityRule)
+
+        if not cluster.public_ip_prefix_id:
+            cluster.public_ip_prefix_id = None
+
+        if not cluster.public_i_pv6_prefix_id:
+            cluster.public_i_pv6_prefix_id = None
+
+        poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
+        return LongRunningOperation(cmd.cli_ctx)(poller)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
+        raise
+
+
+def update_network_security_rule(cmd,
+                                 client,
+                                 resource_group_name,
+                                 cluster_name,
+                                 name,
+                                 access=None,
+                                 description=None,
+                                 direction=None,
+                                 protocol=None,
+                                 priority=None,
+                                 source_port_ranges=None,
+                                 dest_port_ranges=None,
+                                 dest_addr_prefixes=None,
+                                 source_addr_prefixes=None):
+    try:
+        cluster = client.managed_clusters.get(resource_group_name, cluster_name)
+
+        existing_nsg = find_in_collection(cluster, 'network_security_rules', 'name', name)
+        if existing_nsg is None:
+            logger.error('NSG %s does not exist.', name)
+            return None
+
+        if protocol == 'any':
+            protocol_val = '*'
+        elif protocol is not None:
+            protocol_val = protocol
+        else:
+            protocol_val = existing_nsg.protocol
+
+        updated_network_securityRule = NetworkSecurityRule(name=name,
+                                                           access=access if access is not None else existing_nsg.access,
+                                                           description=description if description is not None else existing_nsg.description,
+                                                           direction=direction if direction is not None else existing_nsg.direction,
+                                                           protocol=protocol_val,
+                                                           priority=priority if priority is not None else existing_nsg.priority,
+                                                           source_port_ranges=source_port_ranges if source_port_ranges is not None else existing_nsg.source_port_ranges,
+                                                           destination_port_ranges=dest_port_ranges if dest_port_ranges is not None else existing_nsg.destination_port_ranges,
+                                                           destination_address_prefixes=dest_addr_prefixes if dest_addr_prefixes is not None else existing_nsg.destination_address_prefixes,
+                                                           source_address_prefixes=source_addr_prefixes if source_addr_prefixes is not None else existing_nsg.source_address_prefixes)
+
+        if not cluster.public_ip_prefix_id:
+            cluster.public_ip_prefix_id = None
+
+        if not cluster.public_i_pv6_prefix_id:
+            cluster.public_i_pv6_prefix_id = None
+
+        update_in_collection(cluster, 'network_security_rules', updated_network_securityRule, 'name')
+
+        poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
+        return LongRunningOperation(cmd.cli_ctx)(poller)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
+        raise
+
+
+def get_network_security_rule(client,
+                              resource_group_name,
+                              cluster_name,
+                              name):
+    try:
+        cluster = client.managed_clusters.get(resource_group_name, cluster_name)
+        nsg = find_in_collection(cluster, 'network_security_rules', 'name', name)
+
+        if nsg is None:
+            raise 'NSG with name {} not found'.format(name)
+
+        return nsg
+
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
+        raise
+
+
+def list_network_security_rules(client,
+                                resource_group_name,
+                                cluster_name):
+    try:
+        cluster = client.managed_clusters.get(resource_group_name, cluster_name)
+        return cluster.network_security_rules
+
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
+        raise
+
+
+def delete_network_security_rule(cmd,
+                                 client,
+                                 resource_group_name,
+                                 cluster_name,
+                                 name):
+    try:
+        cluster = client.managed_clusters.get(resource_group_name, cluster_name)
+
+        if not cluster.public_ip_prefix_id:
+            cluster.public_ip_prefix_id = None
+
+        if not cluster.public_i_pv6_prefix_id:
+            cluster.public_i_pv6_prefix_id = None
+
+        if cluster.network_security_rules is not None:
+            initial_size = len(cluster.network_security_rules)
+            if name is not None:
+                cluster.network_security_rules = [nsg for nsg in cluster.network_security_rules if nsg.name != name]
+
+            if initial_size > len(cluster.network_security_rules):
+                poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
+                return LongRunningOperation(cmd.cli_ctx)(poller)
+
+            raise 'NSG with name {} not found'.format(name)
+
+        return cluster
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
+        raise

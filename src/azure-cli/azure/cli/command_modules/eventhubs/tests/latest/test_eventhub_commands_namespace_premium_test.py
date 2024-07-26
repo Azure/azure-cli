@@ -197,6 +197,12 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.assertTrue(namespace['zoneRedundant'])
         self.assertEqual(0, len(namespace['tags']))
 
+        # List Namespace within ResourceGroup
+        self.cmd('eventhubs namespace list --resource-group {rg}')
+
+        # List all Namespace within subscription
+        self.cmd('eventhubs namespace list')
+
         # Delete Namespace list by ResourceGroup
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename1}')

@@ -50,16 +50,22 @@ CREDENTIAL_WARNING = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
+CLASSIC_ADMINISTRATOR_WARNING = (
+    "Azure classic subscription administrators will be retired on August 31, 2024. "
+    "After August 31, 2024, all classic administrators risk losing access to the subscription. "
+    "Delete classic administrators who no longer need access or assign an Azure RBAC role for fine-grained access "
+    "control. Learn more: https://go.microsoft.com/fwlink/?linkid=2238474")
+
 logger = get_logger(__name__)
 
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines, protected-access
 
 
 def list_role_definitions(cmd, name=None, resource_group_name=None, scope=None,
                           custom_role_only=False):
     definitions_client = _auth_client_factory(cmd.cli_ctx, scope).role_definitions
     scope = _build_role_scope(resource_group_name, scope,
-                              definitions_client.config.subscription_id)
+                              definitions_client._config.subscription_id)
     return _search_role_definitions(cmd.cli_ctx, definitions_client, name, [scope], custom_role_only)
 
 
@@ -94,7 +100,7 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         definitions_client = _auth_client_factory(cmd.cli_ctx, scope=role_resource_id).role_definitions
         scopes_in_definition = role_definition.get('assignableScopes', None)
         scopes = (scopes_in_definition if scopes_in_definition else
-                  ['/subscriptions/' + definitions_client.config.subscription_id])
+                  ['/subscriptions/' + definitions_client._config.subscription_id])
         if role_resource_id:
             from msrestazure.tools import parse_resource_id
             role_id = parse_resource_id(role_resource_id)['name']
@@ -125,7 +131,7 @@ def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
                            custom_role_only=False):
     definitions_client = _auth_client_factory(cmd.cli_ctx, scope).role_definitions
     scope = _build_role_scope(resource_group_name, scope,
-                              definitions_client.config.subscription_id)
+                              definitions_client._config.subscription_id)
     roles = _search_role_definitions(cmd.cli_ctx, definitions_client, name, [scope], custom_role_only)
     for r in roles:
         definitions_client.delete(role_definition_id=r.name, scope=scope)
@@ -144,8 +150,9 @@ def _search_role_definitions(cli_ctx, definitions_client, name, scopes, custom_r
     return []
 
 
-def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None,
-                           scope=None, assignee_principal_type=None, description=None,
+def create_role_assignment(cmd, role, scope,
+                           assignee=None, assignee_object_id=None,
+                           assignee_principal_type=None, description=None,
                            condition=None, condition_version=None, assignment_name=None):
     """Check parameters are provided correctly, then call _create_role_assignment."""
     if bool(assignee) == bool(assignee_object_id):
@@ -176,13 +183,13 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
             principal_type = _get_principal_type_from_object_id(cmd.cli_ctx, assignee_object_id)
 
     try:
-        return _create_role_assignment(cmd.cli_ctx, role, object_id, resource_group_name, scope, resolve_assignee=False,
+        return _create_role_assignment(cmd.cli_ctx, role, object_id, scope=scope, resolve_assignee=False,
                                        assignee_principal_type=principal_type, description=description,
                                        condition=condition, condition_version=condition_version,
                                        assignment_name=assignment_name)
     except Exception as ex:  # pylint: disable=broad-except
         if _error_caused_by_role_assignment_exists(ex):  # for idempotent
-            return list_role_assignments(cmd, assignee, role, resource_group_name, scope)[0]
+            return list_role_assignments(cmd, assignee=assignee, role=role, scope=scope)[0]
         raise
 
 
@@ -195,7 +202,7 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
     scope = _build_role_scope(resource_group_name, scope,
-                              assignments_client.config.subscription_id)
+                              assignments_client._config.subscription_id)
 
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
@@ -212,10 +219,13 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     :param include_groups: include extra assignments to the groups of which the user is a
     member(transitively).
     '''
+    if include_classic_administrators:
+        logger.warning(CLASSIC_ADMINISTRATOR_WARNING)
+
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    factory = _auth_client_factory(cmd.cli_ctx, scope)
-    assignments_client = factory.role_assignments
-    definitions_client = factory.role_definitions
+    authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
+    assignments_client = authorization_client.role_assignments
+    definitions_client = authorization_client.role_definitions
 
     if show_all:
         if resource_group_name or scope:
@@ -223,7 +233,7 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
         scope = None
     else:
         scope = _build_role_scope(resource_group_name, scope,
-                                  definitions_client.config.subscription_id)
+                                  definitions_client._config.subscription_id)
 
     assignments = _search_role_assignments(cmd.cli_ctx, assignments_client, definitions_client,
                                            scope, assignee, role,
@@ -231,7 +241,7 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
 
     results = todict(assignments) if assignments else []
     if include_classic_administrators:
-        results += _backfill_assignments_for_co_admins(cmd.cli_ctx, factory, assignee)
+        results += _backfill_assignments_for_co_admins(cmd.cli_ctx, authorization_client, assignee)
 
     if not results:
         return []
@@ -240,7 +250,7 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     # (it's possible that associated roles and principals were deleted, and we just do nothing.)
     # 2. fill in role names
     role_defs = list(definitions_client.list(
-        scope=scope or ('/subscriptions/' + definitions_client.config.subscription_id)))
+        scope=scope or ('/subscriptions/' + definitions_client._config.subscription_id)))
     worker = MultiAPIAdaptor(cmd.cli_ctx)
     role_dics = {i.id: worker.get_role_property(i, 'role_name') for i in role_defs}
     for i in results:
@@ -470,7 +480,7 @@ def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
             'principalName': email,
             'roleDefinitionName': admin.role,
             'roleDefinitionId': 'NA(classic admin role)',
-            'scope': '/subscriptions/' + auth_client.config.subscription_id
+            'scope': '/subscriptions/' + auth_client._config.subscription_id
         }
         if worker.old_api:
             result[-1]['properties'] = properties
@@ -525,7 +535,7 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
             return
 
     scope = _build_role_scope(resource_group_name, scope,
-                              assignments_client.config.subscription_id)
+                              assignments_client._config.subscription_id)
     assignments = _search_role_assignments(cmd.cli_ctx, assignments_client, definitions_client,
                                            scope, assignee, role, include_inherited,
                                            include_groups=False)
@@ -556,9 +566,9 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
             f = "assignedTo('{}')".format(assignee_object_id)
         else:
             f = "principalId eq '{}'".format(assignee_object_id)
-        assignments = list(assignments_client.list(filter=f))
+        assignments = list(assignments_client.list_for_subscription(filter=f))
     else:
-        assignments = list(assignments_client.list())
+        assignments = list(assignments_client.list_for_subscription())
 
     worker = MultiAPIAdaptor(cli_ctx)
     if assignments:
@@ -604,7 +614,7 @@ def _resolve_role_id(role, scope, definitions_client):
     else:
         if is_guid(role):
             role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
-                definitions_client.config.subscription_id, role)
+                definitions_client._config.subscription_id, role)
         if not role_id:  # retrieve role id
             role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
             if not role_defs:
@@ -1150,7 +1160,7 @@ def list_service_principal_owners(client, identifier):
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches, unused-argument
         cmd, display_name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
-        show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
+        show_auth_in_json=None, skip_assignment=False, keyvault=None):
     import time
 
     if role and not scopes or not role and scopes:
@@ -1265,7 +1275,7 @@ def create_service_principal_for_rbac(
 
     logger.warning(CREDENTIAL_WARNING)
 
-    if show_auth_for_sdk:
+    if show_auth_in_json:
         from azure.cli.core._profile import Profile
         profile = Profile(cli_ctx=cmd.cli_ctx)
         result = profile.get_sp_auth_info(scopes[0].split('/')[2] if scopes else None,
@@ -1331,12 +1341,12 @@ def _process_certificate(cli_ctx, years, app_start_date, app_end_date, cert, cre
             _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, cert)
     elif keyvault:
         # 6 - Use existing cert from KeyVault
-        kv_client = _get_keyvault_client(cli_ctx)
         vault_base = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
-        cert_obj = kv_client.get_certificate(vault_base, cert, '')
+        kv_client = _get_keyvault_cert_client(cli_ctx, vault_base)
+        cert_obj = kv_client.get_certificate(cert)
         public_cert_string = base64.b64encode(cert_obj.cer).decode('utf-8')  # pylint: disable=no-member
-        cert_start_date = cert_obj.attributes.not_before  # pylint: disable=no-member
-        cert_end_date = cert_obj.attributes.expires  # pylint: disable=no-member
+        cert_start_date = cert_obj.properties.not_before  # pylint: disable=no-member
+        cert_end_date = cert_obj.properties.expires_on  # pylint: disable=no-member
 
     return public_cert_string, cert_file, cert_start_date, cert_end_date
 
@@ -1363,9 +1373,10 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
     return app_start_date, app_end_date, cert_start_date, cert_end_date
 
 
-def _get_keyvault_client(cli_ctx):
-    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-    return keyvault_data_plane_factory(cli_ctx)
+def _get_keyvault_cert_client(cli_ctx, vault_base_url):
+    from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_certificate_client
+    command_args = {'vault_base_url': vault_base_url}
+    return data_plane_azure_keyvault_certificate_client(cli_ctx, command_args=command_args)
 
 
 def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-locals
@@ -1422,9 +1433,9 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
 
 
 def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_cert_name):  # pylint: disable=too-many-locals
-    import time
-
-    kv_client = _get_keyvault_client(cli_ctx)
+    from azure.cli.command_modules.keyvault._validators import build_certificate_policy
+    vault_base_url = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
+    kv_client = _get_keyvault_cert_client(cli_ctx, vault_base_url)
     cert_policy = {
         'issuer_parameters': {
             'name': 'Self'
@@ -1459,15 +1470,13 @@ def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_ce
             'validity_in_months': int(years * 12)
         }
     }
-    vault_base_url = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
-    kv_client.create_certificate(vault_base_url, keyvault_cert_name, cert_policy)
-    while kv_client.get_certificate_operation(vault_base_url, keyvault_cert_name).status != 'completed':  # pylint: disable=no-member, line-too-long
-        time.sleep(5)
+    policyObj = build_certificate_policy(cli_ctx, cert_policy)
+    kv_client.begin_create_certificate(keyvault_cert_name, policyObj).result()
 
-    cert = kv_client.get_certificate(vault_base_url, keyvault_cert_name, '')
+    cert = kv_client.get_certificate(keyvault_cert_name)
     cert_string = base64.b64encode(cert.cer).decode('utf-8')  # pylint: disable=no-member
-    cert_start_date = cert.attributes.not_before  # pylint: disable=no-member
-    cert_end_date = cert.attributes.expires  # pylint: disable=no-member
+    cert_start_date = cert.properties.not_before  # pylint: disable=no-member
+    cert_end_date = cert.properties.expires_on  # pylint: disable=no-member
     creds_file = None
     return (cert_string, creds_file, cert_start_date, cert_end_date)
 
@@ -1917,17 +1926,14 @@ def list_groups(client, display_name=None, query_filter=None):
 
 
 def get_group(client, object_id):
-    """Get group information from the directory."""
     return client.group_get(object_id)
 
 
 def delete_group(client, object_id):
-    """Delete a group from the directory."""
     return client.group_delete(object_id)
 
 
 def get_group_member_groups(client, object_id, security_enabled_only=False):
-    """Get a collection of object IDs of groups of which the specified group is a member."""
     return _get_member_groups(client.group_get_member_groups, object_id, security_enabled_only)
 
 
@@ -1956,12 +1962,10 @@ def check_group_membership(client, group_id, member_object_id):
 
 
 def list_group_members(client, group_id):
-    """Get the members of a group."""
     return client.group_member_list(group_id)
 
 
 def add_group_member(client, group_id, member_object_id):
-    """Add a member to a group."""
     # API is not idempotent and fails with:
     #   One or more added object references already exist for the following modified properties: 'members'.
     # TODO: make it idempotent like add_group_owner
@@ -1970,7 +1974,6 @@ def add_group_member(client, group_id, member_object_id):
 
 
 def remove_group_member(client, group_id, member_object_id):
-    """Remove a member from a group."""
     return client.group_member_remove(group_id, member_object_id)
 
 

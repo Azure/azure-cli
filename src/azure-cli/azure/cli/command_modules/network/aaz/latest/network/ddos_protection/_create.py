@@ -52,7 +52,6 @@ class Create(AAZCommand):
             options=["-n", "--name"],
             help="Name of the DDoS protection plan.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -73,7 +72,17 @@ class Create(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         yield self.DdosProtectionPlansCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -232,16 +241,12 @@ class Create(AAZCommand):
             )
 
             public_ip_addresses = cls._schema_on_200_201.properties.public_ip_addresses
-            public_ip_addresses.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
-            _build_schema_sub_resource_read(public_ip_addresses.Element)
+            public_ip_addresses.Element = AAZObjectType()
+            _CreateHelper._build_schema_sub_resource_read(public_ip_addresses.Element)
 
             virtual_networks = cls._schema_on_200_201.properties.virtual_networks
-            virtual_networks.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
-            _build_schema_sub_resource_read(virtual_networks.Element)
+            virtual_networks.Element = AAZObjectType()
+            _CreateHelper._build_schema_sub_resource_read(virtual_networks.Element)
 
             tags = cls._schema_on_200_201.tags
             tags.Element = AAZStrType()
@@ -249,25 +254,23 @@ class Create(AAZCommand):
             return cls._schema_on_200_201
 
 
-_schema_sub_resource_read = None
+class _CreateHelper:
+    """Helper class for Create"""
 
+    _schema_sub_resource_read = None
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-    _schema_sub_resource_read = AAZObjectType(
-        flags={"read_only": True}
-    )
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType(
-        flags={"read_only": True},
-    )
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Create"]

@@ -10,15 +10,11 @@ ARM telemetry tracks all HTTP requests and responses through ARM endpoint. As fa
 - Network is inaccessible.
 - No request is needed during execution.
 
-Kusto Cluster and Database: https://dataexplorer.azure.com/clusters/armprod/databases/ARMProd
-
 
 ## CLI Client Telemetry
 
-Client side telemetry is sent at the end of Azure CLI command execution. It covers all commands, no matter if it has http requests or just has local operations.
+Client side telemetry is sent at the end of Azure CLI command execution. It covers all commands, no matter if it has HTTP requests or just has local operations.
 Sanitized data is stored in Kusto cluster which is managed by DevDiv Data team.
-
-Kusto Cluster and Database: https://dataexplorer.azure.com/clusters/ddazureclients/databases/AzureCli
 
 All Azure CLI data is stored in a large json named `Properties` in table `RawEventsAzCli`. Some properties are flatten, some are not. Here are some useful fields:
 > The telemetry has different schema pre Azure CLI 2.0.28. All the fields explained below are for new schema, in other words, CLI version > 2.0.28.
@@ -38,8 +34,8 @@ All Azure CLI data is stored in a large json named `Properties` in table `RawEve
 - `ProductVersion`: CLI core version in the format of `azurecli@{version}`
 - `CoreVersion`: CLI core version
 - `ExeVersion`: `{cli_core_version}@{module_version}`. In the new schema (CLI version > 2.0.28), all module versions are `none`. Hence this field is `{cli_core_version}@none`
-- `OsType`: OS system, eg. linux, windows
-- `OsVersion`: OS platform version, eg. 10.0.14942
+- `OsType`: OS system, e.g., linux, windows
+- `OsVersion`: OS platform version, e.g., 10.0.14942
 - `PythonVersion`: platform python version
 - `ShellType`: cmd/bash/ksh/zsh/cloud-shell/... Note: may not be accurate.
 - `MacAddressHash`: SHA256 hashed MAC address
@@ -63,23 +59,16 @@ All Azure CLI data is stored in a large json named `Properties` in table `RawEve
     - `reserved.datamodel.fault.typestring`: Additional field when `EventName == 'azurecli/fault'`. It logs the exception class.
     - `reserved.datamodel.fault.description`: Additional field when `EventName == 'azurecli/fault'`. It logs exception description or fault type.
     - `context.default.vs.core.os.platform`: OS platform
-    - `context.default.azurecli.source`: `az`/`completer`. It's `completer` if we found argument auto complete settings in os environment variable.
+    - `context.default.azurecli.source`: `az`/`completer`. It's `completer` if we found argument auto complete settings in OS environment variable.
     - `context.default.azurecli.environmentvariables`: It logs customer's environment variables starting with `AZURE_CLI`
     - `context.default.azurecli.extensionname`: It logs the extension name and version in the format of `{extension_name}@{extension_version}` if the command is from CLI extension.
     - `context.default.azurecli.installer`: value of os environment variable `AZ_INSTALLER`
     - `context.default.azurecli.error_type`: It logs the exception class name.
     - `context.default.azurecli.exception_name`: A supplementation for `context.default.azurecli.error_type`
 
-## Accessing Client Telemetry
-
-Kusto Cluster and Database: https://dataexplorer.azure.com/clusters/ddazureclients/databases/AzureCli
-
-To ensure you have a smooth experience using our Data Tools and Data, you have to take the required trainings and join a security group.
-Please follow instruction [Accessing DevDiv Data](https://devdiv.visualstudio.com/DevDiv/_wiki/wikis/DevDiv.wiki/9768/Accessing-DevDiv-Data) to get access permission.
-
 
 ## Doc Sections
 
 - [Kusto Examples](kusto_examples.md) - Samples for kusto query
 
-- [FAQ](faq.md) - Commonly asked questions
+- [FAQ](faq.md) - Frequently Asked Questions

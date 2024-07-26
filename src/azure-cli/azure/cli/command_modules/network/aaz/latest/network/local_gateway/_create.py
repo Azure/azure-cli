@@ -49,7 +49,6 @@ class Create(AAZCommand):
             options=["-n", "--name"],
             help="Name of the local network gateway.",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 min_length=1,
             ),
@@ -113,7 +112,17 @@ class Create(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         yield self.LocalNetworkGatewaysCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -327,14 +336,10 @@ class Create(AAZCommand):
             custom_bgp_ip_addresses.Element = AAZStrType()
 
             default_bgp_ip_addresses = cls._schema_on_200_201.properties.bgp_settings.bgp_peering_addresses.Element.default_bgp_ip_addresses
-            default_bgp_ip_addresses.Element = AAZStrType(
-                flags={"read_only": True},
-            )
+            default_bgp_ip_addresses.Element = AAZStrType()
 
             tunnel_ip_addresses = cls._schema_on_200_201.properties.bgp_settings.bgp_peering_addresses.Element.tunnel_ip_addresses
-            tunnel_ip_addresses.Element = AAZStrType(
-                flags={"read_only": True},
-            )
+            tunnel_ip_addresses.Element = AAZStrType()
 
             local_network_address_space = cls._schema_on_200_201.properties.local_network_address_space
             local_network_address_space.address_prefixes = AAZListType(
@@ -348,6 +353,10 @@ class Create(AAZCommand):
             tags.Element = AAZStrType()
 
             return cls._schema_on_200_201
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]

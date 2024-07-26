@@ -17,13 +17,6 @@ def cf_storage(cli_ctx, *_, **__):
     return get_mgmt_service_client(cli_ctx, StorageManagementClient)
 
 
-def cf_network(cli_ctx, aux_subscriptions=None, **_):
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK,
-                                   aux_subscriptions=aux_subscriptions)
-
-
 def cf_graph(cli_ctx, **_):
     from azure.cli.command_modules.role import graph_client_factory
     client = graph_client_factory(cli_ctx)

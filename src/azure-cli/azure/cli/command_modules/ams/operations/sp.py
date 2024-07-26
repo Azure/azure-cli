@@ -198,7 +198,8 @@ def _create_role_assignment(cli_ctx, role, assignee_object_id, scope):
     RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
                                              'RoleAssignmentCreateParameters', mod='models',
                                              operation_group='role_assignments')
-    parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=assignee_object_id)
+    parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=assignee_object_id,
+                                                principal_type='ServicePrincipal')
 
     return assignments_client.create(scope=scope,
                                      role_assignment_name=_gen_guid(),
@@ -242,16 +243,15 @@ def retry(func):
     def inner(*args, **kwargs):
         _RETRY_TIMES = 36
         # retry till server replication is done
-        for retry_time in range(0, _RETRY_TIMES):
+        for retry_time in range(0, _RETRY_TIMES):  # 0, 1, ..., 35
             try:
                 return func(*args, **kwargs)
-                break  # pylint: disable=unreachable
             except Exception as ex:  # pylint: disable=broad-except
-                if retry_time < _RETRY_TIMES:
+                if retry_time < _RETRY_TIMES - 1:  # Pass if retry_time < 35
                     time.sleep(5)
                     logger.warning('Retrying %s creation: %s/%s', kwargs['entity_name_string'],
                                    retry_time + 1, _RETRY_TIMES)
-                else:
+                else:  # Raise on the 35th retry
                     logger.warning("Creating %s failed for appid. Trace followed:\n%s",
                                    kwargs['entity_name_string'], ex.response.headers if hasattr(ex, 'response') else ex)
                     # pylint: disable=no-member
@@ -296,7 +296,7 @@ def update_application(client, app_object_id, display_name):
 
 def _search_role_assignments(assignments_client, assignee_object_id):
     f = "principalId eq '{}'".format(assignee_object_id)
-    assignments = list(assignments_client.list(filter=f))
+    assignments = list(assignments_client.list_for_subscription(filter=f))
     return assignments
 
 

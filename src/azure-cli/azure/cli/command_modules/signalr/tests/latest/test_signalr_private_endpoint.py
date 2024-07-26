@@ -10,7 +10,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 class AzureSignalRServicePrivateEndpointScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=20)
-    def test_signalr_private_endpoint(self, resource_group):
+    def test_signalr_private_endpoint_2(self, resource_group):
         signalr_name = self.create_random_name('signalr', 16)
         sku = 'Standard_S1'
         unit_count = 1

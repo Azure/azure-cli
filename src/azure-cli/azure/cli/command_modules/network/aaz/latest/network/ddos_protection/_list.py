@@ -48,12 +48,22 @@ class List(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
         if condition_0:
             self.DdosProtectionPlansListByResourceGroup(ctx=self.ctx)()
         if condition_1:
             self.DdosProtectionPlansList(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
@@ -184,16 +194,12 @@ class List(AAZCommand):
             )
 
             public_ip_addresses = cls._schema_on_200.value.Element.properties.public_ip_addresses
-            public_ip_addresses.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
-            _build_schema_sub_resource_read(public_ip_addresses.Element)
+            public_ip_addresses.Element = AAZObjectType()
+            _ListHelper._build_schema_sub_resource_read(public_ip_addresses.Element)
 
             virtual_networks = cls._schema_on_200.value.Element.properties.virtual_networks
-            virtual_networks.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
-            _build_schema_sub_resource_read(virtual_networks.Element)
+            virtual_networks.Element = AAZObjectType()
+            _ListHelper._build_schema_sub_resource_read(virtual_networks.Element)
 
             tags = cls._schema_on_200.value.Element.tags
             tags.Element = AAZStrType()
@@ -320,16 +326,12 @@ class List(AAZCommand):
             )
 
             public_ip_addresses = cls._schema_on_200.value.Element.properties.public_ip_addresses
-            public_ip_addresses.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
-            _build_schema_sub_resource_read(public_ip_addresses.Element)
+            public_ip_addresses.Element = AAZObjectType()
+            _ListHelper._build_schema_sub_resource_read(public_ip_addresses.Element)
 
             virtual_networks = cls._schema_on_200.value.Element.properties.virtual_networks
-            virtual_networks.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
-            _build_schema_sub_resource_read(virtual_networks.Element)
+            virtual_networks.Element = AAZObjectType()
+            _ListHelper._build_schema_sub_resource_read(virtual_networks.Element)
 
             tags = cls._schema_on_200.value.Element.tags
             tags.Element = AAZStrType()
@@ -337,25 +339,23 @@ class List(AAZCommand):
             return cls._schema_on_200
 
 
-_schema_sub_resource_read = None
+class _ListHelper:
+    """Helper class for List"""
 
+    _schema_sub_resource_read = None
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-    _schema_sub_resource_read = AAZObjectType(
-        flags={"read_only": True}
-    )
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType(
-        flags={"read_only": True},
-    )
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["List"]

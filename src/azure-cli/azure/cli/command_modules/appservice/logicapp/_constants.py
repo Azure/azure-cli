@@ -7,41 +7,36 @@ LINUX_RUNTIMES = ['dotnet', 'node', 'python', 'java']
 WINDOWS_RUNTIMES = ['dotnet', 'node', 'java', 'powershell']
 
 DEFAULT_LOGICAPP_RUNTIME = 'node'
-DEFAULT_LOGICAPP_RUNTIME_VERSION = '12'
-DEFAULT_LOGICAPP_FUNCTION_VERSION = '3'
-# functions version : default node version
-FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION = {
-    '2': '~10',
-    '3': '~12'
-}
+DEFAULT_LOGICAPP_FUNCTION_VERSION = '4'
+
 # functions version -> runtime : default runtime version
 FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION = {
     '2': {
-        'node': '8',
-        'dotnet': '2',
-        'python': '3.7',
-        'java': '8'
+        'node': '~8',
+        'dotnet': '2'
     },
     '3': {
-        'node': '12',
-        'dotnet': '3',
-        'python': '3.7',
-        'java': '8'
+        'node': '~16',
+        'dotnet': '3'
+    },
+    '4': {
+        'node': '~16',
+        'dotnet': '6'
     }
 }
 # functions version -> runtime : runtime versions
 FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS = {
     '2': {
-        'node': ['8', '10'],
-        'python': ['3.6', '3.7'],
-        'dotnet': ['2'],
-        'java': ['8']
+        'node': ['~8', '~10'],
+        'dotnet': ['2']
     },
     '3': {
-        'node': ['10', '12'],
-        'python': ['3.6', '3.7', '3.8'],
-        'dotnet': ['3'],
-        'java': ['8']
+        'node': ['~14', '~16', '~18'],
+        'dotnet': ['3']
+    },
+    '4': {
+        'node': ['~16', '~18'],
+        'dotnet': ['3', '6']
     }
 }
 # dotnet runtime version : dotnet linuxFxVersion

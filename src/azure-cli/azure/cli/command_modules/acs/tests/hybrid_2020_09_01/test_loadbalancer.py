@@ -63,10 +63,12 @@ class TestLoadBalancer(unittest.TestCase):
 
         p = loadbalancer.configure_load_balancer_profile(
             managed_outbound_ip_count,
+            None,
             outbound_ips,
             outbound_ip_prefixes,
             outbound_ports,
             idle_timeout,
+            None,
             profile,
             lb_models,
         )

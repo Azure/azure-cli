@@ -73,19 +73,12 @@ class AAZObject(AAZBaseValue):
     def __setitem__(self, key, data):
         assert not key.startswith('_')
         attr_schema, name = self._get_attr_schema_and_name(key)
-        if name is None:
-            # ignore undefined key
-            return
-
         self._data[name] = attr_schema.process_data(data, key=name)
 
     def __delitem__(self, key):
         _, name = self._get_attr_schema_and_name(key)
-
         if name in self._data:
             del self._data[name]
-        elif name is None:
-            raise KeyError(f"Attribute {key} not exist")
 
     def __getattr__(self, key) -> AAZBaseValue:
         return self[key]
@@ -155,12 +148,13 @@ class AAZObject(AAZBaseValue):
         """ get attribute schema and it's name based in key """
         disc_schema = self._schema.get_discriminator(self._data)
         if not hasattr(self._schema, key) and disc_schema is not None:
-            attr_schema = disc_schema[key]
+            attr_schema = disc_schema[key]  # will raise error if key not exist
             schema = disc_schema
         else:
-            attr_schema = self._schema[key]
+            attr_schema = self._schema[key]  # will raise error if key not exist
             schema = self._schema
         name = schema.get_attr_name(key)
+        assert name is not None
         return attr_schema, name
 
 
@@ -188,8 +182,7 @@ class AAZBaseDictValue(AAZBaseValue):
         return len(self._data)
 
     def __iter__(self):
-        for key in self._data:
-            yield key
+        yield from self._data
 
     def __eq__(self, other):
         if isinstance(other, AAZBaseValue):
@@ -332,8 +325,7 @@ class AAZList(AAZBaseValue):
         self._len = 0
         if self._data is not None and self._data != AAZUndefined:
             for idx in self._data:
-                if idx + 1 > self._len:
-                    self._len = idx + 1
+                self._len = max(self._len, idx + 1)
 
     def __getitem__(self, idx) -> AAZBaseValue:
         if not isinstance(idx, int):
@@ -347,8 +339,7 @@ class AAZList(AAZBaseValue):
         if idx not in self._data:
             self._data[idx] = AAZValuePatch.build(item_schema)
 
-            if idx + 1 > self._len:
-                self._len = idx + 1
+            self._len = max(self._len, idx + 1)
 
         return item_schema._ValueCls(item_schema, self._data[idx])
 
@@ -368,8 +359,7 @@ class AAZList(AAZBaseValue):
 
         self._data[idx] = item_schema.process_data(data, key=idx)
 
-        if idx + 1 > self._len:
-            self._len = idx + 1
+        self._len = max(self._len, idx + 1)
 
     def __delitem__(self, idx):
         if not isinstance(idx, int):

@@ -2,14 +2,13 @@
 
 ## What's the relationship of CLI telemetry and ARM telemetry?
 
-- CLI telemetry is client telemetry. It logs os, platform, command, parameter, result and other client info.
-- ARM telemetry is server telemetry. It tracks all HTTP requests and responses through ARM endpoint from different clients, including CLI, Powershell, SDK...
+- CLI telemetry is client telemetry. It logs OS, platform, command, parameter, result and other client info.
+- ARM telemetry is server telemetry. It tracks all HTTP requests and responses through ARM endpoint from different clients, including CLI, PowerShell, SDK...
 - They share the same `clientRequestId` which you can leverage to join `HttpIncomingRequests` (ARM telemetry table) with `RawEventsAzCli` (CLI telemetry table)
 
 
 ## How can I filter CLI requests from ARM telemetry?
 
-[Execute in Web](https://dataexplorer.azure.com/clusters/armprod/databases/ARMProd?query=H4sIAAAAAAAAA/MoKSnwzEvOz83MSw9KLSxNLS4p5qpRKM9ILUpVCPH0dQ0OcfQNULBTSEzP1zDM0ITLlRanFjmmp+aVKCTn55UkZuYVK6g7VpUWpTr7eOob6akDFZYkZqcqGBoAAPoAVdxjAAAA)
 ```
 HttpIncomingRequests
 | where TIMESTAMP > ago(1h)

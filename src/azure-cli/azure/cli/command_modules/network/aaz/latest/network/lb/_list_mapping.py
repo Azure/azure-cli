@@ -22,9 +22,9 @@ class ListMapping(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
+        "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools/{}/queryinboundnatruleportmapping", "2022-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools/{}/queryinboundnatruleportmapping", "2023-09-01"],
         ]
     }
 
@@ -49,15 +49,15 @@ class ListMapping(AAZCommand):
             options=["--backend-pool-name"],
             help="The name of the backend address pool.",
             required=True,
-        )
-        _args_schema.resource_group = AAZStrArg(
-            options=["-g", "--resource-group"],
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
-            required=True,
+            id_part="child_name_1",
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
             help="The load balancer name.",
+            required=True,
+            id_part="name",
+        )
+        _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
 
@@ -167,7 +167,7 @@ class ListMapping(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -217,46 +217,48 @@ class ListMapping(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_backend_address_inbound_nat_rule_port_mappings_read(cls._schema_on_200)
+            _ListMappingHelper._build_schema_backend_address_inbound_nat_rule_port_mappings_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
 
-_schema_backend_address_inbound_nat_rule_port_mappings_read = None
+class _ListMappingHelper:
+    """Helper class for ListMapping"""
 
+    _schema_backend_address_inbound_nat_rule_port_mappings_read = None
 
-def _build_schema_backend_address_inbound_nat_rule_port_mappings_read(_schema):
-    global _schema_backend_address_inbound_nat_rule_port_mappings_read
-    if _schema_backend_address_inbound_nat_rule_port_mappings_read is not None:
-        _schema.inbound_nat_rule_port_mappings = _schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings
-        return
+    @classmethod
+    def _build_schema_backend_address_inbound_nat_rule_port_mappings_read(cls, _schema):
+        if cls._schema_backend_address_inbound_nat_rule_port_mappings_read is not None:
+            _schema.inbound_nat_rule_port_mappings = cls._schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings
+            return
 
-    _schema_backend_address_inbound_nat_rule_port_mappings_read = AAZObjectType()
+        cls._schema_backend_address_inbound_nat_rule_port_mappings_read = _schema_backend_address_inbound_nat_rule_port_mappings_read = AAZObjectType()
 
-    backend_address_inbound_nat_rule_port_mappings_read = _schema_backend_address_inbound_nat_rule_port_mappings_read
-    backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings = AAZListType(
-        serialized_name="inboundNatRulePortMappings",
-    )
+        backend_address_inbound_nat_rule_port_mappings_read = _schema_backend_address_inbound_nat_rule_port_mappings_read
+        backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings = AAZListType(
+            serialized_name="inboundNatRulePortMappings",
+        )
 
-    inbound_nat_rule_port_mappings = _schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings
-    inbound_nat_rule_port_mappings.Element = AAZObjectType()
+        inbound_nat_rule_port_mappings = _schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings
+        inbound_nat_rule_port_mappings.Element = AAZObjectType()
 
-    _element = _schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings.Element
-    _element.backend_port = AAZIntType(
-        serialized_name="backendPort",
-        flags={"read_only": True},
-    )
-    _element.frontend_port = AAZIntType(
-        serialized_name="frontendPort",
-        flags={"read_only": True},
-    )
-    _element.inbound_nat_rule_name = AAZStrType(
-        serialized_name="inboundNatRuleName",
-        flags={"read_only": True},
-    )
-    _element.protocol = AAZStrType()
+        _element = _schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings.Element
+        _element.backend_port = AAZIntType(
+            serialized_name="backendPort",
+            flags={"read_only": True},
+        )
+        _element.frontend_port = AAZIntType(
+            serialized_name="frontendPort",
+            flags={"read_only": True},
+        )
+        _element.inbound_nat_rule_name = AAZStrType(
+            serialized_name="inboundNatRuleName",
+            flags={"read_only": True},
+        )
+        _element.protocol = AAZStrType()
 
-    _schema.inbound_nat_rule_port_mappings = _schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings
+        _schema.inbound_nat_rule_port_mappings = cls._schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings
 
 
 __all__ = ["ListMapping"]

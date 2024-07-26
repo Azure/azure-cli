@@ -266,7 +266,7 @@ def _format_property_change(builder, property_change, max_path_length, indent_le
         _format_property_modify(builder, before, after, children, indent_level + 1)
     elif property_change_type == PropertyChangeType.array:
         _format_property_change_path(builder, property_change, "children", max_path_length, indent_level)
-        _format_property_array_change(builder, children, indent_level + 1)
+        _format_property_array_change(builder, property_change, children, indent_level + 1)
     elif property_change_type == PropertyChangeType.no_effect:
         _format_property_change_path(builder, property_change, "after", max_path_length, indent_level)
         _format_property_no_effect(builder, after, indent_level + 1)
@@ -275,6 +275,9 @@ def _format_property_change(builder, property_change, max_path_length, indent_le
 
 
 def _format_property_change_path(builder, property_change, value_name, max_path_length, indent_level):
+    if not property_change.path:
+        return
+
     path, property_change_type = property_change.path, property_change.property_change_type
     value = getattr(property_change, value_name)
 
@@ -350,7 +353,14 @@ def _format_property_modify(builder, before, after, children, indent_level):
             builder.append_line()
 
 
-def _format_property_array_change(builder, property_changes, indent_level):
+def _format_property_array_change(builder, parent_property_change, property_changes, indent_level):
+    if not parent_property_change.path:
+        # The parent change doesn't have a path, which means the current
+        # array change is a nested change. We need to decrease indent_level
+        # and print indentation before printing "[".
+        indent_level -= 1
+        _format_indent(builder, indent_level)
+
     if not property_changes:
         builder.append_line("[]")
         return

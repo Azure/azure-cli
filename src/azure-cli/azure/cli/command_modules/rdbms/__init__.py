@@ -13,7 +13,6 @@ from azure.cli.command_modules.rdbms.flexible_server_commands import load_flexib
 from azure.cli.command_modules.rdbms._params import load_arguments
 import azure.cli.command_modules.rdbms._help  # pylint: disable=unused-import
 import azure.cli.command_modules.rdbms._helptext_pg  # pylint: disable=unused-import
-import azure.cli.command_modules.rdbms._helptext_mysql  # pylint: disable=unused-import
 
 
 # pylint: disable=import-outside-toplevel
@@ -35,6 +34,17 @@ class RdbmsCommandsLoader(AzCommandsLoader):
                 recommend_remove=True))
 
     def load_command_table(self, args):
+        from azure.cli.core.aaz import load_aaz_command_table
+        try:
+            from . import aaz
+        except ImportError:
+            aaz = None
+        if aaz:
+            load_aaz_command_table(
+                loader=self,
+                aaz_pkg_name=aaz.__name__,
+                args=args
+            )
 
         load_command_table(self, args)
         load_flexibleserver_command_table(self, args)

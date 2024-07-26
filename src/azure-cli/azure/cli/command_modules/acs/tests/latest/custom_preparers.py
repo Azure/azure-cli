@@ -5,6 +5,7 @@
 
 from datetime import datetime
 import os
+import unittest
 
 from azure.cli.testsdk.preparers import (
     ResourceGroupPreparer,
@@ -176,25 +177,14 @@ class AKSCustomRoleBasedServicePrincipalPreparer(
             key,
         )
 
+    def __call__(self, fn):
+        if not self.dev_setting_sp_password:
+            return unittest.skip("skip test case that requires service principal as password is not provided")(fn)
+        return super(AKSCustomRoleBasedServicePrincipalPreparer, self).__call__(fn)
+
     def create_resource(self, name, **kwargs):
-        if not self.dev_setting_sp_name:
-            command = "az ad sp create-for-rbac -n {}{}".format(
-                name, " --skip-assignment" if self.skip_assignment else ""
-            )
-
-            try:
-                self.result = self.live_only_execute(
-                    self.cli_ctx, command
-                ).get_output_in_json()
-            except AttributeError:  # live only execute returns None if playing from record
-                pass
-
-            if self.live_test or self.test_class_instance.in_recording:
-                sp_name = self.result['appId']
-                sp_password = self.result.get("password") or GraphClientPasswordReplacer.PWD_REPLACEMENT
-            else:
-                sp_name = MOCK_GUID
-                sp_password = MOCK_SECRET
+        if not self.dev_setting_sp_password:
+            return
         else:
             # call AbstractPreparer.moniker to make resource counts and self.resource_moniker consistent between live
             # and play-back. see SingleValueReplacer.process_request, AbstractPreparer.__call__._preparer_wrapper

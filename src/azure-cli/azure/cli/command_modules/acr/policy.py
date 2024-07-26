@@ -124,7 +124,7 @@ def acr_config_soft_delete_update(cmd,
     policies.soft_delete_policy = policies.soft_delete_policy if policies.soft_delete_policy else SoftDeletePolicy()
 
     if status:
-        if(policies.soft_delete_policy.status == 'enabled' and status == 'disabled'):
+        if (policies.soft_delete_policy.status == 'enabled' and status == 'disabled'):
             logger.warning("Disabling soft-delete does not affect purge behavior for previously deleted artifacts."
                            " Artifacts currently in a soft-deleted state will continue to be purged in accordance"
                            " with the current soft-delete retention days policy.")
@@ -161,9 +161,13 @@ def acr_config_authentication_as_arm_show(cmd,
 
     AzureADAuthenticationAsArmPolicy = cmd.get_models('AzureADAuthenticationAsArmPolicy')
     policies = registry.policies
-    aadAuth_policy = policies.azure_ad_authentication_as_arm_policy if policies else AzureADAuthenticationAsArmPolicy()
 
-    return aadAuth_policy
+    # On AzureStackHub, the 2019-05-01 API version is still in use, so we need to check if the
+    # 'azure_ad_authentication_as_arm_policy' attribute exists before we invoke it
+    if policies and hasattr(policies, 'azure_ad_authentication_as_arm_policy'):
+        return policies.azure_ad_authentication_as_arm_policy
+
+    return AzureADAuthenticationAsArmPolicy
 
 
 def acr_config_authentication_as_arm_update(cmd,

@@ -22,9 +22,9 @@ class Start(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}/start", "2022-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}/start", "2023-11-01"],
         ]
     }
 
@@ -49,6 +49,7 @@ class Start(AAZCommand):
             options=["-n", "--name"],
             help="Name of the application gateway.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -132,7 +133,7 @@ class Start(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -140,6 +141,10 @@ class Start(AAZCommand):
 
         def on_200(self, session):
             pass
+
+
+class _StartHelper:
+    """Helper class for Start"""
 
 
 __all__ = ["Start"]

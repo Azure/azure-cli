@@ -42,12 +42,12 @@ class TestRecordsCollection(unittest.TestCase):
         self.assertEqual(1758, len([r for r in collection]))
 
     def test_create_records_collection_with_last_send(self):
-        last_send = datetime.datetime.now() - datetime.timedelta(hours=6)
+        last_send = datetime.datetime.now() - datetime.timedelta(minutes=20)
         collection = RecordsCollection(last_send, self.work_dir)
         collection.snapshot_and_read()
 
-        # the threshold for pushing 'cache' file is 24, so 'cache' file should not be moved
-        self.assert_cache_files_count(1)
+        # cache strategy has been dropped, so no `cache` file
+        self.assert_cache_files_count(0)
         # no new records since last_send
         self.assertEqual(0, len([r for r in collection]))
 

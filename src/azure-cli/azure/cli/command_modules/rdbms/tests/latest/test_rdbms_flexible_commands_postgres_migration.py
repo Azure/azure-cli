@@ -39,6 +39,10 @@ class MigrationScenarioTest(ScenarioTest):
     def test_postgres_flexible_server_migration(self):
         self._test_server_migration('postgres')
 
+    def test_postgres_flexible_server_onpremise_migration(self):
+        self._test_server_migration_onpremise('postgres', True, "1a50e116-8f35-4401-a573-6eda6f539e28")
+        self._test_server_migration_onpremise('postgres', False, "d703653c-3d00-4926-8d4f-4871fb7c7ff1")
+
     def _test_server_migration(self, database_engine):
         # Set this to True or False depending on whether we are in live mode or test mode
         # livemode = True
@@ -46,25 +50,29 @@ class MigrationScenarioTest(ScenarioTest):
 
         if livemode:
             # Live mode values
-            target_subscription_id = "bb5358e5-fa78-4717-87e1-e57f1b4da5d1"
+            target_subscription_id = "5c5037e5-d3f1-4e7b-b3a9-f6bf94902b30"
             migration_name = str(uuid.uuid4())
         else:
             # Mock test mode values
             target_subscription_id = "00000000-0000-0000-0000-000000000000"
-            migration_name = "00000000-0000-0000-0000-000000000000"
+            migration_name = "392a7b75-da70-4bb5-9a12-93c0ab771244"
 
         target_resource_group_name = "Sterling2MeruRG"
         target_server_name = "target-server-longhaul"
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         properties_filepath = os.path.join(curr_dir, 'migrationPublic.json').replace('\\', '\\\\')
 
+        print(target_subscription_id)
+
         # test check migration name availability -success
         result = self.cmd('{} flexible-server migration check-name-availability --subscription {} --resource-group {} --name {} --migration-name {} '
-                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()
+                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name),
+                          checks=[JMESPathCheck('nameAvailable', True)]).get_output_in_json()
 
         # test create migration - success
         result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --name {} --migration-name {} --properties {} '
-                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name, properties_filepath)).get_output_in_json()
+                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name, properties_filepath),
+                          checks=[JMESPathCheck('migrationMode', "Offline")]).get_output_in_json()
         migration_name = result['name']
 
         # test list migrations - success, with filter
@@ -79,6 +87,58 @@ class MigrationScenarioTest(ScenarioTest):
         result = self.cmd('{} flexible-server migration show --subscription {} --resource-group {} --name {} --migration-name {}'
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()
 
+        self.assertEqual(result['name'], migration_name)
+        self.assertEqual(result['migrationOption'], "ValidateAndMigrate")
+        self.assertEqual(result['sourceType'], "PostgreSQLSingleServer")
+        self.assertEqual(result['sslMode'], "VerifyFull")
+
         # test update migration - error - no param
         result = self.cmd('{} flexible-server migration update --subscription {} --resource-group {} --name {} --migration-name {}'
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name), expect_failure=True)
+
+    def _test_server_migration_onpremise(self, database_engine, validateOnly=False, migration_name=None):
+        # Set this to True or False depending on whether we are in live mode or test mode
+        # livemode = True
+        livemode = False
+
+        if livemode:
+            # Live mode values
+            target_subscription_id = "5c5037e5-d3f1-4e7b-b3a9-f6bf94902b30"
+            migration_name = str(uuid.uuid4())
+        else:
+            # Mock test mode values
+            target_subscription_id = "00000000-0000-0000-0000-000000000000"
+
+        migration_option = "ValidateAndMigrate"
+        if validateOnly:
+            migration_option = "Validate"
+
+        target_resource_group_name = "Sterling2MeruRG"
+        target_server_name = "target-server-longhaul"
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        properties_filepath = os.path.join(curr_dir, 'migrationOnPremise.json').replace('\\', '\\\\')
+
+        print(target_subscription_id)
+
+        # test check migration name availability -success
+        self.cmd('{} flexible-server migration check-name-availability --subscription {} --resource-group {} --name {} --migration-name {} '
+                 .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name),
+                 checks=[JMESPathCheck('nameAvailable', True)]).get_output_in_json()
+
+        # test create migration - success
+        result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --name {} --migration-name {} --properties {} --migration-option {}'
+                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name, properties_filepath, migration_option),
+                          checks=[JMESPathCheck('migrationMode', "Offline"),
+                                  JMESPathCheck('migrationOption', migration_option),
+                                  JMESPathCheck('sourceType', "OnPremises"),
+                                  JMESPathCheck('sslMode', "Prefer")]).get_output_in_json()
+        migration_name = result['name']
+
+        # test test show migration - success
+        result = self.cmd('{} flexible-server migration show --subscription {} --resource-group {} --name {} --migration-name {}'
+                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()
+
+        self.assertEqual(result['name'], migration_name)
+        self.assertEqual(result['migrationOption'], migration_option)
+        self.assertEqual(result['sourceType'], "OnPremises")
+        self.assertEqual(result['sslMode'], "Prefer")

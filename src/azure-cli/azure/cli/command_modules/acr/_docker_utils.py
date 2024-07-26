@@ -7,7 +7,6 @@ try:
     from urllib.parse import urlencode, urlparse, urlunparse
 except ImportError:
     from urllib import urlencode
-    from urlparse import urlparse, urlunparse
 
 import time
 from json import loads
@@ -26,6 +25,7 @@ from azure.cli.core.util import should_disable_connection_verify
 from azure.cli.core.cloud import CloudSuffixNotSetException
 from azure.cli.core._profile import _AZ_LOGIN_MESSAGE
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.azclierror import AzureResponseError
 
 from ._client_factory import cf_acr_registries
 from ._constants import get_managed_sku
@@ -33,6 +33,7 @@ from ._constants import ACR_AUDIENCE_RESOURCE_NAME
 from ._utils import get_registry_by_name, ResourceNotFound
 from .policy import acr_config_authentication_as_arm_show
 from ._format import add_timestamp
+from ._errors import CONNECTIVITY_TOOMANYREQUESTS_ERROR
 
 
 logger = get_logger(__name__)
@@ -52,6 +53,8 @@ class RepoAccessTokenPermission(Enum):
     DELETED_READ = 'deleted_read'
     DELETED_RESTORE = 'deleted_restore'
     PULL = 'pull'
+    PUSH = 'push'
+    PULL_PUSH = '{},{}'.format(PULL, PUSH)
     META_WRITE_META_READ = '{},{}'.format(METADATA_WRITE, METADATA_READ)
     DELETE_META_READ = '{},{}'.format(DELETE, METADATA_READ)
     PULL_META_READ = '{},{}'.format(PULL, METADATA_READ)
@@ -163,6 +166,11 @@ def _get_aad_token_after_challenge(cli_ctx,
     response = requests.post(authhost, urlencode(content), headers=headers,
                              verify=(not should_disable_connection_verify()))
 
+    if response.status_code == 429:
+        if is_diagnostics_context:
+            return CONNECTIVITY_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
+        raise AzureResponseError(CONNECTIVITY_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
+                                 .get_error_message())
     if response.status_code not in [200]:
         from ._errors import CONNECTIVITY_REFRESH_TOKEN_ERROR
         if is_diagnostics_context:
@@ -405,6 +413,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
                                                             permission,
                                                             use_acr_audience=use_acr_audience)
         except CLIError as e:
+            raise_toomanyrequests_error(str(e))
             logger.warning("%s: %s", AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))
 
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
@@ -435,6 +444,11 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
             'Please specify both username and password in non-interactive mode.')
 
     return login_server, None, None
+
+
+def raise_toomanyrequests_error(error):
+    if CONNECTIVITY_TOOMANYREQUESTS_ERROR.error_title in error:
+        raise AzureResponseError("{}: {}".format(AAD_TOKEN_BASE_ERROR_MESSAGE, error))
 
 
 def get_login_credentials(cmd,
@@ -529,8 +543,12 @@ def get_manifest_authorization_header(username, password):
     else:
         auth = _get_basic_auth_str(username, password)
     return {'Authorization': auth,
-            'Accept': '*/*, application/vnd.cncf.oras.artifact.manifest.v1+json'
-            ', application/vnd.oci.image.manifest.v1+json'}
+            'Accept': '*/*, application/vnd.oci.artifact.manifest.v1+json'
+            ', application/vnd.cncf.oras.artifact.manifest.v1+json'
+            ', application/vnd.oci.image.manifest.v1+json'
+            ', application/vnd.oci.image.index.v1+json'
+            ', application/vnd.docker.distribution.manifest.v2+json'
+            ', application/vnd.docker.distribution.manifest.list.v2+json'}
 
 
 # pylint: disable=too-many-statements
@@ -597,20 +615,20 @@ def request_data_from_registry(http_method,
             log_registry_response(response)
 
             if manifest_headers and raw and response.status_code == 200:
-                return response.content.decode('utf-8'), None
+                return response.content.decode('utf-8'), None, response.status_code
             if response.status_code == 200:
                 result = response.json()[result_index] if result_index else response.json()
                 next_link = response.headers['link'] if 'link' in response.headers else None
-                return result, next_link
+                return result, next_link, response.status_code
             if response.status_code == 201 or response.status_code == 202:
                 result = None
                 try:
                     result = response.json()[result_index] if result_index else response.json()
                 except ValueError as e:
                     logger.debug('Response is empty or is not a valid json. Exception: %s', str(e))
-                return result, None
+                return result, None, response.status_code
             if response.status_code == 204:
-                return None, None
+                return None, None, response.status_code
             if response.status_code == 401:
                 raise RegistryException(
                     parse_error_message('Authentication required.', response),
@@ -627,7 +645,7 @@ def request_data_from_registry(http_method,
                 raise RegistryException(
                     parse_error_message('Failed to request data due to a conflict.', response),
                     response.status_code)
-            raise Exception(parse_error_message('Could not {} the requested data.'.format(http_method), response))
+            raise Exception(parse_error_message('Could not {} the requested data.'.format(http_method), response))  # pylint: disable=broad-exception-raised
         except CLIError:
             raise
         except Exception as e:  # pylint: disable=broad-except
@@ -638,11 +656,43 @@ def request_data_from_registry(http_method,
     raise CLIError(errorMessage)
 
 
+def parse_image_name(image, allow_digest=False, default_latest=True):
+    if allow_digest and '@' in image:
+        # This is probably an image name by manifest digest
+        tokens = image.split('@')
+        if len(tokens) == 2:
+            return tokens[0], None, tokens[1]
+
+    if ':' in image and '@' not in image:
+        # This is probably an image name by tag
+        tokens = image.split(':')
+        if len(tokens) == 2:
+            return tokens[0], tokens[1], None
+
+    if ':' not in image and '@' not in image:
+        # This is probably an image with implicit latest tag
+        if default_latest:
+            return image, 'latest', None
+
+        return image, None, None
+
+    if allow_digest:
+        raise CLIError("The name of the image may include a tag in the format"
+                       " 'name:tag' or digest in the format 'name@digest'.")
+    raise CLIError("The name of the image may include a tag in the format 'name:tag'.")
+
+
 def parse_error_message(error_message, response):
     import json
     try:
-        server_message = json.loads(response.text)['errors'][0]['message']
-        error_message = 'Error: {}'.format(server_message) if server_message else error_message
+        server_error = json.loads(response.text)['errors'][0]
+        if 'message' in server_error:
+            server_message = server_error['message']
+            if 'detail' in server_error and isinstance(server_error['detail'], str):
+                server_details = server_error['detail']
+                error_message = 'Error: {} Detail: {}'.format(server_message, server_details)
+            else:
+                error_message = 'Error: {}'.format(server_message)
     except (ValueError, KeyError, TypeError, IndexError):
         pass
 

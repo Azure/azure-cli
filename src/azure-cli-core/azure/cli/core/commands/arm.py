@@ -175,11 +175,14 @@ class ResourceId(str):
         return str.__new__(cls, val)
 
 
-def resource_exists(cli_ctx, resource_group, name, namespace, type, **_):  # pylint: disable=redefined-builtin
+def resource_exists(cli_ctx, subscription, resource_group, name, namespace, type,
+                    **_):  # pylint: disable=redefined-builtin
     ''' Checks if the given resource exists. '''
     odata_filter = "resourceGroup eq '{}' and name eq '{}'" \
         " and resourceType eq '{}/{}'".format(resource_group, name, namespace, type)
-    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources
+    # Support cross subscription resource existence check
+    client = get_mgmt_service_client(
+        cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, subscription_id=subscription).resources
     existing = len(list(client.list(filter=odata_filter))) == 1
     return existing
 
@@ -386,9 +389,9 @@ def register_global_subscription_argument(cli_ctx):
     cli_ctx.register_event(EVENT_INVOKER_PRE_LOAD_ARGUMENTS, add_subscription_parameter)
 
 
-add_usage = '--add property.listProperty <key=value, string or JSON string>'
-set_usage = '--set property1.property2=<value>'
-remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
+add_usage = '`--add property.listProperty <key=value, string or JSON string>`'
+set_usage = '`--set property1.property2=<value>`'
+remove_usage = '`--remove property.list <indexToRemove>` OR `--remove propertyToRemove`'
 
 
 def _get_operations_tmpl(cmd, custom_command=False):
@@ -711,7 +714,7 @@ def _find_property(instance, path):
 
 def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
     import time
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
 
     # get
     resource = getter()
@@ -726,7 +729,8 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
         RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
                                                  'RoleAssignmentCreateParameters', mod='models',
                                                  operation_group='role_assignments')
-        parameters = RoleAssignmentCreateParameters(role_definition_id=identity_role_id, principal_id=principal_id)
+        parameters = RoleAssignmentCreateParameters(role_definition_id=identity_role_id, principal_id=principal_id,
+                                                    principal_type=None)
 
         logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
         retry_times = 36
@@ -736,7 +740,7 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
                 assignments_client.create(scope=identity_scope, role_assignment_name=assignment_name,
                                           parameters=parameters)
                 break
-            except CloudError as ex:
+            except HttpResponseError as ex:
                 if 'role assignment already exists' in ex.message:
                     logger.info('Role assignment already exists')
                     break

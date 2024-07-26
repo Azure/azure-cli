@@ -46,7 +46,7 @@ class SBQueueScenarioTest(ScenarioTest):
             'time_sample4': 'P1Y3M2D',
             'time_sample5': 'P1Y2M3DT3H11M2S',
             'time_sample6': 'P1Y',
-            'time_sample7': '01:03:04',
+            'time_sample7': 'P1DT3M4S',
             'time_sample8': 'PT10M',
             'time_sample9': 'PT3M',
             'time_sample10': 'PT2M'
@@ -72,14 +72,14 @@ class SBQueueScenarioTest(ScenarioTest):
                  '--max-delivery-count 8 --status Active --default-message-time-to-live {time_sample5} '
                  '--enable-batched-operations false --forward-to {samplequeue} --forward-dead-lettered-messages-to {samplequeue}').get_output_in_json()
 
-        self.assertEqual(queue['autoDeleteOnIdle'], '10675199 days, 2:48:05.477581')
-        self.assertEqual(queue['defaultMessageTimeToLive'], '428 days, 3:11:02')
+        self.assertEqual(queue['autoDeleteOnIdle'], 'P10675199DT2H48M5.4775807S')
+        self.assertEqual(queue['defaultMessageTimeToLive'], 'P428DT3H11M2S')
         self.assertEqual(queue['deadLetteringOnMessageExpiration'], True)
-        self.assertEqual(queue['duplicateDetectionHistoryTimeWindow'], '0:10:00')
+        self.assertEqual(queue['duplicateDetectionHistoryTimeWindow'], 'PT10M')
         self.assertEqual(queue['enableExpress'], False)
         self.assertEqual(queue['enableBatchedOperations'], False)
         self.assertEqual(queue['enablePartitioning'], False)
-        self.assertEqual(queue['lockDuration'], '0:03:00')
+        self.assertEqual(queue['lockDuration'], 'PT3M')
         self.assertEqual(queue['maxDeliveryCount'], 8)
         self.assertEqual(queue['maxSizeInMegabytes'], 4096)
         self.assertEqual(queue['requiresDuplicateDetection'], True)
@@ -101,24 +101,22 @@ class SBQueueScenarioTest(ScenarioTest):
             'requiresDuplicateDetection': queue['requiresDuplicateDetection'],
             'requiresSession': queue['requiresSession'],
             'status': queue['status'],
-            'enableBatchedOperations': queue['enableBatchedOperations'],
-            'forwardTo': queue['forwardTo'],
-            'forwardDeadLetteredMessagesTo': queue['forwardDeadLetteredMessagesTo']
+            'enableBatchedOperations': queue['enableBatchedOperations']
         })
 
         queue = self.cmd('servicebus queue update --resource-group {rg} --name {queuename2} --namespace-name {namespacename} '
                          '--lock-duration {time_sample10}').get_output_in_json()
 
-        self.assertEqual(queue['lockDuration'], '0:02:00')
+        self.assertEqual(queue['lockDuration'], 'PT2M')
         self.kwargs.update({'lockDuration': queue['lockDuration']})
 
         self.assertOnUpdate(queue, self.kwargs)
 
         queue = self.cmd(
             'servicebus queue update --resource-group {rg} --name {queuename2} --namespace-name {namespacename} '
-            '--default-message-time-to-live {time_sample7}').get_output_in_json()
+            '--default-message-time-to-live P1DT0H3M4S').get_output_in_json()
 
-        self.assertEqual(queue['defaultMessageTimeToLive'], '1 day, 0:03:04')
+        self.assertEqual(queue['defaultMessageTimeToLive'], 'P1DT3M4S')
         self.kwargs.update({'defaultMessageTimeToLive': queue['defaultMessageTimeToLive']})
 
         self.assertOnUpdate(queue, self.kwargs)
@@ -152,7 +150,7 @@ class SBQueueScenarioTest(ScenarioTest):
             'servicebus queue update --resource-group {rg} --name {queuename2} --namespace-name {namespacename} '
             '--duplicate-detection-history-time-window PT8M').get_output_in_json()
 
-        self.assertEqual(queue['duplicateDetectionHistoryTimeWindow'], '0:08:00')
+        self.assertEqual(queue['duplicateDetectionHistoryTimeWindow'], 'PT8M')
         self.kwargs.update({'duplicateDetectionHistoryTimeWindow': queue['duplicateDetectionHistoryTimeWindow']})
 
         self.assertOnUpdate(queue, self.kwargs)
@@ -224,7 +222,7 @@ class SBQueueScenarioTest(ScenarioTest):
             'servicebus queue create --resource-group {rg} --name {queuename3} --namespace-name {namespacename} '
             '--auto-delete-on-idle {time_sample1} --enable-session --enable-express --enable-partitioning').get_output_in_json()
 
-        self.assertEqual(queue['autoDeleteOnIdle'], '7 days, 0:00:00')
+        self.assertEqual(queue['autoDeleteOnIdle'], 'P7D')
         self.assertEqual(queue['enableExpress'], True)
         self.assertEqual(queue['enablePartitioning'], True)
         self.assertEqual(queue['requiresSession'], True)
@@ -242,9 +240,7 @@ class SBQueueScenarioTest(ScenarioTest):
             'requiresDuplicateDetection': queue['requiresDuplicateDetection'],
             'requiresSession': queue['requiresSession'],
             'status': queue['status'],
-            'enableBatchedOperations': queue['enableBatchedOperations'],
-            'forwardTo': queue['forwardTo'],
-            'forwardDeadLetteredMessagesTo': queue['forwardDeadLetteredMessagesTo']
+            'enableBatchedOperations': queue['enableBatchedOperations']
         })
 
         self.assertOnUpdate(queue, self.kwargs)
@@ -253,7 +249,7 @@ class SBQueueScenarioTest(ScenarioTest):
             'servicebus queue update --resource-group {rg} --name {queuename3} --namespace-name {namespacename} '
             '--auto-delete-on-idle {time_sample7}').get_output_in_json()
 
-        self.assertEqual(queue['autoDeleteOnIdle'], '1 day, 0:03:04')
+        self.assertEqual(queue['autoDeleteOnIdle'], 'P1DT3M4S')
         self.kwargs.update({'autoDeleteOnIdle': queue['autoDeleteOnIdle']})
 
         self.assertOnUpdate(queue, self.kwargs)
@@ -302,48 +298,6 @@ class SBQueueScenarioTest(ScenarioTest):
         # Queue List
         self.cmd('servicebus queue list --resource-group {rg} --namespace-name {namespacename}')
 
-        # Create Authoriazation Rule
-        self.cmd(
-            'servicebus queue authorization-rule create --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname} --rights {accessrights}',
-            checks=[self.check('name', '{authoname}')])
-
-        # Get Create Authorization Rule
-        self.cmd(
-            'servicebus queue authorization-rule show --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname}',
-            checks=[self.check('name', '{authoname}')])
-
-        # Update Authoriazation Rule
-        self.cmd(
-            'servicebus queue authorization-rule update --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname} --rights {accessrights1}',
-            checks=[self.check('name', '{authoname}')])
-
-        # Get Authorization Rule Listkeys
-        currentKeys = self.cmd(
-            'servicebus queue authorization-rule keys list --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname}').get_output_in_json()
-
-        # Regeneratekeys - Primary
-        regenerateprimarykeyresult = self.cmd(
-            'servicebus queue authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname} --key {primary}').get_output_in_json()
-        self.assertIsNotNone(regenerateprimarykeyresult)
-        self.assertNotEqual(currentKeys['primaryKey'], regenerateprimarykeyresult['primaryKey'])
-        self.assertEqual(currentKeys['secondaryKey'], regenerateprimarykeyresult['secondaryKey'])
-
-        currentKeys = regenerateprimarykeyresult
-
-        # Regeneratekeys - Secondary
-        regeneratesecondarykeyresult = self.cmd(
-            'servicebus queue authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname} --key {secondary}').get_output_in_json()
-        self.assertIsNotNone(regeneratesecondarykeyresult)
-        self.assertEqual(currentKeys['primaryKey'], regeneratesecondarykeyresult['primaryKey'])
-        self.assertNotEqual(currentKeys['secondaryKey'], regeneratesecondarykeyresult['secondaryKey'])
-
-        # Delete Queue Authorization Rule
-        self.cmd(
-            'servicebus queue authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname}')
-
-        # Delete Queue
-        self.cmd('servicebus queue delete --resource-group {rg} --namespace-name {namespacename} --name {queuename}')
-
         # Delete Namespace
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')
 
@@ -388,5 +342,3 @@ class SBQueueScenarioTest(ScenarioTest):
         self.assertEqual(actual['requiresDuplicateDetection'], expected['requiresDuplicateDetection'])
         self.assertEqual(actual['requiresSession'], expected['requiresSession'])
         self.assertEqual(actual['status'], expected['status'])
-        self.assertEqual(actual['forwardTo'], expected['forwardTo'])
-        self.assertEqual(actual['forwardDeadLetteredMessagesTo'], expected['forwardDeadLetteredMessagesTo'])

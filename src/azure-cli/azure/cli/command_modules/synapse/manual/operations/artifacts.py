@@ -394,7 +394,7 @@ def upload_workspace_package(cmd, workspace_name, package, progress_callback=Non
             if data == b'':
                 break
 
-            client.append(package_name, data)
+            client.append('appendblock', package_name, data)
             index += len(data)
             if progress_callback is not None:
                 progress_callback(index, package_size)
@@ -558,12 +558,12 @@ def export_sql_script(cmd, workspace_name, output_folder, sql_script_name=None):
 
 def list_link_connection(cmd, workspace_name):
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
-    return client.list_link_connections_by_workspace()
+    return client.list_by_workspace()
 
 
 def get_link_connection(cmd, workspace_name, link_connection_name):
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
-    return client.get_link_connection(link_connection_name)
+    return client.get(link_connection_name)
 
 
 def create_or_update_link_connection(cmd, workspace_name, link_connection_name, definition_file):
@@ -576,12 +576,12 @@ def create_or_update_link_connection(cmd, workspace_name, link_connection_name, 
     if 'landingZone' in properties_file:
         properties_file['landingZone'] = info['landingZone']
     properties = LinkConnectionResource(properties=properties_file)
-    return client.create_or_update_link_connection(link_connection_name, properties)
+    return client.create_or_update(link_connection_name, properties)
 
 
 def delete_link_connection(cmd, workspace_name, link_connection_name):
     client = cf_synapse_link_connection(cmd.cli_ctx, workspace_name)
-    return client.delete_link_connection(link_connection_name)
+    return client.delete(link_connection_name)
 
 
 def get_link_connection_status(cmd, workspace_name, link_connection_name):

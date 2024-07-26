@@ -254,7 +254,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(NoneCheck())
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(allow_blob_public_access=True)
     def test_storage_blob_container_operations(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         c = self.create_container(account_info)
@@ -273,6 +273,20 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                          c)
         self.storage_cmd('storage container show-permission -n {}', account_info, c) \
             .assert_with_checks(JMESPathCheck('publicAccess', 'off'))
+
+        # test case with access policy set
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        policy = self.create_random_name('policy', 16)
+        self.storage_cmd('storage container policy create -c {} -n {} --expiry {} --permissions racwdxyltfmei',
+                         account_info, c, policy, expiry)
+        self.storage_cmd('storage container set-permission -n {} --public-access blob',
+                         account_info, c)
+        self.storage_cmd('storage container show-permission -n {}', account_info, c) \
+            .assert_with_checks(JMESPathCheck('publicAccess', 'blob'))
+        self.storage_cmd('storage container policy list -c {} ', account_info, c) \
+            .assert_with_checks(JMESPathCheckExists('{}.expiry'.format(policy)),
+                                JMESPathCheck('{}.permission'.format(policy), 'racwdxyltfmei'))
 
         self.storage_cmd('storage container show -n {}', account_info, c) \
             .assert_with_checks(JMESPathCheck('name', c))
@@ -416,6 +430,10 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type append --if-none-match *', account_info,
                              container, local_file, blob_name)
 
+        local_file_larger = self.create_temp_file(20 * 1024)
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type append', account_info,
+                         container, local_file_larger, blob_name)
+
     @ResourceGroupPreparer()
     def test_storage_blob_update_service_properties(self, resource_group):
         storage_account = self.create_random_name(prefix='account', length=24)
@@ -546,7 +564,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         local_file = self.create_temp_file(128)
 
         # test with file
-        block_blob_tiers = ['Hot','Cool','Archive']
+        block_blob_tiers = ['Cold', 'Hot','Cool','Archive']
         for tier in block_blob_tiers:
             blob_name = self.create_random_name(prefix='blob', length=24)
             self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type {} --tier {} ', account_info,
@@ -762,6 +780,25 @@ class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('az storage blob show -c {} -n {} ', account_info, container_name, blob_name2) \
             .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
                                 JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-hot'))
+
+        # test rehydrate from Archive to Cold by Standard priority
+        blob_name3 = self.create_random_name(prefix='blob', length=24)
+
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info,
+                         container_name, blob_name3, source_file)
+
+        self.storage_cmd('storage blob set-tier -c {} -n {} --tier Archive', account_info,
+                         container_name, blob_name3)
+
+        self.storage_cmd('az storage blob show -c {} -n {} ', account_info, container_name, blob_name3) \
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'))
+
+        self.storage_cmd('storage blob set-tier -c {} -n {} --tier Cold', account_info,
+                         container_name, blob_name3)
+
+        self.storage_cmd('az storage blob show -c {} -n {} ', account_info, container_name, blob_name3) \
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
+                                JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-cold'))
 
 
 @api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2020-10-02')

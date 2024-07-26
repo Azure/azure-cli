@@ -1,0 +1,19 @@
+$TTL 300
+$ORIGIN zone10.com.
+
+@ 3600 IN SOA ns1-03.azure-dns.com. azuredns-hostmaster.@ (
+              1 ; serial
+              3600 ; refresh
+              300 ; retry
+              2419200 ; expire
+              300 ; minimum
+              )
+
+  172800 IN NS ns1-03.azure-dns.com.
+  172800 IN NS ns2-03.azure-dns.net.
+  172800 IN NS ns3-03.azure-dns.org.
+  172800 IN NS ns4-03.azure-dns.info.
+;
+
+test-ds 600 IN DS 56254 8 2 123456789abcdef67890123456789abcdef67890
+test-tlsa 600 IN TLSA 3 1 1 0C72AC70B745AC19998811B131D662C9AC69DBDBE7CB23E5B514B56664C5D3D6

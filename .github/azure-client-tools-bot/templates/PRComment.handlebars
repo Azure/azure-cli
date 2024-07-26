@@ -1,0 +1,25 @@
+{{#each this}}
+<details>
+<summary>{{renderStatus Status}}{{TestName}}</summary>
+
+{{#each Items}}
+><details>
+> <summary>{{renderStatus Status}}{{Module}}</summary>
+>
+{{#each Items}}
+>><details>
+>> <summary>{{renderStatus Status}}{{Profile}}</summary>
+>>
+{{#each Items}}
+>>><details>
+>>> <summary>{{renderStatus Status}}{{PythonVersion}}</summary>
+>>>
+{{renderContent Content 3}}
+>>></details>
+{{/each}}
+>></details>
+{{/each}}
+></details>
+{{/each}}
+</details>
+{{/each}}

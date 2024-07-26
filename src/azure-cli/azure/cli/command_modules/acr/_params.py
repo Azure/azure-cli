@@ -72,9 +72,9 @@ image_by_tag_or_digest_type = CLIArgumentType(
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
-    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, \
+    PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, \
         TokenStatus, ZoneRedundancy = self.get_models(
-            'SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus',
+            'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus',
             'TokenStatus', 'ZoneRedundancy')
     TaskStatus, BaseImageTriggerType, SourceRegistryLoginMode, UpdateTriggerPayloadType = self.get_models(
         'TaskStatus', 'BaseImageTriggerType', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType', operation_group='tasks')
@@ -84,7 +84,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('tags', arg_type=tags_type)
         c.argument('registry_name', options_list=['--name', '-n'], help='The name of the container registry. It should be specified in lower case. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr', validator=validate_registry_name)
         c.argument('tenant_suffix', options_list=['--suffix'], help="The tenant suffix in registry login server. You may specify '--suffix tenant' if your registry login server is in the format 'registry-tenant.azurecr.io'. Applicable if you\'re accessing the registry from a different subscription or you have permission to access images but not the permission to manage the registry resource.")
-        c.argument('sku', help='The SKU of the container registry', arg_type=get_enum_type(SkuName))
+        c.argument('sku', help='The SKU of the container registry', arg_type=get_enum_type(['Basic', 'Standard', 'Premium']))
         c.argument('admin_enabled', help='Indicates whether the admin user is enabled', arg_type=get_three_state_flag())
         c.argument('password_name', help='The name of password to regenerate', arg_type=get_enum_type(PasswordName))
         c.argument('username', options_list=['--username', '-u'], help='The username used to log into a container registry')
@@ -118,11 +118,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('identity', help="Use assigned managed identity resource id or name if in the same resource group")
         c.argument('key_encryption_key', help="Key vault key uri. To enable automated rotation, provide a version-less key uri. For manual rotation, provide a versioned key uri.")
 
+    with self.argument_context('acr create') as c:
+        c.argument('allow_metadata_search', arg_type=get_three_state_flag(), is_preview=True, help="Enable or disable the metadata-search feature for the registry. If not specified, this is set to disabled by default.")
+
     with self.argument_context('acr update', arg_group='Network Rule') as c:
         c.argument('data_endpoint_enabled', get_three_state_flag(), help="Enable dedicated data endpoint for client firewall configuration")
 
     with self.argument_context('acr update') as c:
         c.argument('anonymous_pull_enabled', get_three_state_flag(), help="Enable registry-wide pull from unauthenticated clients")
+
+    with self.argument_context('acr update') as c:
+        c.argument('allow_metadata_search', arg_type=get_three_state_flag(), is_preview=True, help="Enable or disable the metadata-search feature for the registry.")
 
     with self.argument_context('acr import') as c:
         c.argument('source_image', options_list=['--source'], help="Source image name or fully qualified source containing the registry login server. If `--registry` is used, `--source` will always be interpreted as a source image, even if it contains the login server.")
@@ -168,6 +174,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('list_enabled', help='Indicates whether this item shows in list operation results.', arg_type=get_three_state_flag())
         c.argument('read_enabled', help='Indicates whether read operation is allowed.', arg_type=get_three_state_flag())
         c.argument('write_enabled', help='Indicates whether write or delete operation is allowed.', arg_type=get_three_state_flag())
+
+    with self.argument_context('acr artifact-streaming') as c:
+        c.argument('repository', help="The name of the repository.", required=True)
+        c.argument('image', arg_type=image_by_tag_or_digest_type, required=True)
+        c.argument('enable_streaming', help="Indicates whether artifact streaming is enabled for a repository.", required=True, arg_type=get_three_state_flag())
+
+    with self.argument_context('acr artifact-streaming operation') as c:
+        c.argument('repository', help="The name of the repository.", required=False)
+        c.argument('image', arg_type=image_by_tag_or_digest_type, required=False)
+        c.argument('operation_id', options_list=['--id'], required=False, help="The ID returned when creating a streaming artifact.")
 
     with self.argument_context('acr manifest') as c:
         c.argument('registry_name', options_list=['--registry', '-r'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr', validator=validate_registry_name)
@@ -226,6 +242,21 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('digest', options_list=['--digest', '-d'], help="The digest of the manifest such as 'sha256@abc123'.")
         c.argument('force', options_list=['--force', '-f'], help='Overwrite the existing tag.', action='store_true')
         c.argument('manifest_spec', options_list=['--name', '-n'], help="The name of the artifact. May include a tag in the format 'name:tag'.")
+
+    with self.argument_context('acr cache') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('name', options_list=['--name', '-n'], help='The name of the cache rule.')
+        c.argument('cred_set', options_list=['--cred-set', '-c'], help='The name of the credential set.')
+        c.argument('source_repo', options_list=['--source-repo', '-s'], help="The full source repository path such as 'docker.io/library/ubuntu'.")
+        c.argument('target_repo', options_list=['--target-repo', '-t'], help="The target repository namespace such as 'ubuntu'.")
+        c.argument('remove_cred_set', action="store_true", help='Optional boolean indicating whether to remove the credential set from the cache rule. False by default.')
+
+    with self.argument_context('acr credential-set') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('name', options_list=['--name', '-n'], help='The name of the credential set.')
+        c.argument('login_server', options_list=['--login-server', '-l'], help="The login server address of the upstream registry such as 'docker.io'")
+        c.argument('username_id', options_list=['--username-id', '-u'], help='The Azure Key Vault secret ID of the secret containing the username to the upstream registry.')
+        c.argument('password_id', options_list=['--password-id', '-p'], help='The Azure Key Vault secret ID of the secret containing the password to the upstream registry.')
 
     with self.argument_context('acr repository untag') as c:
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")
@@ -291,8 +322,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.positional('source_location', help="The local source code directory path (e.g., './src'), or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz'), or the repository of an OCI artifact in an Azure container registry (e.g., 'oci://myregistry.azurecr.io/myartifact:mytag').", completer=FilesCompleter())
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", action='store_true')
         c.argument('no_wait', help="Do not wait for the build to complete and return immediately after queuing the build.", action='store_true')
-        c.argument('arg', options_list=['--build-arg'], help="Build argument in '--build-arg name[=value]' format. Multiples supported by passing --build-arg multiple times.", action='append', validator=validate_arg)
-        c.argument('secret_arg', options_list=['--secret-build-arg'], help="Secret build argument in '--secret-build-arg name[=value]' format. Multiples supported by passing '--secret-build-arg name[=value]' multiple times.", action='append', validator=validate_secret_arg)
+        c.argument('arg', options_list=['--build-arg'], help="Build argument in '--build-arg name[=value]' format. Multiples are supported by passing '--build-arg name[=value]' multiple times. IMPORTANT: This parameter should not include passwords, access tokens, or sensitive information of any kind. This parameter value will be visible to the ACR team for debugging purposes.", action='append', validator=validate_arg)
+        c.argument('secret_arg', options_list=['--secret-build-arg'], help="Secret build argument in '--secret-build-arg name[=value]' format. Multiples are supported by passing '--secret-build-arg name[=value]' multiple times. This parameter value is not surfaced to the ACR team and is more suitable for sensitive information.", action='append', validator=validate_secret_arg)
         c.argument('agent_pool_name', options_list=['--agent-pool'], help='The name of the agent pool.', is_preview=True)
         c.argument('log_template', options_list=['--log-template'], help="The repository and tag template for run log artifact using the format: 'log/repo:tag' (e.g., 'acr/logs:{{.Run.ID}}'). Only applicable to CMK enabled registry.", is_preview=True)
 
@@ -313,8 +344,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
         # common to DockerBuildStep, FileTaskStep and RunTaskStep
         c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code repository (Requires '.git' suffix for a github repo) or a remote tarball (e.g., 'http://server/context.tar.gz'), or the repository of an OCI artifact in an Azure container registry (e.g., 'oci://myregistry.azurecr.io/myartifact:mytag'). If '/dev/null' is specified, the value will be set to None and ignored. This is a required argument if the task is not a system task.")
-        c.argument('arg', help="Build argument in '--arg name[=value]' format. Multiples supported by passing '--arg` multiple times.", action='append', validator=validate_arg)
-        c.argument('secret_arg', help="Secret build argument in '--secret-arg name[=value]' format. Multiples supported by passing --secret-arg multiple times.", action='append', validator=validate_secret_arg)
+        c.argument('arg', help="Build argument in '--arg name[=value]' format. Multiples are supported by passing '--arg name[=value]' multiple times. IMPORTANT: This parameter should not include passwords, access tokens, or sensitive information of any kind. This parameter value will be visible to the ACR team for debugging purposes.", action='append', validator=validate_arg)
+        c.argument('secret_arg', help="Secret build argument in '--secret-arg name[=value]' format. Multiples are supported by passing '--secret-arg name[=value]' multiple times. This parameter value is not surfaced to the ACR team and is more suitable for sensitive information.", action='append', validator=validate_secret_arg)
         c.argument('set_value', options_list=['--set'], help="Task value in '--set name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set)
         c.argument('set_secret', help="Secret task value in '--set-secret name[=value]' format. Multiples supported by passing --set-secret multiple times.", action='append', validator=validate_set_secret)
 
@@ -415,8 +446,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('description', options_list=['--description'], help='Description for the scope map. Maximum 256 characters are allowed.', required=False)
         c.argument('scope_map_name', options_list=['--name', '-n'], help='The name of the scope map.', required=True)
 
-    repo_valid_actions = "Valid actions are {}".format({action.value for action in RepoScopeMapActions})
-    gateway_valid_actions = "Valid actions are {}".format({action.value for action in GatewayScopeMapActions})
+    # Action strings generated this way to ensure consistent ordering each time the help text is generated.
+    repo_valid_actions = "Valid actions are {}".format(sorted(action.value for action in RepoScopeMapActions))
+    gateway_valid_actions = "Valid actions are {}".format(sorted(action.value for action in GatewayScopeMapActions))
     with self.argument_context('acr scope-map update') as c:
         c.argument('add_repository', options_list=['--add-repository', c.deprecate(target='--add', redirect='--add-repository', hide=True)], nargs='+', action='append', required=False,
                    help='repository permissions to be added. Use the format "--add-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
@@ -510,7 +542,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr connected-registry create') as c:
         c.argument('log_level', help='Set the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False, default="Information")
-        c.argument('mode', arg_type=get_enum_type(['ReadOnly', 'ReadWrite']), options_list=['--mode', '-m'], help='Determine the access it will have when synchronized.', required=False, default="ReadWrite")
+        c.argument('mode', arg_type=get_enum_type(['ReadOnly', 'ReadWrite']), options_list=['--mode', '-m'], help='Determine the access it will have when synchronized.', required=False, default="ReadOnly")
         c.argument('client_token_list', options_list=['--client-tokens'], nargs='+', help='Specify the client access to the repositories in the connected registry. It can be in the format [TOKEN_NAME01] [TOKEN_NAME02]...')
         c.argument('sync_window', options_list=['--sync-window', '-w'], help='Required parameter if --sync-schedule is present. Used to determine the schedule duration. Uses ISO 8601 duration format.')
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False, default="* * * * *")

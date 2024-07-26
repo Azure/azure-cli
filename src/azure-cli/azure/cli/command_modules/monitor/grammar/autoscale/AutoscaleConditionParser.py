@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# Generated from AutoscaleCondition.g4 by ANTLR 4.9.3
+# Generated from AutoscaleCondition.g4 by ANTLR 4.13.1
 # encoding: utf-8
 # pylint: disable=all
 from antlr4 import *
@@ -13,51 +13,49 @@ if sys.version_info[1] > 5:
 else:
 	from typing.io import TextIO
 
-
 def serializedATN():
-    with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\34")
-        buf.write("\u0081\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
-        buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
-        buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\3\2\3\2\3\2\3\2\3")
-        buf.write("\2\7\2(\n\2\f\2\16\2+\13\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2")
-        buf.write("\3\2\3\2\7\2\66\n\2\f\2\16\29\13\2\3\2\7\2<\n\2\f\2\16")
-        buf.write("\2?\13\2\3\3\3\3\3\3\3\4\6\4E\n\4\r\4\16\4F\3\5\6\5J\n")
-        buf.write("\5\r\5\16\5K\3\6\3\6\3\6\3\7\3\7\3\7\3\b\3\b\3\t\3\t\3")
-        buf.write("\t\3\n\3\n\3\n\3\n\3\n\7\n^\n\n\f\n\16\na\13\n\3\13\3")
-        buf.write("\13\3\13\3\13\3\f\3\f\3\f\3\r\3\r\3\r\3\16\3\16\3\16\3")
-        buf.write("\17\3\17\3\17\3\20\3\20\3\20\3\20\7\20w\n\20\f\20\16\20")
-        buf.write("z\13\20\3\21\6\21}\n\21\r\21\16\21~\3\21\2\2\22\2\4\6")
-        buf.write("\b\n\f\16\20\22\24\26\30\32\34\36 \2\b\5\2\3\13\32\32")
-        buf.write("\34\34\7\2\3\4\6\t\f\16\32\32\34\34\4\2\r\r\23\23\3\2")
-        buf.write("\17\20\4\2\r\r\26\26\b\2\4\6\b\b\21\21\30\30\32\32\34")
-        buf.write("\34\2x\2)\3\2\2\2\4@\3\2\2\2\6D\3\2\2\2\bI\3\2\2\2\nM")
-        buf.write("\3\2\2\2\fP\3\2\2\2\16S\3\2\2\2\20U\3\2\2\2\22X\3\2\2")
-        buf.write("\2\24b\3\2\2\2\26f\3\2\2\2\30i\3\2\2\2\32l\3\2\2\2\34")
-        buf.write("o\3\2\2\2\36r\3\2\2\2 |\3\2\2\2\"#\7\31\2\2#$\5\6\4\2")
-        buf.write("$%\7\31\2\2%&\7\32\2\2&(\3\2\2\2\'\"\3\2\2\2(+\3\2\2\2")
-        buf.write(")\'\3\2\2\2)*\3\2\2\2*,\3\2\2\2+)\3\2\2\2,-\5\b\5\2-.")
-        buf.write("\7\32\2\2./\3\2\2\2/\60\5\n\6\2\60\61\5\f\7\2\61\62\5")
-        buf.write("\4\3\2\62\67\5\16\b\2\63\64\7\32\2\2\64\66\5\22\n\2\65")
-        buf.write("\63\3\2\2\2\669\3\2\2\2\67\65\3\2\2\2\678\3\2\2\28=\3")
-        buf.write("\2\2\29\67\3\2\2\2:<\7\33\2\2;:\3\2\2\2<?\3\2\2\2=;\3")
-        buf.write("\2\2\2=>\3\2\2\2>\3\3\2\2\2?=\3\2\2\2@A\7\34\2\2AB\7\32")
-        buf.write("\2\2B\5\3\2\2\2CE\t\2\2\2DC\3\2\2\2EF\3\2\2\2FD\3\2\2")
-        buf.write("\2FG\3\2\2\2G\7\3\2\2\2HJ\t\3\2\2IH\3\2\2\2JK\3\2\2\2")
-        buf.write("KI\3\2\2\2KL\3\2\2\2L\t\3\2\2\2MN\7\27\2\2NO\7\32\2\2")
-        buf.write("O\13\3\2\2\2PQ\7\30\2\2QR\7\32\2\2R\r\3\2\2\2ST\7\34\2")
-        buf.write("\2T\17\3\2\2\2UV\7\22\2\2VW\7\32\2\2W\21\3\2\2\2XY\5\20")
-        buf.write("\t\2Y_\5\24\13\2Z[\5\26\f\2[\\\5\24\13\2\\^\3\2\2\2]Z")
-        buf.write("\3\2\2\2^a\3\2\2\2_]\3\2\2\2_`\3\2\2\2`\23\3\2\2\2a_\3")
-        buf.write("\2\2\2bc\5\34\17\2cd\5\30\r\2de\5\36\20\2e\25\3\2\2\2")
-        buf.write("fg\t\4\2\2gh\7\32\2\2h\27\3\2\2\2ij\t\5\2\2jk\7\32\2\2")
-        buf.write("k\31\3\2\2\2lm\t\6\2\2mn\7\32\2\2n\33\3\2\2\2op\7\34\2")
-        buf.write("\2pq\7\32\2\2q\35\3\2\2\2rx\5 \21\2st\5\32\16\2tu\5 \21")
-        buf.write("\2uw\3\2\2\2vs\3\2\2\2wz\3\2\2\2xv\3\2\2\2xy\3\2\2\2y")
-        buf.write("\37\3\2\2\2zx\3\2\2\2{}\t\7\2\2|{\3\2\2\2}~\3\2\2\2~|")
-        buf.write("\3\2\2\2~\177\3\2\2\2\177!\3\2\2\2\n)\67=FK_x~")
-        return buf.getvalue()
-
+    return [
+        4,1,26,127,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
+        6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,
+        2,14,7,14,2,15,7,15,1,0,1,0,1,0,1,0,1,0,5,0,38,8,0,10,0,12,0,41,
+        9,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,5,0,52,8,0,10,0,12,0,55,
+        9,0,1,0,5,0,58,8,0,10,0,12,0,61,9,0,1,1,1,1,1,1,1,2,4,2,67,8,2,11,
+        2,12,2,68,1,3,4,3,72,8,3,11,3,12,3,73,1,4,1,4,1,4,1,5,1,5,1,5,1,
+        6,1,6,1,7,1,7,1,7,1,8,1,8,1,8,1,8,1,8,5,8,92,8,8,10,8,12,8,95,9,
+        8,1,9,1,9,1,9,1,9,1,10,1,10,1,10,1,11,1,11,1,11,1,12,1,12,1,12,1,
+        13,1,13,1,13,1,14,1,14,1,14,1,14,5,14,117,8,14,10,14,12,14,120,9,
+        14,1,15,4,15,123,8,15,11,15,12,15,124,1,15,0,0,16,0,2,4,6,8,10,12,
+        14,16,18,20,22,24,26,28,30,0,6,3,0,1,9,24,24,26,26,5,0,1,2,4,7,10,
+        12,24,24,26,26,2,0,11,11,17,17,1,0,13,14,2,0,11,11,20,20,6,0,2,4,
+        6,6,15,15,22,22,24,24,26,26,118,0,39,1,0,0,0,2,62,1,0,0,0,4,66,1,
+        0,0,0,6,71,1,0,0,0,8,75,1,0,0,0,10,78,1,0,0,0,12,81,1,0,0,0,14,83,
+        1,0,0,0,16,86,1,0,0,0,18,96,1,0,0,0,20,100,1,0,0,0,22,103,1,0,0,
+        0,24,106,1,0,0,0,26,109,1,0,0,0,28,112,1,0,0,0,30,122,1,0,0,0,32,
+        33,5,23,0,0,33,34,3,4,2,0,34,35,5,23,0,0,35,36,5,24,0,0,36,38,1,
+        0,0,0,37,32,1,0,0,0,38,41,1,0,0,0,39,37,1,0,0,0,39,40,1,0,0,0,40,
+        42,1,0,0,0,41,39,1,0,0,0,42,43,3,6,3,0,43,44,5,24,0,0,44,45,1,0,
+        0,0,45,46,3,8,4,0,46,47,3,10,5,0,47,48,3,2,1,0,48,53,3,12,6,0,49,
+        50,5,24,0,0,50,52,3,16,8,0,51,49,1,0,0,0,52,55,1,0,0,0,53,51,1,0,
+        0,0,53,54,1,0,0,0,54,59,1,0,0,0,55,53,1,0,0,0,56,58,5,25,0,0,57,
+        56,1,0,0,0,58,61,1,0,0,0,59,57,1,0,0,0,59,60,1,0,0,0,60,1,1,0,0,
+        0,61,59,1,0,0,0,62,63,5,26,0,0,63,64,5,24,0,0,64,3,1,0,0,0,65,67,
+        7,0,0,0,66,65,1,0,0,0,67,68,1,0,0,0,68,66,1,0,0,0,68,69,1,0,0,0,
+        69,5,1,0,0,0,70,72,7,1,0,0,71,70,1,0,0,0,72,73,1,0,0,0,73,71,1,0,
+        0,0,73,74,1,0,0,0,74,7,1,0,0,0,75,76,5,21,0,0,76,77,5,24,0,0,77,
+        9,1,0,0,0,78,79,5,22,0,0,79,80,5,24,0,0,80,11,1,0,0,0,81,82,5,26,
+        0,0,82,13,1,0,0,0,83,84,5,16,0,0,84,85,5,24,0,0,85,15,1,0,0,0,86,
+        87,3,14,7,0,87,93,3,18,9,0,88,89,3,20,10,0,89,90,3,18,9,0,90,92,
+        1,0,0,0,91,88,1,0,0,0,92,95,1,0,0,0,93,91,1,0,0,0,93,94,1,0,0,0,
+        94,17,1,0,0,0,95,93,1,0,0,0,96,97,3,26,13,0,97,98,3,22,11,0,98,99,
+        3,28,14,0,99,19,1,0,0,0,100,101,7,2,0,0,101,102,5,24,0,0,102,21,
+        1,0,0,0,103,104,7,3,0,0,104,105,5,24,0,0,105,23,1,0,0,0,106,107,
+        7,4,0,0,107,108,5,24,0,0,108,25,1,0,0,0,109,110,5,26,0,0,110,111,
+        5,24,0,0,111,27,1,0,0,0,112,118,3,30,15,0,113,114,3,24,12,0,114,
+        115,3,30,15,0,115,117,1,0,0,0,116,113,1,0,0,0,117,120,1,0,0,0,118,
+        116,1,0,0,0,118,119,1,0,0,0,119,29,1,0,0,0,120,118,1,0,0,0,121,123,
+        7,5,0,0,122,121,1,0,0,0,123,124,1,0,0,0,124,122,1,0,0,0,124,125,
+        1,0,0,0,125,31,1,0,0,0,8,39,53,59,68,73,93,118,124
+    ]
 
 class AutoscaleConditionParser ( Parser ):
 
@@ -132,7 +130,7 @@ class AutoscaleConditionParser ( Parser ):
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.9.3")
+        self.checkVersion("4.13.1")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
 
@@ -222,7 +220,7 @@ class AutoscaleConditionParser ( Parser ):
             self.state = 39
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==AutoscaleConditionParser.QUOTE:
+            while _la==23:
                 self.state = 32
                 self.match(AutoscaleConditionParser.QUOTE)
                 self.state = 33
@@ -250,7 +248,7 @@ class AutoscaleConditionParser ( Parser ):
             self.state = 53
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==AutoscaleConditionParser.WHITESPACE:
+            while _la==24:
                 self.state = 49
                 self.match(AutoscaleConditionParser.WHITESPACE)
                 self.state = 50
@@ -262,7 +260,7 @@ class AutoscaleConditionParser ( Parser ):
             self.state = 59
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==AutoscaleConditionParser.NEWLINE:
+            while _la==25:
                 self.state = 56
                 self.match(AutoscaleConditionParser.NEWLINE)
                 self.state = 61
@@ -370,7 +368,7 @@ class AutoscaleConditionParser ( Parser ):
             while True:
                 self.state = 65
                 _la = self._input.LA(1)
-                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutoscaleConditionParser.T__0) | (1 << AutoscaleConditionParser.T__1) | (1 << AutoscaleConditionParser.T__2) | (1 << AutoscaleConditionParser.T__3) | (1 << AutoscaleConditionParser.T__4) | (1 << AutoscaleConditionParser.T__5) | (1 << AutoscaleConditionParser.T__6) | (1 << AutoscaleConditionParser.T__7) | (1 << AutoscaleConditionParser.T__8) | (1 << AutoscaleConditionParser.WHITESPACE) | (1 << AutoscaleConditionParser.WORD))) != 0)):
+                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 83887102) != 0)):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -378,7 +376,7 @@ class AutoscaleConditionParser ( Parser ):
                 self.state = 68 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutoscaleConditionParser.T__0) | (1 << AutoscaleConditionParser.T__1) | (1 << AutoscaleConditionParser.T__2) | (1 << AutoscaleConditionParser.T__3) | (1 << AutoscaleConditionParser.T__4) | (1 << AutoscaleConditionParser.T__5) | (1 << AutoscaleConditionParser.T__6) | (1 << AutoscaleConditionParser.T__7) | (1 << AutoscaleConditionParser.T__8) | (1 << AutoscaleConditionParser.WHITESPACE) | (1 << AutoscaleConditionParser.WORD))) != 0)):
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & 83887102) != 0)):
                     break
 
         except RecognitionException as re:
@@ -437,7 +435,7 @@ class AutoscaleConditionParser ( Parser ):
                 if _alt == 1:
                     self.state = 70
                     _la = self._input.LA(1)
-                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutoscaleConditionParser.T__0) | (1 << AutoscaleConditionParser.T__1) | (1 << AutoscaleConditionParser.T__3) | (1 << AutoscaleConditionParser.T__4) | (1 << AutoscaleConditionParser.T__5) | (1 << AutoscaleConditionParser.T__6) | (1 << AutoscaleConditionParser.T__9) | (1 << AutoscaleConditionParser.T__10) | (1 << AutoscaleConditionParser.T__11) | (1 << AutoscaleConditionParser.WHITESPACE) | (1 << AutoscaleConditionParser.WORD))) != 0)):
+                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 83893494) != 0)):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
@@ -690,7 +688,7 @@ class AutoscaleConditionParser ( Parser ):
             self.state = 93
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==AutoscaleConditionParser.T__10 or _la==AutoscaleConditionParser.AND:
+            while _la==11 or _la==17:
                 self.state = 88
                 self.dim_separator()
                 self.state = 89
@@ -798,7 +796,7 @@ class AutoscaleConditionParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 100
             _la = self._input.LA(1)
-            if not(_la==AutoscaleConditionParser.T__10 or _la==AutoscaleConditionParser.AND):
+            if not(_la==11 or _la==17):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -847,7 +845,7 @@ class AutoscaleConditionParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 103
             _la = self._input.LA(1)
-            if not(_la==AutoscaleConditionParser.T__12 or _la==AutoscaleConditionParser.T__13):
+            if not(_la==13 or _la==14):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -899,7 +897,7 @@ class AutoscaleConditionParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 106
             _la = self._input.LA(1)
-            if not(_la==AutoscaleConditionParser.T__10 or _la==AutoscaleConditionParser.OR):
+            if not(_la==11 or _la==20):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -1079,7 +1077,7 @@ class AutoscaleConditionParser ( Parser ):
                 if _alt == 1:
                     self.state = 121
                     _la = self._input.LA(1)
-                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutoscaleConditionParser.T__1) | (1 << AutoscaleConditionParser.T__2) | (1 << AutoscaleConditionParser.T__3) | (1 << AutoscaleConditionParser.T__5) | (1 << AutoscaleConditionParser.T__14) | (1 << AutoscaleConditionParser.NUMBER) | (1 << AutoscaleConditionParser.WHITESPACE) | (1 << AutoscaleConditionParser.WORD))) != 0)):
+                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 88113244) != 0)):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)

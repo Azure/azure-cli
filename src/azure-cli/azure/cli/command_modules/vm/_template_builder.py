@@ -6,6 +6,7 @@
 
 from enum import Enum
 
+from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core.azclierror import ValidationError, InvalidArgumentValueError
@@ -14,6 +15,8 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 
 from azure.cli.command_modules.vm._vm_utils import get_target_network_api
+
+logger = get_logger(__name__)
 
 
 # pylint: disable=too-few-public-methods
@@ -160,7 +163,7 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
 
     api_version = '2015-06-15'
     if application_security_groups:
-        asg_ids = [{'id': x.id} for x in application_security_groups]
+        asg_ids = [{'id': x['id']} for x in application_security_groups]
         nic_properties['ipConfigurations'][0]['properties']['applicationSecurityGroups'] = asg_ids
         api_version = '2017-09-01'
 
@@ -303,7 +306,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
         capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
-        os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None):
+        os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None,
+        enable_proxy_agent=None, proxy_agent_mode=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -626,7 +630,20 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if encryption_at_host is not None:
         vm_properties['securityProfile']['encryptionAtHost'] = encryption_at_host
 
-    if security_type is not None:
+    proxy_agent_settings = {}
+    if enable_proxy_agent is not None:
+        proxy_agent_settings['enabled'] = enable_proxy_agent
+
+    if proxy_agent_mode is not None:
+        proxy_agent_settings['mode'] = proxy_agent_mode
+
+    if proxy_agent_settings:
+        vm_properties['securityProfile']['proxyAgentSettings'] = proxy_agent_settings
+
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type is not None and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         vm_properties['securityProfile']['securityType'] = security_type
 
     if enable_secure_boot is not None or enable_vtpm is not None:
@@ -947,7 +964,13 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
                         v_cpus_per_core=None, os_disk_security_encryption_type=None,
                         os_disk_secure_vm_disk_encryption_set=None, os_disk_delete_option=None,
-                        regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None):
+                        regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
+                        enable_osimage_notification=None, max_surge=None, enable_hibernation=None,
+                        enable_auto_os_upgrade=None, enable_proxy_agent=None, proxy_agent_mode=None,
+                        security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
+                        enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
+                        additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
+                        enable_user_redeploy_scheduled_events=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -982,7 +1005,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     if application_security_groups and cmd.supported_api_version(min_api='2018-06-01',
                                                                  operation_group='virtual_machine_scale_sets'):
-        ip_config_properties['applicationSecurityGroups'] = [{'id': x.id} for x in application_security_groups]
+        ip_config_properties['applicationSecurityGroups'] = [{'id': x['id']} for x in application_security_groups]
 
     if ip_config_properties:
         ip_configuration = {
@@ -1262,9 +1285,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         }
     if upgrade_policy_mode and cmd.supported_api_version(min_api='2020-12-01',
                                                          operation_group='virtual_machine_scale_sets'):
-        vmss_properties['upgradePolicy']['rollingUpgradePolicy'] = {}
-        rolling_upgrade_policy = vmss_properties['upgradePolicy']['rollingUpgradePolicy']
-
+        rolling_upgrade_policy = {}
         if max_batch_instance_percent is not None:
             rolling_upgrade_policy['maxBatchInstancePercent'] = max_batch_instance_percent
 
@@ -1283,8 +1304,49 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         if prioritize_unhealthy_instances is not None:
             rolling_upgrade_policy['prioritizeUnhealthyInstances'] = prioritize_unhealthy_instances
 
-        if not rolling_upgrade_policy:
-            del rolling_upgrade_policy
+        if max_surge is not None:
+            rolling_upgrade_policy['maxSurge'] = max_surge
+
+        if rolling_upgrade_policy:
+            vmss_properties['upgradePolicy']['rollingUpgradePolicy'] = rolling_upgrade_policy
+
+    if upgrade_policy_mode and cmd.supported_api_version(min_api='2018-10-01',
+                                                         operation_group='virtual_machine_scale_sets'):
+        automatic_os_upgrade_policy = {}
+        if enable_auto_os_upgrade is not None:
+            automatic_os_upgrade_policy['enableAutomaticOSUpgrade'] = enable_auto_os_upgrade
+
+        if automatic_os_upgrade_policy:
+            vmss_properties['upgradePolicy']['automaticOSUpgradePolicy'] = automatic_os_upgrade_policy
+
+    if upgrade_policy_mode and upgrade_policy_mode.lower() == 'rolling' and orchestration_mode.lower() == 'uniform' and\
+            cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
+        if os_type.lower() == 'linux':
+            from azure.cli.command_modules.vm._vmss_application_health import application_health_setting_for_linux
+            application_health_data = application_health_setting_for_linux
+            health_extension_name = 'ApplicationHealthLinux'
+        else:
+            from azure.cli.command_modules.vm._vmss_application_health import application_health_setting_for_windows
+            application_health_data = application_health_setting_for_windows
+            health_extension_name = 'ApplicationHealthWindows'
+        health_extension = [{
+            "name": health_extension_name,
+            "properties": {
+                "publisher": "Microsoft.ManagedServices",
+                "type": health_extension_name,
+                "typeHandlerVersion": "1.0",
+                "autoUpgradeMinorVersion": True,
+                "settings": {
+                    "port": 80,
+                    "protocol": "http",
+                    "requestPath": "/"
+                }
+            }
+        }]
+        virtual_machine_profile['extensionProfile'] = {
+            'extensions': health_extension
+        }
+        os_profile['customData'] = b64encode(application_health_data)
 
     if enable_spot_restore and cmd.supported_api_version(min_api='2021-04-01',
                                                          operation_group='virtual_machine_scale_sets'):
@@ -1340,14 +1402,47 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if proximity_placement_group:
         vmss_properties['proximityPlacementGroup'] = {'id': proximity_placement_group}
 
+    scheduled_events_profile = {}
     if terminate_notification_time is not None:
-        scheduled_events_profile = {
+        scheduled_events_profile.update({
             'terminateNotificationProfile': {
                 'notBeforeTimeout': terminate_notification_time,
                 'enable': 'true'
             }
-        }
+        })
         virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
+
+    if enable_osimage_notification is not None:
+        scheduled_events_profile.update({
+            'osImageNotificationProfile': {
+                'enable': enable_osimage_notification
+            }
+        })
+        virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
+
+    scheduled_events_policy = {}
+    if additional_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "scheduledEventsAdditionalPublishingTargets": {
+                "eventGridAndResourceGraph": {
+                    "enable": additional_scheduled_events
+                }
+            }
+        })
+    if enable_user_redeploy_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedRedeploy": {
+                "automaticallyApprove": enable_user_redeploy_scheduled_events
+            }
+        })
+    if enable_user_reboot_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedReboot": {
+                "automaticallyApprove": enable_user_reboot_scheduled_events
+            }
+        })
+    if scheduled_events_policy:
+        vmss_properties['scheduledEventsPolicy'] = scheduled_events_policy
 
     if automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
         automatic_repairs_policy = {
@@ -1360,11 +1455,22 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if scale_in_policy:
         vmss_properties['scaleInPolicy'] = {'rules': scale_in_policy}
 
+    if enable_resilient_vm_creation is not None or enable_resilient_vm_deletion is not None:
+        resiliency_policy = {}
+        if enable_resilient_vm_creation is not None:
+            resiliency_policy['resilientVMCreationPolicy'] = {'enabled': enable_resilient_vm_creation}
+        if enable_resilient_vm_deletion is not None:
+            resiliency_policy['resilientVMDeletionPolicy'] = {'enabled': enable_resilient_vm_deletion}
+        vmss_properties['resiliencyPolicy'] = resiliency_policy
+
     security_profile = {}
     if encryption_at_host:
         security_profile['encryptionAtHost'] = encryption_at_host
 
-    if security_type is not None:
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type is not None and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         security_profile['securityType'] = security_type
 
     if enable_secure_boot is not None or enable_vtpm is not None:
@@ -1372,6 +1478,16 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
             'secureBootEnabled': enable_secure_boot,
             'vTpmEnabled': enable_vtpm
         }
+
+    proxy_agent_settings = {}
+    if enable_proxy_agent is not None:
+        proxy_agent_settings['enabled'] = enable_proxy_agent
+
+    if proxy_agent_mode is not None:
+        proxy_agent_settings['mode'] = proxy_agent_mode
+
+    if proxy_agent_settings:
+        security_profile['proxyAgentSettings'] = proxy_agent_settings
 
     if security_profile:
         virtual_machine_profile['securityProfile'] = security_profile
@@ -1392,12 +1508,27 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
             }
         }
 
+    if security_posture_reference_id:
+        virtual_machine_profile['securityPostureReference'] = {
+            'id': security_posture_reference_id,
+        }
+
+    if security_posture_reference_exclude_extensions:
+        security_posture_reference = virtual_machine_profile.get('securityPostureReference', {})
+        security_posture_reference['excludeExtensions'] = security_posture_reference_exclude_extensions
+        virtual_machine_profile['securityPostureReference'] = security_posture_reference
+
     if virtual_machine_profile:
         vmss_properties['virtualMachineProfile'] = virtual_machine_profile
 
     if orchestration_mode and cmd.supported_api_version(min_api='2020-06-01',
                                                         operation_group='virtual_machine_scale_sets'):
         vmss_properties['orchestrationMode'] = orchestration_mode
+
+    if enable_hibernation is not None:
+        if not vmss_properties.get('additionalCapabilities'):
+            vmss_properties['additionalCapabilities'] = {}
+        vmss_properties['additionalCapabilities']['hibernationEnabled'] = enable_hibernation
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',

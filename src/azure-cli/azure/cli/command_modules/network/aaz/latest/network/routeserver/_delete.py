@@ -47,7 +47,7 @@ class Delete(AAZCommand):
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the Route Server.",
+            help="Name of the route server.",
             required=True,
             id_part="name",
         )
@@ -150,6 +150,10 @@ class Delete(AAZCommand):
 
         def on_204(self, session):
             pass
+
+
+class _DeleteHelper:
+    """Helper class for Delete"""
 
 
 __all__ = ["Delete"]

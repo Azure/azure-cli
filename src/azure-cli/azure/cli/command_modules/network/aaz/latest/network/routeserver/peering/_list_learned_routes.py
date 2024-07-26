@@ -49,11 +49,13 @@ class ListLearnedRoutes(AAZCommand):
             options=["-n", "--name"],
             help="The name of the Route Server Peering.",
             required=True,
+            id_part="child_name_1",
         )
         _args_schema.routeserver = AAZStrArg(
             options=["--routeserver"],
             help="The name of the Route Server.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -61,7 +63,17 @@ class ListLearnedRoutes(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         yield self.VirtualHubBgpConnectionsListLearnedRoutes(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -165,15 +177,15 @@ class ListLearnedRoutes(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZObjectType()
+            cls._schema_on_200 = AAZDictType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.Element = AAZListType()
 
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
+            _element = cls._schema_on_200.Element
+            _element.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.value.Element
+            _element = cls._schema_on_200.Element.Element
             _element.as_path = AAZStrType(
                 serialized_name="asPath",
                 flags={"read_only": True},
@@ -201,6 +213,10 @@ class ListLearnedRoutes(AAZCommand):
             )
 
             return cls._schema_on_200
+
+
+class _ListLearnedRoutesHelper:
+    """Helper class for ListLearnedRoutes"""
 
 
 __all__ = ["ListLearnedRoutes"]

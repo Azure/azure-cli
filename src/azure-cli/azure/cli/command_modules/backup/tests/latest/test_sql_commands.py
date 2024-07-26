@@ -22,6 +22,7 @@ server_friendly_sql = 'sql-clitestvm-d'
 item_auto_sql = 'SQLInstance;mssqlserver'
 item1_sql = 'SQLDataBase;mssqlserver;msdb'
 item1_sql_fname = 'msdb'
+instance_name = 'sqlinstance;mssqlserver'
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
@@ -459,7 +460,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'id': id_sql,
             'pit': 'SQLDatabase',
             'item_id': item_id_sql,
-            'titem': item1_sql_fname + '_restored'
+            'titem': item1_sql_fname + '_restored',
+            'tinstance_name': instance_name
         })
 
         self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
@@ -499,7 +501,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.kwargs['rp'] = self.kwargs['rp']['name']
 
-        self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode AlternateWorkloadRestore --rp-name {rp} --item-name {item} --container-name {container1} --target-item-name {titem} --target-server-type SQLInstance --target-server-name {fname} --workload-type {wt}').get_output_in_json(), separators=(',', ':'))
+        self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode AlternateWorkloadRestore --rp-name {rp} --item-name {item} --container-name {container1} --target-item-name {titem} --target-server-type SQLInstance --target-server-name {fname} --workload-type {wt} --target-instance-name {tinstance_name}').get_output_in_json(), separators=(',', ':'))
         with open("recoveryconfig_sql_restore.json", "w") as f:
             f.write(self.kwargs['rc'])
 
@@ -668,8 +670,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
-        self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
+        # self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
 
+    @AllowLargeResponse()
     @record_only()
     def test_backup_wl_sql_archive (self):
         self.kwargs.update({

@@ -8,18 +8,20 @@ import os
 import urllib
 import urllib3
 import certifi
+from datetime import datetime
 
 from knack.log import get_logger
 
-from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError, ResourceNotFoundError)
+from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError, ResourceNotFoundError,
+                                       CLIInternalError)
 from azure.cli.core.commands.parameters import get_subscription_locations
-from azure.cli.core.util import should_disable_connection_verify
+from azure.cli.core.util import should_disable_connection_verify, send_raw_request
 from azure.cli.core.commands.client_factory import get_subscription_id
 
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
-from ._client_factory import web_client_factory
-from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND
+from ._client_factory import web_client_factory, providers_client_factory
+from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND, LINUXAPP_KIND
 
 logger = get_logger(__name__)
 
@@ -78,16 +80,22 @@ def get_sku_tier(name):  # pylint: disable=too-many-return-statements
         return 'PREMIUM'
     if name in ['P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUMV2'
+    if name in ['P0V3']:
+        return 'PREMIUM0V3'
     if name in ['P1V3', 'P2V3', 'P3V3']:
         return 'PREMIUMV3'
+    if name in ['P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3']:
+        return 'PREMIUMMV3'
     if name in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
     if name in ['EP1', 'EP2', 'EP3']:
         return 'ElasticPremium'
     if name in ['I1', 'I2', 'I3']:
         return 'Isolated'
-    if name in ['I1V2', 'I2V2', 'I3V2']:
+    if name in ['I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2']:
         return 'IsolatedV2'
+    if name in ['I1MV2', 'I2MV2', 'I3MV2', 'I4MV2', 'I5MV2']:
+        return 'IsolatedMV2'
     if name in ['WS1', 'WS2', 'WS3']:
         return 'WorkflowStandard'
     raise ValidationError("Invalid sku(pricing tier), please refer to command help for valid values")
@@ -124,13 +132,44 @@ def retryable_method(retries=3, interval_sec=5, excpt_type=Exception):
             while True:
                 try:
                     return func(*args, **kwargs)
-                except excpt_type as exception:  # pylint: disable=broad-except
+                except excpt_type:  # pylint: disable=broad-except
                     current_retry -= 1
                     if current_retry <= 0:
-                        raise exception
+                        raise
                 time.sleep(interval_sec)
         return call
     return decorate
+
+
+def register_app_provider(cmd):
+    from azure.mgmt.resource.resources.models import ProviderRegistrationRequest, ProviderConsentDefinition
+
+    namespace = "Microsoft.App"
+    providers_client = providers_client_factory(cmd.cli_ctx)
+    is_registered = False
+    try:
+        registration_state = providers_client.get(namespace).registration_state
+        is_registered = registration_state and registration_state.lower() == 'registered'
+    except Exception:  # pylint: disable=broad-except
+        logger.warning("An error occurred while trying to get the registration state of the '%s' provider.", namespace)
+
+    if not is_registered:
+        try:
+            logger.warning("Registering the '%s' provider.", namespace)
+            properties = ProviderRegistrationRequest(
+                third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=True))
+            providers_client.register(namespace, properties=properties)
+            timeout_secs = 120
+            start_time = datetime.now()
+            while not is_registered:
+                time.sleep(5)
+                registration_state = providers_client.get(namespace).registration_state
+                is_registered = registration_state and registration_state.lower() == 'registered'
+                if not is_registered and (datetime.now() - start_time).seconds >= timeout_secs:
+                    raise CLIInternalError("Timed out waiting for the '%s' provider to register." % namespace)
+            logger.warning("Successfully registered the '%s' provider.", namespace)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning("An error occurred while trying to register the '%s' provider: %s", namespace, str(ex))
 
 
 def raise_missing_token_suggestion():
@@ -141,12 +180,34 @@ def raise_missing_token_suggestion():
                                        "the steps found at the following link:\n{0}".format(pat_documentation))
 
 
+def raise_missing_ado_token_suggestion():
+    pat_documentation = ("https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-"
+                         "tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat")
+    raise RequiredArgumentMissingError("If this repo is an Azure Dev Ops repo, please provide a Personal Access Token."
+                                       "Please run with the '--login-with-ado' flag or follow "
+                                       "the steps found at the following link:\n{0}".format(pat_documentation))
+
+
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     group = client.resource_groups.get(resource_group_name)
     return group.location
+
+
+def is_centauri_functionapp(cmd, resource_group, name):
+    client = web_client_factory(cmd.cli_ctx)
+    functionapp = client.web_apps.get(resource_group, name)
+    return functionapp.managed_environment_id is not None
+
+
+def is_flex_functionapp(cli_ctx, resource_group, name):
+    app = get_raw_functionapp(cli_ctx, resource_group, name)
+    if app["properties"]["serverFarmId"] is None:
+        return False
+    sku = app["properties"]["sku"]
+    return sku and sku.lower() == 'flexconsumption'
 
 
 def _list_app(cli_ctx, resource_group_name=None):
@@ -167,11 +228,24 @@ def _rename_server_farm_props(webapp):
     return webapp
 
 
+def get_raw_functionapp(cli_ctx, resource_group_name, name):
+    site_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
+    subscription_id = get_subscription_id(cli_ctx)
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, '2023-12-01')
+    request_url = cli_ctx.cloud.endpoints.resource_manager + site_url
+    response = send_raw_request(cli_ctx, "GET", request_url)
+    return response.json()
+
+
 def _get_location_from_webapp(client, resource_group_name, webapp):
     webapp = client.web_apps.get(resource_group_name, webapp)
     if not webapp:
         raise ResourceNotFoundError("'{}' app doesn't exist".format(webapp))
     return webapp.location
+
+
+def _normalize_flex_location(location):
+    return location.lower().replace(" ", "")
 
 
 # can't just normalize locations with location.lower().replace(" ", "") because of UAE/UK regions
@@ -182,6 +256,15 @@ def _normalize_location(cmd, location):
         if loc.display_name.lower() == location or loc.name.lower() == location:
             return loc.name
     return location
+
+
+def _remove_list_duplicates(webapp):
+    outbound_ips = webapp.possible_outbound_ip_addresses.split(',')
+    outbound_ips_list = list(dict.fromkeys(outbound_ips))
+    outbound_ips_list.sort()
+    outbound_ips = ','.join(outbound_ips_list)
+    del webapp.possible_outbound_ip_addresses
+    setattr(webapp, 'possible_outbound_ip_addresses', outbound_ips)
 
 
 def get_pool_manager(url):
@@ -221,6 +304,17 @@ def get_app_service_plan_from_webapp(cmd, webapp, api_version=None):
     client = web_client_factory(cmd.cli_ctx, api_version=api_version)
     plan = parse_resource_id(webapp.server_farm_id)
     return client.app_service_plans.get(plan['resource_group'], plan['name'])
+
+
+def app_service_plan_exists(cmd, resource_group_name, plan, api_version=None):
+    from azure.core.exceptions import ResourceNotFoundError as RNFR
+    exists = True
+    try:
+        client = web_client_factory(cmd.cli_ctx, api_version=api_version)
+        client.app_service_plans.get(resource_group_name, plan)
+    except RNFR:
+        exists = False
+    return exists
 
 
 # Allows putting additional properties on an SDK model instance
@@ -266,3 +360,9 @@ def is_webapp(app):
     if app is None or app.kind is None:
         return False
     return not is_logicapp(app) and not is_functionapp(app) and "app" in app.kind
+
+
+def is_linux_webapp(app):
+    if not is_webapp(app):
+        return False
+    return LINUXAPP_KIND in app.kind

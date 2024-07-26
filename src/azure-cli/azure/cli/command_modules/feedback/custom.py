@@ -68,7 +68,8 @@ _ISSUES_TEMPLATE = """
 
 **Errors:**
 ```
-{errors_string}
+Paste here the error message you have received. Make sure to remove all sensitive information,
+such as user name, password, credential, subscription ID, etc.
 ```
 
 ## To Reproduce:
@@ -352,7 +353,6 @@ def _build_issue_info_tup(command_log_file=None):
         format_dict["command_name"] = command_name
 
         if command_log_file.command_data_dict:
-            errors_list = command_log_file.command_data_dict.get("errors", [])
             executed_command = command_log_file.command_data_dict.get("command_args", "")
             extension_name = command_log_file.command_data_dict.get("extension_name", "")
             extension_version = command_log_file.command_data_dict.get("extension_version", "")
@@ -363,7 +363,6 @@ def _build_issue_info_tup(command_log_file=None):
                 is_ext = True
                 ext_name = extension_name
 
-            format_dict["errors_string"] = ''.join(errors_list)
             format_dict["executed_command"] = "az " + executed_command if executed_command else executed_command
             format_dict["command_name"] += extension_info
 

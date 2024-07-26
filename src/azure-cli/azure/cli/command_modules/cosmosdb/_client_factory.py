@@ -152,3 +152,25 @@ def cf_cassandra_data_center(cli_ctx, _):
 
 def cf_service(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).service
+
+
+# restorable gremlin databases/graphs
+def cf_restorable_gremlin_databases(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_gremlin_databases
+
+
+def cf_restorable_gremlin_graphs(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_gremlin_graphs
+
+
+def cf_restorable_gremlin_resources(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_gremlin_resources
+
+
+# restorable tables
+def cf_restorable_tables(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_tables
+
+
+def cf_restorable_table_resources(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_table_resources

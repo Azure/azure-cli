@@ -3,12 +3,27 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=protected-access, too-few-public-methods
+import copy
 import argparse
 
+from knack.arguments import CLIArgumentType
+from knack.log import get_logger
+from knack.util import CLIError
 from azure.cli.command_modules.monitor.util import (
     get_aggregation_map, get_operator_map, get_autoscale_scale_direction_map)
 
 from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.aaz._arg import AAZCompoundTypeArg, AAZListType
+from azure.cli.core.aaz._arg_fmt import AAZListArgFormat
+from azure.cli.core.aaz._base import AAZUndefined, AAZBlankArgValue
+from azure.cli.core.aaz._arg_action import AAZCompoundTypeArgAction, AAZArgActionOperations, \
+    _ELEMENT_APPEND_KEY, AAZSimpleTypeArgAction
+from azure.cli.core.aaz._help import AAZShowHelp
+from azure.cli.core.aaz.exceptions import AAZInvalidValueError
+from azure.cli.core.aaz._prompt import AAZPromptInput
+
+logger = get_logger(__name__)
 
 
 def timezone_name_type(value):
@@ -86,6 +101,47 @@ def get_period_type(as_timedelta=False):
     return period_type
 
 
+# pylint: disable=redefined-builtin
+def get_date_midnight_type(help=None):
+
+    help_string = help + ' ' if help else ''
+    accepted_formats = ['date (yyyy-mm-dd)', 'time (hh:mm:ss.xxxxx)', 'timezone (+/-hh:mm)']
+    help_string = help_string + 'Format: ' + ' '.join(accepted_formats)
+
+    # pylint: disable=too-few-public-methods
+    class DateAction(argparse.Action):
+
+        def __call__(self, parser, namespace, values, option_string=None):
+            """ Parse a date value and return the ISO8601 string. """
+            import dateutil.parser
+            import dateutil.tz
+
+            value_string = ' '.join(values)
+            dt_val = None
+            try:
+                # attempt to parse ISO 8601
+                dt_val = dateutil.parser.parse(value_string)
+            except ValueError:
+                pass
+
+            # TODO: custom parsing attempts here
+            if not dt_val:
+                raise CLIError("Unable to parse: '{}'. Expected format: {}".format(value_string, help_string))
+            if dt_val.tzinfo:
+                logger.warning('Timezone info will be ignored in %s.', value_string)
+            dt_val = dt_val.replace(tzinfo=dateutil.tz.tzutc())
+
+            # Issue warning if any supplied time will be ignored
+            if any([dt_val.hour, dt_val.minute, dt_val.second, dt_val.microsecond]):
+                logger.warning('Time info will be set to midnight UTC for %s.', value_string)
+            date_midnight = dt_val.replace(hour=0, minute=0, second=0, microsecond=0)
+            format_string = date_midnight.isoformat()
+            logger.info('Time info set to midnight UTC from %s to %s', value_string, format_string)
+            setattr(namespace, self.dest, format_string)
+
+    return CLIArgumentType(action=DateAction, nargs='+', help=help_string)
+
+
 # pylint: disable=protected-access, too-few-public-methods
 class MetricAlertConditionAction(argparse._AppendAction):
 
@@ -96,7 +152,6 @@ class MetricAlertConditionAction(argparse._AppendAction):
 
         from azure.cli.command_modules.monitor.grammar.metric_alert import (
             MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator)
-        from azure.mgmt.monitor.models import MetricCriteria, DynamicMetricCriteria
 
         usage = 'usage error: --condition {avg,min,max,total,count} [NAMESPACE.]METRIC\n' \
                 '                         [{=,!=,>,>=,<,<=} THRESHOLD]\n' \
@@ -117,15 +172,15 @@ class MetricAlertConditionAction(argparse._AppendAction):
             walker = antlr4.ParseTreeWalker()
             walker.walk(validator, tree)
             metric_condition = validator.result()
-            if isinstance(metric_condition, MetricCriteria):
+            if "static" in metric_condition:
                 # static metric criteria
                 for item in ['time_aggregation', 'metric_name', 'operator', 'threshold']:
-                    if not getattr(metric_condition, item, None):
+                    if item not in metric_condition["static"]:
                         raise InvalidArgumentValueError(usage)
-            elif isinstance(metric_condition, DynamicMetricCriteria):
+            elif "dynamic" in metric_condition:
                 # dynamic metric criteria
                 for item in ['time_aggregation', 'metric_name', 'operator', 'alert_sensitivity', 'failing_periods']:
-                    if not getattr(metric_condition, item, None):
+                    if item not in metric_condition["dynamic"]:
                         raise InvalidArgumentValueError(usage)
             else:
                 raise NotImplementedError()
@@ -147,13 +202,12 @@ class MetricAlertAddAction(argparse._AppendAction):
             )
             raise InvalidArgumentValueError(err_msg)
 
-        from azure.mgmt.monitor.models import MetricAlertAction
-        action = MetricAlertAction(
-            action_group_id=action_group_id,
-            web_hook_properties=webhook_property_candidates
-        )
-        action.odatatype = 'Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.' \
-                           'DataContracts.Resources.ScheduledQueryRules.Action'
+        action = {
+            "action_group_id": action_group_id,
+            "web_hook_properties": webhook_property_candidates
+        }
+        action["odatatype"] = "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights." \
+                              "Nexus.DataContracts.Resources.ScheduledQueryRules.Action"
         super(MetricAlertAddAction, self).__call__(parser, namespace, action, option_string)
 
 
@@ -217,6 +271,37 @@ class AlertRemoveAction(argparse._AppendAction):
         if _type not in ['email', 'webhook']:
             raise InvalidArgumentValueError('{} TYPE KEY [KEY ...]'.format(option_string))
         return values[1:]
+
+
+# pylint: disable=protected-access
+class AutoscaleCreateAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super(AutoscaleCreateAction, self).__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        _type = values[0].lower()
+        if _type == 'email':
+            return {
+                "key": "email",
+                "value": {
+                    "custom_emails": values[1:]
+                }
+            }
+        if _type == 'webhook':
+            uri = values[1]
+            try:
+                properties = dict(x.split('=', 1) for x in values[2:])
+            except ValueError:
+                raise InvalidArgumentValueError('{} webhook URI [KEY=VALUE ...]'.format(option_string))
+            return {
+                "key": "webhook",
+                "value": {
+                    "service_uri": uri,
+                    "properties": properties
+                }
+            }
+        raise InvalidArgumentValueError('{} TYPE KEY [ARGS]'.format(option_string))
 
 
 # pylint: disable=protected-access
@@ -426,3 +511,122 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
         except IndexError:
             raise InvalidArgumentValueError('--action {}'.format(syntax[type_name]))
         return receiver
+
+
+class AAZCustomListArgAction(AAZCompoundTypeArgAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not isinstance(getattr(namespace, self.dest), AAZArgActionOperations):
+            # overwrite existing namespace value which is not an instance of AAZArgActionOperations.
+            # especially the default value of argument.
+            setattr(namespace, self.dest, AAZArgActionOperations())
+        dest_ops = getattr(namespace, self.dest)
+        try:
+            if self._schema.singular_options and option_string in self._schema.singular_options:
+                # if singular option is used then parsed values by element action
+                action = self._schema.Element._build_cmd_action()
+                action.setup_operations(dest_ops, values, prefix_keys=[_ELEMENT_APPEND_KEY])
+            else:
+                self.setup_operations(dest_ops, values)
+        except (ValueError, KeyError) as ex:
+            raise InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
+        except AAZShowHelp as aaz_help:
+            aaz_help.keys = (option_string, *aaz_help.keys)
+            self.show_aaz_help(parser, aaz_help)
+
+    @classmethod
+    def setup_operations(cls, dest_ops, values, prefix_keys=None):
+        if prefix_keys is None:
+            prefix_keys = []
+        if values is None or values == []:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument cannot be blank")
+            assert not isinstance(cls._schema._blank, AAZPromptInput), "Prompt input is not supported in List args."
+            dest_ops.add(copy.deepcopy(cls._schema._blank), *prefix_keys)
+        else:
+            assert isinstance(values, list)
+            ops = []
+
+            # This part of logic is to support Separate Elements Expression which is widely used in current command,
+            # such as:
+            #       --args val1 val2 val3.
+            # The standard expression of it should be:
+            #       --args [val1,val2,val3]
+
+            element_action = cls._schema.Element._build_cmd_action()
+            if not issubclass(element_action, AAZSimpleTypeArgAction):
+                # Separate Elements Expression only supported for simple type element array
+                raise AAZInvalidValueError("Element action is not nullable")
+
+            # dest_ops
+            try:
+                element_ops = AAZArgActionOperations()
+                for value in values:
+                    element_action.setup_operations(element_ops, value, prefix_keys=[_ELEMENT_APPEND_KEY])
+            except AAZShowHelp as aaz_help:
+                aaz_help.schema = cls._schema
+                aaz_help.keys = (0, *aaz_help.keys)
+                raise aaz_help
+
+            elements = []
+            for _, data in element_ops._ops:
+                elements.append(data)
+            ops = [([], elements)]
+
+        for key_parts, data in ops:
+            dest_ops.add(data, *prefix_keys, *key_parts)
+
+    @classmethod
+    def format_data(cls, data):
+        if data == AAZBlankArgValue:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument value cannot be blank")
+            assert not isinstance(cls._schema._blank, AAZPromptInput), "Prompt input is not supported in List args."
+            data = copy.deepcopy(cls._schema._blank)
+
+        if data is None:
+            if cls._schema._nullable:
+                return data
+            raise AAZInvalidValueError("field is not nullable")
+
+        if isinstance(data, list):
+            result = []
+            action = cls._schema.Element._build_cmd_action()
+            for idx, value in enumerate(data):
+                try:
+                    result.append(action.format_data(value))
+                except AAZInvalidValueError as ex:
+                    raise AAZInvalidValueError(f"Invalid at [{idx}] : {ex}") from ex
+            return result
+
+        raise AAZInvalidValueError(f"list type value expected, got '{data}'({type(data)})")
+
+
+class AAZCustomListArg(AAZCompoundTypeArg, AAZListType):
+
+    def __init__(self, fmt=None, singular_options=None, **kwargs):
+        fmt = fmt or AAZListArgFormat()
+        super().__init__(fmt=fmt, **kwargs)
+        self.singular_options = singular_options
+
+    def to_cmd_arg(self, name, **kwargs):
+        arg = super().to_cmd_arg(name, **kwargs)
+        if self.singular_options:
+            assert arg.options_list
+            arg.options_list.extend(self.singular_options)  # support to parse singular options
+
+        if self._blank != AAZUndefined:
+            arg.nargs = '*'
+        else:
+            arg.nargs = '+'
+        return arg
+
+    def _build_cmd_action(self):
+        class Action(AAZCustomListArgAction):
+            _schema = self  # bind action class with current schema
+
+        return Action
+
+    @property
+    def _type_in_help(self):
+        return f"List<{self.Element._type_in_help}>"

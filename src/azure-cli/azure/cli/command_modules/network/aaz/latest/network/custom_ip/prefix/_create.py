@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/customipprefixes/{}", "2022-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/customipprefixes/{}", "2023-11-01"],
         ]
     }
 
@@ -49,7 +49,6 @@ class Create(AAZCommand):
             options=["-n", "--name"],
             help="The name of the custom IP prefix.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -107,6 +106,14 @@ class Create(AAZCommand):
         # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.prefix_type = AAZStrArg(
+            options=["--prefix-type"],
+            arg_group="Properties",
+            help="Type of custom IP prefix. Should be Singular, Parent, or Child.",
+            enum={"Child": "Child", "Parent": "Parent", "Singular": "Singular"},
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -190,7 +197,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -228,6 +235,7 @@ class Create(AAZCommand):
                 properties.set_prop("customIpPrefixParent", AAZObjectType)
                 properties.set_prop("expressRouteAdvertise", AAZBoolType, ".express_route_advertise")
                 properties.set_prop("geo", AAZStrType, ".geo")
+                properties.set_prop("prefixType", AAZStrType, ".prefix_type")
                 properties.set_prop("signedMessage", AAZStrType, ".signed_message")
 
             custom_ip_prefix_parent = _builder.get(".properties.customIpPrefixParent")
@@ -302,7 +310,7 @@ class Create(AAZCommand):
             properties.custom_ip_prefix_parent = AAZObjectType(
                 serialized_name="customIpPrefixParent",
             )
-            _build_schema_sub_resource_read(properties.custom_ip_prefix_parent)
+            _CreateHelper._build_schema_sub_resource_read(properties.custom_ip_prefix_parent)
             properties.express_route_advertise = AAZBoolType(
                 serialized_name="expressRouteAdvertise",
             )
@@ -335,11 +343,11 @@ class Create(AAZCommand):
 
             child_custom_ip_prefixes = cls._schema_on_200_201.properties.child_custom_ip_prefixes
             child_custom_ip_prefixes.Element = AAZObjectType()
-            _build_schema_sub_resource_read(child_custom_ip_prefixes.Element)
+            _CreateHelper._build_schema_sub_resource_read(child_custom_ip_prefixes.Element)
 
             public_ip_prefixes = cls._schema_on_200_201.properties.public_ip_prefixes
             public_ip_prefixes.Element = AAZObjectType()
-            _build_schema_sub_resource_read(public_ip_prefixes.Element)
+            _CreateHelper._build_schema_sub_resource_read(public_ip_prefixes.Element)
 
             tags = cls._schema_on_200_201.tags
             tags.Element = AAZStrType()
@@ -350,21 +358,23 @@ class Create(AAZCommand):
             return cls._schema_on_200_201
 
 
-_schema_sub_resource_read = None
+class _CreateHelper:
+    """Helper class for Create"""
 
+    _schema_sub_resource_read = None
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-    _schema_sub_resource_read = AAZObjectType()
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Create"]

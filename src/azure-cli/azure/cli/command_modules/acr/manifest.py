@@ -16,7 +16,6 @@ from azure.cli.core.azclierror import InvalidArgumentValueError, AzureResponseEr
 from ._utils import get_registry_by_name
 
 from .repository import (
-    _parse_image_name,
     get_image_digest,
     _obtain_data_from_registry,
     _get_manifest_path,
@@ -24,6 +23,7 @@ from .repository import (
 )
 
 from ._docker_utils import (
+    parse_image_name,
     request_data_from_registry,
     get_access_credentials,
     get_login_server_suffix,
@@ -59,8 +59,9 @@ def _get_v2_manifest_path(repository, manifest):
     return '/v2/{}/manifests/{}'.format(repository, manifest)
 
 
-def _get_referrers_path(repository):
-    return '/v2/{}/_oras/artifacts/referrers'.format(repository)
+# https://github.com/opencontainers/distribution-spec/blob/main/spec.md#listing-referrers
+def _get_referrers_path(repository, manifest):
+    return '/v2/{}/referrers/{}'.format(repository, manifest)
 
 
 def _get_deleted_manifest_path(repository):
@@ -81,14 +82,14 @@ def _obtain_manifest_from_registry(login_server,
                                    password,
                                    raw=False):
 
-    result, _ = request_data_from_registry(http_method='get',
-                                           login_server=login_server,
-                                           path=path,
-                                           raw=raw,
-                                           username=username,
-                                           password=password,
-                                           result_index=None,
-                                           manifest_headers=True)
+    result, _, _ = request_data_from_registry(http_method='get',
+                                              login_server=login_server,
+                                              path=path,
+                                              raw=raw,
+                                              username=username,
+                                              password=password,
+                                              result_index=None,
+                                              manifest_headers=True)
 
     return result
 
@@ -97,21 +98,19 @@ def _obtain_referrers_from_registry(login_server,
                                     path,
                                     username,
                                     password,
-                                    digest,
                                     artifact_type=None):
 
     result_list = {REF_KEY: []}
     execute_next_http_call = True
 
     params = {
-        'digest': digest,
         'artifactType': artifact_type
     }
 
     while execute_next_http_call:
         execute_next_http_call = False
 
-        result, next_link = request_data_from_registry(
+        result, next_link, _ = request_data_from_registry(
             http_method='get',
             login_server=login_server,
             path=path,
@@ -148,14 +147,14 @@ def _parse_fqdn(cmd, fqdn, is_manifest=True, allow_digest=True, default_latest=T
 
         _validate_login_server_suffix(cmd, reg_suffix)
 
-        # We must check for this here as the default tag 'latest' gets added in _parse_image_name
+        # We must check for this here as the default tag 'latest' gets added in parse_image_name
         if not is_manifest and ':' in manifest_spec:
             raise InvalidArgumentValueError("The positional parameter 'repo_id'"
                                             " should not include a tag or digest.")
 
-        repository, tag, manifest = _parse_image_name(manifest_spec,
-                                                      allow_digest=allow_digest,
-                                                      default_latest=default_latest)
+        repository, tag, digest = parse_image_name(manifest_spec,
+                                                   allow_digest=allow_digest,
+                                                   default_latest=default_latest)
 
     except IndexError as e:
         if is_manifest:
@@ -163,7 +162,7 @@ def _parse_fqdn(cmd, fqdn, is_manifest=True, allow_digest=True, default_latest=T
 
         raise InvalidArgumentValueError(BAD_REPO_FQDN) from e
 
-    return registry_name, repository, tag, manifest
+    return registry_name, repository, tag, digest
 
 
 def _validate_login_server_suffix(cmd, reg_suffix):
@@ -334,7 +333,7 @@ def acr_manifest_deleted_tags_list(cmd,
                                                         default_latest=False)
 
     else:
-        repository, tag, _ = _parse_image_name(permissive_repo, allow_digest=False, default_latest=False)
+        repository, tag, _ = parse_image_name(permissive_repo, allow_digest=False, default_latest=False)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -380,7 +379,7 @@ def acr_manifest_deleted_restore(cmd,
         registry_name, repository, tag, _ = _parse_fqdn(cmd, manifest_id[0], allow_digest=False)
 
     else:
-        repository, tag, _ = _parse_image_name(manifest_spec, allow_digest=False, default_latest=False)
+        repository, tag, _ = parse_image_name(manifest_spec, allow_digest=False, default_latest=False)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -412,7 +411,7 @@ def acr_manifest_deleted_restore(cmd,
             user_confirmation("Multiple deleted manifests found for tag: {}. Restoring most recently deleted"
                               "manifest with digest: {}. Is this okay?".format(tag, digest), yes)
 
-    raw_result, _ = request_data_from_registry(
+    raw_result, _, _ = request_data_from_registry(
         'post',
         login_server,
         _get_restore_deleted_manifest_path(repository, digest),
@@ -444,14 +443,13 @@ def acr_manifest_list_referrers(cmd,
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
     if manifest_id:
-        registry_name, repository, tag, manifest = _parse_fqdn(cmd, manifest_id[0])
-
+        registry_name, repository, tag, digest = _parse_fqdn(cmd, manifest_id[0])
     else:
-        repository, tag, manifest = _parse_image_name(manifest_spec, allow_digest=True)
+        repository, tag, digest = parse_image_name(manifest_spec, allow_digest=True)
 
-    if not manifest:
+    if not digest:
         image = repository + ':' + tag
-        repository, tag, manifest = get_image_digest(cmd, registry_name, image, tenant_suffix, username, password)
+        repository, digest = get_image_digest(cmd, registry_name, image, tenant_suffix, username, password)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -464,20 +462,18 @@ def acr_manifest_list_referrers(cmd,
 
     raw_result = _obtain_referrers_from_registry(
         login_server=login_server,
-        path=_get_referrers_path(repository),
+        path=_get_referrers_path(repository, digest),
         username=username,
         password=password,
-        artifact_type=artifact_type,
-        digest=manifest)
+        artifact_type=artifact_type)
 
     if recursive:
         for referrers_obj in raw_result[REF_KEY]:
             internal_referrers_obj = _obtain_referrers_from_registry(
                 login_server=login_server,
-                path=_get_referrers_path(repository),
+                path=_get_referrers_path(repository, referrers_obj["digest"]),
                 username=username,
-                password=password,
-                digest=referrers_obj["digest"])
+                password=password)
 
             for ref in internal_referrers_obj[REF_KEY]:
                 raw_result[REF_KEY].append(ref)
@@ -497,10 +493,9 @@ def acr_manifest_show(cmd,
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
     if manifest_id:
-        registry_name, repository, tag, manifest = _parse_fqdn(cmd, manifest_id[0])
-
+        registry_name, repository, tag, digest = _parse_fqdn(cmd, manifest_id[0])
     else:
-        repository, tag, manifest = _parse_image_name(manifest_spec, allow_digest=True)
+        repository, tag, digest = parse_image_name(manifest_spec, allow_digest=True)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -522,7 +517,7 @@ def acr_manifest_show(cmd,
     else:
         raw_result = _obtain_manifest_from_registry(
             login_server=login_server,
-            path=_get_v2_manifest_path(repository, manifest),
+            path=_get_v2_manifest_path(repository, digest),
             raw=raw_output,
             username=username,
             password=password)
@@ -628,14 +623,13 @@ def acr_manifest_delete(cmd,
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
     if manifest_id:
-        registry_name, repository, tag, manifest = _parse_fqdn(cmd, manifest_id[0])
-
+        registry_name, repository, tag, digest = _parse_fqdn(cmd, manifest_id[0])
     else:
-        repository, tag, manifest = _parse_image_name(manifest_spec, allow_digest=True)
+        repository, tag, digest = parse_image_name(manifest_spec, allow_digest=True)
 
-    if not manifest:
+    if not digest:
         image = repository + ':' + tag
-        repository, tag, manifest = get_image_digest(cmd, registry_name, image, tenant_suffix, username, password)
+        repository, digest = get_image_digest(cmd, registry_name, image, tenant_suffix, username, password)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -647,11 +641,11 @@ def acr_manifest_delete(cmd,
         permission=RepoAccessTokenPermission.DELETE.value)
 
     user_confirmation("Are you sure you want to delete the artifact '{}'"
-                      " and all manifests that refer to it?".format(manifest), yes)
+                      " and all manifests that refer to it?".format(digest), yes)
 
     return request_data_from_registry(
         http_method='delete',
         login_server=login_server,
-        path=_get_v2_manifest_path(repository, manifest),
+        path=_get_v2_manifest_path(repository, digest),
         username=username,
         password=password)[0]

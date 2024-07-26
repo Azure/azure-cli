@@ -30,7 +30,7 @@ from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.core._profile import Profile
-from azure.cli.core.util import sdk_no_wait, get_file_json, in_cloud_console
+from azure.cli.core.util import sdk_no_wait, get_file_json
 
 logger = get_logger(__name__)
 MAX_TASKS_PER_REQUEST = 100
@@ -101,7 +101,7 @@ def create_account(client,
         if encryption_key_identifier else None
     encryption = EncryptionProperties(
         key_source=encryption_key_source,
-        encryption_key_identifier=encryption_key_identifier) if encryption_key_source else None
+        key_vault_properties=encryption_key_identifier) if encryption_key_source else None
     parameters = BatchAccountCreateParameters(location=location,
                                               tags=tags,
                                               auto_storage=properties,
@@ -132,7 +132,7 @@ def update_account(client, resource_group_name, account_name,
         if encryption_key_identifier else None
     encryption = EncryptionProperties(
         key_source=encryption_key_source,
-        encryption_key_identifier=encryption_key_identifier) if encryption_key_source else None
+        key_vault_properties=encryption_key_identifier) if encryption_key_source else None
 
     parameters = BatchAccountUpdateParameters(
         tags=tags,
@@ -222,10 +222,7 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
     else:
         cmd.cli_ctx.config.set_value('batch', 'auth_mode', 'aad')
         if show:
-            if in_cloud_console():
-                resource = cmd.cli_ctx.cloud.endpoints.active_directory_resource_id
-            else:
-                resource = cmd.cli_ctx.cloud.endpoints.batch_resource_id
+            resource = cmd.cli_ctx.cloud.endpoints.batch_resource_id
             profile = Profile(cli_ctx=cmd.cli_ctx)
             creds, subscription, tenant = profile.get_raw_token(resource=resource)
             return {

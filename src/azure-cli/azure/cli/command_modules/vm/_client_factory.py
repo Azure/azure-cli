@@ -12,24 +12,6 @@ def _compute_client_factory(cli_ctx, **kwargs):
                                    aux_subscriptions=kwargs.get('aux_subscriptions'))
 
 
-def cf_ni(cli_ctx, _):
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    # TODO: Remove hard coded api-version once
-    # https://github.com/Azure/azure-rest-api-specs/issues/570
-    # is fixed.
-    ni = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK).network_interfaces
-    ni.api_version = '2016-03-30'
-    return ni
-
-
-def cf_public_ip_addresses(cli_ctx):
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    public_ip_ops = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK).public_ip_addresses
-    return public_ip_ops
-
-
 def cf_avail_set(cli_ctx, _):
     return _compute_client_factory(cli_ctx).availability_sets
 
@@ -149,14 +131,13 @@ def cf_log_analytics_data_sources(cli_ctx, subscription_id, *_):
 
 def cf_log_analytics_data_plane(cli_ctx, _):
     """Initialize Log Analytics data client for use with CLI."""
-    from azure.loganalytics import LogAnalyticsDataClient
+    from azure.monitor.query import LogsQueryClient
     from azure.cli.core._profile import Profile
     profile = Profile(cli_ctx=cli_ctx)
     cred, _, _ = profile.get_login_credentials(
         resource=cli_ctx.cloud.endpoints.log_analytics_resource_id)
     api_version = 'v1'
-    return LogAnalyticsDataClient(cred,
-                                  base_url=cli_ctx.cloud.endpoints.log_analytics_resource_id + '/' + api_version)
+    return LogsQueryClient(cred, endpoint=cli_ctx.cloud.endpoints.log_analytics_resource_id + '/' + api_version)
 
 
 def cf_disk_encryption_set(cli_ctx, _):

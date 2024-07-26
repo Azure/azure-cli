@@ -18,15 +18,17 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NETWORK_CONTRIBUTOR_ROLE_ID,
 )
 from azure.cli.command_modules.acs._graph import resolve_object_id
-from azure.cli.command_modules.acs._helpers import get_property_from_dict_or_object
+from azure.cli.command_modules.acs._helpers import get_property_from_dict_or_object, use_shared_identity
 from azure.cli.core.azclierror import AzCLIError, UnauthorizedError
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.core.exceptions import HttpResponseError
+from azure.core.exceptions import HttpResponseError, ResourceExistsError
 from knack.log import get_logger
 from knack.prompting import prompt_y_n
 from msrestazure.azure_exceptions import CloudError
 
 logger = get_logger(__name__)
+
+# pylint: disable=protected-access
 
 
 def resolve_role_id(role, scope, definitions_client):
@@ -68,10 +70,10 @@ def add_role_assignment_executor(cmd, role, assignee, resource_group_name=None, 
     definitions_client = factory.role_definitions
 
     # FIXME: is this necessary?
-    if assignments_client.config is None:
+    if assignments_client._config is None:
         raise AzCLIError("Assignments client config is undefined.")
 
-    scope = build_role_scope(resource_group_name, scope, assignments_client.config.subscription_id)
+    scope = build_role_scope(resource_group_name, scope, assignments_client._config.subscription_id)
 
     # XXX: if role is uuid, this function's output cannot be used as role assignment defintion id
     # ref: https://github.com/Azure/azure-cli/issues/2458
@@ -92,8 +94,9 @@ def add_role_assignment_executor(cmd, role, assignee, resource_group_name=None, 
         operation_group="role_assignments",
     )
     if cmd.supported_api_version(min_api="2018-01-01-preview", resource_type=ResourceType.MGMT_AUTHORIZATION):
-        parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
-        return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
+        parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id,
+                                                    principal_type=None)
+        return assignments_client.create(scope, assignment_name, parameters, headers=custom_headers)
 
     # for backward compatibility
     RoleAssignmentProperties = get_sdk(
@@ -104,7 +107,7 @@ def add_role_assignment_executor(cmd, role, assignee, resource_group_name=None, 
         operation_group="role_assignments",
     )
     properties = RoleAssignmentProperties(role_definition_id=role_id, principal_id=object_id)
-    return assignments_client.create(scope, assignment_name, properties, custom_headers=custom_headers)
+    return assignments_client.create(scope, assignment_name, properties, headers=custom_headers)
 
 
 def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principal=True, delay=2, scope=None):
@@ -125,7 +128,7 @@ def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principa
             )
             break
         except (CloudError, HttpResponseError) as ex:
-            if ex.message == "The role assignment already exists.":
+            if isinstance(ex, ResourceExistsError) or "The role assignment already exists." in ex.message:
                 break
             logger.info(ex.message)
         except Exception as ex:  # pylint: disable=broad-except
@@ -164,9 +167,9 @@ def search_role_assignments(
             f = "assignedTo('{}')".format(assignee_object_id)
         else:
             f = "principalId eq '{}'".format(assignee_object_id)
-        assignments = list(assignments_client.list(filter=f))
+        assignments = list(assignments_client.list_for_subscription(filter=f))
     else:
-        assignments = list(assignments_client.list())
+        assignments = list(assignments_client.list_for_subscription())
 
     if assignments:
         assignments = [
@@ -245,7 +248,7 @@ def delete_role_assignments_executor(
         if not prompt_y_n(msg, default="n"):
             return
 
-    scope = build_role_scope(resource_group_name, scope, assignments_client.config.subscription_id)
+    scope = build_role_scope(resource_group_name, scope, assignments_client._config.subscription_id)
     assignments = search_role_assignments(
         cli_ctx,
         assignments_client,
@@ -296,6 +299,8 @@ def ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identity
     if not add_role_assignment(
         cmd, CONST_MANAGED_IDENTITY_OPERATOR_ROLE, cluster_identity_object_id, is_service_principal=False, scope=scope
     ):
+        if use_shared_identity():
+            return
         raise UnauthorizedError(
             "Could not grant Managed Identity Operator " "permission to cluster identity at scope {}".format(scope)
         )
@@ -306,11 +311,11 @@ def ensure_aks_acr_role_assignment(cmd, assignee, registry_id, detach=False, is_
         if not delete_role_assignments(
             cmd.cli_ctx, "acrpull", assignee, scope=registry_id, is_service_principal=is_service_principal
         ):
-            raise AzCLIError("Could not delete role assignments for ACR. " "Are you an Owner on this subscription?")
+            raise AzCLIError("Could not delete role assignments for ACR. Are you an Owner on this subscription?")
         return
 
     if not add_role_assignment(cmd, "acrpull", assignee, scope=registry_id, is_service_principal=is_service_principal):
-        raise AzCLIError("Could not create a role assignment for ACR. " "Are you an Owner on this subscription?")
+        raise AzCLIError("Could not create a role assignment for ACR. Are you an Owner on this subscription?")
     return
 
 

@@ -2,10 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=unused-argument
-from binascii import hexlify
-from os import urandom
-
 from knack.log import get_logger
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
@@ -34,7 +30,6 @@ from azure.cli.command_modules.appservice.custom import (
 
 from ._constants import (DEFAULT_LOGICAPP_FUNCTION_VERSION,
                          DEFAULT_LOGICAPP_RUNTIME,
-                         DEFAULT_LOGICAPP_RUNTIME_VERSION,
                          FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION,
                          DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION)
 
@@ -42,26 +37,24 @@ logger = get_logger(__name__)
 
 
 def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
+                    runtime_version=None, functions_version=DEFAULT_LOGICAPP_FUNCTION_VERSION,
                     app_insights=None, app_insights_key=None, disable_app_insights=None,
                     deployment_source_url=None, deployment_source_branch='master', deployment_local_git=None,
                     docker_registry_server_password=None, docker_registry_server_user=None,
                     deployment_container_image_name=None, tags=None, https_only=False):
     # pylint: disable=too-many-statements, too-many-branches, too-many-locals
-    functions_version = DEFAULT_LOGICAPP_FUNCTION_VERSION
     runtime = None
-    runtime_version = None
-
     if not deployment_container_image_name:
         runtime = DEFAULT_LOGICAPP_RUNTIME
-        runtime_version = DEFAULT_LOGICAPP_RUNTIME_VERSION
+        if runtime_version is None:
+            runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version][runtime]
 
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
     SiteConfig, Site, NameValuePair = cmd.get_models('SiteConfig', 'Site', 'NameValuePair')
 
-    docker_registry_server_url = parse_docker_image_name(
-        deployment_container_image_name)
+    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
 
     site_config = SiteConfig(app_settings=[])
     logicapp_def = Site(location=None, site_config=site_config, tags=tags, https_only=https_only)
@@ -92,14 +85,16 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
         site_config.app_settings.append(NameValuePair(
             name='FUNCTIONS_WORKER_RUNTIME', value=runtime))
 
+    if runtime == DEFAULT_LOGICAPP_RUNTIME and runtime_version is not None:
+        site_config.app_settings.append(NameValuePair(
+            name='WEBSITE_NODE_DEFAULT_VERSION', value=runtime_version))
+
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
     if is_linux:
         logicapp_def.kind = 'functionapp,workflowapp,linux'
         logicapp_def.reserved = True
 
-    site_config.app_settings.append(NameValuePair(name='MACHINEKEY_DecryptionKey',
-                                                  value=str(hexlify(urandom(32)).decode()).upper()))
     if deployment_container_image_name:
         logicapp_def.kind = 'functionapp,workflowapp,linux,container'
         site_config.app_settings.append(NameValuePair(name='DOCKER_CUSTOM_IMAGE_NAME',
@@ -133,7 +128,7 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
         site_config.always_on = True
 
     # If plan is elastic premium or windows consumption, we need these app settings
-    if is_plan_elastic_premium(cmd, plan_info):
+    if is_plan_elastic_premium(cmd, plan_info) or is_plan_workflow_standard(cmd, plan_info):
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
                                                       value=con_string))
         site_config.app_settings.append(NameValuePair(
@@ -205,14 +200,6 @@ def _get_linux_fx_functionapp(functions_version, runtime, runtime_version):
     return '{}|{}'.format(runtime, runtime_version)
 
 
-def _get_java_version_functionapp(functions_version, runtime_version):
-    if runtime_version is None:
-        runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version]['java']
-    if runtime_version == '8':
-        return '1.8'
-    return runtime_version
-
-
 def show_logicapp(cmd, resource_group_name, name):
     return show_app(cmd, resource_group_name=resource_group_name, name=name)
 
@@ -226,6 +213,7 @@ def scale_logicapp(cmd, resource_group_name, name, minimum_instance_count=None, 
                                  minimum_elastic_instance_count=minimum_instance_count)
 
 
+# pylint: disable=unused-argument
 def update_logicapp_scale(cmd, resource_group_name, name, slot=None,
                           function_app_scale_limit=None,
                           minimum_elastic_instance_count=None):

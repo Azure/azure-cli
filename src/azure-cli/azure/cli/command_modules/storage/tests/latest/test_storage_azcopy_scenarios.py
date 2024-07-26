@@ -112,6 +112,8 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         # sync directory
         self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
             test_dir, container, storage_account))
+        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {} -- --cap-mbps=2'.format(
+            test_dir, container, storage_account))
         self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))
 

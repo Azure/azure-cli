@@ -1,0 +1,29 @@
+on:
+  pull_request_target:
+    types: [opened]
+    branches:
+      - dev
+      - release
+
+permissions:
+  pull-requests: write
+
+jobs:
+  thank-user:
+    runs-on: ubuntu-20.04
+    name: Say thanks for the PR
+    steps:
+      - name: get message
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          message=$(echo "$TITLE" | grep -oP '[{\[][^}\]]+[}\]]' | sed 's/{\|}\|\[\|\]//g')
+          echo "message=$message" >> $GITHUB_ENV
+          if [ -z $message ]; then
+              echo "message=$(echo 'Thank you for your contribution! We will review the pull request and get back to you soon.')" >> $GITHUB_ENV
+          fi
+      - name: comment on the pull request
+        uses: mshick/add-pr-comment@v2
+        with:
+          repo-token: ${{ secrets.CLI_BOT }}
+          message: "${{ env.message }}"

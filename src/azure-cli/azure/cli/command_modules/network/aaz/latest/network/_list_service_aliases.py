@@ -22,12 +22,14 @@ class ListServiceAliases(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/locations/{}/availableservicealiases", "2022-01-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/locations/{}/availableservicealiases", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/locations/{}/availableservicealiases", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/locations/{}/availableservicealiases", "2023-09-01"],
         ]
     }
+
+    AZ_SUPPORT_PAGINATION = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -45,7 +47,6 @@ class ListServiceAliases(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
-            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
             required=True,
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
@@ -55,12 +56,22 @@ class ListServiceAliases(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         condition_0 = has_value(self.ctx.args.location) and has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         condition_1 = has_value(self.ctx.args.location) and has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
         if condition_0:
             self.AvailableServiceAliasesListByResourceGroup(ctx=self.ctx)()
         if condition_1:
             self.AvailableServiceAliasesList(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
@@ -115,7 +126,7 @@ class ListServiceAliases(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -211,7 +222,7 @@ class ListServiceAliases(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -262,6 +273,10 @@ class ListServiceAliases(AAZCommand):
             _element.type = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _ListServiceAliasesHelper:
+    """Helper class for ListServiceAliases"""
 
 
 __all__ = ["ListServiceAliases"]

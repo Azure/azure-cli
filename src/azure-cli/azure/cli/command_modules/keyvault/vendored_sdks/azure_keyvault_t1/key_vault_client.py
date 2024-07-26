@@ -100,7 +100,6 @@ class KeyVaultClient(MultiApiClientMixin):
     @property
     def models(self):
         api_version = self._get_api_version(None)
-
         if api_version == v7_2_VERSION:
             from .v7_2 import models as implModels
         else:

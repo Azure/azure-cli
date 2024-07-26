@@ -32,7 +32,6 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         restart_policy = 'Never'
         secrets = 'secret1=superawesomesecret secret2="nothing to see"'
         secret_path = '/s'
-
         self.kwargs.update({
             'container_group_name': container_group_name,
             'resource_group_location': resource_group_location,
@@ -143,6 +142,162 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                              'containers[0].resources.requests.memoryInGb', memory),
                          self.exists('volumes'),
                          self.check('volumes[0].secret', {})])
+						 
+    # Test create container with Spot Priority
+    @ResourceGroupPreparer()
+    def test_container_create_spot_priority(self, resource_group, resource_group_location):
+        container_group_name = self.create_random_name('clicontainer', 16)
+        image = 'alpine:latest'
+        os_type = 'Linux'
+        cpu = 1
+        memory = 1
+        command = '"/bin/sh -c \'while true; do echo hello; sleep 20; done\'"'
+        env = 'KEY1=VALUE1 KEY2=FOO=BAR='
+        restart_policy = 'Never'
+        priority = 'Spot'
+        self.kwargs.update({
+            'container_group_name': container_group_name,
+            'resource_group_location': resource_group_location,
+            'image': image,
+            'os_type': os_type, 
+            'cpu': cpu,
+            'memory': memory,
+            'command': command,
+            'env': env,
+            'restart_policy': restart_policy,
+            'priority' : priority
+        })
+
+        # Test create
+        self.cmd('container create -g {rg} -n {container_group_name} --image {image} --os-type {os_type} '
+                 '--cpu {cpu} --memory {memory} --priority {priority} '
+                 '--command-line {command} -e {env} --restart-policy {restart_policy}  ',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('priority', '{priority}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+
+        # Test show
+        self.cmd('container show -g {rg} -n {container_group_name}',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('priority', '{priority}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+
+        # Test logs
+        self.cmd('container logs -g {rg} -n {container_group_name}')
+
+        # Test delete
+        self.cmd('container delete -g {rg} -n {container_group_name} -y',
+            checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('priority', '{priority}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+
+    # Test create container with Regular Priority
+    @ResourceGroupPreparer()
+    def test_container_create_regular_priority(self, resource_group, resource_group_location):
+        container_group_name = self.create_random_name('clicontainer', 16)
+        image = 'alpine:latest'
+        os_type = 'Linux'
+        cpu = 1
+        memory = 1
+        command = '"/bin/sh -c \'while true; do echo hello; sleep 20; done\'"'
+        env = 'KEY1=VALUE1 KEY2=FOO=BAR='
+        restart_policy = 'Never'
+        priority = 'Regular'
+        self.kwargs.update({
+            'container_group_name': container_group_name,
+            'resource_group_location': resource_group_location,
+            'image': image,
+            'os_type': os_type, 
+            'cpu': cpu,
+            'memory': memory,
+            'command': command,
+            'env': env,
+            'restart_policy': restart_policy,
+            'priority' : priority
+        })
+
+        # Test create
+        self.cmd('container create -g {rg} -n {container_group_name} --image {image} --os-type {os_type} '
+                 '--cpu {cpu} --memory {memory} --priority {priority} '
+                 '--command-line {command} -e {env} --restart-policy {restart_policy}  ',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('priority', '{priority}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+
+        # Test show
+        self.cmd('container show -g {rg} -n {container_group_name}',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('priority', '{priority}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+
+        # Test logs
+        self.cmd('container logs -g {rg} -n {container_group_name}')
+
+        # Test delete
+        self.cmd('container delete -g {rg} -n {container_group_name} -y',
+            checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('priority', '{priority}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
 
     # Test create container using managed identities.
     @ResourceGroupPreparer()
@@ -360,6 +515,80 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         self.check(cg_definition['properties']['containers'][0]['properties']['resources']['requests']['cpu'], 1.0)
         self.check(cg_definition['properties']['containers'][0]['properties']['resources']['requests']['memoryInGB'], 1.5)
 
+    # Test export container with identity.
+    @ResourceGroupPreparer()
+    def test_container_export_with_identity(self, resource_group, resource_group_location):
+        container_group_name1 = self.create_random_name('clicontainer', 16)
+        container_group_name2 = self.create_random_name('clicontainer', 16)
+        container_group_name3 = self.create_random_name('clicontainer', 16)
+        image = 'nginx:latest'
+        user_assigned_identity_name = self.create_random_name('cliaciidentity', 20)
+        system_assigned_identity = '[system]'
+
+        self.kwargs.update({
+            'user_assigned_identity_name': user_assigned_identity_name,
+        })
+
+        msi_identity_result = self.cmd('identity create -g {rg} -n {user_assigned_identity_name}').get_output_in_json()
+
+        _, output_file = tempfile.mkstemp()
+
+        def check_export_with_identity(container_group_name, identity_type):
+            cg_definition = None
+            with open(output_file, 'r') as f:
+                cg_definition = yaml.safe_load(f)
+
+            self.check(cg_definition["name"], container_group_name)
+            self.check(cg_definition['properties']['containers'][0]['properties']['image'], image)
+            self.check(cg_definition['location'], resource_group_location)
+            self.check(cg_definition['identity']['type'], identity_type)
+            if 'UserAssigned' in identity_type:
+                self.exists(cg_definition['identity']['user_assigned_identities'])
+
+        self.kwargs.update({
+            'container_group_name1': container_group_name1,
+            'container_group_name2': container_group_name2,
+            'container_group_name3': container_group_name3,
+            'resource_group_location': resource_group_location,
+            'output_file': output_file,
+            'image': image,
+            'user_assigned_identity': msi_identity_result['id'],
+            'system_assigned_identity': system_assigned_identity,
+        })
+
+        # Test create system assigned identity
+        self.cmd('container create -g {rg} -n {container_group_name1} --image {image} --assign-identity',
+                 checks=[self.check('name', '{container_group_name1}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', 'Linux'),
+                         self.check('containers[0].image', '{image}'),
+                         self.check('identity.type', 'SystemAssigned')])
+        self.cmd('container export -g {rg} -n {container_group_name1} -f "{output_file}"')
+        check_export_with_identity(container_group_name1, 'SystemAssigned')
+
+        # Test create user assigned identity
+        self.cmd('container create -g {rg} -n {container_group_name2} --image {image} --assign-identity {user_assigned_identity}',
+                 checks=[self.check('name', '{container_group_name2}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', 'Linux'),
+                         self.check('containers[0].image', '{image}'),
+                         self.check('identity.type', 'UserAssigned')])
+        self.cmd('container export -g {rg} -n {container_group_name2} -f "{output_file}"')
+        check_export_with_identity(container_group_name2, 'UserAssigned')
+
+        # Test create system user assigned identity
+        self.cmd('container create -g {rg} -n {container_group_name3} --image {image} --assign-identity {system_assigned_identity} {user_assigned_identity}',
+                 checks=[self.check('name', '{container_group_name3}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', 'Linux'),
+                         self.check('containers[0].image', '{image}'),
+                         self.check('identity.type', 'SystemAssigned, UserAssigned')])
+        self.cmd('container export -g {rg} -n {container_group_name3} -f "{output_file}"')
+        check_export_with_identity(container_group_name3, 'SystemAssigned, UserAssigned')
+
     # Test create container with azure file volume
     @ResourceGroupPreparer()
     @unittest.skip("Skip test as unable to re-record due to missing pre-req. resources.")
@@ -411,8 +640,9 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.exists('containers[0].volumeMounts'),
                          self.check('containers[0].volumeMounts[0].mountPath', '{azure_file_volume_mount_path}')])
 
-        # Test create container with git repo volume
+    # Test create container with git repo volume
     @ResourceGroupPreparer()
+    @unittest.skip("Skip test as unable to re-record due to missing pre-req. resources.")
     def test_container_git_repo_volume_mount(self, resource_group, resource_group_location):
         container_group_name = self.create_random_name('clicontainer', 16)
         gitrepo_url = 'https://github.com/yolo3301/dumb-flow.git'
@@ -597,3 +827,93 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check(
                              'containers[0].resources.requests.memoryInGb', memory),
                          self.check('zones[0]', zone)])
+
+    # Test container with Confidential SKU
+    @ResourceGroupPreparer()
+    def test_container_create_with_confidential_sku(self, resource_group, resource_group_location):
+        container_group_name = self.create_random_name('clicontainer', 16)
+        image = 'alpine:latest'
+        os_type = 'Linux'
+        ip_address_type = 'Public'
+        cpu = 1
+        memory = 1
+        command = '"/bin/sh -c \'while true; do echo hello; sleep 20; done\'"'
+        restart_policy = 'Never'
+        location = "northeurope"
+        sku="Confidential"
+        env = 'KEY1=VALUE1 KEY2=FOO=BAR='
+
+        self.kwargs.update({
+            'container_group_name': container_group_name,
+            'location': location,
+            'image': image,
+            'os_type': os_type,
+            'ip_address_type': ip_address_type,
+            'cpu': cpu,
+            'memory': memory,
+            'command': command,
+            'restart_policy': restart_policy,
+            'sku': sku,
+            'env': env
+        })
+
+        # Test create
+        self.cmd('container create -g {rg} -n {container_group_name} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --cpu {cpu} --memory {memory} --sku {sku} '
+                 '--command-line {command} --restart-policy {restart_policy} --location {location} -e {env} '
+                 '--privileged --allow-escalation',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory),
+                         self.exists('containers[0].securityContext'),
+                         self.check('containers[0].securityContext.privileged', True),
+                         self.check('sku', sku),
+                         self.exists('confidentialComputeProperties.ccePolicy')])
+        # Test show
+        self.cmd('container show -g {rg} -n {container_group_name}',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory),
+                         self.exists('containers[0].securityContext'),
+                         self.check('containers[0].securityContext.privileged', True),
+                         self.check('containers[0].securityContext.allowPrivilegeEscalation', True),
+                         self.check('sku', sku),
+                         self.exists('confidentialComputeProperties.ccePolicy')])
+
+        # Test logs
+        self.cmd('container logs -g {rg} -n {container_group_name}')
+
+        # Test delete
+        self.cmd('container delete -g {rg} -n {container_group_name} -y',
+            checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory),
+                         self.check('sku', sku),
+                         self.exists('confidentialComputeProperties.ccePolicy')])

@@ -17,6 +17,8 @@ from azure.cli.command_modules.aro._validators import validate_vnet_resource_gro
 from azure.cli.command_modules.aro._validators import validate_worker_count
 from azure.cli.command_modules.aro._validators import validate_worker_vm_disk_size_gb
 from azure.cli.command_modules.aro._validators import validate_refresh_cluster_credentials
+from azure.cli.command_modules.aro._validators import validate_version_format
+from azure.cli.command_modules.aro._validators import validate_outbound_type
 from azure.cli.core.commands.parameters import name_type
 from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
 from azure.cli.core.commands.parameters import resource_group_name_type
@@ -45,7 +47,7 @@ def load_arguments(self, _):
                    validator=validate_cluster_resource_group)
         c.argument('fips_validated_modules', arg_type=get_three_state_flag(),
                    options_list=['--fips-validated-modules', '--fips'],
-                   help='Use FIPS validated cryptography modules.')
+                   help='Use FIPS validated cryptography modules. Default: False')
 
         c.argument('client_id',
                    help='Client ID of cluster service principal.',
@@ -54,6 +56,11 @@ def load_arguments(self, _):
                    help='Client secret of cluster service principal.',
                    validator=validate_client_secret(isCreate=True))
 
+        c.argument('version',
+                   options_list=['--version', c.deprecate(target='--install-version', redirect='--version', hide=True)],
+                   help='OpenShift version to use for cluster creation.',
+                   validator=validate_version_format)
+
         c.argument('pod_cidr',
                    help='CIDR of pod network. Must be a minimum of /18 or larger.',
                    validator=validate_cidr('pod_cidr'))
@@ -61,18 +68,23 @@ def load_arguments(self, _):
                    help='CIDR of service network. Must be a minimum of /18 or larger.',
                    validator=validate_cidr('service_cidr'))
 
+        c.argument('outbound_type',
+                   help='Outbound type of cluster. Must be "Loadbalancer" or "UserDefinedRouting".',
+                   validator=validate_outbound_type)
+        c.argument('enable_preconfigured_nsg', arg_type=get_three_state_flag(),
+                   help='Use Preconfigured NSGs. Default: False')
         c.argument('disk_encryption_set',
                    help='ResourceID of the DiskEncryptionSet to be used for master and worker VMs.',
                    validator=validate_disk_encryption_set)
         c.argument('master_encryption_at_host', arg_type=get_three_state_flag(),
                    options_list=['--master-encryption-at-host', '--master-enc-host'],
-                   help='Encryption at host flag for master VMs.')
+                   help='Encryption at host flag for master VMs. Default: False')
         c.argument('master_vm_size',
                    help='Size of master VMs.')
 
         c.argument('worker_encryption_at_host', arg_type=get_three_state_flag(),
                    options_list=['--worker-encryption-at-host', '--worker-enc-host'],
-                   help='Encryption at host flag for worker VMs.')
+                   help='Encryption at host flag for worker VMs. Default: False')
         c.argument('worker_vm_size',
                    help='Size of worker VMs.')
         c.argument('worker_vm_disk_size_gb',
@@ -115,3 +127,7 @@ def load_arguments(self, _):
                    help='Refresh cluster application credentials.',
                    options_list=['--refresh-credentials'],
                    validator=validate_refresh_cluster_credentials)
+    with self.argument_context('aro get-admin-kubeconfig') as c:
+        c.argument('file',
+                   help='Path to the file where kubeconfig should be saved. Default: kubeconfig in local directory',
+                   options_list=['--file', '-f'])

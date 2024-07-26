@@ -16,24 +16,34 @@ from msrestazure.tools import (
     parse_resource_id,
     is_valid_resource_id
 )
+from azure.cli.core import telemetry
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (
     ValidationError,
     InvalidArgumentValueError,
-    RequiredArgumentMissingError
+    RequiredArgumentMissingError,
 )
 
-from ._utils import run_cli_cmd
+from ._utils import (
+    run_cli_cmd,
+    get_object_id_of_current_user
+)
 from ._resource_config import (
     CLIENT_TYPE,
     RESOURCE,
     SOURCE_RESOURCES,
     TARGET_RESOURCES,
     SOURCE_RESOURCES_PARAMS,
+    SOURCE_RESOURCES_OPTIONAL_PARAMS,
     SOURCE_RESOURCES_CREATE_PARAMS,
     TARGET_RESOURCES_PARAMS,
     AUTH_TYPE_PARAMS,
-    SUPPORTED_AUTH_TYPE
+    SUPPORTED_AUTH_TYPE,
+    LOCAL_CONNECTION_RESOURCE,
+    LOCAL_CONNECTION_PARAMS,
+    SPRING_APP_DEPLOYMENT_RESOURCE,
+    WEB_APP_SLOT_RESOURCE,
+    OPT_OUT_OPTION,
 )
 
 
@@ -46,6 +56,8 @@ def get_source_resource_name(cmd):
     '''
     source = None
     source_name = cmd.name.split(' ')[0]
+    if source_name == RESOURCE.Local.value.lower():
+        return RESOURCE.Local
     for item in SOURCE_RESOURCES:
         if item.value.lower() == source_name.lower():
             source = item
@@ -229,6 +241,14 @@ def interactive_input(arg, hint):
             'auth_type': 'userAssignedIdentity'
         }
         cmd_value = 'client-id={} subscription-id={}'.format(client_id, subscription_id)
+    elif arg == 'user_account_auth_info':
+        object_id = prompt(
+            'User Account object-id (--user-account object-id=): ')
+        value = {
+            'auth_type': 'userAccount',
+            'principal_id': object_id
+        }
+        cmd_value = 'object-id={}'.format(object_id)
     else:
         value = prompt('{}: '.format(hint))
         cmd_value = value
@@ -263,11 +283,20 @@ def get_local_context_value(cmd, arg):
     return None
 
 
+def opt_out_auth(namespace):
+    '''Validate if config and auth are both opted out
+    '''
+    opt_out_list = getattr(namespace, 'opt_out_list', None)
+    if opt_out_list is not None and \
+            OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list:
+        return True
+    return False
+
+
 def intelligent_experience(cmd, namespace, missing_args):
     '''Use local context and interactive inputs to get arg values
     '''
     cmd_arg_values = dict()
-
     # use commandline source/target resource args
     for arg in missing_args:
         if getattr(namespace, arg, None) is not None:
@@ -284,7 +313,15 @@ def intelligent_experience(cmd, namespace, missing_args):
             'auth_type': 'systemAssignedIdentity'
         }
         logger.warning('Auth info is not specified, use default one: --system-identity')
-
+        if opt_out_auth(namespace):
+            logger.warning('Auth info is only used to generate configurations. %s',
+                           'Skip enabling identity and role assignments.')
+    elif 'user_account_auth_info' in missing_args:
+        cmd_arg_values['user_account_auth_info'] = {
+            'auth_type': 'userAccount'
+        }
+        logger.warning(
+            'Auth info is not specified, use default one: --user-account')
     if cmd.cli_ctx.local_context.is_on:
         # arguments found in local context
         context_arg_values = dict()
@@ -320,21 +357,43 @@ def intelligent_experience(cmd, namespace, missing_args):
     return cmd_arg_values
 
 
-def validate_source_resource_id(namespace):
+def validate_source_resource_id(cmd, namespace):
     '''Validate resource id of a source resource
     '''
     if getattr(namespace, 'source_id', None):
         if not is_valid_resource_id(namespace.source_id):
-            raise InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.source_id))
-        matched = False
-        for resource in SOURCE_RESOURCES.values():
-            matched = re.match(get_resource_regex(resource), namespace.source_id)
+            e = InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.source_id))
+            telemetry.set_exception(e, 'source-id-invalid')
+            raise e
+
+        source = get_source_resource_name(cmd)
+
+        # For Web App, match slot pattern first:
+        if source == RESOURCE.WebApp:
+            slotPattern = WEB_APP_SLOT_RESOURCE
+            matched = re.match(get_resource_regex(slotPattern), namespace.source_id, re.IGNORECASE)
             if matched:
                 namespace.source_id = matched.group()
                 return True
-        if not matched:
-            raise InvalidArgumentValueError('Unsupported source resource id: {}'.format(namespace.source_id))
+        if source == RESOURCE.SpringCloud:
+            deploymentPattern = SPRING_APP_DEPLOYMENT_RESOURCE
+            matched = re.match(get_resource_regex(deploymentPattern), namespace.source_id, re.IGNORECASE)
+            if matched:
+                namespace.source_id = matched.group()
+                return True
 
+        # For other source and Web App which cannot match slot pattern
+        pattern = SOURCE_RESOURCES.get(source)
+        matched = re.match(get_resource_regex(pattern),
+                           namespace.source_id, re.IGNORECASE)
+        if matched:
+            namespace.source_id = matched.group()
+            return True
+        e = InvalidArgumentValueError(
+            'Unsupported source resource id: {}. '
+            'Source id pattern should be: {}'.format(namespace.source_id, pattern))
+        telemetry.set_exception(e, 'source-id-unsupported')
+        raise e
     return False
 
 
@@ -343,7 +402,7 @@ def validate_connection_id(namespace):
     '''
     if getattr(namespace, 'indentifier', None):
         matched = False
-        for resource in SOURCE_RESOURCES.values():
+        for resource in list(SOURCE_RESOURCES.values()) + [WEB_APP_SLOT_RESOURCE, SPRING_APP_DEPLOYMENT_RESOURCE]:
             regex = '({})/providers/Microsoft.ServiceLinker/linkers/([^/]*)'.format(get_resource_regex(resource))
             matched = re.match(regex, namespace.indentifier, re.IGNORECASE)
             if matched:
@@ -351,38 +410,62 @@ def validate_connection_id(namespace):
                 namespace.connection_name = matched.group(2)
                 return True
         if not matched:
-            raise InvalidArgumentValueError('Connection id is invalid: {}'.format(namespace.indentifier))
+            e = InvalidArgumentValueError('Connection id is invalid: {}'.format(namespace.indentifier))
+            telemetry.set_exception(e, 'connection-id-invalid')
+            raise e
 
     return False
 
 
-def validate_target_resource_id(namespace):
+def validate_target_resource_id(cmd, namespace):
     '''Validate resource id of a target resource
     '''
     if getattr(namespace, 'target_id', None):
         if not is_valid_resource_id(namespace.target_id):
-            raise InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.target_id))
-        matched = False
-        for resource in TARGET_RESOURCES.values():
-            matched = re.match(get_resource_regex(resource), namespace.target_id, re.IGNORECASE)
-            if matched:
-                namespace.target_id = matched.group()
-                return True
-        if not matched:
-            raise InvalidArgumentValueError('Unsupported target resource id is invalid: {}'.format(namespace.target_id))
+            e = InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.target_id))
+            telemetry.set_exception(e, 'target-id-invalid')
+            raise e
+
+        target = get_target_resource_name(cmd)
+        pattern = TARGET_RESOURCES.get(target)
+        matched = re.match(get_resource_regex(pattern), namespace.target_id, re.IGNORECASE)
+        if matched:
+            namespace.target_id = matched.group()
+            return True
+        e = InvalidArgumentValueError('Target resource id is invalid: {}. '
+                                      'Target id pattern should be: {}'.format(namespace.target_id, pattern))
+        telemetry.set_exception(e, 'target-id-unsupported')
+        raise e
 
     return False
 
 
-def get_missing_source_args(cmd):
+def validate_opt_out_auth_and_config(namespace):
+    '''Validate if config and auth are both opted out
+    '''
+    opt_out_list = getattr(namespace, 'opt_out_list', None)
+    if opt_out_list is not None and \
+            OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list and \
+            OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list:
+        return True
+    return False
+
+
+def get_missing_source_args(cmd, namespace):
     '''Get source resource related args
     '''
     source = get_source_resource_name(cmd)
     missing_args = dict()
 
-    for arg, content in SOURCE_RESOURCES_PARAMS.get(source).items():
+    for arg, content in SOURCE_RESOURCES_PARAMS.get(source, {}).items():
         missing_args[arg] = content
 
+    # For WebApp, slot may needed
+    args = SOURCE_RESOURCES_OPTIONAL_PARAMS.get(source)
+    if args:
+        for arg, content in args.items():
+            if getattr(namespace, arg, None):
+                missing_args[arg] = content
     return missing_args
 
 
@@ -420,14 +503,6 @@ def get_missing_auth_args(cmd, namespace):
     target = get_target_resource_name(cmd)
     missing_args = dict()
 
-    # when keyvault csi is enabled, auth_type is userIdentity without subs_id and client_id
-    if source == RESOURCE.KubernetesCluster and target == RESOURCE.KeyVault\
-            and getattr(namespace, 'enable_csi', None):
-        setattr(namespace, 'user_identity_auth_info', {
-            'auth_type': 'userAssignedIdentity'
-        })
-        return missing_args
-
     # check if there are auth_info related params
     auth_param_exist = False
     for _, params in AUTH_TYPE_PARAMS.items():
@@ -435,6 +510,26 @@ def get_missing_auth_args(cmd, namespace):
             if getattr(namespace, arg, None):
                 auth_param_exist = True
                 break
+
+    # when keyvault csi is enabled, auth_type is userIdentity without subs_id and client_id
+    if source == RESOURCE.KubernetesCluster and target == RESOURCE.KeyVault:
+        if getattr(namespace, 'enable_csi', None):
+            if auth_param_exist:
+                logger.warning('When CSI driver is enabled (--enable-csi), \
+                               Service Connector uses the user assigned managed identity generated by AKS \
+                               azure-keyvault-secrets-provider add-on to authenticate. \
+                               Additional auth info is ignored.')
+            setattr(namespace, 'user_identity_auth_info', {
+                'auth_type': 'userAssignedIdentity'
+            })
+            return missing_args
+        if not auth_param_exist:
+            setattr(namespace, 'enable_csi', True)
+            setattr(namespace, 'user_identity_auth_info', {
+                'auth_type': 'userAssignedIdentity'
+            })
+            logger.warning('Auth info is not specified, use secrets store csi driver as default: --enable-csi')
+            return missing_args
 
     if source and target and not auth_param_exist:
         default_auth_type = SUPPORTED_AUTH_TYPE.get(source, {}).get(target, {})[0]
@@ -472,12 +567,54 @@ def get_missing_client_type(namespace):
     return missing_args
 
 
+def validate_local_default_params(cmd, namespace):  # pylint: disable=unused-argument
+    '''Get missing args of local connection command
+    '''
+    missing_args = dict()
+
+    if getattr(namespace, 'id', None):
+        namespace.id = namespace.id.lower()
+        if not is_valid_resource_id(namespace.id):
+            raise InvalidArgumentValueError(
+                'Resource id is invalid: {}'.format(namespace.id))
+        resource = LOCAL_CONNECTION_RESOURCE.lower()
+        for item in re.findall(r'(\{[^\{\}]*\})', resource):
+            resource = resource.replace(item, '([^/]*)')
+
+        matched = re.match(resource, namespace.id)
+        if matched:
+            namespace.resource_group_name = matched.group(2)
+            namespace.location = matched.group(3)
+            namespace.connection_name = matched.group(4)
+        else:
+            raise InvalidArgumentValueError(
+                'Unsupported resource id: {}'.format(namespace.id))
+    else:
+        if not getattr(namespace, 'resource_group_name', None):
+            missing_args.update(
+                {'resource_group_name': LOCAL_CONNECTION_PARAMS.get("resource_group_name")})
+    return missing_args
+
+
+def apply_local_default_params(cmd, namespace, arg_values):  # pylint: disable=unused-argument
+    for arg in LOCAL_CONNECTION_PARAMS:
+        if arg in arg_values:
+            setattr(namespace, arg, arg_values.get(arg, None))
+
+
+def validate_local_list_params(cmd, namespace):  # pylint: disable=unused-argument
+    missing_args = dict()
+    if getattr(namespace, 'resource_group', None) is None:
+        missing_args.update(LOCAL_CONNECTION_PARAMS.get("resource_group"))
+    return missing_args
+
+
 def validate_list_params(cmd, namespace):
     '''Get missing args of list command
     '''
     missing_args = dict()
-    if not validate_source_resource_id(namespace):
-        missing_args.update(get_missing_source_args(cmd))
+    if not validate_source_resource_id(cmd, namespace):
+        missing_args.update(get_missing_source_args(cmd, namespace))
     return missing_args
 
 
@@ -485,10 +622,22 @@ def validate_create_params(cmd, namespace):
     '''Get missing args of create command
     '''
     missing_args = dict()
-    if not validate_source_resource_id(namespace):
-        missing_args.update(get_missing_source_args(cmd))
+    if not validate_source_resource_id(cmd, namespace):
+        missing_args.update(get_missing_source_args(cmd, namespace))
     missing_args.update(get_missing_source_create_args(cmd, namespace))
-    if not validate_target_resource_id(namespace):
+    if not validate_target_resource_id(cmd, namespace):
+        missing_args.update(get_missing_target_args(cmd))
+    if not validate_opt_out_auth_and_config(namespace):
+        missing_args.update(get_missing_auth_args(cmd, namespace))
+    return missing_args
+
+
+def validate_local_create_params(cmd, namespace):
+    '''Get missing args of create command
+    '''
+    missing_args = dict()
+
+    if not validate_target_resource_id(cmd, namespace):
         missing_args.update(get_missing_target_args(cmd))
     missing_args.update(get_missing_auth_args(cmd, namespace))
     return missing_args
@@ -498,8 +647,9 @@ def validate_addon_params(cmd, namespace):
     '''Get missing args of add command with '--new'
     '''
     missing_args = dict()
-    if not validate_source_resource_id(namespace):
-        missing_args.update(get_missing_source_args(cmd))
+    if not validate_source_resource_id(cmd, namespace):
+        missing_args.update(get_missing_source_args(cmd, namespace))
+    missing_args.update(get_missing_auth_args(cmd, namespace))
     return missing_args
 
 
@@ -508,9 +658,17 @@ def validate_update_params(cmd, namespace):
     '''
     missing_args = dict()
     if not validate_connection_id(namespace):
-        missing_args.update(get_missing_source_args(cmd))
-    missing_args.update(get_missing_auth_args(cmd, namespace))
+        missing_args.update(get_missing_source_args(cmd, namespace))
+    # missing_args.update(get_missing_auth_args(cmd, namespace))
     missing_args.update(get_missing_connection_name(namespace))
+    return missing_args
+
+
+def validate_local_update_params(cmd, namespace):  # pylint: disable=unused-argument
+    '''Get missing args of update command
+    '''
+    missing_args = dict()
+    # missing_args.update(get_missing_auth_args(cmd, namespace))
     return missing_args
 
 
@@ -519,15 +677,17 @@ def validate_default_params(cmd, namespace):
     '''
     missing_args = dict()
     if not validate_connection_id(namespace):
-        missing_args.update(get_missing_source_args(cmd))
+        missing_args.update(get_missing_source_args(cmd, namespace))
     missing_args.update(get_missing_connection_name(namespace))
     return missing_args
 
 
 def validate_connection_name(name):
     if not re.match(r'^[A-Za-z0-9\._]+$', name):
-        raise InvalidArgumentValueError("Resource name can only contain letters (A-Z, a-z), "
-                                        "numbers (0-9), periods ('.'), and underscores ('_')")
+        e = InvalidArgumentValueError("Resource name can only contain letters (A-Z, a-z), "
+                                      "numbers (0-9), periods ('.'), and underscores ('_')")
+        telemetry.set_exception('connection-name-invalid')
+        raise e
     return True
 
 
@@ -541,6 +701,29 @@ def apply_source_args(cmd, namespace, arg_values):
             subscription=get_subscription_id(cmd.cli_ctx),
             **arg_values
         )
+    apply_source_optional_args(cmd, namespace, arg_values)
+
+
+def apply_source_optional_args(cmd, namespace, arg_values):
+    '''Set source resource id by optional arg_values
+    '''
+    source = get_source_resource_name(cmd)
+    if source == RESOURCE.WebApp:
+        if arg_values.get('slot', None):
+            resource = WEB_APP_SLOT_RESOURCE
+            if check_required_args(resource, arg_values):
+                namespace.source_id = resource.format(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    **arg_values
+                )
+    if source == RESOURCE.SpringCloud:
+        if arg_values.get('deployment', None):
+            resource = SPRING_APP_DEPLOYMENT_RESOURCE
+            if check_required_args(resource, arg_values):
+                namespace.source_id = resource.format(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    **arg_values
+                )
 
 
 def apply_source_create_args(cmd, namespace, arg_values):
@@ -575,6 +758,25 @@ def apply_auth_args(cmd, namespace, arg_values):
             for arg in AUTH_TYPE_PARAMS.get(auth_type):
                 if arg in arg_values:
                     setattr(namespace, arg, arg_values.get(arg, None))
+                    if arg == 'workload_identity_auth_info':
+                        apply_workload_identity(namespace, arg_values)
+
+
+def apply_workload_identity(namespace, arg_values):
+    output = run_cli_cmd('az identity show --ids {}'.format(
+        arg_values.get('workload_identity_auth_info')
+    ))
+    if output:
+        client_id = output.get('clientId')
+        subs_id = arg_values.get('workload_identity_auth_info').split('/')[2]
+    else:
+        raise ValidationError('Invalid user identity resource ID for workload identity.')
+    setattr(namespace, 'user_identity_auth_info',
+            {
+                'client_id': client_id,
+                'subscription_id': subs_id,
+                'auth_type': 'userAssignedIdentity'
+            })
 
 
 def apply_connection_name(namespace, arg_values):
@@ -606,10 +808,18 @@ def apply_create_params(cmd, namespace, arg_values):
     apply_auth_args(cmd, namespace, arg_values)
 
 
+def apply_local_create_params(cmd, namespace, arg_values):
+    '''Set create command missing args
+    '''
+    apply_target_args(cmd, namespace, arg_values)
+    apply_auth_args(cmd, namespace, arg_values)
+
+
 def apply_addon_params(cmd, namespace, arg_values):
     '''Set addon command missing args
     '''
     apply_source_args(cmd, namespace, arg_values)
+    apply_auth_args(cmd, namespace, arg_values)
 
 
 def apply_update_params(cmd, namespace, arg_values):
@@ -620,11 +830,53 @@ def apply_update_params(cmd, namespace, arg_values):
     apply_auth_args(cmd, namespace, arg_values)
 
 
+def apply_local_update_params(cmd, namespace, arg_values):
+    '''Set update command missing args
+    '''
+    apply_auth_args(cmd, namespace, arg_values)
+
+
 def apply_default_params(cmd, namespace, arg_values):
     '''Set missing args of commands except for list, create
     '''
     apply_source_args(cmd, namespace, arg_values)
     apply_connection_name(namespace, arg_values)
+
+
+def validate_local_params(cmd, namespace):
+    '''Validate command parameters
+    '''
+    def _validate_and_apply(validate, apply):
+        missing_args = validate(cmd, namespace)
+        if missing_args:
+            arg_values = intelligent_experience(cmd, namespace, missing_args)
+            apply(cmd, namespace, arg_values)
+    # for command: 'list'
+    if cmd.name.endswith(' list'):
+        _validate_and_apply(validate_local_list_params,
+                            apply_local_default_params)
+    else:
+        _validate_and_apply(validate_local_default_params,
+                            apply_local_default_params)
+
+    # for command: 'create'
+    if 'create' in cmd.name:
+        # if --new is specified
+        if getattr(namespace, 'connection_name', None) is None:
+            namespace.connection_name = generate_connection_name(cmd)
+        else:
+            validate_connection_name(namespace.connection_name)
+        if getattr(namespace, 'new_addon', None):
+            _validate_and_apply(validate_addon_params, apply_addon_params)
+        else:
+            _validate_and_apply(validate_local_create_params,
+                                apply_local_create_params)
+        if getattr(namespace, 'client_type', None) is None:
+            namespace.client_type = get_client_type(cmd, namespace)
+    # for command: update
+    elif 'update' in cmd.name:
+        _validate_and_apply(validate_local_update_params,
+                            apply_local_update_params)
 
 
 def validate_params(cmd, namespace):
@@ -702,3 +954,11 @@ def validate_service_state(linker_parameters):
         if output and output.get('disableLocalAuth') is True:
             raise ValidationError('Secret as auth type is not allowed when local auth is disabled for the '
                                   'specified appconfig, you may use service principal or managed identity.')
+
+
+def get_default_object_id_of_current_user(cmd, namespace):  # pylint: disable=unused-argument
+    user_account_auth_info = getattr(namespace, 'user_account_auth_info', None)
+    if user_account_auth_info and not user_account_auth_info.get('principal_id', None):
+        user_object_id = get_object_id_of_current_user()
+        user_account_auth_info['principal_id'] = user_object_id
+        setattr(namespace, 'user_account_auth_info', user_account_auth_info)

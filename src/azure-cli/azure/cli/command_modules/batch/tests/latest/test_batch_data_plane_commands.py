@@ -28,7 +28,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         return filepath
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='northcentralus')
+    @BatchAccountPreparer(location='eastus')
     def test_batch_certificate_cmd(self, resource_group, batch_account_name):
         create_cert_file_path = self._get_test_data_file('batchtest.cer')
         self.kwargs.update({
@@ -90,10 +90,11 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                                 expect_failure=True)
 
         result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_A1 '
-                                '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04"'
-                                ' --disk-encryption-targets "TemporaryDisk"')
+                                '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
+                                '--disk-encryption-targets "TemporaryDisk"')
 
-        time.sleep(120)
+        if self.is_live or self.in_recording:
+            time.sleep(120)
 
         result = self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
             self.check('allocationState', 'steady'),
@@ -141,6 +142,162 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @BatchAccountPreparer()
+    def test_batch_pool_trustedLaunch_cmd(
+            self,
+            resource_group,
+            batch_account_name):
+        endpoint = self.get_account_endpoint(
+            batch_account_name,
+            resource_group).replace("https://", "")
+        key = self.get_account_key(
+            batch_account_name,
+            resource_group)
+
+        self.kwargs.update({
+            'p_id': 'xplatCreatedPool',
+            'acc_n': batch_account_name,
+            'acc_k': key,
+            'acc_u': endpoint
+        })
+
+        self.batch_cmd('batch pool create --id {p_id} --vm-size "standard_d2s_v3" '
+                        '--image "canonical:ubuntuserver:18.04-lts" '
+                        '--node-agent-sku-id "batch.node.ubuntu 18.04" '
+                        '--target-dedicated-nodes 2 '
+                        '--security-type "TrustedLaunch" '
+                        '--encryption-at-host true '
+                        '--enable-secure-boot true '
+                        '--enable-vtpm true')
+
+        res = self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()
+
+        self.assertTrue(res['virtualMachineConfiguration']['securityProfile']['securityType'])
+        self.assertTrue(res['virtualMachineConfiguration']['securityProfile']['encryptionAtHost'])
+        self.assertTrue(res['virtualMachineConfiguration']['securityProfile']['uefiSettings']['secureBootEnabled'])
+        self.assertTrue(res['virtualMachineConfiguration']['securityProfile']['uefiSettings']['vTpmEnabled'])
+
+        self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
+
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer()
+    def test_batch_pool_osDisk_cmd(
+            self,
+            resource_group,
+            batch_account_name):
+        endpoint = self.get_account_endpoint(
+            batch_account_name,
+            resource_group).replace("https://", "")
+        key = self.get_account_key(
+            batch_account_name,
+            resource_group)
+
+        self.kwargs.update({
+            'p_id': 'xplatCreatedPool',
+            'acc_n': batch_account_name,
+            'acc_k': key,
+            'acc_u': endpoint
+        })
+
+        self.batch_cmd('batch pool create --id {p_id} --vm-size "standard_d2s_v3" '
+                        '--image "canonical:0001-com-ubuntu-server-focal:20_04-lts" '
+                        '--node-agent-sku-id "batch.node.ubuntu 20.04" '
+                        '--target-dedicated-nodes 2 '
+                        '--os-disk-size 100 '
+                        '--os-disk-caching ReadWrite '
+                        '--storage-account-type "StandardSSD_LRS" ')
+
+        res = self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()
+        print(res)
+
+        self.assertTrue(res['virtualMachineConfiguration']['osDisk']['caching'])
+        self.assertTrue(res['virtualMachineConfiguration']['osDisk']['managedDisk']['storageAccountType'])
+        self.assertTrue(res['virtualMachineConfiguration']['osDisk']['diskSizeGb'])
+
+        self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
+
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer()
+    def test_batch_pool_upgradePolicy_cmd(
+            self,
+            resource_group,
+            batch_account_name):
+        endpoint = self.get_account_endpoint(
+            batch_account_name,
+            resource_group).replace("https://", "")
+        key = self.get_account_key(
+            batch_account_name,
+            resource_group)
+
+        self.kwargs.update({
+            'p_id': 'xplatCreatedPool',
+            'acc_n': batch_account_name,
+            'acc_k': key,
+            'acc_u': endpoint
+        })
+
+        self.batch_cmd('batch pool create --id {p_id} --vm-size "standard_d4s_v3" '
+                        '--image "MicrosoftWindowsServer:WindowsServer:2016-datacenter-smalldisk" '
+                        '--node-agent-sku-id "batch.node.windows amd64" '
+                        '--policy "zonal" '
+                        '--target-dedicated-nodes 2 '
+                        '--upgrade-policy-mode "automatic" '
+                        '--disable-auto-rollback '
+                        '--enable-auto-os-upgrade '
+                        '--defer-os-rolling-upgrade '
+                        '--use-rolling-upgrade-policy '
+                        '--enable-cross-zone-upgrade '
+                        '--max-batch-instance-percent 20 '
+                        '--max-unhealthy-instance-percent 20 '
+                        '--max-unhealthy-upgraded-instance-percent 20 '
+                        '--pause-time-between-batches "PT0S" '
+                        '--prioritize-unhealthy-instances '
+                        '--rollback-failed-instances-on-policy-breach ')
+
+        res = self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()
+        print(res)
+
+        self.assertTrue(res['upgradePolicy']['mode'])
+        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['disableAutomaticRollback'])
+        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['enableAutomaticOsUpgrade'])
+        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['osRollingUpgradeDeferral'])
+        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['useRollingUpgradePolicy'])
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['enableCrossZoneUpgrade'])
+        self.assertEqual(res['upgradePolicy']['rollingUpgradePolicy']['maxBatchInstancePercent'], 20)
+        self.assertEqual(res['upgradePolicy']['rollingUpgradePolicy']['maxUnhealthyInstancePercent'], 20)
+        self.assertEqual(res['upgradePolicy']['rollingUpgradePolicy']['maxUnhealthyUpgradedInstancePercent'], 20)
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['pauseTimeBetweenBatches'], '')
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['prioritizeUnhealthyInstances'])
+        self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['rollbackFailedInstancesOnPolicyBreach'])
+
+        self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
+
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer()
+    def test_batch_pool_enableAcceleratedNetworking_cmd(
+            self,
+            resource_group,
+            batch_account_name):
+        endpoint = self.get_account_endpoint(
+            batch_account_name,
+            resource_group).replace("https://", "")
+        key = self.get_account_key(
+            batch_account_name,
+            resource_group)
+
+        self.kwargs.update({
+            'p_id': 'xplatCreatedPool',
+            'acc_n': batch_account_name,
+            'acc_k': key,
+            'acc_u': endpoint
+        })
+        self.batch_cmd('batch pool create --id {p_id} --image "MicrosoftWindowsServer:WindowsServer:2016-datacenter-smalldisk"  --target-dedicated-nodes 2 --vm-size "standard_d2_v2" --node-agent-sku-id "batch.node.windows amd64" --accelerated-networking true')
+
+        self.assertTrue(self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()['networkConfiguration']['enableAcceleratedNetworking'])
+
+        self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
+
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer()
     def test_batch_job_list_cmd(
             self,
             resource_group,
@@ -171,7 +328,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch job delete --job-id {j_id} --yes')
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='canadacentral')
+    @BatchAccountPreparer(location='eastus')
     def test_batch_task_create_cmd(self, resource_group, batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
@@ -200,8 +357,10 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                            self.check('id', 'aaa'),
                            self.check('commandLine', 'ping 127.0.0.1 -n 30')])
 
-        if self.is_live or self.in_recording:
+        task_result = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
+        if self.is_live or self.in_recording or task_result["taskCounts"]["active"] == 0:
             time.sleep(10)
+
         task_result = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
 
         self.assertEqual(task_result["taskCounts"]["completed"], 0)
@@ -217,7 +376,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertTrue(any([i for i in result if i['taskId'] == 'xplatTask1']))
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='canadaeast')
+    @BatchAccountPreparer(location='eastus')
     def test_batch_jobs_and_tasks(self, resource_group, batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
@@ -305,7 +464,11 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         # test create iaas pool using parameters
         self.batch_cmd('batch pool create --id {pool_i} --vm-size Standard_A1 '
                        '--image Canonical:UbuntuServer:18.04-LTS '
-                       '--node-agent-sku-id "batch.node.ubuntu 18.04"')
+                       '--node-agent-sku-id "batch.node.ubuntu 18.04" '
+                       '--target-communication classic')
+        self.batch_cmd('batch pool show --pool-id {pool_i}').assert_with_checks([
+            self.check('targetNodeCommunicationMode', 'classic')
+        ])
 
         # test create pool with missing parameters
         with self.assertRaises(SystemExit):
@@ -399,6 +562,12 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool set --pool-id {pool_j} --start-task-command-line new_value')
         updated = self.batch_cmd('batch pool show --pool-id {pool_j} --select "startTask"').get_output_in_json()
         self.assertNotEqual(current['startTask']['commandLine'], updated['startTask']['commandLine'])
+
+        # test patch pool with target-node-communication-mode
+        self.batch_cmd('batch pool set --pool-id {pool_j} --target-communication classic')
+        self.batch_cmd('batch pool show --pool-id {pool_j}').assert_with_checks([
+            self.check('targetNodeCommunicationMode', 'classic')
+        ])
 
         # test list node agent skus
         self.batch_cmd('batch pool supported-images list')

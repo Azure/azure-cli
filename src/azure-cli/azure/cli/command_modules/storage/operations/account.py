@@ -6,8 +6,9 @@
 """Custom operations for storage account commands"""
 
 import os
+from ipaddress import ip_network
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
-from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item
+from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item, user_confirmation
 from azure.cli.core.profiles import ResourceType, get_sdk
 from knack.log import get_logger
 from knack.util import CLIError
@@ -17,7 +18,7 @@ logger = get_logger(__name__)
 
 def check_name_availability(cmd, client, name):
     StorageAccountCheckNameAvailabilityParameters = cmd.get_models('StorageAccountCheckNameAvailabilityParameters')
-    account_name = StorageAccountCheckNameAvailabilityParameters(name=name)
+    account_name = StorageAccountCheckNameAvailabilityParameters(name=name, type="Microsoft.Storage/storageAccounts")
     return client.check_name_availability(account_name)
 
 
@@ -72,16 +73,27 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
-                           allow_protected_append_writes=None, public_network_access=None):
+                           allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
     scf = storage_client_factory(cmd.cli_ctx)
+
+    # check name availability and throw a warning if an account with the same name is found
+    # TODO throw error instead of just a warning during the next breaking change window
+    StorageAccountCheckNameAvailabilityParameters = cmd.get_models('StorageAccountCheckNameAvailabilityParameters')
+    account_name_param = StorageAccountCheckNameAvailabilityParameters(name=account_name,
+                                                                       type="Microsoft.Storage/storageAccounts")
+    name_is_available = scf.storage_accounts.check_name_availability(account_name_param)
+    if name_is_available and not name_is_available.name_available and name_is_available.reason == "AlreadyExists":
+        logger.warning("A storage account with the provided name %s is found. "
+                       "Will continue to update the existing account.", account_name)
+
     if kind is None:
         logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' "
                        "in the future")
     params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags,
-                                            encryption=Encryption())
+                                            encryption=Encryption(key_source="Microsoft.Storage"))
     # TODO: remove this part when server side remove the constraint
     if encryption_services is None:
         params.encryption.services = {'blob': {}}
@@ -204,14 +216,22 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if encryption_key_type_for_table is not None or encryption_key_type_for_queue is not None:
         EncryptionServices = cmd.get_models('EncryptionServices')
         EncryptionService = cmd.get_models('EncryptionService')
-        params.encryption = Encryption()
-        params.encryption.services = EncryptionServices()
+        if params.encryption is None:
+            params.encryption = Encryption()
+        if params.encryption.services is None:
+            params.encryption.services = EncryptionServices()
         if encryption_key_type_for_table is not None:
             table_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_table)
-            params.encryption.services.table = table_encryption_service
+            if isinstance(params.encryption.services, dict):
+                params.encryption.services["table"] = table_encryption_service
+            else:
+                params.encryption.services.table = table_encryption_service
         if encryption_key_type_for_queue is not None:
             queue_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_queue)
-            params.encryption.services.queue = queue_encryption_service
+            if isinstance(params.encryption.services, dict):
+                params.encryption.services["queue"] = queue_encryption_service
+            else:
+                params.encryption.services.queue = queue_encryption_service
 
     if any([routing_choice, publish_microsoft_endpoints, publish_internet_endpoints]):
         RoutingPreference = cmd.get_models('RoutingPreference')
@@ -269,6 +289,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if public_network_access is not None:
         params.public_network_access = public_network_access
+
+    if dns_endpoint_type is not None:
+        params.dns_endpoint_type = dns_endpoint_type
 
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
@@ -363,10 +386,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
-                           allow_protected_append_writes=None, public_network_access=None):
-    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
+                           allow_protected_append_writes=None, public_network_access=None, upgrade_to_storagev2=None,
+                           yes=None):
+    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet, Kind = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
-                       'NetworkRuleSet')
+                       'NetworkRuleSet', 'Kind')
 
     domain = instance.custom_domain
     if custom_domain is not None:
@@ -402,6 +426,36 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if encryption_key_version is not None:
         encryption.key_vault_properties.key_version = encryption_key_version
 
+    warning_message = None
+    if upgrade_to_storagev2:
+        if instance.kind == Kind.STORAGE:
+            warning_message = "Upgrading a General Purpose v1 storage account to a general-purpose v2 account is " \
+                              "free. You may specify the desired account tier during the upgrade process. " \
+                              "If an account tier is not specified on upgrade, the default account tier of the " \
+                              "upgraded account will be Hot. \nHowever, changing the storage access tier after the " \
+                              "upgrade may result in changes to your bill so it is recommended to specify the new " \
+                              "account tier during upgrade. \n" \
+                              "See (http://go.microsoft.com/fwlink/?LinkId=786482) to learn more."
+        elif instance.kind == Kind.BLOB_STORAGE:
+            warning_message = "Upgrading a BlobStorage account to a general-purpose v2 account is free as long as " \
+                              "the upgraded account's tier remains unchanged. If an account tier is not specified " \
+                              "on upgrade, the default account tier of the upgraded account will be Hot. \nIf there " \
+                              "are account access tier changes as part of the upgrade, there will be charges " \
+                              "associated with moving blobs as part of the account access tier change. \n" \
+                              "See (http://go.microsoft.com/fwlink/?LinkId=786482) to learn more."
+            if access_tier is None:
+                access_tier = AccessTier.HOT
+        elif access_tier is not None:
+            warning_message = "Changing the access tier may result in additional charges. \n" \
+                              "See (http://go.microsoft.com/fwlink/?LinkId=786482) to learn more."
+    else:
+        if access_tier is not None:
+            warning_message = "Changing the access tier may result in additional charges. \n" \
+                              "See (http://go.microsoft.com/fwlink/?LinkId=786482) to learn more."
+
+    if warning_message:
+        user_confirmation(warning_message, yes)
+
     params = StorageAccountUpdateParameters(
         sku=Sku(name=sku) if sku is not None else instance.sku,
         tags=tags if tags is not None else instance.tags,
@@ -410,6 +464,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier,
         enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only
     )
+
+    if upgrade_to_storagev2:
+        params.kind = Kind.STORAGE_V2
 
     if identity_type and 'UserAssigned' in identity_type and user_identity_id:
         user_assigned_identities = {user_identity_id: {}}
@@ -493,8 +550,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if enable_files_adds is not None:
         ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
         if enable_files_adds:  # enable AD
-            if not(domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and
-                   azure_storage_sid):
+            if not (domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and
+                    azure_storage_sid):
                 raise CLIError("To enable ActiveDirectoryDomainServicesForFile, user must specify all of: "
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
                                "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
@@ -629,6 +686,8 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
                      vnet_name=None, ip_address=None, tenant_id=None, resource_id=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
+    if not subnet and not ip_address:
+        logger.warning('No subnet or ip address supplied.')
     if subnet:
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(subnet):
@@ -643,8 +702,18 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
         IpRule = cmd.get_models('IPRule')
         if not rules.ip_rules:
             rules.ip_rules = []
-        rules.ip_rules = [r for r in rules.ip_rules if r.ip_address_or_range != ip_address]
-        rules.ip_rules.append(IpRule(ip_address_or_range=ip_address, action=action))
+        for ip in ip_address:
+            to_modify = True
+            for x in rules.ip_rules:
+                existing_ip_network = ip_network(x.ip_address_or_range)
+                new_ip_network = ip_network(ip)
+                if new_ip_network.overlaps(existing_ip_network):
+                    logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
+                                   ip, x.ip_address_or_range)
+                    to_modify = False
+                    break
+            if to_modify:
+                rules.ip_rules.append(IpRule(ip_address_or_range=ip, action=action))
     if resource_id:
         ResourceAccessRule = cmd.get_models('ResourceAccessRule')
         if not rules.resource_access_rules:
@@ -666,7 +735,9 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
         rules.virtual_network_rules = [x for x in rules.virtual_network_rules
                                        if not x.virtual_network_resource_id.endswith(subnet)]
     if ip_address:
-        rules.ip_rules = [x for x in rules.ip_rules if x.ip_address_or_range != ip_address]
+        to_remove = [ip_network(x) for x in ip_address]
+        rules.ip_rules = list(filter(lambda x: all(ip_network(x.ip_address_or_range) != i for i in to_remove),
+                                     rules.ip_rules))
 
     if resource_id:
         rules.resource_access_rules = [x for x in rules.resource_access_rules if
@@ -880,6 +951,19 @@ def update_encryption_scope(cmd, client, resource_group_name, account_name, encr
                         encryption_scope_name=encryption_scope_name, encryption_scope=encryption_scope)
 
 
+def list_encryption_scope(client, resource_group_name, account_name,
+                          maxpagesize=None, marker=None, filter=None, include=None):  # pylint: disable=redefined-builtin
+    generator = client.list(resource_group_name, account_name, maxpagesize=maxpagesize, filter=filter, include=include)
+    pages = generator.by_page(continuation_token=marker)
+
+    result = list(next(pages))
+    if pages.continuation_token:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+
+    return result
+
+
 # pylint: disable=no-member
 def create_or_policy(cmd, client, account_name, resource_group_name=None, properties=None, source_account=None,
                      destination_account=None, policy_id="default", rule_id=None, source_container=None,
@@ -913,6 +997,7 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
             if account_name == parse_resource_id(or_policy.source_account)['name']:
                 raise CLIError('ValueError: Please specify --policy-id with auto-generated policy id value on '
                                'destination account.')
+        raise ex
 
 
 def update_or_policy(client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
@@ -1075,3 +1160,52 @@ def update_local_user(cmd, client, resource_group_name, account_name, username, 
                          home_directory, has_shared_key, has_ssh_key, has_ssh_password)
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                    username=username, properties=local_user)
+
+
+def begin_failover(client, resource_group_name, account_name, failover_type=None, yes=None, **kwargs):
+    if not failover_type or failover_type.lower() != "planned":
+        message = """
+        The secondary cluster will become the primary cluster after failover. Please understand the following impact to your storage account before you initiate the failover:
+            1. Please check the Last Sync Time using `az storage account show` with `--expand geoReplicationStats` and check the "geoReplicationStats" property. This is the data you may lose if you initiate the failover.
+            2. After the failover, your storage account type will be converted to locally redundant storage (LRS). You can convert your account to use geo-redundant storage (GRS).
+            3. Once you re-enable GRS/GZRS for your storage account, Microsoft will replicate data to your new secondary region. Replication time is dependent on the amount of data to replicate. Please note that there are bandwidth charges for the bootstrap. Please refer to doc: https://azure.microsoft.com/pricing/details/bandwidth/
+        """
+        user_confirmation(message, yes)
+    return client.begin_failover(resource_group_name=resource_group_name, account_name=account_name, failover_type=failover_type, **kwargs)
+
+
+def list_blob_cors_rules(client, resource_group_name, account_name):
+    blob_service_properties = client.get_service_properties(resource_group_name=resource_group_name,
+                                                            account_name=account_name)
+    if not blob_service_properties.cors or not blob_service_properties.cors.cors_rules:
+        return []
+    return blob_service_properties.cors.cors_rules
+
+
+# pylint: disable=dangerous-default-value
+def add_blob_cors_rule(cmd, client, resource_group_name, account_name, max_age_in_seconds,
+                       allowed_origins, allowed_methods, allowed_headers=[], exposed_headers=[]):
+    CorsRules, CorsRule = cmd.get_models('CorsRules', 'CorsRule')
+    blob_service_properties = client.get_service_properties(resource_group_name=resource_group_name,
+                                                            account_name=account_name)
+    if not blob_service_properties.cors or not blob_service_properties.cors.cors_rules:
+        blob_service_properties.cors = CorsRules(cors_rules=[])
+
+    new_rule = CorsRule(allowed_origins=allowed_origins, allowed_methods=allowed_methods,
+                        allowed_headers=allowed_headers, exposed_headers=exposed_headers,
+                        max_age_in_seconds=max_age_in_seconds)
+    blob_service_properties.cors.cors_rules.append(new_rule)
+    return client.set_service_properties(resource_group_name=resource_group_name,
+                                         account_name=account_name,
+                                         parameters=blob_service_properties).cors.cors_rules
+
+
+def clear_blob_cors_rules(cmd, client, resource_group_name, account_name):
+    blob_service_properties = client.get_service_properties(resource_group_name=resource_group_name,
+                                                            account_name=account_name)
+    CorsRules = cmd.get_models('CorsRules')
+    blob_service_properties.cors = CorsRules(cors_rules=[])
+    client.set_service_properties(resource_group_name=resource_group_name,
+                                  account_name=account_name,
+                                  parameters=blob_service_properties)
+    return []

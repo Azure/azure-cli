@@ -44,7 +44,7 @@ class SBNamespaceMSITesting(ScenarioTest):
             'key3': 'key3',
             'key4': 'key4',
             'key5': 'key5',
-            'kv_name': self.create_random_name(prefix='eventhubs-kv', length=20)
+            'kv_name': self.create_random_name(prefix='servicebus-kv', length=20)
         })
 
         identity1 = self.cmd('identity create --name {identity1} '+
@@ -73,13 +73,13 @@ class SBNamespaceMSITesting(ScenarioTest):
 
 
         self.cmd(
-            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id1object} --key-permissions  all')
+            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id1object} --key-permissions  all --secret-permission all')
         self.cmd(
-            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id2object} --key-permissions  all')
+            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id2object} --key-permissions  all --secret-permission all')
         self.cmd(
-            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id3object} --key-permissions  all')
+            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id3object} --key-permissions  all --secret-permission all')
         self.cmd(
-            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id3object} --key-permissions  all')
+            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id4object} --key-permissions  all --secret-permission all')
         self.cmd('keyvault key create -n {key1} --vault-name {kv_name}')
         self.cmd('keyvault key create -n {key2} --vault-name {kv_name}')
         self.cmd('keyvault key create -n {key3} --vault-name {kv_name}')
@@ -90,16 +90,16 @@ class SBNamespaceMSITesting(ScenarioTest):
 
         self.kwargs.update({'pId': namespace['identity']['principalId']})
 
-        self.cmd(
-            'keyvault set-policy -n {kv_name} -g {rg} --object-id {pId} --key-permissions  all')
+        self.cmd('keyvault set-policy -n {kv_name} -g {rg} --object-id {pId} --key-permissions  all')
 
         namespace = self.cmd(
             'servicebus namespace encryption add --resource-group {rg} --namespace-name {namespacename1}' +
             ' --encryption-config key-name={key1} key-vault-uri={key_uri}'
-            ' --encryption-config key-name={key2} key-vault-uri={key_uri}').get_output_in_json()
+            ' --encryption-config key-name={key2} key-vault-uri={key_uri} --infra-encryption').get_output_in_json()
         self.assertEqual(namespace['identity']['type'], self.kwargs['system'])
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 2
+        self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])
 
         namespace = self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacename} --sku {sku} --location {loc} --mi-system-assigned --mi-user-assigned {id1} {id2}' +
@@ -124,7 +124,7 @@ class SBNamespaceMSITesting(ScenarioTest):
         assert len(n) == 2
 
         namespace = self.cmd('servicebus namespace encryption add --resource-group {rg} --namespace-name {namespacename}' +
-                             ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
+                             ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1} ').get_output_in_json()
 
         self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
         n = [i for i in namespace['identity']['userAssignedIdentities']]
@@ -152,3 +152,5 @@ class SBNamespaceMSITesting(ScenarioTest):
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 3
 
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename1}')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')

@@ -10,7 +10,8 @@ from azure.cli.core.util import empty_on_404
 from ._client_factory import (
     cf_signalr,
     cf_custom_domains,
-    cf_custom_certificates)
+    cf_custom_certificates,
+    cf_replicas)
 
 
 def load_command_table(self, _):
@@ -53,6 +54,11 @@ def load_command_table(self, _):
     signalr_custom_certificate_utils = CliCommandType(
         operations_tmpl='azure.cli.command_modules.signalr.customcertificate#{}',
         client_factory=cf_custom_certificates
+    )
+
+    signalr_replica_utils = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.signalr.replica#{}',
+        client_factory=cf_replicas
     )
 
     with self.command_group('signalr', signalr_custom_utils) as g:
@@ -102,3 +108,9 @@ def load_command_table(self, _):
         g.command('delete', 'custom_certificate_delete')
         g.generic_update_command('update', getter_name='get_custom_certificate', setter_name='set_custom_certificate', custom_func_name='update', custom_func_type=signalr_custom_certificate_utils)
         g.command('list', 'custom_certificate_list')
+
+    with self.command_group('signalr replica', signalr_replica_utils) as g:
+        g.command('create', 'signalr_replica_create')
+        g.command('list', 'signalr_replica_list')
+        g.show_command('show', 'signalr_replica_show', exception_handler=empty_on_404)
+        g.show_command('delete', 'signalr_replica_delete')

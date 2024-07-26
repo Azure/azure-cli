@@ -3,6 +3,123 @@
 Release History
 ===============
 
+2.62.0
+++++++
+* Fix #28997: Fix error "User cancelled the Accounts Control Operation" when logging in with WAM as Administrator (#29088)
+* Resolve CVE-2024-37891 (#29194)
+* Resolve CVE-2024-35195 (#29186)
+* `aaz`: Add argument completer support (#29204)
+
+2.61.0
+++++++
+* Resolve CVE-2024-34064 (#28895)
+* [BREAKING CHANGE] `az login`: Use WAM as the default authentication method on Windows. For more details, see https://go.microsoft.com/fwlink/?linkid=2271136 (#28841)
+* `aaz`: Support extended values in `AAZArgEnum` (#28850)
+* Add `tenantDefaultDomain` and `tenantDisplayName` properties to login contexts (shown by `az account list`) (#28910)
+* Prompt for interactive authentication for all silent authentication failures (#28966)
+
+2.60.0
+++++++
+* Fix #28737: Fix token cache for service principal authentication (#28747)
+* Resolve CVE-2023-3651 (#28735)
+
+2.59.0
+++++++
+* Minor fixes
+
+2.58.0
+++++++
+* [BREAKING CHANGE] `az login`: Replace `allow_broker` with `enable_broker_on_windows` (#27726)
+
+2.57.0
+++++++
+* `aaz`: Handle null value when deserialize output (#28253)
+* Add warning for customers when there're credentials in cli output if this feature has been turned on through `az config set clients.show_secrets_warning=True` (#27929)
+
+2.56.0
+++++++
+* Minor fixes
+
+2.55.0
+++++++
+* Minor fixes
+
+2.54.0
+++++++
+* `aaz`: Support data-plane clients (#27617)
+* [PREVIEW] Support disabling instance discovery by running `az config set core.instance_discovery=false` (#27494)
+
+2.53.1
+++++++
+* No changes
+
+2.53.0
+++++++
+* `aaz`: Fix command name case issue for aaz command table lazy load (#27344)
+
+2.52.0
+++++++
+* `aaz`: Support `configured_default` for `AAZBaseArg` (#27205)
+
+2.51.0
+++++++
+* `aaz`: Add `--max-items` and `--next-token` for pagination (#26710)
+* `aaz`: Support paginating calculation (#26713)
+* `aaz`: Support blank input for compound argument types (#26870)
+* Drop client telemetry cache strategy (#26854)
+
+2.50.0
+++++++
+* `aaz`: Add short summary for `--location` when its default value comes from resource group (#26584)
+* `aaz`: Handle null property in error response (#26605)
+* `aaz`: Explicitly raise TypeError exception during LRO (#26634)
+* `aaz`: Parse and re-serialize query parameters within next link (#26768)
+
+2.49.0
+++++++
+* Dynamically install extensions without prompt when not in a TTY (#26219)
+
+2.48.1
+++++++
+* No changes
+
+2.48.0
+++++++
+* `aaz`: Support hidden secret properties of response in output (#26102)
+* `aaz`: Support `AAZPasswordArg` (#26134)
+* `aaz`: Support argument prompt input for simple type args (#26134)
+
+2.47.0
+++++++
+* `aaz`: Add support for changing subscription of `AAZCommand` in customization code (#25745)
+
+2.46.0
+++++++
+* Add announcement for WAM-based login (#25416)
+
+2.45.0
+++++++
+* `aaz`: Support AAZFileArg (#25075)
+* `aaz`: Support singular options of `AAZListArg` in shorthand syntax partial value expression (#25302)
+
+2.44.1
+++++++
+* No changes
+
+2.44.0
+++++++
+* `aaz`: Support subresource selector (#24827)
+* `aaz`: Improve generic update arguments to consist with previous behaviors (#24960)
+
+2.43.0
+++++++
+* `aaz`: Fix `has_value` function for list, dict and object arg types (#24625)
+* `aaz`: Support argument preview and experimental (#24637)
+* `aaz`: Add registered property for `AAZBaseArg` (#24640)
+* `aaz`: Add aazlist and aazdict args transform help functions (#24690)
+* `aaz`: Support camel case key in `AAZObjectType` (#24771)
+* Disable removing and updating system extension in Cloud Shell (#24361)
+
 2.42.0
 ++++++
 * `aaz`: Support `FreeFormDictType` and `FreeFormDictArg` (#24183)

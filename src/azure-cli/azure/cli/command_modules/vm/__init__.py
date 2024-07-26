@@ -31,6 +31,17 @@ class ComputeCommandsLoader(AzCommandsLoader):
 
     def load_command_table(self, args):
         from azure.cli.command_modules.vm.commands import load_command_table
+        from azure.cli.core.aaz import load_aaz_command_table
+        try:
+            from . import aaz
+        except ImportError:
+            aaz = None
+        if aaz:
+            load_aaz_command_table(
+                loader=self,
+                aaz_pkg_name=aaz.__name__,
+                args=args
+            )
         load_command_table(self, args)
         try:
             # When generated commands are required uncomment the following two lines.

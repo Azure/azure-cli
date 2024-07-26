@@ -55,6 +55,7 @@ def transform_sqlvm_output(result):
                               ('sqlImageOffer', result.sql_image_offer),
                               ('sqlImageSku', result.sql_image_sku),
                               ('sqlManagement', result.sql_management),
+                              ('leastPrivilegeMode', result.least_privilege_mode),
                               ('resourceGroup', resource_group),
                               ('sqlServerLicenseType', result.sql_server_license_type),
                               ('virtualMachineResourceId', result.virtual_machine_resource_id),
@@ -292,6 +293,10 @@ def format_server_configuration_management_settings(result):
     if settings:
         order_dict['additionalFeaturesServerConfigurations'] = settings
 
+    settings = format_azure_ad_authentication_settings(result.azure_ad_authentication_settings)
+    if settings:
+        order_dict['azureAdAuthenticationSettings'] = settings
+
     return order_dict
 
 
@@ -379,5 +384,19 @@ def format_assessment_schedule(result):
         order_dict['dayOfWeek'] = result.day_of_week
     if result.start_time is not None:
         order_dict['startTimeLocal'] = result.start_time
+
+    return order_dict
+
+
+def format_azure_ad_authentication_settings(result):
+    '''
+    Formats the AzureAD authentication object removing arguments that are empty
+    '''
+
+    from collections import OrderedDict
+    # Only display parameters that have content
+    order_dict = OrderedDict()
+    if result is not None and result.client_id is not None:
+        order_dict['clientId'] = result.client_id
 
     return order_dict

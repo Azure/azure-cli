@@ -1,53 +1,7 @@
 interactions:
 - request:
-    body: '{"location": "westus"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '22'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --location
-      User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.0 (Windows-10-10.0.22000-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001?api-version=2021-04-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001","name":"rg-cluster-000001","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '231'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 11 Jul 2022 09:45:12 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: '{"location": "westus", "sku": {"name": "Dedicated", "capacity": 2}, "properties":
-      {"supportsScaling": true}}'
+    body: '{"location": "eastus", "properties": {"supportsScaling": true}, "sku":
+      {"capacity": 2, "name": "Dedicated"}}'
     headers:
       Accept:
       - application/json
@@ -64,27 +18,27 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"status":"Unknown","supportsScaling":true},"sku":{"name":"Dedicated","capacity":2}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","properties":{"createdAt":"2023-04-10T05:39:52.5987799Z","updatedAt":"2023-04-10T05:39:52.5987799Z","provisioningState":"Creating","status":"Creating","supportsScaling":true,"metricId":""},"sku":{"name":"Dedicated","capacity":2}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '348'
+      - '477'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:45:25 GMT
+      - Mon, 10 Apr 2023 05:39:52 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=false&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=false&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
       pragma:
       - no-cache
       server:
@@ -94,7 +48,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 202
       message: Accepted
@@ -112,21 +66,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:45:56 GMT
+      - Mon, 10 Apr 2023 05:40:23 GMT
       expires:
       - '-1'
       pragma:
@@ -158,21 +112,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:46:26 GMT
+      - Mon, 10 Apr 2023 05:40:54 GMT
       expires:
       - '-1'
       pragma:
@@ -204,21 +158,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:46:57 GMT
+      - Mon, 10 Apr 2023 05:41:24 GMT
       expires:
       - '-1'
       pragma:
@@ -250,21 +204,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:47:26 GMT
+      - Mon, 10 Apr 2023 05:41:55 GMT
       expires:
       - '-1'
       pragma:
@@ -296,21 +250,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:47:57 GMT
+      - Mon, 10 Apr 2023 05:42:25 GMT
       expires:
       - '-1'
       pragma:
@@ -342,21 +296,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:48:27 GMT
+      - Mon, 10 Apr 2023 05:42:55 GMT
       expires:
       - '-1'
       pragma:
@@ -388,21 +342,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:48:57 GMT
+      - Mon, 10 Apr 2023 05:43:25 GMT
       expires:
       - '-1'
       pragma:
@@ -434,21 +388,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:49:28 GMT
+      - Mon, 10 Apr 2023 05:43:55 GMT
       expires:
       - '-1'
       pragma:
@@ -480,21 +434,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:49:59 GMT
+      - Mon, 10 Apr 2023 05:44:26 GMT
       expires:
       - '-1'
       pragma:
@@ -526,21 +480,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:50:29 GMT
+      - Mon, 10 Apr 2023 05:44:56 GMT
       expires:
       - '-1'
       pragma:
@@ -572,21 +526,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:51:00 GMT
+      - Mon, 10 Apr 2023 05:45:27 GMT
       expires:
       - '-1'
       pragma:
@@ -618,21 +572,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:51:31 GMT
+      - Mon, 10 Apr 2023 05:45:57 GMT
       expires:
       - '-1'
       pragma:
@@ -664,21 +618,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:52:01 GMT
+      - Mon, 10 Apr 2023 05:46:29 GMT
       expires:
       - '-1'
       pragma:
@@ -710,21 +664,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:52:31 GMT
+      - Mon, 10 Apr 2023 05:46:59 GMT
       expires:
       - '-1'
       pragma:
@@ -756,21 +710,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:53:02 GMT
+      - Mon, 10 Apr 2023 05:47:29 GMT
       expires:
       - '-1'
       pragma:
@@ -802,21 +756,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:53:31 GMT
+      - Mon, 10 Apr 2023 06:12:52 GMT
       expires:
       - '-1'
       pragma:
@@ -848,21 +802,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:54:02 GMT
+      - Mon, 10 Apr 2023 06:13:23 GMT
       expires:
       - '-1'
       pragma:
@@ -894,21 +848,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:54:32 GMT
+      - Mon, 10 Apr 2023 06:13:53 GMT
       expires:
       - '-1'
       pragma:
@@ -940,21 +894,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:55:03 GMT
+      - Mon, 10 Apr 2023 06:14:24 GMT
       expires:
       - '-1'
       pragma:
@@ -986,21 +940,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:55:35 GMT
+      - Mon, 10 Apr 2023 06:14:55 GMT
       expires:
       - '-1'
       pragma:
@@ -1032,21 +986,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:56:05 GMT
+      - Mon, 10 Apr 2023 06:15:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1078,21 +1032,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:56:35 GMT
+      - Mon, 10 Apr 2023 06:15:55 GMT
       expires:
       - '-1'
       pragma:
@@ -1124,21 +1078,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:57:05 GMT
+      - Mon, 10 Apr 2023 06:16:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1170,21 +1124,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:57:36 GMT
+      - Mon, 10 Apr 2023 06:16:55 GMT
       expires:
       - '-1'
       pragma:
@@ -1216,21 +1170,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:58:06 GMT
+      - Mon, 10 Apr 2023 06:17:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1262,21 +1216,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:58:36 GMT
+      - Mon, 10 Apr 2023 06:17:58 GMT
       expires:
       - '-1'
       pragma:
@@ -1308,21 +1262,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:59:07 GMT
+      - Mon, 10 Apr 2023 06:18:27 GMT
       expires:
       - '-1'
       pragma:
@@ -1354,21 +1308,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 09:59:37 GMT
+      - Mon, 10 Apr 2023 06:18:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1400,21 +1354,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:00:08 GMT
+      - Mon, 10 Apr 2023 06:19:28 GMT
       expires:
       - '-1'
       pragma:
@@ -1446,21 +1400,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:00:39 GMT
+      - Mon, 10 Apr 2023 06:19:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1492,21 +1446,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:01:10 GMT
+      - Mon, 10 Apr 2023 06:20:29 GMT
       expires:
       - '-1'
       pragma:
@@ -1538,21 +1492,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:01:40 GMT
+      - Mon, 10 Apr 2023 06:21:00 GMT
       expires:
       - '-1'
       pragma:
@@ -1584,21 +1538,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:02:11 GMT
+      - Mon, 10 Apr 2023 06:21:30 GMT
       expires:
       - '-1'
       pragma:
@@ -1630,21 +1584,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:02:41 GMT
+      - Mon, 10 Apr 2023 06:22:01 GMT
       expires:
       - '-1'
       pragma:
@@ -1676,21 +1630,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:03:12 GMT
+      - Mon, 10 Apr 2023 06:22:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1722,21 +1676,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:03:42 GMT
+      - Mon, 10 Apr 2023 06:23:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1768,21 +1722,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:04:12 GMT
+      - Mon, 10 Apr 2023 06:23:32 GMT
       expires:
       - '-1'
       pragma:
@@ -1814,21 +1768,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:04:42 GMT
+      - Mon, 10 Apr 2023 06:24:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1860,21 +1814,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:05:13 GMT
+      - Mon, 10 Apr 2023 06:24:33 GMT
       expires:
       - '-1'
       pragma:
@@ -1906,21 +1860,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:05:44 GMT
+      - Mon, 10 Apr 2023 06:25:04 GMT
       expires:
       - '-1'
       pragma:
@@ -1952,21 +1906,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:06:15 GMT
+      - Mon, 10 Apr 2023 06:25:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1998,21 +1952,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:06:45 GMT
+      - Mon, 10 Apr 2023 06:26:04 GMT
       expires:
       - '-1'
       pragma:
@@ -2044,21 +1998,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-selfserve-000002","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '110'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:07:15 GMT
+      - Mon, 10 Apr 2023 06:27:09 GMT
       expires:
       - '-1'
       pragma:
@@ -2090,113 +2044,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --supports-scaling --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","properties":{"createdAt":"2023-04-10T05:39:52.7588571Z","updatedAt":"2023-04-10T06:26:32.4657303Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51030"},"sku":{"name":"Dedicated","capacity":2}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:07:45 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs cluster create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --location --supports-scaling --capacity
-      User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"status":"Succeeded"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '22'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 11 Jul 2022 10:08:16 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs cluster create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --location --supports-scaling --capacity
-      User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T09:45:22.7560168Z","updatedAt":"2022-07-11T10:07:49.4101573Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51004"},"sku":{"name":"Dedicated","capacity":2}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '461'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 11 Jul 2022 10:08:16 GMT
+      - Mon, 10 Apr 2023 06:27:12 GMT
       expires:
       - '-1'
       pragma:
@@ -2228,21 +2090,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T09:45:22.7560168Z","updatedAt":"2022-07-11T10:07:49.4101573Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51004"},"sku":{"name":"Dedicated","capacity":2}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","properties":{"createdAt":"2023-04-10T05:39:52.7588571Z","updatedAt":"2023-04-10T06:26:32.4657303Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51030"},"sku":{"name":"Dedicated","capacity":2}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '461'
+      - '490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:08:19 GMT
+      - Mon, 10 Apr 2023 06:27:14 GMT
       expires:
       - '-1'
       pragma:
@@ -2261,9 +2123,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "sku": {"name": "Standard", "tier": "Standard"},
-      "properties": {"clusterArmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002",
-      "publicNetworkAccess": "Enabled"}}'
+    body: '{"identity": {"type": "None"}, "location": "eastus", "properties": {"clusterArmId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002"},
+      "sku": {"name": "Standard", "tier": "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -2274,28 +2136,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '290'
+      - '283'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --location --sku --cluster-arm-id
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2022-07-11T10:08:25.54Z","updatedAt":"2022-07-11T10:08:25.54Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2023-04-10T06:27:22.387Z","updatedAt":"2023-04-10T06:27:22.387Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '953'
+      - '949'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:08:27 GMT
+      - Mon, 10 Apr 2023 06:27:24 GMT
       expires:
       - '-1'
       pragma:
@@ -2332,22 +2194,22 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --sku --cluster-arm-id
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2022-07-11T10:08:25.54Z","updatedAt":"2022-07-11T10:08:25.54Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2023-04-10T06:27:22.387Z","updatedAt":"2023-04-10T06:27:22.387Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '953'
+      - '949'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:08:58 GMT
+      - Mon, 10 Apr 2023 06:27:55 GMT
       expires:
       - '-1'
       pragma:
@@ -2382,181 +2244,31 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --sku --cluster-arm-id
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2022-07-11T10:08:25.54Z","updatedAt":"2022-07-11T10:08:25.54Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2023-04-10T06:27:22.387Z","updatedAt":"2023-04-10T06:28:12.743Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '953'
+      - '947'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:09:30 GMT
+      - Mon, 10 Apr 2023 06:28:25 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --location --sku --cluster-arm-id
-      User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2022-07-11T10:08:25.54Z","updatedAt":"2022-07-11T10:08:25.54Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Activating"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '953'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 11 Jul 2022 10:10:02 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --location --sku --cluster-arm-id
-      User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2022-07-11T10:08:25.54Z","updatedAt":"2022-07-11T10:10:07.08Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '951'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 11 Jul 2022 10:10:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --location --sku --cluster-arm-id
-      User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2022-07-11T10:08:25.54Z","updatedAt":"2022-07-11T10:10:07.08Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '951'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 11 Jul 2022 10:10:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -2582,21 +2294,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T09:45:22.7560168Z","updatedAt":"2022-07-11T10:07:49.4101573Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51004"},"sku":{"name":"Dedicated","capacity":2}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","properties":{"createdAt":"2023-04-10T05:39:52.7588571Z","updatedAt":"2023-04-10T06:26:32.4657303Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51030"},"sku":{"name":"Dedicated","capacity":2}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '461'
+      - '490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:10:35 GMT
+      - Mon, 10 Apr 2023 06:28:29 GMT
       expires:
       - '-1'
       pragma:
@@ -2615,8 +2327,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "sku": {"name": "Dedicated", "capacity": 1}, "properties":
-      {"supportsScaling": true}}'
+    body: '{"location": "eastus", "properties": {"supportsScaling": true}, "sku":
+      {"capacity": 1, "name": "Dedicated"}}'
     headers:
       Accept:
       - application/json
@@ -2633,27 +2345,27 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
-    method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2022-01-01-preview
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"status":"Unknown","supportsScaling":true},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","properties":{"createdAt":"2023-04-10T05:39:52.7588571Z","updatedAt":"2023-04-10T06:26:32.4657303Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51030"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '348'
+      - '490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:10:38 GMT
+      - Mon, 10 Apr 2023 06:28:30 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=false&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=false&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
       pragma:
       - no-cache
       server:
@@ -2681,21 +2393,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:11:08 GMT
+      - Mon, 10 Apr 2023 06:29:03 GMT
       expires:
       - '-1'
       pragma:
@@ -2727,21 +2439,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:11:39 GMT
+      - Mon, 10 Apr 2023 06:29:33 GMT
       expires:
       - '-1'
       pragma:
@@ -2773,21 +2485,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:12:10 GMT
+      - Mon, 10 Apr 2023 06:30:03 GMT
       expires:
       - '-1'
       pragma:
@@ -2819,21 +2531,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:12:40 GMT
+      - Mon, 10 Apr 2023 06:30:33 GMT
       expires:
       - '-1'
       pragma:
@@ -2865,21 +2577,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:13:09 GMT
+      - Mon, 10 Apr 2023 06:31:04 GMT
       expires:
       - '-1'
       pragma:
@@ -2911,21 +2623,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:13:41 GMT
+      - Mon, 10 Apr 2023 06:31:34 GMT
       expires:
       - '-1'
       pragma:
@@ -2957,21 +2669,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:14:11 GMT
+      - Mon, 10 Apr 2023 06:32:05 GMT
       expires:
       - '-1'
       pragma:
@@ -3003,21 +2715,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:14:41 GMT
+      - Mon, 10 Apr 2023 06:32:35 GMT
       expires:
       - '-1'
       pragma:
@@ -3049,21 +2761,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:15:11 GMT
+      - Mon, 10 Apr 2023 06:33:05 GMT
       expires:
       - '-1'
       pragma:
@@ -3095,21 +2807,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:15:42 GMT
+      - Mon, 10 Apr 2023 06:33:35 GMT
       expires:
       - '-1'
       pragma:
@@ -3141,21 +2853,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:16:12 GMT
+      - Mon, 10 Apr 2023 06:34:07 GMT
       expires:
       - '-1'
       pragma:
@@ -3187,21 +2899,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:16:43 GMT
+      - Mon, 10 Apr 2023 06:34:38 GMT
       expires:
       - '-1'
       pragma:
@@ -3233,21 +2945,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:17:14 GMT
+      - Mon, 10 Apr 2023 06:35:07 GMT
       expires:
       - '-1'
       pragma:
@@ -3279,21 +2991,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:17:44 GMT
+      - Mon, 10 Apr 2023 06:35:38 GMT
       expires:
       - '-1'
       pragma:
@@ -3325,21 +3037,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:18:15 GMT
+      - Mon, 10 Apr 2023 06:36:08 GMT
       expires:
       - '-1'
       pragma:
@@ -3371,21 +3083,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:18:45 GMT
+      - Mon, 10 Apr 2023 06:36:38 GMT
       expires:
       - '-1'
       pragma:
@@ -3417,21 +3129,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:19:15 GMT
+      - Mon, 10 Apr 2023 06:37:09 GMT
       expires:
       - '-1'
       pragma:
@@ -3463,21 +3175,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:19:45 GMT
+      - Mon, 10 Apr 2023 06:37:39 GMT
       expires:
       - '-1'
       pragma:
@@ -3509,21 +3221,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:20:16 GMT
+      - Mon, 10 Apr 2023 06:38:09 GMT
       expires:
       - '-1'
       pragma:
@@ -3555,21 +3267,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:20:46 GMT
+      - Mon, 10 Apr 2023 06:38:40 GMT
       expires:
       - '-1'
       pragma:
@@ -3601,21 +3313,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:21:16 GMT
+      - Mon, 10 Apr 2023 06:39:11 GMT
       expires:
       - '-1'
       pragma:
@@ -3647,21 +3359,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:21:47 GMT
+      - Mon, 10 Apr 2023 06:39:41 GMT
       expires:
       - '-1'
       pragma:
@@ -3693,21 +3405,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:22:17 GMT
+      - Mon, 10 Apr 2023 06:40:12 GMT
       expires:
       - '-1'
       pragma:
@@ -3739,21 +3451,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:22:48 GMT
+      - Mon, 10 Apr 2023 06:40:42 GMT
       expires:
       - '-1'
       pragma:
@@ -3785,21 +3497,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:23:18 GMT
+      - Mon, 10 Apr 2023 06:41:13 GMT
       expires:
       - '-1'
       pragma:
@@ -3831,21 +3543,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:23:49 GMT
+      - Mon, 10 Apr 2023 06:41:43 GMT
       expires:
       - '-1'
       pragma:
@@ -3877,21 +3589,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:24:19 GMT
+      - Mon, 10 Apr 2023 06:42:13 GMT
       expires:
       - '-1'
       pragma:
@@ -3923,21 +3635,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:24:50 GMT
+      - Mon, 10 Apr 2023 06:42:44 GMT
       expires:
       - '-1'
       pragma:
@@ -3969,21 +3681,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:25:19 GMT
+      - Mon, 10 Apr 2023 06:43:14 GMT
       expires:
       - '-1'
       pragma:
@@ -4015,21 +3727,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:25:50 GMT
+      - Mon, 10 Apr 2023 06:43:44 GMT
       expires:
       - '-1'
       pragma:
@@ -4061,21 +3773,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:26:20 GMT
+      - Mon, 10 Apr 2023 06:44:16 GMT
       expires:
       - '-1'
       pragma:
@@ -4107,21 +3819,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:26:50 GMT
+      - Mon, 10 Apr 2023 06:44:46 GMT
       expires:
       - '-1'
       pragma:
@@ -4153,21 +3865,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:27:21 GMT
+      - Mon, 10 Apr 2023 06:45:16 GMT
       expires:
       - '-1'
       pragma:
@@ -4199,21 +3911,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:27:51 GMT
+      - Mon, 10 Apr 2023 06:45:46 GMT
       expires:
       - '-1'
       pragma:
@@ -4245,21 +3957,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:28:21 GMT
+      - Mon, 10 Apr 2023 06:46:16 GMT
       expires:
       - '-1'
       pragma:
@@ -4291,21 +4003,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:28:51 GMT
+      - Mon, 10 Apr 2023 06:46:47 GMT
       expires:
       - '-1'
       pragma:
@@ -4337,21 +4049,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:29:22 GMT
+      - Mon, 10 Apr 2023 06:47:18 GMT
       expires:
       - '-1'
       pragma:
@@ -4383,21 +4095,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:29:52 GMT
+      - Mon, 10 Apr 2023 06:47:48 GMT
       expires:
       - '-1'
       pragma:
@@ -4429,21 +4141,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:30:23 GMT
+      - Mon, 10 Apr 2023 06:48:18 GMT
       expires:
       - '-1'
       pragma:
@@ -4475,21 +4187,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:30:55 GMT
+      - Mon, 10 Apr 2023 06:48:48 GMT
       expires:
       - '-1'
       pragma:
@@ -4521,21 +4233,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
   response:
     body:
-      string: '{"status":"Succeeded"}'
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '22'
+      - '63'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:31:25 GMT
+      - Mon, 10 Apr 2023 06:49:20 GMT
       expires:
       - '-1'
       pragma:
@@ -4567,21 +4279,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --capacity
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T09:45:22.7560168Z","updatedAt":"2022-07-11T10:31:19.3219496Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51004"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","properties":{"createdAt":"2023-04-10T05:39:52.7588571Z","updatedAt":"2023-04-10T06:48:52.7856903Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51030"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '461'
+      - '490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:31:25 GMT
+      - Mon, 10 Apr 2023 06:49:23 GMT
       expires:
       - '-1'
       pragma:
@@ -4613,21 +4325,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T09:45:22.7560168Z","updatedAt":"2022-07-11T10:31:19.3219496Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51004"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","properties":{"createdAt":"2023-04-10T05:39:52.7588571Z","updatedAt":"2023-04-10T06:48:52.7856903Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51030"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '461'
+      - '490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:31:28 GMT
+      - Mon, 10 Apr 2023 06:49:25 GMT
       expires:
       - '-1'
       pragma:
@@ -4659,21 +4371,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002/namespaces?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002/namespaces?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.Eventhub/namespaces/eventhubs-ns1-000003"}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.Eventhub/namespaces/eventhubs-ns1-000003"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '166'
+      - '163'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:31:31 GMT
+      - Mon, 10 Apr 2023 06:49:27 GMT
       expires:
       - '-1'
       pragma:
@@ -4705,21 +4417,114 @@ interactions:
       ParameterSetName:
       - --resource-group
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/manojprasad-rampup/providers/Microsoft.EventHub/clusters/manojprasad-eh-cluster","name":"manojprasad-eh-cluster","type":"Microsoft.EventHub/Clusters","location":"westus","tags":{},"properties":{"createdAt":"2022-06-09T16:38:29.5028531Z","updatedAt":"2022-06-28T01:10:44.5261254Z","status":"Deleting","supportsScaling":false,"metricId":"PROD-BY3-574"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T09:45:22.7560168Z","updatedAt":"2022-07-11T10:31:19.3219496Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51004"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-chzstck3t/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-44ab","name":"eventhubs-selfserve-44ab","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T07:37:37.8296187Z","updatedAt":"2022-07-11T08:00:04.8206499Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51002"},"sku":{"name":"Dedicated","capacity":2}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-77mni2kdy/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-wl4h","name":"eventhubs-selfserve-wl4h","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T08:42:46.8033194Z","updatedAt":"2022-07-11T09:28:14.9647503Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51009"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/framborg/providers/Microsoft.EventHub/clusters/frambowestus","name":"frambowestus","type":"Microsoft.EventHub/Clusters","location":"westus","tags":{},"properties":{"createdAt":"2022-06-20T22:00:30.7134585Z","updatedAt":"2022-06-20T22:00:35.5885209Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51007"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-rqbrjini7/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-uvyb","name":"eventhubs-selfserve-uvyb","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T06:53:26.5616982Z","updatedAt":"2022-07-11T07:26:02.2029184Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51006"},"sku":{"name":"Dedicated","capacity":2}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-5hl5q5ztd/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-pubm","name":"eventhubs-selfserve-pubm","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T05:57:53.2217773Z","updatedAt":"2022-07-11T06:49:17.1262781Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51008"},"sku":{"name":"Dedicated","capacity":2}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","properties":{"createdAt":"2023-04-10T05:39:52.7588571Z","updatedAt":"2023-04-10T06:48:52.7856903Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51030"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clusqjqklv","name":"eventhubs-clusqjqklv","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"key2":"val2"},"properties":{"createdAt":"2023-04-10T05:19:20.5441154Z","updatedAt":"2023-04-10T05:21:16.1782146Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51026"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clusyv3zsf","name":"eventhubs-clusyv3zsf","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"key2":"val2"},"properties":{"createdAt":"2023-04-10T05:10:33.1003731Z","updatedAt":"2023-04-10T05:12:31.4064413Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51012"},"sku":{"name":"Dedicated","capacity":1}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3218'
+      - '1522'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 11 Jul 2022 10:31:32 GMT
+      - Mon, 10 Apr 2023 06:49:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - ''
+      - ''
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --resource-group --name --yes
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2023-01-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 10 Apr 2023 06:49:37 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=false&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
+  response:
+    body:
+      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '63'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 10 Apr 2023 06:50:09 GMT
       expires:
       - '-1'
       pragma:
