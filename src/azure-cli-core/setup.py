@@ -59,7 +59,7 @@ DEPENDENCIES = [
     'paramiko>=2.0.8,<4.0.0',
     'pkginfo>=1.5.0.1',
     # psutil can't install on cygwin: https://github.com/Azure/azure-cli/issues/9399
-    'psutil~=5.9; sys_platform != "cygwin"',
+    'psutil>=5.9; sys_platform != "cygwin"',
     'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'requests[socks]'
