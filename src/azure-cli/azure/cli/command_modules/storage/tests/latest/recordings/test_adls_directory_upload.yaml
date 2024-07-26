@@ -1,0 +1,825 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-core/1.28.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2023-05-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2024-07-26T09:30:55.3330233Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2024-07-26T09:30:55.3330233Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Fri, 26 Jul 2024 09:31:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/b666433c-0038-433d-923f-d4f5b713735a
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11997'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show-connection-string
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-core/1.28.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2023-05-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2024-07-26T09:30:55.3330233Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2024-07-26T09:30:55.3330233Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Fri, 26 Jul 2024 09:31:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/af33dcf7-c464-4c9c-af10-2bd86da4719e
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show-connection-string
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-core/1.28.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-05-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2024-07-26T09:30:55.3330233Z","key2":"2024-07-26T09:30:55.3330233Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"isHnsEnabled":true,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2024-07-26T09:30:56.7236850Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2024-07-26T09:30:56.7236850Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2024-07-26T09:30:55.2236475Z","primaryEndpoints":{"dfs":"https://clitest000002.dfs.core.windows.net/","web":"https://clitest000002.z22.web.core.windows.net/","blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1470'
+      content-type:
+      - application/json
+      date:
+      - Fri, 26 Jul 2024 09:31:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-storage-dfs/12.9.0b1 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 26 Jul 2024 09:31:27 GMT
+      x-ms-version:
+      - '2021-08-06'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/testfilesystem?restype=container
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Jul 2024 09:31:28 GMT
+      etag:
+      - '"0x8DCAD55BA146B7D"'
+      last-modified:
+      - Fri, 26 Jul 2024 09:31:28 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2021-08-06'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs directory create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -f --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-storage-dfs/12.9.0b1 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 26 Jul 2024 09:31:28 GMT
+      x-ms-version:
+      - '2021-08-06'
+    method: PUT
+    uri: https://clitest000002.dfs.core.windows.net/testfilesystem/testdir?resource=directory
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Jul 2024 09:31:29 GMT
+      etag:
+      - '"0x8DCAD55BAEF8750"'
+      last-modified:
+      - Fri, 26 Jul 2024 09:31:29 GMT
+      server:
+      - Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2021-08-06'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs directory upload
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -f -d -s --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-storage-dfs/12.9.0b1 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 26 Jul 2024 09:31:30 GMT
+      x-ms-version:
+      - '2021-08-06'
+    method: HEAD
+    uri: https://clitest000002.blob.core.windows.net/testfilesystem/testdir
+  response:
+    body:
+      string: ''
+    headers:
+      accept-ranges:
+      - bytes
+      content-length:
+      - '0'
+      content-type:
+      - application/octet-stream
+      date:
+      - Fri, 26 Jul 2024 09:31:31 GMT
+      etag:
+      - '"0x8DCAD55BAEF8750"'
+      last-modified:
+      - Fri, 26 Jul 2024 09:31:29 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-access-tier:
+      - Hot
+      x-ms-access-tier-inferred:
+      - 'true'
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-creation-time:
+      - Fri, 26 Jul 2024 09:31:29 GMT
+      x-ms-group:
+      - $superuser
+      x-ms-lease-state:
+      - available
+      x-ms-lease-status:
+      - unlocked
+      x-ms-meta-hdi_isfolder:
+      - 'true'
+      x-ms-owner:
+      - $superuser
+      x-ms-permissions:
+      - rwxr-x---
+      x-ms-resource-type:
+      - directory
+      x-ms-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2021-08-06'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs file list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -f --path --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-storage-dfs/12.9.0b1 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 26 Jul 2024 09:31:36 GMT
+      x-ms-version:
+      - '2021-08-06'
+    method: GET
+    uri: https://clitest000002.dfs.core.windows.net/testfilesystem?resource=filesystem&directory=testdir&recursive=true&maxResults=5000
+  response:
+    body:
+      string: '{"paths":[{"contentLength":"87","creationTime":"133664598940060216","etag":"0x8DCAD55BDAF9C14","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:34 GMT","name":"testdir/readme","owner":"$superuser","permissions":"rw-r-----"}]}
+
+        '
+    headers:
+      content-type:
+      - application/json;charset=utf-8
+      date:
+      - Fri, 26 Jul 2024 09:31:37 GMT
+      server:
+      - Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-08-06'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs directory upload
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -f -d -s --recursive --account-name --auth-mode
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-storage-dfs/12.9.0b1 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 26 Jul 2024 09:31:38 GMT
+      x-ms-version:
+      - '2021-08-06'
+    method: HEAD
+    uri: https://clitest000002.blob.core.windows.net/testfilesystem/testdir
+  response:
+    body:
+      string: ''
+    headers:
+      date:
+      - Fri, 26 Jul 2024 09:31:38 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      www-authenticate:
+      - Bearer authorization_uri=https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/oauth2/authorize
+        resource_id=https://storage.azure.com
+      x-ms-error-code:
+      - NoAuthenticationInformation
+      x-ms-version:
+      - '2021-08-06'
+    status:
+      code: 401
+      message: Server failed to authenticate the request. Please refer to the information
+        in the www-authenticate header.
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs file list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -f --path --account-name --auth-mode
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-storage-dfs/12.9.0b1 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 26 Jul 2024 09:31:54 GMT
+      x-ms-version:
+      - '2021-08-06'
+    method: GET
+    uri: https://clitest000002.dfs.core.windows.net/testfilesystem?resource=filesystem&directory=testdir&recursive=true&maxResults=5000
+  response:
+    body:
+      string: '{"paths":[{"contentLength":"0","creationTime":"133664599084488216","etag":"0x8DCAD55C5F0D618","expiryTime":"0","group":"$superuser","isDirectory":"true","lastModified":"Fri,
+        26 Jul 2024 09:31:48 GMT","name":"testdir/apple","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rwxr-x---"},{"contentLength":"133","creationTime":"133664599111225012","etag":"0x8DCAD55C8064780","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:51 GMT","name":"testdir/apple/file_0","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599118612640","etag":"0x8DCAD55C8732280","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:52 GMT","name":"testdir/apple/file_1","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599121973056","etag":"0x8DCAD55C89B1458","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:52 GMT","name":"testdir/apple/file_2","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599108908008","etag":"0x8DCAD55C7DD5010","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:51 GMT","name":"testdir/apple/file_3","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599089498472","etag":"0x8DCAD55C71BC1DC","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:50 GMT","name":"testdir/apple/file_4","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599105809240","etag":"0x8DCAD55C790D4DC","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:51 GMT","name":"testdir/apple/file_5","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599113888676","etag":"0x8DCAD55C8217A78","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:52 GMT","name":"testdir/apple/file_6","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599098425240","etag":"0x8DCAD55C7437618","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:50 GMT","name":"testdir/apple/file_7","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599128594980","etag":"0x8DCAD55C8F0BA68","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:53 GMT","name":"testdir/apple/file_8","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599123972492","etag":"0x8DCAD55C8A091B8","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:52 GMT","name":"testdir/apple/file_9","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"87","creationTime":"133664598940060216","etag":"0x8DCAD55BDAF9C14","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:34 GMT","name":"testdir/readme","owner":"$superuser","permissions":"rw-r-----"}]}
+
+        '
+    headers:
+      content-type:
+      - application/json;charset=utf-8
+      date:
+      - Fri, 26 Jul 2024 09:31:54 GMT
+      server:
+      - Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-08-06'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs directory upload
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -f -d -s --recursive --connection-string
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-storage-dfs/12.9.0b1 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 26 Jul 2024 09:31:55 GMT
+      x-ms-version:
+      - '2021-08-06'
+    method: HEAD
+    uri: https://clitest000002.blob.core.windows.net/testfilesystem/testdir
+  response:
+    body:
+      string: ''
+    headers:
+      accept-ranges:
+      - bytes
+      content-length:
+      - '0'
+      content-type:
+      - application/octet-stream
+      date:
+      - Fri, 26 Jul 2024 09:31:56 GMT
+      etag:
+      - '"0x8DCAD55BAEF8750"'
+      last-modified:
+      - Fri, 26 Jul 2024 09:31:29 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-access-tier:
+      - Hot
+      x-ms-access-tier-inferred:
+      - 'true'
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-creation-time:
+      - Fri, 26 Jul 2024 09:31:29 GMT
+      x-ms-group:
+      - $superuser
+      x-ms-lease-state:
+      - available
+      x-ms-lease-status:
+      - unlocked
+      x-ms-meta-hdi_isfolder:
+      - 'true'
+      x-ms-owner:
+      - $superuser
+      x-ms-permissions:
+      - rwxr-x---
+      x-ms-resource-type:
+      - directory
+      x-ms-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2021-08-06'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs file list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -f --path --connection-string
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-storage-dfs/12.9.0b1 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 26 Jul 2024 09:32:06 GMT
+      x-ms-version:
+      - '2021-08-06'
+    method: GET
+    uri: https://clitest000002.dfs.core.windows.net/testfilesystem?resource=filesystem&directory=testdir&recursive=true&maxResults=5000
+  response:
+    body:
+      string: '{"paths":[{"contentLength":"0","creationTime":"133664599084488216","etag":"0x8DCAD55C5F0D618","expiryTime":"0","group":"$superuser","isDirectory":"true","lastModified":"Fri,
+        26 Jul 2024 09:31:48 GMT","name":"testdir/apple","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rwxr-x---"},{"contentLength":"133","creationTime":"133664599111225012","etag":"0x8DCAD55C8064780","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:51 GMT","name":"testdir/apple/file_0","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599118612640","etag":"0x8DCAD55C8732280","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:52 GMT","name":"testdir/apple/file_1","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599121973056","etag":"0x8DCAD55C89B1458","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:52 GMT","name":"testdir/apple/file_2","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599108908008","etag":"0x8DCAD55C7DD5010","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:51 GMT","name":"testdir/apple/file_3","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599089498472","etag":"0x8DCAD55C71BC1DC","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:50 GMT","name":"testdir/apple/file_4","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599105809240","etag":"0x8DCAD55C790D4DC","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:51 GMT","name":"testdir/apple/file_5","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599113888676","etag":"0x8DCAD55C8217A78","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:52 GMT","name":"testdir/apple/file_6","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599098425240","etag":"0x8DCAD55C7437618","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:50 GMT","name":"testdir/apple/file_7","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599128594980","etag":"0x8DCAD55C8F0BA68","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:53 GMT","name":"testdir/apple/file_8","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"133","creationTime":"133664599123972492","etag":"0x8DCAD55C8A091B8","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:52 GMT","name":"testdir/apple/file_9","owner":"a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599237806880","etag":"0x8DCAD55CF635DF4","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:04 GMT","name":"testdir/file_0","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599229624652","etag":"0x8DCAD55CF15D4E0","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:03 GMT","name":"testdir/file_1","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599203066364","etag":"0x8DCAD55CDF731CC","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:01 GMT","name":"testdir/file_2","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599220907220","etag":"0x8DCAD55CE725050","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:02 GMT","name":"testdir/file_3","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599224614116","etag":"0x8DCAD55CEBE5EBC","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:03 GMT","name":"testdir/file_4","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599195715432","etag":"0x8DCAD55CD7424E8","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:01 GMT","name":"testdir/file_5","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599232126652","etag":"0x8DCAD55CF3BC704","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:04 GMT","name":"testdir/file_6","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599215774380","etag":"0x8DCAD55CE1FD814","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:02 GMT","name":"testdir/file_7","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599227121160","etag":"0x8DCAD55CEE87340","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:03 GMT","name":"testdir/file_8","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599242774084","etag":"0x8DCAD55CFAF8338","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:04 GMT","name":"testdir/file_9","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"87","creationTime":"133664598940060216","etag":"0x8DCAD55BDAF9C14","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:31:34 GMT","name":"testdir/readme","owner":"$superuser","permissions":"rw-r-----"}]}
+
+        '
+    headers:
+      content-type:
+      - application/json;charset=utf-8
+      date:
+      - Fri, 26 Jul 2024 09:32:07 GMT
+      server:
+      - Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-08-06'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs directory upload
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -f -d -s --recursive --account-name --sas-token
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-storage-dfs/12.9.0b1 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 26 Jul 2024 09:32:08 GMT
+      x-ms-version:
+      - '2021-08-06'
+    method: HEAD
+    uri: https://clitest000002.blob.core.windows.net/testfilesystem/testdir/subdir?se=2024-07-26T10%3A31Z&sp=racwdl&spr=https&sv=2022-11-02&sr=c&sig=bAAK30YYTT4YxG9FyVDHWCTgKnuvn8MBqy8JC6EEjE8%3D
+  response:
+    body:
+      string: ''
+    headers:
+      date:
+      - Fri, 26 Jul 2024 09:32:08 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-error-code:
+      - BlobNotFound
+      x-ms-version:
+      - '2021-08-06'
+    status:
+      code: 404
+      message: The specified blob does not exist.
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs file list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -f --path --account-name --sas-token
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-storage-dfs/12.9.0b1 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 26 Jul 2024 09:32:16 GMT
+      x-ms-version:
+      - '2021-08-06'
+    method: GET
+    uri: https://clitest000002.dfs.core.windows.net/testfilesystem?resource=filesystem&directory=testdir%2Fsubdir&recursive=true&maxResults=5000&se=2024-07-26T10%3A31Z&sp=racwdl&spr=https&sv=2022-11-02&sr=c&sig=bAAK30YYTT4YxG9FyVDHWCTgKnuvn8MBqy8JC6EEjE8%3D
+  response:
+    body:
+      string: '{"paths":[{"contentLength":"134","creationTime":"133664599325997176","etag":"0x8DCAD55D4CE676C","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:13 GMT","name":"testdir/subdir/file_0","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599321097684","etag":"0x8DCAD55D47EEF98","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:12 GMT","name":"testdir/subdir/file_1","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599326026388","etag":"0x8DCAD55D4CC2410","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:13 GMT","name":"testdir/subdir/file_2","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599326015996","etag":"0x8DCAD55D4CE5684","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:13 GMT","name":"testdir/subdir/file_3","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599326063660","etag":"0x8DCAD55D4F6E3B4","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:13 GMT","name":"testdir/subdir/file_4","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599326000180","etag":"0x8DCAD55D4F7E3E8","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:13 GMT","name":"testdir/subdir/file_5","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599318602960","etag":"0x8DCAD55D47E9924","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:12 GMT","name":"testdir/subdir/file_6","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599323544948","etag":"0x8DCAD55D4C9B9D4","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:13 GMT","name":"testdir/subdir/file_7","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599325996292","etag":"0x8DCAD55D4CAED0C","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:13 GMT","name":"testdir/subdir/file_8","owner":"$superuser","permissions":"rw-r-----"},{"contentLength":"134","creationTime":"133664599325978992","etag":"0x8DCAD55D4F6A400","expiryTime":"0","group":"$superuser","lastModified":"Fri,
+        26 Jul 2024 09:32:13 GMT","name":"testdir/subdir/file_9","owner":"$superuser","permissions":"rw-r-----"}]}
+
+        '
+    headers:
+      content-type:
+      - application/json;charset=utf-8
+      date:
+      - Fri, 26 Jul 2024 09:32:17 GMT
+      server:
+      - Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-08-06'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs file exists
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -f --path --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-storage-dfs/12.9.0b1 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 26 Jul 2024 09:32:22 GMT
+      x-ms-version:
+      - '2021-08-06'
+    method: HEAD
+    uri: https://clitest000002.blob.core.windows.net/testfilesystem/readme
+  response:
+    body:
+      string: ''
+    headers:
+      accept-ranges:
+      - bytes
+      content-length:
+      - '87'
+      content-type:
+      - text/plain
+      date:
+      - Fri, 26 Jul 2024 09:32:23 GMT
+      etag:
+      - '"0x8DCAD55D89EC120"'
+      last-modified:
+      - Fri, 26 Jul 2024 09:32:19 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-access-tier:
+      - Hot
+      x-ms-access-tier-inferred:
+      - 'true'
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-creation-time:
+      - Fri, 26 Jul 2024 09:32:19 GMT
+      x-ms-group:
+      - $superuser
+      x-ms-lease-state:
+      - available
+      x-ms-lease-status:
+      - unlocked
+      x-ms-owner:
+      - $superuser
+      x-ms-permissions:
+      - rw-r-----
+      x-ms-resource-type:
+      - file
+      x-ms-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2021-08-06'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs file exists
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -f --path --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-storage-dfs/12.9.0b1 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 26 Jul 2024 09:32:29 GMT
+      x-ms-version:
+      - '2021-08-06'
+    method: HEAD
+    uri: https://clitest000002.blob.core.windows.net/testfilesystem/duff/edward
+  response:
+    body:
+      string: ''
+    headers:
+      accept-ranges:
+      - bytes
+      content-length:
+      - '0'
+      content-type:
+      - application/octet-stream
+      date:
+      - Fri, 26 Jul 2024 09:32:30 GMT
+      etag:
+      - '"0x8DCAD55DBC0D514"'
+      last-modified:
+      - Fri, 26 Jul 2024 09:32:25 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-access-tier:
+      - Hot
+      x-ms-access-tier-inferred:
+      - 'true'
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-creation-time:
+      - Fri, 26 Jul 2024 09:32:25 GMT
+      x-ms-group:
+      - $superuser
+      x-ms-lease-state:
+      - available
+      x-ms-lease-status:
+      - unlocked
+      x-ms-meta-hdi_isfolder:
+      - 'true'
+      x-ms-owner:
+      - $superuser
+      x-ms-permissions:
+      - rwxr-x---
+      x-ms-resource-type:
+      - directory
+      x-ms-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2021-08-06'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs directory upload
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -f -d -s --account-name
+      User-Agent:
+      - AZURECLI/2.62.0 (PIP) azsdk-python-storage-dfs/12.9.0b1 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 26 Jul 2024 09:32:36 GMT
+      x-ms-version:
+      - '2021-08-06'
+    method: HEAD
+    uri: https://clitest000002.blob.core.windows.net/testfilesystem/testdir/readme
+  response:
+    body:
+      string: ''
+    headers:
+      date:
+      - Fri, 26 Jul 2024 09:32:36 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      www-authenticate:
+      - Bearer authorization_uri=https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/oauth2/authorize
+        resource_id=https://storage.azure.com
+      x-ms-error-code:
+      - NoAuthenticationInformation
+      x-ms-version:
+      - '2021-08-06'
+    status:
+      code: 401
+      message: Server failed to authenticate the request. Please refer to the information
+        in the www-authenticate header.
+version: 1

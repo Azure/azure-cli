@@ -100,8 +100,9 @@ class AzCopy:
                 args_hides[i] = args_hides[i][0:args_hides[i].index('sig') + 4]
         logger.warning("Azcopy command: %s", args_hides)
         env_kwargs = {}
-        if self.creds and self.creds.token_info:
-            env_kwargs = {'AZCOPY_OAUTH_TOKEN_INFO': json.dumps(self.creds.token_info)}
+        if self.creds and self.creds.tenant_id:
+            env_kwargs = {'AZCOPY_TENANT_ID': self.creds.tenant_id,
+                          'AZCOPY_AUTO_LOGIN_TYPE': 'AzCLI'}
         result = subprocess.call(args, env=dict(os.environ, **env_kwargs))
         if result > 0:
             raise CLIError('Failed to perform {} operation.'.format(args[1]))
@@ -120,17 +121,21 @@ class AzCopy:
 
 
 class AzCopyCredentials:  # pylint: disable=too-few-public-methods
-    def __init__(self, sas_token=None, token_info=None):
+    def __init__(self, sas_token=None, token_info=None, tenant_id=None):
         self.sas_token = sas_token
         self.token_info = token_info
+        self.tenant_id = tenant_id
 
 
 def login_auth_for_azcopy(cmd):
-    token_info = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)[0][2]
+    raw_token = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)
+    token_info = raw_token[0][2]
     try:
         token_info = _unserialize_non_msi_token_payload(token_info)
     except KeyError:  # unserialized MSI token payload
-        raise Exception('MSI auth not yet supported.')  # pylint: disable=broad-exception-raised
+        # if msi token, only get the tenant_id, AzCopy will get the account token from AzCLI directly
+        tenant_id = raw_token[2]
+        return AzCopyCredentials(tenant_id=tenant_id)
     return AzCopyCredentials(token_info=token_info)
 
 
