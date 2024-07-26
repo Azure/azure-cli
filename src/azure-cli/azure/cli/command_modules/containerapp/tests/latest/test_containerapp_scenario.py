@@ -510,6 +510,23 @@ class ContainerappScenarioTest(ScenarioTest):
         create_containerapp_env(self, env2, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
         containerapp_env2 = self.cmd(
             'containerapp env show -g {} -n {}'.format(resource_group, env2)).get_output_in_json()
+        # test `az containerapp up` with --environment
+        image = 'mcr.microsoft.com/azuredocs/aks-helloworld:v1'
+        ca_name = self.create_random_name(prefix='containerapp', length=24)
+        self.cmd('containerapp up -g {} -n {} --environment {} --image {}'.format(resource_group, ca_name, env2, image), expect_failure=False)
+        self.cmd(f'containerapp show -g {resource_group} -n {ca_name}', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.environmentId", containerapp_env2["id"]),
+            JMESPathCheck('properties.template.containers[0].image', image),
+        ])
+        # test `az containerapp up` for existing containerapp without --environment
+        image2 = 'mcr.microsoft.com/k8se/quickstart:latest'
+        self.cmd('containerapp up -g {} -n {} --image {}'.format(resource_group, ca_name, image2), expect_failure=False)
+        self.cmd(f'containerapp show -g {resource_group} -n {ca_name}', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.environmentId", containerapp_env2["id"]),
+            JMESPathCheck('properties.template.containers[0].image', image2),
+        ])
 
         user_identity_name = self.create_random_name(prefix='containerapp-user', length=24)
         user_identity = self.cmd(

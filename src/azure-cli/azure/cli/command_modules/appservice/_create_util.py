@@ -305,8 +305,7 @@ def find_key_in_json(json_data, key):
         if key in k:
             yield v
         elif isinstance(v, dict):
-            for id_val in find_key_in_json(v, key):
-                yield id_val
+            yield from find_key_in_json(v, key)
 
 
 def set_location(cmd, sku, location):

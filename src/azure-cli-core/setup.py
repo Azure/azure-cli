@@ -53,13 +53,13 @@ DEPENDENCIES = [
     'jmespath',
     'knack~=0.11.0',
     'msal-extensions==1.2.0',
-    'msal[broker]==1.29.0',
+    'msal[broker]==1.30.0',
     'msrestazure~=0.6.4',
     'packaging>=20.9',
     'paramiko>=2.0.8,<4.0.0',
     'pkginfo>=1.5.0.1',
     # psutil can't install on cygwin: https://github.com/Azure/azure-cli/issues/9399
-    'psutil~=5.9; sys_platform != "cygwin"',
+    'psutil>=5.9; sys_platform != "cygwin"',
     'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'requests[socks]'

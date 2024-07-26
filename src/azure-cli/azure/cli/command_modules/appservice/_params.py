@@ -183,6 +183,7 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp list-runtimes') as c:
         c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps', deprecate_info=c.deprecate(redirect="--os-type"))
         c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
+        c.argument('show_runtime_details', action='store_true', help="show detailed versions of runtime stacks")
 
     with self.argument_context('functionapp list-runtimes') as c:
         c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
