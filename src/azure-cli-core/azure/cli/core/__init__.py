@@ -512,10 +512,9 @@ class MainCommandsLoader(CLICommandsLoader):
 
                 if command is None:
                     # load all arguments via reflection
-                    loader.skip_applicability = True
                     for cmd in loader.command_table.values():
                         cmd.load_arguments()  # this loads the arguments via reflection
-                        loader.load_arguments(cmd.name) # this can load all the arguments for commands in extensions
+                    loader.skip_applicability = True
                     loader.load_arguments('')  # this adds entries to the argument registries
                 else:
                     loader.command_name = command
