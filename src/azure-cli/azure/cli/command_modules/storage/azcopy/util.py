@@ -5,7 +5,6 @@
 
 
 import os
-import json
 import platform
 import subprocess
 import datetime

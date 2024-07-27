@@ -636,6 +636,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sr=d', fs_sas)
         self.assertIn('sdd=2', fs_sas)
 
+
+class StorageADLSGen2LiveTests(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
     @StorageTestFilesPreparer()
