@@ -139,19 +139,22 @@ def login_auth_for_azcopy(cmd):
 
 
 def client_auth_for_azcopy(cmd, client, service='blob'):
-    azcopy_creds = storage_client_auth_for_azcopy(client, service)
-    if azcopy_creds is not None:
-        return azcopy_creds
-
-    # oauth mode
+    # prefer oauth mode
     if client.token_credential:
-        token_info = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)[0][2]
+        raw_token = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)
+        token_info = raw_token[0][2]
         try:
             token_info = _unserialize_non_msi_token_payload(token_info)
         except KeyError as ex:  # unserialized token payload
-            from azure.cli.core.azclierror import ValidationError
-            raise ValidationError('No {}. MSI auth and service principal are not yet supported.'.format(ex))
+            # if msi token, only get the tenant_id, AzCopy will get the account token from AzCLI directly
+            tenant_id = raw_token[2]
+            return AzCopyCredentials(tenant_id=tenant_id)
         return AzCopyCredentials(token_info=token_info)
+
+    # try to get sas
+    azcopy_creds = storage_client_auth_for_azcopy(client, service)
+    if azcopy_creds is not None:
+        return azcopy_creds
 
     return None
 
