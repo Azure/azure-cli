@@ -111,3 +111,46 @@ def retry(retry_times=3, interval=0.5, exceptions=Exception):
                         raise  # End of retry. Re-raise the exception as-is.
         return _wrapped_func
     return _decorator
+
+
+def subprocess_arg_check(*args, **kwargs):
+    print("func args: ", *args)
+    if not kwargs.get("shell", False):
+        return
+    if isinstance(args, list):
+        return
+    raise ValueError("args should be a list of sequence")
+
+
+def subprocess_kwarg_mask(kwargs):
+    if kwargs.get("shell", False):
+        logger.warn("Removed shell=True for cli processor")
+        kwargs["shell"] = False
+
+
+def cli_subprocess_func_mask(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        subprocess_arg_check(*args, **kwargs)
+        subprocess_kwarg_mask(kwargs)
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def cli_subprocess_popen_init_mask(init_func):
+    @wraps(init_func)
+    def wrapper(self, *args, **kwargs):
+        subprocess_arg_check(args)
+        subprocess_kwarg_mask(kwargs)
+        return init_func(self, *args, **kwargs)
+
+    return wrapper
+
+
+def cli_subprocess_decorator(target):
+    if isinstance(target, type):
+        if '__init__' in target.__dict__:
+            target.__init__ = cli_subprocess_popen_init_mask(target.__init__)
+        return target
+    else:
+        return cli_subprocess_func_mask(target)
