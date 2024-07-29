@@ -1373,6 +1373,8 @@ def _set_pe_restore_trigger_restore_properties(cmd, trigger_restore_properties, 
             raise InvalidArgumentValueError("--disk-access-option parameter can't be provided since private access "
                                             "is not enabled in given recovery point")
 
+    return trigger_restore_properties
+
 
 def _set_edge_zones_trigger_restore_properties(cmd, trigger_restore_properties, restore_to_edge_zone, recovery_point,
                                                target_subscription, use_secondary_region, restore_mode):
