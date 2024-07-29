@@ -1182,6 +1182,22 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
     return network, start_ip, end_ip
 
 
+def flexible_server_maintenance_reschedule(client, resource_group_name, server_name, maintenance_name, maintenance_start_time):
+    parameters = mysql_flexibleservers.models.MaintenanceUpdate(maintenance_start_time=maintenance_start_time)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               server_name=server_name,
+                               maintenance_name=maintenance_name,
+                               parameters=parameters)
+
+
+def flexible_server_maintenance_list(client, resource_group_name, server_name):
+    return client.list(resource_group_name=resource_group_name, server_name=server_name)
+
+
+def flexible_server_maintenance_show(client, resource_group_name, server_name, maintenance_name):
+    return client.read(resource_group_name=resource_group_name, server_name=server_name, maintenance_name=maintenance_name)
+
+
 def flexible_server_exist_network_resource(cmd, resource_group_name, server_name, location, private_dns_zone_arguments=None, vnet=None, subnet=None):
     network = mysql_flexibleservers.models.Network()
     if private_dns_zone_arguments is None:
