@@ -17,6 +17,10 @@ cd /azure-cli/
 pip install wheel
 ./scripts/ci/build.sh
 
+# Use old version setuptools in build environment, see https://github.com/pypa/setuptools/issues/4519
+echo "setuptools<72" > constraints.txt
+export PIP_CONSTRAINT=`pwd`/constraints.txt
+
 # From Fedora36, when using `pip install --prefix` with root privileges, the package is installed into `{prefix}/local/lib`.
 # In order to keep the original installation path, I have to set RPM_BUILD_ROOT
 # Ref https://docs.fedoraproject.org/en-US/fedora/latest/release-notes/developers/Development_Python/#_pipsetup_py_installation_with_prefix
