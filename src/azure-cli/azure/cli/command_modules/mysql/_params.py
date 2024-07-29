@@ -364,6 +364,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('data_source_sas_token', arg_type=data_source_sas_token_arg_type)
         c.argument('mode', default='Offline', arg_type=mode_arg_type)
 
+    with self.argument_context('mysql flexible-server import stop-replication') as c:
+        c.argument('server_name', arg_type=server_name_arg_type)
+
     with self.argument_context('mysql flexible-server delete') as c:
         c.argument('yes', arg_type=yes_arg_type)
 

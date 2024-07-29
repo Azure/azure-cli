@@ -807,7 +807,7 @@ class WebappConfigureTest(ScenarioTest):
 
         # site config update runtime tests
         # windows
-        self.cmd('webapp config set -g {} -n {} --runtime java:17:TOMCAT:10.0'.format(resource_group, webapp_name)).assert_with_checks([
+        self.cmd('webapp config set -g {} -n {} --runtime TOMCAT:10.0-java17'.format(resource_group, webapp_name)).assert_with_checks([
             JMESPathCheck("javaVersion", "17"),
             JMESPathCheck("javaContainer", "TOMCAT"),
             JMESPathCheck("javaContainerVersion", "10.0"),
@@ -3091,7 +3091,7 @@ class WebappStackTest(ScenarioTest):
         webapp_plan = self.create_random_name(prefix='webapp-list-show-details-plan', length=40)
 
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, webapp_plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp_name, webapp_plan, 'java:17:TOMCAT:10.0'),
+        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp_name, webapp_plan, 'TOMCAT:10.0-java17'),
             checks=[
                 JMESPathCheck('name', webapp_name),
         ])
