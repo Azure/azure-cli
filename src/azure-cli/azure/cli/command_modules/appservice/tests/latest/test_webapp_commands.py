@@ -2898,7 +2898,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
-        with self.assertRaisesRegexp(CLIError, "Deployment failed because the build process failed"):
+        with self.assertRaisesRegex(CLIError, "Deployment failed because the build process failed"):
             self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async'.format(resource_group, webapp_name, zip_file))
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
@@ -2910,7 +2910,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
-        with self.assertRaisesRegexp(CLIError, "Deployment failed because the site failed to start within 10 mins."):
+        with self.assertRaisesRegex(CLIError, "Deployment failed because the site failed to start within 10 mins."):
             self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async'.format(resource_group, webapp_name, zip_file))
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deployment_source_configzip_runtimestatus', location='eastus')
@@ -2955,7 +2955,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
-        with self.assertRaisesRegexp(CLIError, "Deployment failed because the build process failed"):
+        with self.assertRaisesRegex(CLIError, "Deployment failed because the build process failed"):
             self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deployment_source_configzip_runtimestatus', location='eastus')
@@ -2967,7 +2967,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
-        with self.assertRaisesRegexp(CLIError, "Deployment failed because the site failed to start within 10 mins."):
+        with self.assertRaisesRegex(CLIError, "Deployment failed because the site failed to start within 10 mins."):
             self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
 
 class DomainScenarioTest(ScenarioTest):
