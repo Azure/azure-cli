@@ -23,6 +23,10 @@ pip install wheel
 # Ref https://docs.fedoraproject.org/en-US/fedora/latest/release-notes/developers/Development_Python/#_pipsetup_py_installation_with_prefix
 export RPM_BUILD_ROOT=/
 
+# Use old version setuptools in build environment, see https://github.com/pypa/setuptools/issues/4519
+echo "setuptools<72" > constraints.txt
+export PIP_CONSTRAINT=`pwd`/constraints.txt
+
 pip install pytest --prefix /usr/lib64/az
 pip install pytest-xdist --prefix /usr/lib64/az
 pip install pytest-forked --prefix /usr/lib64/az

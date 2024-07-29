@@ -18,6 +18,10 @@ cd /azure-cli/
 ln -sf /opt/az/bin/python3 /usr/bin/python
 ./scripts/ci/build.sh
 
+# Use old version setuptools in build environment, see https://github.com/pypa/setuptools/issues/4519
+echo "setuptools<72" > constraints.txt
+export PIP_CONSTRAINT=`pwd`/constraints.txt
+
 /opt/az/bin/python3 -m pip install pytest
 /opt/az/bin/python3 -m pip install pytest-xdist
 /opt/az/bin/python3 -m pip install pytest-forked
