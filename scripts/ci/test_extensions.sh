@@ -6,6 +6,10 @@ ls -la $share_folder/build
 
 ALL_MODULES=`find $share_folder/build/ -name "*.whl"`
 
+# Use old version setuptools in build environment, see https://github.com/pypa/setuptools/issues/4519
+echo "setuptools<72" > constraints.txt
+export PIP_CONSTRAINT=`pwd`/constraints.txt
+
 pip install -e ./tools
 [ -d privates ] && pip install -qqq privates/*.whl
 pip install $ALL_MODULES

@@ -16,6 +16,10 @@ REPO_ROOT="$(dirname ${BASH_SOURCE[0]})/.."
 
 pushd ${REPO_ROOT} > /dev/null
 
+# Use old version setuptools in build environment, see https://github.com/pypa/setuptools/issues/4519
+echo "setuptools<72" > constraints.txt
+export PIP_CONSTRAINT=`pwd`/constraints.txt
+
 find src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip install --no-deps
 pip install -r ./src/azure-cli/requirements.$(python ./scripts/get-python-version.py).$(uname).txt
 
