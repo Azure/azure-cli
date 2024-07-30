@@ -78,7 +78,7 @@ def load_arguments(self, _):
 
     static_web_app_sku_arg_type = CLIArgumentType(
         help='The pricing tiers for Static Web App',
-        arg_type=get_enum_type(['Free', 'Standard'])
+        arg_type=get_enum_type(['Free', 'Standard', 'Dedicated'])
     )
 
     # use this hidden arg to give a command the right instance, that functionapp commands
