@@ -115,7 +115,7 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 # pylint: disable=too-many-instance-attributes
 class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', kind='Storage',
-                 allow_blob_public_access=False, allow_shared_key_access=True, hns=False, length=24,
+                 allow_blob_public_access=False, allow_shared_key_access=None, hns=False, length=24,
                  parameter_name='storage_account', resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME', key='sa'):
         super(StorageAccountPreparer, self).__init__(name_prefix, length)
@@ -141,9 +141,7 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
                 template += ' --allow-blob-public-access false'
             else:
                 template += ' --allow-blob-public-access true'
-            if not self.allow_shared_key_access:
-                template += ' --allow-shared-key-access false'
-            else:
+            if self.allow_shared_key_access:
                 template += ' --allow-shared-key-access true'
             if self.hns:
                 template += ' --hns'
