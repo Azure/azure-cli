@@ -728,11 +728,12 @@ class LBProbeCreate(_LBProbeCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.probe_threshold):
+        if has_value(args.number_of_probes):
             logger.warning(
-                "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
-                "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
-                "by not specifying the value of the property."
+                "The property \"numberOfProbes\" is not respected. Load Balancer health probes will probe up or down "
+                "immediately after one probe regardless of the property's configured value. To control the number of "
+                "successful or failed consecutive probes necessary to mark backend instances as healthy or unhealthy, "
+                "please leverage the property \"probeThreshold\" instead."
             )
         if has_value(args.request_path) and args.request_path == "":
             args.request_path = None
@@ -750,11 +751,12 @@ class LBProbeUpdate(_LBProbeUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.probe_threshold):
+        if has_value(args.number_of_probes):
             logger.warning(
-                "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
-                "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
-                "by not specifying the value of the property."
+                "The property \"numberOfProbes\" is not respected. Load Balancer health probes will probe up or down "
+                "immediately after one probe regardless of the property's configured value. To control the number of "
+                "successful or failed consecutive probes necessary to mark backend instances as healthy or unhealthy, "
+                "please leverage the property \"probeThreshold\" instead."
             )
         if has_value(args.request_path) and args.request_path == "":
             args.request_path = None

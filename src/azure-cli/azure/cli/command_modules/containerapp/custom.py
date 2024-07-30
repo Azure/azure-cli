@@ -84,7 +84,7 @@ from ._utils import (_validate_subscription_registered,
 from ._validators import validate_revision_suffix
 from ._ssh_utils import (SSH_DEFAULT_ENCODING, WebSocketConnection, read_ssh, get_stdin_writer, SSH_CTRL_C_MSG,
                          SSH_BACKUP_ENCODING)
-from ._constants import (MAXIMUM_SECRET_LENGTH, MICROSOFT_SECRET_SETTING_NAME, FACEBOOK_SECRET_SETTING_NAME, GITHUB_SECRET_SETTING_NAME,
+from ._constants import (MICROSOFT_SECRET_SETTING_NAME, FACEBOOK_SECRET_SETTING_NAME, GITHUB_SECRET_SETTING_NAME,
                          GOOGLE_SECRET_SETTING_NAME, TWITTER_SECRET_SETTING_NAME, APPLE_SECRET_SETTING_NAME, CONTAINER_APPS_RP,
                          NAME_INVALID, NAME_ALREADY_EXISTS, ACR_IMAGE_SUFFIX, HELLO_WORLD_IMAGE, LOG_TYPE_SYSTEM, LOG_TYPE_CONSOLE,
                          MANAGED_CERTIFICATE_RT, PRIVATE_CERTIFICATE_RT, PENDING_STATUS, SUCCEEDED_STATUS, CONTAINER_APPS_SDK_MODELS,
@@ -1624,7 +1624,14 @@ def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=Non
         if execution_name_list is not None:
             execution_name_list = execution_name_list.split(",")
             execution_name_list = json.dumps({'jobExecutionName': execution_name_list})
-        return ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name, job_execution_names=execution_name_list)
+        r = ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name, job_execution_names=execution_name_list)
+
+        # if stop is called for a single job execution, return generic response
+        if job_execution_name:
+            return "Job Execution: " + job_execution_name + ", stopped successfully."
+
+        # else return the response
+        return r
     except CLIError as e:
         handle_raw_exception(e)
 
@@ -3125,14 +3132,6 @@ def set_secrets(cmd, name, resource_group_name, secrets,
                 no_wait=False):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
-    for s in secrets:
-        if s:
-            parsed = s.split("=")
-            if parsed:
-                if len(parsed[0]) > MAXIMUM_SECRET_LENGTH and not disable_max_length:
-                    raise ValidationError(f"Secret names cannot be longer than {MAXIMUM_SECRET_LENGTH}. "
-                                          f"Please shorten {parsed[0]}")
-
     # if not yaml and not secrets:
     #     raise RequiredArgumentMissingError('Usage error: --secrets is required if not using --yaml')
 
@@ -3253,14 +3252,6 @@ def set_secrets_job(cmd, name, resource_group_name, secrets,
                     disable_max_length=False,
                     no_wait=False):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
-
-    for s in secrets:
-        if s:
-            parsed = s.split("=")
-            if parsed:
-                if len(parsed[0]) > MAXIMUM_SECRET_LENGTH and not disable_max_length:
-                    raise ValidationError(f"Secret names cannot be longer than {MAXIMUM_SECRET_LENGTH}. "
-                                          f"Please shorten {parsed[0]}")
 
     containerappjob_def = None
     try:
@@ -3751,15 +3742,25 @@ def containerapp_up_logic(cmd, resource_group_name, name, managed_env, image, en
     return create_containerapp(cmd=cmd, name=name, resource_group_name=resource_group_name, managed_env=managed_env, image=image, env_vars=env_vars, ingress=ingress, target_port=target_port, registry_server=registry_server, registry_user=registry_user, registry_pass=registry_pass, workload_profile_name=workload_profile_name)
 
 
-def list_certificates(cmd, name, resource_group_name, location=None, certificate=None, thumbprint=None):
-    if certificate and is_valid_resource_id(certificate):
-        certificate_type = parse_resource_id(certificate)["resource_type"]
-    else:
-        certificate_type = PRIVATE_CERTIFICATE_RT
+def create_managed_certificate(cmd, name, resource_group_name, hostname, validation_method, certificate_name=None):
+    if certificate_name and not check_managed_cert_name_availability(cmd, resource_group_name, name, certificate_name):
+        raise ValidationError(f"Certificate name '{certificate_name}' is not available.")
+    cert_name = certificate_name
+    while not cert_name:
+        cert_name = generate_randomized_managed_cert_name(hostname, resource_group_name)
+        if not check_managed_cert_name_availability(cmd, resource_group_name, name, certificate_name):
+            cert_name = None
+    certificate_envelop = prepare_managed_certificate_envelop(cmd, name, resource_group_name, hostname, validation_method.upper())
+    try:
+        r = ManagedEnvironmentClient.create_or_update_managed_certificate(cmd, resource_group_name, name, cert_name, certificate_envelop, True, validation_method.upper() == 'TXT')
+        return r
+    except Exception as e:
+        handle_raw_exception(e)
 
-    if certificate_type != PRIVATE_CERTIFICATE_RT:
-        raise ValidationError(f"The certificate {certificate} is not private-key certificate.")
-    return list_certificates_logic(cmd, name, resource_group_name, location, certificate, thumbprint, private_key_certificates_only=True)
+
+def list_certificates(cmd, name, resource_group_name, location=None, certificate=None, thumbprint=None, managed_certificates_only=False, private_key_certificates_only=False):
+
+    return list_certificates_logic(cmd, name, resource_group_name, location, certificate, thumbprint, managed_certificates_only=managed_certificates_only, private_key_certificates_only=private_key_certificates_only)
 
 
 def list_certificates_logic(cmd, name, resource_group_name, location=None, certificate=None, thumbprint=None, managed_certificates_only=False, private_key_certificates_only=False):
@@ -3867,23 +3868,8 @@ def upload_certificate(cmd, name, resource_group_name, certificate_file, certifi
 
 
 def delete_certificate(cmd, resource_group_name, name, location=None, certificate=None, thumbprint=None):
-    if not certificate and not thumbprint:
-        raise RequiredArgumentMissingError('Please specify at least one of parameters: --certificate and --thumbprint')
-    # validate for GA
-    cert_name = certificate
-    if certificate and is_valid_resource_id(certificate):
-        cert_type = parse_resource_id(certificate)["resource_type"]
-        cert_name = parse_resource_id(certificate)["resource_name"]
-    else:
-        cert_type = PRIVATE_CERTIFICATE_RT
 
-    if thumbprint:
-        cert_type = PRIVATE_CERTIFICATE_RT
-
-    if cert_type != PRIVATE_CERTIFICATE_RT:
-        raise ValidationError(f"The certificate {cert_name} is not private-key certificate.")
-
-    delete_certificate_logic(cmd, resource_group_name, name, cert_name, location, certificate, thumbprint, cert_type)
+    delete_certificate_logic(cmd=cmd, resource_group_name=resource_group_name, name=name, cert_name=certificate, location=location, certificate=certificate, thumbprint=thumbprint)
 
 
 # this function will be used in extension
@@ -3923,11 +3909,19 @@ def delete_certificate_logic(cmd, resource_group_name, name, cert_name, location
             raise ResourceNotFoundError(f"The certificate '{cert_name}' does not exist in Container app environment '{name}'.")
         if len(managed_certs) > 0 and len(private_certs) > 0:
             raise RequiredArgumentMissingError(f"Found more than one certificates with name '{cert_name}':\n'{managed_certs[0]['id']}',\n'{private_certs[0]['id']}'.\nPlease specify the certificate id using --certificate.")
-        try:
-            ManagedEnvironmentClient.delete_managed_certificate(cmd, resource_group_name, name, cert_name)
-            logger.warning('Successfully deleted certificate: %s', cert_name)
-        except Exception as e:
-            handle_raw_exception(e)
+        if private_certs:
+            try:
+                ManagedEnvironmentClient.delete_certificate(cmd, resource_group_name, name, cert_name)
+                logger.warning('Successfully deleted certificate: %s', cert_name)
+            except Exception as e:
+                handle_raw_exception(e)
+
+        if managed_certs:
+            try:
+                ManagedEnvironmentClient.delete_managed_certificate(cmd, resource_group_name, name, cert_name)
+                logger.warning('Successfully deleted certificate: %s', cert_name)
+            except Exception as e:
+                handle_raw_exception(e)
 
 
 def upload_ssl(cmd, resource_group_name, name, environment, certificate_file, hostname, certificate_password=None, certificate_name=None, location=None):
@@ -3956,11 +3950,9 @@ def upload_ssl(cmd, resource_group_name, name, environment, certificate_file, ho
     return patch_new_custom_domain(cmd, resource_group_name, name, new_custom_domains)
 
 
-def bind_hostname(cmd, resource_group_name, name, hostname, thumbprint=None, certificate=None, location=None, environment=None):
-    # validate for GA
-    if not thumbprint and not certificate:
-        raise RequiredArgumentMissingError('Please specify at least one of parameters: --certificate and --thumbprint')
-    return bind_hostname_logic(cmd, resource_group_name, name, hostname, thumbprint, certificate, location, environment)
+def bind_hostname(cmd, resource_group_name, name, hostname, thumbprint=None, certificate=None, location=None, environment=None, validation_method=None):
+
+    return bind_hostname_logic(cmd, resource_group_name, name, hostname, thumbprint, certificate, location, environment, validation_method)
 
 
 def bind_hostname_logic(cmd, resource_group_name, name, hostname, thumbprint=None, certificate=None, location=None, environment=None, validation_method=None):

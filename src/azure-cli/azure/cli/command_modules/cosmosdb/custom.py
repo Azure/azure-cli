@@ -68,6 +68,9 @@ from azure.mgmt.cosmosdb.models import (
     DataCenterResourceProperties,
     ManagedCassandraManagedServiceIdentity,
     ServiceResourceCreateUpdateParameters,
+    SqlDedicatedGatewayServiceResourceCreateUpdateProperties,
+    DedicatedGatewayType,
+    ServiceType,
     MongoRoleDefinitionCreateUpdateParameters,
     MongoUserDefinitionCreateUpdateParameters
 )
@@ -515,6 +518,11 @@ def cli_cosmosdb_update(client,
     docdb_account = async_docdb_update.result()
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
+
+
+def cli_cosmosdb_delete(client, resource_group_name, account_name, no_wait=False):
+    return sdk_no_wait(no_wait, client.begin_delete,
+                       resource_group_name=resource_group_name, account_name=account_name)
 
 
 def cli_cosmosdb_list(client, resource_group_name=None):
@@ -3429,12 +3437,17 @@ def cli_cosmosdb_service_create(client,
                                 resource_group_name,
                                 service_name,
                                 instance_count=1,
-                                instance_size="Cosmos.D4s"):
+                                instance_size="Cosmos.D4s",
+                                dedicated_gateway_type=DedicatedGatewayType.INTEGRATED_CACHE.value):
 
-    service_kind = "SqlDedicatedGateway"
-    params = ServiceResourceCreateUpdateParameters(service_type=service_kind,
-                                                   instance_count=instance_count,
-                                                   instance_size=instance_size)
+    properties = SqlDedicatedGatewayServiceResourceCreateUpdateProperties(instance_count=instance_count,
+                                                                          instance_size=instance_size,
+                                                                          dedicated_gateway_type=dedicated_gateway_type)
+
+    properties.service_type = ServiceType.SQL_DEDICATED_GATEWAY.value
+    params = ServiceResourceCreateUpdateParameters(
+        properties=properties
+    )
 
     return client.begin_create(resource_group_name, account_name, service_name, create_update_parameters=params)
 
@@ -3446,9 +3459,12 @@ def cli_cosmosdb_service_update(client,
                                 instance_count,
                                 instance_size=None):
 
-    service_kind = "SqlDedicatedGateway"
-    params = ServiceResourceCreateUpdateParameters(service_type=service_kind,
-                                                   instance_count=instance_count,
-                                                   instance_size=instance_size)
+    properties = SqlDedicatedGatewayServiceResourceCreateUpdateProperties(instance_count=instance_count,
+                                                                          instance_size=instance_size)
+
+    properties.service_type = ServiceType.SQL_DEDICATED_GATEWAY.value
+    params = ServiceResourceCreateUpdateParameters(
+        properties=properties
+    )
 
     return client.begin_create(resource_group_name, account_name, service_name, create_update_parameters=params)

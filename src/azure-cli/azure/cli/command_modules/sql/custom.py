@@ -4956,6 +4956,7 @@ def managed_instance_create(
         service_principal_type=None,
         zone_redundant=None,
         instance_pool_name=None,
+        dns_zone_partner=None,
         authentication_metadata=None,
         **kwargs):
     '''
@@ -4996,6 +4997,8 @@ def managed_instance_create(
 
     kwargs['zone_redundant'] = zone_redundant
     kwargs['authentication_metadata'] = authentication_metadata
+
+    kwargs['dns_zone_partner'] = dns_zone_partner
 
     ad_only = None
     if enable_ad_only_auth:
@@ -6164,6 +6167,7 @@ def managed_db_move_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         **kwargs):
@@ -6177,6 +6181,7 @@ def managed_db_move_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         'Move',
@@ -6189,6 +6194,7 @@ def managed_db_copy_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         **kwargs):
@@ -6202,6 +6208,7 @@ def managed_db_copy_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         'Copy',
@@ -6214,6 +6221,7 @@ def managed_db_move_copy_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        destination_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         operation_mode,
@@ -6227,7 +6235,8 @@ def managed_db_move_copy_start(
         cmd.cli_ctx,
         dest_resource_group_name or resource_group_name,
         dest_instance_name,
-        database_name)
+        database_name,
+        destination_subscription_id)
 
     return client.begin_start_move(
         resource_group_name=resource_group_name,
@@ -6244,6 +6253,7 @@ def managed_db_move_copy_complete(
         database_name,
         dest_resource_group_name,
         dest_instance_name,
+        dest_subscription_id,
         **kwargs):
     '''
     Completes managed database move/copy operation
@@ -6253,7 +6263,8 @@ def managed_db_move_copy_complete(
         cmd.cli_ctx,
         dest_resource_group_name or resource_group_name,
         dest_instance_name,
-        database_name)
+        database_name,
+        dest_subscription_id)
 
     return client.begin_complete_move(
         resource_group_name=resource_group_name,
@@ -6270,6 +6281,7 @@ def managed_db_move_copy_cancel(
         database_name,
         dest_resource_group_name,
         dest_instance_name,
+        dest_subscription_id,
         **kwargs):
     '''
     Cancels managed database move/copy operation
@@ -6279,7 +6291,8 @@ def managed_db_move_copy_cancel(
         cmd.cli_ctx,
         dest_resource_group_name or resource_group_name,
         dest_instance_name,
-        database_name)
+        database_name,
+        dest_subscription_id)
 
     return client.begin_cancel_move(
         resource_group_name=resource_group_name,

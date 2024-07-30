@@ -44,7 +44,7 @@ class CdnAfdSecurityPolicyScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         
         # Create a security policy with non-exisit waf should fail
         waf_policy_id = f'/subscriptions/{self.get_subscription_id()}/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/nonexist'
-        with self.assertRaisesRegexp(HttpResponseError, "Web Application Firewall Policy being attached to AFDX profile does not exist"):
+        with self.assertRaisesRegex(HttpResponseError, "Web Application Firewall Policy being attached to AFDX profile does not exist"):
             self.afd_security_policy_create_cmd(resource_group,
                                                 profile_name,
                                                 security_policy_name,
