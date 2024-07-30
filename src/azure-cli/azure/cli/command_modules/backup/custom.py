@@ -1342,6 +1342,8 @@ def _get_alr_restore_mode(target_vm_name, target_vnet_name, target_vnet_resource
 
 def _set_pe_restore_trigger_restore_properties(cmd, trigger_restore_properties, disk_access_option, target_disk_access_id,
                                                recovery_point, use_secondary_region):
+    if not hasattr(recovery_point.properties, 'is_private_access_enabled_on_any_disk'):
+        return trigger_restore_properties
     if recovery_point.properties.is_private_access_enabled_on_any_disk:
         if disk_access_option is None:
             raise InvalidArgumentValueError("--disk-access-option parameter must be provided since private access "
@@ -1351,7 +1353,7 @@ def _set_pe_restore_trigger_restore_properties(cmd, trigger_restore_properties, 
             if target_disk_access_id is None:
                 raise InvalidArgumentValueError("--target-disk-access-id must be provided when --disk-access-option "
                                                 "is set to EnablePrivateAccessForAllDisks")
-        
+
         if disk_access_option == "SameAsOnSourceDisks":
             if use_secondary_region:
                 raise InvalidArgumentValueError("Given --disk-access-option is not applicable to cross region restore")
@@ -1363,10 +1365,10 @@ def _set_pe_restore_trigger_restore_properties(cmd, trigger_restore_properties, 
             if target_disk_access_id is not None:
                 raise InvalidArgumentValueError("--target-disk-access-id can't be provided for the "
                                                 "given --disk-access-option")
-        
+
         trigger_restore_properties.target_disk_network_access_settings = TargetDiskNetworkAccessSettings(
-            target_disk_access_id = target_disk_access_id,
-            target_disk_network_access_option = disk_access_option
+            target_disk_access_id=target_disk_access_id,
+            target_disk_network_access_option=disk_access_option
         )
     else:
         if disk_access_option is not None or target_disk_access_id is not None:
