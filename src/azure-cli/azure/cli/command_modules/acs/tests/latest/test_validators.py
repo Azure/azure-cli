@@ -378,6 +378,112 @@ class TestExtractCommaSeparatedString(unittest.TestCase):
         g16 = {"WindowsContainerRuntime": "containerd", "AKSHTTPCustomFeatures": "Microsoft.ContainerService/AKSTestFeaturePreview,Microsoft.ContainerService/AKSExampleFeaturePreview"}
         self.assertEqual(t16, g16)
 
+    def test_extract_key_value_pair(self):
+        tcs = [
+            (
+                {
+                    "raw_string": "abc = def",
+                    "enable_strip": False,
+                    "allow_empty_value": False,
+                    "keep_none": False,
+                    "default_value": None,
+                },
+                {
+                    "result": {"abc ": " def"},
+                    "exception": None
+                }
+            ),
+            (
+                {
+                    "raw_string": "abc = def",
+                    "enable_strip": True,
+                    "allow_empty_value": False,
+                    "keep_none": False,
+                    "default_value": None,
+                },
+                {
+                    "result": {"abc": "def"},
+
+                    "exception": None
+                }
+            ),
+            (
+                {
+                    "raw_string": "abc=",
+                    "enable_strip": False,
+                    "allow_empty_value": False,
+                    "keep_none": False,
+                    "default_value": {},
+                },
+                {
+                    "result": {"abc ": " def"},
+                    "exception": InvalidArgumentValueError("Empty value not allowed. The value '' of key 'abc' in 'abc=' is empty."),
+                }
+            ),
+            (
+                {
+                    "raw_string": "abc=",
+                    "enable_strip": False,
+                    "allow_empty_value": True,
+                    "keep_none": False,
+                    "default_value": {},
+                },
+                {
+                    "result": {"abc": ""},
+                    "exception": None
+                }
+            ),
+            (
+                {
+                    "raw_string": None,
+                    "enable_strip": False,
+                    "allow_empty_value": False,
+                    "keep_none": False,
+                    "default_value": {},
+                },
+                {
+                    "result": {},
+                    "exception": None
+                }
+            ),
+            (
+                {
+                    "raw_string": None,
+                    "enable_strip": False,
+                    "allow_empty_value": False,
+                    "keep_none": True,
+                    "default_value": {},
+                },
+                {
+                    "result": None,
+                    "exception": None
+                }
+            ),
+            (
+                {
+                    "raw_string": None,
+                    "enable_strip": False,
+                    "allow_empty_value": False,
+                    "keep_none": False,
+                    "default_value": "",
+                },
+                {
+                    "result": "",
+                    "exception": None
+                }
+            ),
+        ]
+        for tc in tcs:
+            s = tc[0]
+            g = tc[1]
+            if g["exception"]:
+                with self.assertRaises(type(g["exception"])) as cm:
+                    t = validators.extract_key_value_pair(s["raw_string"], s["enable_strip"], s["allow_empty_value"], s["keep_none"], s["default_value"])
+                self.assertEqual(str(cm.exception), str(g["exception"]))
+            else:
+                t = validators.extract_key_value_pair(s["raw_string"], s["enable_strip"], s["allow_empty_value"], s["keep_none"], s["default_value"])
+                self.assertEqual(t, g["result"])
+
 
 class CredentialFormatNamespace:
     def __init__(self, credential_format):
