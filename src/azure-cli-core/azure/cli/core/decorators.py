@@ -14,6 +14,7 @@ import hashlib
 from functools import wraps
 
 from knack.log import get_logger
+from azure.cli.core.util import subprocess_arg_mask, subprocess_kwarg_mask, subprocess_arg_type_check
 
 
 logger = get_logger(__name__)
@@ -113,25 +114,11 @@ def retry(retry_times=3, interval=0.5, exceptions=Exception):
     return _decorator
 
 
-def subprocess_arg_check(*args, **kwargs):
-    print("func args: ", *args)
-    if not kwargs.get("shell", False):
-        return
-    if isinstance(args, list):
-        return
-    raise ValueError("args should be a list of sequence")
-
-
-def subprocess_kwarg_mask(kwargs):
-    if kwargs.get("shell", False):
-        logger.warn("Removed shell=True for cli processor")
-        kwargs["shell"] = False
-
-
 def cli_subprocess_func_mask(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        subprocess_arg_check(*args, **kwargs)
+        subprocess_arg_type_check(*args, kwargs)
+        subprocess_arg_mask(*args, kwargs)
         subprocess_kwarg_mask(kwargs)
         return func(*args, **kwargs)
     return wrapper
@@ -140,7 +127,8 @@ def cli_subprocess_func_mask(func):
 def cli_subprocess_popen_init_mask(init_func):
     @wraps(init_func)
     def wrapper(self, *args, **kwargs):
-        subprocess_arg_check(args)
+        subprocess_arg_type_check(*args, kwargs)
+        subprocess_arg_mask(*args, kwargs)
         subprocess_kwarg_mask(kwargs)
         return init_func(self, *args, **kwargs)
 

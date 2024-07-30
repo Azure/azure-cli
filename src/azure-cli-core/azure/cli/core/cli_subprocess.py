@@ -5,7 +5,7 @@
 
 import subprocess
 from knack.log import get_logger
-from decorators import cli_subprocess_decorator
+from azure.cli.core.decorators import cli_subprocess_decorator
 
 __all__ = [
     # recommended invoking function
@@ -60,7 +60,7 @@ def check_output(*popenargs, **kwargs):
 @cli_subprocess_decorator
 class CliPopen(subprocess.Popen):
     """
-    Constrcut subprocess.Popen with masked shell kwargs to avoid security vulnerability
+    Construct subprocess.Popen with masked shell kwargs to avoid security vulnerability
     """
 
     def __init__(self, *args, **kwargs):
