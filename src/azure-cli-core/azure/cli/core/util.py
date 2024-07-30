@@ -1360,7 +1360,7 @@ def should_encrypt_token_cache(cli_ctx):
     return encrypt
 
 
-def subprocess_arg_type_check(*args, **kwargs):
+def subprocess_arg_type_check(args, kwargs):
     skip_arg_type_check = kwargs.get("skip_arg_type_check", None)
     if skip_arg_type_check is not None:
         del kwargs["skip_arg_type_check"]
