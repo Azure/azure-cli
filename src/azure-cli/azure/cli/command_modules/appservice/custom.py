@@ -55,6 +55,7 @@ from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import (web_client_factory, ex_handler_factory, providers_client_factory,
                               appcontainers_client_factory)
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
+from ._appservice_utils import MSI_LOCAL_ID
 from .utils import (_normalize_sku,
                     get_sku_tier,
                     retryable_method,
@@ -112,7 +113,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
-                  public_network_access=None, acr_use_identity=False, basic_auth=""):
+                  public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth=""):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -321,6 +322,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,
                                    role, None, scope)
         webapp.identity = identity
+
+    if acr_identity:
+        update_site_configs(cmd, resource_group_name, name, acr_identity=acr_identity)
 
     _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth.lower())
     return webapp
@@ -1224,7 +1228,6 @@ def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
 
 
 def _build_identities_info(identities):
-    from ._appservice_utils import MSI_LOCAL_ID
     identities = identities or []
     identity_types = []
     if not identities or MSI_LOCAL_ID in identities:
@@ -1766,7 +1769,9 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                         vnet_route_all_enabled=None,
                         generic_configurations=None,
                         min_replicas=None,
-                        max_replicas=None):
+                        max_replicas=None,
+                        acr_use_identity=None,
+                        acr_identity=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
@@ -1858,6 +1863,37 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     if not updating_ip_security_restrictions:
         setattr(configs, 'ip_security_restrictions', None)
         setattr(configs, 'scm_ip_security_restrictions', None)
+
+    if acr_identity:
+        if not configs.acr_use_managed_identity_creds:
+            setattr(configs, 'acr_use_managed_identity_creds', True)
+        acr_user_managed_identity_id = ''
+        if acr_identity.casefold() != MSI_LOCAL_ID:
+            if acr_identity.endswith('/'):
+                acr_identity = acr_identity[:len(acr_identity) - 1]
+            web_app = get_webapp(cmd, resource_group_name, name, slot)
+            webapp_identity = web_app.identity
+            matched_key = None
+            for key in webapp_identity.user_assigned_identities.keys():
+                if key.casefold() == acr_identity.casefold():
+                    matched_key = key
+            matched_identity = None if matched_key is None else webapp_identity.user_assigned_identities[matched_key]
+            if not matched_identity:
+                raise ResourceNotFoundError("Unable to retrieve identity {}, "
+                                            "please make sure the identity resource id you provide is correct "
+                                            "and it is assigned to this webapp. "
+                                            "When seeing this error while creating webapp "
+                                            "please remove created webapp before trying again "
+                                            "or set up user managed identity used for acr manually"
+                                            .format(acr_identity))
+            acr_user_managed_identity_id = matched_identity.client_id
+        setattr(configs, 'acr_user_managed_identity_id', acr_user_managed_identity_id)
+
+    if acr_use_identity is not None:
+        acr_use_identity = values['acr_use_identity'].casefold() == 'true'
+        if not acr_use_identity:
+            setattr(configs, 'acr_user_managed_identity_id', "")
+        setattr(configs, 'acr_use_managed_identity_creds', acr_use_identity)
 
     if is_centauri_functionapp(cmd, resource_group_name, name):
         if min_replicas is not None:
