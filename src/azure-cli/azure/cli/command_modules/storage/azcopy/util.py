@@ -145,7 +145,7 @@ def client_auth_for_azcopy(cmd, client, service='blob'):
         token_info = raw_token[0][2]
         try:
             token_info = _unserialize_non_msi_token_payload(token_info)
-        except KeyError as ex:  # unserialized token payload
+        except KeyError:  # unserialized token payload
             # if msi token, only get the tenant_id, AzCopy will get the account token from AzCLI directly
             tenant_id = raw_token[2]
             return AzCopyCredentials(tenant_id=tenant_id)
