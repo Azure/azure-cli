@@ -7002,13 +7002,13 @@ def _get_onedeploy_status_url(params):
 
 def _get_onedeploy_request_body(params):
     import os
+    file_hash = None
 
     if params.src_path:
         logger.warning('Deploying from local path: %s', params.src_path)
         client = web_client_factory(params.cmd.cli_ctx)
         app = client.web_apps.get(params.resource_group_name, params.webapp_name)   
         app_is_linux_webapp = is_linux_webapp(app)
-        file_hash = None
 
         try:
             with open(os.path.realpath(os.path.expanduser(params.src_path)), 'rb') as fs:
