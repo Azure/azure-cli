@@ -141,10 +141,11 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
                 template += ' --allow-blob-public-access false'
             else:
                 template += ' --allow-blob-public-access true'
-            if self.allow_shared_key_access is not None and not self.allow_shared_key_access:
-                template += ' --allow-shared-key-access false'
-            else:
-                template += ' --allow-shared-key-access true'
+            if self.allow_shared_key_access is not None:
+                if not self.allow_shared_key_access:
+                    template += ' --allow-shared-key-access false'
+                else:
+                    template += ' --allow-shared-key-access true'
             if self.hns:
                 template += ' --hns'
             self.live_only_execute(self.cli_ctx, template.format(
