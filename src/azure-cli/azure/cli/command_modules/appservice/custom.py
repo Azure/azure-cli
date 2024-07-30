@@ -8342,12 +8342,12 @@ def show_webapp(cmd, resource_group_name, name, slot=None):  # adding this to no
     return show_app(cmd, resource_group_name, name, slot)
 
 
-def _compute_checksum(bytes):
+def _compute_checksum(input_bytes):
     file_hash = None
     try:
         import hashlib
         logger.info("Computing checksum of the file ...")
-        file_hash = hashlib.sha256(bytes).hexdigest()
+        file_hash = hashlib.sha256(input_bytes).hexdigest()
         logger.info("Computed checksum for deployment request header x-ms-artifact-checksum '%s'", file_hash)
     except Exception as ex:  # pylint: disable=broad-except
         logger.info("Computing the checksum of the file failed with exception:'%s'", ex)
