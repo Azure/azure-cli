@@ -1366,11 +1366,10 @@ def subprocess_arg_type_check(*args, **kwargs):
         del kwargs["skip_arg_type_check"]
     if skip_arg_type_check:
         return
-    if not kwargs.get("shell", False):
-        return
     if isinstance(args, list):
         return
-    raise CLIError("cli_subprocess args should be a list of sequence")
+    from azure.cli.core.azclierror import ArgumentUsageError
+    raise ArgumentUsageError("cli_subprocess args should be a list of sequence")
 
 
 def subprocess_arg_mask(args, kwargs):

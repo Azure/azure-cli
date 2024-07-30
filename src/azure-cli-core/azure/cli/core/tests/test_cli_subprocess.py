@@ -49,6 +49,14 @@ class TestCliSubprocess(unittest.TestCase):
         stdout, _ = process.communicate()
         self.assertEqual(stdout.decode("utf8").strip(), "abecho123", "unexpected output when run cmd in popen")
 
+    def test_cli_subprocess_arg_type_check(self):
+        cmd = "echo abc"
+        if platform.system().lower() == "windows":
+            cmd = "cmd.exe /c" + cmd
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaises(ArgumentUsageError):
+            cli_subprocess.CliPopen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+
     def test_subprocess_shell(self):
         if platform.system().lower() == "windows":
             return

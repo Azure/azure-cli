@@ -16,7 +16,7 @@ __all__ = [
     "call",
     "check_call",
     "check_output",
-    ]
+]
 
 logger = get_logger(__name__)
 
