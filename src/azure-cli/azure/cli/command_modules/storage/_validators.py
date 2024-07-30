@@ -1967,23 +1967,33 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
             logger.info("%s is not Azure storage url.", url)
             return service, url
     # validate credential
+    if container:
+        cmd.command_kwargs["resource_type"] = ResourceType.DATA_STORAGE_BLOB
+    elif share:
+        cmd.command_kwargs["resource_type"] = ResourceType.DATA_STORAGE_FILESHARE
     validate_client_parameters(cmd, namespace)
     kwargs = {'account_name': namespace.account_name,
               'account_key': namespace.account_key,
               'connection_string': namespace.connection_string,
               'sas_token': namespace.sas_token}
+    if hasattr(namespace, 'token_credential'):
+        kwargs.update({'token_credential': namespace.token_credential})
     if container:
-        client = blob_data_service_factory(cmd.cli_ctx, kwargs)
+        client = cf_blob_service(cmd.cli_ctx, kwargs)
         if blob is None:
             blob = ''
-        url = client.make_blob_url(container, blob)
-
+        from .operations.blob import create_blob_url
+        url = create_blob_url(client, container, blob, snapshot=None)
         service = 'blob'
     elif share:
-        client = file_data_service_factory(cmd.cli_ctx, kwargs)
+        if hasattr(namespace, 'enable_file_backup_request_intent'):
+            kwargs.update({'enable_file_backup_request_intent': namespace.enable_file_backup_request_intent})
+        client = cf_share_service(cmd.cli_ctx, kwargs)
+        client = client.get_share_client(share)
         dir_name, file_name = os.path.split(file_path) if file_path else (None, '')
         dir_name = None if dir_name in ('', '.') else dir_name
-        url = client.make_file_url(share, dir_name, file_name)
+        from .operations.file import create_file_url
+        url = create_file_url(client, directory_name=dir_name, file_name=file_name)
         service = 'file'
     elif not any([url, container, share]):  # In account level, only blob service is supported
         service = 'blob'
@@ -2010,6 +2020,15 @@ def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, re
         sas_token = sas_token.lstrip('?')
     else:
         try:
+            from .util import create_short_lived_container_sas_track2, create_short_lived_share_sas_track2
+            if source_container:
+                source_sas = create_short_lived_container_sas_track2(cmd, account_name=source_account,
+                                                                     account_key=source_key,
+                                                                     container=source_container)
+            if source_share:
+                source_sas = create_short_lived_share_sas_track2(cmd, account_name=source_account,
+                                                                 account_key=source_key,
+                                                                 share=source_share)
             sas_token = _generate_sas_token(cmd, account_name, account_key, service,
                                             resource_types=resource_types, permissions=permissions)
         except Exception as ex:  # pylint: disable=broad-except
@@ -2021,6 +2040,11 @@ def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, re
 
 
 def validate_azcopy_credential(cmd, namespace):
+    auth_mode_login = False
+    if namespace.auth_mode == 'login':
+        auth_mode_login = True
+        namespace.enable_file_backup_request_intent = True
+
     # Get destination uri
     if not _is_valid_uri(namespace.destination):
         namespace.url = namespace.destination
@@ -2028,7 +2052,8 @@ def validate_azcopy_credential(cmd, namespace):
             cmd, namespace, url=namespace.destination,
             container=namespace.destination_container, blob=namespace.destination_blob,
             share=namespace.destination_share, file_path=namespace.destination_file_path)
-        namespace.destination = _add_sas_for_url(cmd, url=namespace.destination, account_name=namespace.account_name,
+        if not auth_mode_login:
+            namespace.destination = _add_sas_for_url(cmd, url=namespace.destination, account_name=namespace.account_name,
                                                  account_key=namespace.account_key, sas_token=namespace.sas_token,
                                                  service=service, resource_types='co', permissions='wac')
 
@@ -2050,7 +2075,8 @@ def validate_azcopy_credential(cmd, namespace):
             cmd, namespace, url=namespace.source,
             container=namespace.source_container, blob=namespace.source_blob,
             share=namespace.source_share, file_path=namespace.source_file_path)
-        namespace.source = _add_sas_for_url(cmd, url=namespace.source, account_name=namespace.account_name,
+        if not auth_mode_login:
+            namespace.source = _add_sas_for_url(cmd, url=namespace.source, account_name=namespace.account_name,
                                             account_key=namespace.account_key, sas_token=namespace.sas_token,
                                             service=service, resource_types='sco', permissions='rl')
 
