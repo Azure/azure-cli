@@ -4956,6 +4956,7 @@ def managed_instance_create(
         service_principal_type=None,
         zone_redundant=None,
         instance_pool_name=None,
+        authentication_metadata=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -4994,6 +4995,7 @@ def managed_instance_create(
     kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
 
     kwargs['zone_redundant'] = zone_redundant
+    kwargs['authentication_metadata'] = authentication_metadata
 
     ad_only = None
     if enable_ad_only_auth:
@@ -5083,7 +5085,8 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         zone_redundant=None,
         instance_pool_name=None,
         database_format=None,
-        pricing_model=None):
+        pricing_model=None,
+        authentication_metadata=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -5161,6 +5164,9 @@ def managed_instance_update(  # pylint: disable=too-many-locals
 
     if pricing_model is not None:
         instance.pricing_model = pricing_model
+
+    if authentication_metadata is not None:
+        instance.authentication_metadata = authentication_metadata
 
     return instance
 
