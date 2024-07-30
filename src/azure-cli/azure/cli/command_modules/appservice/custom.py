@@ -7000,7 +7000,7 @@ def _get_onedeploy_request_body(params):
 
     if params.src_path:
         logger.warning('Deploying from local path: %s', params.src_path)
-        
+
         if params.track_status is not None and params.track_status:
             client = web_client_factory(params.cmd.cli_ctx)
             app = client.web_apps.get(params.resource_group_name, params.webapp_name)
@@ -8340,6 +8340,7 @@ def _encrypt_github_actions_secret(public_key, secret_value):
 
 def show_webapp(cmd, resource_group_name, name, slot=None):  # adding this to not break extensions
     return show_app(cmd, resource_group_name, name, slot)
+
 
 def _compute_checksum(bytes):
     file_hash = None
