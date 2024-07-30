@@ -516,6 +516,7 @@ def cli_cosmosdb_update(client,
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
 
+
 def cli_cosmosdb_delete(client, resource_group_name, account_name, no_wait=False):
     return sdk_no_wait(no_wait, client.begin_delete,
                        resource_group_name=resource_group_name, account_name=account_name)
