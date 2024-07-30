@@ -789,11 +789,16 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     import os
     import requests
     from azure.cli.core.util import should_disable_connection_verify
-    # Read file content
+    # check if the app is a linux web app
+    app_is_linux_webapp = is_linux_webapp(app)
 
+    # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
         logger.warning("Starting zip deployment. This operation can take a while to complete ...")
+        if app_is_linux_webapp and track_status is not None and track_status:
+            headers["x-ms-artifact-checksum"] = _compute_checksum(zip_content)
+
         res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
@@ -6990,12 +6995,22 @@ def _get_onedeploy_status_url(params):
 
 def _get_onedeploy_request_body(params):
     import os
+    file_hash = None
+    app_is_linux_webapp = False
 
     if params.src_path:
         logger.warning('Deploying from local path: %s', params.src_path)
+
+        if params.track_status is not None and params.track_status:
+            client = web_client_factory(params.cmd.cli_ctx)
+            app = client.web_apps.get(params.resource_group_name, params.webapp_name)
+            app_is_linux_webapp = is_linux_webapp(app)
+
         try:
             with open(os.path.realpath(os.path.expanduser(params.src_path)), 'rb') as fs:
                 body = fs.read()
+                if app_is_linux_webapp:
+                    file_hash = _compute_checksum(body)
         except Exception as e:  # pylint: disable=broad-except
             raise ResourceNotFoundError("Either '{}' is not a valid local file path or you do not have permissions to "
                                         "access it".format(params.src_path)) from e
@@ -7016,7 +7031,7 @@ def _get_onedeploy_request_body(params):
     else:
         raise ResourceNotFoundError('Unable to determine source location of the artifact being deployed')
 
-    return body
+    return body, file_hash
 
 
 def _update_artifact_type(params):
@@ -7043,10 +7058,13 @@ def _make_onedeploy_request(params):
     from azure.cli.core.util import should_disable_connection_verify
 
     # Build the request body, headers, API URL and status URL
-    body = _get_onedeploy_request_body(params)
+    body, file_hash = _get_onedeploy_request_body(params)
     deploy_url = _build_onedeploy_url(params)
     deployment_status_url = _get_onedeploy_status_url(params)
     headers = _get_ondeploy_headers(params)
+
+    if file_hash:
+        headers["x-ms-artifact-checksum"] = file_hash
 
     # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
     # For that, set poll_async_deployment_for_debugging=True
@@ -8322,3 +8340,16 @@ def _encrypt_github_actions_secret(public_key, secret_value):
 
 def show_webapp(cmd, resource_group_name, name, slot=None):  # adding this to not break extensions
     return show_app(cmd, resource_group_name, name, slot)
+
+
+def _compute_checksum(input_bytes):
+    file_hash = None
+    try:
+        import hashlib
+        logger.info("Computing checksum of the file ...")
+        file_hash = hashlib.sha256(input_bytes).hexdigest()
+        logger.info("Computed checksum for deployment request header x-ms-artifact-checksum '%s'", file_hash)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.info("Computing the checksum of the file failed with exception:'%s'", ex)
+
+    return file_hash
