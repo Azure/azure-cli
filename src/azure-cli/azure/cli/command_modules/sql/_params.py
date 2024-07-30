@@ -2336,7 +2336,7 @@ def load_arguments(self, _):
 
         c.argument('zone_redundant',
                    arg_type=zone_redundant_param_type)
-        
+
         c.argument('authentication_metadata',
                    arg_type=authentication_metadata_param_type)
 
