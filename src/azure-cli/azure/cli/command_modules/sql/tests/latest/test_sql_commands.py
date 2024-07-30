@@ -1501,11 +1501,11 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
 
         print('Arguments are updated with login and sid data')
 
-        with self.assertRaisesRegexp(SystemExit, "2"):
+        with self.assertRaisesRegex(SystemExit, "2"):
             self.cmd('sql server ad-admin create -s {sn} -g {rg}')
-        with self.assertRaisesRegexp(SystemExit, "2"):
+        with self.assertRaisesRegex(SystemExit, "2"):
             self.cmd('sql server ad-admin create -s {sn} -g {rg} -u {user}')
-        with self.assertRaisesRegexp(SystemExit, "2"):
+        with self.assertRaisesRegex(SystemExit, "2"):
             self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid}')
 
         self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid} -u {user}',
