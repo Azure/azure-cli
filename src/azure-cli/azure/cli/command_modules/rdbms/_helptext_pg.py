@@ -509,12 +509,12 @@ short-summary: Create a new migration workflow for a flexible server.
 examples:
   - name: >
       Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the properties file. The different properties are defined as: \n
-      sourceDbServerResourceId: Source server details in the format for on-premises, Azure virtual machines (VMs), AWS_RDS. \n
+      sourceDbServerResourceId: Source server details. \n
       adminCredentials: This parameter lists passwords for admin users for both the source server and the target PostgreSQL flexible server. \n
       targetServerUserName: The default value is the admin user created during the creation of the PostgreSQL target flexible server, and the password provided is used for authentication against this user. \n
       dbsToMigrate: Specify the list of databases that you want to migrate to Flexible Server. \n
       overwriteDBsInTarget: When set to true (default), if the target server happens to have an existing database with the same name as the one you're trying to migrate, the migration service automatically overwrites the database. \n
-      Sample migrationConfig.json shown below. \n
+      Sample migrationConfig.json for PostgreSQLSingleServer shown below. \n
       {
         "properties": {
           "sourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
@@ -554,52 +554,52 @@ examples:
       az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
       --migration-name testmigration --properties "migrationConfig.json" --migration-option Migrate
   - name: >
-      To start a migration for other than PostgreSQLSingleServer, SoureType and SslMode must be specified in properties file. These properties are defined as: \n
+      To start a migration for other than PostgreSQLSingleServer, soureType and sslMode must be specified in properties file. These properties are defined as: \n
       sourceType: Values can be - on-premises, AWS_RDS, AzureVM, PostgreSQLSingleServer \n
       sslMode:  SSL modes for migration. SSL mode for PostgreSQLSingleServer is VerifyFull and Prefer/Require for other source types. \n
       Sample migrationConfig.json shown below. \n
       {
         "properties": {
-          "SourceDBServerResourceId": "20.66.25.58:5432@postgres",
-          "SecretParameters": {
-            "AdminCredentials": {
-              "SourceServerPassword": "password",
-              "TargetServerPassword": "password"
+          "sourceDBServerResourceId": "<<hostname or IP address>>:<<port>>@<<username>>",
+          "secretParameters": {
+            "adminCredentials": {
+              "sourceServerPassword": "password",
+              "targetServerPassword": "password"
             },
-            "SourceServerUserName": "postgres",
-            "TargetServerUserName": "fspguser"
+            "sourceServerUserName": "postgres",
+            "targetServerUserName": "fspguser"
           },
           "dBsToMigrate": [
             "ticketdb","timedb","inventorydb"
           ],
-          "OverwriteDbsInTarget": "true",
-          "SourceType": "OnPremises",
-          "SslMode": "Prefer"
+          "overwriteDbsInTarget": "true",
+          "sourceType": "OnPremises",
+          "sslMode": "Prefer"
         }
       }
     text: >
       az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
         --migration-name testmigration --properties "migrationConfig.json"
   - name: >
-      Start a private endpoint enabled migration workflow on the target server by specifying MigrationRuntimeResourceId in properties file. This property is defined as: \n
+      Start a private endpoint enabled migration workflow on the target server by specifying migrationRuntimeResourceId in properties file. This property is defined as: \n
       migrationRuntimeResourceId: The resource ID of the migration runtime server that is responsible for migrating data between source and target server. \n
-      Sample migrationConfig.json will look like this: \n
+      Sample migrationConfig.json shown below. \n
       {
         "properties": {
-          "SourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
-          "MigrationRuntimeResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testsourcemigration",
-          "SecretParameters": {
-            "AdminCredentials": {
-              "SourceServerPassword": "password",
-              "TargetServerPassword": "password"
+          "sourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
+          "migrationRuntimeResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testsourcemigration",
+          "secretParameters": {
+            "adminCredentials": {
+              "sourceServerPassword": "password",
+              "targetServerPassword": "password"
             },
-            "SourceServerUserName": "testuser@pg-single-1",
-            "TargetServerUserName": "fspguser"
+            "sourceServerUserName": "testuser@pg-single-1",
+            "targetServerUserName": "fspguser"
           },
           "dBsToMigrate": [
             "postgres"
           ],
-          "OverwriteDbsInTarget": "true"
+          "overwriteDbsInTarget": "true"
         }
       }
     text: >
