@@ -53,7 +53,7 @@ Release History
 
 **Cosmos DB**
 
-* `az cosmosdb delete`: Add no-wait (#29190)
+* `az cosmosdb delete`: Support `--no-wait` (#29190)
 
 **MySQL**
 
