@@ -6,7 +6,7 @@ Release History
 2.63.0
 ++++++
 * Resolve CVE-2024-39689 (#29320)
-* Set `allow-preview` from config for extension dynamic installation (#29413)
+* Support `az config set extension.dynamic_install_allow_preview` for extension dynamic installation configuration (#29413)
 * Resolve CVE-2024-6345 (#29433)
 * `az logout`: Remove service principal access tokens from token cache (#29441)
 
