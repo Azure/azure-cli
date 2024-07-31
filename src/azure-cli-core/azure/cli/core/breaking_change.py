@@ -4,7 +4,73 @@
 # --------------------------------------------------------------------------------------------
 import abc
 
+from knack.util import StatusTag, color_map
+
 NEXT_BREAKING_CHANGE_RELEASE = '2.67.0'
+DEFAULT_BREAKING_CHANGE_TAG = '[BrkChange]'
+
+
+class UpcomingBreakingChangeTag(StatusTag):
+    def __init__(self, cli_ctx, object_type='', target=None, target_version=None, tag_func=None, message_func=None):
+        def _default_get_message(bc):
+            msg = f"A breaking change may occur to this {bc.object_type} "
+            if isinstance(target_version, TargetVersion):
+                msg += str(target_version) + '.'
+            elif isinstance(target_version, str):
+                msg += 'in ' + target_version + '.'
+            else:
+                msg += 'in future release.'
+                return msg
+
+        if isinstance(message_func, str):
+            message_func = lambda _: message_func
+
+        self.target_version = target_version
+        super().__init__(
+            cli_ctx=cli_ctx,
+            object_type=object_type,
+            target=target,
+            color=color_map['deprecation'],
+            tag_func=tag_func or (lambda _: DEFAULT_BREAKING_CHANGE_TAG),
+            message_func=message_func or _default_get_message
+        )
+
+    def expired(self):
+        return False
+
+
+class MergedTag(StatusTag):
+
+    def __init__(self, cli_ctx, *tags):
+        assert len(tags) > 0
+        tag = tags[0]
+
+        def _get_merged_tag(self):
+            return ''.join(set([tag._get_tag(self) for tag in tags]))
+
+        def _get_merged_msg(self):
+            return '\n'.join(set([tag._get_message(self) for tag in tags]))
+
+        super().__init__(cli_ctx, tag.object_type, tag.target, tag_func=_get_merged_tag,
+                         message_func=_get_merged_msg, color=tag._color)
+        self.tags = tags
+
+    def hidden(self):
+        return any([tag.hidden() for tag in self.tags])
+
+    def show_in_help(self):
+        return any([tag.show_in_help() for tag in self.tags])
+
+    def expired(self):
+        return any([tag.expired() for tag in self.tags])
+
+    @property
+    def tag(self):
+        return ''.join(set([str(tag.tag) for tag in self.tags]))
+
+    @property
+    def message(self):
+        return '\n'.join(set([str(tag.message) for tag in self.tags]))
 
 
 def _next_breaking_change_version():
@@ -53,19 +119,122 @@ class UnspecificVersion(TargetVersion):
 
 
 class BreakingChange(abc.ABC):
-    @property
-    @abc.abstractmethod
-    def message(self):
-        pass
+    def __init__(self, cmd, arg=None, target=None):
+        self.cmd = cmd
+        if isinstance(arg, str):
+            self.args = [arg]
+        elif isinstance(arg, list):
+            self.args = arg
+        else:
+            self.args = []
+        self.target = target if target else '/'.join(self.args) if self.args else self.cmd
 
     @property
-    @abc.abstractmethod
+    def message(self):
+        return ''
+
+    @property
     def target_version(self):
-        pass
+        return UnspecificVersion()
 
     @staticmethod
     def format_doc_link(doc_link):
         return f' To know more about the Breaking Change, please visit {doc_link}.' if doc_link else ''
+
+    @property
+    def command_name(self):
+        if self.cmd.startswith('az '):
+            return self.cmd[3:].strip()
+        else:
+            return self.cmd
+
+    def is_command_group(self, cli_ctx):
+        return self.command_name in cli_ctx.invocation.commands_loader.command_group_table
+
+    def to_tag(self, cli_ctx):
+        if self.args:
+            object_type = 'argument'
+        elif self.is_command_group(cli_ctx):
+            object_type = 'command group'
+        else:
+            object_type = 'command'
+        return UpcomingBreakingChangeTag(cli_ctx, object_type, target=self.target, target_version=self.target_version,
+                                         message_func=lambda _: self.message)
+
+    def apply(self, cli_ctx):
+        def _handle_argument_deprecation(deprecate_info, parent_class):
+
+            class DeprecatedArgumentAction(parent_class):
+
+                def __call__(self, parser, namespace, values, option_string=None):
+                    if not hasattr(namespace, '_argument_deprecations'):
+                        setattr(namespace, '_argument_deprecations', [deprecate_info])
+                    else:
+                        namespace._argument_deprecations.append(deprecate_info)  # pylint: disable=protected-access
+                    try:
+                        super().__call__(parser, namespace, values, option_string)
+                    except NotImplementedError:
+                        setattr(namespace, self.dest, values)
+
+            return DeprecatedArgumentAction
+
+        def find_arg(arg_name, arguments):
+            if arg_name in arguments:
+                return arg_name, arguments[arg_name]
+            for key, argument in arguments.items():
+                for option in argument.options_list or []:
+                    if arg_name == option:
+                        return key, argument
+            trimmed_arg_name = arg_name.strip('-').replace('-', '_')
+            if trimmed_arg_name in arguments:
+                return trimmed_arg_name, arguments[trimmed_arg_name]
+            return None, None
+
+        def iter_direct_sub_cg(cg_name):
+            for key, command_group in cli_ctx.invocation.commands_loader.command_group_table.items():
+                if key.rsplit(maxsplit=1)[0] == cg_name:
+                    from azure.cli.core.commands import AzCommandGroup
+                    if isinstance(command_group, AzCommandGroup):
+                        yield command_group
+                    else:
+                        yield from iter_direct_sub_cg(key)
+
+        def upsert_breaking_change(command_group, tag):
+            command_group.group_kwargs['deprecate_info'] = tag
+
+        if self.args:
+            for arg_name in self.args:
+                #     arg_name, arg_type = find_arg(arg)
+                #     # if arg_type and 'deprecate_info' in arg_type.settings:
+                #     #     arg_type.settings['deprecate_info'] = self.to_tag(cli_ctx)
+                #     # else:
+                #     #     arg_type.settings['upcoming_breaking_change'] = [self.to_tag(cli_ctx)]
+                #     if not arg_type:
+                #         continue
+                #     for loader in cli_ctx.invocation.commands_loader.cmd_to_loader_map[self.command_name]:
+                #         with loader.argument_context(self.command_name) as c:
+                #             c.argument(arg_name, arg_type=arg_type, deprecate_info=self.to_tag(cli_ctx))
+                # cli_ctx.invocation.commands_loader._update_command_definitions()
+                command = cli_ctx.invocation.commands_loader.command_table.get(self.cmd)
+                if not command:
+                    return
+                arg_name, arg = find_arg(arg_name, command.arguments)
+                if not arg:
+                    continue
+                arg.deprecate_info = self.to_tag(cli_ctx)
+                arg.action = _handle_argument_deprecation(arg.deprecate_info, arg.options['action'])
+        elif self.is_command_group(cli_ctx):
+            command_group = cli_ctx.invocation.commands_loader.command_group_table[self.command_name]
+            if not command_group:
+                for command_group in iter_direct_sub_cg(self.command_name):
+                    upsert_breaking_change(command_group, self.to_tag(cli_ctx))
+            else:
+                upsert_breaking_change(command_group, self.to_tag(cli_ctx))
+        else:
+            command = cli_ctx.invocation.commands_loader.command_table.get(self.cmd)
+            if not command:
+                return
+            command.deprecate_info = self.to_tag(cli_ctx)
 
 
 class AzCLIRemoveChange(BreakingChange):
@@ -79,8 +248,9 @@ class AzCLIRemoveChange(BreakingChange):
     :param redirect: alternative way to replace the old behavior
     :param doc_link: link of the related document
     """
-    def __init__(self, target, target_version=NextBreakingChangeWindow(), redirect=None, doc_link=None):
-        self.target = target
+
+    def __init__(self, cmd, arg=None, target_version=NextBreakingChangeWindow(), target=None, redirect=None, doc_link=None):
+        super().__init__(cmd, arg, target)
         self._target_version = target_version
         self.alter = redirect
         self.doc_link = doc_link
@@ -108,8 +278,9 @@ class AzCLIRenameChange(BreakingChange):
     :type target_version: TargetVersion
     :param doc_link: link of the related document
     """
-    def __init__(self, target, new_name, target_version=NextBreakingChangeWindow(), doc_link=None):
-        self.target = target
+
+    def __init__(self, cmd, new_name, arg=None, target=None, target_version=NextBreakingChangeWindow(), doc_link=None):
+        super().__init__(cmd, arg, target)
         self.new_name = new_name
         self._target_version = target_version
         self.doc_link = doc_link
@@ -133,7 +304,9 @@ class AzCLIOutputChange(BreakingChange):
     :param guide: how to adapt to the change
     :param doc_link: link of the related document
     """
-    def __init__(self, description: str, target_version=NextBreakingChangeWindow(), guide=None, doc_link=None):
+
+    def __init__(self, cmd, description: str, target_version=NextBreakingChangeWindow(), guide=None, doc_link=None):
+        super().__init__(cmd, None, None)
         self.desc = description
         self._target_version = target_version
         self.guide = guide
@@ -167,7 +340,9 @@ class AzCLILogicChange(BreakingChange):
     :param detail: detailed information
     :param doc_link: link of the related document
     """
-    def __init__(self, summary, target_version=NextBreakingChangeWindow(), detail=None, doc_link=None):
+
+    def __init__(self, cmd, summary, target_version=NextBreakingChangeWindow(), detail=None, doc_link=None):
+        super().__init__(cmd, None, None)
         self.summary = summary
         self._target_version = target_version
         self.detail = detail
@@ -193,7 +368,10 @@ class AzCLIDefaultChange(BreakingChange):
     :type target_version: TargetVersion
     :param doc_link: link of the related document
     """
-    def __init__(self, target, current_default, new_default, target_version=NextBreakingChangeWindow(), doc_link=None):
+
+    def __init__(self, cmd, arg, current_default, new_default, target_version=NextBreakingChangeWindow(),
+                 target=None, doc_link=None):
+        super().__init__(cmd, arg, target)
         self.target = target
         self.current_default = current_default
         self.new_default = new_default
@@ -219,8 +397,9 @@ class AzCLIBeRequired(BreakingChange):
     :type target_version: TargetVersion
     :param doc_link: link of the related document
     """
-    def __init__(self, target, target_version=NextBreakingChangeWindow(), doc_link=None):
-        self.target = target
+
+    def __init__(self, cmd, arg, target_version=NextBreakingChangeWindow(), target=None, doc_link=None):
+        super().__init__(cmd, arg, target)
         self._target_version = target_version
         self.doc_link = doc_link
 
@@ -241,7 +420,9 @@ class AzCLIOtherChange(BreakingChange):
     :param target_version: version where the breaking change is expected to happen.
     :type target_version: TargetVersion
     """
-    def __init__(self, message, target_version=NextBreakingChangeWindow()):
+
+    def __init__(self, cmd, message, arg=None, target=None, target_version=NextBreakingChangeWindow()):
+        super().__init__(cmd, arg, target)
         self._message = message
         self._target_version = target_version
 
@@ -271,6 +452,20 @@ def import_extension_breaking_changes(ext_mod):
         import_module(ext_mod + '._breaking_change')
     except ImportError:
         pass
+
+
+def register_upcoming_breaking_change_info(cli_ctx):
+    from knack import events
+
+    def update_breaking_change_info(cli_ctx, **kwargs):
+        for bc in upcoming_breaking_changes.values():
+            if isinstance(bc, list):
+                for bc in bc:
+                    bc.apply(cli_ctx)
+            else:
+                bc.apply(cli_ctx)
+
+    cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, update_breaking_change_info)
 
 
 def iter_command_breaking_changes(cmd):

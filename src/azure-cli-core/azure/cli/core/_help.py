@@ -61,7 +61,6 @@ class CLIPrintMixin(CLIHelp):
 
     def _print_detailed_help(self, cli_name, help_file):
         CLIPrintMixin._print_extensions_msg(help_file)
-        CLIPrintMixin._print_break_change_msg(help_file)
         super(CLIPrintMixin, self)._print_detailed_help(cli_name, help_file)
         self._print_az_find_message(help_file.command)
 
@@ -127,16 +126,6 @@ class CLIPrintMixin(CLIHelp):
             #     logger.warning(help_file.command_source.get_experimental_warn_msg())
             # elif help_file.command_source.preview:
             #     logger.warning(help_file.command_source.get_preview_warn_msg())
-
-    @staticmethod
-    def _print_break_change_msg(help_file):
-        from azure.cli.core.breaking_change import iter_command_breaking_changes, BreakingChange
-
-        for bc in iter_command_breaking_changes(help_file.command):
-            if isinstance(bc, str):
-                logger.warning(bc)
-            elif isinstance(bc, BreakingChange):
-                logger.warning(bc.message)
 
 
 class AzCliHelp(CLIPrintMixin, CLIHelp):
@@ -260,6 +249,44 @@ class CliHelpFile(KnackHelpFile):
         # Each help file (for a command or group) has a version denoting the source of its data.
         super(CliHelpFile, self).__init__(help_ctx, delimiters)
         self.links = []
+
+        from knack.deprecation import resolve_deprecate_info, ImplicitDeprecated, Deprecated
+        from azure.cli.core.breaking_change import UpcomingBreakingChangeTag, MergedTag
+        direct_deprecate_info = None
+        breaking_changes = []
+        deprecate_info = resolve_deprecate_info(help_ctx.cli_ctx, delimiters)
+        if isinstance(deprecate_info, Deprecated):
+            direct_deprecate_info = deprecate_info
+        elif isinstance(deprecate_info, UpcomingBreakingChangeTag):
+            breaking_changes.append(deprecate_info)
+
+        # search for implicit deprecation
+        path_comps = delimiters.split()[:-1]
+        implicit_deprecate_info = None
+        while path_comps:
+            deprecate_info = resolve_deprecate_info(help_ctx.cli_ctx, ' '.join(path_comps))
+            if isinstance(deprecate_info, Deprecated) and implicit_deprecate_info is None:
+                implicit_deprecate_info = deprecate_info
+            elif isinstance(deprecate_info, UpcomingBreakingChangeTag):
+                breaking_changes.append(deprecate_info)
+            del path_comps[-1]
+
+        if implicit_deprecate_info:
+            deprecate_kwargs = implicit_deprecate_info.__dict__.copy()
+            deprecate_kwargs['object_type'] = 'command' if delimiters in \
+                help_ctx.cli_ctx.invocation.commands_loader.command_table else 'command group'
+            del deprecate_kwargs['_get_tag']
+            del deprecate_kwargs['_get_message']
+            self.deprecate_info = ImplicitDeprecated(cli_ctx=help_ctx.cli_ctx, **deprecate_kwargs)
+        else:
+            self.deprecate_info = direct_deprecate_info
+
+        all_deprecate_info = [self.deprecate_info] if self.deprecate_info else []
+        all_deprecate_info.extend(breaking_changes)
+        if len(all_deprecate_info) > 1:
+            self.deprecate_info = MergedTag(help_ctx.cli_ctx, *all_deprecate_info)
+        elif all_deprecate_info:
+            self.deprecate_info = all_deprecate_info[0]
 
     def _should_include_example(self, ex):
         supported_profiles = ex.get('supported-profiles')

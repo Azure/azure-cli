@@ -58,6 +58,7 @@ class AzCli(CLI):
     def __init__(self, **kwargs):
         super(AzCli, self).__init__(**kwargs)
 
+        from azure.cli.core.breaking_change import register_upcoming_breaking_change_info
         from azure.cli.core.commands import register_cache_arguments
         from azure.cli.core.commands.arm import (
             register_ids_argument, register_global_subscription_argument)
@@ -90,6 +91,7 @@ class AzCli(CLI):
         register_global_subscription_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
         register_cache_arguments(self)
+        register_upcoming_breaking_change_info(self)
 
         self.progress_controller = None
 
