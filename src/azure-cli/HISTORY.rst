@@ -13,7 +13,7 @@ Release History
 **AKS**
 
 * `az aks create`: Not set the `--network-plugin` based on the default from the Python SDK (#29388)
-* `az aks create/update`: Support in place param updates for managed prom (#29273)
+* `az aks create/update`: Support in place param updates for managed Prometheus (#29273)
 * `az aks create/update`: Add validations for PremiumV2 disk (#29445)
 * `az aks upgrade`: Support tier switch with AKS upgrade (#29448)
 * `az aks create/update`: Add `--network-policy none` option to command (#29420)
