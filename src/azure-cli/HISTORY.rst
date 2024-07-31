@@ -26,7 +26,7 @@ Release History
 **App Service**
 
 * `az webapp list-runtimes`: Add parameter `--show-runtime-details` to show detailed runtime stacks and update the format of java related stacks listed (#29367)
-* `az webapp create`: Add parameter `--acr-identity` to allow users choose user assigned identity they want to use for ACR image pull (#29321)
+* `az webapp create`: Add parameter `--acr-identity` to allow users to choose user assigned identity for ACR image pull (#29321)
 * `az webapp config set`: Add parameter `--acr-use-identity` and `--acr-identity` to allow users update ACR image pull related configs (#29321)
 
 **ARM**
