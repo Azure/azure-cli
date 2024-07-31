@@ -72,7 +72,7 @@ Release History
 **RDBMS**
 
 * [BREAKING CHANGE] `az postgres flexible-server create`: Update default value of PG version to be 16 (#29443)
-* `az postgres flexible-server create`: Bug fix for using existing subnet while creating pg flex server (#29457)
+* Fix #27422: `az postgres flexible-server create`: Bug fix for using existing subnet while creating pg flex server (#29457)
 * `az postgres flexible-server restore`: Bug fix when using resource id as value for source-server argument (#29460)
 
 **Role**
