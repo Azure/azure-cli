@@ -46,6 +46,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'rg_loc': location,
             'rg': resource_group,
             'sku': standard_sku,
+            'sku': standard_sku,
             'tags': tag,
             'identity': system_assigned_identity,
             'retention_days': 1,
@@ -58,6 +59,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                                  self.check('resourceGroup', resource_group),
                                  self.check('provisioningState', 'Succeeded'),
                                  self.check('sku.name', standard_sku),
+                                 self.check('sku.name', standard_sku),
                                  self.check('tags', structured_tag),
                                  self.check('identity.type', 'SystemAssigned'),
                                  self.check('softDeleteRetentionInDays', '{retention_days}'),
@@ -69,6 +71,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('[0].resourceGroup', resource_group),
                          self.check('[0].provisioningState', 'Succeeded'),
                          self.check('[0].sku.name', standard_sku),
+                         self.check('[0].sku.name', standard_sku),
                          self.check('[0].tags', structured_tag),
                          self.check('[0].identity.type', 'SystemAssigned')])
 
@@ -77,6 +80,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
                          self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', standard_sku),
                          self.check('sku.name', standard_sku),
                          self.check('tags', structured_tag),
                          self.check('identity.type', 'SystemAssigned')])
@@ -119,6 +123,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('resourceGroup', resource_group),
                          self.check('tags', structured_tag),
                          self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', premium_sku),
                          self.check('sku.name', premium_sku),
                          self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
 
