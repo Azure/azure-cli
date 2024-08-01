@@ -69,6 +69,19 @@ finally:
                 init_finish_time - start_time,
                 invoke_finish_time - init_finish_time)
 
+    import os
+    from azure.cli.core._environment import _ENV_AZ_INSTALLER
+
+    if os.getenv(_ENV_AZ_INSTALLER) == 'DOCKER':
+        import distro
+
+        if distro.id() == 'alpine' and az_cli.config.getboolean('core', 'show_alpine_warning', True):
+            logger.warning("Azure CLI 2.63.0 is the last version supported on the Alpine docker image. Microsoft will not "
+                           "be providing additional updates or bug fixes for this image. Consider migrating to the Azure "
+                           "Linux based image for the Azure CLI, which is fully supported."
+                           "For more details, see https://learn.microsoft.com/en-us/cli/azure/run-azure-cli-docker\n\n"
+                           "To hide this warning, please run `az config set core.show_alpine_warning=false`")
+
     try:
         # check for new version auto-upgrade
         if exit_code == 0 and az_cli.config.getboolean('auto-upgrade', 'enable', False) and \
