@@ -32,7 +32,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     def test_azconfig_mgmt(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='MgmtTest', length=24)
 
-        location = 'centraluseuap'
+        location = 'eastus'
         standard_sku = 'standard'
         premium_sku = 'premium'
         tag_key = "key"
@@ -137,15 +137,18 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
-        # create store with premium sku
+        # create store in premium tier with replica
         config_store_name = self.create_random_name(prefix='MgmtTestPremiumSku', length=24)
+        replica_name = self.create_random_name(prefix='MgmtTestPremiumSkuReplica', length=24)
         
         self.kwargs.update({
             "premium_sku": premium_sku,
-            "config_store_name": config_store_name
+            "config_store_name": config_store_name,
+            "replica_name": replica_name,
+            "replica_location": "westus"
         })
 
-        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {premium_sku} --tags {tags} --assign-identity {identity} --retention-days {retention_days} --enable-purge-protection {enable_purge_protection}',
+        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {premium_sku} --tags {tags} --assign-identity {identity} --retention-days {retention_days} --enable-purge-protection {enable_purge_protection} --replica-name {replica_name} --replica-location {replica_location}',
                          checks=[self.check('name', '{config_store_name}'),
                                  self.check('location', '{rg_loc}'),
                                  self.check('resourceGroup', resource_group),
@@ -173,6 +176,23 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('sku.name', premium_sku),
                          self.check('tags', structured_tag),
                          self.check('identity.type', 'SystemAssigned')])
+        
+        self.cmd('appconfig replica show -s {config_store_name} -g {rg} -n {replica_name}',
+                 checks=[self.check('name', '{replica_name}'),
+                         self.check('location', '{replica_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('appconfig replica list -s {config_store_name}',
+                 checks=[self.check('[0].name', '{replica_name}'),
+                         self.check('[0].location', '{replica_loc}'),
+                         self.check('[0].resourceGroup', resource_group),
+                         self.check('[0].provisioningState', 'Succeeded')])
+
+        self.cmd('appconfig replica delete -s {config_store_name} -g {rg} -n {replica_name} -y')
+
+        with self.assertRaisesRegex(ResourceNotFoundError, f"The replica '{replica_name}' for App Configuration '{config_store_name}' not found."):
+            self.cmd('appconfig replica show -s {config_store_name} -g {rg} -n {replica_name}')
         
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
