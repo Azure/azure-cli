@@ -433,7 +433,7 @@ class VolumeUpdate(_VolumeUpdate):
             arg_group="Properties",
             help="Name or Resource ID of the vnet. If you want to use a vnet in other resource group or subscription, please provide the Resource ID instead of the name of the vnet.",
             required=False,
-        )        
+        )
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
             maximum=2457600,
             minimum=50
