@@ -14,6 +14,7 @@ import re
 import sys
 import time
 import copy
+from collections import OrderedDict
 from importlib import import_module
 
 from azure.cli.core.breaking_change import UpcomingBreakingChangeTag
@@ -752,7 +753,11 @@ class AzCliCommandInvoker(CommandInvoker):
         self._resolve_extension_override_warning(cmd)
 
     def _resolve_preview_and_deprecation_warnings(self, cmd, parsed_args):
-        deprecations = [] + getattr(parsed_args, '_argument_deprecations', [])
+        deprecations = getattr(parsed_args, '_argument_deprecations', [])
+        # Dedup the deprecations
+        # If an argument has multiple breaking changes or deprecations,
+        # duplicated deprecations would be produced due to the inherent logic of action
+        deprecations = list(OrderedDict.fromkeys(deprecations))
         if cmd.deprecate_info:
             deprecations.append(cmd.deprecate_info)
 

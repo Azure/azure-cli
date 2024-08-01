@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import abc
 
+from knack.deprecation import Deprecated
 from knack.util import StatusTag, color_map
 
 NEXT_BREAKING_CHANGE_RELEASE = '2.67.0'
@@ -44,16 +45,19 @@ class MergedTag(StatusTag):
     def __init__(self, cli_ctx, *tags):
         assert len(tags) > 0
         tag = tags[0]
+        self.tags = list(tags)
 
         def _get_merged_tag(self):
-            return ''.join(set([tag._get_tag(self) for tag in tags]))
+            return ''.join(set([tag._get_tag(self) for tag in self.tags]))
 
         def _get_merged_msg(self):
-            return '\n'.join(set([tag._get_message(self) for tag in tags]))
+            return '\n'.join(set([tag._get_message(self) for tag in self.tags]))
 
         super().__init__(cli_ctx, tag.object_type, tag.target, tag_func=_get_merged_tag,
                          message_func=_get_merged_msg, color=tag._color)
-        self.tags = tags
+
+    def merge(self, other):
+        self.tags.append(other)
 
     def hidden(self):
         return any([tag.hidden() for tag in self.tags])
@@ -162,15 +166,19 @@ class BreakingChange(abc.ABC):
                                          message_func=lambda _: self.message)
 
     def apply(self, cli_ctx):
-        def _handle_argument_deprecation(deprecate_info, parent_class):
+        def _argument_breaking_change_action(status_tag, parent_class):
 
             class DeprecatedArgumentAction(parent_class):
 
                 def __call__(self, parser, namespace, values, option_string=None):
                     if not hasattr(namespace, '_argument_deprecations'):
-                        setattr(namespace, '_argument_deprecations', [deprecate_info])
+                        setattr(namespace, '_argument_deprecations', [])
+                    if isinstance(status_tag, MergedTag):
+                        for tag in status_tag.tags:
+                            namespace._argument_deprecations.append(tag)
                     else:
-                        namespace._argument_deprecations.append(deprecate_info)  # pylint: disable=protected-access
+                        if status_tag not in namespace._argument_deprecations:
+                            namespace._argument_deprecations.append(status_tag)
                     try:
                         super().__call__(parser, namespace, values, option_string)
                     except NotImplementedError:
@@ -178,12 +186,22 @@ class BreakingChange(abc.ABC):
 
             return DeprecatedArgumentAction
 
+        def update_option(option_name, arguments):
+            for key, argument in arguments.items():
+                if argument.options_list and len(argument.options_list) > 1:
+                    for idx, option in enumerate(argument.options_list):
+                        if isinstance(option, str) and option_name == option and isinstance(self, AzCLIDeprecate):
+                            argument.options_list[idx] = self.to_tag(cli_ctx)
+                            argument.options_list[idx].target = option
+                            return True
+            return False
+
         def find_arg(arg_name, arguments):
             if arg_name in arguments:
                 return arg_name, arguments[arg_name]
             for key, argument in arguments.items():
                 for option in argument.options_list or []:
-                    if arg_name == option:
+                    if arg_name == option or (isinstance(option, Deprecated) and arg_name == option.target):
                         return key, argument
             trimmed_arg_name = arg_name.strip('-').replace('-', '_')
             if trimmed_arg_name in arguments:
@@ -204,25 +222,21 @@ class BreakingChange(abc.ABC):
 
         if self.args:
             for arg_name in self.args:
-                #     arg_name, arg_type = find_arg(arg)
-                #     # if arg_type and 'deprecate_info' in arg_type.settings:
-                #     #     arg_type.settings['deprecate_info'] = self.to_tag(cli_ctx)
-                #     # else:
-                #     #     arg_type.settings['upcoming_breaking_change'] = [self.to_tag(cli_ctx)]
-                #     if not arg_type:
-                #         continue
-                #     for loader in cli_ctx.invocation.commands_loader.cmd_to_loader_map[self.command_name]:
-                #         with loader.argument_context(self.command_name) as c:
-                #             c.argument(arg_name, arg_type=arg_type, deprecate_info=self.to_tag(cli_ctx))
-                # cli_ctx.invocation.commands_loader._update_command_definitions()
                 command = cli_ctx.invocation.commands_loader.command_table.get(self.cmd)
                 if not command:
                     return
+                if update_option(arg_name, command.arguments):
+                    continue
                 arg_name, arg = find_arg(arg_name, command.arguments)
                 if not arg:
                     continue
-                arg.deprecate_info = self.to_tag(cli_ctx)
-                arg.action = _handle_argument_deprecation(arg.deprecate_info, arg.options['action'])
+                if isinstance(arg.deprecate_info, Deprecated) or isinstance(arg.deprecate_info, UpcomingBreakingChangeTag):
+                    arg.deprecate_info = MergedTag(cli_ctx, arg.deprecate_info, self.to_tag(cli_ctx))
+                elif isinstance(arg.deprecate_info, MergedTag):
+                    arg.deprecate_info.merge(self.to_tag(cli_ctx))
+                else:
+                    arg.deprecate_info = self.to_tag(cli_ctx)
+                arg.action = _argument_breaking_change_action(arg.deprecate_info, arg.options['action'])
         elif self.is_command_group(cli_ctx):
             command_group = cli_ctx.invocation.commands_loader.command_group_table[self.command_name]
             if not command_group:
@@ -235,6 +249,30 @@ class BreakingChange(abc.ABC):
             if not command:
                 return
             command.deprecate_info = self.to_tag(cli_ctx)
+
+
+class AzCLIDeprecate(BreakingChange):
+    def __init__(self, cmd, arg=None, **kwargs):
+        super().__init__(cmd, arg, None)
+        self.kwargs = kwargs
+
+    def message(self):
+        msg = "`{}` has been deprecated and will be removed ".format(self.target)
+        if self.kwargs.get('expiration'):
+            msg += "in version '{}'.".format(self.kwargs.get('expiration'))
+        else:
+            msg += 'in a future release.'
+        if self.kwargs.get('redirect'):
+            msg += " Use '{}' instead.".format(self.kwargs.get('redirect'))
+
+    def target_version(self):
+        if self.kwargs.get('expiration'):
+            return ExactVersion(self.kwargs.get('expiration'))
+        else:
+            return UnspecificVersion()
+
+    def to_tag(self, cli_ctx):
+        return Deprecated(cli_ctx, **self.kwargs)
 
 
 class AzCLIRemoveChange(BreakingChange):
