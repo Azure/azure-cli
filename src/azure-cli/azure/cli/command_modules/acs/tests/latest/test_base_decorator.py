@@ -24,9 +24,9 @@ class BaseDecoratorHelperFunctionsTestCase(unittest.TestCase):
         self.assertEqual(validate_decorator_mode(DecoratorMode.CREATE), True)
         self.assertEqual(validate_decorator_mode(DecoratorMode.UPDATE), True)
         self.assertEqual(validate_decorator_mode(DecoratorMode), False)
-        # self.assertEqual(validate_decorator_mode(1), False)
+        self.assertEqual(validate_decorator_mode(1), False)
         self.assertEqual(validate_decorator_mode("1"), False)
-        # self.assertEqual(validate_decorator_mode(True), False)
+        self.assertEqual(validate_decorator_mode(True), False)
         self.assertEqual(validate_decorator_mode({}), False)
 
 
@@ -94,8 +94,8 @@ class BaseAKSContextTestCase(unittest.TestCase):
         with self.assertRaises(CLIInternalError):
             BaseAKSContext(self.cmd, [], self.models, decorator_mode=DecoratorMode.CREATE)
         # fail on not passing decorator_mode with Enum type DecoratorMode
-        # with self.assertRaises(CLIInternalError):
-        #     BaseAKSContext(self.cmd, BaseAKSParamDict({}), self.models, decorator_mode=1)
+        with self.assertRaises(CLIInternalError):
+            BaseAKSContext(self.cmd, BaseAKSParamDict({}), self.models, decorator_mode=1)
 
     def test_get_intermediate(self):
         ctx_1 = BaseAKSContext(self.cmd, BaseAKSParamDict({}), self.models, decorator_mode=DecoratorMode.CREATE)
