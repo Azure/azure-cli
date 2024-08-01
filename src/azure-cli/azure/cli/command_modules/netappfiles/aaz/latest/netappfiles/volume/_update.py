@@ -423,7 +423,6 @@ class Update(AAZCommand):
             options=["--usage-threshold"],
             arg_group="Properties",
             help={"short-summary": "Maximum storage quota allowed for a file system in GiB.", "long-summary": "Maximum storage quota allowed for a file system in bytes. This is a soft quota used for alerting only. For regular volumes, valid values are in the range 50GiB to 100TiB. For large volumes, valid values are in the range 100TiB to 500TiB, and on an exceptional basis, to 2400TiB."},
-            default=100,
             fmt=AAZIntArgFormat(
                 maximum=2638827906662400,
                 minimum=53687091200,
