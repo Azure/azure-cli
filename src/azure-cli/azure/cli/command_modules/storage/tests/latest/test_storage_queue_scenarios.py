@@ -27,7 +27,7 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
                  checks=JMESPathCheck('created', True))
         # Test create with fail-on-exist
         from azure.core.exceptions import ResourceExistsError
-        with self.assertRaisesRegexp(ResourceExistsError, 'The specified queue already exists.'):
+        with self.assertRaisesRegex(ResourceExistsError, 'The specified queue already exists.'):
             self.cmd(
                 'storage queue create -n {} --fail-on-exist --connection-string {}'.format(queue, connection_string))
 
@@ -64,7 +64,7 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
         # Test delete with fail-not-exist
         queue_not_exist = self.create_random_name('queue', 24)
         from azure.core.exceptions import ResourceNotFoundError
-        with self.assertRaisesRegexp(ResourceNotFoundError, 'The specified queue does not exist.'):
+        with self.assertRaisesRegex(ResourceNotFoundError, 'The specified queue does not exist.'):
             self.cmd('storage queue delete -n {} --fail-not-exist'.format(queue_not_exist))
 
         # check status of the queue

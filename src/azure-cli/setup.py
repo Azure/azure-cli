@@ -12,12 +12,12 @@ import sys
 try:
     from azure_cli_bdist_wheel import cmdclass
 except ImportError:
-    from distutils import log as logger
+    import logging
 
-    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.62.0"
+VERSION = "2.63.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:

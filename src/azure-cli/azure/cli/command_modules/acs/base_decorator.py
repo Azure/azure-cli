@@ -26,11 +26,9 @@ def validate_decorator_mode(decorator_mode) -> bool:
     :return: bool
     """
     is_valid_decorator_mode = False
-    try:
+
+    if isinstance(decorator_mode, DecoratorMode):
         is_valid_decorator_mode = decorator_mode in DecoratorMode
-    # will raise TypeError in Python >= 3.8
-    except TypeError:
-        pass
 
     return is_valid_decorator_mode
 

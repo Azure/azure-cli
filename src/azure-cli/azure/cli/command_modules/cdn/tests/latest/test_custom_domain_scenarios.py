@@ -187,7 +187,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         # Enable custom HTTPS with a custom certificate
         # With the latest service side change to move the certificate validation to RP layer, the request will be rejected.
-        with self.assertRaisesRegexp(HttpResponseError, "The certificate chain includes an invalid number of certificates. The number of certificates should be greater than 2"):
+        with self.assertRaisesRegex(HttpResponseError, "The certificate chain includes an invalid number of certificates. The number of certificates should be greater than 2"):
             self.custom_domain_enable_https_command(resource_group,
                                                     profile_name,
                                                     endpoint_name,
@@ -234,7 +234,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         # Enable custom HTTPS with the custom certificate.
         # With the latest service side change to move the certificate validation to RP layer, the request will be rejected.
-        with self.assertRaisesRegexp(HttpResponseError, "The certificate chain includes an invalid number of certificates. The number of certificates should be greater than 2"):
+        with self.assertRaisesRegex(HttpResponseError, "The certificate chain includes an invalid number of certificates. The number of certificates should be greater than 2"):
             self.custom_domain_enable_https_command(resource_group,
                                                     profile_name,
                                                     endpoint_name,
