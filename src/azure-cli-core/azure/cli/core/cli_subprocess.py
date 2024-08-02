@@ -7,7 +7,6 @@
 
 import subprocess
 import re
-from functools import wraps
 from knack.log import get_logger
 
 
@@ -53,59 +52,34 @@ def subprocess_arg_mask(args, kwargs):
 
 def subprocess_kwarg_mask(kwargs):
     if kwargs.get("shell", False):
-        logger.warning("Removed shell=True for cli processor")
+        logger.warning("Removed shell=True for cli subprocess")
         kwargs["shell"] = False
 
 
-def cli_subprocess_func_mask(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        subprocess_arg_type_check(*args, kwargs)
-        subprocess_arg_mask(*args, kwargs)
-        subprocess_kwarg_mask(kwargs)
-        return func(*args, **kwargs)
-    return wrapper
+def cli_subprocess_pre_parser(args, kwargs):
+    subprocess_arg_type_check(args, kwargs)
+    subprocess_arg_mask(args, kwargs)
+    subprocess_kwarg_mask(kwargs)
 
 
-def cli_subprocess_popen_init_mask(init_func):
-    @wraps(init_func)
-    def wrapper(self, *args, **kwargs):
-        subprocess_arg_type_check(*args, kwargs)
-        subprocess_arg_mask(*args, kwargs)
-        subprocess_kwarg_mask(kwargs)
-        return init_func(self, *args, **kwargs)
-
-    return wrapper
-
-
-def cli_subprocess_decorator(target):
-    if isinstance(target, type):
-        if '__init__' in target.__dict__:
-            target.__init__ = cli_subprocess_popen_init_mask(target.__init__)
-        return target
-    else:
-        return cli_subprocess_func_mask(target)
-
-
-@cli_subprocess_decorator
 def run(*popenargs, **kwargs):
     """Run command with arguments and remove shell=True
 
     The other arguments are the same as for the subprocess.run.
     """
+    cli_subprocess_pre_parser(*popenargs, kwargs)
     return subprocess.run(*popenargs, **kwargs)
 
 
-@cli_subprocess_decorator
 def call(*popenargs, **kwargs):
     """Run command with arguments and remove shell=True
 
     The other arguments are the same as for the subprocess.call.
     """
+    cli_subprocess_pre_parser(*popenargs, kwargs)
     return subprocess.call(*popenargs, **kwargs)
 
 
-@cli_subprocess_decorator
 def check_call(*popenargs, **kwargs):
     """Run command with arguments and remove shell=True
 
@@ -113,21 +87,22 @@ def check_call(*popenargs, **kwargs):
 
     check_call(["ls", "-l"])
     """
+    cli_subprocess_pre_parser(*popenargs, kwargs)
     return subprocess.check_call(*popenargs, **kwargs)
 
 
-@cli_subprocess_decorator
 def check_output(*popenargs, **kwargs):
     """Run command with arguments, remove shell=True, and return its output, as subprocess.check_output.
     """
+    cli_subprocess_pre_parser(*popenargs, kwargs)
     return subprocess.check_output(*popenargs, **kwargs)
 
 
-@cli_subprocess_decorator
 class CliPopen(subprocess.Popen):
     """
     Construct subprocess.Popen with masked shell kwargs to avoid security vulnerability
     """
 
     def __init__(self, *args, **kwargs):
+        cli_subprocess_pre_parser(*args, kwargs)
         super().__init__(*args, **kwargs)
