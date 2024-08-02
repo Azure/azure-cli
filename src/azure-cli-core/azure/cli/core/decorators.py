@@ -16,7 +16,6 @@ import hashlib
 from functools import wraps
 
 from knack.log import get_logger
-from azure.cli.core.util import subprocess_arg_mask, subprocess_kwarg_mask, subprocess_arg_type_check
 
 
 logger = get_logger(__name__)
@@ -114,33 +113,3 @@ def retry(retry_times=3, interval=0.5, exceptions=Exception):
                         raise  # End of retry. Re-raise the exception as-is.
         return _wrapped_func
     return _decorator
-
-
-def cli_subprocess_func_mask(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        subprocess_arg_type_check(*args, kwargs)
-        subprocess_arg_mask(*args, kwargs)
-        subprocess_kwarg_mask(kwargs)
-        return func(*args, **kwargs)
-    return wrapper
-
-
-def cli_subprocess_popen_init_mask(init_func):
-    @wraps(init_func)
-    def wrapper(self, *args, **kwargs):
-        subprocess_arg_type_check(*args, kwargs)
-        subprocess_arg_mask(*args, kwargs)
-        subprocess_kwarg_mask(kwargs)
-        return init_func(self, *args, **kwargs)
-
-    return wrapper
-
-
-def cli_subprocess_decorator(target):
-    if isinstance(target, type):
-        if '__init__' in target.__dict__:
-            target.__init__ = cli_subprocess_popen_init_mask(target.__init__)
-        return target
-    else:
-        return cli_subprocess_func_mask(target)

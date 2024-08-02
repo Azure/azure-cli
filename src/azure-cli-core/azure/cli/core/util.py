@@ -52,8 +52,6 @@ DISALLOWED_USER_NAMES = [
     "sys", "test2", "test3", "user4", "user5"
 ]
 
-ARG_MASK_CHAR = re.compile(r'[$;\s]')
-
 
 def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
@@ -1358,33 +1356,3 @@ def should_encrypt_token_cache(cli_ctx):
     encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
 
     return encrypt
-
-
-def subprocess_arg_type_check(args, kwargs):
-    skip_arg_type_check = kwargs.get("skip_arg_type_check", None)
-    if skip_arg_type_check is not None:
-        del kwargs["skip_arg_type_check"]
-    if skip_arg_type_check:
-        return
-    if isinstance(args, list):
-        return
-    from azure.cli.core.azclierror import ArgumentUsageError
-    raise ArgumentUsageError("cli_subprocess args should be a list of sequence")
-
-
-def subprocess_arg_mask(args, kwargs):
-    enable_arg_mask = kwargs.get("enable_arg_mask", None)
-    if enable_arg_mask is not None:
-        del kwargs["enable_arg_mask"]
-    if not enable_arg_mask:
-        return
-    if not isinstance(args, list):
-        return
-    for i, val in enumerate(args):
-        args[i] = re.sub(ARG_MASK_CHAR, "", val)
-
-
-def subprocess_kwarg_mask(kwargs):
-    if kwargs.get("shell", False):
-        logger.warning("Removed shell=True for cli processor")
-        kwargs["shell"] = False

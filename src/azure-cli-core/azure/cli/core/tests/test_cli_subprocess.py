@@ -31,7 +31,7 @@ class TestCliSubprocess(unittest.TestCase):
         if platform.system().lower() == "windows":
             cmd = ["cmd.exe", "/c"] + cmd
         output = cli_subprocess.check_output(cmd, stderr=subprocess.PIPE)
-        self.assertEqual(int(output), 0, "unexpected output when run cmd in check output")
+        self.assertEqual(output.decode("utf8").strip(), "abc", "unexpected output when run cmd in check output")
 
     def test_cli_subprocess_call(self):
         cmd = ["echo", "abc"]
