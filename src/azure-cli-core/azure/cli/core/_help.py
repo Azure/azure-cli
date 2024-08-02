@@ -251,7 +251,7 @@ class CliHelpFile(KnackHelpFile):
         self.links = []
 
         from knack.deprecation import resolve_deprecate_info, ImplicitDeprecated, Deprecated
-        from azure.cli.core.breaking_change import UpcomingBreakingChangeTag, MergedTag
+        from azure.cli.core.breaking_change import UpcomingBreakingChangeTag, MergedStatusTag
         direct_deprecate_info = None
         breaking_changes = []
         deprecate_info = resolve_deprecate_info(help_ctx.cli_ctx, delimiters)
@@ -284,7 +284,7 @@ class CliHelpFile(KnackHelpFile):
         all_deprecate_info = [self.deprecate_info] if self.deprecate_info else []
         all_deprecate_info.extend(breaking_changes)
         if len(all_deprecate_info) > 1:
-            self.deprecate_info = MergedTag(help_ctx.cli_ctx, *all_deprecate_info)
+            self.deprecate_info = MergedStatusTag(help_ctx.cli_ctx, *all_deprecate_info)
         elif all_deprecate_info:
             self.deprecate_info = all_deprecate_info[0]
 

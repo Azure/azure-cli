@@ -17,7 +17,7 @@ import copy
 from collections import OrderedDict
 from importlib import import_module
 
-from azure.cli.core.breaking_change import UpcomingBreakingChangeTag
+from azure.cli.core.breaking_change import UpcomingBreakingChangeTag, MergedStatusTag
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
     BLOCKED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
@@ -754,6 +754,14 @@ class AzCliCommandInvoker(CommandInvoker):
 
     def _resolve_preview_and_deprecation_warnings(self, cmd, parsed_args):
         deprecations = getattr(parsed_args, '_argument_deprecations', [])
+        for arg_name, argument in parsed_args.func.arguments.items():
+            if isinstance(argument.deprecate_info, UpcomingBreakingChangeTag):
+                if argument.deprecate_info.always_display:
+                    deprecations.append(argument.deprecate_info)
+            elif isinstance(argument.deprecate_info, MergedStatusTag):
+                for deprecation in argument.deprecate_info.tags:
+                    if isinstance(deprecation, UpcomingBreakingChangeTag) and deprecation.always_display:
+                        deprecations.append(deprecation)
         # Dedup the deprecations
         # If an argument has multiple breaking changes or deprecations,
         # duplicated deprecations would be produced due to the inherent logic of action

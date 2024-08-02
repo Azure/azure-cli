@@ -12,7 +12,8 @@ DEFAULT_BREAKING_CHANGE_TAG = '[BrkChange]'
 
 
 class UpcomingBreakingChangeTag(StatusTag):
-    def __init__(self, cli_ctx, object_type='', target=None, target_version=None, tag_func=None, message_func=None):
+    def __init__(self, cli_ctx, object_type='', target=None, target_version=None, tag_func=None, message_func=None,
+                 always_display=False):
         def _default_get_message(bc):
             msg = f"A breaking change may occur to this {bc.object_type} "
             if isinstance(target_version, TargetVersion):
@@ -26,6 +27,7 @@ class UpcomingBreakingChangeTag(StatusTag):
         if isinstance(message_func, str):
             message_func = lambda _: message_func
 
+        self.always_display = always_display
         self.target_version = target_version
         super().__init__(
             cli_ctx=cli_ctx,
@@ -40,7 +42,7 @@ class UpcomingBreakingChangeTag(StatusTag):
         return False
 
 
-class MergedTag(StatusTag):
+class MergedStatusTag(StatusTag):
 
     def __init__(self, cli_ctx, *tags):
         assert len(tags) > 0
@@ -155,15 +157,21 @@ class BreakingChange(abc.ABC):
     def is_command_group(self, cli_ctx):
         return self.command_name in cli_ctx.invocation.commands_loader.command_group_table
 
-    def to_tag(self, cli_ctx):
+    def to_tag(self, cli_ctx, **kwargs):
         if self.args:
             object_type = 'argument'
         elif self.is_command_group(cli_ctx):
             object_type = 'command group'
         else:
             object_type = 'command'
-        return UpcomingBreakingChangeTag(cli_ctx, object_type, target=self.target, target_version=self.target_version,
-                                         message_func=lambda _: self.message)
+        tag_kwargs = {
+            'object_type': object_type,
+            'target': self.target,
+            'target_version': self.target_version,
+            'message_func': lambda _: self.message,
+        }
+        tag_kwargs.update(kwargs)
+        return UpcomingBreakingChangeTag(cli_ctx, **tag_kwargs)
 
     def apply(self, cli_ctx):
         def _argument_breaking_change_action(status_tag, parent_class):
@@ -173,7 +181,7 @@ class BreakingChange(abc.ABC):
                 def __call__(self, parser, namespace, values, option_string=None):
                     if not hasattr(namespace, '_argument_deprecations'):
                         setattr(namespace, '_argument_deprecations', [])
-                    if isinstance(status_tag, MergedTag):
+                    if isinstance(status_tag, MergedStatusTag):
                         for tag in status_tag.tags:
                             namespace._argument_deprecations.append(tag)
                     else:
@@ -231,8 +239,8 @@ class BreakingChange(abc.ABC):
                 if not arg:
                     continue
                 if isinstance(arg.deprecate_info, Deprecated) or isinstance(arg.deprecate_info, UpcomingBreakingChangeTag):
-                    arg.deprecate_info = MergedTag(cli_ctx, arg.deprecate_info, self.to_tag(cli_ctx))
-                elif isinstance(arg.deprecate_info, MergedTag):
+                    arg.deprecate_info = MergedStatusTag(cli_ctx, arg.deprecate_info, self.to_tag(cli_ctx))
+                elif isinstance(arg.deprecate_info, MergedStatusTag):
                     arg.deprecate_info.merge(self.to_tag(cli_ctx))
                 else:
                     arg.deprecate_info = self.to_tag(cli_ctx)
@@ -271,8 +279,10 @@ class AzCLIDeprecate(BreakingChange):
         else:
             return UnspecificVersion()
 
-    def to_tag(self, cli_ctx):
-        return Deprecated(cli_ctx, **self.kwargs)
+    def to_tag(self, cli_ctx, **kwargs):
+        tag_kwargs = dict(self.kwargs)
+        tag_kwargs.update(kwargs)
+        return Deprecated(cli_ctx, **tag_kwargs)
 
 
 class AzCLIRemoveChange(BreakingChange):
@@ -295,7 +305,7 @@ class AzCLIRemoveChange(BreakingChange):
 
     @property
     def message(self):
-        alter = f' Please use {self.alter} instead.' if self.alter else ''
+        alter = f' Please use `{self.alter}` instead.' if self.alter else ''
         doc = self.format_doc_link(self.doc_link)
         return f'`{self.target}` will be removed {str(self._target_version)}.{alter}{doc}'
 
@@ -426,6 +436,11 @@ class AzCLIDefaultChange(BreakingChange):
     def target_version(self):
         return self._target_version
 
+    def to_tag(self, cli_ctx, **kwargs):
+        if 'always_display' not in kwargs:
+            kwargs['always_display'] = True
+        return super().to_tag(cli_ctx, **kwargs)
+
 
 class AzCLIBeRequired(BreakingChange):
     """
@@ -449,6 +464,11 @@ class AzCLIBeRequired(BreakingChange):
     @property
     def target_version(self):
         return self._target_version
+
+    def to_tag(self, cli_ctx, **kwargs):
+        if 'always_display' not in kwargs:
+            kwargs['always_display'] = True
+        return super().to_tag(cli_ctx, **kwargs)
 
 
 class AzCLIOtherChange(BreakingChange):
