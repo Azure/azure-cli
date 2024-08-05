@@ -501,7 +501,7 @@ class AzCLIBeRequired(BreakingChange):
     @property
     def message(self):
         doc = self.format_doc_link(self.doc_link)
-        return f'The argument `{self.target}` will become required {str(self._target_version)}.{doc}'
+        return f"The argument '{self.target}' will become required {str(self._target_version)}.{doc}"
 
     @property
     def target_version(self):
