@@ -436,7 +436,6 @@ class AzCLIDefaultChange(BreakingChange):
     def __init__(self, cmd, arg, current_default, new_default, target_version=NextBreakingChangeWindow(),
                  target=None, doc_link=None):
         super().__init__(cmd, arg, target, target_version)
-        self.target = target
         self.current_default = current_default
         self.new_default = new_default
         self.doc_link = doc_link
@@ -537,9 +536,10 @@ def announce_logic_breaking_change(command_name, summary, target_version=NextBre
     upcoming_breaking_changes.append(AzCLILogicChange(command_name, summary, target_version, detail, doc_link))
 
 
-def announce_default_value_breaking_change(command_name, summary, target_version=NextBreakingChangeWindow(),
-                                           detail=None, doc_link=None):
-    upcoming_breaking_changes.append(AzCLIDefaultChange(command_name, summary, target_version, detail, doc_link))
+def announce_default_value_breaking_change(command_name, arg, current_default, new_default,
+                                           target_version=NextBreakingChangeWindow(), target=None, doc_link=None):
+    upcoming_breaking_changes.append(AzCLIDefaultChange(command_name, arg, current_default, new_default,
+                                                        target_version, target, doc_link))
 
 
 def announce_required_flag_breaking_change(command_name, arg, target_version=NextBreakingChangeWindow(), target=None,
