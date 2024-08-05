@@ -60,11 +60,6 @@ def _find_arg(arg_name, arguments):
     return None, None
 
 
-class NonExpirationDeprecated(Deprecated):
-    def expired(self):
-        return False
-
-
 class UpcomingBreakingChangeTag(StatusTag):
     def __init__(self, cli_ctx, object_type='', target=None, target_version=None, tag_func=None, message_func=None,
                  always_display=False):
@@ -172,14 +167,14 @@ class ExactVersion(TargetVersion):
 # pylint: disable=too-few-public-methods
 class UnspecificVersion(TargetVersion):
     def __str__(self):
-        return 'in future'
+        return 'in a future release'
 
     def version(self):
         return None
 
 
 class BreakingChange(abc.ABC):
-    def __init__(self, cmd, arg=None, target=None):
+    def __init__(self, cmd, arg=None, target=None, target_version=None):
         self.cmd = cmd
         if isinstance(arg, str):
             self.args = [arg]
@@ -188,6 +183,12 @@ class BreakingChange(abc.ABC):
         else:
             self.args = []
         self.target = target if target else '/'.join(self.args) if self.args else self.cmd
+        if isinstance(target_version, TargetVersion):
+            self._target_version = target_version
+        elif isinstance(target_version, str):
+            self._target_version = ExactVersion(target_version)
+        else:
+            self._target_version = UnspecificVersion()
 
     @property
     def message(self):
@@ -195,7 +196,7 @@ class BreakingChange(abc.ABC):
 
     @property
     def target_version(self):
-        return UnspecificVersion()
+        return self._target_version
 
     @staticmethod
     def format_doc_link(doc_link):
@@ -281,35 +282,26 @@ class BreakingChange(abc.ABC):
 
 
 class AzCLIDeprecate(BreakingChange):
-    def __init__(self, cmd, arg=None, **kwargs):
-        super().__init__(cmd, arg, None)
+    def __init__(self, cmd, arg=None, target_version=NextBreakingChangeWindow(), **kwargs):
+        super().__init__(cmd, arg, None, target_version)
         self.kwargs = kwargs
 
     @staticmethod
-    def _build_message(object_type, target, expiration, redirect):
+    def _build_message(object_type, target, target_version, redirect):
         if object_type in ['argument', 'option']:
             msg = "{} '{}' has been deprecated and will be removed ".format(object_type, target).capitalize()
         elif object_type:
             msg = "This {} has been deprecated and will be removed ".format(object_type)
         else:
             msg = "`{}` has been deprecated and will be removed ".format(target)
-        if expiration:
-            msg += "in version '{}'.".format(expiration)
-        else:
-            msg += 'in a future release.'
+        msg += str(target_version) + '.'
         if redirect:
             msg += " Use '{}' instead.".format(redirect)
         return msg
 
     def message(self):
         return self._build_message(self.kwargs.get('object_type'), self.target, self.kwargs.get('expiration'),
-                                  self.kwargs.get('redirect'))
-
-    def target_version(self):
-        if self.kwargs.get('expiration'):
-            return ExactVersion(self.kwargs.get('expiration'))
-        else:
-            return UnspecificVersion()
+                                   self.kwargs.get('redirect'))
 
     def to_tag(self, cli_ctx, **kwargs):
         if self.args:
@@ -321,12 +313,12 @@ class AzCLIDeprecate(BreakingChange):
         tag_kwargs = {
             'object_type': object_type,
             'message_func': lambda depr: self._build_message(
-                depr.object_type, depr.target, depr.expiration, depr.redirect),
+                depr.object_type, depr.target, self.target_version, depr.redirect),
             'target': self.target
         }
         tag_kwargs.update(self.kwargs)
         tag_kwargs.update(kwargs)
-        return NonExpirationDeprecated(cli_ctx, **tag_kwargs)
+        return Deprecated(cli_ctx, **tag_kwargs)
 
 
 class AzCLIRemoveChange(BreakingChange):
@@ -342,8 +334,7 @@ class AzCLIRemoveChange(BreakingChange):
     """
 
     def __init__(self, cmd, arg=None, target_version=NextBreakingChangeWindow(), target=None, redirect=None, doc_link=None):
-        super().__init__(cmd, arg, target)
-        self._target_version = target_version
+        super().__init__(cmd, arg, target, target_version)
         self.alter = redirect
         self.doc_link = doc_link
 
@@ -352,10 +343,6 @@ class AzCLIRemoveChange(BreakingChange):
         alter = f" Please use '{self.alter}' instead." if self.alter else ''
         doc = self.format_doc_link(self.doc_link)
         return f"'{self.target}' will be removed {str(self._target_version)}.{alter}{doc}"
-
-    @property
-    def target_version(self):
-        return self._target_version
 
 
 class AzCLIRenameChange(BreakingChange):
@@ -372,19 +359,14 @@ class AzCLIRenameChange(BreakingChange):
     """
 
     def __init__(self, cmd, new_name, arg=None, target=None, target_version=NextBreakingChangeWindow(), doc_link=None):
-        super().__init__(cmd, arg, target)
+        super().__init__(cmd, arg, target, target_version)
         self.new_name = new_name
-        self._target_version = target_version
         self.doc_link = doc_link
 
     @property
     def message(self):
         doc = self.format_doc_link(self.doc_link)
         return f"'{self.target}' will be renamed to '{self.new_name}' {str(self._target_version)}.{doc}"
-
-    @property
-    def target_version(self):
-        return self._target_version
 
 
 class AzCLIOutputChange(BreakingChange):
@@ -398,9 +380,8 @@ class AzCLIOutputChange(BreakingChange):
     """
 
     def __init__(self, cmd, description: str, target_version=NextBreakingChangeWindow(), guide=None, doc_link=None):
-        super().__init__(cmd, None, None)
+        super().__init__(cmd, None, None, target_version)
         self.desc = description
-        self._target_version = target_version
         self.guide = guide
         self.doc_link = doc_link
 
@@ -416,11 +397,7 @@ class AzCLIOutputChange(BreakingChange):
         else:
             guide = ''
         doc = self.format_doc_link(self.doc_link)
-        return f'The output will be changed {str(self._target_version)}. {desc} {guide}{doc}'
-
-    @property
-    def target_version(self):
-        return self._target_version
+        return f'The output will be changed {str(self.target_version)}. {desc} {guide}{doc}'
 
 
 class AzCLILogicChange(BreakingChange):
@@ -434,20 +411,15 @@ class AzCLILogicChange(BreakingChange):
     """
 
     def __init__(self, cmd, summary, target_version=NextBreakingChangeWindow(), detail=None, doc_link=None):
-        super().__init__(cmd, None, None)
+        super().__init__(cmd, None, None, target_version)
         self.summary = summary
-        self._target_version = target_version
         self.detail = detail
         self.doc_link = doc_link
 
     @property
     def message(self):
         detail = f' {self.detail}' if self.detail else ''
-        return f'{self.summary} {str(self._target_version)}.{detail}{self.format_doc_link(self.doc_link)}'
-
-    @property
-    def target_version(self):
-        return self._target_version
+        return f'{self.summary} {str(self.target_version)}.{detail}{self.format_doc_link(self.doc_link)}'
 
 
 class AzCLIDefaultChange(BreakingChange):
@@ -463,11 +435,10 @@ class AzCLIDefaultChange(BreakingChange):
 
     def __init__(self, cmd, arg, current_default, new_default, target_version=NextBreakingChangeWindow(),
                  target=None, doc_link=None):
-        super().__init__(cmd, arg, target)
+        super().__init__(cmd, arg, target, target_version)
         self.target = target
         self.current_default = current_default
         self.new_default = new_default
-        self._target_version = target_version
         self.doc_link = doc_link
 
     @property
@@ -475,10 +446,6 @@ class AzCLIDefaultChange(BreakingChange):
         doc = self.format_doc_link(self.doc_link)
         return (f"The default value of '{self.target}' will be changed to '{self.new_default}' from "
                 f"'{self.current_default}' {str(self._target_version)}.{doc}")
-
-    @property
-    def target_version(self):
-        return self._target_version
 
     def to_tag(self, cli_ctx, **kwargs):
         if 'always_display' not in kwargs:
@@ -496,18 +463,13 @@ class AzCLIBeRequired(BreakingChange):
     """
 
     def __init__(self, cmd, arg, target_version=NextBreakingChangeWindow(), target=None, doc_link=None):
-        super().__init__(cmd, arg, target)
-        self._target_version = target_version
+        super().__init__(cmd, arg, target, target_version)
         self.doc_link = doc_link
 
     @property
     def message(self):
         doc = self.format_doc_link(self.doc_link)
         return f"The argument '{self.target}' will become required {str(self._target_version)}.{doc}"
-
-    @property
-    def target_version(self):
-        return self._target_version
 
     def to_tag(self, cli_ctx, **kwargs):
         if 'always_display' not in kwargs:
@@ -524,17 +486,12 @@ class AzCLIOtherChange(BreakingChange):
     """
 
     def __init__(self, cmd, message, arg=None, target_version=NextBreakingChangeWindow()):
-        super().__init__(cmd, arg, None)
+        super().__init__(cmd, arg, None, target_version)
         self._message = message
-        self._target_version = target_version
 
     @property
     def message(self):
         return self._message
-
-    @property
-    def target_version(self):
-        return self._target_version
 
 
 upcoming_breaking_changes = []
@@ -566,8 +523,8 @@ def register_upcoming_breaking_change_info(cli_ctx):
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, update_breaking_change_info)
 
 
-def announce_deprecate_info(command_name, arg=None, **kwargs):
-    upcoming_breaking_changes.append(AzCLIDeprecate(command_name, arg=arg, **kwargs))
+def announce_deprecate_info(command_name, arg=None, target_version=NextBreakingChangeWindow(), **kwargs):
+    upcoming_breaking_changes.append(AzCLIDeprecate(command_name, arg, target_version, **kwargs))
 
 
 def announce_output_breaking_change(command_name, description, target_version=NextBreakingChangeWindow(), guide=None,
@@ -595,15 +552,15 @@ def announce_other_breaking_change(command_name, message, arg=None, target_versi
 
 
 def announce_command_group_deprecate(command_group, redirect=None, hide=None,
-                                     target_version=NEXT_BREAKING_CHANGE_RELEASE, **kwargs):
-    announce_deprecate_info(command_group, redirect=redirect, hide=hide, expiration=target_version, **kwargs)
+                                     target_version=NextBreakingChangeWindow(), **kwargs):
+    announce_deprecate_info(command_group, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
 
 
 def announce_command_deprecate(command, redirect=None, hide=None,
-                               target_version=NEXT_BREAKING_CHANGE_RELEASE, **kwargs):
-    announce_deprecate_info(command, redirect=redirect, hide=hide, expiration=target_version, **kwargs)
+                               target_version=NextBreakingChangeWindow(), **kwargs):
+    announce_deprecate_info(command, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
 
 
 def announce_argument_deprecate(command, argument, redirect=None, hide=None,
-                                target_version=NEXT_BREAKING_CHANGE_RELEASE, **kwargs):
-    announce_deprecate_info(command, argument, redirect=redirect, hide=hide, expiration=target_version, **kwargs)
+                                target_version=NextBreakingChangeWindow(), **kwargs):
+    announce_deprecate_info(command, argument, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
