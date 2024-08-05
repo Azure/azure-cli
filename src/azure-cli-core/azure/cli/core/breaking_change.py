@@ -235,6 +235,8 @@ class BreakingChange(abc.ABC):
                         if isinstance(option, str) and option_name == option and isinstance(self, AzCLIDeprecate):
                             argument.options_list[idx] = self.to_tag(cli_ctx, object_type='option')
                             argument.options_list[idx].target = option
+                            argument.action = _argument_breaking_change_action(cli_ctx, argument.options_list[idx],
+                                                                               argument.options['action'])
                             return True
             return False
 
