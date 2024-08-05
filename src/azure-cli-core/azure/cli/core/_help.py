@@ -259,6 +259,10 @@ class CliHelpFile(KnackHelpFile):
             direct_deprecate_info = deprecate_info
         elif isinstance(deprecate_info, UpcomingBreakingChangeTag):
             breaking_changes.append(deprecate_info)
+        elif isinstance(deprecate_info, MergedStatusTag):
+            depr, bcs = CliHelpFile.classify_merged_status_tag(deprecate_info)
+            direct_deprecate_info = depr[0] if depr else None
+            breaking_changes.extend(bcs)
 
         # search for implicit deprecation
         path_comps = delimiters.split()[:-1]
@@ -269,6 +273,11 @@ class CliHelpFile(KnackHelpFile):
                 implicit_deprecate_info = deprecate_info
             elif isinstance(deprecate_info, UpcomingBreakingChangeTag):
                 breaking_changes.append(deprecate_info)
+            elif isinstance(deprecate_info, MergedStatusTag):
+                depr, bcs = CliHelpFile.classify_merged_status_tag(deprecate_info)
+                if depr and implicit_deprecate_info is None:
+                    implicit_deprecate_info = depr[0]
+                breaking_changes.extend(bcs)
             del path_comps[-1]
 
         if implicit_deprecate_info:
@@ -287,6 +296,24 @@ class CliHelpFile(KnackHelpFile):
             self.deprecate_info = MergedStatusTag(help_ctx.cli_ctx, *all_deprecate_info)
         elif all_deprecate_info:
             self.deprecate_info = all_deprecate_info[0]
+
+    @staticmethod
+    def classify_merged_status_tag(merged_status_tag):
+        from knack.deprecation import resolve_deprecate_info, ImplicitDeprecated, Deprecated
+        from azure.cli.core.breaking_change import UpcomingBreakingChangeTag, MergedStatusTag
+
+        deprecate_info = []
+        breaking_changes = []
+        for tag in merged_status_tag.tags:
+            if isinstance(tag, Deprecated):
+                deprecate_info.append(tag)
+            elif isinstance(tag, UpcomingBreakingChangeTag):
+                breaking_changes.append(tag)
+            elif isinstance(tag, MergedStatusTag):
+                depr, bcs = CliHelpFile.classify_merged_status_tag(tag)
+                deprecate_info.extend(depr)
+                breaking_changes.extend(bcs)
+        return deprecate_info, breaking_changes
 
     def _should_include_example(self, ex):
         supported_profiles = ex.get('supported-profiles')

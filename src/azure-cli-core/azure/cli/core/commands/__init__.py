@@ -778,6 +778,8 @@ class AzCliCommandInvoker(CommandInvoker):
                 implicit_deprecate_info = deprecate_info
             elif isinstance(deprecate_info, UpcomingBreakingChangeTag):
                 deprecations.append(deprecate_info)
+            elif isinstance(deprecate_info, MergedStatusTag):
+                deprecations.extend(deprecate_info.tags)
             del path_comps[-1]
 
         if implicit_deprecate_info:

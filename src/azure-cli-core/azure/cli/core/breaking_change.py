@@ -4,9 +4,14 @@
 # --------------------------------------------------------------------------------------------
 import abc
 import argparse
+from collections import defaultdict
 
+from knack.log import get_logger
 from knack.deprecation import Deprecated
 from knack.util import StatusTag, color_map
+
+
+logger = get_logger()
 
 NEXT_BREAKING_CHANGE_RELEASE = '2.67.0'
 DEFAULT_BREAKING_CHANGE_TAG = '[BrkChange]'
@@ -241,14 +246,27 @@ class BreakingChange(abc.ABC):
                             return True
             return False
 
-        def iter_direct_sub_cg(cg_name):
+        def appended_status_tag(old_status_tag, new_status_tag):
+            if isinstance(old_status_tag, Deprecated) or isinstance(old_status_tag, UpcomingBreakingChangeTag):
+                return MergedStatusTag(cli_ctx, old_status_tag, new_status_tag)
+            elif isinstance(old_status_tag, MergedStatusTag):
+                old_status_tag.merge(new_status_tag)
+                return old_status_tag
+            else:
+                return new_status_tag
+
+        def apply_to_direct_sub_cg_or_command(cg_name, status_tag):
             for key, command_group in cli_ctx.invocation.commands_loader.command_group_table.items():
                 if key.rsplit(maxsplit=1)[0] == cg_name:
                     from azure.cli.core.commands import AzCommandGroup
                     if isinstance(command_group, AzCommandGroup):
-                        yield command_group
+                        command_group.group_kwargs['deprecate_info'] = \
+                            appended_status_tag(command_group.group_kwargs.get('deprecate_info'), status_tag)
                     else:
-                        yield from iter_direct_sub_cg(key)
+                        apply_to_direct_sub_cg_or_command(key, status_tag)
+            for key, command in cli_ctx.invocation.commands_loader.command_table.items():
+                if key.rsplit(maxsplit=1)[0] == cg_name:
+                    command.deprecate_info = appended_status_tag(command.deprecate_info, self.to_tag(cli_ctx))
 
         if self.args:
             command = cli_ctx.invocation.commands_loader.command_table.get(self.command_name)
@@ -260,25 +278,20 @@ class BreakingChange(abc.ABC):
                 arg_name, arg = _find_arg(arg_name, command.arguments)
                 if not arg:
                     continue
-                if isinstance(arg.deprecate_info, Deprecated) or isinstance(arg.deprecate_info, UpcomingBreakingChangeTag):
-                    arg.deprecate_info = MergedStatusTag(cli_ctx, arg.deprecate_info, self.to_tag(cli_ctx))
-                elif isinstance(arg.deprecate_info, MergedStatusTag):
-                    arg.deprecate_info.merge(self.to_tag(cli_ctx))
-                else:
-                    arg.deprecate_info = self.to_tag(cli_ctx)
+                arg.deprecate_info = appended_status_tag(arg.deprecate_info, self.to_tag(cli_ctx))
                 arg.action = _argument_breaking_change_action(cli_ctx, arg.deprecate_info, arg.options['action'])
         elif self.is_command_group(cli_ctx):
             command_group = cli_ctx.invocation.commands_loader.command_group_table[self.command_name]
             if not command_group:
-                for command_group in iter_direct_sub_cg(self.command_name):
-                    command_group.group_kwargs['deprecate_info'] = self.to_tag(cli_ctx)
+                apply_to_direct_sub_cg_or_command(self.command_name, self.to_tag(cli_ctx))
             else:
-                command_group.group_kwargs['deprecate_info'] = self.to_tag(cli_ctx)
+                command_group.group_kwargs['deprecate_info'] = \
+                    appended_status_tag(command_group.group_kwargs.get('deprecate_info'), self.to_tag(cli_ctx))
         else:
             command = cli_ctx.invocation.commands_loader.command_table.get(self.cmd)
             if not command:
                 return
-            command.deprecate_info = self.to_tag(cli_ctx)
+            command.deprecate_info = appended_status_tag(command.deprecate_info, self.to_tag(cli_ctx))
 
 
 class AzCLIDeprecate(BreakingChange):
@@ -493,7 +506,7 @@ class AzCLIOtherChange(BreakingChange):
         return self._message
 
 
-upcoming_breaking_changes = []
+upcoming_breaking_changes = defaultdict(lambda: [])
 
 
 def import_module_breaking_changes(mod):
@@ -516,39 +529,40 @@ def register_upcoming_breaking_change_info(cli_ctx):
     from knack import events
 
     def update_breaking_change_info(cli_ctx, **kwargs):
-        for bc in upcoming_breaking_changes:
-            bc.apply(cli_ctx)
+        for breaking_changes in upcoming_breaking_changes.values():
+            for breaking_change in breaking_changes:
+                breaking_change.apply(cli_ctx)
 
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, update_breaking_change_info)
 
 
 def announce_deprecate_info(command_name, arg=None, target_version=NextBreakingChangeWindow(), **kwargs):
-    upcoming_breaking_changes.append(AzCLIDeprecate(command_name, arg, target_version, **kwargs))
+    upcoming_breaking_changes[command_name].append(AzCLIDeprecate(command_name, arg, target_version, **kwargs))
 
 
 def announce_output_breaking_change(command_name, description, target_version=NextBreakingChangeWindow(), guide=None,
                                     doc_link=None):
-    upcoming_breaking_changes.append(AzCLIOutputChange(command_name, description, target_version, guide, doc_link))
+    upcoming_breaking_changes[command_name].append(AzCLIOutputChange(command_name, description, target_version, guide, doc_link))
 
 
 def announce_logic_breaking_change(command_name, summary, target_version=NextBreakingChangeWindow(), detail=None,
                                    doc_link=None):
-    upcoming_breaking_changes.append(AzCLILogicChange(command_name, summary, target_version, detail, doc_link))
+    upcoming_breaking_changes[command_name].append(AzCLILogicChange(command_name, summary, target_version, detail, doc_link))
 
 
 def announce_default_value_breaking_change(command_name, arg, current_default, new_default,
                                            target_version=NextBreakingChangeWindow(), target=None, doc_link=None):
-    upcoming_breaking_changes.append(AzCLIDefaultChange(command_name, arg, current_default, new_default,
+    upcoming_breaking_changes[command_name].append(AzCLIDefaultChange(command_name, arg, current_default, new_default,
                                                         target_version, target, doc_link))
 
 
 def announce_required_flag_breaking_change(command_name, arg, target_version=NextBreakingChangeWindow(), target=None,
                                            doc_link=None):
-    upcoming_breaking_changes.append(AzCLIBeRequired(command_name, arg, target_version, target, doc_link))
+    upcoming_breaking_changes[command_name].append(AzCLIBeRequired(command_name, arg, target_version, target, doc_link))
 
 
 def announce_other_breaking_change(command_name, message, arg=None, target_version=NextBreakingChangeWindow()):
-    upcoming_breaking_changes.append(AzCLIOtherChange(command_name, message, arg, target_version))
+    upcoming_breaking_changes[command_name].append(AzCLIOtherChange(command_name, message, arg, target_version))
 
 
 def announce_command_group_deprecate(command_group, redirect=None, hide=None,
@@ -564,3 +578,18 @@ def announce_command_deprecate(command, redirect=None, hide=None,
 def announce_argument_deprecate(command, argument, redirect=None, hide=None,
                                 target_version=NextBreakingChangeWindow(), **kwargs):
     announce_deprecate_info(command, argument, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
+
+
+def announce_manual_breaking_change(tag, breaking_change):
+    upcoming_breaking_changes[breaking_change.command_name + ':' + tag].append(breaking_change)
+
+
+def print_manual_breaking_change(cli_ctx, tag, custom_logger=None):
+    command = cli_ctx.invocation.command_name
+    custom_logger = custom_logger or logger
+
+    command_comps = command.split()
+    while command_comps:
+        for breaking_change in upcoming_breaking_changes[' '.join(command_comps) + ':' + tag]:
+            custom_logger.warning(breaking_change)
+        del command_comps[-1]
