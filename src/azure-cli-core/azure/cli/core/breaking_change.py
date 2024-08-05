@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import abc
+import argparse
 
 from knack.deprecation import Deprecated
 from knack.util import StatusTag, color_map
@@ -11,9 +12,23 @@ NEXT_BREAKING_CHANGE_RELEASE = '2.67.0'
 DEFAULT_BREAKING_CHANGE_TAG = '[BrkChange]'
 
 
-def _argument_breaking_change_action(status_tag, parent_class):
+def _get_action_class(cli_ctx, action):
+    action_class = argparse.Action
 
-    class ArgumentBreakingChangeAction(parent_class):
+    # action is either a user-defined Action class or a string referring a library-defined Action
+    if isinstance(action, type) and issubclass(action, argparse.Action):
+        action_class = action
+    elif isinstance(action, str):
+        action_class = cli_ctx.invocation.command_loader.cli_ctx.invocation.parser._registries['action'][
+            action]  # pylint: disable=protected-access
+    return action_class
+
+
+def _argument_breaking_change_action(cli_ctx, status_tag, action):
+
+    action_class = _get_action_class(cli_ctx, action)
+
+    class ArgumentBreakingChangeAction(action_class):
 
         def __call__(self, parser, namespace, values, option_string=None):
             if not hasattr(namespace, '_argument_deprecations'):
@@ -248,7 +263,7 @@ class BreakingChange(abc.ABC):
                     arg.deprecate_info.merge(self.to_tag(cli_ctx))
                 else:
                     arg.deprecate_info = self.to_tag(cli_ctx)
-                arg.action = _argument_breaking_change_action(arg.deprecate_info, arg.options['action'])
+                arg.action = _argument_breaking_change_action(cli_ctx, arg.deprecate_info, arg.options['action'])
         elif self.is_command_group(cli_ctx):
             command_group = cli_ctx.invocation.commands_loader.command_group_table[self.command_name]
             if not command_group:
@@ -332,9 +347,9 @@ class AzCLIRemoveChange(BreakingChange):
 
     @property
     def message(self):
-        alter = f' Please use `{self.alter}` instead.' if self.alter else ''
+        alter = f" Please use '{self.alter}' instead." if self.alter else ''
         doc = self.format_doc_link(self.doc_link)
-        return f'`{self.target}` will be removed {str(self._target_version)}.{alter}{doc}'
+        return f"'{self.target}' will be removed {str(self._target_version)}.{alter}{doc}"
 
     @property
     def target_version(self):
@@ -363,7 +378,7 @@ class AzCLIRenameChange(BreakingChange):
     @property
     def message(self):
         doc = self.format_doc_link(self.doc_link)
-        return f'`{self.target}` will be renamed to `{self.new_name}` {str(self._target_version)}.{doc}'
+        return f"'{self.target}' will be renamed to '{self.new_name}' {str(self._target_version)}.{doc}"
 
     @property
     def target_version(self):
@@ -456,8 +471,8 @@ class AzCLIDefaultChange(BreakingChange):
     @property
     def message(self):
         doc = self.format_doc_link(self.doc_link)
-        return (f'The default value of `{self.target}` will be changed to `{self.new_default}` from '
-                f'`{self.current_default}` {str(self._target_version)}.{doc}')
+        return (f"The default value of '{self.target}' will be changed to '{self.new_default}' from "
+                f"'{self.current_default}' {str(self._target_version)}.{doc}")
 
     @property
     def target_version(self):
