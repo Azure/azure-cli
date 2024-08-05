@@ -29,6 +29,7 @@ from ._utils import (
     get_object_id_of_current_user
 )
 from ._resource_config import (
+    AUTH_TYPE,
     CLIENT_TYPE,
     RESOURCE,
     SOURCE_RESOURCES,
@@ -531,6 +532,10 @@ def get_missing_auth_args(cmd, namespace):
             logger.warning('Auth info is not specified, use secrets store csi driver as default: --enable-csi')
             return missing_args
 
+    # ACA as target use null auth
+    if target == RESOURCE.ContainerApp:
+        return missing_args
+
     if source and target and not auth_param_exist:
         default_auth_type = SUPPORTED_AUTH_TYPE.get(source, {}).get(target, {})[0]
 
@@ -755,6 +760,8 @@ def apply_auth_args(cmd, namespace, arg_values):
     if source and target:
         auth_types = SUPPORTED_AUTH_TYPE.get(source, {}).get(target, {})
         for auth_type in auth_types:
+            if auth_type == AUTH_TYPE.Null:
+                continue
             for arg in AUTH_TYPE_PARAMS.get(auth_type):
                 if arg in arg_values:
                     setattr(namespace, arg, arg_values.get(arg, None))

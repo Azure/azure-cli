@@ -291,6 +291,14 @@ examples:
           --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
 """
 
+helps['mysql flexible-server import stop-replication'] = """
+type: command
+short-summary: To stop replication between the source single server and target flexible server.
+examples:
+  - name: Stop replication to 'testFlexServer'.
+    text: az mysql flexible-server import stop-replication -g testGroup -n testFlexServer
+"""
+
 helps['mysql flexible-server show'] = """
 type: command
 short-summary: Get the details of a flexible server.
@@ -316,7 +324,8 @@ helps['mysql flexible-server update'] = """
 type: command
 short-summary: Update a flexible server.
 long-summary: >
-  [!WARNING] Enabling High-availability may result in a short downtime for the server based on your server configuration.
+    > [!WARNING]
+    > Enabling High-availability may result in a short downtime for the server based on your server configuration.
 examples:
   - name: Update a flexible server's sku, using local context for server and resource group.
     text: az mysql flexible-server update --sku-name Standard_D4ds_v4 --tier GeneralPurpose

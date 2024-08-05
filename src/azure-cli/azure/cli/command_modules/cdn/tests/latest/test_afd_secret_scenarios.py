@@ -26,7 +26,7 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc-int/secrets/localdev-multi"
         secret_version = "5f652542f6ef46ef9fc4ed8af07c54f1"
 
-        with self.assertRaisesRegexp(HttpResponseError, "The server \\(leaf\\) certificate isn't within the validity period"):
+        with self.assertRaisesRegex(HttpResponseError, "The server \\(leaf\\) certificate isn't within the validity period"):
             self.afd_secret_create_cmd(resource_group,
                                profile_name,
                                secret_name,

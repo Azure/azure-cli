@@ -71,6 +71,7 @@ class AUTH_TYPE(Enum):
     WorkloadIdentity = 'workload-identity'
     ServicePrincipalSecret = 'service-principal'
     UserAccount = 'user-account'
+    Null = 'null'
 
 
 # The dict defines the client types
@@ -149,7 +150,9 @@ TARGET_RESOURCES = {
     RESOURCE.ConfluentKafka: '#',  # special target resource, no arm resource id
     RESOURCE.AppInsights: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/microsoft.insights/components/{appinsights}',
 
-    RESOURCE.CognitiveServices: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.CognitiveServices/accounts/{account}'
+    RESOURCE.CognitiveServices: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.CognitiveServices/accounts/{account}',
+
+    RESOURCE.ContainerApp: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.App/containerApps/{target_app_name}'
 }
 
 
@@ -650,6 +653,18 @@ TARGET_RESOURCES_PARAMS = {
             'help': 'Name of the cognitive services account',
             'placeholder': 'MyAccount'
         }
+    },
+    RESOURCE.ContainerApp: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the target container app',
+            'placeholder': 'TargetContainerAppRG'
+        },
+        'target_app_name': {
+            'options': ['--target-app-name'],
+            'help': 'Name of the target container app',
+            'placeholder': 'MyTargetContainerApp'
+        }
     }
 }
 
@@ -906,7 +921,9 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
 
-        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
+        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+
+        RESOURCE.ContainerApp: [AUTH_TYPE.Null]
     },
 }
 SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloud]
@@ -1157,6 +1174,19 @@ SUPPORTED_CLIENT_TYPE = {
         RESOURCE.CognitiveServices: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Python,
+            CLIENT_TYPE.Blank
+        ],
+        RESOURCE.ContainerApp: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Go,
+            CLIENT_TYPE.Php,
+            CLIENT_TYPE.Ruby,
+            CLIENT_TYPE.Django,
+            CLIENT_TYPE.SpringBoot,
             CLIENT_TYPE.Blank
         ]
     }

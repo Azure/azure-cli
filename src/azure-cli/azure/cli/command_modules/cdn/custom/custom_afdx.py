@@ -319,6 +319,8 @@ class AFDOriginCreate(_AFDOriginCreate):
         args_schema.enable_private_link = AAZBoolArg(
             options=['--enable-private-link'],
             help='Indicates whether private link is enanbled on that origin.',
+            blank=True,
+            default=True
         )
         args_schema.private_link_location = AAZStrArg(
             options=['--private-link-location'],
@@ -364,6 +366,7 @@ class AFDOriginUpdate(_AFDOriginUpdate):
         args_schema.enable_private_link = AAZBoolArg(
             options=['--enable-private-link'],
             help='Indicates whether private link is enanbled on that origin.',
+            blank=True
         )
         args_schema.private_link_location = AAZStrArg(
             options=['--private-link-location'],

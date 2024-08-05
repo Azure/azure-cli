@@ -25,7 +25,7 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         # Test create with fail-on-exist
         from azure.core.exceptions import ResourceExistsError
-        with self.assertRaisesRegexp(ResourceExistsError, 'The specified share already exists.'):
+        with self.assertRaisesRegex(ResourceExistsError, 'The specified share already exists.'):
             self.cmd(
                 'storage share create -n {} --fail-on-exist --connection-string {} --quota 3'
                 .format(share_name, connection_string))
@@ -66,7 +66,7 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         # Test delete with fail-not-exist
         share_not_exist = self.create_random_name('share', 24)
         from azure.core.exceptions import ResourceNotFoundError
-        with self.assertRaisesRegexp(ResourceNotFoundError, 'The specified share does not exist.'):
+        with self.assertRaisesRegex(ResourceNotFoundError, 'The specified share does not exist.'):
             self.storage_cmd('storage share delete -n {} --fail-not-exist', account_info, share_not_exist)
 
         self.storage_cmd('storage share update --name {} --quota 3', account_info, share)

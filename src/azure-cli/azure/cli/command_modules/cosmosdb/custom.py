@@ -520,6 +520,11 @@ def cli_cosmosdb_update(client,
     return docdb_account
 
 
+def cli_cosmosdb_delete(client, resource_group_name, account_name, no_wait=False):
+    return sdk_no_wait(no_wait, client.begin_delete,
+                       resource_group_name=resource_group_name, account_name=account_name)
+
+
 def cli_cosmosdb_list(client, resource_group_name=None):
     """ Lists all Azure Cosmos DB database accounts within a given resource group or subscription. """
     if resource_group_name:

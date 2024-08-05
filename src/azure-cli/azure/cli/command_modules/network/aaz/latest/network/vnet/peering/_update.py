@@ -31,9 +31,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/virtualnetworkpeerings/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/virtualnetworkpeerings/{}", "2023-11-01"],
         ]
     }
 
@@ -185,7 +185,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -288,7 +288,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -435,6 +435,23 @@ class _UpdateHelper:
         properties.do_not_verify_remote_gateways = AAZBoolType(
             serialized_name="doNotVerifyRemoteGateways",
         )
+        properties.enable_only_i_pv6_peering = AAZBoolType(
+            serialized_name="enableOnlyIPv6Peering",
+        )
+        properties.local_address_space = AAZObjectType(
+            serialized_name="localAddressSpace",
+        )
+        cls._build_schema_address_space_read(properties.local_address_space)
+        properties.local_subnet_names = AAZListType(
+            serialized_name="localSubnetNames",
+        )
+        properties.local_virtual_network_address_space = AAZObjectType(
+            serialized_name="localVirtualNetworkAddressSpace",
+        )
+        cls._build_schema_address_space_read(properties.local_virtual_network_address_space)
+        properties.peer_complete_vnets = AAZBoolType(
+            serialized_name="peerCompleteVnets",
+        )
         properties.peering_state = AAZStrType(
             serialized_name="peeringState",
         )
@@ -451,6 +468,9 @@ class _UpdateHelper:
         cls._build_schema_address_space_read(properties.remote_address_space)
         properties.remote_bgp_communities = AAZObjectType(
             serialized_name="remoteBgpCommunities",
+        )
+        properties.remote_subnet_names = AAZListType(
+            serialized_name="remoteSubnetNames",
         )
         properties.remote_virtual_network = AAZObjectType(
             serialized_name="remoteVirtualNetwork",
@@ -470,6 +490,9 @@ class _UpdateHelper:
             serialized_name="useRemoteGateways",
         )
 
+        local_subnet_names = _schema_virtual_network_peering_read.properties.local_subnet_names
+        local_subnet_names.Element = AAZStrType()
+
         remote_bgp_communities = _schema_virtual_network_peering_read.properties.remote_bgp_communities
         remote_bgp_communities.regional_community = AAZStrType(
             serialized_name="regionalCommunity",
@@ -479,6 +502,9 @@ class _UpdateHelper:
             serialized_name="virtualNetworkCommunity",
             flags={"required": True},
         )
+
+        remote_subnet_names = _schema_virtual_network_peering_read.properties.remote_subnet_names
+        remote_subnet_names.Element = AAZStrType()
 
         remote_virtual_network = _schema_virtual_network_peering_read.properties.remote_virtual_network
         remote_virtual_network.id = AAZStrType()

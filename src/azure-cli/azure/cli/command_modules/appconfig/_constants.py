@@ -77,6 +77,7 @@ class StatusCodes:
 class HttpHeaders:
     from azure.cli.core import __version__ as core_version
     USER_AGENT = "AZURECLI.APPCONFIG/{0}".format(core_version)
+    CORRELATION_REQUEST_ID = "x-ms-correlation-request-id"
 
 
 class KVSetConstants:

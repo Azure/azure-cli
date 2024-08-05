@@ -417,7 +417,8 @@ def get_object_id_of_current_user():
 
 def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
                              user_identity_auth_info, system_identity_auth_info,
-                             service_principal_auth_info_secret, new_addon, auth_action=None, config_action=None):
+                             service_principal_auth_info_secret, new_addon,
+                             auth_action=None, config_action=None, target_type=None):
     all_auth_info = []
     if secret_auth_info is not None:
         all_auth_info.append(secret_auth_info)
@@ -430,7 +431,8 @@ def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
     if service_principal_auth_info_secret is not None:
         all_auth_info.append(service_principal_auth_info_secret)
     if len(all_auth_info) == 0:
-        if auth_action == 'optOutAllAuth' and config_action == 'optOut':
+        if (auth_action == 'optOutAllAuth' and config_action == 'optOut') \
+           or target_type == RESOURCE.ContainerApp:
             return None
         raise ValidationError('At least one auth info is needed')
     if not new_addon and len(all_auth_info) != 1:
@@ -537,6 +539,8 @@ Learn more at https://spring.io/projects/spring-cloud-azure#overview"
 # LinkerResource Model is converted into dict in update flow,
 # which conflicts with the default behavior of creation wrt the key name format.
 def get_auth_type_for_update(authInfo):
+    if authInfo is None:
+        return None
     if 'auth_type' in authInfo:
         return authInfo['auth_type']
     return authInfo['authType']

@@ -1,0 +1,15 @@
+trigger:
+- main
+- dev
+
+pr: none # Disable pull request triggers.
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: Content CI/ReferenceAutomation
+      ref: refs/heads/master
+
+extends:
+  template: ReferencePipelineTrigger/template.yml@templates

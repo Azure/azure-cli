@@ -904,6 +904,8 @@ examples:
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --instance-pool-name myinstancepool
   - name: Create managed instance with database format and pricing model
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --database-format AlwaysUpToDate --pricing-model Regular
+  - name: Create managed instance with dns zone partner
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --dns-zone-partner dns
 """
 
 helps['sql mi delete'] = """
@@ -1929,6 +1931,8 @@ helps['sql midb move start'] = """
 type: command
 short-summary: Start managed database move operation.
 examples:
+  - name: Start cross subscription move operation.
+    text: az sql midb move start --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup --dest-sub-id DestinationSubscriptionId
   - name: Start cross resource group move operation.
     text: az sql midb move start --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
   - name: Start move operation inside same resource group.
@@ -1939,6 +1943,8 @@ helps['sql midb move complete'] = """
 type: command
 short-summary: Complete managed database move operation.
 examples:
+  - name: Complete cross subscription move operation.
+    text: az sql midb move complete --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup --dest-sub-id DestinationSubscriptionId
   - name: Complete cross resource group move operation.
     text: az sql midb move complete --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
   - name: Complete move operation inside same resource group.
@@ -1949,6 +1955,8 @@ helps['sql midb move cancel'] = """
 type: command
 short-summary: Cancel managed database move operation.
 examples:
+  - name: Cancel cross subscription move operation.
+    text: az sql midb move cancel --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup --dest-sub-id DestinationSubscriptionId
   - name: Cancel cross resource group move operation.
     text: az sql midb move cancel --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
   - name: Cancel move operation inside same resource group.
@@ -1978,6 +1986,8 @@ helps['sql midb copy start'] = """
 type: command
 short-summary: Start managed database copy operation.
 examples:
+  - name: Start cross subscription copy operation.
+    text: az sql midb copy start --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup --dest-sub-id DestinationSubscriptionId
   - name: Start cross resource group copy operation.
     text: az sql midb copy start --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
   - name: Start copy operation inside same resource group.
@@ -1988,6 +1998,8 @@ helps['sql midb copy complete'] = """
 type: command
 short-summary: Complete managed database copy operation.
 examples:
+  - name: Complete cross subscription copy operation.
+    text: az sql midb copy complete --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup --dest-sub-id DestinationSubscriptionId
   - name: Complete cross resource group copy operation.
     text: az sql midb copy complete --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
   - name: Complete copy operation inside same resource group.
@@ -1998,6 +2010,8 @@ helps['sql midb copy cancel'] = """
 type: command
 short-summary: Cancel managed database copy operation.
 examples:
+  - name: Cancel cross subscription copy operation.
+    text: az sql midb copy cancel --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup --dest-sub-id DestinationSubscriptionId
   - name: Cancel cross resource group copy operation.
     text: az sql midb copy cancel --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
   - name: Cancel copy operation inside same resource group.

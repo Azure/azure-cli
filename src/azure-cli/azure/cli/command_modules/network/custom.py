@@ -1860,8 +1860,7 @@ def set_ag_waf_config(cmd, resource_group_name, application_gateway_name, enable
         def pre_instance_update(self, instance):
             def _flatten(collection, expand_property_fn):
                 for each in collection:
-                    for value in expand_property_fn(each):
-                        yield value
+                    yield from expand_property_fn(each)
 
             if disabled_rule_groups or disabled_rules:
                 disabled_groups = []

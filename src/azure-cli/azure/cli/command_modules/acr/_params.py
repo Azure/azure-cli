@@ -160,7 +160,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('days', type=int, help='The number of days to retain a soft-deleted manifest or tag after which it gets purged (Range: 1 to 90). Default is 7.')
 
     with self.argument_context('acr login') as c:
-        c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
         c.argument('expose_token', options_list=['--expose-token', '-t'], help='Expose access token instead of automatically logging in through Docker CLI', action='store_true')
 
     with self.argument_context('acr repository') as c:

@@ -585,7 +585,7 @@ class AcrCommandsTests(ScenarioTest):
         self.assertTrue('systemAssigned' in result['type'])
         self.assertTrue('userAssigned' in result['type'])
         self.assertTrue(len(result['userAssignedIdentities']) == 1)
-        self.assertEquals(list(result['userAssignedIdentities'].keys())[0].lower(), self.kwargs['identity_id'].lower())
+        self.assertEqual(list(result['userAssignedIdentities'].keys())[0].lower(), self.kwargs['identity_id'].lower())
 
         # remove identities
         import time

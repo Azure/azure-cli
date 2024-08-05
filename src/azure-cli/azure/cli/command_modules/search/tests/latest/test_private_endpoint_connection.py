@@ -47,7 +47,7 @@ class AzureSearchServicesTests(ScenarioTest):
 
         # create vnet
         self.cmd('az network vnet create --resource-group {rg} --name {vnet_name} --address-prefix 10.0.0.0/16')
-        self.cmd('az network vnet subnet create --resource-group {rg} --vnet-name {vnet_name} --name {subnet_name} --address-prefixes 10.0.0.0/24')
+        self.cmd('az network vnet subnet create --resource-group {rg} --vnet-name {vnet_name} --name {subnet_name} --address-prefixes 10.0.0.0/24 --default-outbound false')
         self.cmd('az network vnet subnet update --resource-group {rg} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
 
         # create private endpoint

@@ -842,7 +842,7 @@ class VMAvailSetScenarioTest(ScenarioTest):
             self.check('[0].name', '{availset}')
         ])
         result = self.cmd('vm availability-set list --query "[?name==\'availset-test\']"').get_output_in_json()
-        self.assertEquals(1, len(result))
+        self.assertEqual(1, len(result))
         self.cmd('vm availability-set list-sizes -g {rg} -n {availset}',
                  checks=self.check('type(@)', 'array'))
         self.cmd('vm availability-set show -g {rg} -n {availset}',

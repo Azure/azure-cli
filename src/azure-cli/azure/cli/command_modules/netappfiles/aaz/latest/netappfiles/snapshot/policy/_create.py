@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/snapshotpolicies/{}", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/snapshotpolicies/{}", "2024-03-01"],
         ]
     }
 
@@ -49,7 +49,7 @@ class Create(AAZCommand):
             help="The name of the NetApp account",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -242,7 +242,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -273,11 +273,11 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("dailySchedule", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("dailySchedule", AAZObjectType)
                 properties.set_prop("enabled", AAZBoolType, ".enabled")
-                properties.set_prop("hourlySchedule", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("monthlySchedule", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("weeklySchedule", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("hourlySchedule", AAZObjectType)
+                properties.set_prop("monthlySchedule", AAZObjectType)
+                properties.set_prop("weeklySchedule", AAZObjectType)
 
             daily_schedule = _builder.get(".properties.dailySchedule")
             if daily_schedule is not None:
@@ -355,16 +355,13 @@ class Create(AAZCommand):
             properties = cls._schema_on_200_201.properties
             properties.daily_schedule = AAZObjectType(
                 serialized_name="dailySchedule",
-                flags={"required": True},
             )
             properties.enabled = AAZBoolType()
             properties.hourly_schedule = AAZObjectType(
                 serialized_name="hourlySchedule",
-                flags={"required": True},
             )
             properties.monthly_schedule = AAZObjectType(
                 serialized_name="monthlySchedule",
-                flags={"required": True},
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -372,7 +369,6 @@ class Create(AAZCommand):
             )
             properties.weekly_schedule = AAZObjectType(
                 serialized_name="weeklySchedule",
-                flags={"required": True},
             )
 
             daily_schedule = cls._schema_on_200_201.properties.daily_schedule

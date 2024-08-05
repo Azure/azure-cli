@@ -1,0 +1,25 @@
+name: Comment Issue when labeled non-security
+on:
+  issues:
+    types: [opened, labeled, unlabeled]
+
+jobs:
+  comment-non-security:
+    if: contains(github.event.issue.labels.*.name, 'non-security')
+    runs-on: ubuntu-20.04
+    permissions:
+      issues: write
+    name: Comment on issue
+    steps:
+      - name: Checkout comment message
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/template/non-security-comment.md
+      - name: Comment on issue with no security label
+        uses: mshick/add-pr-comment@v2
+        with:
+           repo-token: ${{ secrets.GITHUB_TOKEN }}
+           message-id: issueNoSecurityCommentBot
+           message-path: |
+            .github/template/non-security-comment.md

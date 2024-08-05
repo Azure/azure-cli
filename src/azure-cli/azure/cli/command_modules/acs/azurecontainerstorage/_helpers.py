@@ -55,7 +55,7 @@ def validate_storagepool_creation(
         if not role_assignment_success:
             raise UnknownError(
                 f"Cannot set --enable-azure-container-storage to {CONST_STORAGE_POOL_TYPE_ELASTIC_SAN}. "
-                "Unable to add Role Assignments needed for Elastic SAN storagepools to be functional. "
+                "Unable to add Role Assignments needed for Elastic SAN storage pools to be functional. "
                 "Please check with your admin for permissions."
             )
 

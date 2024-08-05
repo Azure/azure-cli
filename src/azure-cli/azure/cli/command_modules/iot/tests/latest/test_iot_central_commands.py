@@ -219,8 +219,7 @@ class IoTCentralTest(ScenarioTest):
         # self.cmd('iot central app private-endpoint-connection reject --id {iotc_pec_id}',
         #          checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
 
-        # with self.assertRaisesRegexp(CloudError, 'You cannot approve the connection request after rejection.'):
+        # with self.assertRaisesRegex(CloudError, 'You cannot approve the connection request after rejection.'):
         #     self.cmd('iot central app private-endpoint-connection approve --account-name {app_name} -g {rg} --name {iotc_pec_name}')
 
         self.cmd('iot central app private-endpoint-connection delete --id {iotc_pec_id} -y')
-     

@@ -676,7 +676,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         exported_file_path = os.path.join(TEST_DIR, 'export.json')
         exported_json_object = os.path.join(TEST_DIR, 'export_changed_json.json')
         exported_json_object_reference = os.path.join(TEST_DIR, 'export_changed_json_ref.json')
- 
+
         self.kwargs.update({
             'import_source': 'file',
             'imported_format': 'json',
@@ -712,17 +712,17 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
                      self.check('key', key_name),
                      self.check('etag', background_color_kv['etag']),
                      ])
-        
+
         self.kwargs.update({
             'imported_file_path': imported_file_path
         })
 
         self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y --import-mode all')
-        
+
         updated_background_color_kv = self.cmd('appconfig kv show -n {config_store_name} --key {key}').get_output_in_json()
 
-        self.assertNotEquals(background_color_kv['etag'], updated_background_color_kv['etag'])
+        self.assertNotEqual(background_color_kv['etag'], updated_background_color_kv['etag'])
 
         # skip key vault reference while exporting
         self.kwargs.update({
@@ -1097,15 +1097,15 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         # Assert first reference is in the right format
         app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account}').get_output_in_json()
         exported_keys = next(x for x in app_settings if x['name'] == entry_key)
-        self.assertEquals(exported_keys['name'], entry_key)
-        self.assertEquals(exported_keys['value'], expected_reference)
-        self.assertEquals(exported_keys['slotSetting'], False)
+        self.assertEqual(exported_keys['name'], entry_key)
+        self.assertEqual(exported_keys['value'], expected_reference)
+        self.assertEqual(exported_keys['slotSetting'], False)
 
-        # Assert second reference is of right format    
+        # Assert second reference is of right format
         exported_keys = next(x for x in app_settings if x['name'] == entry_key2)
-        self.assertEquals(exported_keys['name'], entry_key2)
-        self.assertEquals(exported_keys['value'], expected_reference2)
-        self.assertEquals(exported_keys['slotSetting'], False)
+        self.assertEqual(exported_keys['name'], entry_key2)
+        self.assertEqual(exported_keys['value'], expected_reference2)
+        self.assertEqual(exported_keys['slotSetting'], False)
 
 
         # Test to confirm the right app configuration reference
@@ -2405,7 +2405,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, "Feature name cannot contain the following characters: '%', ':'"):
             self.cmd('appconfig feature set -n {config_store_name} --feature {feature}')
 
-  
+
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
@@ -2977,8 +2977,8 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super(AppConfigSnapshotLiveScenarioTest, self).__init__(*args, **kwargs)
-    
-    
+
+
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
     def test_azconfig_snapshot_mgmt(self, resource_group, location):
@@ -3011,7 +3011,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         dev_label = "dev"
         entry_key3 = "LastTestKey"
         entry_value3 = "LastTestValue"
-        
+
         # Create 2 keys with a common prefix and label "dev"
         self.kwargs.update({
             "key": entry_key,
@@ -3046,7 +3046,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
 
         # Create a snapshot of all key-values that begin with the prefix 'Test'
         filter_dict = { "key": "Test*", "label": dev_label }
-        retention_period = 3600 # Set retention period of 1 hour 
+        retention_period = 3600 # Set retention period of 1 hour
         self.kwargs.update({
             'filter': '\'{}\''.format(json.dumps(filter_dict)),
             'retention_period': retention_period
@@ -3057,15 +3057,15 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
                  checks=[self.check('itemsCount', 2),
                          self.check('status', 'ready')])
 
-        
+
         # Test showing created snapshot
         created_snapshot = self.cmd('appconfig snapshot show --connection-string {connection_string} --snapshot-name {snapshot_name} --fields name status items_count filters').get_output_in_json()
-        
+
         self.assertEqual(created_snapshot['items_count'], 2)
         self.check(created_snapshot['status'], 'ready')
         self.assertDictEqual(created_snapshot['filters'][0], filter_dict)
         self.assertRaises(KeyError, lambda: created_snapshot['created'])
-        
+
         # Test listing snapshots
         created_snapshots = self.cmd('appconfig snapshot list --snapshot-name {snapshot_name} --connection-string {connection_string} --fields name status items_count filters').get_output_in_json()
         self.assertEqual(created_snapshots[0]['items_count'], 2)
@@ -3074,11 +3074,11 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
 
         # Test snapshot archive
         archived_snapshot = self.cmd('appconfig snapshot archive --connection-string {connection_string} --snapshot-name {snapshot_name}').get_output_in_json()
-        self.assertIsNotNone(archived_snapshot['expires'])        
+        self.assertIsNotNone(archived_snapshot['expires'])
         self.assertEqual(archived_snapshot['status'], 'archived')
         active_snapshots = self.cmd('appconfig snapshot list --connection-string {connection_string} --status ready').get_output_in_json()
         self.assertEqual(len(active_snapshots), 0)
-        
+
         # Test snapshot recovery
         self.cmd('appconfig snapshot recover --connection-string {connection_string} -s {snapshot_name}',
                                      checks=[self.check('itemsCount', 2),

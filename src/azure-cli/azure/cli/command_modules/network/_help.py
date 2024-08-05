@@ -4182,7 +4182,7 @@ helps['network nic ip-config address-pool add'] = """
 type: command
 short-summary: Add an address pool to an IP configuration.
 examples:
-  - name: Add an address pool to an IP configuration.
+  - name: Add an address pool to an IP configuration. Specify the full backend pool ID of a load balancer when in a different resource group than the specified NIC.
     text: |
         az network nic ip-config address-pool add -g MyResourceGroup --nic-name MyNic \\
             -n MyIpConfig --address-pool MyAddressPool

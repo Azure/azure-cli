@@ -1242,8 +1242,9 @@ class TestProfile(unittest.TestCase):
         with self.assertRaisesRegex(CLIError, 'Cloud Shell'):
             cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
 
+    @mock.patch('azure.cli.core.auth.identity.Identity.logout_service_principal')
     @mock.patch('azure.cli.core.auth.identity.Identity.logout_user')
-    def test_logout(self, logout_user_mock):
+    def test_logout(self, logout_user_mock, logout_service_principal_mock):
         cli = DummyCli()
 
         storage_mock = {'subscriptions': []}
@@ -1258,10 +1259,13 @@ class TestProfile(unittest.TestCase):
 
         # verify
         self.assertEqual(0, len(storage_mock['subscriptions']))
+        # Make sure logout is attempted on both account types
         logout_user_mock.assert_called_with(self.user1)
+        logout_service_principal_mock.assert_called_with(self.user1)
 
+    @mock.patch('azure.cli.core.auth.identity.Identity.logout_all_service_principal')
     @mock.patch('azure.cli.core.auth.identity.Identity.logout_all_users')
-    def test_logout_all(self, logout_all_users_mock):
+    def test_logout_all(self, logout_all_users_mock, logout_all_service_principal_mock):
         cli = DummyCli()
         # setup
         storage_mock = {'subscriptions': []}
@@ -1280,7 +1284,9 @@ class TestProfile(unittest.TestCase):
 
         # verify
         self.assertEqual([], storage_mock['subscriptions'])
+        # Make sure logout is attempted on both account types
         logout_all_users_mock.assert_called_once()
+        logout_all_service_principal_mock.assert_called_once()
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)

@@ -16,6 +16,7 @@ from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_STORAGE_POOL_OPTION_SSD,
     CONST_STORAGE_POOL_SKU_PREMIUM_LRS,
     CONST_STORAGE_POOL_SKU_PREMIUM_ZRS,
+    CONST_STORAGE_POOL_SKU_PREMIUMV2_LRS,
     CONST_STORAGE_POOL_TYPE_AZURE_DISK,
     CONST_STORAGE_POOL_TYPE_ELASTIC_SAN,
     CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
@@ -137,7 +138,7 @@ def validate_disable_azure_container_storage_params(  # pylint: disable=too-many
         if is_storagepool_type_not_active:
             raise ArgumentUsageError(
                 'Invalid --disable-azure-container-storage value. '
-                'Azure Container Storage is not enabled for storagepool '
+                'Azure Container Storage is not enabled for storage pool '
                 f'type {storage_pool_type} in the cluster.'
             )
 
@@ -166,8 +167,8 @@ def validate_disable_azure_container_storage_params(  # pylint: disable=too-many
 
         if number_of_storagepool_types_active == number_of_storagepool_types_to_be_disabled:
             raise ArgumentUsageError(
-                f'Since {storage_pool_type} is the only storagepool type enabled for Azure Container Storage, '
-                'disabling the storagepool type will lead to disabling Azure Container Storage from the cluster. '
+                f'Since {storage_pool_type} is the only storage pool type enabled for Azure Container Storage, '
+                'disabling the storage pool type will lead to disabling Azure Container Storage from the cluster. '
                 f'To disable Azure Container Storage, set --disable-azure-container-storage to {CONST_ACSTOR_ALL}.'
             )
 
@@ -362,6 +363,7 @@ def validate_enable_azure_container_storage_params(  # pylint: disable=too-many-
         agentpool_details,
         storage_pool_type,
         storage_pool_option,
+        storage_pool_sku,
         is_extension_installed
     )
 
@@ -372,12 +374,13 @@ def validate_enable_azure_container_storage_params(  # pylint: disable=too-many-
            storage_pool_type == CONST_STORAGE_POOL_TYPE_ELASTIC_SAN):
             raise ArgumentUsageError(
                 'Invalid --enable-azure-container-storage value. '
-                'Azure Container Storage is already enabled for storagepool type '
+                'Azure Container Storage is already enabled for storage pool type '
                 f'{storage_pool_type} in the cluster.'
             )
 
         # pylint: disable=too-many-boolean-expressions
         if storage_pool_type == CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK and \
+           ephemeral_disk_volume_type is None and \
            ((is_ephemeralDisk_nvme_enabled and
             storage_pool_option == CONST_STORAGE_POOL_OPTION_NVME and
             ephemeral_disk_nvme_perf_tier is None) or
@@ -387,7 +390,7 @@ def validate_enable_azure_container_storage_params(  # pylint: disable=too-many-
                 is_ephemeralDisk_localssd_enabled else CONST_STORAGE_POOL_OPTION_NVME
             raise ArgumentUsageError(
                 'Invalid --enable-azure-container-storage value. '
-                'Azure Container Storage is already enabled for storagepool type '
+                'Azure Container Storage is already enabled for storage pool type '
                 f'{CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK} and option {ephemeral_disk_type_installed} '
                 'in the cluster.'
             )
@@ -426,11 +429,12 @@ def _validate_storage_pool_size(storage_pool_size, storage_pool_type):
             )
 
 
-def _validate_nodepools(  # pylint: disable=too-many-branches
+def _validate_nodepools(  # pylint: disable=too-many-branches,too-many-locals
     nodepool_list,
     agentpool_details,
     storage_pool_type,
     storage_pool_option,
+    storage_pool_sku,
     is_extension_installed,
 ):
     nodepool_arr = []
@@ -443,7 +447,7 @@ def _validate_nodepools(  # pylint: disable=too-many-branches
         if nodepool_list is not None:
             raise ArgumentUsageError(
                 'Cannot set --azure-container-storage-nodepools while using '
-                '--enable-azure-container-storage to enable a type of storagepool '
+                '--enable-azure-container-storage to enable a type of storage pool '
                 'in a cluster where Azure Container Storage is already installed.'
             )
 
@@ -457,12 +461,12 @@ def _validate_nodepools(  # pylint: disable=too-many-branches
 
         if len(nodepool_arr) == 0:
             raise ArgumentUsageError(
-                f'Cannot enable Azure Container Storage storagepool of type {storage_pool_type} '
+                f'Cannot enable Azure Container Storage storage pool of type {storage_pool_type} '
                 'since none of the nodepools in the cluster are labelled for Azure Container Storage.'
             )
 
         insufficient_core_error = (
-            f'Cannot enable Azure Container Storage storagepool type: {storage_pool_type} '
+            f'Cannot enable Azure Container Storage storage pool type: {storage_pool_type} '
             'on a node pool consisting of nodes with cores less than 4. '
             'Node pool: {0} with node size: {1} has nodes with {2} cores. '
             f'Remove the label {CONST_ACSTOR_IO_ENGINE_LABEL_KEY}={CONST_ACSTOR_IO_ENGINE_LABEL_VAL} '
@@ -486,6 +490,7 @@ def _validate_nodepools(  # pylint: disable=too-many-branches
 
     nvme_nodepool_found = False
     available_node_count = 0
+    multi_zoned_cluster = False
     for nodepool in nodepool_arr:
         for agentpool in agentpool_details:
             pool_name = agentpool.get("name")
@@ -523,6 +528,10 @@ def _validate_nodepools(  # pylint: disable=too-many-branches
                 if node_count is not None:
                     available_node_count = available_node_count + node_count
 
+                zoned_nodepool = agentpool.get("zoned")
+                if zoned_nodepool:
+                    multi_zoned_cluster = True
+
     if available_node_count < 3:
         raise UnknownError(
             'Insufficient nodes present. Azure Container Storage requires atleast 3 nodes to be enabled.'
@@ -534,6 +543,15 @@ def _validate_nodepools(  # pylint: disable=too-many-branches
         raise ArgumentUsageError(
             f'Cannot set --storage-pool-option as {CONST_STORAGE_POOL_OPTION_NVME} '
             'as none of the node pools can support ephemeral NVMe disk.'
+        )
+
+    if storage_pool_type == CONST_STORAGE_POOL_TYPE_AZURE_DISK and \
+       storage_pool_sku == CONST_STORAGE_POOL_SKU_PREMIUMV2_LRS and \
+       not multi_zoned_cluster:
+        raise ArgumentUsageError(
+            f'Cannot set --storage-pool-sku as {CONST_STORAGE_POOL_SKU_PREMIUMV2_LRS} '
+            'as none of the node pools are zoned. Please add a zoned node pool and '
+            'try again.'
         )
 
 

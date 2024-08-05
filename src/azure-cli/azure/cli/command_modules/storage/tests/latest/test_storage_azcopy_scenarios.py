@@ -101,7 +101,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                                 JMESPathCheck("properties.contentSettings.contentType", "application/javascript"))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(allow_shared_key_access=False)
     @StorageTestFilesPreparer()
     def test_storage_blob_azcopy_sync_oauth(self, storage_account, test_dir):
         container = self.create_random_name(prefix='container', length=20)
@@ -112,7 +112,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         # sync directory
         self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
             test_dir, container, storage_account))
-        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {} -- --cap-mbps=2'.format(
+        self.cmd('storage blob sync -s "{}" -c {} --account-name {} --auth-mode login -- --cap-mbps=2'.format(
             test_dir, container, storage_account))
         self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))

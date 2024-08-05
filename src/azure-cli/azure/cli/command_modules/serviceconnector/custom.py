@@ -313,14 +313,16 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       webpubsub=None,                                        # Resource.WebPubSub
                       signalr=None,                                          # Resource.SignalR
                       appinsights=None,                                      # Resource.AppInsights
+                      target_app_name=None,                                  # Resource.ContainerApp
                       ):
     auth_action = 'optOutAllAuth' if (opt_out_list is not None and
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
     config_action = 'optOut' if (opt_out_list is not None and
                                  OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
+    target_type = get_target_resource_name(cmd)
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
                                          system_identity_auth_info, service_principal_auth_info_secret, new_addon,
-                                         auth_action, config_action)
+                                         auth_action, config_action, target_type)
     if auth_info is not None and is_passwordless_command(cmd, auth_info) and auth_action != 'optOutAllAuth':
         if _get_or_add_extension(cmd, PASSWORDLESS_EXTENSION_NAME, PASSWORDLESS_EXTENSION_MODULE, False):
             azext_custom = _get_azext_module(
@@ -391,6 +393,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            customized_keys=None,
                            opt_out_list=None,
                            app_config_id=None,
+                           target_app_name=None,                                  # Resource.ContainerApp
                            **kwargs,
                            ):
     if not source_id:
@@ -402,9 +405,11 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
     config_action = 'optOut' if (opt_out_list is not None and
                                  OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
+    source_type = get_source_resource_name(cmd)
+    target_type = get_target_resource_name(cmd)
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
                                          system_identity_auth_info, service_principal_auth_info_secret, new_addon,
-                                         auth_action, config_action)
+                                         auth_action, config_action, target_type)
 
     if store_in_connection_string:
         if client_type == CLIENT_TYPE.Dotnet.value:
@@ -439,8 +444,6 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     }
 
     # HACK: set user token to work around OBO
-    source_type = get_source_resource_name(cmd)
-    target_type = get_target_resource_name(cmd)
     client = set_user_token_by_source_and_target(client, cmd.cli_ctx, source_type, target_type)
 
     if key_vault_id:
@@ -500,7 +503,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         parameters['auth_info'] = new_auth_info or parameters['auth_info']
 
     # migration warning for Spring Azure Cloud
-    if client_type == CLIENT_TYPE.SpringBoot.value and target_type == RESOURCE.CosmosSql:
+    if client_type == CLIENT_TYPE.SpringBoot.value and target_type == RESOURCE.CosmosSql and auth_info is not None:
         isSecretType = (auth_info['auth_type'] == AUTH_TYPE.SecretAuto.value or
                         auth_info['auth_type'] == AUTH_TYPE.Secret.value)
         logger.warning(springboot_migration_warning(require_update=False,
@@ -685,7 +688,8 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
             'Either client type or auth info should be specified to update')
     auth_action = 'optOutAllAuth' if (opt_out_list is not None and
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
-    auth_info["auth_mode"] = auth_action
+    if auth_info is not None:
+        auth_info["auth_mode"] = auth_action
 
     if linker.get('secretStore') and linker.get('secretStore').get('keyVaultId'):
         key_vault_id = key_vault_id or linker.get('secretStore').get('keyVaultId')

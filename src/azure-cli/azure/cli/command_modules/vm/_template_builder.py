@@ -1319,7 +1319,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         if automatic_os_upgrade_policy:
             vmss_properties['upgradePolicy']['automaticOSUpgradePolicy'] = automatic_os_upgrade_policy
 
-    if upgrade_policy_mode and upgrade_policy_mode.lower() == 'rolling' and orchestration_mode.lower() == 'uniform' and\
+    if upgrade_policy_mode and upgrade_policy_mode.lower() == 'rolling' and\
             cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
         if os_type.lower() == 'linux':
             from azure.cli.command_modules.vm._vmss_application_health import application_health_setting_for_linux

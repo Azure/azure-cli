@@ -324,7 +324,8 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
                      repository=None,
                      artifact_repository=None,
                      permission=None,
-                     is_login_context=False):
+                     is_login_context=False,
+                     resource_group_name=None):
     """Try to get AAD authorization tokens or admin user credentials.
     :param str registry_name: The name of container registry
     :param str tenant_suffix: The registry login server tenant suffix
@@ -342,7 +343,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     cli_ctx = cmd.cli_ctx
     resource_not_found, registry = None, None
     try:
-        registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name)
+        registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
         login_server = registry.login_server
         if tenant_suffix:
             logger.warning(
@@ -455,7 +456,8 @@ def get_login_credentials(cmd,
                           registry_name,
                           tenant_suffix=None,
                           username=None,
-                          password=None):
+                          password=None,
+                          resource_group_name=None):
     """Try to get AAD authorization tokens or admin user credentials to log into a registry.
     :param str registry_name: The name of container registry
     :param str username: The username used to log into the container registry
@@ -467,7 +469,8 @@ def get_login_credentials(cmd,
                             username,
                             password,
                             only_refresh_token=True,
-                            is_login_context=True)
+                            is_login_context=True,
+                            resource_group_name=resource_group_name)
 
 
 def get_access_credentials(cmd,
@@ -477,7 +480,8 @@ def get_access_credentials(cmd,
                            password=None,
                            repository=None,
                            artifact_repository=None,
-                           permission=None):
+                           permission=None,
+                           resource_group_name=None):
     """Try to get AAD authorization tokens or admin user credentials to access a registry.
     :param str registry_name: The name of container registry
     :param str username: The username used to log into the container registry
@@ -494,7 +498,8 @@ def get_access_credentials(cmd,
                             only_refresh_token=False,
                             repository=repository,
                             artifact_repository=artifact_repository,
-                            permission=permission)
+                            permission=permission,
+                            resource_group_name=resource_group_name)
 
 
 def log_registry_response(response):

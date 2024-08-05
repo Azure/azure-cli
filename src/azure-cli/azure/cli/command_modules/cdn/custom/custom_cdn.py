@@ -19,6 +19,7 @@ from azure.cli.command_modules.cdn.aaz.latest.cdn.origin_group import Create as 
     Update as _CDNOriginGroupUpdate, Show as _CDNOriginGroupShow
 from azure.cli.command_modules.cdn.aaz.latest.cdn.endpoint import Create as _CDNEndpointCreate, \
     Update as _CDNEndpointUpdate, Show as _CDNEndpointShow
+from azure.cli.command_modules.cdn.aaz.latest.cdn.profile_migration import Migrate as _Migrate
 from azure.cli.command_modules.cdn.aaz.latest.cdn._name_exists import NameExists
 from .custom_rule_util import (create_condition, create_action, create_delivery_policy_from_existing)
 import argparse
@@ -1106,3 +1107,52 @@ class CDNEndpointRuleConditionRemove(_CDNEndpointUpdate):
         else:
             logger.warning("rule cannot be found. This command will be skipped. Please check the rule name")
         args.delivery_policy = delivery_policy
+
+
+class CdnMigrateToAfd(_Migrate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.identity_type = AAZStrArg(
+            options=['--identity-type'],
+            help='Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).',
+            enum=['SystemAssigned', 'None', 'UserAssigned', 'SystemAssigned, UserAssigned'],
+        )
+        args_schema.user_assigned_identities = AAZListArg(
+            options=['--user-assigned-identities'],
+            help='The set of user assigned identities associated with the resource. '
+            'The userAssignedIdentities dictionary keys will be ARM resource ids in the form: '
+            '\'/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupName}}'
+            '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{{identityName}}. '
+            'The dictionary values can be empty objects ({{}}) in requests.',
+        )
+        args_schema.user_assigned_identities.Element = AAZStrArg()
+        return args_schema
+
+    def post_operations(self):
+        args = self.ctx.args
+        identity = None
+        user_assigned_identities = {}
+        for identity in args.user_assigned_identities:
+            user_assigned_identities[identity.to_serialized_data()] = {}
+        if args.identity_type == 'UserAssigned' or args.identity_type == 'SystemAssigned, UserAssigned':
+            identity = {
+                'type': args.identity_type,
+                'userAssignedIdentities': user_assigned_identities
+            }
+        elif args.identity_type == 'SystemAssigned':
+            identity = {
+                'type': args.identity_type
+            }
+
+        existing = _AFDProfileShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name
+        })
+        location = None if 'location' not in existing else existing['location']
+        _AFDProfileUpdate(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name,
+            'location': location,
+            'identity': identity
+        })

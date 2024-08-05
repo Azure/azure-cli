@@ -341,4 +341,21 @@ cdn profile update:
         origin_response_timeout_seconds:
             rule_exclusions:
             - option_length_too_long
+
+cdn profile-migration:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+cdn profile-migration check-compatibility:
+    parameters:
+        migration_endpoint_mappings:
+            rule_exclusions:
+            - option_length_too_long
+cdn profile-migration migrate:
+    parameters:
+        migration_endpoint_mappings:
+            rule_exclusions:
+            - option_length_too_long
+        user_assigned_identities:
+            rule_exclusions:
+            - option_length_too_long
 ...

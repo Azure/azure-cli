@@ -112,4 +112,5 @@ def check_azuremonitormetrics_profile(cmd, cluster_subscription, cluster_resourc
     if "azureMonitorProfile" in values_array:
         if "metrics" in values_array["azureMonitorProfile"]:
             if values_array["azureMonitorProfile"]["metrics"]["enabled"] is True:
-                raise CLIError(f"Azure Monitor Metrics is already enabled for this cluster. Please use `az aks update --disable-azure-monitor-metrics -g {cluster_resource_group_name} -n {cluster_name}` and then try enabling.")
+                return True
+    return False

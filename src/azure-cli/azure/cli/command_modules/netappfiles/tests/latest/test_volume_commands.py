@@ -570,3 +570,19 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         })
 
         networkSiblingSet = self.cmd("az netappfiles update-network-sibling-set -l {loc} --subnet-id {subnet_id} --network-sibling-set-id {networkSiblingSetId} --network-sibling-set-state-id='{networkSiblingSetStateId}' --network-features {networkFeatures}").get_output_in_json()
+    
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_volumesize8Tib(self):
+        # tests that adding export policy works with non-default service level/usage threshold
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        pool_payload = "--service-level 'Standard' --size 8"
+        volume_payload = "--service-level 'Standard' --usage-threshold 8192"
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', pool_payload=pool_payload, volume_payload=volume_payload)
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        # check the specified volume properties
+        assert volume['usageThreshold'] == 8192 * GIB_SCALE
+        assert volume['serviceLevel'] == "Standard"

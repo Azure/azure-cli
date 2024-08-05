@@ -311,13 +311,8 @@ class VolumeCreate(_VolumeCreate):
 
         args_schema.usage_threshold._default = 100
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
-            maximum=2400,
-            minimum=100
-        )
-
-        args_schema.coolness_period._fmt = AAZIntArgFormat(
-            maximum=183,
-            minimum=2,
+            maximum=2457600,
+            minimum=50
         )
 
         # The API does only support setting Basic and Standard
@@ -440,13 +435,8 @@ class VolumeUpdate(_VolumeUpdate):
             required=False,
         )
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
-            maximum=2400,
-            minimum=100,
-        )
-
-        args_schema.coolness_period._fmt = AAZIntArgFormat(
-            maximum=183,
-            minimum=2,
+            maximum=2457600,
+            minimum=50
         )
 
         return args_schema

@@ -117,6 +117,37 @@ class TestIdentity(unittest.TestCase):
             identity.login_with_service_principal("00000000-0000-0000-0000-000000000000",
                                                   {"certificate": test_cert_file}, "openid")
 
+    @mock.patch("msal.application.PublicClientApplication.remove_account")
+    @mock.patch("msal.application.PublicClientApplication.get_accounts")
+    def test_logout_user(self, get_accounts_mock, remove_account_mock):
+        accounts = [
+            {
+                'home_account_id': '00000000-0000-0000-0000-000000000000.00000000-0000-0000-0000-000000000000',
+                'environment': 'login.microsoftonline.com',
+                'username': 'test@test.com',
+                'account_source': 'broker',
+                'authority_type': 'MSSTS',
+                'local_account_id': '00000000-0000-0000-0000-000000000000',
+                'realm': '00000000-0000-0000-0000-000000000000'
+            }
+        ]
+        get_accounts_mock.return_value = accounts
+
+        identity = Identity('https://login.microsoftonline.com')
+        identity.logout_user('00000000-0000-0000-0000-000000000000')
+        remove_account_mock.assert_called_with(accounts[0])
+
+    @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.remove_entry")
+    @mock.patch("msal.application.ConfidentialClientApplication.remove_tokens_for_client")
+    @mock.patch("msal.application.ConfidentialClientApplication.__init__", return_value=None)
+    def test_logout_service_principal(self, init_mock, remove_tokens_for_client_mock, remove_entry_mock):
+        identity = Identity('https://login.microsoftonline.com')
+        client_id = '00000000-0000-0000-0000-000000000000'
+        identity.logout_service_principal(client_id)
+        assert init_mock.call_args.args[0] == client_id
+        remove_tokens_for_client_mock.assert_called_once()
+        remove_entry_mock.assert_called_with(client_id)
+
 
 class TestServicePrincipalAuth(unittest.TestCase):
 

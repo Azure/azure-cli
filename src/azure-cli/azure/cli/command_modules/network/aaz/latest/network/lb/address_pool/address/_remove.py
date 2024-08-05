@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network lb address-pool address remove",
-    is_preview=True,
 )
 class Remove(AAZCommand):
     """Remove one backend address from the load balance backend address pool.

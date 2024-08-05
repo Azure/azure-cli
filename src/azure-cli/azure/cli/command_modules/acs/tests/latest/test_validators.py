@@ -876,7 +876,7 @@ class TestValidateDisableAzureContainerStorage(unittest.TestCase):
         is_azureDisk_enabled = False
         err = (
             "Invalid --disable-azure-container-storage value. "
-            "Azure Container Storage is not enabled for storagepool "
+            "Azure Container Storage is not enabled for storage pool "
             "type {0} in the cluster.".format(pool_type)
         )
         with self.assertRaises(ArgumentUsageError) as cm:
@@ -888,8 +888,8 @@ class TestValidateDisableAzureContainerStorage(unittest.TestCase):
     def test_disable_only_storage_pool_installed(self):
         pool_type = acstor_consts.CONST_STORAGE_POOL_TYPE_AZURE_DISK
         err = (
-            "Since azureDisk is the only storagepool type enabled for Azure Container Storage, "
-            "disabling the storagepool type will lead to disabling Azure Container Storage from the cluster. "
+            "Since azureDisk is the only storage pool type enabled for Azure Container Storage, "
+            "disabling the storage pool type will lead to disabling Azure Container Storage from the cluster. "
             "To disable Azure Container Storage, set --disable-azure-container-storage to all."
         )
         with self.assertRaises(ArgumentUsageError) as cm:
@@ -902,8 +902,8 @@ class TestValidateDisableAzureContainerStorage(unittest.TestCase):
         pool_type = acstor_consts.CONST_STORAGE_POOL_TYPE_AZURE_DISK
         is_azureDisk_enabled = True
         err = (
-            "Since azureDisk is the only storagepool type enabled for Azure Container Storage, "
-            "disabling the storagepool type will lead to disabling Azure Container Storage from the cluster. "
+            "Since azureDisk is the only storage pool type enabled for Azure Container Storage, "
+            "disabling the storage pool type will lead to disabling Azure Container Storage from the cluster. "
             "To disable Azure Container Storage, set --disable-azure-container-storage to all."
         )
         with self.assertRaises(ArgumentUsageError) as cm:
@@ -963,6 +963,25 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         with self.assertRaises(ArgumentUsageError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
                 storage_pool_type, storage_pool_name, storage_pool_sku, None, None, None, None, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            )
+        self.assertEqual(str(cm.exception), err)
+
+    def test_enable_with_premiumv2_sku_and_azure_disk(self):
+        storage_pool_name = "valid-name"
+        storage_pool_sku = acstor_consts.CONST_STORAGE_POOL_SKU_PREMIUMV2_LRS
+        storage_pool_type = acstor_consts.CONST_STORAGE_POOL_TYPE_AZURE_DISK
+        nodepool_list = "pool1"
+        agentpools = [{"name": "pool1", "vm_size": "Standard_L8s_v3", "count": 3, "zoned": False}]
+        err = (
+            "Cannot set --storage-pool-sku as {0} "
+            "as none of the node pools are zoned. "
+            "Please add a zoned node pool and try again.".format(
+                storage_pool_sku
+            )
+        )
+        with self.assertRaises(ArgumentUsageError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_params(
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1247,7 +1266,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         nodepool_list = "nodepool1,nodepool2"
         err = (
             "Cannot set --azure-container-storage-nodepools while using "
-            "--enable-azure-container-storage to enable a type of storagepool "
+            "--enable-azure-container-storage to enable a type of storage pool "
             "in a cluster where Azure Container Storage is already installed."
         )
         with self.assertRaises(ArgumentUsageError) as cm:
@@ -1264,7 +1283,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         agentpools = [{"name": "nodepool1", "node_labels": {"acstor.azure.com/io-engine": "acstor"}, "count": 3}, {"name": "nodepool2"}]
         err = (
             "Invalid --enable-azure-container-storage value. "
-            "Azure Container Storage is already enabled for storagepool type "
+            "Azure Container Storage is already enabled for storage pool type "
             "{0} in the cluster.".format(storage_pool_type)
         )
         with self.assertRaises(ArgumentUsageError) as cm:
