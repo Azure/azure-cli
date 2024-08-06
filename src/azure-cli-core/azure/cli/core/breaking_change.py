@@ -24,8 +24,7 @@ def _get_action_class(cli_ctx, action):
     if isinstance(action, type) and issubclass(action, argparse.Action):
         action_class = action
     elif isinstance(action, str):
-        action_class = cli_ctx.invocation.command_loader.cli_ctx.invocation.parser._registries['action'][
-            action]  # pylint: disable=protected-access
+        action_class = cli_ctx.invocation.command_loader.cli_ctx.invocation.parser._registries['action'][action]  # pylint: disable=protected-access
     return action_class
 
 
@@ -78,9 +77,6 @@ class UpcomingBreakingChangeTag(StatusTag):
                 msg += 'in future release.'
                 return msg
 
-        if isinstance(message_func, str):
-            message_func = lambda _: message_func
-
         self.always_display = always_display
         self.target_version = target_version
         super().__init__(
@@ -104,10 +100,10 @@ class MergedStatusTag(StatusTag):
         self.tags = list(tags)
 
         def _get_merged_tag(self):
-            return ''.join(set([tag._get_tag(self) for tag in self.tags]))
+            return ''.join({tag._get_tag(self) for tag in self.tags})  # pylint: disable=protected-access
 
         def _get_merged_msg(self):
-            return '\n'.join(set([tag._get_message(self) for tag in self.tags]))
+            return '\n'.join({tag._get_message(self) for tag in self.tags})  # pylint: disable=protected-access
 
         super().__init__(cli_ctx, tag.object_type, tag.target, tag_func=_get_merged_tag,
                          message_func=_get_merged_msg, color=tag._color)
@@ -116,21 +112,21 @@ class MergedStatusTag(StatusTag):
         self.tags.append(other)
 
     def hidden(self):
-        return any([tag.hidden() for tag in self.tags])
+        return any(tag.hidden() for tag in self.tags)
 
     def show_in_help(self):
-        return any([tag.show_in_help() for tag in self.tags])
+        return any(tag.show_in_help() for tag in self.tags)
 
     def expired(self):
-        return any([tag.expired() for tag in self.tags])
+        return any(tag.expired() for tag in self.tags)
 
     @property
     def tag(self):
-        return ''.join(set([str(tag.tag) for tag in self.tags]))
+        return ''.join({str(tag.tag) for tag in self.tags})
 
     @property
     def message(self):
-        return '\n'.join(set([str(tag.message) for tag in self.tags]))
+        return '\n'.join({str(tag.message) for tag in self.tags})
 
 
 def _next_breaking_change_version():
@@ -211,8 +207,7 @@ class BreakingChange(abc.ABC):
     def command_name(self):
         if self.cmd.startswith('az '):
             return self.cmd[3:].strip()
-        else:
-            return self.cmd
+        return self.cmd
 
     def is_command_group(self, cli_ctx):
         return self.command_name in cli_ctx.invocation.commands_loader.command_group_table
@@ -235,7 +230,7 @@ class BreakingChange(abc.ABC):
 
     def register(self, cli_ctx):
         def register_option_deprecate(option_name, arguments):
-            for key, argument in arguments.items():
+            for _, argument in arguments.items():
                 if argument.options_list and len(argument.options_list) > 1:
                     for idx, option in enumerate(argument.options_list):
                         if isinstance(option, str) and option_name == option and isinstance(self, AzCLIDeprecate):
@@ -247,7 +242,7 @@ class BreakingChange(abc.ABC):
             return False
 
         def appended_status_tag(old_status_tag, new_status_tag):
-            if isinstance(old_status_tag, Deprecated) or isinstance(old_status_tag, UpcomingBreakingChangeTag):
+            if isinstance(old_status_tag, (Deprecated, UpcomingBreakingChangeTag)):
                 return MergedStatusTag(cli_ctx, old_status_tag, new_status_tag)
             elif isinstance(old_status_tag, MergedStatusTag):
                 old_status_tag.merge(new_status_tag)
@@ -312,6 +307,7 @@ class AzCLIDeprecate(BreakingChange):
             msg += " Use '{}' instead.".format(redirect)
         return msg
 
+    @property
     def message(self):
         return self._build_message(self.kwargs.get('object_type'), self.target, self.kwargs.get('expiration'),
                                    self.kwargs.get('redirect'))
@@ -346,7 +342,8 @@ class AzCLIRemoveChange(BreakingChange):
     :param doc_link: link of the related document
     """
 
-    def __init__(self, cmd, arg=None, target_version=NextBreakingChangeWindow(), target=None, redirect=None, doc_link=None):
+    def __init__(self, cmd, arg=None, target_version=NextBreakingChangeWindow(), target=None, redirect=None,
+                 doc_link=None):
         super().__init__(cmd, arg, target, target_version)
         self.alter = redirect
         self.doc_link = doc_link
@@ -528,7 +525,7 @@ def import_extension_breaking_changes(ext_mod):
 def register_upcoming_breaking_change_info(cli_ctx):
     from knack import events
 
-    def update_breaking_change_info(cli_ctx, **kwargs):
+    def update_breaking_change_info(cli_ctx, **kwargs):  # pylint: disable=unused-argument
         for breaking_changes in upcoming_breaking_changes.values():
             for breaking_change in breaking_changes:
                 breaking_change.register(cli_ctx)
@@ -542,18 +539,20 @@ def announce_deprecate_info(command_name, arg=None, target_version=NextBreakingC
 
 def announce_output_breaking_change(command_name, description, target_version=NextBreakingChangeWindow(), guide=None,
                                     doc_link=None):
-    upcoming_breaking_changes[command_name].append(AzCLIOutputChange(command_name, description, target_version, guide, doc_link))
+    upcoming_breaking_changes[command_name].append(
+        AzCLIOutputChange(command_name, description, target_version, guide, doc_link))
 
 
 def announce_logic_breaking_change(command_name, summary, target_version=NextBreakingChangeWindow(), detail=None,
                                    doc_link=None):
-    upcoming_breaking_changes[command_name].append(AzCLILogicChange(command_name, summary, target_version, detail, doc_link))
+    upcoming_breaking_changes[command_name].append(
+        AzCLILogicChange(command_name, summary, target_version, detail, doc_link))
 
 
 def announce_default_value_breaking_change(command_name, arg, current_default, new_default,
                                            target_version=NextBreakingChangeWindow(), target=None, doc_link=None):
-    upcoming_breaking_changes[command_name].append(AzCLIDefaultChange(command_name, arg, current_default, new_default,
-                                                        target_version, target, doc_link))
+    upcoming_breaking_changes[command_name].append(
+        AzCLIDefaultChange(command_name, arg, current_default, new_default, target_version, target, doc_link))
 
 
 def announce_required_flag_breaking_change(command_name, arg, target_version=NextBreakingChangeWindow(), target=None,

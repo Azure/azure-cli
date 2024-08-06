@@ -299,7 +299,7 @@ class CliHelpFile(KnackHelpFile):
 
     @staticmethod
     def classify_merged_status_tag(merged_status_tag):
-        from knack.deprecation import resolve_deprecate_info, ImplicitDeprecated, Deprecated
+        from knack.deprecation import Deprecated
         from azure.cli.core.breaking_change import UpcomingBreakingChangeTag, MergedStatusTag
 
         deprecate_info = []
