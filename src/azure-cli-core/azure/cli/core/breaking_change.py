@@ -233,8 +233,8 @@ class BreakingChange(abc.ABC):
         tag_kwargs.update(kwargs)
         return UpcomingBreakingChangeTag(cli_ctx, **tag_kwargs)
 
-    def apply(self, cli_ctx):
-        def apply_option_deprecate(option_name, arguments):
+    def register(self, cli_ctx):
+        def register_option_deprecate(option_name, arguments):
             for key, argument in arguments.items():
                 if argument.options_list and len(argument.options_list) > 1:
                     for idx, option in enumerate(argument.options_list):
@@ -255,7 +255,7 @@ class BreakingChange(abc.ABC):
             else:
                 return new_status_tag
 
-        def apply_to_direct_sub_cg_or_command(cg_name, status_tag):
+        def register_to_direct_sub_cg_or_command(cg_name, status_tag):
             for key, command_group in cli_ctx.invocation.commands_loader.command_group_table.items():
                 if key.rsplit(maxsplit=1)[0] == cg_name:
                     from azure.cli.core.commands import AzCommandGroup
@@ -263,7 +263,7 @@ class BreakingChange(abc.ABC):
                         command_group.group_kwargs['deprecate_info'] = \
                             appended_status_tag(command_group.group_kwargs.get('deprecate_info'), status_tag)
                     else:
-                        apply_to_direct_sub_cg_or_command(key, status_tag)
+                        register_to_direct_sub_cg_or_command(key, status_tag)
             for key, command in cli_ctx.invocation.commands_loader.command_table.items():
                 if key.rsplit(maxsplit=1)[0] == cg_name:
                     command.deprecate_info = appended_status_tag(command.deprecate_info, self.to_tag(cli_ctx))
@@ -273,7 +273,7 @@ class BreakingChange(abc.ABC):
             if not command:
                 return
             for arg_name in self.args:
-                if apply_option_deprecate(arg_name, command.arguments):
+                if register_option_deprecate(arg_name, command.arguments):
                     continue
                 arg_name, arg = _find_arg(arg_name, command.arguments)
                 if not arg:
@@ -283,7 +283,7 @@ class BreakingChange(abc.ABC):
         elif self.is_command_group(cli_ctx):
             command_group = cli_ctx.invocation.commands_loader.command_group_table[self.command_name]
             if not command_group:
-                apply_to_direct_sub_cg_or_command(self.command_name, self.to_tag(cli_ctx))
+                register_to_direct_sub_cg_or_command(self.command_name, self.to_tag(cli_ctx))
             else:
                 command_group.group_kwargs['deprecate_info'] = \
                     appended_status_tag(command_group.group_kwargs.get('deprecate_info'), self.to_tag(cli_ctx))
@@ -531,7 +531,7 @@ def register_upcoming_breaking_change_info(cli_ctx):
     def update_breaking_change_info(cli_ctx, **kwargs):
         for breaking_changes in upcoming_breaking_changes.values():
             for breaking_change in breaking_changes:
-                breaking_change.apply(cli_ctx)
+                breaking_change.register(cli_ctx)
 
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, update_breaking_change_info)
 
@@ -581,7 +581,7 @@ def announce_argument_deprecate(command, argument, redirect=None, hide=None,
 
 
 def announce_manual_breaking_change(tag, breaking_change):
-    upcoming_breaking_changes[breaking_change.command_name + ':' + tag].append(breaking_change)
+    upcoming_breaking_changes[breaking_change.command_name + '.' + tag].append(breaking_change)
 
 
 def print_manual_breaking_change(cli_ctx, tag, custom_logger=None):
@@ -590,6 +590,6 @@ def print_manual_breaking_change(cli_ctx, tag, custom_logger=None):
 
     command_comps = command.split()
     while command_comps:
-        for breaking_change in upcoming_breaking_changes[' '.join(command_comps) + ':' + tag]:
+        for breaking_change in upcoming_breaking_changes.get(' '.join(command_comps) + '.' + tag, []):
             custom_logger.warning(breaking_change)
         del command_comps[-1]
