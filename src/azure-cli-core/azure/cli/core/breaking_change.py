@@ -244,7 +244,7 @@ class BreakingChange(abc.ABC):
         def appended_status_tag(old_status_tag, new_status_tag):
             if isinstance(old_status_tag, (Deprecated, UpcomingBreakingChangeTag)):
                 return MergedStatusTag(cli_ctx, old_status_tag, new_status_tag)
-            elif isinstance(old_status_tag, MergedStatusTag):
+            if isinstance(old_status_tag, MergedStatusTag):
                 old_status_tag.merge(new_status_tag)
                 return old_status_tag
             return new_status_tag
