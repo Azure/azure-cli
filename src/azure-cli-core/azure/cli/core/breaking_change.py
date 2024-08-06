@@ -247,8 +247,7 @@ class BreakingChange(abc.ABC):
             elif isinstance(old_status_tag, MergedStatusTag):
                 old_status_tag.merge(new_status_tag)
                 return old_status_tag
-            else:
-                return new_status_tag
+            return new_status_tag
 
         def register_to_direct_sub_cg_or_command(cg_name, status_tag):
             for key, command_group in cli_ctx.invocation.commands_loader.command_group_table.items():
