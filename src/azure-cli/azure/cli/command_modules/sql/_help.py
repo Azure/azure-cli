@@ -906,6 +906,8 @@ examples:
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --database-format AlwaysUpToDate --pricing-model Regular
   - name: Create managed instance with dns zone partner
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --dns-zone-partner dns
+  - name: Create managed instance which uses Windows authentication metadata mode
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --am Windows
 """
 
 helps['sql mi delete'] = """
@@ -1041,6 +1043,8 @@ examples:
     text: az sql mi update -g mygroup -n myinstance --remove instancePoolId --capacity vcorecapacity
   - name: Update mi database format and pricing model
     text: az sql mi update -g mygroup -n myinstance --database-format AlwaysUpToDate --pricing-model Regular
+  - name: Update managed instance to use Windows authentication metadata mode
+    text: az sql mi update -g mygroup -n myinstance --am Windows
 """
 
 helps['sql midb'] = """
