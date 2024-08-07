@@ -61,11 +61,11 @@ class List(AAZCommand):
         self.DataExportsListByWorkspace(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -167,7 +167,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
+                flags={"client_flatten": True},
             )
             _element.type = AAZStrType(
                 flags={"read_only": True},
@@ -181,7 +181,7 @@ class List(AAZCommand):
                 serialized_name="dataExportId",
             )
             properties.destination = AAZObjectType(
-                flags={"required": True},
+                flags={"client_flatten": True},
             )
             properties.enable = AAZBoolType()
             properties.last_modified_date = AAZStrType(
@@ -214,6 +214,10 @@ class List(AAZCommand):
             table_names.Element = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _ListHelper:
+    """Helper class for List"""
 
 
 __all__ = ["List"]
