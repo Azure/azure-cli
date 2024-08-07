@@ -325,7 +325,6 @@ jobs:
       filePath: build_scripts\windows\scripts\test_zip_installation.ps1
 
 - job: BuildDockerImageAlpine
-  continueOnError: true
   displayName: Build Docker Image Alpine
   strategy:
     matrix:
@@ -358,7 +357,6 @@ jobs:
       ArtifactName: $(artifactName)
 
 - job: TestDockerImageAlpine
-  continueOnError: true
   displayName: Test Docker Image Alpine
   dependsOn:
     - BuildDockerImageAlpine

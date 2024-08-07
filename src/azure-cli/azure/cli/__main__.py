@@ -31,6 +31,12 @@ except ValueError:
 
 logger = get_logger(__name__)
 
+ALPINE_WARNING_MESSAGE = (
+    "Azure CLI 2.63.0 is the last version available on Alpine and will not receive updates. "
+    "Consider migrating to the Azure Linux based image for Azure CLI. "
+    "For more information: https://go.microsoft.com/fwlink/?linkid=2282203"
+)
+
 
 def cli_main(cli, args):
     return cli.invoke(args)
@@ -123,6 +129,8 @@ finally:
         prompt_survey_message(az_cli)
     except Exception as ex:  # pylint: disable=broad-except
         logger.debug("Intercept survey prompt failed. %s", str(ex))
+
+    logger.warning(ALPINE_WARNING_MESSAGE)
 
     telemetry.set_init_time_elapsed("{:.6f}".format(init_finish_time - start_time))
     telemetry.set_invoke_time_elapsed("{:.6f}".format(invoke_finish_time - init_finish_time))
