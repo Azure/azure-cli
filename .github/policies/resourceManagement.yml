@@ -3225,10 +3225,10 @@ configuration:
             pattern: '[Aa]z \b(group|resource|provider|feature|tag|policy|lock|managedapp|resourcemanagement)\b'
             isRegex: True
         - titleContains:
-            pattern: '[Aa]z account (clear|get-access-token|list|list-locations|set|show)\b'
+            pattern: '[Aa]z account (lock|management-group)\b'
             isRegex: True
         - bodyContains:
-            pattern: '[Aa]z account (clear|get-access-token|list|list-locations|set|show)\b'
+            pattern: '[Aa]z account (lock|management-group)\b'
             isRegex: True
       - or:
         - isAction:
@@ -3250,10 +3250,10 @@ configuration:
         - payloadType: Issues
         - or:
             - titleContains:
-                pattern: '[Aa]z account\b(?!\s+(clear|get-access-token|list|list-locations|set|show)\b)'
+                pattern: '[Aa]z account\b(?!\s+(lock|management-group)\b)'
                 isRegex: True
             - bodyContains:
-                pattern: '[Aa]z account\b(?!\s+(clear|get-access-token|list|list-locations|set|show)\b)'
+                pattern: '[Aa]z account\b(?!\s+(lock|management-group)\b)'
                 isRegex: True
         - or:
             - isAction:
