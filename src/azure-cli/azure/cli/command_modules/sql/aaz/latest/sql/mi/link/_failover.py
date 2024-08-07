@@ -10,22 +10,26 @@
 
 from azure.cli.core.aaz import *
 
+
 @register_command(
-    "sql mi link create",
+    "sql mi link failover",
+    confirmation="This operation may cause data loss if failover type is ForcedAllowDataLoss. Are you sure you want to proceed?"
 )
-class Create(AAZCommand):
-    """Creates a new instance link.
+class Failover(AAZCommand):
+    """Failovers an instance link.
 
-    This command creates an Azure SQL Managed Instance link by joining distributed availability group on SQL Server based on the parameters passed.
+    This command may cause data loss if the failover type is ForcedAllowDataLoss, thus user must explicitly confirm the command when prompted, or use --yes parameter.
 
-    :example: Creates an instance link.
-        az sql mi link create -g 'rg1' --instance-name 'mi1' --name 'link1' --primary-availability-group-name 'primaryag1' --secondary-availability-group-name 'secondaryag1' --source-endpoint '"tcp://server1:5022" --target-database 'db1' --no-wait')
+    :example: Failover a specific instance link
+        az sql mi link failover -g 'rg1' --instance-name 'mi1' --name 'link1 --failover-type 'ForcedAllowDataLoss' --no-wait
     """
 
     _aaz_info = {
         "version": "2023-08-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2023-08-01-preview"],
+            ["mgmt-plane",
+             "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}",
+             "2023-08-01-preview"],
         ]
     }
 
@@ -50,69 +54,30 @@ class Create(AAZCommand):
             options=["-n", "--link", "--name", "--distributed-availability-group-name"],
             help="Name of the instance link.",
             required=True,
+            id_part="child_name_1",
         )
         _args_schema.managed_instance_name = AAZStrArg(
             options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
             help="Name of Azure SQL Managed Instance.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             help="Name of the resource group.",
             required=True,
         )
 
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.partner_availability_group_name = AAZStrArg(
-            options=["--partner-ag-name", "--partner-availability-group-name"],
-            arg_group="Properties",
-            help="Name of the partner availability group.",
+        _args_schema.failover_type = AAZResourceGroupNameArg(
+            options=["--failover-type"],
+            help="The failover type, can be ForcedAllowDataLoss or Planned.",
+            required=True,
         )
-        _args_schema.instance_availability_group_name = AAZStrArg(
-            options=["--instance-ag-name", "--instance-availability-group-name"],
-            arg_group="Properties",
-            help="Name of the instance availability group.",
-        )
-        _args_schema.partner_endpoint = AAZStrArg(
-            options=["--partner-endpoint"],
-            arg_group="Properties",
-            help="IP address of the partner endpoint.",
-        )
-        _args_schema.databases = AAZListArg(
-            options=["--databases"],
-            arg_group="Properties",
-            help="Database names in the distributed availability group.",
-            required=True
-        )
-        _args_schema.failover_mode = AAZStrArg(
-            options=["--failover-mode"],
-            arg_group="Properties",
-            help="Link failover mode.",
-            required=False
-        )
-        _args_schema.instance_link_role = AAZStrArg(
-            options=["--instance-link-role"],
-            arg_group="Properties",
-            help="Managed instance side link role.",
-            required=False
-        )
-        _args_schema.seeding_mode = AAZStrArg(
-            options=["--seeding-mode"],
-            arg_group="Properties",
-            help="Database seeding mode.",
-            required=False
-        )
-
-        databases = cls._args_schema.databases
-        databases.Element = AAZObjectArg()
-        databases.Element.databaseName = AAZStrArg()
 
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.DistributedAvailabilityGroupsCreateOrUpdate(ctx=self.ctx)()
+        yield self.DistributedAvailabilityGroupsFailover(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -127,7 +92,7 @@ class Create(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class DistributedAvailabilityGroupsCreateOrUpdate(AAZHttpOperation):
+    class DistributedAvailabilityGroupsFailover(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -137,16 +102,16 @@ class Create(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [200, 201]:
+            if session.http_response.status_code in [200]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
@@ -157,13 +122,13 @@ class Create(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/distributedAvailabilityGroups/{distributedAvailabilityGroupName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/distributedAvailabilityGroups/{distributedAvailabilityGroupName}/failover",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "PUT"
+            return "POST"
 
         @property
         def error_format(self):
@@ -224,56 +189,42 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("partnerAvailabilityGroupName", AAZStrType, ".partner_availability_group_name")
-                properties.set_prop("instanceAvailabilityGroupName", AAZStrType, ".instance_availability_group_name")
-                properties.set_prop("partnerEndpoint", AAZStrType, ".partner_endpoint")
-                properties.set_prop("databases", AAZListType, ".databases")
-                properties.set_prop("instanceLinkRole", AAZStrType, ".instance_link_role")
-                properties.set_prop("seedingMode", AAZStrType, ".seeding_mode")
-                properties.set_prop("failoverMode", AAZStrType, ".failover_mode")
-
-            databases = _builder.get(".properties.databases")
-            if databases is not None:
-                databases.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.databases[]")
-            if _elements is not None:
-                _elements.set_prop("databaseName", AAZStrType, ".databaseName")
+                properties.set_prop("failoverType", AAZStrType, ".failover_type")
 
             return self.serialize_content(_content_value)
 
-        def on_200_201(self, session):
+        def on_200(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200_201
+                schema_builder=self._build_schema_on_200
             )
 
-        _schema_on_200_201 = None
+        _schema_on_200 = None
 
         @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
 
-            cls._schema_on_200_201 = AAZObjectType()
+            cls._schema_on_200 = AAZObjectType()
 
-            _schema_on_200_201 = cls._schema_on_200_201
-            _schema_on_200_201.id = AAZStrType(
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.name = AAZStrType(
+            _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.properties = AAZObjectType(
+            _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200_201.type = AAZStrType(
+            _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200_201.properties
+            properties = cls._schema_on_200.properties
             properties.distributed_availability_group_id = AAZStrType(
                 serialized_name="distributedAvailabilityGroupId",
                 flags={"read_only": True},
@@ -393,11 +344,11 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
 
-            return cls._schema_on_200_201
+            return cls._schema_on_200
 
 
-class _CreateHelper:
-    """Helper class for Create"""
+class _FailoverHelper:
+    """Helper class for Failover"""
 
 
-__all__ = ["Create"]
+__all__ = ["Failover"]

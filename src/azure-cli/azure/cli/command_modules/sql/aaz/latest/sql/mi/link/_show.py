@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-08-01-preview",
+        "version": "2023-08-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2022-08-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2023-08-01-preview"],
         ]
     }
 
@@ -131,7 +131,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-08-01-preview",
+                    "api-version", "2023-08-01-preview",
                     required=True,
                 ),
             }
@@ -182,39 +182,118 @@ class Show(AAZCommand):
                 serialized_name="distributedAvailabilityGroupId",
                 flags={"read_only": True},
             )
-            properties.instance_role = AAZStrType(
-                serialized_name="instanceRole",
+            properties.distributed_availability_group_name = AAZStrType(
+                serialized_name="distributedAvailabilityGroupName",
                 flags={"read_only": True},
             )
-            properties.last_hardened_lsn = AAZStrType(
-                serialized_name="lastHardenedLsn",
-                flags={"read_only": True},
+            properties.instance_link_role = AAZStrType(
+                serialized_name="instanceLinkRole",
             )
-            properties.link_state = AAZStrType(
-                serialized_name="linkState",
-                flags={"read_only": True},
+            properties.failover_mode = AAZStrType(
+                serialized_name="failoverMode",
             )
-            properties.primary_availability_group_name = AAZStrType(
-                serialized_name="primaryAvailabilityGroupName",
+            properties.partner_availability_group_name = AAZStrType(
+                serialized_name="partnerAvailabilityGroupName",
             )
             properties.replication_mode = AAZStrType(
                 serialized_name="replicationMode",
             )
-            properties.secondary_availability_group_name = AAZStrType(
-                serialized_name="secondaryAvailabilityGroupName",
+            properties.instance_availability_group_name = AAZStrType(
+                serialized_name="instanceAvailabilityGroupName",
             )
-            properties.source_endpoint = AAZStrType(
-                serialized_name="sourceEndpoint",
+            properties.partner_endpoint = AAZStrType(
+                serialized_name="partnerEndpoint",
             )
-            properties.source_replica_id = AAZStrType(
-                serialized_name="sourceReplicaId",
+            properties.partner_link_role = AAZStrType(
+                serialized_name="partnerLinkRole",
                 flags={"read_only": True},
             )
-            properties.target_database = AAZStrType(
-                serialized_name="targetDatabase",
+            properties.databases = AAZListType(
+                serialized_name="databases",
             )
-            properties.target_replica_id = AAZStrType(
-                serialized_name="targetReplicaId",
+
+            properties.seeding_mode = AAZStrType(
+                serialized_name="seedingMode",
+            )
+
+            databases = properties.databases
+            databases.Element = AAZObjectType()
+
+            _element = databases.Element
+            _element.connectedState = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.databaseName = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.instanceRedoReplicationLagSeconds = AAZIntType(
+                flags={"read_only": True},
+            )
+
+            _element.instanceReplicaId = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.instanceSendReplicationLagSeconds = AAZIntType(
+                flags={"read_only": True},
+            )
+
+            _element.lastBackupLsn = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.lastBackupTime = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.lastCommitLsn = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.lastCommitTime = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.lastHardenedLsn = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.lastHardenedTime = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.lastReceivedLsn = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.lastReceivedTime = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.partnerReplicaId = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.replicaState = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.synhronizationHealth = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.partnerAuthCertValidity = AAZDictType()
+            partnerAuthCertValidity = _element.partnerAuthCertValidity
+
+            partnerAuthCertValidity.certificateName = AAZStrType(
+                serialized_name="certificateName",
+                flags={"read_only": True},
+            )
+
+            partnerAuthCertValidity.expiryDate = AAZStrType(
+                serialized_name="expiryDate",
                 flags={"read_only": True},
             )
 
