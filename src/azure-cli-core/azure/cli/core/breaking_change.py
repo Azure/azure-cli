@@ -147,7 +147,11 @@ class TargetVersion(abc.ABC):
 # pylint: disable=too-few-public-methods
 class NextBreakingChangeWindow(TargetVersion):
     def __str__(self):
-        return f'in next breaking change release({_next_breaking_change_version()})'
+        next_breaking_change_version = _next_breaking_change_version()
+        if next_breaking_change_version:
+            return f'in next breaking change release({next_breaking_change_version})'
+        else:
+            return f'in next breaking change release'
 
     def version(self):
         return _next_breaking_change_version()
@@ -578,7 +582,7 @@ def announce_argument_deprecate(command, argument, redirect=None, hide=None,
     announce_deprecate_info(command, argument, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
 
 
-def announce_manual_breaking_change(tag, breaking_change):
+def announce_conditional_breaking_change(tag, breaking_change):
     upcoming_breaking_changes[breaking_change.command_name + '.' + tag].append(breaking_change)
 
 
