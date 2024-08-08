@@ -25,12 +25,7 @@ def validate_decorator_mode(decorator_mode) -> bool:
 
     :return: bool
     """
-    is_valid_decorator_mode = False
-
-    if isinstance(decorator_mode, DecoratorMode):
-        is_valid_decorator_mode = decorator_mode in DecoratorMode
-
-    return is_valid_decorator_mode
+    return isinstance(decorator_mode, DecoratorMode) and decorator_mode in DecoratorMode
 
 
 # pylint: disable=too-few-public-methods
